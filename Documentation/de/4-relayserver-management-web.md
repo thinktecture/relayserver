@@ -47,7 +47,7 @@ Der Reiter "Logs" zeigt die letzten 10 empfangenen Client Requests und erlaubt e
 
 ## Menüpunkt Links (Provisioning)
 
-Ein Link bezeichnet die freigeschaltete oder gesperrte Verbindung zu einer On-Premises Applikation (via On-Premises Connector).
+Ein Link bezeichnet die freigeschaltete oder gesperrte Verbindung zwischen dem RelayServer und einem On-Premises Connection.
 
 Der Menüpunkt "Links" erlaubt die Verwaltung und Neuanlage von Links im RelayServer.
 
