@@ -61,7 +61,7 @@ In der Tabelle werden die folgenden Informationen bereitgestellt:
 | --- | --- |
 | Description | Ein frei wählbarer Name für den Link zu besseren Unterscheidung und Administation |
 | Name | URL-fähiger Kurzname des Links (daher keine Sonderzeichen und keine Leerzeichen zulässig) |
-| ID | Vom RelayServer für diesen Link automatisch generierte GUID. |
+| ID | Vom RelayServer für diesen Link automatisch generierte GUID |
 | Creation Date | Anlagedatum des Links |
 | Connection state | Grün: On-Premises Connector ist verbundenRot: On-Premises Connector ist nicht verbunden |
 
@@ -97,68 +97,64 @@ Folgende Informationen und Konfigurationsmöglichkeiten bietet die Info-Übersic
 
 | Name | Description |
 | --- | --- |
-| ID | Same as above |
-| Name | Same as above |
-| Description | Same as above |
-| Connectivity | Same as above. Additionally the Ping button allows you to send a ping through the Relay System, to check if the On-Premises Connector is reachable. If the ping is successful, the Relay System behaves as it should. If a request is still not working, the problem could be the On-Premises target. |
-| Link active | Indicates if the link is enabled or not. Can be turned off temporarily to deactive a link. Relay System will behave as if the link does not exist and denies all requests to a link. |
-| Forward internal server error contents | Per default RelayServer will clear the content body from a On-Premises Target response if HTTP status code is 500 to prevent leaking internal information to the clients. In case you need this information, you can turn this option on. It is strongly recommended to turn off this option when running in production. |
-| Allow local client requests only | Per default this option is turned off. If you turn it on, this link will only work for requests coming from local host. This is useful, for example, if you have a Web API in front of the RelayServer which does custom authorization and authentication (especially if your On-Premises Targets don't or can't do that). With this option turned on, RelayServer will deny all public requests, so only the requests from your Web API can come through. |
-| Creation Date | Same as above |
+| ID | Vom RelayServer für diesen Link automatisch generierte GUID |
+| Name | URL-fähiger Kurzname des Links (daher keine Sonderzeichen und keine Leerzeichen zulässig) |
+| Description | Ein frei wählbarer Name für den Link zu besseren Unterscheidung und Administation |
+| Connectivity | Grün: On-Premises Connector ist verbundenRot: On-Premises Connector ist nicht verbunden; über den Button "Ping" kann ein Ping vom RelayServer an den On-Premises Connector geschickt werden |
+| Link active | Gibt an, ob der Link aktiviert oder deaktiviert ist. Bei einem deaktivierten Link wird der RelayServer keinen Daten an den Link und damit an den On-Premises Connector weiterleiten. |
+| Forward internal server error contents | Standardmäßig löscht der RelayServer den Content Body von Nachrichten der On-Premises Applikation, wenn der Status-Code 500 gesendet wird. Dadurch wird verhindert, dass kritische interne Informationen nach außen gelangen. Sollte beim Debugging diese Information benötigt werden, so kann die Weiterleitung über diesen Schalter aktiviert werden. Es wird nicht empfohlen, diese Option im produktiven Betrieb zu aktivieren. |
+| Allow local client requests only | Diese Option ist standardmäßig ausgeschaltet. Wird sie aktiviert, so werden diesem Link nur Anfragen weitergeleitet, die von Localhost kommen. Dies kann sinnvoll sein, wenn vor dem RelayServer eine Web API läuft, welche spezielle Funktionen (z.B. Authentifizierung und Autorisierung) für die Clients zur Verfügung stellt. |
+| Creation Date | Anlagedatum des Links |
 
 #### Charts
 
-In the Charts screen you see the same chart as the dashboard chart. But it will show you content-in and content-out for a specific link only. Additional you can select a date range and a resolution (day, month, year) for data aggregation.
+In der Chartansicht wird grafisch der ein- und ausgehende Traffic für den ausgewählten Link dargestellt. Über Datums-Selektionsfelder und das Dropdown kann der darzustellende Zeitraum spezifiziert werden.
 
 ![4-relayserver-management-web10.png](./assets/4-relayserver-management-web10.png)
 
 #### Logs
 
-See dashboard logs for more details.
+Der Bereich "Logs" zeigt für den ausgewählten Link die letzten 10 empfangenen Client Requests und erlaubt es, zu den einzelnen Requests detailliertere Informationen abzurufen.
 
 #### Trace
 
 ![4-relayserver-management-web11.png](./assets/4-relayserver-management-web11.png)
 
-Sometimes the information the log provides is not enough and more insight is needed. Therefor you can enable link trace mode. When this mode is activated, RelayServer will trace every single HTTP request and response. It will save both header and content to disk for further investigation. Be aware that this mode can slow down your link since a lot of data will be produced, especially on highly loaded links.
+Für ein tiefergehendes Debugging von Verbindungen zwischen Client und On-Premises Applikation über den RelayServer kann ein Trace durchgeführt werden. Wenn das Tracing aktiviert ist, werden alle HTTPS Requests und Responses vollständig protokolliert. Im Nachgang können zu jedem einzelnen Request Header- und Content-Informationen angeschaut werden.
 
-You can start tracing by using the Start tracing button. It allows you to turn on trace mode for a specified length (2-10 minutes). It will be turned off automatically when the time is reached. But you can disable trace mode any time (if it is running).
+Achtung: die Geschwindigkeit einer Verbindung zwischen dem RelayServer und dem entsprechenden Link wird durch einen aktiven Trace-Vorgang negativ beeinflusst. 
 
-If the trace is finished, refresh the page to see a new trace log entry. Click on Show results for more information about the trace results.
+Ein Trace-Vorgang wird durch den Button "Start tracing" aktiviert. Er läuft für die eingestellte Minutenzahl und beendet sich danach automatisch. Während ein Trace-Vorgang läuft, kann er jederzeit vorzeitig beendet werden.
+
+Die Ergebnisse eines Trace-Vorgangs finden sich in der Logs-Tabelle. Über den Button "Show results" sind Details zum ausgewählten Trace-Vorgang abrufbar.
 
 ##### Trace result
 
-If a trace has finished and you've opened the trace result, you'll see the following screen:
+Wenn ein Trace-Vorgang abgeschlossen worden ist und über die Logansicht die Details zu diesem Vorgang aufgerufen werden, dann erscheint folgende Darstellung:
 
 ![4-relayserver-management-web12.png](./assets/4-relayserver-management-web12.png)
 
-The first table shows you some information about the trace:
+
+Die erste Tabelle liefert einen Überblick zum ausgewählten Trace-Vorgang:
 
 | Name | Description |
 | --- | --- |
-| Id | Internal identifier of this trace |
-| Start |  Start date/time |
-| End | End date/time |
-| Runtime | Length of trace in MM:ss format |
+| Id | Interne GUID des Trace-Vorgangs |
+| Start |  Startzeitpunkt des Trace-Vorgangs |
+| End | Endzeitpunkt des Trace-Vorgangs |
+| Runtime | Länge des Trace-Vorgangs im Format MM:SS |
 
-Below this table you can see every single request which was done while tracing was active. The log table show the following columns:
+Darunter findet sich in einer Tabelle die Darstellung jedes einzelnen Requests aus dem Trace-Vorgang. Die Tabelle enthält die folgenden Informationen:
 
 | Name | Description |
 | --- | --- |
-| Date |  Date of the request |
-| Client header | Header of the client's request |
-| On-Premises Target header | Header of the On-Premises Target response |
-| Content view | Buttons for viewing or download request or response content |
+| Date |  Zeitpunkt der Client-Anfrage |
+| Client header | Header der Client-Anfrage |
+| On-Premises Target header | Header der Antwort der On-Premises Applikation |
+| Content view | Buttons zur Anzeige oder zum Download der Client-Anfrage und der Antwort der On-Premises Applikation |
 
-The 4 buttons within the Content view column are grouped into two functions:
+Die Buttons zur Anzeige der der Client-Anfrage oder der Antwort der On-Premises Applikation sind nur dann sichtbar, wenn das Format des Elements direkt darstellbar ist (Content-type: text/\*). Sollte es sich um nicht im Browser darstellbaren Content handeln, so besteht die Möglichkeit, das entsprechende Element herunterzuladen.
 
-View content (Eye buttons)
-
-Download content (Download buttons)
-
-If the content is directly viewable (normally all Content-type: text/\*) you can use the View content button to view the content in your browser directly. If this options is not available the button will not be visible.
-
-Otherwise, you can use the Download content buttons to download the content.
 
 ## Menüpunkt Users
 
