@@ -1,0 +1,31 @@
+<div class="page-header">
+    <h1 translate>LOGIN.TITLE</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <form name="loginForm" class="loginForm" role="form">
+            <fieldset>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                    <input type="text" class="form-control" placeholder="{{'COMMON.USERNAME' | translate}}"
+                           name="username" ng-model="username"
+                           autofocus required/>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                    <input type="password" class="form-control" placeholder="{{'COMMON.PASSWORD' | translate}}"
+                           ng-model="password"
+                           name="password" required/>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-question"></i> </span>
+                    <label class="form-control password-control">
+                        <input type="checkbox" name="rememberMe" value="Remember Me" ng-model="rememberMe"  /> {{ 'LOGIN.REMEMBER_ME' | translate }}
+                    </label>
+                </div>
+                <button class="pull-right btn btn-primary btn-block" ng-click="login()" ng-disabled="loginForm.$invalid" translate>LOGIN.LOGIN</button>
+            </fieldset>
+        </form>
+    </div>
+</div>

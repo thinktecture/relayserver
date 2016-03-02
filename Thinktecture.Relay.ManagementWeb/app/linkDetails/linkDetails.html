@@ -1,0 +1,25 @@
+<div class="page-header">
+    <h1>{{ 'LINK_DETAILS.TITLE' | translate:translationData }}</h1>
+</div>
+
+<uib-tabset>
+    <uib-tab heading="{{ 'LINK_DETAILS.TABS.INFO' | translate }}" active="tabs.info.active" select="invokeOnTabActivate()">
+        <link-info-tab></link-info-tab>
+    </uib-tab>
+
+    <uib-tab heading="{{ 'LINK_DETAILS.TABS.CHARTS' | translate }}" active="tabs.chart.active" select="invokeOnTabActivate()">
+        <link-charts-tab></link-charts-tab>
+    </uib-tab>
+
+    <uib-tab heading="{{ 'LINK_DETAILS.TABS.LOGS' | translate }}" active="tabs.logs.active" select="invokeOnTabActivate()">
+        <link-logs-tab></link-logs-tab>
+    </uib-tab>
+
+    <uib-tab heading="{{ 'LINK_DETAILS.TABS.TRACE' | translate }}" active="tabs.trace.active" select="invokeOnTabActivate()">
+        <link-trace-tab></link-trace-tab>
+    </uib-tab>
+    <uib-tab ng-repeat="trace in traceResults" class="resultTab-{{trace.id}}" active="tabs[trace.id].active" select="invokeOnTabActivate()" >
+        <tab-heading>{{ trace.id }} <i class="fa fa-times" ng-click="closeResultTab($event, trace.id)"></i> </tab-heading>
+        <link-trace-result-tab></link-trace-result-tab>
+    </uib-tab>
+</uib-tabset>

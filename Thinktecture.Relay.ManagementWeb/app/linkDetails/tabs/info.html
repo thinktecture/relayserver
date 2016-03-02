@@ -1,0 +1,90 @@
+<h2 translate>LINK_DETAILS.TABS.INFO</h2>
+<div class="row margin-bottom-10">
+    <div class="col-md-12">
+        <button type="button" class="btn btn-danger" ng-click="confirmDelete()"><i class="fa fa-trash-o"></i> <span translate>LINK_DETAILS.DELETE</span></button>
+    </div>
+</div>
+<table class="table table-striped">
+    <tr>
+        <td>ID</td>
+        <td ng-bind="link.id"></td>
+    </tr>
+    <tr>
+        <td translate>LINKS.USERNAME</td>
+        <td>
+            <inplace-edit
+                    value="link.userName"
+                    update="updateUserName"
+                    error-check="isUserNameAvailable"
+                    error-text="COMMON.ERRORS.USER_NAME_UNAVAILABLE"
+                    has-error="errors.userName"></inplace-edit>
+        </td>
+    </tr>
+    <tr>
+        <td translate>LINKS.SYMBOLIC_NAME</td>
+        <td>
+            <inplace-edit
+                    value="link.symbolicName"
+                    update="updateSymbolicName"></inplace-edit>
+        </td>
+    </tr>
+    <tr>
+        <td translate>LINK_DETAILS.IS_CONNECTED</td>
+        <td>
+            <i class="fa fa-circle" ng-class="{'text-green': link.isConnected, 'text-red': !link.isConnected}"></i>&nbsp;
+            <button ng-click="pingLink()" class="btn btn-sm btn-default" ng-disabled="isPinging"><span class="fa fa-spinner fa-spin"p ng-show="isPinging"></span> Ping</button>
+        </td>
+    </tr>
+    <tr>
+        <td translate>LINK_DETAILS.CONNECTION_IDS</td>
+        <td>
+                    <span>
+                        <span ng-repeat="conn in link.connections">
+                            {{conn}}<br>
+                        </span>
+                    </span>
+        </td>
+    </tr>
+
+    <tr>
+        <td translate>LINKS.STATE</td>
+        <td><toggle-switch
+                on-text="LINKS.IS_ENABLED"
+                off-text="LINKS.IS_DISABLED"
+                on="!link.isDisabled"
+                toggle="toggleDisabledState()"></toggle-switch>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            {{ 'LINK_DETAILS.FORWARD_LOCAL_TARGET_ERROR_RESPONSE' | translate }}
+            <span uib-tooltip="{{ 'LINK_DETAILS.FORWARD_LOCAL_TARGET_ERROR_RESPONSE_WARNING' | translate }}" class="text-danger fa fa-warning"></span>
+        </td>
+        <td>
+            <toggle-switch
+                    off-text="LINKS.IS_DISABLED"
+                    on-text="LINKS.IS_ENABLED"
+                    on="link.forwardOnPremiseTargetErrorResponse"
+                    toggle="toggleForwardOnPremiseTargetErrorResponse()"></toggle-switch>
+        </td>
+    </tr>
+    <tr>
+        <td translate>LINK_DETAILS.ALLOW_LOCAL_CLIENT_REQUESTS_ONLY</td>
+        <td>
+            <toggle-switch
+                    on-text="LINKS.IS_ENABLED"
+                    off-text="LINKS.IS_DISABLED"
+                    on="link.allowLocalClientRequestsOnly"
+                    toggle="toggleAllowLocalClientRequestsOnly()"></toggle-switch>
+        </td>
+    </tr>
+    <!--<tr>
+        <td translate>LINK_DETAILS.MAXIMUM_LINKS</td>
+        <td>{{ link.maximumLinks | defaultTextWhenFalsy:'LINK_DETAILS.MAXIMUM_LINKS_UNLIMITED' |
+            translate }}</td>
+    </tr>-->
+    <tr>
+        <td translate>LINKS.CREATION_DATE</td>
+        <td>{{ link.creationDate | date:'medium' }}</td>
+    </tr>
+</table>

@@ -1,0 +1,9 @@
+{
+  "relayServer": {
+    "host": "windows8vm.local",
+    "port": 20000
+  },
+  "link": "monitoring",
+  "password": "r95o3SPL9ysGUUhr9n3UhPLggnh/dvVMGHm4Q1CwI0l1aR7iI7IMvYnEwNHBPRII6NIRB3coEFAjbA1JsaPUaxV7icYvD7DtCNSURX0ddVCDbySrw5SURngQZNnfbwCumAgjSg==",
+  "port": 32555
+}

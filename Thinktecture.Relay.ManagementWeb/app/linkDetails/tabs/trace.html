@@ -1,0 +1,38 @@
+<h2 translate>LINK_DETAILS.TABS.TRACE</h2>
+<div class="row">
+    <div class="col-md-12" translate>LINK_DETAILS.TRACE.DESCRIPTION</div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <form ng-show="!trace.isRunning" class="form-inline" role="form" name="newTraceForm" novalidate>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="fa fa-stethoscope"></i></span>
+                <input class="form-control trace-number-input" type="number" min="{{trace.min}}" max="{{trace.max}}" placeholder="{{ 'LINK_DETAILS.TRACE.MINUTES' | translate }}"
+                       id="minutes" name="minutes" required ng-model="trace.minutes" />
+            </div>
+            <button ng-click="startTracing()" ng-disabled="newTraceForm.$invalid" class="btn btn-success" type="submit"><i class="fa fa-play"></i> <span translate="LINK_DETAILS.TRACE.START" translate-values="{ minutes: trace.minutes }"></span></button>
+        </form>
+        <button ng-click="stopTracing()" ng-show="trace.isRunning" class="btn btn-danger" type="button"><i class="fa fa-stop"></i> <span translate="LINK_DETAILS.TRACE.STOP" translate-values="{ time: trace.timeLeft }"></span></button>
+    </div>
+</div>
+
+<h3 translate>LINK_DETAILS.TRACE.LOGS</h3>
+<div class="text-muted text-center" ng-show="trace.logs.length == 0" translate>LINK_DETAILS.NO_LOGS_AVAILABLE</div>
+<table class="table table-striped table-hover" ng-show="trace.logs.length > 0">
+    <thead>
+    <tr>
+        <th>Start date</th>
+        <th>End date</th>
+        <th>Run time</th>
+        <th>&nbsp;</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="log in trace.logs">
+        <td>{{ log.startDate | date:'medium' }}</td>
+        <td>{{ log.endDate | date:'medium' }}</td>
+        <td>{{ traceRuntimeFormat(log.startDate, log.endDate) }}</td>
+        <td><button ng-click="showTraceResult(log.id)" class="btn btn-default btn-sm" translate>LINK_DETAILS.TRACE.SHOW_RESULTS</button></td>
+    </tr>
+    </tbody>
+</table>

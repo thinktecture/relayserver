@@ -1,0 +1,50 @@
+<h2 translate="LINK_DETAILS.TRACE.TRACE_RESULT" translate-values="{ id: trace.id }"></h2>
+<table class="table table-striped">
+    <tbody>
+    <tr>
+        <td>Id</td>
+        <td ng-bind="trace.id"></td>
+    </tr>
+    <tr>
+        <td>Start</td>
+        <td>{{ trace.startDate | date:'medium' }}</td>
+    </tr>
+    <tr>
+        <td>End</td>
+        <td>{{ trace.startDate | date:'medium' }}</td>
+    </tr>
+    <tr>
+        <td>Runtime</td>
+        <td>{{ traceRuntimeFormat(trace.startDate, trace.endDate) }}</td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 translate>LINK_DETAILS.TABS.LOGS</h3>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th translate>COMMON.DATE</th>
+        <th translate>LINK_DETAILS.TRACE.REQUEST_HEADER</th>
+        <th translate>LINK_DETAILS.TRACE.RESPONSE_HEADER</th>
+        <th>&nbsp;</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="log in trace.logs">
+        <td>{{ log.tracingDate | date:'medium' }}</td>
+        <td>
+            <trace-headers data="log.onPremiseConnectorTrace.headers"></trace-headers>
+        </td>
+        <td>
+            <trace-headers data="log.onPremiseTargetTrace.headers"></trace-headers>
+        </td>
+        <td>
+            <button class="btn btn-default" ng-click="viewContent(log.onPremiseConnectorTrace.headerFileName)" ng-show="log.onPremiseConnectorTrace.isViewable && log.onPremiseConnectorTrace.isContentAvailable"><i class="fa fa-eye"></i> <span translate>LINK_DETAILS.TRACE.REQUEST_CONTENT</span></button>
+            <!--<a class="btn btn-default" href="{{ getDownloadUrl(log.clientTrace.filePrefix) }}"><i class="fa fa-download"></i> Client Content</a>-->
+            <button class="btn btn-default" ng-click="viewContent(log.onPremiseTargetTrace.headerFileName)" ng-show="log.onPremiseTargetTrace.isViewable && log.onPremiseTargetTrace.isContentAvailable"><i class="fa fa-eye"></i> <span translate>LINK_DETAILS.TRACE.RESPONSE_CONTENT</span></button>
+            <!--<a class="btn btn-default" href="{{ getDownloadUrl(log.onPremiseTargetTrace.filePrefix) }}"><i class="fa fa-download"></i>  Local Target Content</a>-->
+        </td>
+    </tr>
+    </tbody>
+</table>

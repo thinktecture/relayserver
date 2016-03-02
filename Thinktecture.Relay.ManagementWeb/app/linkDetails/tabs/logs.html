@@ -1,0 +1,35 @@
+<h2 translate>LINK_DETAILS.TABS.LOGS</h2>
+<button ng-click="reloadLogs()" ng-disabled="areLogsReloading" class="btn btn-default"><span class="fa fa-refresh" ng-class="{ 'fa-spin': areLogsReloading }"></span> {{ 'COMMON.REFRESH' | translate }}</button>
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>Status Code</th>
+        <th>Target Key</th>
+        <th>Local URL</th>
+        <th>Content Bytes In</th>
+        <th>Content Bytes Out</th>
+        <th>On-Premise Connector In Date</th>
+        <th>On-Premise Connector Out Date</th>
+        <th>On-Premise Target In Date</th>
+        <th>On-Premise Target Out Date</th>
+        <th>Origin ID</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="log in logs">
+        <td ng-bind="log.httpStatusCode"></td>
+        <td ng-bind="log.onPremiseTargetKey"></td>
+        <td ng-bind="log.localUrl"></td>
+        <td ng-bind="log.contentBytesIn"></td>
+        <td ng-bind="log.contentBytesOut"></td>
+        <td>{{ log.onPremiseConnectorInDate | date:'medium' }}</td>
+        <td>{{ log.onPremiseConnectorOutDate | date:'medium' }}</td>
+        <td>{{ log.onPremiseTargetInDate | date:'medium' }}</td>
+        <td>{{ log.onPremiseTargetOutDate | date:'medium' }}</td>
+        <td ng-bind="log.originId"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="text-muted text-center" ng-show="logs.length == 0" translate>LINK_DETAILS.NO_LOGS_AVAILABLE</div>

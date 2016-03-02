@@ -1,0 +1,45 @@
+<h2 translate>LINK_DETAILS.TABS.CHARTS</h2>
+<button ng-click="reloadChart()" ng-disabled="isChartReloading" class="btn btn-default"><span class="fa fa-refresh" ng-class="{ 'fa-spin': isChartReloading }"></span> {{ 'COMMON.REFRESH' | translate }}</button>
+
+<div class="row">
+    <div class="col-md-12">
+        <span ng-show="chart.data[0].length == 0" translate>LINK_DETAILS.NO_DATA</span>
+        <div>
+            <div class="row">
+                <div class="col-md-12">
+                    <canvas id="contentBytesChart" chart-line chart-type="line" data="chart.data" labels="chart.labels" series="chart.series" options="chart.options"></canvas>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="fromDate" name="fromDate" uib-datepicker-popup is-open="chart.isFromDatePickerOpen" ng-model="chart.fromDate" max-date="chart.toDate" ng-change="reloadChart()" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="openFrom($event)"><i class="fa fa-calendar"></i></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="toDate" name="toDate" uib-datepicker-popup is-open="chart.isToDatePickerOpen" ng-model="chart.toDate" min-date="chart.fromDate" ng-change="reloadChart()" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="openTo($event)"><i class="fa fa-calendar"></i></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="btn-group pull-right" uib-dropdown is-open="isOpen">
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle>
+                            {{chart.resolution}} <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu" uib-dropdown-menu>
+                            <li ng-repeat="resolution in chart.resolutions">
+                                <a href="" ng-click="chart.resolution = resolution; reloadChart()"><i class="fa fa-check" ng-show="chart.resolution == resolution"></i> <span translate="LINK_DETAILS.RESOLUTIONS.{{resolution | uppercase}}"></span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

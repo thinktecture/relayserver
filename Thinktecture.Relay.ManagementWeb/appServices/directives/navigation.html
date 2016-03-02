@@ -1,0 +1,25 @@
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" translate>MAIN.TITLE</a>
+        </div>
+
+        <ul class="nav navbar-right navbar-nav" ng-controller="logoutController" ng-show="isLoggedIn()">
+            <li><a href="" ng-click="logout()" translate><i class="fa fa-sign-out"></i> MAIN.LOGOUT</a></li>
+        </ul>
+
+        <div class="navbar-default">
+            <ul class="nav navbar-nav">
+                <li ui-sref-active="active">
+                    <a ui-sref="dashboard" translate>MAIN.DASHBOARD</a>
+                </li>
+                <li ui-sref-active="active">
+                    <a ui-sref="links" translate>MAIN.LINKS</a>
+                </li>
+                <li ui-sref-active="active">
+                    <a ui-sref="users" translate>MAIN.USERS</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

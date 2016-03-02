@@ -1,0 +1,11 @@
+<div class="page-header">
+    <h1 translate>USERS.TITLE</h1>
+</div>
+
+<div class="row margin-bottom-10">
+    <div class="col-md-12">
+        <button class="btn btn-primary" ng-click="createUser()"><span class="fa fa-plus-circle"></span> {{ 'USERS.ADD_USER' | translate }}</button>
+    </div>
+</div>
+
+<div ui-grid="gridOptions" external-scopes="externalScope" class="default-grid"></div>

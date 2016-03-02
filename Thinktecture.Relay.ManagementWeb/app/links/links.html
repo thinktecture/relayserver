@@ -1,0 +1,34 @@
+<div class="page-header">
+    <h1>{{ paging.maxItems }} {{ 'LINKS.TITLE' | translate }}</h1>
+</div>
+
+<div class="row margin-bottom-10">
+    <div class="col-md-9">
+        <button class="btn btn-primary" ng-click="createLink()"><span class="fa fa-plus-circle"></span>
+            {{'LINKS.CREATE_LINK' | translate }}
+        </button>
+    </div>
+    <div class="col-md-3">
+        <div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+            <input type="text" ng-model="paging.searchText" ng-change="pageChanged()" class="form-control" placeholder="{{ 'LINKS.SEARCH_TEXT' | translate }}" ng-model-options="{debounce: 500}" />
+            <span class="input-group-addon" ng-show="paging.searchText"><a href="" ng-click="paging.searchText = ''; pageChanged()"><i class="fa fa-times"></i></a></span>
+        </div>
+    </div>
+</div>
+
+<div ui-grid="gridOptions" external-scopes="externalScope" class="default-grid"></div>
+
+<div class="row row-pagination">
+     <div class="col-md-12">
+         <uib-pagination total-items="paging.maxItems" ng-model="paging.page" boundary-links="true" ng-change="pageChanged()"
+                     max-size="10"
+                     rotate="false"
+                     items-per-page="paging.pageSize"
+                     previous-text="{{ 'LINKS.PREVIOUS' | translate }}"
+                     next-text="{{ 'LINKS.NEXT' | translate }}"
+                     last-text="{{ 'LINKS.LAST' | translate }}"
+                     first-text="{{ 'LINKS.FIRST' | translate }}"
+                 ></uib-pagination>
+     </div>
+</div>

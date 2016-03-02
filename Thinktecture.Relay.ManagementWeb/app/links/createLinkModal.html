@@ -1,0 +1,41 @@
+<form class="form-horizontal" role="form" name="createLinkForm" novalidate ng-show="!password">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="cancel()" tabindex="-1"><span>&times;</span><span class="sr-only" translate>COMMON.CLOSE</span></button>
+        <h3 class="modal-title" translate>LINKS.MODAL_CREATE.TITLE</h3>
+    </div>
+    <div class="modal-body">
+        <div class="form-group" ng-class="{'has-error':createLinkForm.symbolicName.$error.required && createLinkForm.symbolicName.$dirty}">
+            <label for="symbolicName" class="col-sm-2 control-label" translate>LINKS.SYMBOLIC_NAME</label>
+            <div class="col-sm-10">
+                <input id="symbolicName" name="symbolicName" class="form-control" ng-model="link.symbolicName" autofocus ng-model-options="{debounce: 50}" placeholder="{{ 'LINKS.SYMBOLIC_NAME' | translate }}" maxlength="250" required />
+                <span class="text-danger" ng-show="createLinkForm.symbolicName.$error.required && createLinkForm.symbolicName.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{'has-error':(createLinkForm.userName.$invalid && createLinkForm.userName.$dirty) || userNameUnavailable, 'has-success': userNameAvailable}">
+            <label for="userName" class="col-sm-2 control-label" translate>LINKS.USERNAME</label>
+            <div class="col-sm-10">
+                <input id="userName" name="userName" class="form-control" ng-model="link.userName" ng-model-options="{debounce: 50}" placeholder="{{ 'LINKS.USERNAME' | translate }}" maxlength="250" required />
+                <span class="fa fa-check form-control-feedback" ng-show="userNameAvailable"></span>
+                <span class="text-danger" ng-show="userNameUnavailable" translate>COMMON.ERRORS.USER_NAME_UNAVAILABLE</span>
+                <span class="text-danger" ng-show="createLinkForm.userName.$error.required && createLinkForm.userName.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" ng-disabled="createLinkForm.$invalid || userNameUnavailable" ng-click="submit()" translate>COMMON.CREATE</button>
+        <button class="btn btn-default" ng-click="cancel()" translate>COMMON.CANCEL</button>
+    </div>
+</form>
+<div ng-show="password">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="cancel()" tabindex="-1"><span>&times;</span><span class="sr-only" translate>COMMON.CLOSE</span></button>
+        <h3 class="modal-title" translate>LINKS.MODAL_CREATE.TITLE</h3>
+    </div>
+    <div class="modal-body">
+        <span translate>LINKS.MODAL_CREATE.CREATED</span>
+        <pre ng-bind="password"></pre>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" ng-click="closeSuccess()" translate>COMMON.CLOSE</button>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+<div>
+    <div ng-show="!inEditMode" ng-click="inEditMode = true"><span class="inplace-editable">{{value}}</span></div>
+    <form name="inplaceEditForm" ng-show="inEditMode" ng-submit="submit()">
+        <div ng-class="{'has-error': hasError}">
+            <input type="text" ng-model="internalValue" required ng-model-options="{debounce: 50}" name="value"
+                   class="form-control inplace-editable-control"/>
+            <button type="submit" ng-disabled="hasError || !inplaceEditForm.value.$dirty || internalValue == value"
+                    class="btn btn-success"><span class="glyphicon glyphicon-ok"></span></button>
+            <button type="button" ng-click="reset()" class="btn btn-danger"><span
+                    class="glyphicon glyphicon-remove"></span></button>
+        </div>
+        <div ng-show="hasError || inplaceEditForm.$invalid">
+            <span class="text-danger" translate="{{errorText}}" ng-show="!inplaceEditForm.value.$error.required"></span>
+            <span class="text-danger" translate ng-show="inplaceEditForm.value.$error.required">COMMON.ERRORS.FIELD_REQUIRED</span>
+        </div>
+    </form>
+</div>

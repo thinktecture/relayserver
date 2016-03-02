@@ -1,0 +1,41 @@
+{
+  "name": "thinktecture-relayserver",
+  "version": "1.0.4",
+  "description": "RelayServer",
+  "main": "gulpfile.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thinktecture/relayserver.git"
+  },
+  "scripts": {
+    "gitbook": "gulp gitbook",
+    "gitbook-pdf": "gulp gitbook:pdf",
+    "watch": "gulp watch",
+    "deploy": "gulp relay:deploy",
+    "release": "gulp release"
+  },
+  "keywords": [
+    "Thinktecture",
+    "RelayServer"
+  ],
+  "author": "Thinktecture AG",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thinktecture/relayserver/issues"
+  },
+  "homepage": "http://thinktecture.com/relay",
+  "devDependencies": {
+    "chalk": "^1.1.1",
+    "del": "^2.2.0",
+    "gitbook": "^2.6.4",
+    "gulp": "^3.9.0",
+    "gulp-github-release": "1.1.2",
+    "gulp-inject": "^3.0.0",
+    "gulp-less": "^3.0.5",
+    "gulp-rename": "^1.2.2",
+    "gulp-server-livereload": "^1.5.4",
+    "gulp-zip": "^3.0.2",
+    "q": "^1.4.1",
+    "run-sequence": "^1.1.5"
+  }
+}

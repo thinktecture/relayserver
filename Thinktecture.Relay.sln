@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.TestClient", "Thinktecture.Relay.TestClient\Thinktecture.Relay.TestClient.csproj", "{775FA393-5907-4553-8411-54D79ACFB425}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Test", "Thinktecture.Relay.Server.Test\Thinktecture.Relay.Server.Test.csproj", "{FC928931-8741-48E1-9061-343CF009C903}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.OnPremiseConnector", "Thinktecture.Relay.OnPremiseConnector\Thinktecture.Relay.OnPremiseConnector.csproj", "{63D02790-C22D-479B-BC30-1A45F2B832E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.OnPremiseConnectorService", "Thinktecture.Relay.OnPremiseConnectorService\Thinktecture.Relay.OnPremiseConnectorService.csproj", "{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7286C586-743A-443C-BF95-5394EE8E49F4}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Stresstest", "Thinktecture.Relay.Stresstest\Thinktecture.Relay.Stresstest.csproj", "{DCF80FFC-13A9-4985-9462-A7C3EED1EE72}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}.Release|Any CPU.Build.0 = Release|Any CPU
+		{775FA393-5907-4553-8411-54D79ACFB425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{775FA393-5907-4553-8411-54D79ACFB425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{775FA393-5907-4553-8411-54D79ACFB425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{775FA393-5907-4553-8411-54D79ACFB425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC928931-8741-48E1-9061-343CF009C903}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC928931-8741-48E1-9061-343CF009C903}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC928931-8741-48E1-9061-343CF009C903}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC928931-8741-48E1-9061-343CF009C903}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63D02790-C22D-479B-BC30-1A45F2B832E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63D02790-C22D-479B-BC30-1A45F2B832E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63D02790-C22D-479B-BC30-1A45F2B832E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63D02790-C22D-479B-BC30-1A45F2B832E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCF80FFC-13A9-4985-9462-A7C3EED1EE72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCF80FFC-13A9-4985-9462-A7C3EED1EE72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCF80FFC-13A9-4985-9462-A7C3EED1EE72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCF80FFC-13A9-4985-9462-A7C3EED1EE72}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FC928931-8741-48E1-9061-343CF009C903} = {C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}
+	EndGlobalSection
+EndGlobal

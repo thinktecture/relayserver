@@ -1,0 +1,57 @@
+﻿using System;
+using System.Configuration;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Thinktecture.Relay.OnPremiseConnector;
+using Thinktecture.Relay.OnPremiseConnectorService.Configuration;
+
+namespace Thinktecture.Relay.OnPremiseConnectorService
+{
+	internal class OnPremisesService
+	{
+		private RelayServerConnector _connector;
+
+		public async Task Start()
+		{
+			var section = (RelayServerSection) ConfigurationManager.GetSection("relayServer");
+
+			if (section.OnPremiseTargets.Count == 0)
+                throw new ConfigurationErrorsException("At least one On-Premise Target needs to be configured.");
+
+			switch (section.Security.AuthenticationType)
+			{
+				case AuthenticationType.Identity:
+					if (String.IsNullOrEmpty(section.Security.Identity.UserName))
+						throw new ConfigurationErrorsException("The user name cannot be null or empty when using authentication type 'Identity'.");
+
+					_connector = new RelayServerConnector(section.Security.Identity.UserName, section.Security.Identity.Password, new Uri(section.BaseUrl), (int) section.RequestTimeout.TotalSeconds);
+					break;
+
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+		    _connector.RelayedRequestHeader = "X-Relayed";
+
+			foreach (var onPremiseTarget in section.OnPremiseTargets.Cast<OnPremiseTargetElement>())
+			{
+				_connector.RegisterOnPremiseTarget(onPremiseTarget.Key, new Uri(onPremiseTarget.BaseUrl));
+			}
+
+
+			await _connector.Connect();
+		}
+
+		public void Stop()
+		{
+			if (_connector != null)
+			{
+				_connector.Disconnect();
+				_connector.Dispose();
+				_connector = null;
+			}
+		}
+	}
+}

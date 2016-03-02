@@ -1,0 +1,54 @@
+<div class="page-header">
+    <h1 translate>DASHBOARD.TITLE</h1>
+</div>
+
+<uib-tabset>
+    <uib-tab heading="{{ 'LINK_DETAILS.TABS.CHARTS' | translate }}">
+        <h2 translate>LINK_DETAILS.TABS.CHARTS</h2>
+
+        <div class="row">
+            <div class="col-md-12">
+                <canvas id="contentBytesChart" chart-line chart-type="line" data="chart.data" labels="chart.labels" series="chart.series" options="chart.options"></canvas>
+            </div>
+        </div>
+    </uib-tab>
+
+    <uib-tab heading="{{ 'LINK_DETAILS.TABS.LOGS' | translate }}">
+        <h2 translate>LINK_DETAILS.TABS.LOGS</h2>
+
+        <div class="text-muted text-center" ng-show="dashboard.logs.length == 0" translate>LINK_DETAILS.NO_LOGS_AVAILABLE</div>
+
+        <table class="table table-striped table-hover" ng-show="dashboard.logs.length > 0">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Status Code</th>
+                <th>Target Key</th>
+                <th>Local URL</th>
+                <th>Content Bytes In</th>
+                <th>Content Bytes Out</th>
+                <th>On-Premise Connector In Date</th>
+                <th>On-Premise Connector Out Date</th>
+                <th>On-Premise Target In Date</th>
+                <th>On-Premise Target Out Date</th>
+                <th>Origin ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="log in dashboard.logs">
+                <td><a href="" ng-click="open(log.linkId)">{{log.linkId}}</a></td>
+                <td ng-bind="log.httpStatusCode"></td>
+                <td ng-bind="log.onPremiseTargetKey"></td>
+                <td ng-bind="log.localUrl"></td>
+                <td ng-bind="log.contentBytesIn"></td>
+                <td ng-bind="log.contentBytesOut"></td>
+                <td>{{ log.onPremiseConnectorInDate | date:'medium' }}</td>
+                <td>{{ log.onPremiseConnectorOutDate | date:'medium' }}</td>
+                <td>{{ log.onPremiseTargetInDate | date:'medium' }}</td>
+                <td>{{ log.onPremiseTargetOutDate | date:'medium' }}</td>
+                <td ng-bind="log.originId"></td>
+            </tr>
+            </tbody>
+        </table>
+    </uib-tab>
+</uib-tabset>
