@@ -1,35 +1,35 @@
 # [Was ist der Thinktecture RelayServer?](1-was-ist-der-thinktecture-relayserver.md)
 
-Der Thinktecture RelayServer (nachfolgend kurz RelayServer genannt) ermöglicht als Open Source Software eine bi-direktionale, sichere Kommunikation von Clients, mobilen Endgeräten und Applikationen mit On-Premises Applikationen hinter Routern und Firewalls über das https-Protokoll bei vollständiger zentraler Kontrolle und Auditierung der zulässigen Teilnehmer und der erlaubten Daten.
+Der Thinktecture RelayServer (nachfolgend kurz RelayServer genannt) ermöglicht als Open Source Software eine bi-direktionale, sichere Kommunikation von Clients, mobilen Endgeräten und Applikationen mit On-Premises-Applikationen hinter Routern und Firewalls über das HTTPS-Protokoll bei vollständiger zentraler Kontrolle und Auditierung der zulässigen Teilnehmer und der erlaubten Daten.
 
-Dafür bildet der Relay Dienst auf einem für Client und On-Premises Applikationen gleichermaßen erreichbaren Server einen sicheren Austauschpunkt für Nachrichten. Da der Server unter der vollen Kontrolle des Betreibers steht und sowohl mit Client als auch On-Premises Applikationen durchgängig verschlüsselt kommuniziert, ist die Sicherheit der übertragenen Daten jederzeit gewährleistet.
+Ein für Client-Anwendungen und On-Premises-Applikationen gleichermaßen erreichbarer Server bildet einen sicheren Austauschpunkt für Nachrichten und Daten. Da der Server unter der vollen Kontrolle des Betreibers steht und sowohl mit Clients als auch On-Premises-Applikationen durchgängig verschlüsselt kommuniziert, ist die Sicherheit der übertragenen Daten jederzeit gewährleistet.
 
-Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin dafür, dass sowohl Client als auch On-Premises Applikationen nur ausgehende Verbindungen zur Kommunikation aufbauen müssen. Damit sind Firewalls, Router und NAT-Systeme in der Regel ebenso wenig ein Problem, wie häufig wechselnde IP-Adressen von einfachen DSL-Anschlüssen oder Mobilfunkverbindungen.
+Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin dafür, dass sowohl Clients als auch On-Premises-Applikationen nur ausgehende Verbindungen zur Kommunikation aufbauen müssen. Damit sind Firewalls, Router und NAT-Systeme in der Regel ebensowenig ein Problem, wie häufig wechselnde IP-Adressen von einfachen DSL-Anschlüssen oder Mobilfunkverbindungen.
 
 # Vorteile des RelayServers
 
 - Open Source Software
 - Vollständige Datenhoheit liegt beim Betreiber des RelayServers
 - Als reine Softwarelösung schnell implementierbar
-- Für die Client-Software keine Libraries notwendig
-- Die Lösung ist Mandantenfähig, so dass über einen RelayServer Daten für mehrere verschiedenen On-Premises Applikationen und deren Clients fließen können
+- Für die Client-Software sind keine Libraries notwendig
+- Die Lösung ist mandantenfähig, so dass über einen RelayServer Daten für mehrere verschiedene On-Premises-Applikationen und deren Clients fließen können
 - Firewalls, NAT und Proxies stellen in der Regel kein Problem dar
-- Der Datentransport ist mit https verschlüsselt
-- Die On-Premises Applikation benötigt ausschließlich eine offene https-out Möglichkeit
+- Der Transportkanal ist via HTTPS-Verbindung verschlüsselt
+- Die On-Premises-Applikation benötigt als Minimalanforderung eine offene ausgehende HTTPS-Verbindung
 - Keine spezielle Hardware notwendig
-- Keine Firewalländerungen notwendig
+- Keine Firewall-Änderungen notwendig
 - Keine Datenhaltung in einer DMZ notwendig
 
 # Zielsetzung des RelayServers
 
 Die Anforderungen an Unternehmens-Applikationen haben sich in den letzten Jahren massiv verändert. Die bisherigen Applikations-Umgebungen bestehend aus Servern und Desktop-basierten Clients in einem lokalen, abgesicherten Netzwerk adressieren nicht mehr die aktuelle Realität.
 
-Unternehmen und Anwender verlangen von ihren Lösungs-Anbietern konkrete Antworten zu diesen wesentlichen Herausforderungen:
+Unternehmen und Anwender verlangen von ihren Lösungsanbietern konkrete Antworten zu diesen wesentlichen Herausforderungen:
 
 ## Herausforderung: Sicherer mobiler Datenzugriff
 ![1-herausfoderung-mobiler-datenzugriff.png](./assets/1-herausfoderung-mobiler-datenzugriff.png)
  
-Mobile Endgeräte wie Laptops, Tablets und Smartphones sind aus dem beruflichen Alltag nicht mehr wegzudenken. Beim Zugriff auf Unternehmensdaten über solche Geräte entsteht schnell der Wunsch, nicht mehr an das lokale Netzwerk gebunden zu sein. Die bisherigen Grenzen des Netzwerks müssen daher durchlässig werden, ohne dabei die Sicherheit der Unternehmensdaten zu gefährden.
+Mobile Endgeräte wie Laptops, Tablets und Smartphones sind aus dem beruflichen Alltag nicht mehr wegzudenken. Beim Zugriff auf Unternehmensdaten über solche Geräte entsteht schnell der Wunsch, nicht mehr an das lokale Netzwerk gebunden zu sein. Die bisherigen Grenzen des Netzwerks müssen daher "durchlässig" werden, ohne dabei die Sicherheit der Unternehmensdaten zu gefährden.
 
 Der RelayServer unterstützt dafür die sichere Verbindung von mobilen Endgeräten mit On-Premises Applikationen rein auf Basis von Software. Der On-Premises Server kann dabei über einen einfachen dynamischen DSL-Uplink oder eine 3G-Verbindung mit dem Internet verbunden sein.
 
