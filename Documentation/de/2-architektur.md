@@ -27,7 +27,7 @@
 
 Ein Link bezeichnet die konfigurierte Verbindung zwischen dem RelayServer und einer On-Premises Applikation (über einen On-Premises Connector). Ein Link wird im RelayServer konfiguriert und erlaubt mit dem dabei erzeugten Authentifizierungskey dem On-Premises Connector den Verbindungsaufbau. Ein bestehender Link kann in den Modus *aktiviert* oder *deaktiviert* geschaltet werden. Nur im aktivierten Modus werden Client-Anfragen an die On-Premises Applikation weitergeleitet. 
 
-Durch die Möglichkeiten, Links anzulegen und dann nach belieben zu aktivieren oder zu deaktivieren, ergibt sich ein verlässlicher und schneller schneller Mechanismus, um den Datenaustausch mit einzelnen On-Premises Installationen zu ermöglichen bzw. zu unterbinden. Der technische Verbindungsaufbau ist von der Berechtigung zur Kommunikation dadurch sauber getrennt.
+Durch die Möglichkeiten, Links anzulegen und dann nach belieben zu aktivieren oder zu deaktivieren, ergibt sich ein verlässlicher und schneller Mechanismus, um den Datenaustausch mit einzelnen On-Premises Installationen zu ermöglichen bzw. zu unterbinden. Der technische Verbindungsaufbau ist von der Berechtigung zur Kommunikation dadurch sauber getrennt.
 
 # Technische Details
 
