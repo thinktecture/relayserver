@@ -214,16 +214,16 @@ Zum Betrieb des RelayServers müssen auf dem dafür verwendeten Windows Server f
 
 ## Installation
 
-Der On-Premises Connector wird mit einem Installations-Assistenten zur Verfügung gestellt. Er installiert sich durch die Ausführung des Assistenten als Service auf dem betreffenden System.
+In typischen Einsatzszenarien des RelayServers wird der On-Premises Connector eng mit der On-Premises Applikation verbunden. Die Installation des On-Premises Connectors erfolgt daher in der Regel durch den Installer der On-Premises Applikation. Für Test-Setups kann der On-Premises Connector auch separat installiert werden.
 
 ## Konfiguration des On-Premises Connectors
 
-To configure On-Premises Connector head over to the installation directory (default: C:\Program Files\Thinktecture\On-Premises Connector) and open Thinktecture.Relay.OnPremiseConnector.exe.config in your preferred xml editor.
+Zur Konfiguration des On-Premises Connectors wird die Konfigurationsdatei Thinktecture.Relay.OnPremiseConnector.exe.config im Installationsordner (Standard: C:\Program Files\Thinktecture\On-Premises Connector)des On-Premises Connectors in einem beliebigen Editor geöffnet.
 
-The only things you need to change is within the <relayServer></relayServer> section:
+In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> bearbeitet werden:
 
 ```
-<relayServer baseUrl="http://127.0.0.1:20000/">
+<relayServer baseUrl="https://relay.company.example/">
   <security authenticationType="Identity">
     <identity userName="userName" password="password" />
   </security>
@@ -235,23 +235,23 @@ The only things you need to change is within the <relayServer></relayServer> sec
 
 ### relayServer Element
 
-|  Attribute name | Description |
+|  Attribut | Beschreibung |
 | --- | --- |
-| baseUrl | URL of RelayServer |
+| baseUrl | URL des RelayServer |
 
 ### security Element
 
-|  Attribute name | Description |
+|  Attribut | Beschreibung |
 | --- | --- |
-| authenticationType | Currently Identity is the only supported authentication type |
+| authenticationType | In der aktuellen Version des RelayServers wird nur der Modus *Identity* unterstützt |
 
 ### identity Element
 
-|  Attribute name | Description |
+|  Attribut | Beschreibung |
 | --- | --- |
-| userName | userName (link name) |
-| password | password of the link |
+| userName | Name des Links |
+| password | Passwort des Links |
 
-onPremiseTargets Element
+### onPremiseTargets Element
 
-Key-Value-based list (where Value is baseUrl). Add as many relayTargets as your On-Promise Connector should handle.
+Liste von On-Premises Applikationen, die vom On-Premises Connector mit Anfragen versorgt werden sollen.
