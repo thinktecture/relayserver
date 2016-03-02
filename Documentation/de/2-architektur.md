@@ -18,10 +18,16 @@
 1. Der On-Premises Connector baut beim Start eine Verbindung zum konfigurierten RelayServer auf (z.B. [https://relay.company.example](https://relay.company.example)).
 1. Die dafür notwendige Verbindung ist eine ausschließlich ausgehende Verbindung, so dass in der Regel keine Änderungen an Firewalls, Routern oder NAT-Systemen notwendig sind.
 1. Beim Verbindungsaufbau muss sich der On-Premises Connector beim RelayServer authentifizieren.
-1. Nach erfolgter Authentifizierung gilt der On-Premises Connector als verbunden jedoch nicht automatisch auch als aktiv und damit für Clients erreichbar. Diese Entscheidung trifft der RelayServer anhand seiner Konfiguration. Diese Funktionalität ist die Grundlage für ein verlässliches Provisioning.
+1. Nach erfolgter Authentifizierung gilt der On-Premises Connector und damit auch die On-Premises Applikation als verbunden - RelayServer und On-Premises Connector haben einen sogenannten *Link* aufgebaut. Details zu Links finden sich im folgenden Abschnitt.
 1. Der On-Premises Connector hält über verschiedene Ansätze die etablierte Verbindung dauerhaft offen und wartet auf mögliche Anfragen von Clients, die ihm der RelayServer weiterleitet.
-1. Eingehende Anfragen von Clients werden vom On-Premises Connector entgegengenommen und der dahinter liegenden On-Premises Applikation als Web Request weitergeleitet. Aus Sicht der On-Premises Applikation besteht kein Unterschied zu einem „normalen" Client-Request.
+1. Eingehende Anfragen von Clients werden vom On-Premises Connector entgegengenommen und der dahinter liegenden On-Premises Applikation als Web Request weitergeleitet. Aus Sicht der On-Premises Applikation besteht kein Unterschied zu einem "normalen" Client-Request.
 1. Die Antwort auf die Client-Anfrage liefert die On-Premises Applikation daher an den On-Premises Connector zurück, der die Antwort wiederum über den RelayServer an den Client weiterreicht.
+
+## Link
+
+Ein Link bezeichnet die konfigurierte Verbindung zwischen dem RelayServer und einer On-Premises Applikation (über einen On-Premises Connector). Ein Link wird im RelayServer konfiguriert und erlaubt mit dem dabei erzeugten Authentifizierungskey dem On-Premises Connector den Verbindungsaufbau. Ein bestehender Link kann in den Modus *aktiviert* oder *deaktiviert* geschaltet werden. Nur im aktivierten Modus werden Client-Anfragen an die On-Premises Applikation weitergeleitet. 
+
+Durch die Möglichkeiten, Links anzulegen und dann nach belieben zu aktivieren oder zu deaktivieren, ergibt sich ein verlässlicher und schneller schneller Mechanismus, um den Datenaustausch mit einzelnen On-Premises Installationen zu ermöglichen bzw. zu unterbinden. Der technische Verbindungsaufbau ist von der Berechtigung zur Kommunikation dadurch sauber getrennt.
 
 # Technische Details
 
@@ -29,7 +35,7 @@
 
 Beim Start des On-Premises Connectors wird eine Verbindung zum in der Konfigurationsdatei hinterlegten RelayServer aufgebaut. Da es sich dabei um eine ausgehende HTTPS-Verbindung bzw. Secure Websocket-Verbindung handelt, sind in Firewalls in den allermeisten Fällen daher keine besonderen oder kritischen Regeln für den On-Premises Connector zu hinterlegen.
 
-Bei erfolgreicher Verbindung zum RelayServer muss sich der On-Premises Connector zunächst mit einem Key authentifizieren. Dieser Key wird out-of-band bspw. über sichere EMail kommuniziert. Nach erfolgreicher Authentifizierung wird zwischen RelayServer und On-Premises Connector eine Real-Time-Verbindung aufgebaut. Ist der On-Premises Connector laut Konfiguration in der Datenbank für die Kommunikation mit Clients freigeschaltet, so vermerkt der RelayServer in seiner Datenbank den Status „aktiv" für den verbundenen On-Premises Connector. Nachrichten von Clients für diesen On-Premises Connector werden ab jetzt weitergeleitet.
+Bei erfolgreicher Verbindung zum RelayServer muss sich der On-Premises Connector zunächst mit einem Key authentifizieren. Dieser Key wird out-of-band bspw. über sichere EMail kommuniziert. Nach erfolgreicher Authentifizierung wird zwischen RelayServer und On-Premises Connector eine Real-Time-Verbindung aufgebaut. Ist der On-Premises Connector laut Konfiguration in der Datenbank für die Kommunikation mit Clients freigeschaltet, so vermerkt der RelayServer in seiner Datenbank den Status *verbunden* für den entsprechenden On-Premises Connector. Nachrichten von Clients für die zugehörige On-Premises Applikation werden ab jetzt weitergeleitet.
 
 Für die Real-Time-Verbindung kommt SignalR als Verbindungstechnologie zum Einsatz. Sie sorgt auch dafür, dass die etablierte Verbindung zwischen RelayServer und On-Premises Connector dauerhaft geöffnet bleibt. Bei einer Unterbrechung der Verbindung wird durch die Funktionalität von SignalR darüber hinaus automatisch regelmäßig ein Verbindungsneuaufbau versucht, bis wieder eine stabile Verbindung besteht.
 
