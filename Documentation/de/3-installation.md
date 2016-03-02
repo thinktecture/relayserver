@@ -49,7 +49,7 @@ Mit den Default-Anmeldedaten guest / guest erfolgt der Login und die Statusüber
 
 ## Installation
 
-Der einfachste Weg der Installation des RelayServers ist die Verwendung des fertigen Zip-Packets von GitHub unter
+Der einfachste Weg der Installation des RelayServers ist die Verwendung des fertigen ZIP-Pakets von GitHub unter
 
 ```
 https://github.com/thinktecture/relayserver
