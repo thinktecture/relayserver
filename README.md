@@ -24,4 +24,4 @@ Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin da
 
 # Architektur, Installation und Management
 
-Eine vollständige Dokumentation zum RelayServer inklusive aller Details zu seiner Architektur, einer ausführlichen Installationsanleitung und einer Einführung in das RelayServer Management Web befindet sich unter [thinktecture/relaysever/Documentation/de](./Documentation/de/relayserver.md).
+Eine vollständige Dokumentation zum RelayServer inklusive aller Details zu seiner Architektur, einer ausführlichen Installationsanleitung und einer Einführung in das RelayServer Management Web befindet sich unter [thinktecture/relayserver/Documentation/de](./Documentation/de/relayserver.md).
