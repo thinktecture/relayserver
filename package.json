@@ -19,11 +19,11 @@
     "RelayServer"
   ],
   "author": "Thinktecture AG",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/thinktecture/relayserver/issues"
   },
-  "homepage": "http://thinktecture.com/relay",
+  "homepage": "http://thinktecture.com/relayserver",
   "devDependencies": {
     "chalk": "^1.1.1",
     "del": "^2.2.0",
