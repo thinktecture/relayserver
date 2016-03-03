@@ -21,3 +21,5 @@ Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin da
 - Keine spezielle Hardware notwendig
 - Keine Firewall-Änderungen notwendig
 - Keine Datenhaltung in einer DMZ notwendig
+
+Eine vollständige Dokumentation zum RelayServer inklusive allen Details zu seiner Architektur, einer ausführlichen Installationsanleitung und einer Einführung in das RelayServer Management Web befindet sich unter [thinktecture/relaysever/Documentation/de](./Documentation/de/relayserver.md).
