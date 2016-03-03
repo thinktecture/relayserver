@@ -29,6 +29,46 @@ Ein Link bezeichnet die konfigurierte Verbindung zwischen dem RelayServer und ei
 
 Durch die Möglichkeiten, Links anzulegen und dann nach belieben zu aktivieren oder zu deaktivieren, ergibt sich ein verlässlicher und schneller Mechanismus, um den Datenaustausch mit einzelnen On-Premises Installationen zu ermöglichen bzw. zu unterbinden. Der technische Verbindungsaufbau ist von der Berechtigung zur Kommunikation dadurch sauber getrennt.
 
+## Datenabruf mit und ohne RelayServer
+
+Beispiel: Es gibt eine On-Premises Applikation, die per Web API unter anderem Artikeldaten für Clients im lokalen Netzwerk bereitstellt. Für einen sicheren Datenzugriff sind alle Clients authentifiziert und senden bei jedem Request ein entsprechendes Token an die Web API mit. Zugriffe ohne gültiges Token werden von der On-Premises Applikation abgelehnt.
+Ein Zugriff von mobilen Geräten war bisher nicht vorgesehen, so dass die API ausschließlich aus dem lokalen Netzwerk unter dieser URL abrufbar war:
+
+```
+/articles/getAllArticles
+```
+
+Die Clients sollen jetzt über einen RelayServer, der unter *https://relay.company.example* erreichbar ist, auch mobil auf diese Daten zugreifen können. Wie wirkt sich der Einsatz des RelayServer auf dieses Beispiel-Setup aus?
+
+### URL-Schema ohne RelayServer
+
+Die Clients nutzen die Web API der On-Premises Applikation im lokalen Netzwerk durch GET-Requests gegen die URL
+
+```
+http://localhost/articles/getAllArticles
+```
+
+Ist der Client nicht im gleichen Netzwerk wie die Web API der On-Premises Applikation, so schlägt die Abfrage fehl.
+
+### URL-Schema mit RelayServer
+
+Da der RelayServer wie ein transparenter Reverse-Proxy funktioniert, sind nur minimale Änderungen am Beipsiel-Setup notwendig. Die Basis-URL der Web API *http://localhost* dürfte in der Regel im Client als Konstante hinterlegt sein und sich leicht verändern lassen.
+
+Wir benötigen für das neue Setup
+1. die URL des RelayServers (*https://relay.company.example*) und
+1. den Namen des Links, unter dem sich der zugehörige On-Premises Connector mit dem RelayServer verbindet und so die On-Premises Applikation für externe Clients sichtbar macht sowie
+1. den im OnPremise-Connector konfigurierten Name für die  On-Premises Applikation
+
+In unserem Beipsiel lautet der Name des Links z.B. *mandant1* (Details zur Einrichtung eines Links finden sich in der Dokumentation im Abschnitt zum RelayServer Management Web) und der Name der On-Premises Applikation *MyArticleBackend*.
+
+Die neue URL für die GET-Requests der Clients lautet nun:
+
+```
+https://relay.company.example/mandant1/MyArticleBackend/articles/getAllArticles
+```
+
+Daher bechränkt sich die notwendige Änderung in der Gesamtarchitektur nur auf die Anpassung einer Konstante im Client. An der Web API der On-Premises Applikation sind keine Änderungen notwendig. Ebenfalls musste der Code des Clients nicht um spezielle Libraries für die Kommunikation erweitert werden.
+
 # Technische Details
 
 ## Verbindungsaufbau vom On-Premises Connector zum RelayServer
