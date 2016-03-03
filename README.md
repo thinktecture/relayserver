@@ -15,7 +15,7 @@ Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin da
 - Als reine Softwarelösung schnell implementierbar
 - Für die Client-Software sind keine Libraries notwendig
 - Die Lösung ist mandantenfähig, so dass über einen RelayServer Daten für mehrere verschiedene On-Premises-Applikationen und deren Clients fließen können
-- Firewalls, NAT und Proxies stellen in der Regel kein Problem dar
+- Firewalls, NAT und Proxys stellen in der Regel kein Problem dar
 - Der Transportkanal ist via HTTPS-Verbindung verschlüsselt
 - Die On-Premises-Applikation benötigt als Minimalanforderung eine offene ausgehende HTTPS-Verbindung
 - Keine spezielle Hardware notwendig
