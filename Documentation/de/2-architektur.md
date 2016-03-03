@@ -55,6 +55,7 @@ Ist der Client nicht im gleichen Netzwerk wie die Web API der On-Premises Applik
 Da der RelayServer wie ein transparenter Reverse-Proxy funktioniert, sind nur minimale Änderungen am Beipsiel-Setup notwendig. Die Basis-URL der Web API *http://localhost* dürfte in der Regel im Client als Konstante hinterlegt sein und sich leicht verändern lassen.
 
 Wir benötigen für das neue Setup
+
 1. die URL des RelayServers (*https://relay.company.example*) und
 1. den Namen des Links, unter dem sich der zugehörige On-Premises Connector mit dem RelayServer verbindet und so die On-Premises Applikation für externe Clients sichtbar macht sowie
 1. den im OnPremise-Connector konfigurierten Name für die  On-Premises Applikation
