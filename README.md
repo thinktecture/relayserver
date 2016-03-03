@@ -1,6 +1,6 @@
 # Thinktecture RelayServer
 
-Der Thinktecture RelayServer (nachfolgend kurz RelayServer genannt) ermöglicht als Open Source Software eine bi-direktionale, sichere Kommunikation von Clients, mobilen Endgeräten und Applikationen mit On-Premises-Applikationen hinter Routern und Firewalls über das HTTPS-Protokoll bei vollständiger zentraler Kontrolle und Auditierung der zulässigen Teilnehmer und der erlaubten Daten.
+Der Thinktecture RelayServer (nachfolgend kurz RelayServer genannt) ermöglicht als Open-Source-Software eine bidirektionale, sichere Kommunikation von Clients, mobilen Endgeräten und Applikationen mit On-Premises-Applikationen hinter Routern und Firewalls über das HTTPS-Protokoll bei vollständiger zentraler Kontrolle und Auditierung der zulässigen Teilnehmer und der erlaubten Daten.
 
 Ein für Client-Anwendungen und On-Premises-Applikationen gleichermaßen erreichbarer Server bildet einen sicheren Austauschpunkt für Nachrichten und Daten. Da der Server unter der vollen Kontrolle des Betreibers steht und sowohl mit Clients als auch On-Premises-Applikationen durchgängig verschlüsselt kommuniziert, ist die Sicherheit der übertragenen Daten jederzeit gewährleistet.
 
@@ -10,7 +10,7 @@ Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin da
 
 # Vorteile des RelayServers
 
-- Open Source Software
+- Open-Source-Software
 - Vollständige Datenhoheit liegt beim Betreiber des RelayServers
 - Als reine Softwarelösung schnell implementierbar
 - Für die Client-Software sind keine Libraries notwendig
@@ -24,4 +24,4 @@ Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin da
 
 # Architektur, Installation und Management
 
-Eine vollständige Dokumentation zum RelayServer inklusive allen Details zu seiner Architektur, einer ausführlichen Installationsanleitung und einer Einführung in das RelayServer Management Web befindet sich unter [thinktecture/relaysever/Documentation/de](./Documentation/de/relayserver.md).
+Eine vollständige Dokumentation zum RelayServer inklusive aller Details zu seiner Architektur, einer ausführlichen Installationsanleitung und einer Einführung in das RelayServer Management Web befindet sich unter [thinktecture/relaysever/Documentation/de](./Documentation/de/relayserver.md).
