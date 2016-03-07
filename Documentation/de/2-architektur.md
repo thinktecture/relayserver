@@ -52,7 +52,7 @@ Ist der Client nicht im gleichen Netzwerk wie die Web API der On-Premises Applik
 
 ### URL-Schema mit RelayServer
 
-Da der RelayServer wie ein transparenter Reverse-Proxy funktioniert, sind nur minimale Änderungen am Beipsiel-Setup notwendig. Die Basis-URL der Web API *http://localhost* dürfte in der Regel im Client als Konstante hinterlegt sein und sich leicht verändern lassen.
+Da der RelayServer wie ein transparenter Reverse-Proxy funktioniert, sind nur minimale Änderungen am Beispiel-Setup notwendig. Die Basis-URL der Web API *http://localhost* dürfte in der Regel im Client als Konstante hinterlegt sein und sich leicht verändern lassen.
 
 Wir benötigen für das neue Setup
 
@@ -60,7 +60,7 @@ Wir benötigen für das neue Setup
 1. den Namen des Links, unter dem sich der zugehörige On-Premises Connector mit dem RelayServer verbindet und so die On-Premises Applikation für externe Clients sichtbar macht sowie
 1. den im OnPremise-Connector konfigurierten Name für die  On-Premises Applikation
 
-In unserem Beipsiel lautet der Name des Links z.B. *mandant1* (Details zur Einrichtung eines Links finden sich in der Dokumentation im Abschnitt zum RelayServer Management Web) und der Name der On-Premises Applikation *MyArticleBackend*.
+In unserem Beispiel lautet der Name des Links z.B. *mandant1* (Details zur Einrichtung eines Links finden sich in der Dokumentation im Abschnitt zum RelayServer Management Web) und der Name der On-Premises Applikation *MyArticleBackend*.
 
 Die neue URL für die GET-Requests der Clients lautet nun:
 
