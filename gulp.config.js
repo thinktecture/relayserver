@@ -68,7 +68,7 @@ module.exports = {
             configFileName: 'SAMPLE_Thinktecture.Relay.Server.exe.config',
             deploy: 'deploy',
             managementWeb: path.join('deploy', 'ManagementWeb'),
-            packageFileName: 'relay.zip'
+            packageFileName: 'relayServer.zip'
         }
     },
     release: {
