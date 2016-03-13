@@ -2,7 +2,7 @@
     "use strict";
 
     app.module.config(function ($stateProvider, $urlRouterProvider) {
-        $urlRouterProvider.otherwise('/dashboard');
+        $urlRouterProvider.otherwise('/');
 
         var linkDetailsState = createState('linkDetails');
         linkDetailsState.url = '/details?id&tab';
@@ -13,21 +13,18 @@
             }
         };
 
-        var loginState = createState('login', true);
-        loginState.url += '?redirectTo';
-
         $stateProvider
-            .state('dashboard', createState('dashboard'))
+            .state('dashboard', createState('dashboard', false, '/'))
             .state('links', createState('links'))
             .state('links.details', linkDetailsState)
             .state('users', createState('users'))
-            .state('login', loginState)
+            .state('login', createState('login', true, '/login?redirectTo'))
             .state('setup', createState('setup', true));
     });
 
-    function createState(name, anonymous) {
+    function createState(name, anonymous, url) {
         return {
-            url: '/' + name,
+            url: url || '/' + name,
             templateUrl: 'app/' + name + '/' + name + '.html',
             controller: name + 'Controller',
             data: {
