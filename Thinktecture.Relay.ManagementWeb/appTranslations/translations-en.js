@@ -20,14 +20,14 @@
             }
         },
         "MAIN": {
-            "TITLE": "Thinktecture Relay Admin",
+            "TITLE": "Thinktecture RelayServer Admin",
             "LOGOUT": "Logout",
             "DASHBOARD": "Dashboard",
             "LINKS": "Links",
             "USERS": "Users"
         },
         "DASHBOARD": {
-            "TITLE": "Thinktecture Relay Server Dashboard"
+            "TITLE": "Dashboard"
         },
         "LOGIN": {
             "TITLE": "Login",
@@ -36,8 +36,8 @@
             "REMEMBER_ME": "Remember me"
         },
         "SETUP": {
-            "TITLE": "Thinktecture Relay Server first time setup",
-            "DESCRIPTION": "Welcome to Thinktecture Relay Server first time setup. It seems that this is the first access to the admin interface. Please create your first admin user before logging in.",
+            "TITLE": "RelayServer first time setup",
+            "DESCRIPTION": "Welcome to RelayServer first time setup. It seems that this is the first access to the admin interface. Please create your first admin user before logging in.",
             "CREATE_USER": "Create user",
             "USER_NOT_CREATED": "The user can't be created!",
             "USER_CREATED": "User was created successfully. You can now log in."
@@ -52,7 +52,7 @@
             "CREATE_LINK": "Create Link",
             "MODAL_CREATE": {
                 "TITLE": "Create New Link",
-                "CREATED": "Your link has been created successfully. Please copy the password to authenticate your link with Relay Server:"
+                "CREATED": "Your link has been created successfully. Please copy the password to authenticate your link with RelayServer:"
             },
             "PREVIOUS": "Previous",
             "NEXT": "Next",
@@ -108,7 +108,7 @@
                 "STOP": "Stop tracing ({{time}} left)",
                 "MINUTES": "Minutes",
                 "MINUTES_LABEL": "Runtime (in minutes)",
-                "DESCRIPTION": "Use the following form to start tracing a link. Relay server will trace every HTTP request and response for the given link. " +
+                "DESCRIPTION": "Use the following form to start tracing a link. RelayServer will trace every HTTP request and response for the given link. " +
                                "It will save both header and content to disk for further investigation. ",
                 "LOGS": "Logs",
                 "SHOW_RESULTS": "Show results",
