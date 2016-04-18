@@ -222,7 +222,7 @@ namespace Thinktecture.Relay.Server.Repository
                 };
                 
                 var cacheKey = userName + "/" + password;
-                PasswordInformation previousInfo = null;
+                PasswordInformation previousInfo;
 
                 lock (_successfullyValidatedUsernamesAndPasswords)
                 {

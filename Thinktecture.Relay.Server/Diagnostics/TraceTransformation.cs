@@ -64,7 +64,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
                     using (var resultStream = new MemoryStream())
                     {
                         var buffer = new byte[1024];
-                        var bytesRead = 0;
+                        int bytesRead;
 
                         while ((bytesRead = deflateStream.Read(buffer, 0, buffer.Length)) > 0)
                         {
@@ -86,7 +86,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
                     using (var resultStream = new MemoryStream())
                     {
                         var buffer = new byte[1024];
-                        var bytesRead = 0;
+                        int bytesRead;
 
                         while ((bytesRead = deflateStream.Read(buffer, 0, buffer.Length)) > 0)
                         {

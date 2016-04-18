@@ -30,9 +30,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
         private int _id;
         private string _accessToken;
         private bool _stopRequested;
-        private string _relayedRequestHeader = null;
+        private string _relayedRequestHeader;
 
-        private static int _nextId = 0;
+        private static int _nextId;
         private static Random _random = new Random();
 
         private const int MIN_WAIT_TIME_IN_SECONDS = 2 * 1000;
