@@ -125,10 +125,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
                 await Start();
                 _logger.Info("Connected to relay server. #" + _id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Info("***** ERROR WHILE CONNECTING: #" + _id);
-                Delay(5000).ContinueWith(_ => Start());
+                await Delay(5000).ContinueWith(_ => Start());
             }
         }
 
