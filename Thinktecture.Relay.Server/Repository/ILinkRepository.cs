@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Thinktecture.Relay.Server.Dto;
 
 namespace Thinktecture.Relay.Server.Repository

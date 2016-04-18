@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.Linq;
 using Topshelf;
 
 namespace Thinktecture.Relay.Server
