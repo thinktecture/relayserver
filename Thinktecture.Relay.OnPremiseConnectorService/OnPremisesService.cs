@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NLog;
 using Thinktecture.Relay.OnPremiseConnector;

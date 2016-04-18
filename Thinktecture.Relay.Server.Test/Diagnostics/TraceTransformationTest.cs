@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Web.Http.Results;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
