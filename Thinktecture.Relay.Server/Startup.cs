@@ -216,7 +216,7 @@ namespace Thinktecture.Relay.Server
 
             try
             {
-                var options = new FileServerOptions()
+                var options = new FileServerOptions
                 {
                     FileSystem = new PhysicalFileSystem("ManagementWeb"),
                     RequestPath = new PathString("/managementweb"),

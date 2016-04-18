@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 using Ploeh.AutoFixture;
 using Thinktecture.Relay.Server.Dto;
@@ -79,7 +80,6 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
         private IList<Guid> CreateLinkFakes(int multiplier)
         {
-            var result = new List<Guid>();
             var fixture = new Fixture();
             var links = fixture.Build<Link>()
                 .OmitAutoProperties()
@@ -87,12 +87,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
                 .With(p => p.UserName)
                 .CreateMany(10 * multiplier);
 
-            foreach (var link in links)
-            {
-                result.Add(_linkRepository.CreateLink(link.SymbolicName, link.UserName).Id);
-            }
-
-            return result;
+            return links.Select(link => _linkRepository.CreateLink(link.SymbolicName, link.UserName).Id).ToList();
         }
     }
 }

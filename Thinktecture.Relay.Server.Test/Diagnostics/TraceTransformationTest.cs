@@ -14,9 +14,9 @@ namespace Thinktecture.Relay.Server.Diagnostics
         {
             var sut = new TraceTransformation();
 
-            var traceFile = new TraceFile()
+            var traceFile = new TraceFile
             {
-                Headers = new Dictionary<string, string>()
+                Headers = new Dictionary<string, string>
                 {
                     {"Content-Type", "text/plain"},
                 }
@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
         {
             var sut = new TraceTransformation();
 
-            var traceFile = new TraceFile()
+            var traceFile = new TraceFile
             {
                 // Content is abc
                 Content = new byte[] {97, 98, 99}
@@ -66,10 +66,10 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
             var sut = new TraceTransformation();
 
-            var traceFile = new TraceFile()
+            var traceFile = new TraceFile
             {
                 Content = deflateContent,
-                Headers = new Dictionary<string, string>()
+                Headers = new Dictionary<string, string>
                 {
                     {"Content-Encoding", "deflate"}
                 }
@@ -102,10 +102,10 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
             var sut = new TraceTransformation();
 
-            var traceFile = new TraceFile()
+            var traceFile = new TraceFile
             {
                 Content = deflateContent,
-                Headers = new Dictionary<string, string>()
+                Headers = new Dictionary<string, string>
                 {
                     {"Content-Encoding", "gzip"}
                 }

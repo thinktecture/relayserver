@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		{
 			if (onPremiseConnectorRequest == null)
 			{
-				throw new ArgumentNullException("onPremiseConnectorRequest", "A client request must be set.");
+				throw new ArgumentNullException(nameof(onPremiseConnectorRequest), "A client request must be set.");
 			}
 
 			var onPremiseTargetInformation = GetOnPremiseTargetInformation(onPremiseTargetReponse);

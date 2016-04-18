@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Repository
 
         public Guid Create(string userName, string password)
         {
-            if ((String.IsNullOrWhiteSpace(userName)) || (String.IsNullOrWhiteSpace(password)))
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
             {
                 return Guid.Empty;
             }
@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.Server.Repository
 
         public User Authenticate(string userName, string password)
         {
-            if ((String.IsNullOrWhiteSpace(userName)) || (String.IsNullOrWhiteSpace(password)))
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
             {
                 return null;
             }
@@ -74,7 +74,7 @@ namespace Thinktecture.Relay.Server.Repository
 
             if (_passwordHash.ValidatePassword(Encoding.UTF8.GetBytes(password), passwordInformation))
             {
-                return new User()
+                return new User
                 {
                     UserName = user.UserName,
                     Id = user.Id,
@@ -117,7 +117,7 @@ namespace Thinktecture.Relay.Server.Repository
         public bool Update(Guid id, string password)
         {
             if ((id == Guid.Empty)
-                || (String.IsNullOrWhiteSpace(password)))
+                || string.IsNullOrWhiteSpace(password))
             {
                 return false;
             }
@@ -154,7 +154,7 @@ namespace Thinktecture.Relay.Server.Repository
                     return null;
                 }
 
-                return new User()
+                return new User
                 {
                     CreationDate = dbUser.CreationDate,
                     Id = dbUser.Id,

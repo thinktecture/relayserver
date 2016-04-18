@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
             result.Content.Headers.ContentLength = content.Length;
             result.Content.Headers.TryAddWithoutValidation("Content-Type", traceFile.Headers.ContainsKey("Content-Type")
                 ? traceFile.Headers["Content-Type"]
-                : String.Empty);
+                : string.Empty);
         }
 
         private byte[] UncompressContentIfNeeded(TraceFile traceFile)

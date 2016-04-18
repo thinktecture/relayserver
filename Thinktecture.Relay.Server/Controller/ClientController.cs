@@ -70,7 +70,7 @@ namespace Thinktecture.Relay.Server.Controller
                 return NotFound();
             }
 
-            if (String.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
+            if (string.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
             {
                 _logger.Info("{0}: Path without username is not found. Wrong path information: {1}", link.Id, path);
                 return NotFound();

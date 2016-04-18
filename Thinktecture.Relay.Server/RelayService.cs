@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server
 
 	    public void Start()
 	    {
-	        var address = String.Format("{0}://{1}:{2}", _allowHttp ? "http" : "https", _hostName, _port);
+	        var address = $"{(_allowHttp ? "http" : "https")}://{_hostName}:{_port}";
 
 #if DEBUG
             Console.WriteLine("Listing on: {0}", address);

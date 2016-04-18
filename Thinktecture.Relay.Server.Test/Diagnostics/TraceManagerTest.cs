@@ -98,7 +98,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 65, 66, 67 }
 			};
-			var onPremiseTargetResponse = new OnPremiseTargetReponse()
+			var onPremiseTargetResponse = new OnPremiseTargetReponse
 			{
 				HttpHeaders = new Dictionary<string, string>
 				{
@@ -140,7 +140,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 65, 66, 67 }
 			};
-			var onPremiseTargetResponse = new OnPremiseTargetReponse()
+			var onPremiseTargetResponse = new OnPremiseTargetReponse
 			{
 				HttpHeaders = new Dictionary<string, string>
 				{
@@ -191,7 +191,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 65, 66, 67 }
 			};
-			var onPremiseTargetResponse = new OnPremiseTargetReponse()
+			var onPremiseTargetResponse = new OnPremiseTargetReponse
 			{
 				HttpHeaders = new Dictionary<string, string>
 				{
@@ -215,19 +215,19 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		[TestMethod]
 		public async Task GetTraceFilesAsync_returns_file_info_objects_for_all_trace_files_of_a_given_prefix()
         {
-            var traceFileReaderMock = new Mock<TraceFileReader>() { CallBase = true };
+            var traceFileReaderMock = new Mock<TraceFileReader> { CallBase = true };
             var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), null);
 			var filePrefix1 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831637";
 			var filePrefix2 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831700";
 			IEnumerable<Trace> result;
 
-            var clientHeaders = new Dictionary<string, string>()
+            var clientHeaders = new Dictionary<string, string>
 		    {
 		        {"Content-Type", "text/plain"},
 		        {"Content-Length", "0"}
 		    };
 
-            var onPremiseTargetHeaders = new Dictionary<string, string>()
+            var onPremiseTargetHeaders = new Dictionary<string, string>
 		    {
 		        {"Content-Type", "image/png"},
 		        {"Content-Length", "500"}
@@ -252,19 +252,19 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		public async Task GetTraceFilesAsync_catches_errors_when_reading_a_file_and_logs_them()
 		{
 			var loggerMock = new Mock<ILogger>();
-		    var traceFileReaderMock = new Mock<TraceFileReader>() {CallBase = true};
+		    var traceFileReaderMock = new Mock<TraceFileReader> {CallBase = true};
             var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), loggerMock.Object);
 			var filePrefix1 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831637";
 			var filePrefix2 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831700";
 			IEnumerable<Trace> result;
 
-            var clientHeaders = new Dictionary<string, string>()
+            var clientHeaders = new Dictionary<string, string>
 		    {
 		        {"Content-Type", "text/plain"},
 		        {"Content-Length", "0"}
 		    };
 
-            var onPremiseTargetHeaders = new Dictionary<string, string>()
+            var onPremiseTargetHeaders = new Dictionary<string, string>
 		    {
 		        {"Content-Type", "image/png"},
 		        {"Content-Length", "500"}

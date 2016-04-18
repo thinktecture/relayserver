@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 	internal class OnPremisesService
 	{
 		private RelayServerConnector _connector;
-	    private Logger _logger = LogManager.GetCurrentClassLogger();
+	    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 		public async Task Start()
 		{
@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 		        switch (section.Security.AuthenticationType)
 		        {
 		            case AuthenticationType.Identity:
-		                if (String.IsNullOrEmpty(section.Security.Identity.UserName))
+		                if (string.IsNullOrEmpty(section.Security.Identity.UserName))
 		                    throw new ConfigurationErrorsException(
 		                        "The user name cannot be null or empty when using authentication type 'Identity'.");
 

@@ -15,12 +15,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
         static OnPremiseTargetConnector()
         {
-            _requestHeaderTransformations = new Dictionary<string, Action<HttpWebRequest, string>>()
+            _requestHeaderTransformations = new Dictionary<string, Action<HttpWebRequest, string>>
             {
                 { "Accept", (r, v) => r.Accept = v },
                 { "Connection", (r, v) => r.Connection = v },
                 { "Content-Type", (r, v) => r.ContentType = v },
-                { "Content-Length", (r, v) => r.ContentLength = Int64.Parse(v) },
+                { "Content-Length", (r, v) => r.ContentLength = long.Parse(v) },
                 { "Date", (r, v) => r.Date = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture) },
                 { "Expect", null },
                 { "Host", null },
@@ -51,7 +51,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
             _logger.Debug("Requesting response from On-Premise Target...");
             _logger.Trace("Requesting response from On-Premise Target. url={0}, request-id={1}, origin-id", url, onPremiseTargetRequest.RequestId, onPremiseTargetRequest.OriginId);
 
-            var onPremiseTargetReponse = new OnPremiseTargetReponse()
+            var onPremiseTargetReponse = new OnPremiseTargetReponse
             {
                 RequestId = onPremiseTargetRequest.RequestId,
                 OriginId = onPremiseTargetRequest.OriginId,
@@ -83,7 +83,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
                     _logger.Trace("Gateway timeout. request-id={0}", onPremiseTargetRequest.RequestId);
 
                     onPremiseTargetReponse.StatusCode = HttpStatusCode.GatewayTimeout;
-                    onPremiseTargetReponse.HttpHeaders = new Dictionary<string, string>()
+                    onPremiseTargetReponse.HttpHeaders = new Dictionary<string, string>
                     {
                         { "X-TTRELAY-TIMEOUT", "On-Premise Target" }
                     };
@@ -111,12 +111,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
                 return onPremiseTargetReponse;
             }
-            finally
-            {
-                if (webResponse != null)
-                {
-                    webResponse.Dispose();
-                }
+            finally {
+                webResponse?.Dispose();
             }
         }
 
@@ -135,10 +131,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
                 Action<HttpWebRequest, string> restrictedHeader;
                 if (_requestHeaderTransformations.TryGetValue(httpHeader.Key, out restrictedHeader))
                 {
-                    if (restrictedHeader != null)
-                    {
-                        restrictedHeader(webRequest, httpHeader.Value);
-                    }
+                    restrictedHeader?.Invoke(webRequest, httpHeader.Value);
                 }
                 else
                 {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Linq.Expressions;
 using Thinktecture.Relay.Server.Dto;
 
@@ -17,7 +16,7 @@ namespace Thinktecture.Relay.Server.Repository
             var property = Expression.Property(parameter, column);
             var expression = Expression.Lambda(property, parameter);
             var method = sortDirection == SortDirection.Asc ? "OrderBy" : "OrderByDescending";
-            var types = new Type[] { query.ElementType, expression.Body.Type };
+            var types = new[] { query.ElementType, expression.Body.Type };
             var result = Expression.Call(typeof (Queryable), method, types, query.Expression, expression);
             return query.Provider.CreateQuery<T>(result);
         }

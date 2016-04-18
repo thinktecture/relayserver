@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 					Directory.CreateDirectory(_configuration.TraceFileDirectory);
 				}
 
-				var filenamePrefix = String.Format("{0}-{1}", Path.Combine(_configuration.TraceFileDirectory, traceConfigurationId.ToString()), DateTime.Now.Ticks);
+				var filenamePrefix = $"{Path.Combine(_configuration.TraceFileDirectory, traceConfigurationId.ToString())}-{DateTime.Now.Ticks}";
 
 				_traceFileWriter.WriteHeaderFile(filenamePrefix + OnPremiseConnectorHeaderExtension, onPremiseConnectorRequest.HttpHeaders);
 				_traceFileWriter.WriteContentFile(filenamePrefix + OnPremiseConnectorContentExtension, onPremiseConnectorRequest.Body);
@@ -69,10 +69,10 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				.ToList()
 				.Where(f => f.StartsWith(prefix))
 				.Select(f => Path.GetFileName(
-					f.Replace(OnPremiseConnectorHeaderExtension, String.Empty)
-					.Replace(OnPremiseConnectorContentExtension, String.Empty)
-					.Replace(OnPremiseTargetContentExtension, String.Empty)
-					.Replace(OnPremiseTargetHeaderExtension, String.Empty)))
+					f.Replace(OnPremiseConnectorHeaderExtension, string.Empty)
+					.Replace(OnPremiseConnectorContentExtension, string.Empty)
+					.Replace(OnPremiseTargetContentExtension, string.Empty)
+					.Replace(OnPremiseTargetHeaderExtension, string.Empty)))
 					.Distinct().ToList();
 			var traceFileInfos = new List<Trace>();
 
@@ -95,8 +95,8 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	    {
 	        var path = Path.Combine(_configuration.TraceFileDirectory, headerFileName);
 
-	        var result = new TraceFile()
-	        {
+	        var result = new TraceFile
+            {
 	            Headers = await _traceFileReader.ReadHeaderFileAsync(path),
 	        };
 
@@ -125,16 +125,16 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 			var tracingDate = new DateTime(long.Parse(filePrefix.Split('-').Last()));
 
-            return new Trace()
+            return new Trace
             {
-                OnPremiseConnectorTrace = new TraceFile()
+                OnPremiseConnectorTrace = new TraceFile
                 {
                     ContentFileName = filePrefix + OnPremiseConnectorContentExtension,
                     HeaderFileName = filePrefix + OnPremiseConnectorHeaderExtension,
                     Headers = clientHeaders
                 },
 
-                OnPremiseTargetTrace = new TraceFile()
+                OnPremiseTargetTrace = new TraceFile
                 {
                     ContentFileName = filePrefix + OnPremiseTargetContentExtension,
                     HeaderFileName =  filePrefix + OnPremiseTargetHeaderExtension,

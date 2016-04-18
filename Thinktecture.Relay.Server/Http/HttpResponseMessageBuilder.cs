@@ -15,15 +15,15 @@ namespace Thinktecture.Relay.Server.Http
 
 		public HttpResponseMessageBuilder()
 		{
-			_contentHeaderTransformation = new Dictionary<string, Action<HttpContent, string>>()
+			_contentHeaderTransformation = new Dictionary<string, Action<HttpContent, string>>
 			{
 				{ "Content-Disposition", (r, v) => r.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(v) },
-				{ "Content-Length", (r, v) => r.Headers.ContentLength = Int64.Parse(v) },
+				{ "Content-Length", (r, v) => r.Headers.ContentLength = long.Parse(v) },
 				{ "Content-Location", (r, v) => r.Headers.ContentLocation = new Uri(v) },
 				{ "Content-MD5", null },
 				{ "Content-Range", null },
 				{ "Content-Type", (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v) },
-				{ "Expires", (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?) null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))) },
+				{ "Expires", (r, v) => r.Headers.Expires = v == "-1" ? (DateTimeOffset?) null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)) },
 				{ "Last-Modified", (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)) }
 			};
 		}
@@ -51,7 +51,7 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			if (onPremiseTargetReponse == null)
 			{
-                throw new ArgumentNullException("onPremiseTargetReponse", "On-Premise Target response must not be null here.");
+                throw new ArgumentNullException(nameof(onPremiseTargetReponse), "On-Premise Target response must not be null here.");
 			}
 
 			if (onPremiseTargetReponse.StatusCode == HttpStatusCode.InternalServerError &&
@@ -79,11 +79,8 @@ namespace Thinktecture.Relay.Server.Http
 
 				if (_contentHeaderTransformation.TryGetValue(httpHeader.Key, out contentHeaderTranformation))
 				{
-					if (contentHeaderTranformation != null)
-					{
-						contentHeaderTranformation(content, httpHeader.Value);
-					}
-				}
+                    contentHeaderTranformation?.Invoke(content, httpHeader.Value);
+                }
 				else
 				{
 					content.Headers.TryAddWithoutValidation(httpHeader.Key, httpHeader.Value);

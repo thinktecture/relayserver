@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 		private static readonly ConfigurationProperty _onPremiseTargets = new ConfigurationProperty("onPremiseTargets", typeof(OnPremiseTargetCollection), null, ConfigurationPropertyOptions.IsRequired);
         private static readonly ConfigurationProperty _maxRetries = new ConfigurationProperty("maxRetries", typeof(int), 3, ConfigurationPropertyOptions.None);
 
-		private static readonly ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection()
+		private static readonly ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection
 		{
 			_baseUrl,
 			_requestTimeout,
@@ -21,34 +21,16 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
             _maxRetries
 		};
 
-		protected override ConfigurationPropertyCollection Properties
-		{
-			get { return _properties; }
-		}
+		protected override ConfigurationPropertyCollection Properties => _properties;
 
-		public string BaseUrl
-		{
-			get { return (string) this[_baseUrl]; }
-		}
+	    public string BaseUrl => (string) this[_baseUrl];
 
-		public TimeSpan RequestTimeout
-		{
-			get { return (TimeSpan) this[_requestTimeout]; }
-		}
+	    public TimeSpan RequestTimeout => (TimeSpan) this[_requestTimeout];
 
-		public SecurityElement Security
-		{
-			get { return (SecurityElement) this[_security]; }
-		}
+	    public SecurityElement Security => (SecurityElement) this[_security];
 
-		public OnPremiseTargetCollection OnPremiseTargets
-		{
-			get { return (OnPremiseTargetCollection) this[_onPremiseTargets]; }
-		}
+	    public OnPremiseTargetCollection OnPremiseTargets => (OnPremiseTargetCollection) this[_onPremiseTargets];
 
-	    public int MaxRetries
-	    {
-            get { return (int) this[_maxRetries]; }
-	    }
+	    public int MaxRetries => (int) this[_maxRetries];
 	}
 }
