@@ -52,8 +52,10 @@ Mit den Default-Anmeldedaten guest / guest erfolgt der Login und die Statusüber
 Der einfachste Weg der Installation des RelayServers ist die Verwendung des fertigen ZIP-Pakets von GitHub unter
 
 ```
-https://github.com/thinktecture/relayserver
+https://github.com/thinktecture/relayserver/releases
 ```
+
+![2-relayserver-download.png](./assets/2-relayserver-download.png)
 
 Das Zip kann in dem für den RelayServer vorgesehen Ordner entpackt werden. Dem Ordner müssen nun über den Windows Explorer / Eigenschaften Full Control Rechte für den Network Service zugewiesen werden. Dies ist notwendig, damit RelayServer in diesem Ordner später als Windows Service gestartet werden kann.
 
@@ -92,7 +94,22 @@ Thinktecture.Relay.Server.exe uninstall
 
 # Konfiguration des RelayServers
 
-Der RelayServer wird über die Thinktecture.Relay.Server.exe.config im Ordner des RelayServers konfiguriert. Zum Editieren dieser Datei kann jeder beliebige Texteditor (z.B. Notepad) verwendet werden.
+Der RelayServer wird über die Thinktecture.Relay.Server.exe.config im Ordner des RelayServers konfiguriert. Zum Editieren dieser Datei kann jeder beliebige Texteditor (z.B. Notepad) verwendet werden. Als Ausgangsbasis empfiehlt sich die Verwendung der Beispielkonfiguration
+
+```
+SAMPLE_Thinktecture.Relay.Server.exe.config
+```
+
+![2-sample-config-file.png](./assets/2-sample-config-file.png)
+
+
+Diese Konfigurationsdatei sollte nach der initialen Bearbeitung als 
+
+```
+Thinktecture.Relay.Server.exe.config
+```
+
+abgespeichert werden.
 
 ## Connection Strings
 
