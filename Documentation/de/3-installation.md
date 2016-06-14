@@ -15,7 +15,7 @@ Die Installation von RabbitMQ, welches eine installierte Erlang- Ausführungsumg
 Nach der Installation von Erlang und RabbitMQ ist es sinnvoll, die Management Weboberfläche für RabbitMQ zu aktivieren. Die Aktivierung erfolgt im RabbitMQ Command Prompt, der durch die Installation von RabbitMQ in der gleichnamigen Programmgruppe im Startmenü angelegt worden ist. Im RabbitMQ Command Prompt müssen die nachfolgenden Befehle ausgeführt werden:
 
 ```
-rabbitmq-plugins enable rabbitmq\_management
+rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service stop
 rabbitmq-service start
 ```
