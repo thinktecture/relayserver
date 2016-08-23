@@ -18,6 +18,7 @@ namespace Thinktecture.Relay.Server.Configuration
         public bool EnableOnPremiseConnections { get; private set; }
         public string HostName { get; private set; }
         public int Port { get; private set; }
+        public TimeSpan HeartbeatTimeout { get; private set; }
 
         public Configuration(ILogger logger)
         {
@@ -29,6 +30,12 @@ namespace Thinktecture.Relay.Server.Configuration
                 tmpInt = 30;
             }
             OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
+
+            if (!Int32.TryParse(ConfigurationManager.AppSettings["HeartbeatTimeout"], out tmpInt))
+            {
+                tmpInt = 30;
+            }
+            HeartbeatTimeout = TimeSpan.FromSeconds(tmpInt);
 
             var settings = ConfigurationManager.ConnectionStrings["RabbitMQ"];
             if (settings != null)

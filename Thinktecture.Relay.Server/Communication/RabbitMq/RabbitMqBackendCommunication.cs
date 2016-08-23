@@ -8,6 +8,8 @@ using EasyNetQ.Topology;
 using Newtonsoft.Json;
 using NLog.Interface;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector.SignalR;
+using Thinktecture.Relay.OnPremiseConnector.SignalR.Messages;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.OnPremise;
@@ -29,17 +31,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
         private IBus _bus;
         private IDisposable _consumer;
 
-        internal class ConnectionInformation
-        {
-            public readonly string LinkId;
-
-            public ConnectionInformation(string linkId)
-            {
-                LinkId = linkId;
-            }
-        }
-
-        public RabbitMqBackendCommunication(IConfiguration configuration, IRabbitMqBusFactory busFactory, IOnPremiseConnectorCallbackFactory onPremiseConnectorCallbackFactory, ILogger logger) 
+        public RabbitMqBackendCommunication(IConfiguration configuration, IRabbitMqBusFactory busFactory, IOnPremiseConnectorCallbackFactory onPremiseConnectorCallbackFactory, ILogger logger, IHeartbeatMonitor heartbeatMonitor) 
             : base(logger)
         {
             _configuration = configuration;
@@ -53,6 +45,16 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
             _declaredQueues = new ConcurrentDictionary<string, IQueue>();
 
             StartReceivingOnPremiseTargetResponses(OriginId);
+
+            heartbeatMonitor.Initialize(_onPremises, configuration.HeartbeatTimeout, OriginId);
+            heartbeatMonitor.ConnectionTimedOut += HeartbeatMonitorConnectionTimedOut;
+            heartbeatMonitor.Start();
+        }
+
+        private void HeartbeatMonitorConnectionTimedOut(string connectionId, string onPremiseId)
+        {
+            _logger.Warn("OnPremise {0} has a connection timeout for {1}", onPremiseId, connectionId);
+            UnregisterOnPremise(connectionId);
         }
 
         public override Task<IOnPremiseTargetReponse> GetResponseAsync(string requestId)
@@ -103,7 +105,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
             var consumer = _bus.Advanced.Consume(queue, (Action<IMessage<string>, MessageReceivedInfo>) ((message, info) => registrationInformation.RequestAction(JsonConvert.DeserializeObject<OnPremiseConnectorRequest>(message.Body))));
             _onPremiseConsumers[registrationInformation.ConnectionId] = consumer;
-            _onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.OnPremiseId);
+            _onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.OnPremiseId, registrationInformation.SendHeartbeatAction);
         }
 
         private IQueue DeclareOnPremiseQueue(string onPremiseId)
@@ -155,6 +157,33 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
         public override List<string> GetConnections(string linkId)
         {
             return _onPremises.Where(p=>p.Value.LinkId.Equals(linkId, StringComparison.OrdinalIgnoreCase)).Select(p=>p.Key).ToList();
+        }
+
+        public override void HeartbeatReceived(string connectionId)
+        {
+            var connection = _onPremises[connectionId];
+
+            if (connection == null)
+            {
+                _logger.Warn("Received heartbeat for connection {0}, but it was not found.", connectionId);
+                return;
+            }
+
+            connection.LastHeartbeatReceived = DateTime.Now;
+        }
+
+        public override void EnableConnectionFeatures(Features features, string connectionId)
+        {
+            var connection = _onPremises[connectionId];
+
+            if (connection == null)
+            {
+                _logger.Warn("Trying to set features for connection {0}, but it was not found.", connectionId);
+                return;
+            }
+
+            connection.Features.Heartbeat = features.Heartbeat;
+            _logger.Info("Set features for connection {0}: Heartbeat {1}", connection, features.Heartbeat);
         }
 
         private void StartReceivingOnPremiseTargetResponses(string originId)

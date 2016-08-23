@@ -46,6 +46,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		    public bool EnableOnPremiseConnections { get; private set; }
 		    public string HostName { get; private set; }
 		    public int Port { get; private set; }
+		    public TimeSpan HeartbeatTimeout { get; private set; }
 
 		    public Configuration()
 			{

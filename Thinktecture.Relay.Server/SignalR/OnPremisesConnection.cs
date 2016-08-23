@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
@@ -16,13 +15,14 @@ namespace Thinktecture.Relay.Server.SignalR
         private readonly IBackendCommunication _backendCommunication;
         private readonly IPostDataTemporaryStore _temporaryStore;
         private readonly ILogger _logger;
+        private readonly IOnPremisesMessageHandler _messageHandler;
 
-        public OnPremisesConnection(IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILogger logger)
+        public OnPremisesConnection(IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILogger logger, IOnPremisesMessageHandler messageHandler)
         {
             _backendCommunication = backendCommunication;
             _temporaryStore = temporaryStore;
             _logger = logger;
-
+            _messageHandler = messageHandler;
         }
 
         protected override bool AuthorizeRequest(IRequest request)
@@ -76,6 +76,12 @@ namespace Thinktecture.Relay.Server.SignalR
             await Connection.Send(connectionId, onPremiseTargetRequest);
         }
 
+        protected override Task OnReceived(IRequest request, string connectionId, string data)
+        {   
+            _messageHandler.Received(Connection, request, connectionId, data);
+            return base.OnReceived(request, connectionId, data);
+        }
+
         protected override Task OnReconnected(IRequest request, string connectionId)
         {
             var onPremiseId = GetOnPremiseIdFromRequest(request);
@@ -100,6 +106,10 @@ namespace Thinktecture.Relay.Server.SignalR
                 ConnectionId = connectionId,
                 OnPremiseId = onPremiseId,
                 RequestAction = async cr => await ForwardClientRequest(connectionId, cr),
+                
+#pragma warning disable 4014
+                SendHeartbeatAction = cr => ForwardClientRequest(connectionId, cr),
+#pragma warning restore 4014
                 IpAddress = GetIpAddressFromOwinEnvironment(request.Environment)
             });
         }

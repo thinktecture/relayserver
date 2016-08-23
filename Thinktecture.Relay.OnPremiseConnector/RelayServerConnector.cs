@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Autofac;
 using NLog.Interface;
+using Thinktecture.Relay.OnPremiseConnector.Heartbeat;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
@@ -18,6 +19,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 			builder.RegisterType<RelayServerConnectionFactory>().As<IRelayServerConnectionFactory>();
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
+		    builder.RegisterType<HeartbeatMonitor>().As<IHeartbeatMonitor>();
 
 			builder.Register(context => new LoggerAdapter(NLog.LogManager.GetLogger("ClientLogger"))).As<ILogger>().SingleInstance();
 

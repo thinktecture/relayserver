@@ -181,6 +181,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Communication\ConnectionInformation.cs" />
+    <Compile Include="Communication\HeartbeatMonitor.cs" />
+    <Compile Include="Communication\IHeartbeatMonitor.cs" />
     <Compile Include="Communication\RegistrationInformation.cs" />
     <Compile Include="Controller\OnPremiseConnectionsModule.cs" />
     <Compile Include="Dto\ContentBytesChartGroupKey.cs" />
@@ -275,9 +278,11 @@
     <Compile Include="Security\IPasswordHash.cs" />
     <Compile Include="Security\PasswordHash.cs" />
     <Compile Include="Security\PasswordInformation.cs" />
+    <Compile Include="SignalR\IOnPremisesMessageHandler.cs" />
     <Compile Include="SignalR\IPostDataTemporaryStore.cs" />
     <Compile Include="SignalR\OnPremisesConnection.cs" />
     <Compile Include="Security\AuthorizationServerProvider.cs" />
+    <Compile Include="SignalR\OnPremisesMessageHandler.cs" />
     <Compile Include="SignalR\PostDataTemporaryStore.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Program.cs" />

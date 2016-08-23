@@ -12,7 +12,9 @@ using Microsoft.AspNet.SignalR.Client;
 using Newtonsoft.Json;
 using NLog.Interface;
 using Thinktecture.IdentityModel.Client;
+using Thinktecture.Relay.OnPremiseConnector.Heartbeat;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector.SignalR.Messages;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
@@ -25,6 +27,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
         private readonly int _maxRetries;
         private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
         private readonly ILogger _logger;
+        private readonly IHeartbeatMonitor _heartbeatMonitor;
         private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
         private readonly HttpClient _httpClient;
         private bool _eventsHooked;
@@ -38,8 +41,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
         private const int MIN_WAIT_TIME_IN_SECONDS = 2 * 1000;
         private const int MAX_WAIT_TIME_IN_SECONDS = 30 * 1000;
-        
-        public RelayServerConnection(string userName, string password, Uri relayServer, int requestTimeout, int maxRetries, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+
+        public RelayServerConnection(string userName, string password, Uri relayServer, int requestTimeout, int maxRetries, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger, IHeartbeatMonitor heartbeatMonitor)
             : base(new Uri(relayServer, "/signalr").AbsoluteUri)
         {
             _id = Interlocked.Increment(ref _nextId);
@@ -50,8 +53,24 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
             _maxRetries = maxRetries;
             _onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
             _logger = logger;
+            _heartbeatMonitor = heartbeatMonitor;
             _connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
             _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
+
+            heartbeatMonitor.SendHeartbeatRequest += HeartbeatMonitorOnSendHeartbeatRequest;
+            heartbeatMonitor.ConnectionTimedOut += HeartbeatMonitorOnConnectionTimedOut;
+        }
+
+        private void HeartbeatMonitorOnConnectionTimedOut()
+        {
+            _logger.Warn("Connection timed out.");
+            Stop();
+        }
+
+        private void HeartbeatMonitorOnSendHeartbeatRequest()
+        {
+            _logger.Trace("Sending heartbeat");
+            Send(MessageContainer.Create(new HeartbeatMessage()));
         }
 
         public String RelayedRequestHeader
@@ -92,14 +111,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
                     _logger.Debug("Requesting authorization token");
 
                     var resp = await client.RequestResourceOwnerPasswordAsync(_userName, _password);
-         
+
                     _logger.Trace("Received token for #" + _id);
                     return resp;
                 }
                 catch (Exception ex)
                 {
                     var randomWaitTime = GetRandomWaitTime();
-                    _logger.Trace(String.Format("Could not connect and authenticate to relay server - re-trying in {0} second. #{1}", randomWaitTime, _id), ex);
+                    _logger.Trace(String.Format("Could not connect and authenticate to relay server - re-trying in {0} milliseconds. #{1}", randomWaitTime, _id), ex);
                     Thread.Sleep(randomWaitTime);
                 }
             }
@@ -124,13 +143,29 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
             try
             {
                 await Start();
+                AutoconfigureFeatures();
                 _logger.Info("Connected to relay server. #" + _id);
             }
             catch (Exception ex)
             {
                 _logger.Info("***** ERROR WHILE CONNECTING: #" + _id);
-                Delay(5000).ContinueWith(_ => Start());
+#pragma warning disable CS4014
+                Delay(5000).ContinueWith(_ => Start())
+                    .ContinueWith(__ => AutoconfigureFeatures());
+#pragma warning restore CS4014
             }
+        }
+
+        private void AutoconfigureFeatures()
+        {
+            _logger.Trace("Sending supported features to relay server");
+            Send(MessageContainer.Create(new FeaturesMessage()
+            {
+                Features =
+                {
+                    Heartbeat = true
+                }
+            }));
         }
 
         private async Task<bool> TryRequestAuthorizationTokenAsync()
@@ -159,7 +194,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
             }
 
             Headers.Add("Authorization", tokenResponse.TokenType + " " + _accessToken);
-            
+
             _logger.Trace("Setting Bearer token: {0}", _accessToken);
         }
 
@@ -183,11 +218,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
         private void OnReconnected()
         {
             _logger.Debug("Connection restored. #" + _id);
+
+            // A little delay is needed before we can actually communicate with the server
+            Delay(1000)
+                .ContinueWith(_ => AutoconfigureFeatures());
         }
 
         private void OnReconnecting()
         {
             _logger.Debug("Connection lost. Trying to reconnect... #" + _id);
+            _heartbeatMonitor.Stop();
         }
 
         private async void OnReceived(string data)
@@ -201,6 +241,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
             if (onPremiseTargetRequest.HttpMethod == "PING")
             {
                 await HandlePingRequestAsync(onPremiseTargetRequest);
+                return;
+            }
+
+            if (onPremiseTargetRequest.HttpMethod == "INTERNAL")
+            {
+                HandleInternalRequest(onPremiseTargetRequest);
                 return;
             }
 
@@ -222,6 +268,45 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
             }
 
             _logger.Debug("No connector for request {0} found. url={1}", onPremiseTargetRequest.RequestId, onPremiseTargetRequest.Url);
+        }
+
+        private void HandleInternalRequest(OnPremiseTargetRequest onPremiseTargetRequest)
+        {
+            var messageString = Encoding.UTF8.GetString(onPremiseTargetRequest.Body);
+            _logger.Trace("Received internal message {0}", messageString);
+
+            var messageContainer = JsonConvert.DeserializeObject<MessageContainer>(messageString);
+
+            switch (messageContainer.Type)
+            {
+                case MessageType.HeartbeatConfiguration:
+                    HandleHeartbeatConfigurationMessage(
+                        JsonConvert.DeserializeObject<HeartbeatConfigurationMessage>(messageContainer.Message));
+                    break;
+
+                case MessageType.Heartbeat:
+                    HandleHeartbeatMessage();
+                    break;
+
+                default:
+                    _logger.Trace("Received an unknown internal message: {0}", messageString);
+                    break;
+            }
+        }
+
+        private void HandleHeartbeatMessage()
+        {
+            _logger.Trace("Received heartbeat");
+            _heartbeatMonitor.LastHeartbeatReceived = DateTime.Now;
+        }
+
+        private void HandleHeartbeatConfigurationMessage(HeartbeatConfigurationMessage message)
+        {
+            _heartbeatMonitor.Stop();
+
+            _heartbeatMonitor.Timeout = message.Timeout;
+
+            _heartbeatMonitor.Start();
         }
 
         private async Task HandlePingRequestAsync(IOnPremiseTargetRequest request)
@@ -302,6 +387,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
         {
             _logger.Info("Closed ... #" + _id);
 
+            _heartbeatMonitor.Stop();
             base.OnClosed();
 
             _logger.Debug("Reconnecting in 5 seconds");

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NLog.Interface;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector.SignalR;
+using Thinktecture.Relay.OnPremiseConnector.SignalR.Messages;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
@@ -20,6 +22,9 @@ namespace Thinktecture.Relay.Server.Communication
 		public abstract Task SendOnPremiseTargetResponse(string originId, IOnPremiseTargetReponse reponse);
 	    public abstract bool IsRegistered(string connectionId);
 	    public abstract List<string> GetConnections(string linkId);
+	    public abstract void HeartbeatReceived(string connectionId);
+	    public abstract void EnableConnectionFeatures(Features features, string connectionId);
+
 
 	    protected BackendCommunication(ILogger logger)
 		{

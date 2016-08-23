@@ -58,6 +58,8 @@ namespace Thinktecture.Relay.Server
             var builder = new ContainerBuilder();
 
             builder.RegisterType<OnPremisesConnection>().ExternallyOwned();
+            builder.RegisterType<OnPremisesMessageHandler>().As<IOnPremisesMessageHandler>();
+
             builder.RegisterType<AuthorizationServerProvider>().SingleInstance();
             builder.RegisterType<PasswordHash>().As<IPasswordHash>();
 
@@ -68,6 +70,7 @@ namespace Thinktecture.Relay.Server
 
             builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
             builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
+            builder.RegisterType<HeartbeatMonitor>().As<IHeartbeatMonitor>();
 
             builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
             builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
@@ -83,7 +86,7 @@ namespace Thinktecture.Relay.Server
 	        builder.RegisterType<HttpResponseMessageBuilder>().As<IHttpResponseMessageBuilder>();
 	        builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
 	        builder.RegisterType<PathSplitter>().As<IPathSplitter>();
-
+           
             builder.Register(context => new LoggerAdapter(LogManager.GetLogger("Server"))).As<ILogger>().SingleInstance();
 
             var container = builder.Build();
@@ -132,28 +135,6 @@ namespace Thinktecture.Relay.Server
 
         private static void MapSignalR(IAppBuilder app, ILifetimeScope container)
         {
-            /*
-            foreach (var key in app.Properties.Keys)
-            {
-                Console.WriteLine("Key: {0}", key);
-            }
-            OwinHttpListener listener = (OwinHttpListener)app.Properties["Microsoft.Owin.Host.HttpListener.OwinHttpListener"];
-            int maxPending;
-            int maxAccepts;
-            if (listener != null)
-            {
-                listener.GetRequestProcessingLimits(out maxAccepts, out maxPending);
-                Console.WriteLine("Limits: a: {0}, p:{1}", maxAccepts, maxPending);
-                listener.SetRequestQueueLimit(5000);
-                listener.SetRequestProcessingLimits(1000, maxPending);
-                listener.GetRequestProcessingLimits(out maxAccepts, out maxPending);
-                Console.WriteLine("Limits: a: {0}, p:{1}", maxAccepts, maxPending);
-            }
-            else
-            {
-                Console.WriteLine("No Owin listener found");
-            }
-            */
             var config = container.Resolve<IConfiguration>();
 
             if (!config.EnableOnPremiseConnections)

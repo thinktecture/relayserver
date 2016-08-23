@@ -16,5 +16,6 @@ namespace Thinktecture.Relay.Server.Configuration
         bool EnableOnPremiseConnections { get; }
         string HostName { get; }
         int Port { get; }
+        TimeSpan HeartbeatTimeout { get; }
 	}
 }

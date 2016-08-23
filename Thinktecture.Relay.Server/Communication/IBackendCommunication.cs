@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector.SignalR;
+using Thinktecture.Relay.OnPremiseConnector.SignalR.Messages;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
@@ -16,5 +18,7 @@ namespace Thinktecture.Relay.Server.Communication
 		Task SendOnPremiseTargetResponse(string originId, IOnPremiseTargetReponse reponse);
 	    bool IsRegistered(string connectionId);
 	    List<string> GetConnections(string linkId);
+	    void HeartbeatReceived(string connectionId);
+	    void EnableConnectionFeatures(Features features, string connectionId);
 	}
 }
