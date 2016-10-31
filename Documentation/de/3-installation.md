@@ -235,7 +235,7 @@ In typischen Einsatzszenarien des RelayServers wird der On-Premises Connector en
 
 ## Konfiguration des On-Premises Connectors
 
-Zur Konfiguration des On-Premises Connectors wird die Konfigurationsdatei Thinktecture.Relay.OnPremiseConnector.exe.config im Installationsordner (Standard: C:\Program Files\Thinktecture\On-Premises Connector)des On-Premises Connectors in einem beliebigen Editor geöffnet.
+Zur Konfiguration des On-Premises Connectors wird die Konfigurationsdatei Thinktecture.Relay.OnPremiseConnector.exe.config im Installationsordner (Standard: C:\Program Files\Thinktecture\On-Premises Connector) des On-Premises Connectors in einem beliebigen Editor geöffnet.
 
 In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> bearbeitet werden:
 
