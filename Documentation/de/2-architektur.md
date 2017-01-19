@@ -65,7 +65,7 @@ In unserem Beispiel lautet der Name des Links z.B. *mandant1* (Details zur Einri
 Die neue URL für die GET-Requests der Clients lautet nun:
 
 ```
-https://relay.company.example/mandant1/MyArticleBackend/articles/getAllArticles
+https://relay.company.example/relay/mandant1/MyArticleBackend/articles/getAllArticles
 ```
 
 Daher bechränkt sich die notwendige Änderung in der Gesamtarchitektur nur auf die Anpassung einer Konstante im Client. An der Web API der On-Premises Applikation sind keine Änderungen notwendig. Ebenfalls musste der Code des Clients nicht um spezielle Libraries für die Kommunikation erweitert werden.
