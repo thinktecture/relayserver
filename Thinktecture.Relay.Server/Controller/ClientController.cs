@@ -88,11 +88,13 @@ namespace Thinktecture.Relay.Server.Controller
                 (OnPremiseConnectorRequest)
                     await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName);
 
+            var onPremiseTargetResponseTask = _backendCommunication.GetResponseAsync(onPremiseConnectorRequest.RequestId);
+
             _logger.Trace("{0}: Sending on premise connector request.", link.Id);
             await _backendCommunication.SendOnPremiseConnectorRequest(link.Id.ToString(), onPremiseConnectorRequest);
 
             _logger.Trace("{0}: Waiting for response. Request Id", onPremiseConnectorRequest.RequestId);
-            var onPremiseTargetReponse = await _backendCommunication.GetResponseAsync(onPremiseConnectorRequest.RequestId);
+            var onPremiseTargetReponse = await onPremiseTargetResponseTask;
 
             if (onPremiseTargetReponse != null)
             {
