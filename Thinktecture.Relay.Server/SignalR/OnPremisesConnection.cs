@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
@@ -49,9 +48,9 @@ namespace Thinktecture.Relay.Server.SignalR
         {
             _logger.Debug("Forwarding client request to connection '{0}'", connectionId);
             _logger.Trace("Forwarding client request to connection '{0}'. request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
-                connectionId, onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.HttpMethod, onPremiseConnectorRequest.Url, onPremiseConnectorRequest.OriginId, onPremiseConnectorRequest.Body != null ? onPremiseConnectorRequest.Body.Length : 0);
+                connectionId, onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.HttpMethod, onPremiseConnectorRequest.Url, onPremiseConnectorRequest.OriginId, onPremiseConnectorRequest.Body?.Length ?? 0);
 
-            var onPremiseTargetRequest = new OnPremiseTargetRequest()
+            var onPremiseTargetRequest = new OnPremiseTargetRequest
             {
                 RequestId = onPremiseConnectorRequest.RequestId,
                 HttpMethod = onPremiseConnectorRequest.HttpMethod,
@@ -65,7 +64,7 @@ namespace Thinktecture.Relay.Server.SignalR
                 if (onPremiseConnectorRequest.Body.Length > 0x20000) // 128k
                 {
                     _temporaryStore.Save(onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.Body);
-                    onPremiseTargetRequest.Body = String.Empty;
+                    onPremiseTargetRequest.Body = string.Empty;
                 }
                 else
                 {

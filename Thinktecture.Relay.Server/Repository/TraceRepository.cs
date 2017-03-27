@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Repository
 		{
 			using (var context = new RelayContext())
 			{
-			    var link = new DbLink()
+			    var link = new DbLink
 			    {
 			        Id = traceConfiguration.LinkId
 			    };
@@ -65,12 +65,7 @@ namespace Thinktecture.Relay.Server.Repository
 				var traceConfiguration = context.TraceConfigurations.SingleOrDefault(t => t.StartDate < DateTime.UtcNow && t.EndDate > DateTime.UtcNow &&
 					t.LinkId == linkId);
 
-				if (traceConfiguration == null)
-				{
-					return null;
-				}
-
-				return traceConfiguration.Id;
+			    return traceConfiguration?.Id;
 			}
 		}
 
@@ -105,7 +100,7 @@ namespace Thinktecture.Relay.Server.Repository
 
 	            return context.TraceConfigurations
 	                .Where(t => t.Id == id.Value)
-	                .Select(d => new TraceConfiguration()
+	                .Select(d => new TraceConfiguration
 	                {
 	                    CreationDate = d.CreationDate,
 	                    EndDate = d.EndDate,
@@ -122,7 +117,7 @@ namespace Thinktecture.Relay.Server.Repository
 	        {
 	            return context.TraceConfigurations
 	                .Where(t => t.Id == traceConfigurationId)
-	                .Select(t => new TraceConfiguration()
+	                .Select(t => new TraceConfiguration
 	                {
 	                    CreationDate = t.CreationDate,
 	                    EndDate = t.EndDate,

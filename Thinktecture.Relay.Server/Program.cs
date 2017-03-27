@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.Linq;
 using Topshelf;
 
 namespace Thinktecture.Relay.Server
@@ -11,13 +10,13 @@ namespace Thinktecture.Relay.Server
         {
             // TODO: Use configuration (see RELAY-68)
             int port;
-            if (!Int32.TryParse(ConfigurationManager.AppSettings["Port"], out port))
+            if (!int.TryParse(ConfigurationManager.AppSettings["Port"], out port))
             {
                 port = 20000;
             }
 
             var hostName = ConfigurationManager.AppSettings["HostName"] ?? "+";
-            var allowHttp = String.Equals(ConfigurationManager.AppSettings["UseInsecureHttp"], "true",
+            var allowHttp = string.Equals(ConfigurationManager.AppSettings["UseInsecureHttp"], "true",
                 StringComparison.OrdinalIgnoreCase);
 
             HostFactory.Run(config =>

@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Security
         /// Validates a password (base64 string) given a hash of the correct one.
         /// </summary>
         /// <param name="password">The password to check.</param>
-        /// <param name="correctHash">A hash of the correct password.</param>
+        /// <param name="passwordInformation">PasswordInformation (Hash, Salt and Iterations) of the correct password.</param>
         /// <returns>True if the password is correct. False otherwise.</returns>
         bool ValidatePassword(byte[] password, PasswordInformation passwordInformation);
     }

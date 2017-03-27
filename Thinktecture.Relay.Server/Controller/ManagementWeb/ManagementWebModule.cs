@@ -7,7 +7,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterAssemblyTypes(typeof(RelayingModule).Assembly)
-                .Where(t => t.Namespace.EndsWith("ManagementWeb"));
+                .Where(t => t.Namespace != null && t.Namespace.EndsWith("ManagementWeb"));
 
             base.Load(builder);
         }

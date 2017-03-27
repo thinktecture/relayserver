@@ -28,15 +28,9 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
         public byte[] Content { get; set; }
 
-        public bool IsViewable
-        {
-            get { return ContentIsViewable(); }
-        }
+        public bool IsViewable => ContentIsViewable();
 
-        public bool IsContentAvailable
-        {
-            get { return CheckIfContentIsAvailable(); }
-        }
+        public bool IsContentAvailable => CheckIfContentIsAvailable();
 
         private bool CheckIfContentIsAvailable()
         {

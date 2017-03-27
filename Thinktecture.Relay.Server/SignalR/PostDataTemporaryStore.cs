@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Interface;
@@ -17,10 +16,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
             public byte[] Data { get; private set; }
 
-            public bool IsTimedOut
-            {
-                get { return _timeoutDate < DateTime.UtcNow; }
-            }
+            public bool IsTimedOut => _timeoutDate < DateTime.UtcNow;
 
             public Entry(byte[] data)
             {

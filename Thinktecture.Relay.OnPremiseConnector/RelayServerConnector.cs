@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			_container = builder.Build();
 		}
 
-	    public String RelayedRequestHeader
+	    public string RelayedRequestHeader
 	    {
 	        set { _connection.RelayedRequestHeader = value; }
 	    }
@@ -33,37 +33,37 @@ namespace Thinktecture.Relay.OnPremiseConnector
 	    private IRelayServerConnection _connection;
 		private bool _disposed;
 
-		/// <summary>
-		/// Creates a new instance of <see cref="RelayServerConnector"/>.
-		/// </summary>
-		/// <param name="userName">A <see cref="String"/> containing the user name.</param>
-		/// <param name="password">A <see cref="String"/> containing the password.</param>
-		/// <param name="relayServer">An <see cref="Uri"/> containing the relay server's base url.</param>
-		/// <param name="requestTimeout">An <see cref="int"/> defining the timeout in seconds.</param>
-		/// <param name="maxRetries">An <see cref="int"/> defining how much retries the connector should do for posting the answer back to the relay server.</param>
-		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 10, int maxRetries = 3)
+        /// <summary>
+        /// Creates a new instance of <see cref="RelayServerConnector"/>.
+        /// </summary>
+        /// <param name="userName">A <see cref="string"/> containing the user name.</param>
+        /// <param name="password">A <see cref="string"/> containing the password.</param>
+        /// <param name="relayServer">An <see cref="Uri"/> containing the relay server's base url.</param>
+        /// <param name="requestTimeout">An <see cref="int"/> defining the timeout in seconds.</param>
+        /// <param name="maxRetries">An <see cref="int"/> defining how much retries the connector should do for posting the answer back to the relay server.</param>
+        public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 10, int maxRetries = 3)
 		{
 		    var factory = _container.Resolve<IRelayServerConnectionFactory>();
 			_connection = factory.Create(userName, password, relayServer, requestTimeout, maxRetries);
 		}
-        
-	    /// <summary>
+
+        /// <summary>
         /// Registers a On-Premise Target.
-		/// </summary>
-		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
+        /// </summary>
+        /// <param name="key">A <see cref="string"/> defining the key for the target.</param>
         /// <param name="uri">An <see cref="Uri"/> containing the On-Premise Target's base url. If this value is null, the registration will be removed</param>
-		public void RegisterOnPremiseTarget(string key, Uri uri)
+        public void RegisterOnPremiseTarget(string key, Uri uri)
 		{
 			CheckDisposed();
 
 			_connection.RegisterOnPremiseTarget(key, uri);
 		}
-        
+
         /// <summary>
         /// Removes a On-Premise Target.
-		/// </summary>
-		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
-		public void RemoveOnPremiseTarget(string key)
+        /// </summary>
+        /// <param name="key">A <see cref="string"/> defining the key for the target.</param>
+        public void RemoveOnPremiseTarget(string key)
 		{
 			CheckDisposed();
 			_connection.RegisterOnPremiseTarget(key, null);

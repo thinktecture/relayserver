@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Net.Http.Headers;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Thinktecture.Relay.Server.Diagnostics

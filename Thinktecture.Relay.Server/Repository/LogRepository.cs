@@ -75,7 +75,7 @@ namespace Thinktecture.Relay.Server.Repository
                 return context.RequestLogEntries
                     .OrderByDescending(e => e.OnPremiseConnectorOutDate)
                     .Take(amount)
-                    .Select(d => new RequestLogEntry()
+                    .Select(d => new RequestLogEntry
                     {
                         OnPremiseConnectorInDate = d.OnPremiseConnectorInDate,
                         OnPremiseConnectorOutDate = d.OnPremiseConnectorOutDate,
@@ -111,7 +111,7 @@ namespace Thinktecture.Relay.Server.Repository
             var groupedQuery = GetGrouping(query, timeFrame.Resolution);
 
             return groupedQuery
-                .Select(group => new ContentBytesChartDataItem()
+                .Select(group => new ContentBytesChartDataItem
                 {
                     In = group.Sum(entry => entry.ContentBytesIn),
                     Out = group.Sum(entry => entry.ContentBytesOut),
@@ -127,7 +127,7 @@ namespace Thinktecture.Relay.Server.Repository
         {
             if (resolution == Resolution.Daily)
             {
-                return query.GroupBy(entry => new ContentBytesChartGroupKey()
+                return query.GroupBy(entry => new ContentBytesChartGroupKey
                 {
                     Year = entry.OnPremiseConnectorInDate.Year,
                     Month = entry.OnPremiseConnectorInDate.Month,
@@ -137,7 +137,7 @@ namespace Thinktecture.Relay.Server.Repository
 
             if (resolution == Resolution.Monthly)
             {
-                return query.GroupBy(entry => new ContentBytesChartGroupKey()
+                return query.GroupBy(entry => new ContentBytesChartGroupKey
                 {
                     Year = entry.OnPremiseConnectorInDate.Year,
                     Month = entry.OnPremiseConnectorInDate.Month,
@@ -145,7 +145,7 @@ namespace Thinktecture.Relay.Server.Repository
                 });
             }
 
-            return query.GroupBy(entry => new ContentBytesChartGroupKey()
+            return query.GroupBy(entry => new ContentBytesChartGroupKey
             {
                 Year = entry.OnPremiseConnectorInDate.Year,
                 Month = null,
@@ -155,7 +155,7 @@ namespace Thinktecture.Relay.Server.Repository
 
         public IEnumerable<ContentBytesChartDataItem> GetContentBytesChartDataItems()
         {
-            var timeFrame = new TimeFrame()
+            var timeFrame = new TimeFrame
             {
                 Start = DateTime.Now.AddDays(-7),
                 End = DateTime.Now,

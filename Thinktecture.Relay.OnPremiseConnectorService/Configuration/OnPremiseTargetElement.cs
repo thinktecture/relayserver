@@ -11,26 +11,17 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 
 		public OnPremiseTargetElement()
 		{
-			_properties = new ConfigurationPropertyCollection()
+			_properties = new ConfigurationPropertyCollection
 			{
 				_key,
 				_baseUrl
 			};
 		}
 
-		protected override ConfigurationPropertyCollection Properties
-		{
-			get { return _properties; }
-		}
+		protected override ConfigurationPropertyCollection Properties => _properties;
 
-		public string Key
-		{
-			get { return (string) this[_key]; }
-		}
+	    public string Key => (string) this[_key];
 
-		public string BaseUrl
-		{
-			get { return (string) this[_baseUrl]; }
-		}
+	    public string BaseUrl => (string) this[_baseUrl];
 	}
 }

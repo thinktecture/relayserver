@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Threading.Tasks;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository.DbModels;
@@ -29,14 +28,14 @@ namespace Thinktecture.Relay.Server.Repository
             {
                 var query = context.Links.AsQueryable();
 
-                if (!String.IsNullOrWhiteSpace(paging.SearchText))
+                if (!string.IsNullOrWhiteSpace(paging.SearchText))
                 {
                     var searchText = paging.SearchText.ToLower();
                     query = query.Where(w => w.UserName.ToLower().Contains(searchText) || w.SymbolicName.ToLower().Contains(searchText));
                 }
 
                 // Default sorting must be provided
-                if (String.IsNullOrWhiteSpace(paging.SortField))
+                if (string.IsNullOrWhiteSpace(paging.SortField))
                 {
                     paging.SortField = "SymbolicName";
                     paging.SortDirection = SortDirection.Asc;
@@ -49,7 +48,7 @@ namespace Thinktecture.Relay.Server.Repository
 
                 var queryResult = query.ToList().Select(GetLinkFromDbLink).ToList();
 
-                var result = new PageResult<Link>()
+                var result = new PageResult<Link>
                 {
                     Items = queryResult,
                     Count = count
@@ -126,7 +125,7 @@ namespace Thinktecture.Relay.Server.Repository
                 context.Links.Add(link);
                 context.SaveChanges();
 
-                var result = new CreateLinkResult()
+                var result = new CreateLinkResult
                 {
                     Id = link.Id,
                     Password = Convert.ToBase64String(password)
@@ -215,7 +214,7 @@ namespace Thinktecture.Relay.Server.Repository
                     return false;
                 }
 
-                var passwordInformation = new PasswordInformation()
+                var passwordInformation = new PasswordInformation
                 {
                     Hash = link.Password,
                     Iterations = link.Iterations,
@@ -223,7 +222,7 @@ namespace Thinktecture.Relay.Server.Repository
                 };
                 
                 var cacheKey = userName + "/" + password;
-                PasswordInformation previousInfo = null;
+                PasswordInformation previousInfo;
 
                 lock (_successfullyValidatedUsernamesAndPasswords)
                 {

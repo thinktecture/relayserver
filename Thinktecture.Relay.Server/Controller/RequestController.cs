@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Controller
                 return NotFound();
             }
 
-            return new ResponseMessageResult(new HttpResponseMessage() { Content = new ByteArrayContent(data) });
+            return new ResponseMessageResult(new HttpResponseMessage { Content = new ByteArrayContent(data) });
         }
     }
 }

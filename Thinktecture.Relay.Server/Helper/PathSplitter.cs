@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Helper
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path", "Path must not be null.");
+				throw new ArgumentNullException(nameof(path), "Path must not be null.");
 			}
 
 			var splitPath = SplitPath(path).ToList();
@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.Server.Helper
 
 		internal string GetTargetKey(List<string> splitPath)
 		{
-			if (splitPath.Count() < 2)
+			if (splitPath.Count < 2)
 			{
 				return null;
 			}
@@ -43,12 +43,12 @@ namespace Thinktecture.Relay.Server.Helper
 
 		internal string GetLocalUrl(List<string> splitPath)
 		{
-			if (splitPath.Count() < 3)
+			if (splitPath.Count < 3)
 			{
 				return null;
 			}
 
-			return "/" + String.Join("/", splitPath.Skip(2));
+			return "/" + string.Join("/", splitPath.Skip(2));
 		}
 
 		internal string GetPathWithoutUserName(List<string> splitPath)
@@ -58,7 +58,7 @@ namespace Thinktecture.Relay.Server.Helper
 				return null;
 			}
 
-			return String.Join("/", splitPath.Skip(1));
+			return string.Join("/", splitPath.Skip(1));
 		}
 
 		internal string GetUserName(List<string> splitPath)

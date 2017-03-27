@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.Server.Configuration
             int tmpInt;
             bool tmpBool;
 
-            if (!Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out tmpInt))
+            if (!int.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out tmpInt))
             {
                 tmpInt = 30;
             }
@@ -39,19 +39,19 @@ namespace Thinktecture.Relay.Server.Configuration
             TraceFileDirectory = ConfigurationManager.AppSettings.Get("TraceFileDirectory") ?? "tracefiles";
 
             LinkPasswordLength = 100;
-            if (Int32.TryParse(ConfigurationManager.AppSettings["LinkPasswordLength"], out tmpInt))
+            if (int.TryParse(ConfigurationManager.AppSettings["LinkPasswordLength"], out tmpInt))
             {
                 LinkPasswordLength = tmpInt;
             }
 
             ConnectionTimeout = 5;
-            if (Int32.TryParse(ConfigurationManager.AppSettings["ConnectionTimeout"], out tmpInt))
+            if (int.TryParse(ConfigurationManager.AppSettings["ConnectionTimeout"], out tmpInt))
             {
                 ConnectionTimeout = tmpInt;
             }
 
             DisconnectTimeout = 6;
-            if (Int32.TryParse(ConfigurationManager.AppSettings["DisconnectTimeout"], out tmpInt))
+            if (int.TryParse(ConfigurationManager.AppSettings["DisconnectTimeout"], out tmpInt))
             {
                 DisconnectTimeout = tmpInt;
             }
@@ -59,31 +59,31 @@ namespace Thinktecture.Relay.Server.Configuration
             HostName = ConfigurationManager.AppSettings["HostName"] ?? "+";
 
             Port = 20000;
-            if (Int32.TryParse(ConfigurationManager.AppSettings["Port"], out tmpInt))
+            if (int.TryParse(ConfigurationManager.AppSettings["Port"], out tmpInt))
             {
                 Port = tmpInt;
             }
 
             EnableManagementWeb = true;
-            if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], out tmpBool))
+            if (bool.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], out tmpBool))
             {
                 EnableManagementWeb = tmpBool;
             }
 
             EnableRelaying = true;
-            if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableRelaying"], out tmpBool))
+            if (bool.TryParse(ConfigurationManager.AppSettings["EnableRelaying"], out tmpBool))
             {
                 EnableRelaying = tmpBool;
             }
 
             EnableOnPremiseConnections = true;
-            if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableOnPremiseConnections"], out tmpBool))
+            if (bool.TryParse(ConfigurationManager.AppSettings["EnableOnPremiseConnections"], out tmpBool))
             {
                 EnableOnPremiseConnections = tmpBool;
             }
 
             UseInsecureHttp = false;
-            if (Boolean.TryParse(ConfigurationManager.AppSettings["UseInsecureHttp"], out tmpBool))
+            if (bool.TryParse(ConfigurationManager.AppSettings["UseInsecureHttp"], out tmpBool))
             {
                 UseInsecureHttp = tmpBool;
             }

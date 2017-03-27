@@ -17,10 +17,12 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
         [ActionName("info")]
         public IHttpActionResult Get()
         {
-            var result = new Dashboard();
+            var result = new Dashboard
+                         {
+                             Logs = _logRepository.GetRecentLogEntries(15),
+                             ContentBytesChartDataItems = _logRepository.GetContentBytesChartDataItems()
+                         };
 
-            result.Logs = _logRepository.GetRecentLogEntries(15);
-            result.ContentBytesChartDataItems = _logRepository.GetContentBytesChartDataItems();
 
             return Ok(result);
         } 

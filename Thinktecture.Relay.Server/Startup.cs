@@ -4,14 +4,12 @@ using System.IO;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using Autofac;
-using Autofac.Builder;
 using Autofac.Integration.SignalR;
 using Autofac.Integration.WebApi;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.FileSystems;
-using Microsoft.Owin.Host.HttpListener;
 using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
@@ -218,7 +216,7 @@ namespace Thinktecture.Relay.Server
 
             try
             {
-                var options = new FileServerOptions()
+                var options = new FileServerOptions
                 {
                     FileSystem = new PhysicalFileSystem("ManagementWeb"),
                     RequestPath = new PathString("/managementweb"),

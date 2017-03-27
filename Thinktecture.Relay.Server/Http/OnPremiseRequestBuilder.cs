@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			// HTTP RFC2616 says, that multiple headers can be combined into a comma-separated single header
 
-			return headers.Aggregate(String.Empty, (s, v) => s + (s == String.Empty ? String.Empty : ", ") + v);
+			return headers.Aggregate(string.Empty, (s, v) => s + (s == string.Empty ? string.Empty : ", ") + v);
 		}
 
 		internal void AddContentHeaders(IOnPremiseConnectorRequest onPremiseConnectorRequest, HttpRequestMessage request)

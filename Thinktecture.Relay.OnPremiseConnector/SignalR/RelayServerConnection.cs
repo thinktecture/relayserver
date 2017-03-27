@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,13 +27,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
         private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
         private readonly HttpClient _httpClient;
         private bool _eventsHooked;
-        private int _id;
+        private readonly int _id;
         private string _accessToken;
         private bool _stopRequested;
-        private string _relayedRequestHeader = null;
+        private string _relayedRequestHeader;
 
-        private static int _nextId = 0;
-        private static Random _random = new Random();
+        private static int _nextId;
+        private static readonly Random _random = new Random();
 
         private const int MIN_WAIT_TIME_IN_SECONDS = 2 * 1000;
         private const int MAX_WAIT_TIME_IN_SECONDS = 30 * 1000;
@@ -51,10 +50,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
             _onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
             _logger = logger;
             _connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
-            _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
+            _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(requestTimeout) };
         }
 
-        public String RelayedRequestHeader
+        public string RelayedRequestHeader
         {
             set { _relayedRequestHeader = value; }
         }
@@ -99,7 +98,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
                 catch (Exception ex)
                 {
                     var randomWaitTime = GetRandomWaitTime();
-                    _logger.Trace(String.Format("Could not connect and authenticate to relay server - re-trying in {0} second. #{1}", randomWaitTime, _id), ex);
+                    _logger.Trace($"Could not connect and authenticate to relay server - re-trying in {randomWaitTime} second. #{_id}", ex);
                     Thread.Sleep(randomWaitTime);
                 }
             }
@@ -126,10 +125,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
                 await Start();
                 _logger.Info("Connected to relay server. #" + _id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Info("***** ERROR WHILE CONNECTING: #" + _id);
-                Delay(5000).ContinueWith(_ => Start());
+                await Delay(5000).ContinueWith(_ => Start());
             }
         }
 
@@ -341,7 +340,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
             return tcs.Task;
         }
 
-        private int GetRandomWaitTime()
+        private static int GetRandomWaitTime()
         {
             return _random.Next(MIN_WAIT_TIME_IN_SECONDS, MAX_WAIT_TIME_IN_SECONDS);
         }

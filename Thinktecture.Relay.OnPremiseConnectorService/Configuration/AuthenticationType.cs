@@ -4,6 +4,6 @@
 	{
 		None = 0,
 
-		Identity = 1,
+		Identity = 1
 	}
 }

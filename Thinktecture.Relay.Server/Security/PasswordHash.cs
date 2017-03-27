@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.Security
             // Hash the password and encode the parameters
             var hash = PBKDF2(password, salt, iterations, HASH_BYTE_SIZE);
 
-            return new PasswordInformation()
+            return new PasswordInformation
             {
                 Hash = Convert.ToBase64String(hash),
                 Iterations = iterations,
