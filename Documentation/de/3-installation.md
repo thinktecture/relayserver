@@ -240,7 +240,7 @@ Zur Konfiguration des On-Premises Connectors wird die Konfigurationsdatei Thinkt
 In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> bearbeitet werden:
 
 ```
-<relayServer baseUrl="https://relay.company.example/">
+<relayServer baseUrl="https://relay.company.example/relay/">
   <security authenticationType="Identity">
     <identity userName="userName" password="password" />
   </security>
@@ -249,6 +249,8 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
   </onPremiseTargets>
 </relayServer>
 ```
+
+Bitte achten Sie bei der Angabe der `baseUrl` auf den Pfadbestandteil `relay` und den schließenden Schrägstrich am Ende.
 
 ### relayServer Element
 
