@@ -4,7 +4,7 @@ Das RelayServer Management Web ist die grafische Benutzeroberfläche zur Konfigu
 
 Für die Analyse von Betriebsproblemen steht außerdem ein umfangreiches Logging und Tracing auf Paketebene zur Verfügung, wenn dieses Feature während der Installation ausgewählt worden ist.
 
-Das RelayServer Management Web ist auch Sicherheitsgründen standardmäßig nur lokal aufrufbar und nicht für den öffentlichen Zugriff freigeschaltet. Der erste Start erfolgt durch Aufruf der URL http://localhost:20000/managementweb/ mit einem aktuellen Browser.
+Das RelayServer Management Web ist auch Sicherheitsgründen standardmäßig nur lokal aufrufbar und nicht für den öffentlichen Zugriff freigeschaltet. Der erste Start erfolgt durch Aufruf der URL http://localhost:20000/managementweb/. Das Management Web sollte bevorzugt mit Chrome verwendet werden. Die Funktion mit anderen Browsern ist nicht unbedingt gewährleistet.
 
 ## Ersteinrichtung des RelayServer Management Web
 
