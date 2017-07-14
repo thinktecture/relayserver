@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}"
 EndProject
@@ -16,6 +16,22 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7286C586-743A-443C-BF95-5394EE8E49F4}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5E5C3493-0D98-4B1D-A50B-1E760782DE2D}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{0961D429-E302-46AC-BB14-198240900C5A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "de", "de", "{C930A0EE-45E1-4815-93BF-65B1F87DC9E0}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\de\1-was-ist-der-thinktecture-relayserver.md = Documentation\de\1-was-ist-der-thinktecture-relayserver.md
+		Documentation\de\2-architektur.md = Documentation\de\2-architektur.md
+		Documentation\de\3-installation.md = Documentation\de\3-installation.md
+		Documentation\de\4-relayserver-management-web.md = Documentation\de\4-relayserver-management-web.md
+		Documentation\de\relayserver.md = Documentation\de\relayserver.md
 	EndProjectSection
 EndProject
 Global
@@ -46,5 +62,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FC928931-8741-48E1-9061-343CF009C903} = {C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}
+		{0961D429-E302-46AC-BB14-198240900C5A} = {5E5C3493-0D98-4B1D-A50B-1E760782DE2D}
+		{C930A0EE-45E1-4815-93BF-65B1F87DC9E0} = {0961D429-E302-46AC-BB14-198240900C5A}
 	EndGlobalSection
 EndGlobal
