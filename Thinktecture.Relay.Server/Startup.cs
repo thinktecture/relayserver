@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Data.Entity;
 using System.IO;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using Autofac;
-using Autofac.Builder;
 using Autofac.Integration.SignalR;
 using Autofac.Integration.WebApi;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.FileSystems;
-using Microsoft.Owin.Host.HttpListener;
 using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
@@ -43,7 +42,7 @@ namespace Thinktecture.Relay.Server
             app.UseAutofacMiddleware(container);
 
             app.UseCors(CorsOptions.AllowAll);
-            
+
             UseOAuthSecurity(app, container);
 
             MapSignalR(app, container);
@@ -72,17 +71,17 @@ namespace Thinktecture.Relay.Server
             builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
             builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
             builder.RegisterType<LogRepository>().As<ILogRepository>().SingleInstance();
-			builder.RegisterType<TraceRepository>().As<ITraceRepository>().SingleInstance();
+            builder.RegisterType<TraceRepository>().As<ITraceRepository>().SingleInstance();
 
-	        builder.RegisterType<RequestLogger>().As<IRequestLogger>().SingleInstance();
-	        builder.RegisterType<TraceManager>().As<ITraceManager>().SingleInstance();
-	        builder.RegisterType<TraceFileWriter>().As<ITraceFileWriter>().SingleInstance();
+            builder.RegisterType<RequestLogger>().As<IRequestLogger>().SingleInstance();
+            builder.RegisterType<TraceManager>().As<ITraceManager>().SingleInstance();
+            builder.RegisterType<TraceFileWriter>().As<ITraceFileWriter>().SingleInstance();
             builder.RegisterType<TraceFileReader>().As<ITraceFileReader>().SingleInstance();
             builder.RegisterType<TraceTransformation>().As<ITraceTransformation>().SingleInstance();
 
-	        builder.RegisterType<HttpResponseMessageBuilder>().As<IHttpResponseMessageBuilder>();
-	        builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
-	        builder.RegisterType<PathSplitter>().As<IPathSplitter>();
+            builder.RegisterType<HttpResponseMessageBuilder>().As<IHttpResponseMessageBuilder>();
+            builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
+            builder.RegisterType<PathSplitter>().As<IPathSplitter>();
 
             builder.Register(context => new LoggerAdapter(LogManager.GetLogger("Server"))).As<ILogger>().SingleInstance();
 
@@ -127,33 +126,25 @@ namespace Thinktecture.Relay.Server
                 Provider = container.Resolve<AuthorizationServerProvider>()
             });
 
-            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
+            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions()
+            {
+                Provider = new OAuthBearerAuthenticationProvider()
+                {
+                    OnApplyChallenge = context =>
+                    {
+                        // Workaround: Keep an already set WWW-Authenticate header (otherwise OWIN would add its challenge).
+                        if (!context.Response.Headers.ContainsKey("WWW-Authenticate"))
+                        {
+                            context.OwinContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
+                        }
+                        return Task.FromResult(0);
+                    }
+                }
+            });
         }
 
         private static void MapSignalR(IAppBuilder app, ILifetimeScope container)
         {
-            /*
-            foreach (var key in app.Properties.Keys)
-            {
-                Console.WriteLine("Key: {0}", key);
-            }
-            OwinHttpListener listener = (OwinHttpListener)app.Properties["Microsoft.Owin.Host.HttpListener.OwinHttpListener"];
-            int maxPending;
-            int maxAccepts;
-            if (listener != null)
-            {
-                listener.GetRequestProcessingLimits(out maxAccepts, out maxPending);
-                Console.WriteLine("Limits: a: {0}, p:{1}", maxAccepts, maxPending);
-                listener.SetRequestQueueLimit(5000);
-                listener.SetRequestProcessingLimits(1000, maxPending);
-                listener.GetRequestProcessingLimits(out maxAccepts, out maxPending);
-                Console.WriteLine("Limits: a: {0}, p:{1}", maxAccepts, maxPending);
-            }
-            else
-            {
-                Console.WriteLine("No Owin listener found");
-            }
-            */
             var config = container.Resolve<IConfiguration>();
 
             if (!config.EnableOnPremiseConnections)
@@ -186,7 +177,8 @@ namespace Thinktecture.Relay.Server
             httpConfig.SuppressDefaultHostAuthentication();
             httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
-            if (configuration.EnableRelaying) {  
+            if (configuration.EnableRelaying)
+            {
                 logger.Info("Relaying enabled");
                 httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
             }
@@ -198,7 +190,8 @@ namespace Thinktecture.Relay.Server
                 httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
             }
 
-            if (configuration.EnableManagementWeb) {
+            if (configuration.EnableManagementWeb)
+            {
                 logger.Info("Management Web enabled");
                 httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
             }
@@ -212,7 +205,8 @@ namespace Thinktecture.Relay.Server
         {
             var configuration = container.Resolve<IConfiguration>();
 
-            if (!configuration.EnableManagementWeb) { 
+            if (!configuration.EnableManagementWeb)
+            {
                 return;
             }
 
