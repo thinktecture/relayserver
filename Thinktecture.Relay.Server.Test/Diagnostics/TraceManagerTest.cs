@@ -47,6 +47,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public string HostName { get; private set; }
 			public int Port { get; private set; }
 			public string ManagementWebLocation { get; private set; }
+			public string TemporaryRequestStoragePath { get; }
 
 			public Configuration()
 			{

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
@@ -68,8 +69,6 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<AuthorizationServerProvider>().SingleInstance();
 			builder.RegisterType<PasswordHash>().As<IPasswordHash>();
 
-			builder.RegisterType<InMemoryPostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
-			
 			builder.RegisterType<ConnectionFactory>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
 			builder.Register(ctx => ctx.Resolve<IRabbitMqFactory>().CreateConnection()).AsImplementedInterfaces().SingleInstance();
@@ -96,6 +95,16 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<PathSplitter>().As<IPathSplitter>();
 
 			builder.Register(context => LogManager.GetLogger("Server")).As<ILogger>().SingleInstance();
+
+			// conditional registrations
+			if (String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["TemporaryRequestStoragePath"]))
+			{
+				builder.RegisterType<InMemoryPostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
+			}
+			else
+			{
+				builder.RegisterType<FilePostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
+			}
 
 			var container = builder.Build();
 

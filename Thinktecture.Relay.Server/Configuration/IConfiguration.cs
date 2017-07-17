@@ -18,5 +18,6 @@ namespace Thinktecture.Relay.Server.Configuration
 		string HostName { get; }
 		int Port { get; }
 		string ManagementWebLocation { get; }
+		string TemporaryRequestStoragePath { get; }
 	}
 }

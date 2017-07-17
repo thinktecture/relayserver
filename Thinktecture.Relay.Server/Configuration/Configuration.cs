@@ -20,6 +20,7 @@ namespace Thinktecture.Relay.Server.Configuration
 		public string HostName { get; private set; }
 		public int Port { get; private set; }
 		public string ManagementWebLocation { get; private set; }
+		public string TemporaryRequestStoragePath { get; private set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -102,6 +103,12 @@ namespace Thinktecture.Relay.Server.Configuration
 				ManagementWebLocation = "ManagementWeb";
 			}
 
+			TemporaryRequestStoragePath = ConfigurationManager.AppSettings["TemporaryRequestStoragePath"];
+			if (String.IsNullOrWhiteSpace(TemporaryRequestStoragePath))
+			{
+				TemporaryRequestStoragePath = null;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -120,6 +127,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			logger.Trace("Setting HostName: {0}", HostName);
 			logger.Trace("Setting Port: {0}", Port);
 			logger.Trace("Setting ManagementWebLocation: {0}", ManagementWebLocation);
+			logger.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
 		}
 	}
 }

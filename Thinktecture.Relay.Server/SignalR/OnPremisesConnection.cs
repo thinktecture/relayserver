@@ -18,16 +18,9 @@ namespace Thinktecture.Relay.Server.SignalR
 
         public OnPremisesConnection(IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILogger logger)
         {
-            if (backendCommunication == null)
-                throw new ArgumentNullException(nameof(backendCommunication));
-            if (temporaryStore == null)
-                throw new ArgumentNullException(nameof(temporaryStore));
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
-
-            _backendCommunication = backendCommunication;
-            _temporaryStore = temporaryStore;
-            _logger = logger;
+			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
+            _temporaryStore = temporaryStore ?? throw new ArgumentNullException(nameof(temporaryStore));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         protected override bool AuthorizeRequest(IRequest request)
@@ -73,11 +66,9 @@ namespace Thinktecture.Relay.Server.SignalR
 
             if (request.Body != null)
             {
-                if (request.Body.Length > 0x20000) // 128k
-                {
-                    _temporaryStore.Save(request.RequestId, request.Body);
-                    request.Body = new byte[0];
-                }
+                // always store request in temporary store
+                _temporaryStore.Save(request.RequestId, request.Body);
+                request.Body = new byte[0];
             }
 
             await Connection.Send(connectionId, request);

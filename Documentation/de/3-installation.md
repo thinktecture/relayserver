@@ -133,7 +133,8 @@ Die Standardeinstellungen umfassen dabei:
 
 ```
 <appSettings>
-     <add key="EnableManagementWeb" value="true"/>
+    <add key="EnableManagementWeb" value="true"/>
+    <add key="ManagementWebLocation" value="ManagementWeb">
     <add key="EnableRelaying" value="true"/>
     <add key="EnableOnPremiseConnections" value="true" />
     <add key="Port" value="443"/>
@@ -145,11 +146,13 @@ Die Standardeinstellungen umfassen dabei:
 |  Key name | Description |
 | --- | --- |
 | EnableManagementWeb | Aktiviert die Management Weboberfläche (default true) |
+| ManagementWebLocation | Pfad zu den Dateien des Management-Webs (default 'ManagementWeb') |
 | EnableRelaying | Aktiviert die Relay-Funktion des Servers (default true) |
 | EnableOnPremiseConnections | Erlaubt den Verbindungsaufbau von On-Premises Connectoren (default true) |
 | Port | Standard-Port des RelayServers (default 443) |
 | HostName | Gewünschte Ziel-URL des RelayServers (default +) |
 | UseInsecureHttp | Aktiviert die Verwendung von HTTP statt HTTPS (die Verwendung von HTTP im Produktivbetrieb wird nicht empfohlen). |
+| TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden. Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist (default) werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
 
 ## netsh settings
 
