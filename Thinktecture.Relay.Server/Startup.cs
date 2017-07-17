@@ -78,6 +78,7 @@ namespace Thinktecture.Relay.Server
 
 			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
 			builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
+			builder.RegisterType<LocalAppDataPersistedSettings>().As<IPersistedSettings>().SingleInstance();
 
 			builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
 			builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();

@@ -17,6 +17,7 @@ namespace Thinktecture.Relay.Server.Communication
         private readonly IMessageDispatcher _messageDispatcher;
         private readonly IOnPremiseConnectorCallbackFactory _requesetCallbackFactory;
         private readonly ILogger _logger;
+        private readonly IPersistedSettings _persistedSettings;
         private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
         private readonly ConcurrentDictionary<string, ConnectionInformation> _onPremises;
 
@@ -25,25 +26,17 @@ namespace Thinktecture.Relay.Server.Communication
 
         public string OriginId { get; }
 
-        public BackendCommunication(IConfiguration configuration, IMessageDispatcher messageDispatcher, IOnPremiseConnectorCallbackFactory requesetCallbackFactory, ILogger logger)
+        public BackendCommunication(IConfiguration configuration, IMessageDispatcher messageDispatcher, IOnPremiseConnectorCallbackFactory requesetCallbackFactory, ILogger logger, IPersistedSettings persistedSettings)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
-            if (messageDispatcher == null)
-                throw new ArgumentNullException(nameof(messageDispatcher));
-            if (requesetCallbackFactory == null)
-                throw new ArgumentNullException(nameof(requesetCallbackFactory));
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _messageDispatcher = messageDispatcher ?? throw new ArgumentNullException(nameof(messageDispatcher));
+            _requesetCallbackFactory = requesetCallbackFactory ?? throw new ArgumentNullException(nameof(requesetCallbackFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _persistedSettings = persistedSettings ?? throw new ArgumentNullException(nameof(persistedSettings));
 
-            OriginId = Guid.NewGuid().ToString();
+            OriginId = _persistedSettings.OriginId.ToString();
             logger.Trace("Creating backend communication with origin id {0}", OriginId);
             logger.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
-
-            _configuration = configuration;
-            _messageDispatcher = messageDispatcher;
-            _requesetCallbackFactory = requesetCallbackFactory;
-            _logger = logger;
 
             _onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
             _requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);

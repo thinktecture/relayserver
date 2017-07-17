@@ -201,6 +201,8 @@
     <Compile Include="Communication\RegistrationAction.cs" />
     <Compile Include="Communication\UnregistrationAction.cs" />
     <Compile Include="Communication\RegistrationInformation.cs" />
+    <Compile Include="Configuration\IPersistedSettings.cs" />
+    <Compile Include="Configuration\LocalAppDataPersistedSettings.cs" />
     <Compile Include="Controller\OnPremiseConnectionsModule.cs" />
     <Compile Include="Security\CustomJwtFormat.cs" />
     <Compile Include="Dto\ContentBytesChartGroupKey.cs" />
