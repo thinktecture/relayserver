@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NLog.Interface;
+using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.OnPremise;
@@ -21,7 +20,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	[TestClass]
 	public class TraceManagerTest
 	{
-		private class OnPremiseTargetReponse : IOnPremiseTargetReponse
+		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
 		{
 			public string RequestId { get; set; }
 			public string OriginId { get; set; }
@@ -37,17 +36,19 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public TimeSpan OnPremiseConnectorCallbackTimeout { get; private set; }
 			public string RabbitMqConnectionString { get; private set; }
 			public string TraceFileDirectory { get; private set; }
-		    public int LinkPasswordLength { get; private set; }
-		    public int DisconnectTimeout { get; private set; }
-		    public int ConnectionTimeout { get; private set; }
-		    public bool UseInsecureHttp { get; private set; }
-		    public bool EnableManagementWeb { get; private set; }
-		    public bool EnableRelaying { get; private set; }
-		    public bool EnableOnPremiseConnections { get; private set; }
-		    public string HostName { get; private set; }
-		    public int Port { get; private set; }
+			public int LinkPasswordLength { get; private set; }
+			public int DisconnectTimeout { get; private set; }
+			public int ConnectionTimeout { get; private set; }
+			public int KeepAliveInterval { get; private set; }
+			public bool UseInsecureHttp { get; private set; }
+			public bool EnableManagementWeb { get; private set; }
+			public bool EnableRelaying { get; private set; }
+			public bool EnableOnPremiseConnections { get; private set; }
+			public string HostName { get; private set; }
+			public int Port { get; private set; }
+			public string ManagementWebLocation { get; private set; }
 
-		    public Configuration()
+			public Configuration()
 			{
 				TraceFileDirectory = "tracefiles";
 			}
@@ -77,7 +78,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			var linkId = Guid.NewGuid();
 			Guid? result;
 
-			traceRepositoryMock.Setup(t => t.GetCurrentTraceConfigurationId(linkId)).Returns((Guid?) null);
+			traceRepositoryMock.Setup(t => t.GetCurrentTraceConfigurationId(linkId)).Returns((Guid?)null);
 
 			result = sut.GetCurrentTraceConfigurationId(linkId);
 
@@ -99,7 +100,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 65, 66, 67 }
 			};
-			var onPremiseTargetResponse = new OnPremiseTargetReponse()
+			var onPremiseTargetResponse = new OnPremiseTargetResponse()
 			{
 				HttpHeaders = new Dictionary<string, string>
 				{
@@ -141,7 +142,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 65, 66, 67 }
 			};
-			var onPremiseTargetResponse = new OnPremiseTargetReponse()
+			var onPremiseTargetResponse = new OnPremiseTargetResponse()
 			{
 				HttpHeaders = new Dictionary<string, string>
 				{
@@ -155,7 +156,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			string onPremiseTargetResponseBodyFileName = null;
 			string onPremiseTargetResponseHeadersFileName = null;
 			DateTime startTime;
-            ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, new Configuration(), loggerMock.Object);
+			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, new Configuration(), loggerMock.Object);
 
 			startTime = DateTime.Now;
 
@@ -192,7 +193,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 65, 66, 67 }
 			};
-			var onPremiseTargetResponse = new OnPremiseTargetReponse()
+			var onPremiseTargetResponse = new OnPremiseTargetResponse()
 			{
 				HttpHeaders = new Dictionary<string, string>
 				{
@@ -201,12 +202,12 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 66, 67, 68 }
 			};
-            ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, new Configuration(), loggerMock.Object);
+			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, new Configuration(), loggerMock.Object);
 
 			var exception = new Exception();
 
 			traceFileWriterMock.Setup(t => t.WriteContentFile(It.IsAny<string>(), clientRequest.Body)).Throws(exception);
-			loggerMock.Setup(l => l.Warn(It.IsAny<string>(), exception));
+			loggerMock.Setup(l => l.Warn(exception, It.IsAny<string>()));
 
 			sut.Trace(clientRequest, onPremiseTargetResponse, traceConfigurationId);
 
@@ -215,32 +216,32 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 		[TestMethod]
 		public async Task GetTraceFilesAsync_returns_file_info_objects_for_all_trace_files_of_a_given_prefix()
-        {
-            var traceFileReaderMock = new Mock<TraceFileReader>() { CallBase = true };
-            var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), null);
+		{
+			var traceFileReaderMock = new Mock<TraceFileReader>() { CallBase = true };
+			var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), null);
 			var filePrefix1 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831637";
 			var filePrefix2 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831700";
 			IEnumerable<Trace> result;
 
-            var clientHeaders = new Dictionary<string, string>()
-		    {
-		        {"Content-Type", "text/plain"},
-		        {"Content-Length", "0"}
-		    };
+			var clientHeaders = new Dictionary<string, string>()
+			{
+				{"Content-Type", "text/plain"},
+				{"Content-Length", "0"}
+			};
 
-            var onPremiseTargetHeaders = new Dictionary<string, string>()
-		    {
-		        {"Content-Type", "image/png"},
-		        {"Content-Length", "500"}
-		    };
+			var onPremiseTargetHeaders = new Dictionary<string, string>()
+			{
+				{"Content-Type", "image/png"},
+				{"Content-Length", "500"}
+			};
 
-            Directory.CreateDirectory("tracefiles");
+			Directory.CreateDirectory("tracefiles");
 
-            var traceFileWriter = new TraceFileWriter();
-            await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".ct.headers", clientHeaders);
-            await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".optt.headers", onPremiseTargetHeaders);
-            await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".ct.headers", clientHeaders);
-            await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".optt.headers", onPremiseTargetHeaders);
+			var traceFileWriter = new TraceFileWriter();
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".ct.headers", clientHeaders);
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".optt.headers", onPremiseTargetHeaders);
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".ct.headers", clientHeaders);
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".optt.headers", onPremiseTargetHeaders);
 
 			result = await sut.GetTracesAsync(Guid.Parse("7975999f-54d9-4b21-a093-4502ea372723"));
 
@@ -253,33 +254,33 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		public async Task GetTraceFilesAsync_catches_errors_when_reading_a_file_and_logs_them()
 		{
 			var loggerMock = new Mock<ILogger>();
-		    var traceFileReaderMock = new Mock<TraceFileReader>() {CallBase = true};
-            var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), loggerMock.Object);
+			var traceFileReaderMock = new Mock<TraceFileReader>() { CallBase = true };
+			var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), loggerMock.Object);
 			var filePrefix1 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831637";
 			var filePrefix2 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831700";
 			IEnumerable<Trace> result;
 
-            var clientHeaders = new Dictionary<string, string>()
-		    {
-		        {"Content-Type", "text/plain"},
-		        {"Content-Length", "0"}
-		    };
+			var clientHeaders = new Dictionary<string, string>()
+			{
+				{"Content-Type", "text/plain"},
+				{"Content-Length", "0"}
+			};
 
-            var onPremiseTargetHeaders = new Dictionary<string, string>()
-		    {
-		        {"Content-Type", "image/png"},
-		        {"Content-Length", "500"}
-		    };
+			var onPremiseTargetHeaders = new Dictionary<string, string>()
+			{
+				{"Content-Type", "image/png"},
+				{"Content-Length", "500"}
+			};
 
-		    Directory.CreateDirectory("tracefiles");
+			Directory.CreateDirectory("tracefiles");
 
-		    var traceFileWriter = new TraceFileWriter();
-		    await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".ct.headers", clientHeaders);
-		    await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".optt.headers", onPremiseTargetHeaders);
-		    await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".crxxxxxxx.headers", clientHeaders);
-		    await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".ltrxxxxxxx.headers", onPremiseTargetHeaders);
-            
-		    loggerMock.Setup(l => l.Warn(It.IsAny<string>(), It.IsAny<Exception>()));
+			var traceFileWriter = new TraceFileWriter();
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".ct.headers", clientHeaders);
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix1 + ".optt.headers", onPremiseTargetHeaders);
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".crxxxxxxx.headers", clientHeaders);
+			await traceFileWriter.WriteHeaderFile("tracefiles/" + filePrefix2 + ".ltrxxxxxxx.headers", onPremiseTargetHeaders);
+
+			loggerMock.Setup(l => l.Warn(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<object[]>()));
 
 			result = await sut.GetTracesAsync(Guid.Parse("7975999f-54d9-4b21-a093-4502ea372723"));
 

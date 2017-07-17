@@ -31,6 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "de", "de", "{C930A0EE-45E1-
 		Documentation\de\2-architektur.md = Documentation\de\2-architektur.md
 		Documentation\de\3-installation.md = Documentation\de\3-installation.md
 		Documentation\de\4-relayserver-management-web.md = Documentation\de\4-relayserver-management-web.md
+		Documentation\de\5-entwicklungssetup.md = Documentation\de\5-entwicklungssetup.md
 		Documentation\de\relayserver.md = Documentation\de\relayserver.md
 	EndProjectSection
 EndProject

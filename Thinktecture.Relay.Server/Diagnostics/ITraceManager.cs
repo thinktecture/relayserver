@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	public interface ITraceManager
 	{
 		Guid? GetCurrentTraceConfigurationId(Guid linkId);
-		void Trace(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetReponse onPremiseTargetReponse, Guid traceConfigurationId);
+		void Trace(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, Guid traceConfigurationId);
 		Task<IEnumerable<Trace>> GetTracesAsync(Guid traceConfigurationId);
 	    Task<TraceFile> GetTraceFileAsync(string headerFileName);
 	}

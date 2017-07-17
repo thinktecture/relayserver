@@ -3,7 +3,7 @@ using System.Web.Http;
 using System.Web.Http.Results;
 using Autofac;
 using Newtonsoft.Json.Linq;
-using NLog.Interface;
+using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
 
@@ -23,11 +23,11 @@ namespace Thinktecture.Relay.Server.Controller
 
         public async Task<OkResult> Forward(JToken message)
         {
-            _logger.Trace("Forwarding {0}", message.ToString());
+            _logger.Trace("Forwarding {0}", message);
 
-            var onPremiseTargetReponse = message.ToObject<OnPremiseTargetReponse>();
+            var onPremiseTargetResponse = message.ToObject<OnPremiseTargetResponse>();
 
-            await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetReponse.OriginId, onPremiseTargetReponse);
+            await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetResponse.OriginId, onPremiseTargetResponse);
 
             return Ok();
         }

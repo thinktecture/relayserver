@@ -44,12 +44,7 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			var body = await content.ReadAsByteArrayAsync();
 
-			if (body.LongLength == 0L)
-			{
-				return null;
-			}
-
-			return body;
+			return (body.LongLength == 0L) ? null : body;
 		}
 
 		internal string CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(IEnumerable<string> headers)

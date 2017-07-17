@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
-using NLog.Interface;
+using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector
 {
-	public class RelayServerConnector : IDisposable
+	public class RelayServerConnector : IDisposable, IRelayServerConnector
 	{
 		private static readonly IContainer _container;
 
@@ -19,18 +22,19 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterType<RelayServerConnectionFactory>().As<IRelayServerConnectionFactory>();
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
 
-			builder.Register(context => new LoggerAdapter(NLog.LogManager.GetLogger("ClientLogger"))).As<ILogger>().SingleInstance();
+			builder.Register(context => LogManager.GetLogger("ClientLogger")).As<ILogger>().SingleInstance();
 
 			_container = builder.Build();
 		}
 
-	    public String RelayedRequestHeader
-	    {
-	        set { _connection.RelayedRequestHeader = value; }
-	    }
+		public string RelayedRequestHeader
+		{
+			get { return _connection.RelayedRequestHeader; }
+			set { _connection.RelayedRequestHeader = value; }
+		}
 
 
-	    private IRelayServerConnection _connection;
+		private IRelayServerConnection _connection;
 		private bool _disposed;
 
 		/// <summary>
@@ -43,34 +47,67 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="maxRetries">An <see cref="int"/> defining how much retries the connector should do for posting the answer back to the relay server.</param>
 		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 10, int maxRetries = 3)
 		{
-		    var factory = _container.Resolve<IRelayServerConnectionFactory>();
+			var factory = _container.Resolve<IRelayServerConnectionFactory>();
 			_connection = factory.Create(userName, password, relayServer, requestTimeout, maxRetries);
 		}
-        
-	    /// <summary>
-        /// Registers a On-Premise Target.
+
+		/// <summary>
+		/// Registers a on-premise web target.
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
-        /// <param name="uri">An <see cref="Uri"/> containing the On-Premise Target's base url. If this value is null, the registration will be removed</param>
+		/// <param name="uri">An <see cref="Uri"/> containing the on-premise target's base url.</param>
 		public void RegisterOnPremiseTarget(string key, Uri uri)
 		{
 			CheckDisposed();
-
 			_connection.RegisterOnPremiseTarget(key, uri);
 		}
-        
-        /// <summary>
-        /// Removes a On-Premise Target.
+
+		/// <summary>
+		/// Registers a on-premise in-proc target.
+		/// </summary>
+		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
+		/// <param name="handlerType">A <see cref="Type"/> implementing <see cref="IOnPremiseInProcHandler"/>.</param>
+		public void RegisterOnPremiseTarget(string key, Type handlerType)
+		{
+			CheckDisposed();
+			_connection.RegisterOnPremiseTarget(key, handlerType);
+		}
+
+		/// <summary>
+		/// Registers a on-premise in-proc target.
+		/// </summary>
+		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
+		/// <param name="handlerFactory">Creates handler.</param>
+		public void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory)
+		{
+			CheckDisposed();
+			_connection.RegisterOnPremiseTarget(key, handlerFactory);
+		}
+
+		/// <summary>
+		/// Registers a on-premise in-proc target.
+		/// </summary>
+		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
+		/// <typeparam name="T">The type of the handler.</typeparam>
+		public void RegisterOnPremiseTarget<T>(string key)
+			where T : IOnPremiseInProcHandler, new()
+		{
+			CheckDisposed();
+			_connection.RegisterOnPremiseTarget<T>(key);
+		}
+
+		/// <summary>
+		/// Removes a on-premise target.
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
 		public void RemoveOnPremiseTarget(string key)
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget(key, null);
+			_connection.RemoveOnPremiseTarget(key);
 		}
 
-        /// <summary>
-        /// Returns the list of configured target keys
+		/// <summary>
+		/// Returns the list of configured target keys
 		/// </summary>
 		public List<string> GetOnPremiseTargetKeys()
 		{
@@ -84,7 +121,6 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public async Task Connect()
 		{
 			CheckDisposed();
-
 			await _connection.Connect();
 		}
 
@@ -94,8 +130,104 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public void Disconnect()
 		{
 			CheckDisposed();
-
 			_connection.Disconnect();
+		}
+
+		/// <summary>
+		/// Makes a GET request to relay server using the current authentication token.
+		/// </summary>
+		/// <param name="linkName">The name of the relay link.</param>
+		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Http response</returns>
+		public Task<HttpResponseMessage> GetViaRelay(string linkName, string relativeUrl, CancellationToken cancellationToken)
+		{
+			return GetViaRelay(linkName, relativeUrl, null, cancellationToken);
+		}
+
+		/// <summary>
+		/// Makes a GET request to relay server using the current authentication token.
+		/// </summary>
+		/// <param name="linkName">The name of the relay link.</param>
+		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="setHeaders">Callback for setting headers.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Http response</returns>
+		public Task<HttpResponseMessage> GetViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken)
+		{
+			if (linkName == null)
+				throw new ArgumentNullException(nameof(linkName));
+			if (relativeUrl == null)
+				throw new ArgumentNullException(nameof(relativeUrl));
+
+			CheckDisposed();
+
+			if (!relativeUrl.StartsWith("/"))
+				relativeUrl = "/" + relativeUrl;
+
+			return _connection.GetToRelay("relay/" + linkName + relativeUrl, setHeaders, cancellationToken);
+		}
+
+		/// <summary>
+		/// Makes a POST request to relay server using the current authentication token.
+		/// </summary>
+		/// <param name="linkName">The name of the relay link.</param>
+		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Http response</returns>
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, CancellationToken cancellationToken)
+		{
+			return PostViaRelay(linkName, relativeUrl, null, null, cancellationToken);
+		}
+
+		/// <summary>
+		/// Makes a POST request to relay server using the current authentication token.
+		/// </summary>
+		/// <param name="linkName">The name of the relay link.</param>
+		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="setHeaders">Callback for setting headers.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Http response</returns>
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken)
+		{
+			return PostViaRelay(linkName, relativeUrl, setHeaders, null, cancellationToken);
+		}
+
+		/// <summary>
+		/// Makes a POST request to relay server using the current authentication token.
+		/// </summary>
+		/// <param name="linkName">The name of the relay link.</param>
+		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Http response</returns>
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Func<HttpContent> content, CancellationToken cancellationToken)
+		{
+			return PostViaRelay(linkName, relativeUrl, null, content, cancellationToken);
+		}
+
+		/// <summary>
+		/// Makes a POST request to relay server using the current authentication token.
+		/// </summary>
+		/// <param name="linkName">The name of the relay link.</param>
+		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="setHeaders">Callback for setting headers.</param>
+		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Http response</returns>
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken)
+		{
+			if (linkName == null)
+				throw new ArgumentNullException(nameof(linkName));
+			if (relativeUrl == null)
+				throw new ArgumentNullException(nameof(relativeUrl));
+
+			CheckDisposed();
+
+			if (!relativeUrl.StartsWith("/"))
+				relativeUrl = "/" + relativeUrl;
+
+			return _connection.PostToRelay("relay/" + linkName + relativeUrl, setHeaders, content, cancellationToken);
 		}
 
 		private void CheckDisposed()

@@ -28,11 +28,11 @@ namespace Thinktecture.Relay.Server.Http
 			};
 		}
 
-		public HttpResponseMessage BuildFrom(IOnPremiseTargetReponse onPremiseTargetReponse, Link link)
+		public HttpResponseMessage BuildFrom(IOnPremiseTargetResponse onPremiseTargetResponse, Link link)
 		{
 			var response = new HttpResponseMessage();
 
-			if (onPremiseTargetReponse == null)
+			if (onPremiseTargetResponse == null)
 			{
 				response.StatusCode = HttpStatusCode.GatewayTimeout;
 				response.Content = new ByteArrayContent(new byte[] { });
@@ -40,28 +40,26 @@ namespace Thinktecture.Relay.Server.Http
 			}
 			else
 			{
-				response.StatusCode = onPremiseTargetReponse.StatusCode;
-				response.Content = GetResponseContentForOnPremiseTargetResponse(onPremiseTargetReponse, link);
+				response.StatusCode = onPremiseTargetResponse.StatusCode;
+				response.Content = GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link);
 			}
 
 			return response;
 		}
 
-		internal HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseTargetReponse onPremiseTargetReponse, Link link)
+		internal HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseTargetResponse onPremiseTargetResponse, Link link)
 		{
-			if (onPremiseTargetReponse == null)
-			{
-                throw new ArgumentNullException("onPremiseTargetReponse", "On-Premise Target response must not be null here.");
-			}
+			if (onPremiseTargetResponse == null)
+				throw new ArgumentNullException(nameof(onPremiseTargetResponse), "On-premise target response cannot be null");
 
-			if (onPremiseTargetReponse.StatusCode == HttpStatusCode.InternalServerError &&
+			if (onPremiseTargetResponse.StatusCode == HttpStatusCode.InternalServerError &&
 				!link.ForwardOnPremiseTargetErrorResponse)
 			{
 				return null;
 			}
 
-			var content = new ByteArrayContent(onPremiseTargetReponse.Body ?? new byte[] { });
-			SetHttpHeaders(onPremiseTargetReponse.HttpHeaders, content);
+			var content = new ByteArrayContent(onPremiseTargetResponse.Body ?? new byte[] { });
+			SetHttpHeaders(onPremiseTargetResponse.HttpHeaders, content);
 
 			return content;
 		}

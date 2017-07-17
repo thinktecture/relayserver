@@ -2,3 +2,4 @@
 # [Architektur des RelayServers](2-architektur.md)
 # [Installation des RelayServers](3-installation.md)
 # [RelayServer Management Web](4-relayserver-management-web.md)
+# [Entwicklungs-Setup](5-entwicklungssetup.md)

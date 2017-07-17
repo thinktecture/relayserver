@@ -7,6 +7,6 @@ namespace Thinktecture.Relay.Server.Diagnostics
 {
 	public interface IRequestLogger
 	{
-		void LogRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetReponse onPremiseTargetReponse, HttpStatusCode responseStatusCode, Guid linkId, string originId, string relayPath);
+		void LogRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpStatusCode responseStatusCode, Guid linkId, string originId, string relayPath);
 	}
 }

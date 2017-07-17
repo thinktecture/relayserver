@@ -14,29 +14,29 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
     public class LinkController : ApiController
     {
         private readonly ILinkRepository _linkRepository;
-	    private readonly IBackendCommunication _backendCommunication;
-	    private readonly IRequestLogger _requestLogger;
+        private readonly IBackendCommunication _backendCommunication;
+        private readonly IRequestLogger _requestLogger;
 
-	    public LinkController(ILinkRepository linkRepository, IBackendCommunication backendCommunication, IRequestLogger requestLogger)
+        public LinkController(ILinkRepository linkRepository, IBackendCommunication backendCommunication, IRequestLogger requestLogger)
         {
-	        _linkRepository = linkRepository;
-	        _backendCommunication = backendCommunication;
-		    _requestLogger = requestLogger;
+            _linkRepository = linkRepository;
+            _backendCommunication = backendCommunication;
+            _requestLogger = requestLogger;
         }
 
-	    [HttpGet]
+        [HttpGet]
         [ActionName("links")]
         public IHttpActionResult GetLinks([FromUri] PageRequest paging)
         {
-	        var result = _linkRepository.GetLinks(paging);
+            var result = _linkRepository.GetLinks(paging);
 
-	        foreach (var item in result.Items)
-	        {
+            foreach (var item in result.Items)
+            {
                 item.Connections = _backendCommunication.GetConnections(item.Id.ToString());
-	            item.IsConnected = item.Connections.Count > 0;
-	        }
+                item.IsConnected = item.Connections.Count > 0;
+            }
 
-	        return Ok(result);
+            return Ok(result);
         }
 
         [HttpGet]
@@ -80,17 +80,17 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
             return result ? (IHttpActionResult) Ok() : BadRequest();
         }
 
-	    [HttpGet]
-	    [ActionName("userNameAvailability")]
-	    public IHttpActionResult GetUserNameAvailability(string userName)
-	    {
-		    if (_linkRepository.IsUserNameAvailable(userName))
-		    {
-			    return Ok();
-		    }
+        [HttpGet]
+        [ActionName("userNameAvailability")]
+        public IHttpActionResult GetUserNameAvailability(string userName)
+        {
+            if (_linkRepository.IsUserNameAvailable(userName))
+            {
+                return Ok();
+            }
 
-		    return Conflict();
-	    }
+            return Conflict();
+        }
 
         [HttpDelete]
         [ActionName("link")]
@@ -124,28 +124,28 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
             return result ? (IHttpActionResult) Ok() : BadRequest();
         }
 
-	    [HttpGet]
-	    [ActionName("ping")]
-	    public async Task<IHttpActionResult> PingAsync(Guid id)
-	    {
-		    var requestId = Guid.NewGuid().ToString();
-		    var onPremiseConnectorRequest = new OnPremiseConnectorRequest
-		    {
-			    HttpMethod = "PING",
-			    Url = "",
-			    RequestStarted = DateTime.UtcNow,
-			    OriginId = _backendCommunication.OriginId,
-			    RequestId = requestId
-			};
+        [HttpGet]
+        [ActionName("ping")]
+        public async Task<IHttpActionResult> PingAsync(Guid id)
+        {
+            var requestId = Guid.NewGuid().ToString();
+            var request = new OnPremiseConnectorRequest
+            {
+                HttpMethod = "PING",
+                Url = String.Empty,
+                RequestStarted = DateTime.UtcNow,
+                OriginId = _backendCommunication.OriginId,
+                RequestId = requestId
+            };
 
-			await _backendCommunication.SendOnPremiseConnectorRequest(id.ToString(), onPremiseConnectorRequest);
+            await _backendCommunication.SendOnPremiseConnectorRequest(id.ToString(), request);
 
-			var onPremiseTargetReponse = await _backendCommunication.GetResponseAsync(requestId);
-			onPremiseConnectorRequest.RequestFinished = DateTime.UtcNow;
+            var response = await _backendCommunication.GetResponseAsync(requestId);
+            request.RequestFinished = DateTime.UtcNow;
 
-			_requestLogger.LogRequest(onPremiseConnectorRequest, onPremiseTargetReponse, HttpStatusCode.OK, id, _backendCommunication.OriginId, "invalid/Ping.local/");
+            _requestLogger.LogRequest(request, response, HttpStatusCode.OK, id, _backendCommunication.OriginId, "DEBUG/PING/");
 
-		    return Ok();
-	    }
+            return Ok();
+        }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
-using NLog.Interface;
+using NLog;
+using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
-using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
@@ -19,110 +18,141 @@ namespace Thinktecture.Relay.Server.SignalR
 
         public OnPremisesConnection(IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILogger logger)
         {
+            if (backendCommunication == null)
+                throw new ArgumentNullException(nameof(backendCommunication));
+            if (temporaryStore == null)
+                throw new ArgumentNullException(nameof(temporaryStore));
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
             _backendCommunication = backendCommunication;
             _temporaryStore = temporaryStore;
             _logger = logger;
-
         }
 
         protected override bool AuthorizeRequest(IRequest request)
         {
-            if (request.User != null)
-            {
-                return request.User.Identity.IsAuthenticated;
-            }
-            return false;
+            return request.User?.Identity.IsAuthenticated ?? false;
         }
 
         protected override Task OnConnected(IRequest request, string connectionId)
         {
-            string onPremiseId = GetOnPremiseIdFromRequest(request);
+            var onPremiseClaims = GetOnPremiseClaims(request);
+            _logger.Debug("On-premise connected. Connection Id: {0}, OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-            _logger.Debug("OnPremise {0} connected", onPremiseId);
-
-            RegisterOnPremise(request, connectionId, onPremiseId);
+            RegisterOnPremise(request, connectionId, onPremiseClaims);
 
             return base.OnConnected(request, connectionId);
         }
 
-        private async Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest onPremiseConnectorRequest)
-        {
-            _logger.Debug("Forwarding client request to connection '{0}'", connectionId);
-            _logger.Trace("Forwarding client request to connection '{0}'. request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
-                connectionId, onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.HttpMethod, onPremiseConnectorRequest.Url, onPremiseConnectorRequest.OriginId, onPremiseConnectorRequest.Body != null ? onPremiseConnectorRequest.Body.Length : 0);
-
-            var onPremiseTargetRequest = new OnPremiseTargetRequest()
-            {
-                RequestId = onPremiseConnectorRequest.RequestId,
-                HttpMethod = onPremiseConnectorRequest.HttpMethod,
-                Url = onPremiseConnectorRequest.Url,
-                HttpHeaders = onPremiseConnectorRequest.HttpHeaders,
-                OriginId = onPremiseConnectorRequest.OriginId
-            };
-
-            if (onPremiseConnectorRequest.Body != null)
-            {
-                if (onPremiseConnectorRequest.Body.Length > 0x20000) // 128k
-                {
-                    _temporaryStore.Save(onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.Body);
-                    onPremiseTargetRequest.Body = String.Empty;
-                }
-                else
-                {
-                    onPremiseTargetRequest.Body = Convert.ToBase64String(onPremiseConnectorRequest.Body);
-                }
-            }
-
-            await Connection.Send(connectionId, onPremiseTargetRequest);
-        }
-
         protected override Task OnReconnected(IRequest request, string connectionId)
         {
-            var onPremiseId = GetOnPremiseIdFromRequest(request);
+            var onPremiseClaims = GetOnPremiseClaims(request);
+            _logger.Debug("On-premise reconnected. Connection Id: {0}, OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-            _logger.Debug("OnPremise {0} reconnected.", onPremiseId);
-
-            RegisterOnPremise(request, connectionId, onPremiseId);
+            RegisterOnPremise(request, connectionId, onPremiseClaims);
 
             return base.OnReconnected(request, connectionId);
         }
 
-        private static string GetOnPremiseIdFromRequest(IRequest request)
-        {
-            string onPremiseId = ((ClaimsPrincipal)request.User).Claims.Single(c => c.Type == "OnPremiseId").Value;
-            return onPremiseId;
-        }
-
-        private void RegisterOnPremise(IRequest request, string connectionId, string onPremiseId)
-        {
-            _backendCommunication.RegisterOnPremise(new RegistrationInformation()
-            {
-                ConnectionId = connectionId,
-                OnPremiseId = onPremiseId,
-                RequestAction = async cr => await ForwardClientRequest(connectionId, cr),
-                IpAddress = GetIpAddressFromOwinEnvironment(request.Environment)
-            });
-        }
-
         protected override Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
         {
-            _logger.Debug("OnPremise {0} disconnected - V2.", connectionId);
+            var onPremiseClaims = GetOnPremiseClaims(request);
+            _logger.Debug("On-premise disconnected. Connection Id: {0}, OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+
             _backendCommunication.UnregisterOnPremise(connectionId);
 
             return base.OnDisconnected(request, connectionId, stopCalled);
         }
 
+        private async Task ForwardClientRequest(string connectionId, OnPremiseTargetRequest request)
+        {
+            _logger.Debug("Forwarding client request to connection {0}", connectionId);
+            _logger.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
+                connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.Body?.Length ?? 0);
+
+            if (request.Body != null)
+            {
+                if (request.Body.Length > 0x20000) // 128k
+                {
+                    _temporaryStore.Save(request.RequestId, request.Body);
+                    request.Body = new byte[0];
+                }
+            }
+
+            await Connection.Send(connectionId, request);
+        }
+
+        protected override Task OnReceived(IRequest request, string connectionId, string data)
+        {
+            _logger.Debug("Acknowledge from connection {0} for {1}", connectionId, data);
+
+            _backendCommunication.AcknowledgeOnPremiseConnectorRequest(connectionId, data);
+
+            return base.OnReceived(request, connectionId, data);
+        }
+
+        private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
+        {
+            var claims = ((ClaimsPrincipal) request.User).Claims;
+
+            return new OnPremiseClaims(
+                claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
+                claims.Single(c => c.Type == "OnPremiseId").Value,
+                claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
+            );
+        }
+
+        private void RegisterOnPremise(IRequest request, string connectionId, OnPremiseClaims claims)
+        {
+            _backendCommunication.RegisterOnPremise(new RegistrationInformation()
+            {
+                ConnectionId = connectionId,
+                OnPremiseId = claims.OnPremiseId,
+                UserName = claims.UserName,
+                Role = claims.Role,
+                RequestAction = cr => ForwardClientRequest(connectionId, (OnPremiseTargetRequest)cr),
+                IpAddress = GetIpAddressFromOwinEnvironment(request.Environment),
+                ConnectorVersion = GetConnectorVersionFromRequest(request),
+            });
+        }
+
         // Adopted from http://stackoverflow.com/questions/11044361/signalr-get-caller-ip-address
         private string GetIpAddressFromOwinEnvironment(IDictionary<string, object> environment)
         {
-            var ipAddress = Get<string>(environment, "server.RemoteIpAddress");
-            return ipAddress;
+            return Get<string>(environment, "server.RemoteIpAddress");
+        }
+
+        private int GetConnectorVersionFromRequest(IRequest request)
+        {
+            string queryArgument = request.QueryString["version"];
+
+            if (!String.IsNullOrWhiteSpace(queryArgument))
+            {
+                return int.Parse(queryArgument);
+            }
+
+            return 0;
         }
 
         private static T Get<T>(IDictionary<string, object> env, string key)
         {
             object value;
-            return env.TryGetValue(key, out value) ? (T)value : default(T);
+            return env.TryGetValue(key, out value) ? (T) value : default(T);
+        }
+
+        private class OnPremiseClaims
+        {
+            public string UserName { get; }
+            public string OnPremiseId { get; }
+            public string Role { get; }
+
+            public OnPremiseClaims(string userName, string onPremiseId, string role)
+            {
+                UserName = userName;
+                OnPremiseId = onPremiseId;
+                Role = role;
+            }
         }
     }
 }

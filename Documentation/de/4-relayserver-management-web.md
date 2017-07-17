@@ -63,7 +63,7 @@ In der Tabelle werden die folgenden Informationen bereitgestellt:
 | Name | URL-fähiger Kurzname des Links (daher keine Sonderzeichen und keine Leerzeichen zulässig) |
 | ID | Vom RelayServer für diesen Link automatisch generierte GUID |
 | Creation Date | Anlagedatum des Links |
-| Connection state | Grün: On-Premises Connector ist verbundenRot: On-Premises Connector ist nicht verbunden |
+| Connection state | Grün: On-Premises Connector ist verbunden Rot: On-Premises Connector ist nicht verbunden |
 
 Über die Suchbox ist eine schnelle Suche nach einem Link möglich. Die Suche inkludiert die Felder Description, Name und ID.
 

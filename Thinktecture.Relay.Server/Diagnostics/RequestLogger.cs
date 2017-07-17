@@ -19,14 +19,14 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			_pathSplitter = pathSplitter;
 		}
 
-		public void LogRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetReponse onPremiseTargetReponse, HttpStatusCode responseStatusCode, Guid linkId, string originId, string relayPath)
+		public void LogRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpStatusCode responseStatusCode, Guid linkId, string originId, string relayPath)
 		{
 			if (onPremiseConnectorRequest == null)
 			{
-				throw new ArgumentNullException("onPremiseConnectorRequest", "A client request must be set.");
+				throw new ArgumentNullException("onPremiseConnectorRequest", "A client request must be set");
 			}
 
-			var onPremiseTargetInformation = GetOnPremiseTargetInformation(onPremiseTargetReponse);
+			var onPremiseTargetInformation = GetOnPremiseTargetInformation(onPremiseTargetResponse);
 			var pathInformation = _pathSplitter.Split(relayPath);
 
 			_logRepository.LogRequest(new RequestLogEntry
@@ -52,15 +52,15 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			return content.LongLength;
 		}
 
-		internal OnPremiseTargetInformation GetOnPremiseTargetInformation(IOnPremiseTargetReponse onPremiseTargetReponse)
+		internal OnPremiseTargetInformation GetOnPremiseTargetInformation(IOnPremiseTargetResponse onPremiseTargetResponse)
 		{
 			var onPremiseTargetInformation = new OnPremiseTargetInformation();
 
-			if (onPremiseTargetReponse != null)
+			if (onPremiseTargetResponse != null)
 			{
-				onPremiseTargetInformation.OnPremiseTargetInDate = onPremiseTargetReponse.RequestStarted;
-				onPremiseTargetInformation.OnPremiseTargetOutDate = onPremiseTargetReponse.RequestFinished;
-				onPremiseTargetInformation.ContentBytesOut = GetContentByteCount(onPremiseTargetReponse.Body);
+				onPremiseTargetInformation.OnPremiseTargetInDate = onPremiseTargetResponse.RequestStarted;
+				onPremiseTargetInformation.OnPremiseTargetOutDate = onPremiseTargetResponse.RequestFinished;
+				onPremiseTargetInformation.ContentBytesOut = GetContentByteCount(onPremiseTargetResponse.Body);
 			}
 
 			return onPremiseTargetInformation;
