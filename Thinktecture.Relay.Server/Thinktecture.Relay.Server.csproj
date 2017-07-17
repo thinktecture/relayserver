@@ -303,7 +303,7 @@
     <Compile Include="SignalR\IPostDataTemporaryStore.cs" />
     <Compile Include="SignalR\OnPremisesConnection.cs" />
     <Compile Include="Security\AuthorizationServerProvider.cs" />
-    <Compile Include="SignalR\PostDataTemporaryStore.cs" />
+    <Compile Include="SignalR\InMemoryPostDataTemporaryStore.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -6,7 +6,7 @@ using NLog;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
-    internal class PostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
+    internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
     {
         private readonly ILogger _logger;
 
@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.SignalR
         private readonly ConcurrentDictionary<string, Entry> _data;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
-        public PostDataTemporaryStore(ILogger logger)
+        public InMemoryPostDataTemporaryStore(ILogger logger)
         {
             _logger = logger;
             _data = new ConcurrentDictionary<string, Entry>();
@@ -90,7 +90,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
         #region IDisposable
 
-        ~PostDataTemporaryStore()
+        ~InMemoryPostDataTemporaryStore()
         {
             GC.SuppressFinalize(this);
         }

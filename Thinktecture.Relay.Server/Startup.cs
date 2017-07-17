@@ -68,7 +68,7 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<AuthorizationServerProvider>().SingleInstance();
 			builder.RegisterType<PasswordHash>().As<IPasswordHash>();
 
-			builder.RegisterType<PostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
+			builder.RegisterType<InMemoryPostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
 			
 			builder.RegisterType<ConnectionFactory>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
