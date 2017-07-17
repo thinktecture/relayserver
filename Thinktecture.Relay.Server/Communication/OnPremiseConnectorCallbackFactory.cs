@@ -1,4 +1,4 @@
-﻿using NLog.Interface;
+﻿using NLog;
 
 namespace Thinktecture.Relay.Server.Communication
 {

@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	[TestClass]
 	public class RequestLoggerTest
 	{
-		private class OnPremiseTargetReponse : IOnPremiseTargetReponse
+		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
 		{
 			public string RequestId { get; set; }
 			public string OriginId { get; set; }
@@ -66,7 +66,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		[TestMethod]
 		public void GetOnPremiseTargetInformation_returns_date_values_from_OnPremiseTargetResult_when_content_is_null()
 		{
-			var onPremiseTargetResponse = new OnPremiseTargetReponse
+			var onPremiseTargetResponse = new OnPremiseTargetResponse
 			{
 				RequestStarted = new DateTime(2014, 1, 1),
 				RequestFinished = new DateTime(2014, 1, 2)
@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		[TestMethod]
 		public void GetOnPremiseTargetInformation_returns_values_from_OnPremiseTargetResult()
 		{
-			var onPremiseTargetResponse = new OnPremiseTargetReponse
+			var onPremiseTargetResponse = new OnPremiseTargetResponse
 			{
 				RequestStarted = new DateTime(2014, 1, 1),
 				RequestFinished = new DateTime(2014, 1, 2),
@@ -145,7 +145,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				RequestStarted = new DateTime(2014, 1, 1),
 				RequestFinished = new DateTime(2014, 1, 2)
 			};
-			var onPremiseTargetResponse = new OnPremiseTargetReponse
+			var onPremiseTargetResponse = new OnPremiseTargetResponse
 			{
 				RequestStarted = new DateTime(2014,1,3),
 				RequestFinished = new DateTime(2014,1,4),

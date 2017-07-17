@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Server.Http
 	[TestClass]
 	public class HttpResponseMessageBuilderTest
 	{
-		private class OnPremiseTargetReponse : IOnPremiseTargetReponse
+		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
 		{
 			public string RequestId { get; set; }
 			public string OriginId { get; set; }
@@ -46,7 +46,7 @@ namespace Thinktecture.Relay.Server.Http
 		public async Task GetResponseMessage_returns_an_HttpResponseMessage_when_given_OnPremiseTargetResponse_is_null()
 		{
 			IHttpResponseMessageBuilder sut = new HttpResponseMessageBuilder();
-			var onPremiseTargetRequest = new OnPremiseTargetReponse
+			var onPremiseTargetRequest = new OnPremiseTargetResponse
 			{
 				StatusCode = HttpStatusCode.NotFound,
 				Body = new byte[] { 0, 0, 0, 0 },
@@ -140,7 +140,7 @@ namespace Thinktecture.Relay.Server.Http
 		public void GetResponseContentForOnPremiseTargetResponse_does_not_disclose_content_when_InternalServerError_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_off()
 		{
 			var sut = new HttpResponseMessageBuilder();
-			var onPremiseTargetResponse = new OnPremiseTargetReponse { StatusCode = HttpStatusCode.InternalServerError };
+			var onPremiseTargetResponse = new OnPremiseTargetResponse { StatusCode = HttpStatusCode.InternalServerError };
 			var link = new Link();
 			HttpContent result;
 
@@ -153,7 +153,7 @@ namespace Thinktecture.Relay.Server.Http
 		public async Task GetResponseContentForOnPremiseTargetResponse_discloses_content_when_InternalServerError_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_on()
 		{
 			var sut = new HttpResponseMessageBuilder();
-			var onPremiseTargetResponse = new OnPremiseTargetReponse { StatusCode = HttpStatusCode.InternalServerError, Body = new byte[] { 0, 0, 0 } };
+			var onPremiseTargetResponse = new OnPremiseTargetResponse { StatusCode = HttpStatusCode.InternalServerError, Body = new byte[] { 0, 0, 0 } };
 			var link = new Link { ForwardOnPremiseTargetErrorResponse = true };
 			HttpContent result;
 
@@ -168,7 +168,7 @@ namespace Thinktecture.Relay.Server.Http
 		public async Task GetResponseContentForOnPremiseTargetResponse_sets_StatusCode_accordingly_and_discloses_content()
 		{
 			var sut = new HttpResponseMessageBuilder();
-			var onPremiseTargetResponse = new OnPremiseTargetReponse { StatusCode = HttpStatusCode.OK, Body = new byte[] { 0, 0, 0, 0 } };
+			var onPremiseTargetResponse = new OnPremiseTargetResponse { StatusCode = HttpStatusCode.OK, Body = new byte[] { 0, 0, 0, 0 } };
 			var link = new Link();
 			HttpContent result;
 

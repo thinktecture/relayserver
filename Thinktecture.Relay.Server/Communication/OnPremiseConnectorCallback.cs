@@ -5,9 +5,9 @@ namespace Thinktecture.Relay.Server.Communication
 {
 	internal class OnPremiseConnectorCallback : IOnPremiseConnectorCallback
 	{
-		public string RequestId { get; private set; }
-		public ManualResetEvent Handle { get; private set; }
-		public IOnPremiseTargetReponse Reponse { set; get; }
+		public string RequestId { get; }
+		public ManualResetEvent Handle { get; }
+		public IOnPremiseTargetResponse Response { get; set; }
 
 		public OnPremiseConnectorCallback(string requestId)
 		{

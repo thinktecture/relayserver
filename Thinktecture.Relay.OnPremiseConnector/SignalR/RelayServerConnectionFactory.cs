@@ -1,5 +1,5 @@
 ﻿using System;
-using NLog.Interface;
+using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR

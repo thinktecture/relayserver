@@ -1,5 +1,6 @@
 ﻿using System;
-using Thinktecture.Relay.Server.OnPremise;
+using System.Threading.Tasks;
+using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
 namespace Thinktecture.Relay.Server.Communication
 {
@@ -7,7 +8,10 @@ namespace Thinktecture.Relay.Server.Communication
     {
         public string ConnectionId { get; set; }
         public string OnPremiseId { get; set; }
-        public Action<IOnPremiseConnectorRequest> RequestAction { get; set; }
+        public Func<IOnPremiseTargetRequest, Task> RequestAction { get; set; }
         public string IpAddress { get; set; }
+        public string UserName { get; set; }
+        public string Role { get; set; }
+        public int ConnectorVersion { get; set; }
     }
 }

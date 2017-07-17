@@ -17,8 +17,7 @@ namespace Thinktecture.Relay.Server
             }
 
             var hostName = ConfigurationManager.AppSettings["HostName"] ?? "+";
-            var allowHttp = String.Equals(ConfigurationManager.AppSettings["UseInsecureHttp"], "true",
-                StringComparison.OrdinalIgnoreCase);
+            var allowHttp = String.Equals(ConfigurationManager.AppSettings["UseInsecureHttp"], "true", StringComparison.OrdinalIgnoreCase);
 
             HostFactory.Run(config =>
             {

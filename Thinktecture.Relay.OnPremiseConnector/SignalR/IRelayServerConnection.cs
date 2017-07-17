@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR
@@ -7,9 +10,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 	internal interface IRelayServerConnection : IDisposable
 	{
 		void RegisterOnPremiseTarget(string key, Uri baseUri);
-	    String RelayedRequestHeader { set; }
-	    Task Connect();
+		void RegisterOnPremiseTarget(string key, Type handlerType);
+		void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory);
+		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();
+		void RemoveOnPremiseTarget(string key);
+		string RelayedRequestHeader { get; set; }
+		Task Connect();
 		void Disconnect();
-	    List<string> GetOnPremiseTargetKeys();
+		List<string> GetOnPremiseTargetKeys();
+
+		Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
+		Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken);
 	}
 }

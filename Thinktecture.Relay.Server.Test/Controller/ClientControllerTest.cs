@@ -7,7 +7,7 @@ using System.Web.Http.Controllers;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NLog.Interface;
+using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.Server.Controller
 	[TestClass]
 	public class ClientControllerTest
 	{
-		private class OnPremiseTargetReponse : IOnPremiseTargetReponse
+		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
 		{
 			public string RequestId { get; set; }
 			public string OriginId { get; set; }
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			var linkFake = new Link { Id = Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda") };
 			var clientRequestFake = new OnPremiseConnectorRequest { RequestId = "239b6e03-9795-450d-bdd1-ab72900f1a98" };
-			var onPremiseTargetReponseFake = new OnPremiseTargetReponse();
+			var onPremiseTargetReponseFake = new OnPremiseTargetResponse();
 			var httpResponseMessageFake = new HttpResponseMessage { StatusCode = HttpStatusCode.Found };
 			var localConfigurationGuid = Guid.NewGuid();
 
@@ -239,7 +239,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			var linkFake = new Link { Id = Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda") };
 			var clientRequestFake = new OnPremiseConnectorRequest { RequestId = "239b6e03-9795-450d-bdd1-ab72900f1a98" };
-			var onPremiseTargetReponseFake = new OnPremiseTargetReponse();
+			var onPremiseTargetReponseFake = new OnPremiseTargetResponse();
 			var httpResponseMessageFake = new HttpResponseMessage { StatusCode = HttpStatusCode.Found };
 
 			loggerMock.Setup(l => l.Trace(It.IsAny<string>));

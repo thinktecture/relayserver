@@ -6,15 +6,16 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
 {
-	public interface IBackendCommunication : IDisposable
-	{
-		string OriginId { get; }
-		Task<IOnPremiseTargetReponse> GetResponseAsync(string requestId);
-		Task SendOnPremiseConnectorRequest(string onPremiseId, IOnPremiseConnectorRequest onPremiseConnectorRequest);
-	    void RegisterOnPremise(RegistrationInformation registrationInformation);
-		void UnregisterOnPremise(string connectionId);
-		Task SendOnPremiseTargetResponse(string originId, IOnPremiseTargetReponse reponse);
-	    bool IsRegistered(string connectionId);
-	    List<string> GetConnections(string linkId);
-	}
+    public interface IBackendCommunication
+    {
+        string OriginId { get; }
+        Task<IOnPremiseTargetResponse> GetResponseAsync(string requestId);
+        Task SendOnPremiseConnectorRequest(string onPremiseId, IOnPremiseTargetRequest onPremiseTargetRequest);
+        void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId);
+        void RegisterOnPremise(RegistrationInformation registrationInformation);
+        void UnregisterOnPremise(string connectionId);
+        Task SendOnPremiseTargetResponse(string originId, IOnPremiseTargetResponse response);
+        bool IsRegistered(string connectionId);
+        List<string> GetConnections(string linkId);
+    }
 }

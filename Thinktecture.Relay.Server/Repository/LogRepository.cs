@@ -7,39 +7,39 @@ using Thinktecture.Relay.Server.Repository.DbModels;
 
 namespace Thinktecture.Relay.Server.Repository
 {
-    public class LogRepository : ILogRepository
-    {
-        public void LogRequest(RequestLogEntry requestLogEntry)
-        {
-            using (var context = new RelayContext())
-            {
-                var link = new DbLink
-                {
-                    Id = requestLogEntry.LinkId
-                };
+	public class LogRepository : ILogRepository
+	{
+		public void LogRequest(RequestLogEntry requestLogEntry)
+		{
+			using (var context = new RelayContext())
+			{
+				var link = new DbLink
+				{
+					Id = requestLogEntry.LinkId
+				};
 
-                context.Links.Attach(link);
+				context.Links.Attach(link);
 
-                context.RequestLogEntries.Add(new DbRequestLogEntry
-                {
-                    Id = Guid.NewGuid(),
-                    ContentBytesIn = requestLogEntry.ContentBytesIn,
-                    ContentBytesOut = requestLogEntry.ContentBytesOut,
-                    OnPremiseConnectorInDate = requestLogEntry.OnPremiseConnectorInDate,
-                    OnPremiseConnectorOutDate = requestLogEntry.OnPremiseConnectorOutDate,
-                    HttpStatusCode = requestLogEntry.HttpStatusCode,
-                    OnPremiseTargetInDate = requestLogEntry.OnPremiseTargetInDate,
-                    OnPremiseTargetKey = requestLogEntry.OnPremiseTargetKey,
-                    OnPremiseTargetOutDate = requestLogEntry.OnPremiseTargetOutDate,
-                    LocalUrl = requestLogEntry.LocalUrl,
-                    OriginId = requestLogEntry.OriginId,
-                    Link = link,
-                    LinkId = requestLogEntry.LinkId
-                });
+				context.RequestLogEntries.Add(new DbRequestLogEntry
+				{
+					Id = Guid.NewGuid(),
+					ContentBytesIn = requestLogEntry.ContentBytesIn,
+					ContentBytesOut = requestLogEntry.ContentBytesOut,
+					OnPremiseConnectorInDate = requestLogEntry.OnPremiseConnectorInDate,
+					OnPremiseConnectorOutDate = requestLogEntry.OnPremiseConnectorOutDate,
+					HttpStatusCode = requestLogEntry.HttpStatusCode,
+					OnPremiseTargetInDate = requestLogEntry.OnPremiseTargetInDate,
+					OnPremiseTargetKey = requestLogEntry.OnPremiseTargetKey,
+					OnPremiseTargetOutDate = requestLogEntry.OnPremiseTargetOutDate,
+					LocalUrl = requestLogEntry.LocalUrl ?? "/",
+					OriginId = requestLogEntry.OriginId,
+					Link = link,
+					LinkId = requestLogEntry.LinkId
+				});
 
-                context.SaveChanges();
-            }
-        }
+				context.SaveChanges();
+			}
+		}
 
         public IEnumerable<RequestLogEntry> GetRecentLogEntriesForLink(Guid linkId,
             int amount)

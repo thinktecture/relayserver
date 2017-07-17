@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using NLog.Interface;
+using NLog;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
@@ -71,14 +70,14 @@ namespace Thinktecture.Relay.Server.SignalR
 
         public void Save(string requestId, byte[] data)
         {
-            _logger.Debug("Storing body for request '" + requestId + "'");
+            _logger.Debug("Storing body for request id {0}", requestId);
 
             _data[requestId] = new Entry(data);
         }
 
         public byte[] Load(string requestId)
         {
-            _logger.Debug("Loading body for request '" + requestId + "'");
+            _logger.Debug("Loading body for request id {0}", requestId);
 
             Entry entry;
             return _data.TryRemove(requestId, out entry) ? entry.Data : new byte[] { };

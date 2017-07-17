@@ -1,236 +1,274 @@
 ﻿using System;
 using System.Data.Entity;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using System.Web.Http.ExceptionHandling;
 using Autofac;
-using Autofac.Builder;
 using Autofac.Integration.SignalR;
 using Autofac.Integration.WebApi;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.FileSystems;
-using Microsoft.Owin.Host.HttpListener;
+using Microsoft.Owin.Security.DataHandler;
+using Microsoft.Owin.Security.Jwt;
 using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
 using NLog;
-using NLog.Interface;
 using Owin;
+using RabbitMQ.Client;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Communication.RabbitMq;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.Controller.ManagementWeb;
 using Thinktecture.Relay.Server.Diagnostics;
+using Thinktecture.Relay.Server.Filters;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
+using Thinktecture.Relay.Server.Logging;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
+using ConnectionConfiguration = Microsoft.AspNet.SignalR.ConnectionConfiguration;
+using IContainer = Autofac.IContainer;
 
 namespace Thinktecture.Relay.Server
 {
-    internal class Startup
-    {
-        public void Configuration(IAppBuilder app)
-        {
-            Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
+	internal class Startup
+	{
+		public void Configuration(IAppBuilder app)
+		{
+			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
 
-            var container = RegisterServices();
-            container.Resolve<IBackendCommunication>(); // ensure that the BUS to rabbitMQ starts up before accepting connections
-            app.UseAutofacMiddleware(container);
+			var container = RegisterServices();
+			container.Resolve<IBackendCommunication>(); // ensure that the BUS to rabbitMQ starts up before accepting connections
+			app.UseAutofacMiddleware(container);
 
-            app.UseCors(CorsOptions.AllowAll);
-            
-            UseOAuthSecurity(app, container);
+			app.UseCors(CorsOptions.AllowAll);
 
-            MapSignalR(app, container);
+			UseOAuthSecurity(app, container);
 
-            UseWebApi(app, container);
+			MapSignalR(app, container);
 
-            UseFileServer(app, container);
-        }
+			UseWebApi(app, container);
 
-        private static IContainer RegisterServices()
-        {
-            var builder = new ContainerBuilder();
+			UseFileServer(app, container);
+		}
 
-            builder.RegisterType<OnPremisesConnection>().ExternallyOwned();
-            builder.RegisterType<AuthorizationServerProvider>().SingleInstance();
-            builder.RegisterType<PasswordHash>().As<IPasswordHash>();
+		private static IContainer RegisterServices()
+		{
+			var builder = new ContainerBuilder();
 
-            builder.RegisterType<PostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
+			builder.RegisterType<OnPremisesConnection>().ExternallyOwned();
+			builder.RegisterType<AuthorizationServerProvider>().SingleInstance();
+			builder.RegisterType<PasswordHash>().As<IPasswordHash>();
 
-            builder.RegisterType<RabbitMqBusFactory>().As<IRabbitMqBusFactory>().SingleInstance();
-            builder.RegisterType<RabbitMqBackendCommunication>().As<IBackendCommunication>().SingleInstance();
+			builder.RegisterType<PostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
+			
+			builder.RegisterType<ConnectionFactory>().AsImplementedInterfaces().SingleInstance();
+			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
+			builder.Register(ctx => ctx.Resolve<IRabbitMqFactory>().CreateConnection()).AsImplementedInterfaces().SingleInstance();
+			builder.RegisterType<RabbitMqMessageDispatcher>().AsImplementedInterfaces().SingleInstance();
+			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance();
 
-            builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
-            builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
+			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
+			builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
 
-            builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
-            builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
-            builder.RegisterType<LogRepository>().As<ILogRepository>().SingleInstance();
+			builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
+			builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
+			builder.RegisterType<LogRepository>().As<ILogRepository>().SingleInstance();
 			builder.RegisterType<TraceRepository>().As<ITraceRepository>().SingleInstance();
 
-	        builder.RegisterType<RequestLogger>().As<IRequestLogger>().SingleInstance();
-	        builder.RegisterType<TraceManager>().As<ITraceManager>().SingleInstance();
-	        builder.RegisterType<TraceFileWriter>().As<ITraceFileWriter>().SingleInstance();
-            builder.RegisterType<TraceFileReader>().As<ITraceFileReader>().SingleInstance();
-            builder.RegisterType<TraceTransformation>().As<ITraceTransformation>().SingleInstance();
+			builder.RegisterType<RequestLogger>().As<IRequestLogger>().SingleInstance();
+			builder.RegisterType<TraceManager>().As<ITraceManager>().SingleInstance();
+			builder.RegisterType<TraceFileWriter>().As<ITraceFileWriter>().SingleInstance();
+			builder.RegisterType<TraceFileReader>().As<ITraceFileReader>().SingleInstance();
+			builder.RegisterType<TraceTransformation>().As<ITraceTransformation>().SingleInstance();
 
-	        builder.RegisterType<HttpResponseMessageBuilder>().As<IHttpResponseMessageBuilder>();
-	        builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
-	        builder.RegisterType<PathSplitter>().As<IPathSplitter>();
+			builder.RegisterType<HttpResponseMessageBuilder>().As<IHttpResponseMessageBuilder>();
+			builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
+			builder.RegisterType<PathSplitter>().As<IPathSplitter>();
 
-            builder.Register(context => new LoggerAdapter(LogManager.GetLogger("Server"))).As<ILogger>().SingleInstance();
+			builder.Register(context => LogManager.GetLogger("Server")).As<ILogger>().SingleInstance();
 
-            var container = builder.Build();
+			var container = builder.Build();
 
-            RegisterApiControllers(container);
+			RegisterApiControllers(container);
 
-            return container;
-        }
+			return container;
+		}
 
-        private static void RegisterApiControllers(IContainer container)
-        {
-            var configuration = container.Resolve<IConfiguration>();
+		private static void RegisterApiControllers(IContainer container)
+		{
+			var configuration = container.Resolve<IConfiguration>();
 
-            var builder = new ContainerBuilder();
+			var builder = new ContainerBuilder();
 
-            if (configuration.EnableManagementWeb)
-            {
-                builder.RegisterModule<ManagementWebModule>();
-            }
+			if (configuration.EnableManagementWeb)
+			{
+				builder.RegisterModule<ManagementWebModule>();
+			}
 
-            if (configuration.EnableRelaying)
-            {
-                builder.RegisterModule<RelayingModule>();
-            }
+			if (configuration.EnableRelaying)
+			{
+				builder.RegisterModule<RelayingModule>();
+			}
 
-            if (configuration.EnableOnPremiseConnections)
-            {
-                builder.RegisterModule<OnPremiseConnectionsModule>();
-            }
+			if (configuration.EnableOnPremiseConnections)
+			{
+				builder.RegisterModule<OnPremiseConnectionsModule>();
+			}
 
-            builder.Update(container);
-        }
+			builder.Update(container);
+		}
 
-        private static void UseOAuthSecurity(IAppBuilder app, ILifetimeScope container)
-        {
-            app.UseOAuthAuthorizationServer(new OAuthAuthorizationServerOptions
-            {
-                AllowInsecureHttp = true,
-                TokenEndpointPath = new PathString("/token"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
-                Provider = container.Resolve<AuthorizationServerProvider>()
-            });
+		private static void UseOAuthSecurity(IAppBuilder app, ILifetimeScope container)
+		{
+			var serverOptions = new OAuthAuthorizationServerOptions
+			{
+				AllowInsecureHttp = true,
+				TokenEndpointPath = new PathString("/token"),
+				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
+				Provider = container.Resolve<AuthorizationServerProvider>()
+			};
 
-            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
-        }
+			var sharedSecret = System.Configuration.ConfigurationManager.AppSettings["OAuthSharedSecret"];
 
-        private static void MapSignalR(IAppBuilder app, ILifetimeScope container)
-        {
-            /*
-            foreach (var key in app.Properties.Keys)
-            {
-                Console.WriteLine("Key: {0}", key);
-            }
-            OwinHttpListener listener = (OwinHttpListener)app.Properties["Microsoft.Owin.Host.HttpListener.OwinHttpListener"];
-            int maxPending;
-            int maxAccepts;
-            if (listener != null)
-            {
-                listener.GetRequestProcessingLimits(out maxAccepts, out maxPending);
-                Console.WriteLine("Limits: a: {0}, p:{1}", maxAccepts, maxPending);
-                listener.SetRequestQueueLimit(5000);
-                listener.SetRequestProcessingLimits(1000, maxPending);
-                listener.GetRequestProcessingLimits(out maxAccepts, out maxPending);
-                Console.WriteLine("Limits: a: {0}, p:{1}", maxAccepts, maxPending);
-            }
-            else
-            {
-                Console.WriteLine("No Owin listener found");
-            }
-            */
-            var config = container.Resolve<IConfiguration>();
+			if (!String.IsNullOrWhiteSpace(sharedSecret))
+			{
+				UseSharedSecret(app, sharedSecret, serverOptions);
+				return;
+			}
 
-            if (!config.EnableOnPremiseConnections)
-            {
-                return;
-            }
+			var certBase64 = System.Configuration.ConfigurationManager.AppSettings["OAuthCertificate"];
+			var authOptions = new OAuthBearerAuthenticationOptions();
 
-            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(config.ConnectionTimeout);
-            GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(config.DisconnectTimeout);
+			if (!String.IsNullOrWhiteSpace(certBase64))
+			{
+				var certRaw = Convert.FromBase64String(certBase64);
+				var oauthCert = new X509Certificate2(certRaw);
 
-            app.MapSignalR<OnPremisesConnection>("/signalr", new ConnectionConfiguration
-            {
-                Resolver = new AutofacDependencyResolver(container)
-            });
-        }
+				serverOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(oauthCert));
+				authOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(oauthCert));
+			}
 
-        private static void UseWebApi(IAppBuilder app, ILifetimeScope container)
-        {
-            var configuration = container.Resolve<IConfiguration>();
-            var logger = container.Resolve<ILogger>();
+			app.UseOAuthAuthorizationServer(serverOptions);
+			app.UseOAuthBearerAuthentication(authOptions);
+		}
 
-            var httpConfig = new HttpConfiguration
-            {
-                IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always,
-                DependencyResolver = new AutofacWebApiDependencyResolver(container)
-            };
+		private static void UseSharedSecret(IAppBuilder app, string sharedSecret, OAuthAuthorizationServerOptions serverOptions)
+		{
+			var issuer = "http://thinktecture.com/relayserver/sts";
+			var audience = "http://thinktecture.com/relayserver/consumers";
+			var key = Convert.FromBase64String(sharedSecret);
 
-            httpConfig.EnableCors(new EnableCorsAttribute("*", "*", "*"));
+			serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
 
-            httpConfig.SuppressDefaultHostAuthentication();
-            httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
+			app.UseOAuthAuthorizationServer(serverOptions);
+			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
+			{
+				AllowedAudiences = new[] {audience},
+				IssuerSecurityTokenProviders = new[] {new SymmetricKeyIssuerSecurityTokenProvider(issuer, key)}
+			});
+		}
 
-            if (configuration.EnableRelaying) {  
-                logger.Info("Relaying enabled");
-                httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
-            }
+		private static void MapSignalR(IAppBuilder app, ILifetimeScope container)
+		{
+			var config = container.Resolve<IConfiguration>();
 
-            if (configuration.EnableOnPremiseConnections)
-            {
-                logger.Info("OnPremise Connections enabled ");
-                httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
-                httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
-            }
+			if (!config.EnableOnPremiseConnections)
+			{
+				return;
+			}
 
-            if (configuration.EnableManagementWeb) {
-                logger.Info("Management Web enabled");
-                httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
-            }
+			GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(config.ConnectionTimeout);
+			GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(config.DisconnectTimeout);
+		    GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
 
-            httpConfig.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+			app.MapSignalR<OnPremisesConnection>("/signalr", new ConnectionConfiguration
+			{
+				Resolver = new AutofacDependencyResolver(container)
+			});
+		}
 
-            app.UseWebApi(httpConfig);
-        }
+		private static void UseWebApi(IAppBuilder app, ILifetimeScope container)
+		{
+			var configuration = container.Resolve<IConfiguration>();
+			var logger = container.Resolve<ILogger>();
 
-        private static void UseFileServer(IAppBuilder app, ILifetimeScope container)
-        {
-            var configuration = container.Resolve<IConfiguration>();
+			var httpConfig = new HttpConfiguration
+			{
+				IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always,
+				DependencyResolver = new AutofacWebApiDependencyResolver(container)
+			};
 
-            if (!configuration.EnableManagementWeb) { 
-                return;
-            }
+			httpConfig.EnableCors(new EnableCorsAttribute("*", "*", "*"));
 
-            try
-            {
-                var options = new FileServerOptions()
-                {
-                    FileSystem = new PhysicalFileSystem("ManagementWeb"),
-                    RequestPath = new PathString("/managementweb"),
-                };
-                options.DefaultFilesOptions.DefaultFileNames.Add("index.html");
+			httpConfig.SuppressDefaultHostAuthentication();
 
-                app.UseFileServer(options);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                // no admin web deployed - catch silently
-            }
-        }
-    }
+			var enableNLogTraceWriter = StringComparer.OrdinalIgnoreCase.Equals(System.Configuration.ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true");
+
+			if (enableNLogTraceWriter)
+				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(logger, new TraceLevelConverter()));
+
+			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(logger));
+			httpConfig.Filters.Add(new NLogActionFilter(logger));
+			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
+
+			if (configuration.EnableRelaying)
+			{
+				logger.Info("Relaying enabled");
+				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new {controller = "Client", action = "Relay"});
+			}
+
+			if (configuration.EnableOnPremiseConnections)
+			{
+				logger.Info("On-premise connections enabled");
+				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new {controller = "Response", action = "Forward"});
+				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new {controller = "Request", action = "Get"});
+			}
+
+			if (configuration.EnableManagementWeb)
+			{
+				logger.Info("Management web enabled");
+				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
+			}
+
+			httpConfig.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+			app.UseWebApi(httpConfig);
+		}
+
+		private static void UseFileServer(IAppBuilder app, ILifetimeScope container)
+		{
+			var configuration = container.Resolve<IConfiguration>();
+			var logger = container.Resolve<ILogger>();
+
+			if (!configuration.EnableManagementWeb)
+			{
+				return;
+			}
+
+			try
+			{
+				var options = new FileServerOptions()
+				{
+					FileSystem = new PhysicalFileSystem(configuration.ManagementWebLocation),
+					RequestPath = new PathString("/managementweb"),
+				};
+				options.DefaultFilesOptions.DefaultFileNames.Add("index.html");
+
+				app.UseFileServer(options);
+			}
+			catch (DirectoryNotFoundException)
+			{
+				// no admin web deployed - catch silently, but display info for the user
+				logger.Info("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
+			}
+		}
+	}
 }

@@ -36,3 +36,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.3.0")]
 
 [assembly: InternalsVisibleTo("Thinktecture.Relay.Server")]
+[assembly: InternalsVisibleTo("Thinktecture.Relay.Server.Test")]

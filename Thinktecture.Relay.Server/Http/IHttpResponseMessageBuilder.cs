@@ -6,6 +6,6 @@ namespace Thinktecture.Relay.Server.Http
 {
 	public interface IHttpResponseMessageBuilder
 	{
-		HttpResponseMessage BuildFrom(IOnPremiseTargetReponse onPremiseTargetReponse, Link link);
+		HttpResponseMessage BuildFrom(IOnPremiseTargetResponse onPremiseTargetResponse, Link link);
 	}
 }
