@@ -2,6 +2,7 @@
 using System.Data.Entity;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Web.Http.ExceptionHandling;
@@ -155,6 +156,19 @@ namespace Thinktecture.Relay.Server
 				serverOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(oauthCert));
 				authOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(oauthCert));
 			}
+
+			authOptions.Provider = new OAuthBearerAuthenticationProvider()
+			{
+				OnApplyChallenge = context =>
+				{
+					// Workaround: Keep an already set WWW-Authenticate header (otherwise OWIN would add its challenge). 
+					if (!context.Response.Headers.ContainsKey("WWW-Authenticate"))
+					{
+						context.OwinContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
+					}
+					return Task.FromResult(0);
+				}
+			};
 
 			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseOAuthBearerAuthentication(authOptions);

@@ -42,6 +42,13 @@ namespace Thinktecture.Relay.Server.Http
 			{
 				response.StatusCode = onPremiseTargetResponse.StatusCode;
 				response.Content = GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link);
+
+				string wwwAuthenticate;
+				if (onPremiseTargetResponse.HttpHeaders.TryGetValue("WWW-Authenticate", out wwwAuthenticate))
+				{
+					var parts = wwwAuthenticate.Split(' ');
+					response.Headers.WwwAuthenticate.Add(parts.Length == 2 ? new AuthenticationHeaderValue(parts[0], parts[1]) : new AuthenticationHeaderValue(wwwAuthenticate));
+				}
 			}
 
 			return response;
@@ -52,8 +59,7 @@ namespace Thinktecture.Relay.Server.Http
 			if (onPremiseTargetResponse == null)
 				throw new ArgumentNullException(nameof(onPremiseTargetResponse), "On-premise target response cannot be null");
 
-			if (onPremiseTargetResponse.StatusCode == HttpStatusCode.InternalServerError &&
-				!link.ForwardOnPremiseTargetErrorResponse)
+			if (onPremiseTargetResponse.StatusCode == HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
 			{
 				return null;
 			}
