@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,6 +8,11 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
     [Table("Links")]
     internal class DbLink
     {
+        public DbLink()
+        {
+            ActiveConnections = new HashSet<DbActiveConnection>();
+        }
+
         [Index(IsClustered = true)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Identity { get; set; }
@@ -28,8 +34,8 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
         [Required]
         public string Salt { get; set; }
 
-		[Required]
-		[MaxLength(250)]
+        [Required]
+        [MaxLength(250)]
         public string SymbolicName { get; set; }
 
         [Required]
@@ -46,5 +52,7 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 
         [Required]
         public DateTime CreationDate { get; set; }
+
+        public virtual ICollection<DbActiveConnection> ActiveConnections { get; set; }
     }
 }

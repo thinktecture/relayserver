@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
                 DeclareQueue(queueName);
                 _model.QueueBind(queueName, _EXCHANGE_NAME, onPremiseId);
 
-                _logger.Debug("Creating request consumer. OnPremiseId: {0}, ConnectionId: {1}", onPremiseId, connectionId);
+                _logger.Debug("Creating request consumer. OnPremiseId: {0}, ConnectionId: {1}, supportsAck: {2}", onPremiseId, connectionId, !noAck);
                 var consumer = new EventingBasicConsumer(_model);
 
                 var consumerTag = _model.BasicConsume(queueName, noAck, consumer);

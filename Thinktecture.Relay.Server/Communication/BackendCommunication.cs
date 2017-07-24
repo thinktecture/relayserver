@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Communication
 {
@@ -18,6 +17,8 @@ namespace Thinktecture.Relay.Server.Communication
         private readonly IOnPremiseConnectorCallbackFactory _requesetCallbackFactory;
         private readonly ILogger _logger;
         private readonly IPersistedSettings _persistedSettings;
+        private readonly ILinkRepository _linkRepository;
+        
         private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
         private readonly ConcurrentDictionary<string, ConnectionInformation> _onPremises;
 
@@ -26,15 +27,17 @@ namespace Thinktecture.Relay.Server.Communication
 
         public string OriginId { get; }
 
-        public BackendCommunication(IConfiguration configuration, IMessageDispatcher messageDispatcher, IOnPremiseConnectorCallbackFactory requesetCallbackFactory, ILogger logger, IPersistedSettings persistedSettings)
+        public BackendCommunication(IConfiguration configuration, IMessageDispatcher messageDispatcher, IOnPremiseConnectorCallbackFactory requesetCallbackFactory, ILogger logger, IPersistedSettings persistedSettings, ILinkRepository linkRepository)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _messageDispatcher = messageDispatcher ?? throw new ArgumentNullException(nameof(messageDispatcher));
             _requesetCallbackFactory = requesetCallbackFactory ?? throw new ArgumentNullException(nameof(requesetCallbackFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _persistedSettings = persistedSettings ?? throw new ArgumentNullException(nameof(persistedSettings));
+            _linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
 
             OriginId = _persistedSettings.OriginId.ToString();
+            _linkRepository.DeleteAllActiveConnectionsForOrigin(OriginId);
             logger.Trace("Creating backend communication with origin id {0}", OriginId);
             logger.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
 
@@ -67,6 +70,7 @@ namespace Thinktecture.Relay.Server.Communication
                 if (onPremiseConnectorCallback.Handle.WaitOne(_configuration.OnPremiseConnectorCallbackTimeout))
                 {
                     _logger.Debug("Received On-Premise response for request id {0}", onPremiseConnectorCallback.RequestId);
+
                     return onPremiseConnectorCallback.Response;
                 }
 
@@ -79,13 +83,13 @@ namespace Thinktecture.Relay.Server.Communication
             }
         }
 
-        public async Task SendOnPremiseConnectorRequest(string onPremiseId, IOnPremiseTargetRequest onPremiseTargetRequest)
+        public async Task SendOnPremiseConnectorRequest(string linkId, IOnPremiseTargetRequest onPremiseTargetRequest)
         {
             CheckDisposed();
 
-            _logger.Debug("Sending request for on-premise connector {0} to message dispatcher", onPremiseId);
+            _logger.Debug("Sending request for on-premise connector link {0} to message dispatcher", linkId);
 
-            await _messageDispatcher.DispatchRequest(onPremiseId, onPremiseTargetRequest);
+            await _messageDispatcher.DispatchRequest(linkId, onPremiseTargetRequest);
         }
 
         public void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId)
@@ -95,8 +99,9 @@ namespace Thinktecture.Relay.Server.Communication
             ConnectionInformation onPremiseInformation;
             if (_onPremises.TryGetValue(connectionId, out onPremiseInformation))
             {
-                _logger.Debug("Acknowledging {0} for on-premise connection id {1}. OnPremise Id: {2}", acknowledgeId, connectionId, onPremiseInformation.OnPremiseId);
-                _messageDispatcher.AcknowledgeRequest(onPremiseInformation.OnPremiseId, acknowledgeId);
+                _logger.Debug("Acknowledging {0} for on-premise connection id {1}. OnPremise Link Id: {2}", acknowledgeId, connectionId, onPremiseInformation.LinkId);
+                _messageDispatcher.AcknowledgeRequest(onPremiseInformation.LinkId, acknowledgeId);
+                _linkRepository.RenewActiveConnection(connectionId);
             }
         }
 
@@ -104,14 +109,16 @@ namespace Thinktecture.Relay.Server.Communication
         {
             CheckDisposed();
 
-            _logger.Debug("Registering on-premise {0} via connection {1}. User name: {2}, Role: {3}, Connector Version: {4}", registrationInformation.OnPremiseId, registrationInformation.ConnectionId, registrationInformation.UserName, registrationInformation.Role, registrationInformation.ConnectorVersion);
+            _logger.Debug("Registering on-premise link {0} via connection {1}. User name: {2}, Role: {3}, Connector Version: {4}", registrationInformation.LinkId, registrationInformation.ConnectionId, registrationInformation.UserName, registrationInformation.Role, registrationInformation.ConnectorVersion);
+
+            _linkRepository.AddOrRenewActiveConnection(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
 
             if (!_onPremises.ContainsKey(registrationInformation.ConnectionId))
-                _onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.OnPremiseId, registrationInformation.UserName, registrationInformation.Role);
+                _onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.LinkId, registrationInformation.UserName, registrationInformation.Role);
 
             if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
             {
-                _requestSubscriptions[registrationInformation.ConnectionId] = _messageDispatcher.OnRequestReceived(registrationInformation.OnPremiseId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion == 0)
+                _requestSubscriptions[registrationInformation.ConnectionId] = _messageDispatcher.OnRequestReceived(registrationInformation.LinkId, registrationInformation.ConnectionId, !registrationInformation.SupportsAck())
                     .Subscribe(request => registrationInformation.RequestAction(request));
             }
         }
@@ -122,12 +129,15 @@ namespace Thinktecture.Relay.Server.Communication
 
             ConnectionInformation onPremiseInformation;
             if (_onPremises.TryRemove(connectionId, out onPremiseInformation))
-                _logger.Debug("Unregistered on-premise connection id {0}. OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseInformation.OnPremiseId, onPremiseInformation.UserName, onPremiseInformation.Role);
+            {
+                _logger.Debug("Unregistered on-premise connection id {0}. OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseInformation.LinkId, onPremiseInformation.UserName, onPremiseInformation.Role);
+            }
 
+            _linkRepository.RemoveActiveConnection(connectionId);
             IDisposable requestSubscription;
             if (_requestSubscriptions.TryRemove(connectionId, out requestSubscription))
             {
-                _logger.Debug("Disposing request subscription for OnPremise id {0} and connection id {1}", onPremiseInformation?.OnPremiseId ?? "unknown", connectionId);
+                _logger.Debug("Disposing request subscription for OnPremise id {0} and connection id {1}", onPremiseInformation?.LinkId ?? "unknown", connectionId);
                 requestSubscription.Dispose();
             }
         }
@@ -139,16 +149,6 @@ namespace Thinktecture.Relay.Server.Communication
             _logger.Debug("Sending response to origin id {0}", originId);
 
             await _messageDispatcher.DispatchResponse(originId, response);
-        }
-
-        public bool IsRegistered(string connectionId)
-        {
-            return _onPremises.Any(o => o.Value.OnPremiseId.Equals(connectionId, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public List<string> GetConnections(string linkId)
-        {
-            return _onPremises.Where(p => p.Value.OnPremiseId.Equals(linkId, StringComparison.OrdinalIgnoreCase)).Select(p => p.Key).ToList();
         }
 
         private IDisposable StartReceivingResponses(string originId)

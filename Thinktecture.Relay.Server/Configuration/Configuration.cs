@@ -21,6 +21,7 @@ namespace Thinktecture.Relay.Server.Configuration
 		public int Port { get; private set; }
 		public string ManagementWebLocation { get; private set; }
 		public string TemporaryRequestStoragePath { get; private set; }
+		public int ActiveConnectionTimeoutInSeconds { get; private set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -109,6 +110,12 @@ namespace Thinktecture.Relay.Server.Configuration
 				TemporaryRequestStoragePath = null;
 			}
 
+			ActiveConnectionTimeoutInSeconds = 120;
+			if (Int32.TryParse(ConfigurationManager.AppSettings["ActiveConnectionTimeoutInSeconds"], out tmpInt))
+			{
+				ActiveConnectionTimeoutInSeconds = tmpInt;
+			}
+			
 			LogSettings(logger);
 		}
 
@@ -128,6 +135,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			logger.Trace("Setting Port: {0}", Port);
 			logger.Trace("Setting ManagementWebLocation: {0}", ManagementWebLocation);
 			logger.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
+			logger.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
 		}
 	}
 }

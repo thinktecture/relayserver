@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using NLog;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository.DbModels;
@@ -12,15 +13,19 @@ namespace Thinktecture.Relay.Server.Repository
 {
     public class LinkRepository : ILinkRepository
     {
+        private readonly ILogger _logger;
         private readonly IPasswordHash _passwordHash;
         private readonly IConfiguration _configuration;
 
         private static readonly Dictionary<string, PasswordInformation> _successfullyValidatedUsernamesAndPasswords = new Dictionary<string, PasswordInformation>();
 
-        public LinkRepository(IPasswordHash passwordHash, IConfiguration configuration)
+        private DateTime ActiveLinkTimeout => DateTime.UtcNow.AddSeconds(-_configuration.ActiveConnectionTimeoutInSeconds);
+
+        public LinkRepository(ILogger logger, IPasswordHash passwordHash, IConfiguration configuration)
         {
-            _passwordHash = passwordHash;
-            _configuration = configuration;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _passwordHash = passwordHash ?? throw new ArgumentNullException(nameof(passwordHash));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public PageResult<Link> GetLinks(PageRequest paging)
@@ -47,12 +52,19 @@ namespace Thinktecture.Relay.Server.Repository
                 query = query.OrderByPropertyName(paging.SortField, paging.SortDirection);
                 query = query.ApplyPaging(paging);
 
-                var queryResult = query.ToList().Select(GetLinkFromDbLink).ToList();
+                var projection = query.Select(q => new
+                    {
+                        links = q,
+                        connections = q.ActiveConnections.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout),
+                    })
+                    .ToList();
+
+                var queryResult = projection.Select(p => GetLinkFromDbLink(p.links)).ToList();
 
                 var result = new PageResult<Link>()
                 {
                     Items = queryResult,
-                    Count = count
+                    Count = count,
                 };
 
                 return result;
@@ -63,14 +75,21 @@ namespace Thinktecture.Relay.Server.Repository
         {
             using (var context = new RelayContext())
             {
-                var link = context.Links.SingleOrDefault(p => p.Id == linkId);
+                var projection = context.Links
+                    .Where(l => l.Id == linkId)
+                    .Select(l => new
+                        {
+                            link = l,
+                            connections = l.ActiveConnections.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout),
+                        })
+                    .SingleOrDefault();
 
-                if (link == null)
+                if (projection == null || projection.link == null)
                 {
                     return null;
                 }
 
-                return GetLinkFromDbLink(link);
+                return GetLinkFromDbLink(projection.link);
             }
         }
 
@@ -101,7 +120,9 @@ namespace Thinktecture.Relay.Server.Repository
                 Password = link.Password,
                 SymbolicName = link.SymbolicName,
                 UserName = link.UserName,
-                AllowLocalClientRequestsOnly = link.AllowLocalClientRequestsOnly
+                AllowLocalClientRequestsOnly = link.AllowLocalClientRequestsOnly,
+                Connections = link.ActiveConnections.Select(c => c.ConnectionId).ToList(),
+                IsConnected = link.ActiveConnections.Any(),
             };
         }
 
@@ -120,7 +141,7 @@ namespace Thinktecture.Relay.Server.Repository
                     Iterations = passwordInformation.Iterations,
                     SymbolicName = symbolicName,
                     UserName = userName,
-                    CreationDate = DateTime.UtcNow
+                    CreationDate = DateTime.UtcNow,
                 };
 
                 context.Links.Add(link);
@@ -129,7 +150,7 @@ namespace Thinktecture.Relay.Server.Repository
                 var result = new CreateLinkResult()
                 {
                     Id = link.Id,
-                    Password = Convert.ToBase64String(password)
+                    Password = Convert.ToBase64String(password),
                 };
 
                 return result;
@@ -167,7 +188,7 @@ namespace Thinktecture.Relay.Server.Repository
             {
                 var itemToDelete = new DbLink
                 {
-                    Id = linkId
+                    Id = linkId,
                 };
 
                 context.Links.Attach(itemToDelete);
@@ -207,7 +228,7 @@ namespace Thinktecture.Relay.Server.Repository
                     p.Id,
                     p.Password,
                     p.Iterations,
-                    p.Salt
+                    p.Salt,
                 }).FirstOrDefault();
 
                 if (link == null)
@@ -219,9 +240,9 @@ namespace Thinktecture.Relay.Server.Repository
                 {
                     Hash = link.Password,
                     Iterations = link.Iterations,
-                    Salt = link.Salt
+                    Salt = link.Salt,
                 };
-                
+
                 var cacheKey = userName + "/" + password;
                 PasswordInformation previousInfo = null;
 
@@ -265,6 +286,101 @@ namespace Thinktecture.Relay.Server.Repository
             using (var context = new RelayContext())
             {
                 return !context.Links.Any(p => p.UserName == userName);
+            }
+        }
+
+        public Task AddOrRenewActiveConnection(string linkId, string originId, string connectionId, int connectorVersion)
+        {
+            _logger.Trace("Adding or updating connection {0} for link {1} and origin {2} with connector version {3}", connectionId, linkId, originId, connectorVersion);
+
+            return Task.Run(() =>
+            {
+                AddOrRenewActiveConnection(new Guid(linkId), new Guid(originId), connectionId, connectorVersion);
+            });
+        }
+
+        private void AddOrRenewActiveConnection(Guid linkId, Guid originId, string connectionId, int connectorVersion)
+        {
+            using (var context = new RelayContext())
+            {
+                var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId);
+
+                if (activeConnection != null)
+                {
+                    activeConnection.LastActivity = DateTime.UtcNow;
+                }
+                else
+                {
+                    context.ActiveConnections.Add(new DbActiveConnection()
+                    {
+                        LinkId = linkId,
+                        OriginId = originId,
+                        ConnectionId = connectionId,
+                        ConnectorVersion = connectorVersion,
+                        LastActivity = DateTime.UtcNow,
+                    });
+                }
+
+                context.SaveChanges();
+            }
+        }
+
+        public Task RenewActiveConnection(string connectionId)
+        {
+            _logger.Trace("Renewing last activity on connection {0}", connectionId);
+
+            return Task.Run(() =>
+            {
+                RenewActiveConnectionInternal(connectionId);
+            });
+        }
+
+        private void RenewActiveConnectionInternal(string connectionId)
+        {
+            using (var context = new RelayContext())
+            {
+                var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.ConnectionId == connectionId);
+
+                if (activeConnection != null)
+                {
+                    activeConnection.LastActivity = DateTime.UtcNow;
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        public Task RemoveActiveConnection(string connectionId)
+        {
+            _logger.Debug("Deleting active connection {0}", connectionId);
+            return Task.Run(() =>
+            {
+                using (var context = new RelayContext())
+                {
+                    var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.ConnectionId == connectionId);
+
+                    if (activeConnection != null)
+                    {
+                        context.ActiveConnections.Remove(activeConnection);
+                        context.SaveChanges();
+                    }
+                }
+            });
+        }
+
+        public void DeleteAllActiveConnectionsForOrigin(string originId)
+        {
+            _logger.Debug("Deleting all active connections for Origin {0}", originId);
+            DeleteAllActiveConnectionsForOrigin(new Guid(originId));
+        }
+
+        private void DeleteAllActiveConnectionsForOrigin(Guid originId)
+        {
+            using (var context = new RelayContext())
+            {
+                var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId);
+                context.ActiveConnections.RemoveRange(invalidConnections);
+
+                context.SaveChanges();
             }
         }
     }

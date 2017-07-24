@@ -18,5 +18,9 @@ namespace Thinktecture.Relay.Server.Repository
 
         bool Authenticate(string userName, [Optional] string password, out Guid linkId);
         bool IsUserNameAvailable(string userName);
+        Task AddOrRenewActiveConnection(string registrationInformationLinkId, string originId, string registrationInformationConnectionId, int connectorVersion);
+        Task RenewActiveConnection(string connectionId);
+        Task RemoveActiveConnection(string connectionId);
+        void DeleteAllActiveConnectionsForOrigin(string originId);
     }
 }

@@ -7,20 +7,23 @@ using Microsoft.AspNet.SignalR;
 using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
     internal class OnPremisesConnection : PersistentConnection
     {
+        private readonly ILogger _logger;
         private readonly IBackendCommunication _backendCommunication;
         private readonly IPostDataTemporaryStore _temporaryStore;
-        private readonly ILogger _logger;
+        private readonly ILinkRepository _linkRepository;
 
-        public OnPremisesConnection(IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILogger logger)
+        public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILinkRepository linkRepository)
         {
-			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
-            _temporaryStore = temporaryStore ?? throw new ArgumentNullException(nameof(temporaryStore));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
+            _temporaryStore = temporaryStore ?? throw new ArgumentNullException(nameof(temporaryStore));
+            _linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
         }
 
         protected override bool AuthorizeRequest(IRequest request)
@@ -64,6 +67,11 @@ namespace Thinktecture.Relay.Server.SignalR
             _logger.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
                 connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.Body?.Length ?? 0);
 
+#pragma warning disable 4014
+            // Justification: Keeping this link active in database should happen in background and not be awaited (fire & forget)
+            _linkRepository.RenewActiveConnection(connectionId);
+#pragma warning restore 4014
+
             if (request.Body != null)
             {
                 // always store request in temporary store
@@ -99,7 +107,7 @@ namespace Thinktecture.Relay.Server.SignalR
             _backendCommunication.RegisterOnPremise(new RegistrationInformation()
             {
                 ConnectionId = connectionId,
-                OnPremiseId = claims.OnPremiseId,
+                LinkId = claims.OnPremiseId,
                 UserName = claims.UserName,
                 Role = claims.Role,
                 RequestAction = cr => ForwardClientRequest(connectionId, (OnPremiseTargetRequest)cr),

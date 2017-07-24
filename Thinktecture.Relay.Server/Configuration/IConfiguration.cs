@@ -19,5 +19,6 @@ namespace Thinktecture.Relay.Server.Configuration
 		int Port { get; }
 		string ManagementWebLocation { get; }
 		string TemporaryRequestStoragePath { get; }
+		int ActiveConnectionTimeoutInSeconds { get; }
 	}
 }

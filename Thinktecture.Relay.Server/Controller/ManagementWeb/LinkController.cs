@@ -30,12 +30,6 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
         {
             var result = _linkRepository.GetLinks(paging);
 
-            foreach (var item in result.Items)
-            {
-                item.Connections = _backendCommunication.GetConnections(item.Id.ToString());
-                item.IsConnected = item.Connections.Count > 0;
-            }
-
             return Ok(result);
         }
 
@@ -49,9 +43,6 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
             {
                 return BadRequest();
             }
-
-            link.Connections = _backendCommunication.GetConnections(link.Id.ToString());
-            link.IsConnected = link.Connections.Count > 0;
 
             return Ok(link);
         }
