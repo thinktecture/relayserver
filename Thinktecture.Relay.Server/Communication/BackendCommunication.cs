@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Communication
@@ -16,11 +18,11 @@ namespace Thinktecture.Relay.Server.Communication
         private readonly IMessageDispatcher _messageDispatcher;
         private readonly IOnPremiseConnectorCallbackFactory _requesetCallbackFactory;
         private readonly ILogger _logger;
-        private readonly IPersistedSettings _persistedSettings;
         private readonly ILinkRepository _linkRepository;
-        
+
         private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
         private readonly ConcurrentDictionary<string, ConnectionInformation> _onPremises;
+        private readonly ConcurrentDictionary<string, HeartbeatInformation> _heartbeatableClients;
 
         private readonly ConcurrentDictionary<string, IDisposable> _requestSubscriptions;
         private readonly IDisposable _responseSubscription;
@@ -33,18 +35,25 @@ namespace Thinktecture.Relay.Server.Communication
             _messageDispatcher = messageDispatcher ?? throw new ArgumentNullException(nameof(messageDispatcher));
             _requesetCallbackFactory = requesetCallbackFactory ?? throw new ArgumentNullException(nameof(requesetCallbackFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _persistedSettings = persistedSettings ?? throw new ArgumentNullException(nameof(persistedSettings));
             _linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
 
-            OriginId = _persistedSettings.OriginId.ToString();
+            if (persistedSettings == null)
+                throw new ArgumentNullException(nameof(persistedSettings));
+
+            OriginId = persistedSettings.OriginId.ToString();
             _linkRepository.DeleteAllActiveConnectionsForOrigin(OriginId);
+
             logger.Trace("Creating backend communication with origin id {0}", OriginId);
             logger.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
 
             _onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
             _requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
             _requestSubscriptions = new ConcurrentDictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
+            _heartbeatableClients = new ConcurrentDictionary<string, HeartbeatInformation>();
+
             _responseSubscription = StartReceivingResponses(OriginId);
+
+            StartHeartbeat();
         }
 
         protected void CheckDisposed()
@@ -116,6 +125,8 @@ namespace Thinktecture.Relay.Server.Communication
             if (!_onPremises.ContainsKey(registrationInformation.ConnectionId))
                 _onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.LinkId, registrationInformation.UserName, registrationInformation.Role);
 
+            RegisterForHeartbeat(registrationInformation);
+
             if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
             {
                 _requestSubscriptions[registrationInformation.ConnectionId] = _messageDispatcher.OnRequestReceived(registrationInformation.LinkId, registrationInformation.ConnectionId, !registrationInformation.SupportsAck())
@@ -134,6 +145,8 @@ namespace Thinktecture.Relay.Server.Communication
             }
 
             _linkRepository.RemoveActiveConnection(connectionId);
+            UnregisterForHeartbeat(connectionId);
+
             IDisposable requestSubscription;
             if (_requestSubscriptions.TryRemove(connectionId, out requestSubscription))
             {
@@ -173,6 +186,104 @@ namespace Thinktecture.Relay.Server.Communication
             {
                 _logger.Debug("Response received but no request callback found for request id {0}", response.RequestId);
             }
+        }
+
+        private void StartHeartbeat()
+        {
+            HeartbeatAllClients();
+        }
+
+        private void RegisterForHeartbeat(RegistrationInformation registrationInformation)
+        {
+            if (registrationInformation.SupportsHeartbeat())
+            {
+                _logger.Trace($"Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and will be registered for heartbeating.");
+                
+                var heartbeatInfo = new HeartbeatInformation()
+                {
+                    ConnectionId = registrationInformation.ConnectionId,
+                    LinkId = registrationInformation.LinkId,
+                    ConnectorVersion = registrationInformation.ConnectorVersion,
+                    RequestAction = registrationInformation.RequestAction,
+                };
+
+                InitializeHeartbeat(heartbeatInfo);
+
+                if (!_heartbeatableClients.ContainsKey(registrationInformation.ConnectionId))
+                {
+                    _heartbeatableClients[registrationInformation.ConnectionId] = heartbeatInfo;
+                }
+            }
+            else
+            {
+                _logger.Trace($"Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and is not capable of heartbeating.");
+            }
+        }
+
+        private void UnregisterForHeartbeat(string connectionId)
+        {
+            _logger.Trace($"Unregistering connection with id {connectionId} from heartbeating.");
+
+            HeartbeatInformation heartbeatInformation;
+            _heartbeatableClients.TryRemove(connectionId, out heartbeatInformation);
+        }
+
+        private async void InitializeHeartbeat(HeartbeatInformation heartbeatInfo)
+        {
+            _logger.Trace($"Initializing heartbeat with connection {heartbeatInfo.ConnectionId}");
+
+            var requestId = Guid.NewGuid().ToString();
+            var request = new OnPremiseConnectorRequest()
+            {
+                HttpMethod = "INIT_HEARTBEAT",
+                Url = String.Empty,
+                RequestStarted = DateTime.UtcNow,
+                OriginId = OriginId,
+                RequestId = requestId,
+                AcknowledgeId = requestId,
+                HttpHeaders = new Dictionary<string, string>()
+                {
+                    { "X-TTRELAY-HEARTBEATINTERVAL", (_configuration.ActiveConnectionTimeoutInSeconds / 2).ToString() },
+                },
+            };
+
+            var responseTask = GetResponseAsync(requestId);
+            await heartbeatInfo.RequestAction(request);
+
+            var response = await responseTask;
+
+            if (response == null)
+            {
+                _logger.Warn($"Connection {heartbeatInfo.ConnectionId} did NOT respond to heartbeat in time.");
+            }
+        }
+
+        private async void HeartbeatAllClients()
+        {
+            if (_disposed)
+                return;
+
+            foreach (var client in _heartbeatableClients.Values)
+            {
+                _logger.Trace($"Sending heartbeat to connection {client.ConnectionId}");
+
+                var requestId = Guid.NewGuid().ToString();
+                var request = new OnPremiseConnectorRequest()
+                {
+                    HttpMethod = "HEARTBEAT",
+                    Url = String.Empty,
+                    RequestStarted = DateTime.UtcNow,
+                    OriginId = OriginId,
+                    RequestId = requestId,
+                    AcknowledgeId = requestId,
+                };
+
+                // heartbeat do NOT go through the message dispatcher as we want to heartbeat the connections directly
+                await client.RequestAction(request);
+            }
+
+            await Task.Delay(_configuration.ActiveConnectionTimeoutInSeconds / 2 * 1000)
+                .ContinueWith(_ => HeartbeatAllClients());
         }
 
         #region IDisposable

@@ -35,11 +35,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
         private static int _nextId;
         private static readonly Random _random = new Random();
 
+        private int _heartbeatInterval;
+        private DateTime _lastHeartbeat = DateTime.MinValue;
+        private CancellationTokenSource _heartbeatCancellationTokenSource;
+
         private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
         private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
 
         public RelayServerConnection(string userName, string password, Uri relayServer, int requestTimeout, int maxRetries, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-            : base(new Uri(relayServer, "/signalr").AbsoluteUri, "version=1")
+            : base(new Uri(relayServer, "/signalr").AbsoluteUri, "version=2")
         {
             _id = Interlocked.Increment(ref _nextId);
             _userName = userName;
@@ -265,7 +269,19 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
                     return;
                 }
 
-                await Send(request.AcknowledgeId); // ACK
+                if (request.HttpMethod == "INIT_HEARTBEAT")
+                {
+                    await HandleInitHeartbeatRequestAsync(request);
+                    return;
+                }
+
+                if (request.HttpMethod == "HEARTBEAT")
+                {
+                    await HandleHeartbeatRequestAsync(request);
+                    return;
+                }
+
+                await Acknowledge(request);
 
                 var key = request.Url.Split('/').FirstOrDefault();
                 if (key != null)
@@ -304,10 +320,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
                         RequestFinished = DateTime.UtcNow,
                         StatusCode = HttpStatusCode.NotFound,
                         OriginId = request.OriginId,
-                        RequestId = request.RequestId
+                        RequestId = request.RequestId,
                     }), Encoding.UTF8, "application/json"), CancellationToken.None);
                 }
             }
+        }
+
+        private async Task Acknowledge(IOnPremiseTargetRequest request)
+        {
+            // older servers do not send acknowledge id, so we need to check for it not being null
+            if (!String.IsNullOrEmpty(request.AcknowledgeId))
+                await Send(request.AcknowledgeId);
         }
 
         private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
@@ -320,8 +343,78 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
                 RequestFinished = DateTime.UtcNow,
                 StatusCode = HttpStatusCode.OK,
                 OriginId = request.OriginId,
-                RequestId = request.RequestId
+                RequestId = request.RequestId,
             }), Encoding.UTF8, "application/json"), CancellationToken.None);
+
+            await Acknowledge(request);
+        }
+
+        private async Task HandleInitHeartbeatRequestAsync(IOnPremiseTargetRequest request)
+        {
+            _logger.Debug("Received initialize heartbeat from relay server #{0}", _id);
+
+            // cancel existing heartbeat if we already have one running
+            _heartbeatCancellationTokenSource?.Cancel(false);
+
+            string heartbeatHeaderValue;
+            request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out heartbeatHeaderValue);
+
+            int heartbeatInterval;
+            if (Int32.TryParse(heartbeatHeaderValue, out heartbeatInterval))
+            {
+                _logger.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
+
+                _heartbeatInterval = heartbeatInterval;
+                _lastHeartbeat = DateTime.UtcNow;
+                _heartbeatCancellationTokenSource = new CancellationTokenSource();
+
+#pragma warning disable 4014
+                // Justification: Heartbeat checking is intended to be done in background and not awaited
+                var token = _heartbeatCancellationTokenSource.Token;
+                Task.Delay(_heartbeatInterval * 1000, token).ContinueWith(_ => CheckHeartbeat(token), token);
+#pragma warning restore 4014
+            }
+
+            await Acknowledge(request);
+        }
+
+        private async Task HandleHeartbeatRequestAsync(IOnPremiseTargetRequest request)
+        {
+            _logger.Debug("Received heartbeat from relay server #{0}", _id);
+
+            _lastHeartbeat = DateTime.UtcNow;
+
+            await Acknowledge(request);
+        }
+
+        public Task CheckHeartbeat(CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+                return Task.CompletedTask;
+
+            _logger.Trace("Checking last heartbeat time. Interval: {0}s, last heartbeat: {1}", _heartbeatInterval, _lastHeartbeat);
+
+            // check if last heartbeat was within interval (and 10 seconds tolerance)
+            if (_lastHeartbeat <= DateTime.UtcNow.AddSeconds(-_heartbeatInterval - 10))
+            {
+                _logger.Warn("Last heartbeat was at {0}, and out of interval of {1}s. Forcing reconnect.", _lastHeartbeat, _heartbeatInterval);
+                ForceReconnect();
+
+                return Task.CompletedTask;
+            }
+
+            return Task.Delay(_heartbeatInterval * 1000, token).ContinueWith(_ => CheckHeartbeat(token), token);
+        }
+
+        private void ForceReconnect()
+        {
+            Disconnect();
+
+            Task.Delay(1500).ContinueWith(_ =>
+            {
+                _stopRequested = false;
+                return Connect();
+            });
         }
 
         public void Disconnect()
@@ -330,6 +423,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
             _stopRequested = true;
             Stop();
+
+            _lastHeartbeat = DateTime.MinValue;
+            _heartbeatInterval = 0;
+            _heartbeatCancellationTokenSource?.Cancel();
+            _heartbeatCancellationTokenSource = null;
         }
 
         public List<string> GetOnPremiseTargetKeys()

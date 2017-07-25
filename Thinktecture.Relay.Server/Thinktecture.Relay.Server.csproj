@@ -192,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\ConnectionInformation.cs" />
+    <Compile Include="Communication\HeartbeatInformation.cs" />
     <Compile Include="Communication\IMessageDispatcher.cs" />
     <Compile Include="Communication\InProcess\InProcessMessageDispatcher.cs" />
     <Compile Include="Communication\InProcess\RequestSubjectContext.cs" />

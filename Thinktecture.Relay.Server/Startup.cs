@@ -147,7 +147,7 @@ namespace Thinktecture.Relay.Server
 				Provider = container.Resolve<AuthorizationServerProvider>()
 			};
 
-			var sharedSecret = System.Configuration.ConfigurationManager.AppSettings["OAuthSharedSecret"];
+			var sharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
 
 			if (!String.IsNullOrWhiteSpace(sharedSecret))
 			{
@@ -155,7 +155,7 @@ namespace Thinktecture.Relay.Server
 				return;
 			}
 
-			var certBase64 = System.Configuration.ConfigurationManager.AppSettings["OAuthCertificate"];
+			var certBase64 = ConfigurationManager.AppSettings["OAuthCertificate"];
 			var authOptions = new OAuthBearerAuthenticationOptions();
 
 			if (!String.IsNullOrWhiteSpace(certBase64))
@@ -234,13 +234,16 @@ namespace Thinktecture.Relay.Server
 
 			httpConfig.SuppressDefaultHostAuthentication();
 
-			var enableNLogTraceWriter = StringComparer.OrdinalIgnoreCase.Equals(System.Configuration.ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true");
-
+			var enableNLogTraceWriter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true");
 			if (enableNLogTraceWriter)
 				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(logger, new TraceLevelConverter()));
 
 			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(logger));
-			httpConfig.Filters.Add(new NLogActionFilter(logger));
+
+			var enableNLogActionFilter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogActionFilter"], "true");
+			if (enableNLogActionFilter)
+				httpConfig.Filters.Add(new NLogActionFilter(logger));
+
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
 			if (configuration.EnableRelaying)

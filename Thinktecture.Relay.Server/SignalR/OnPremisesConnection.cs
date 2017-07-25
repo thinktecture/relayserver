@@ -7,7 +7,6 @@ using Microsoft.AspNet.SignalR;
 using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
-using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
@@ -16,14 +15,12 @@ namespace Thinktecture.Relay.Server.SignalR
         private readonly ILogger _logger;
         private readonly IBackendCommunication _backendCommunication;
         private readonly IPostDataTemporaryStore _temporaryStore;
-        private readonly ILinkRepository _linkRepository;
 
-        public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILinkRepository linkRepository)
+        public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
             _temporaryStore = temporaryStore ?? throw new ArgumentNullException(nameof(temporaryStore));
-            _linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
         }
 
         protected override bool AuthorizeRequest(IRequest request)
@@ -66,11 +63,6 @@ namespace Thinktecture.Relay.Server.SignalR
             _logger.Debug("Forwarding client request to connection {0}", connectionId);
             _logger.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
                 connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.Body?.Length ?? 0);
-
-#pragma warning disable 4014
-            // Justification: Keeping this link active in database should happen in background and not be awaited (fire & forget)
-            _linkRepository.RenewActiveConnection(connectionId);
-#pragma warning restore 4014
 
             if (request.Body != null)
             {

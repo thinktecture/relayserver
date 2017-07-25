@@ -18,5 +18,10 @@ namespace Thinktecture.Relay.Server.Communication
         {
             return ConnectorVersion >= 1;
         }
+
+        public bool SupportsHeartbeat()
+        {
+            return ConnectorVersion >= 2;
+        }
     }
 }
