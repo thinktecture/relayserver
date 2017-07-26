@@ -6,6 +6,8 @@ using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Controller
 {
+    [Authorize(Roles = "OnPremise")]
+    [OnPremiseConnectionModuleBindingFilter]
     public class RequestController : ApiController
     {
         private readonly IPostDataTemporaryStore _temporaryStore;

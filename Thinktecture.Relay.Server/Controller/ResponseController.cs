@@ -10,6 +10,7 @@ using Thinktecture.Relay.Server.Communication;
 namespace Thinktecture.Relay.Server.Controller
 {
     [Authorize(Roles = "OnPremise")]
+    [OnPremiseConnectionModuleBindingFilter]
     public class ResponseController : ApiController
     {
         private readonly ILogger _logger;
