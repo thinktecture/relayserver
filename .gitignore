@@ -5,6 +5,7 @@
 packages/
 node_modules/
 .idea/
+.vs/
 
 *.ncrunchproject
 *.ncrunchsolution
