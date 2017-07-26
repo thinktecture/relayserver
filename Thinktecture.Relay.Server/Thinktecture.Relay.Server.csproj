@@ -202,7 +202,9 @@
     <Compile Include="Communication\UnregistrationAction.cs" />
     <Compile Include="Communication\RegistrationInformation.cs" />
     <Compile Include="Configuration\ModuleState.cs" />
+    <Compile Include="Controller\CheckModuleBindingConfigurationAttribute.cs" />
     <Compile Include="Controller\OnPremiseConnectionsModule.cs" />
+    <Compile Include="Controller\RelayModuleBindingFilter.cs" />
     <Compile Include="Security\CustomJwtFormat.cs" />
     <Compile Include="Dto\ContentBytesChartGroupKey.cs" />
     <Compile Include="Filters\NLogActionFilter.cs" />

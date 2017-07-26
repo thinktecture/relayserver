@@ -209,7 +209,7 @@ namespace Thinktecture.Relay.Server
 			});
 		}
 
-		private static void UseWebApi(IAppBuilder app, ILifetimeScope container)
+		private static void UseWebApi(IAppBuilder app, IContainer container)
 		{
 			var configuration = container.Resolve<IConfiguration>();
 			var logger = container.Resolve<ILogger>();
@@ -253,6 +253,10 @@ namespace Thinktecture.Relay.Server
 			}
 
 			httpConfig.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+			var builder = new ContainerBuilder();
+			builder.RegisterWebApiFilterProvider(httpConfig);
+			builder.Update(container);
 
 			app.UseWebApi(httpConfig);
 		}

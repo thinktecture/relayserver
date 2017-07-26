@@ -14,6 +14,7 @@ using Thinktecture.Relay.Server.Repository;
 namespace Thinktecture.Relay.Server.Controller
 {
     [AllowAnonymous]
+    [RelayModuleBindingFilter]
     public class ClientController : ApiController
     {
         private readonly IBackendCommunication _backendCommunication;
