@@ -39,7 +39,7 @@ namespace Thinktecture.Relay.Server.Http
 			result.RequestId.Should().NotBeNullOrEmpty();
 			result.Url.Should().Be("Google/services/?id=bla");
 			result.RequestStarted.Should().BeOnOrAfter(startTime).And.BeOnOrBefore(DateTime.UtcNow);
-			result.HttpHeaders.Should().NotContainKey("Host");
+			result.HttpHeaders.Keys.Should().NotContain("Host");
 			result.HttpHeaders["Accept"].Should().Be("application/json");
 			result.HttpHeaders["Content-Disposition"].Should().Be("attachment");
 		}

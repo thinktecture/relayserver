@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -24,7 +25,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				{"X-TTRELAY-TIMEOUT", "OnPremise"},
 			};
 
-			sut.WriteHeaderFile("test.headers.txt", headers);
+			sut.WriteHeaderFile("test.headers.txt", new ReadOnlyDictionary<string, string>(headers));
 
 			Thread.Sleep(100); // File write is async
 

@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 {
 	public class TraceFileWriter : ITraceFileWriter
 	{
-		public Task WriteHeaderFile(string fileName, IDictionary<string, string> headers)
+		public Task WriteHeaderFile(string fileName, IReadOnlyDictionary<string, string> headers)
 		{
 			var json = JsonConvert.SerializeObject(headers);
 			return WriteFile(fileName, Encoding.UTF8.GetBytes(json));

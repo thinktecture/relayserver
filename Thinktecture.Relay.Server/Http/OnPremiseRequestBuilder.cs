@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server.Http
 			return headers.Aggregate(String.Empty, (s, v) => s + (s == String.Empty ? String.Empty : ", ") + v);
 		}
 
-		internal void AddContentHeaders(IOnPremiseConnectorRequest onPremiseConnectorRequest, HttpRequestMessage request)
+		internal void AddContentHeaders(OnPremiseConnectorRequest onPremiseConnectorRequest, HttpRequestMessage request)
 		{
 			foreach (var httpHeader in request.Content.Headers)
 			{

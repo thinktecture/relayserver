@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.Server.Http
 			return content;
 		}
 
-		internal void SetHttpHeaders(IDictionary<string, string> httpHeaders, HttpContent content)
+		internal void SetHttpHeaders(IReadOnlyDictionary<string, string> httpHeaders, HttpContent content)
 		{
 			if (httpHeaders == null)
 			{

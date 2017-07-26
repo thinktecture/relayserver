@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -22,6 +23,7 @@ namespace Thinktecture.Relay.Server.Http
 			public string RequestId { get; set; }
 			public Guid OriginId { get; set; }
 			public IDictionary<string, string> HttpHeaders { get; set; }
+			IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => (HttpHeaders != null) ? new ReadOnlyDictionary<string, string>(HttpHeaders) : null;
 			public HttpStatusCode StatusCode { get; set; }
 			public byte[] Body { get; set; }
 			public DateTime RequestStarted { get; set; }
