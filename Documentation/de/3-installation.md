@@ -144,9 +144,9 @@ Die Standardeinstellungen umfassen dabei:
 
 |  Key name | Description |
 | --- | --- |
-| EnableManagementWeb | Aktiviert die Management Weboberfläche (default true) |
-| EnableRelaying | Aktiviert die Relay-Funktion des Servers (default true) |
-| EnableOnPremiseConnections | Erlaubt den Verbindungsaufbau von On-Premises Connectoren (default true) |
+| EnableManagementWeb | Aktiviert die Management Weboberfläche (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet)
+| EnableRelaying | Aktiviert die Relay-Funktion des Servers (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet)|
+| EnableOnPremiseConnections | Erlaubt den Verbindungsaufbau von On-Premises Connectoren (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet)|
 | Port | Standard-Port des RelayServers (default 443) |
 | HostName | Gewünschte Ziel-URL des RelayServers (default +) |
 | UseInsecureHttp | Aktiviert die Verwendung von HTTP statt HTTPS (die Verwendung von HTTP im Produktivbetrieb wird nicht empfohlen). |

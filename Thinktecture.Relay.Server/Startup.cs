@@ -31,11 +31,10 @@ using Thinktecture.Relay.Server.Filters;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Logging;
+using Thinktecture.Relay.Server.Owin;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
-using ConnectionConfiguration = Microsoft.AspNet.SignalR.ConnectionConfiguration;
-using IContainer = Autofac.IContainer;
 
 namespace Thinktecture.Relay.Server
 {
@@ -193,6 +192,7 @@ namespace Thinktecture.Relay.Server
 		private static void MapSignalR(IAppBuilder app, ILifetimeScope container)
 		{
 			var config = container.Resolve<IConfiguration>();
+			string path = "/signalr";
 
 			if (config.EnableOnPremiseConnections == ModuleBinding.False)
 			{
@@ -201,11 +201,16 @@ namespace Thinktecture.Relay.Server
 
 			GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(config.ConnectionTimeout);
 			GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(config.DisconnectTimeout);
-		    GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
+			GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
 
-			app.MapSignalR<OnPremisesConnection>("/signalr", new ConnectionConfiguration
+			if (config.EnableOnPremiseConnections == ModuleBinding.Local)
 			{
-				Resolver = new AutofacDependencyResolver(container)
+				app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
+			}
+
+			app.MapSignalR<OnPremisesConnection>(path, new ConnectionConfiguration
+			{
+				Resolver = new AutofacDependencyResolver(container),
 			});
 		}
 
@@ -273,12 +278,19 @@ namespace Thinktecture.Relay.Server
 
 			try
 			{
+				string path = "/managementweb";
+
 				var options = new FileServerOptions()
 				{
 					FileSystem = new PhysicalFileSystem(configuration.ManagementWebLocation),
-					RequestPath = new PathString("/managementweb"),
+					RequestPath = new PathString(path),
 				};
 				options.DefaultFilesOptions.DefaultFileNames.Add("index.html");
+
+				if (configuration.EnableManagementWeb == ModuleBinding.Local)
+				{
+					app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
+				}
 
 				app.UseFileServer(options);
 			}
