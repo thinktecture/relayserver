@@ -8,6 +8,7 @@ using Thinktecture.Relay.Server.Repository;
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
     [AllowAnonymous]
+    [ManagementWebModuleBindingFilter]
     public class FakeDataController : ApiController
     {
         private readonly IUserRepository _userRepository;

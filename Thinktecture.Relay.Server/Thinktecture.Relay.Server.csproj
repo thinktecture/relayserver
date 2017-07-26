@@ -203,6 +203,7 @@
     <Compile Include="Communication\RegistrationInformation.cs" />
     <Compile Include="Configuration\ModuleState.cs" />
     <Compile Include="Controller\CheckModuleBindingConfigurationAttribute.cs" />
+    <Compile Include="Controller\ManagementWebModuleBindingFilter.cs" />
     <Compile Include="Controller\OnPremiseConnectionModuleBindingFilter.cs" />
     <Compile Include="Controller\OnPremiseConnectionsModule.cs" />
     <Compile Include="Controller\RelayModuleBindingFilter.cs" />
