@@ -109,17 +109,17 @@ namespace Thinktecture.Relay.Server
 
 			var builder = new ContainerBuilder();
 
-			if (configuration.EnableManagementWeb)
+			if (configuration.EnableManagementWeb != ModuleBinding.False)
 			{
 				builder.RegisterModule<ManagementWebModule>();
 			}
 
-			if (configuration.EnableRelaying)
+			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
 				builder.RegisterModule<RelayingModule>();
 			}
 
-			if (configuration.EnableOnPremiseConnections)
+			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
 				builder.RegisterModule<OnPremiseConnectionsModule>();
 			}
@@ -194,7 +194,7 @@ namespace Thinktecture.Relay.Server
 		{
 			var config = container.Resolve<IConfiguration>();
 
-			if (!config.EnableOnPremiseConnections)
+			if (config.EnableOnPremiseConnections == ModuleBinding.False)
 			{
 				return;
 			}
@@ -233,20 +233,20 @@ namespace Thinktecture.Relay.Server
 			httpConfig.Filters.Add(new NLogActionFilter(logger));
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
-			if (configuration.EnableRelaying)
+			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
 				logger.Info("Relaying enabled");
 				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new {controller = "Client", action = "Relay"});
 			}
 
-			if (configuration.EnableOnPremiseConnections)
+			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
 				logger.Info("On-premise connections enabled");
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new {controller = "Response", action = "Forward"});
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new {controller = "Request", action = "Get"});
 			}
 
-			if (configuration.EnableManagementWeb)
+			if (configuration.EnableManagementWeb != ModuleBinding.False)
 			{
 				logger.Info("Management web enabled");
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
@@ -262,7 +262,7 @@ namespace Thinktecture.Relay.Server
 			var configuration = container.Resolve<IConfiguration>();
 			var logger = container.Resolve<ILogger>();
 
-			if (!configuration.EnableManagementWeb)
+			if (configuration.EnableManagementWeb == ModuleBinding.False)
 			{
 				return;
 			}

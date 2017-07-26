@@ -14,9 +14,9 @@ namespace Thinktecture.Relay.Server.Configuration
 		public int ConnectionTimeout { get; private set; }
 		public int KeepAliveInterval { get; private set; }
 		public bool UseInsecureHttp { get; private set; }
-		public bool EnableManagementWeb { get; private set; }
-		public bool EnableRelaying { get; private set; }
-		public bool EnableOnPremiseConnections { get; private set; }
+		public ModuleBinding EnableManagementWeb { get; private set; }
+		public ModuleBinding EnableRelaying { get; private set; }
+		public ModuleBinding EnableOnPremiseConnections { get; private set; }
 		public string HostName { get; private set; }
 		public int Port { get; private set; }
 		public string ManagementWebLocation { get; private set; }
@@ -25,6 +25,7 @@ namespace Thinktecture.Relay.Server.Configuration
 		{
 			int tmpInt;
 			bool tmpBool;
+			ModuleBinding tmpModuleBinding;
 
 			if (!Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out tmpInt))
 			{
@@ -72,22 +73,22 @@ namespace Thinktecture.Relay.Server.Configuration
 				Port = tmpInt;
 			}
 
-			EnableManagementWeb = true;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], out tmpBool))
+			EnableManagementWeb = ModuleBinding.True;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], true, out tmpModuleBinding))
 			{
-				EnableManagementWeb = tmpBool;
+				EnableManagementWeb = tmpModuleBinding;
 			}
 
-			EnableRelaying = true;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableRelaying"], out tmpBool))
+			EnableRelaying = ModuleBinding.True;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableRelaying"], true, out tmpModuleBinding))
 			{
-				EnableRelaying = tmpBool;
+				EnableRelaying = tmpModuleBinding;
 			}
 
-			EnableOnPremiseConnections = true;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableOnPremiseConnections"], out tmpBool))
+			EnableOnPremiseConnections = ModuleBinding.True;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableOnPremiseConnections"], true, out tmpModuleBinding))
 			{
-				EnableOnPremiseConnections = tmpBool;
+				EnableOnPremiseConnections = tmpModuleBinding;
 			}
 
 			UseInsecureHttp = false;
