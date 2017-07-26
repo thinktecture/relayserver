@@ -191,6 +191,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Owin\BlockNonLocalRequestsMiddleware.cs" />
     <Compile Include="Communication\ConnectionInformation.cs" />
     <Compile Include="Communication\IMessageDispatcher.cs" />
     <Compile Include="Communication\InProcess\InProcessMessageDispatcher.cs" />
