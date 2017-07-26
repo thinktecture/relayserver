@@ -49,6 +49,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "en", "en", "{EB57D91E-69B1-
 		Documentation\en\relayserver.md = Documentation\en\relayserver.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ManagementWeb", "ManagementWeb", "{2A39E343-7677-413A-B53A-3A553252371A}"
+	ProjectSection(SolutionItems) = preProject
+		gulpfile.js = gulpfile.js
+		package.json = package.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
