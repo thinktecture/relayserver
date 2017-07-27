@@ -160,7 +160,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				catch (Exception ex)
 				{
 					var randomWaitTime = GetRandomWaitTime();
-					_logger.Info(ex, "Could not connect and authenticate to relay server - re-trying in {0} seconds", randomWaitTime.TotalSeconds);
+                    _logger.Info("Could not authenticate with relay server - re-trying in {0} seconds", randomWaitTime.TotalSeconds);
+                    _logger.Trace(ex, "Could not authenticate with relay server - re-trying in {0} seconds", randomWaitTime.TotalSeconds);
 					Thread.Sleep(randomWaitTime);
 				}
 			}
@@ -189,10 +190,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				await Start();
 				_logger.Info("Connected to relay server #{0}", _id);
 			}
-			catch
+			catch (Exception ex)
 			{
-				_logger.Info("Error while connecting to relay server #{0}", _id);
-				await Task.Delay(5000).ContinueWith(_ => Start());
+                _logger.Info("Error while connecting to relay server #{0}", _id);
+                _logger.Trace(ex, "Error while connecting to relay server #{0}", _id);
 			}
 		}
 
@@ -520,11 +521,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			base.OnClosed();
 
-			if (!_stopRequested)
-			{
-				_logger.Debug("Reconnecting in 5 seconds");
-				Task.Delay(5000).ContinueWith(_ => Connect());
-			}
+            if (!_stopRequested)
+            {
+                var randomWaitTime = GetRandomWaitTime();
+                _logger.Debug("Reconnecting in {0} seconds", randomWaitTime.TotalSeconds);
+                Task.Delay(randomWaitTime).ContinueWith(_ => Connect());
+            }
 		}
 
 		public Task<HttpResponseMessage> GetToRelay(string relativeUrl, CancellationToken cancellationToken)
