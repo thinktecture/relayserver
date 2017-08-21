@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using System.Data.Entity;
 using System.IO;
@@ -195,8 +195,8 @@ namespace Thinktecture.Relay.Server
 			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
 			{
-				AllowedAudiences = new[] {audience},
-				IssuerSecurityTokenProviders = new[] {new SymmetricKeyIssuerSecurityTokenProvider(issuer, key)}
+				AllowedAudiences = new[] { audience },
+				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) }
 			});
 		}
 
@@ -211,7 +211,7 @@ namespace Thinktecture.Relay.Server
 
 			GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(config.ConnectionTimeout);
 			GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(config.DisconnectTimeout);
-		    GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
+			GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
 
 			app.MapSignalR<OnPremisesConnection>("/signalr", new ConnectionConfiguration
 			{
@@ -249,14 +249,14 @@ namespace Thinktecture.Relay.Server
 			if (configuration.EnableRelaying)
 			{
 				logger.Info("Relaying enabled");
-				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new {controller = "Client", action = "Relay"});
+				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
 			}
 
 			if (configuration.EnableOnPremiseConnections)
 			{
 				logger.Info("On-premise connections enabled");
-				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new {controller = "Response", action = "Forward"});
-				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new {controller = "Request", action = "Get"});
+				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
+				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
 			}
 
 			if (configuration.EnableManagementWeb)

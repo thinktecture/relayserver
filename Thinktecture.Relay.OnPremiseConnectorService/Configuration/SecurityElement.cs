@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+using System.Configuration;
 
 namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 {
@@ -20,12 +20,12 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 
 		public AuthenticationType AuthenticationType
 		{
-			get { return (AuthenticationType) this[_authenticationType]; }
+			get { return (AuthenticationType)this[_authenticationType]; }
 		}
 
 		public IdentityElement Identity
 		{
-			get { return (IdentityElement) this[_identity]; }
+			get { return (IdentityElement)this[_identity]; }
 		}
 	}
 }

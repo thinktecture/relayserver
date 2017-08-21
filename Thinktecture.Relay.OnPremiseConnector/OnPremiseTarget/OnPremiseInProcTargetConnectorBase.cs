@@ -16,13 +16,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		protected OnPremiseInProcTargetConnectorBase(ILogger logger, int requestTimeout)
 		{
-			if (logger == null)
-				throw new ArgumentNullException(nameof(logger));
 			if (requestTimeout < 0)
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
 
 			_requestTimeout = requestTimeout;
-			_logger = logger;
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		protected abstract IOnPremiseInProcHandler CreateHandler();

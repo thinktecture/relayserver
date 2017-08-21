@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
@@ -8,92 +8,92 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-    [Authorize(Roles = "Admin")]
-    public class UserController : ApiController
-    {
-        private readonly IUserRepository _userRepository;
+	[Authorize(Roles = "Admin")]
+	public class UserController : ApiController
+	{
+		private readonly IUserRepository _userRepository;
 
-        public UserController(IUserRepository userRepository)
-        {
-            _userRepository = userRepository;
-        }
+		public UserController(IUserRepository userRepository)
+		{
+			_userRepository = userRepository;
+		}
 
-        [AllowAnonymous]
-        [HttpPost]
-        [ActionName("firsttime")]
-        public IHttpActionResult CreateFirstUser(CreateUser user)
-        {
-            if (_userRepository.Any())
-            {
-                return new StatusCodeResult(HttpStatusCode.Forbidden, Request);
-            }
+		[AllowAnonymous]
+		[HttpPost]
+		[ActionName("firsttime")]
+		public IHttpActionResult CreateFirstUser(CreateUser user)
+		{
+			if (_userRepository.Any())
+			{
+				return new StatusCodeResult(HttpStatusCode.Forbidden, Request);
+			}
 
-            return Create(user);
-        }
+			return Create(user);
+		}
 
-        [HttpGet]
-        [ActionName("users")]
-        public IEnumerable<User> List()
-        {
-            return _userRepository.List();
-        }
+		[HttpGet]
+		[ActionName("users")]
+		public IEnumerable<User> List()
+		{
+			return _userRepository.List();
+		}
 
-        [HttpPost]
-        [ActionName("user")]
-        public IHttpActionResult Create(CreateUser user)
-        {
-            if (user == null)
-            {
-                return BadRequest();
-            }
+		[HttpPost]
+		[ActionName("user")]
+		public IHttpActionResult Create(CreateUser user)
+		{
+			if (user == null)
+			{
+				return BadRequest();
+			}
 
-            var id = _userRepository.Create(user.UserName, user.Password);
+			var id = _userRepository.Create(user.UserName, user.Password);
 
-            if (id == Guid.Empty)
-            {
-                return BadRequest();
-            }
+			if (id == Guid.Empty)
+			{
+				return BadRequest();
+			}
 
-            // TODO: Location
-            return Created("", id);
-        }
+			// TODO: Location
+			return Created("", id);
+		}
 
-        [HttpGet]
-        [ActionName("user")]
-        public IHttpActionResult Get(Guid id)
-        {
-            var user = _userRepository.Get(id);
+		[HttpGet]
+		[ActionName("user")]
+		public IHttpActionResult Get(Guid id)
+		{
+			var user = _userRepository.Get(id);
 
-            if (user == null)
-            {
-                return BadRequest();
-            }
+			if (user == null)
+			{
+				return BadRequest();
+			}
 
-            return Ok(user);
-        }
+			return Ok(user);
+		}
 
-        [HttpDelete]
-        [ActionName("user")]
-        public IHttpActionResult Delete(Guid id)
-        {
-            var result = _userRepository.Delete(id);
+		[HttpDelete]
+		[ActionName("user")]
+		public IHttpActionResult Delete(Guid id)
+		{
+			var result = _userRepository.Delete(id);
 
-            return result ? (IHttpActionResult) Ok() : BadRequest();
-        }
+			return result ? (IHttpActionResult)Ok() : BadRequest();
+		}
 
-        [HttpPut]
-        [ActionName("user")]
-        public IHttpActionResult Update(UpdateUser user)
-        {
-            if (user == null)
-            {
-                return BadRequest();
-            }
+		[HttpPut]
+		[ActionName("user")]
+		public IHttpActionResult Update(UpdateUser user)
+		{
+			if (user == null)
+			{
+				return BadRequest();
+			}
 
-            var result = _userRepository.Update(user.Id, user.Password);
+			var result = _userRepository.Update(user.Id, user.Password);
 
-            return result ? (IHttpActionResult) Ok() : BadRequest();
-        }
+			return result ? (IHttpActionResult)Ok() : BadRequest();
+		}
 
 		[HttpGet]
 		[ActionName("userNameAvailability")]
@@ -106,5 +106,5 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 			return Conflict();
 		}
-    }
+	}
 }

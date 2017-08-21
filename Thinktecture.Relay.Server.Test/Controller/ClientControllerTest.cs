@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -250,7 +250,7 @@ namespace Thinktecture.Relay.Server.Controller
 			backendCommunicationMock.Setup(b => b.SendOnPremiseConnectorRequest("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda", clientRequestFake)).Returns(Task.FromResult(0));
 			backendCommunicationMock.Setup(b => b.GetResponseAsync("239b6e03-9795-450d-bdd1-ab72900f1a98")).ReturnsAsync(onPremiseTargetReponseFake);
 			httpResponseMessageBuilderMock.Setup(h => h.BuildFrom(onPremiseTargetReponseFake, linkFake)).Returns(httpResponseMessageFake);
-			traceManagerMock.Setup(t => t.GetCurrentTraceConfigurationId(linkFake.Id)).Returns((Guid?) null);
+			traceManagerMock.Setup(t => t.GetCurrentTraceConfigurationId(linkFake.Id)).Returns((Guid?)null);
 			requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, HttpStatusCode.Found, Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), "c9208bdb-c195-460d-b84e-6c146bb252e5", "Foo/Bar/Baz"));
 
 			result = await sut.Relay("Foo/Bar/Baz");

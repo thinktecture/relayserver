@@ -14,7 +14,7 @@ namespace Thinktecture.Relay.Server.Dto
 		public bool AllowLocalClientRequestsOnly { get; set; }
 		public int MaximumLinks { get; set; }
 		public DateTime CreationDate { get; set; }
-        public bool IsConnected { get; set; }
-	    public List<string> Connections { get; set; }
+		public bool IsConnected { get; set; }
+		public List<string> Connections { get; set; }
 	}
 }

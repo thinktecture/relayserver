@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 
 namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
@@ -21,12 +21,12 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 
 		public string UserName
 		{
-			get { return (string) this[_userName]; }
+			get { return (string)this[_userName]; }
 		}
 
 		public string Password
 		{
-			get { return (string) this[_password]; }
+			get { return (string)this[_password]; }
 		}
 	}
 }

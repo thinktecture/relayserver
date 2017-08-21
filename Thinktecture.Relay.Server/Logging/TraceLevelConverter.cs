@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Logging
 	{
 		public LogLevel Convert(TraceLevel level)
 		{
-			switch(level)
+			switch (level)
 			{
 				case TraceLevel.Off:
 					return LogLevel.Off;

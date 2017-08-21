@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Filters
 
 		public NLogActionFilter(ILogger logger)
 		{
-			if(logger == null)
+			if (logger == null)
 				throw new ArgumentNullException(nameof(logger));
 
 			_logger = logger;
@@ -32,9 +32,9 @@ namespace Thinktecture.Relay.Server.Filters
 
 		public async Task<HttpResponseMessage> ExecuteActionFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
 		{
-			if(actionContext == null)
+			if (actionContext == null)
 				throw new ArgumentNullException(nameof(actionContext));
-			if(continuation == null)
+			if (continuation == null)
 				throw new ArgumentNullException(nameof(continuation));
 
 			_logger.Debug("[Request] {0}: {1}. Arguments: {2}", actionContext.Request?.Method, actionContext.Request?.RequestUri, SerializeArguments(actionContext.ActionArguments));
@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Server.Filters
 			{
 				return JsonConvert.SerializeObject(arguments, _jsonSettings);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				_logger.Error(ex, "Error during serializing action argements.");
 				return null;

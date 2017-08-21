@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
@@ -11,6 +11,6 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		Guid? GetCurrentTraceConfigurationId(Guid linkId);
 		void Trace(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, Guid traceConfigurationId);
 		Task<IEnumerable<Trace>> GetTracesAsync(Guid traceConfigurationId);
-	    Task<TraceFile> GetTraceFileAsync(string headerFileName);
+		Task<TraceFile> GetTraceFileAsync(string headerFileName);
 	}
 }

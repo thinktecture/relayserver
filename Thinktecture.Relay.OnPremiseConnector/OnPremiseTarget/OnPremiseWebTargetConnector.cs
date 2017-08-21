@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -64,7 +64,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			{
 				try
 				{
-					webResponse = (HttpWebResponse) await webRequest.GetResponseAsync();
+					webResponse = (HttpWebResponse)await webRequest.GetResponseAsync();
 				}
 				catch (WebException wex)
 				{
@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 					if (wex.Status == WebExceptionStatus.ProtocolError)
 					{
-						webResponse = (HttpWebResponse) wex.Response;
+						webResponse = (HttpWebResponse)wex.Response;
 					}
 				}
 
@@ -123,7 +123,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			var uri = String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url);
 			var webRequest = WebRequest.CreateHttp(uri);
 			webRequest.Method = onPremiseTargetRequest.HttpMethod;
-			webRequest.Timeout = _requestTimeout*1000;
+			webRequest.Timeout = _requestTimeout * 1000;
 
 			foreach (var httpHeader in onPremiseTargetRequest.HttpHeaders)
 			{

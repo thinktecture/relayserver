@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Web.Http.Tracing;
 using NLog;
@@ -12,9 +12,9 @@ namespace Thinktecture.Relay.Server.Logging
 
 		public NLogTraceWriter(ILogger logger, ITraceLevelConverter traceLevelConverter)
 		{
-			if(logger == null)
+			if (logger == null)
 				throw new ArgumentNullException(nameof(logger));
-			if(traceLevelConverter == null)
+			if (traceLevelConverter == null)
 				throw new ArgumentNullException(nameof(traceLevelConverter));
 
 			_logger = logger;

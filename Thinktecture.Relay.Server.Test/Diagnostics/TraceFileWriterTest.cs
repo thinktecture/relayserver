@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -28,9 +28,9 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 			Thread.Sleep(100); // File write is async
 
-            var referenceObject = JsonConvert.DeserializeObject<IDictionary<string, string>>(File.ReadAllText("test.headers.txt", Encoding.UTF8));
+			var referenceObject = JsonConvert.DeserializeObject<IDictionary<string, string>>(File.ReadAllText("test.headers.txt", Encoding.UTF8));
 
-		    referenceObject.ShouldBeEquivalentTo(headers);
+			referenceObject.ShouldBeEquivalentTo(headers);
 
 			File.Delete("test.headers.txt");
 		}

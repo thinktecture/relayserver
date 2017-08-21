@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Logging
 
 		public Task LogAsync(ExceptionLoggerContext ctx, CancellationToken cancellationToken)
 		{
-			if(ctx == null)
+			if (ctx == null)
 				throw new ArgumentNullException(nameof(ctx));
 
 			_logger.Error(ctx.Exception, "Url: {0}, Http method: {1}.", ctx.Request?.RequestUri, ctx.Request?.Method);

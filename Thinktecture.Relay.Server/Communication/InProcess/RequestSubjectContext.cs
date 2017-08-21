@@ -1,37 +1,37 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Reactive.Subjects;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
 {
-    public class RequestSubjectContext : IDisposable
-    {
-        public Subject<IOnPremiseTargetRequest> Subject { get; }
-        public int ConnectionCount => _connectionIds.Count;
+	public class RequestSubjectContext : IDisposable
+	{
+		public Subject<IOnPremiseTargetRequest> Subject { get; }
+		public int ConnectionCount => _connectionIds.Count;
 
-        private readonly ConcurrentDictionary<string, string> _connectionIds;
+		private readonly ConcurrentDictionary<string, string> _connectionIds;
 
-        public RequestSubjectContext()
-        {
-            Subject = new Subject<IOnPremiseTargetRequest>();
-            _connectionIds = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
+		public RequestSubjectContext()
+		{
+			Subject = new Subject<IOnPremiseTargetRequest>();
+			_connectionIds = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+		}
 
-        public void AddConnection(string connectionId)
-        {
-            _connectionIds.TryAdd(connectionId, connectionId);
-        }
+		public void AddConnection(string connectionId)
+		{
+			_connectionIds.TryAdd(connectionId, connectionId);
+		}
 
-        public void RemoveConnection(string connectionId)
-        {
-            string id;
-            _connectionIds.TryRemove(connectionId, out id);
-        }
+		public void RemoveConnection(string connectionId)
+		{
+			string id;
+			_connectionIds.TryRemove(connectionId, out id);
+		}
 
-        public void Dispose()
-        {
-            Subject.Dispose();
-        }
-    }
+		public void Dispose()
+		{
+			Subject.Dispose();
+		}
+	}
 }

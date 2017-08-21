@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	{
 		public Task WriteHeaderFile(string fileName, IDictionary<string, string> headers)
 		{
-		    var json = JsonConvert.SerializeObject(headers);
+			var json = JsonConvert.SerializeObject(headers);
 			return WriteFile(fileName, Encoding.UTF8.GetBytes(json));
 		}
 

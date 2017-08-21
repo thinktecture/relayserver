@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.Server.SignalR
 					}
 				}
 			}
-			catch(Exception) { } // silently catch, multiple services could try to delete files at the same time
+			catch (Exception) { } // silently catch, multiple services could try to delete files at the same time
 		}
 
 		public void Save(string requestId, byte[] data)

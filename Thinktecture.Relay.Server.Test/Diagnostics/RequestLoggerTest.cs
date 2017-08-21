@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using FluentAssertions;
@@ -147,8 +147,8 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			};
 			var onPremiseTargetResponse = new OnPremiseTargetResponse
 			{
-				RequestStarted = new DateTime(2014,1,3),
-				RequestFinished = new DateTime(2014,1,4),
+				RequestStarted = new DateTime(2014, 1, 3),
+				RequestFinished = new DateTime(2014, 1, 4),
 				Body = new byte[] { 0, 0 }
 			};
 			RequestLogEntry result = null;

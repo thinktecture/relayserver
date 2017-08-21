@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using NLog;
 
@@ -115,7 +115,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			{
 				ActiveConnectionTimeoutInSeconds = tmpInt;
 			}
-			
+
 			LogSettings(logger);
 		}
 

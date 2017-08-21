@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		private static Func<IOnPremiseInProcHandler> CreateFactory(Type type)
 		{
-			return () => (IOnPremiseInProcHandler) Activator.CreateInstance(type);
+			return () => (IOnPremiseInProcHandler)Activator.CreateInstance(type);
 		}
 
 		protected override IOnPremiseInProcHandler CreateHandler()

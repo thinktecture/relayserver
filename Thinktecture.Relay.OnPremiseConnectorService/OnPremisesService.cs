@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using System.Linq;
 using System.Reflection;
@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 		{
 			try
 			{
-				var section = (RelayServerSection) ConfigurationManager.GetSection("relayServer");
+				var section = (RelayServerSection)ConfigurationManager.GetSection("relayServer");
 
 				if (section.OnPremiseTargets.Count == 0)
 					throw new ConfigurationErrorsException("At least one on-premise target needs to be configured");
@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 							throw new ConfigurationErrorsException("The user name cannot be null or empty when using authentication type 'Identity'");
 
 						_connector = new RelayServerConnector(section.Security.Identity.UserName, section.Security.Identity.Password,
-							new Uri(section.BaseUrl), (int) section.RequestTimeout.TotalSeconds);
+							new Uri(section.BaseUrl), (int)section.RequestTimeout.TotalSeconds);
 						break;
 
 					default:
