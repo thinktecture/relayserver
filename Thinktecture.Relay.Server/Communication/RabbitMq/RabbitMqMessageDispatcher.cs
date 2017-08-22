@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Text;
@@ -35,20 +35,20 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			DeclareExchange(_EXCHANGE_NAME);
 		}
 
-		public IObservable<IOnPremiseTargetRequest> OnRequestReceived(string onPremiseId, string connectionId, bool noAck)
+		public IObservable<IOnPremiseTargetRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
 		{
 			return Observable.Create<IOnPremiseTargetRequest>(observer =>
 			{
-				var queueName = "Request " + onPremiseId;
+				var queueName = "Request " + linkId;
 				DeclareQueue(queueName);
-				_model.QueueBind(queueName, _EXCHANGE_NAME, onPremiseId);
+				_model.QueueBind(queueName, _EXCHANGE_NAME, linkId.ToString());
 
-				_logger.Debug("Creating request consumer. OnPremiseId: {0}, ConnectionId: {1}, supportsAck: {2}", onPremiseId, connectionId, !noAck);
+				_logger.Debug("Creating request consumer. OnPremiseId: {0}, ConnectionId: {1}, supportsAck: {2}", linkId, connectionId, !noAck);
 				var consumer = new EventingBasicConsumer(_model);
 
 				var consumerTag = _model.BasicConsume(queueName, noAck, consumer);
 
-				EventHandler<BasicDeliverEventArgs> onReceived = (sender, args) =>
+				void OnReceived(object sender, BasicDeliverEventArgs args)
 				{
 					try
 					{
@@ -66,31 +66,32 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 							_model.BasicAck(args.DeliveryTag, false);
 						}
 					}
-				};
-				consumer.Received += onReceived;
+				}
+
+				consumer.Received += OnReceived;
 
 				return new DelegatingDisposable(_logger, () =>
 				{
-					_logger.Debug("Disposing request consumer. OnPremiseId: {0}, ConnectionId: {1}", onPremiseId, connectionId);
-					consumer.Received -= onReceived;
+					_logger.Debug("Disposing request consumer. OnPremiseId: {0}, ConnectionId: {1}", linkId, connectionId);
+					consumer.Received -= OnReceived;
 					_model.BasicCancel(consumerTag);
 				});
 			});
 		}
 
-		public IObservable<IOnPremiseTargetResponse> OnResponseReceived(string originId)
+		public IObservable<IOnPremiseTargetResponse> OnResponseReceived(Guid originId)
 		{
 			return Observable.Create<IOnPremiseTargetResponse>(observer =>
 			{
 				var queueName = "Response " + originId;
 				DeclareQueue(queueName);
-				_model.QueueBind(queueName, _EXCHANGE_NAME, originId);
+				_model.QueueBind(queueName, _EXCHANGE_NAME, originId.ToString());
 
 				_logger.Debug("Creating response consumer. OriginId: {0}", originId);
 				var consumer = new EventingBasicConsumer(_model);
 				var consumerTag = _model.BasicConsume(queueName, true, consumer);
 
-				EventHandler<BasicDeliverEventArgs> onReceived = (sender, args) =>
+				void OnReceived(object sender, BasicDeliverEventArgs args)
 				{
 					try
 					{
@@ -103,26 +104,26 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					{
 						_logger.Error(ex, "Error during reception of an request via RabbitMQ.");
 					}
-				};
-				consumer.Received += onReceived;
+				}
+
+				consumer.Received += OnReceived;
 
 				return new DelegatingDisposable(_logger, () =>
 				{
 					_logger.Debug("Disposing response consumer. OriginId: {0}", originId);
-					consumer.Received -= onReceived;
+					consumer.Received -= OnReceived;
 					_model.BasicCancel(consumerTag);
 				});
 			});
 		}
 
-		public void AcknowledgeRequest(string onPremiseId, string acknowledgeId)
+		public void AcknowledgeRequest(Guid linkId, string acknowledgeId)
 		{
-			ulong deliveryTag;
-			if (UInt64.TryParse(acknowledgeId, out deliveryTag))
+			if (UInt64.TryParse(acknowledgeId, out var deliveryTag))
 				_model.BasicAck(deliveryTag, false);
 		}
 
-		public Task DispatchRequest(string onPremiseId, IOnPremiseTargetRequest request)
+		public Task DispatchRequest(Guid linkId, IOnPremiseTargetRequest request)
 		{
 			var content = _encoding.GetBytes(JsonConvert.SerializeObject(request));
 			var props = new BasicProperties()
@@ -130,12 +131,12 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				ContentEncoding = "application/json",
 				DeliveryMode = 2
 			};
-			_model.BasicPublish(_EXCHANGE_NAME, onPremiseId, false, props, content);
+			_model.BasicPublish(_EXCHANGE_NAME, linkId.ToString(), false, props, content);
 
 			return Task.CompletedTask;
 		}
 
-		public Task DispatchResponse(string originId, IOnPremiseTargetResponse response)
+		public Task DispatchResponse(Guid originId, IOnPremiseTargetResponse response)
 		{
 			var content = _encoding.GetBytes(JsonConvert.SerializeObject(response));
 			var props = new BasicProperties()
@@ -143,7 +144,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				ContentEncoding = "application/json",
 				DeliveryMode = 2
 			};
-			_model.BasicPublish(_EXCHANGE_NAME, originId, false, props, content);
+			_model.BasicPublish(_EXCHANGE_NAME, originId.ToString(), false, props, content);
 
 			return Task.CompletedTask;
 		}

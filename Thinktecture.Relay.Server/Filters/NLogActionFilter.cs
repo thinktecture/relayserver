@@ -20,10 +20,8 @@ namespace Thinktecture.Relay.Server.Filters
 
 		public NLogActionFilter(ILogger logger)
 		{
-			if (logger == null)
-				throw new ArgumentNullException(nameof(logger));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-			_logger = logger;
 			_jsonSettings = new JsonSerializerSettings()
 			{
 				ReferenceLoopHandling = ReferenceLoopHandling.Ignore

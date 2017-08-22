@@ -6,7 +6,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 {
 	public class TraceFile
 	{
-		private static readonly IEnumerable<string> ViewableContentTypes = new[]
+		private static readonly IEnumerable<string> _viewableContentTypes = new[]
 		{
 			"text/",
 			"application/json"
@@ -19,53 +19,33 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 		public IDictionary<string, string> Headers
 		{
-			get { return _caseInsensitiveHeaders; }
-			set
-			{
-				_caseInsensitiveHeaders = new Dictionary<string, string>(value, StringComparer.OrdinalIgnoreCase);
-			}
+			get => _caseInsensitiveHeaders;
+			set => _caseInsensitiveHeaders = new Dictionary<string, string>(value, StringComparer.OrdinalIgnoreCase);
 		}
 
 		public byte[] Content { get; set; }
 
-		public bool IsViewable
-		{
-			get { return ContentIsViewable(); }
-		}
+		public bool IsViewable => ContentIsViewable();
 
-		public bool IsContentAvailable
-		{
-			get { return CheckIfContentIsAvailable(); }
-		}
+		public bool IsContentAvailable => CheckIfContentIsAvailable();
 
 		private bool CheckIfContentIsAvailable()
 		{
-			string tmp;
-
-			if (!Headers.TryGetValue("content-length", out tmp))
-			{
+			if (!Headers.TryGetValue("content-length", out var tmp))
 				return false;
-			}
 
-			long contentLength;
-
-			if (!long.TryParse(tmp, out contentLength))
-			{
+			if (!Int64.TryParse(tmp, out var contentLength))
 				return false;
-			}
 
 			return contentLength > 0;
 		}
 
 		private bool ContentIsViewable()
 		{
-			string contentType;
-			if (!Headers.TryGetValue("content-type", out contentType))
-			{
+			if (!Headers.TryGetValue("content-type", out var contentType))
 				return false;
-			}
 
-			return ViewableContentTypes.Any(viewableContentType => contentType.Contains(viewableContentType.ToLowerInvariant()));
+			return _viewableContentTypes.Any(viewableContentType => contentType.Contains(viewableContentType.ToLowerInvariant()));
 		}
 	}
 }

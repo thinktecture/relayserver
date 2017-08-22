@@ -27,8 +27,7 @@ namespace Thinktecture.Relay.Server.Security
 
 		public override Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
 		{
-			Guid linkId;
-			if (_linkRepository.Authenticate(context.UserName, context.Password, out linkId))
+			if (_linkRepository.Authenticate(context.UserName, context.Password, out var linkId))
 			{
 				var identity = new ClaimsIdentity(context.Options.AuthenticationType);
 				identity.AddClaim(new Claim(identity.NameClaimType, context.UserName));

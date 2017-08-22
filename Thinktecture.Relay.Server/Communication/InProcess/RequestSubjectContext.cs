@@ -25,8 +25,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 
 		public void RemoveConnection(string connectionId)
 		{
-			string id;
-			_connectionIds.TryRemove(connectionId, out id);
+			_connectionIds.TryRemove(connectionId, out var id);
 		}
 
 		public void Dispose()

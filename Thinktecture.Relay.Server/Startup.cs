@@ -47,7 +47,6 @@ namespace Thinktecture.Relay.Server
 			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
 
 			var container = RegisterServices();
-			container.Resolve<IBackendCommunication>(); // ensure that the BUS to rabbitMQ starts up before accepting connections
 			app.UseAutofacMiddleware(container);
 
 			app.UseCors(CorsOptions.AllowAll);
@@ -73,11 +72,11 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
 			builder.Register(ctx => ctx.Resolve<IRabbitMqFactory>().CreateConnection()).AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<RabbitMqMessageDispatcher>().AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance();
+			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance().AutoActivate(); // ensure that the BUS to rabbitMQ starts up before accepting connections
 
 			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
 			builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
-			builder.RegisterType<LocalAppDataPersistedSettings>().As<IPersistedSettings>().SingleInstance();
+			builder.RegisterType<LocalAppDataPersistedSettings>().As<IPersistedSettings>().SingleInstance().AutoActivate(); // fail fast: load setting immediatelly
 
 			builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
 			builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
@@ -96,7 +95,6 @@ namespace Thinktecture.Relay.Server
 
 			builder.Register(context => LogManager.GetLogger("Server")).As<ILogger>().SingleInstance();
 
-			// conditional registrations
 			if (String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["TemporaryRequestStoragePath"]))
 			{
 				builder.RegisterType<InMemoryPostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();

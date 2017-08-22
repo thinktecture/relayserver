@@ -129,8 +129,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			{
 				_logger.Trace("   adding header. header={0}, value={1}", httpHeader.Key, httpHeader.Value);
 
-				Action<HttpWebRequest, string> restrictedHeader;
-				if (_requestHeaderTransformations.TryGetValue(httpHeader.Key, out restrictedHeader))
+				if (_requestHeaderTransformations.TryGetValue(httpHeader.Key, out var restrictedHeader))
 				{
 					restrictedHeader(webRequest, httpHeader.Value);
 				}

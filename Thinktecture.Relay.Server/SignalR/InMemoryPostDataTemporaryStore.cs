@@ -3,92 +3,67 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using Thinktecture.Relay.Server.Configuration;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
 		private readonly ILogger _logger;
-
-		private class Entry
-		{
-			private readonly DateTime _timeoutDate;
-
-			public byte[] Data { get; private set; }
-
-			public bool IsTimedOut
-			{
-				get { return _timeoutDate < DateTime.UtcNow; }
-			}
-
-			public Entry(byte[] data)
-			{
-				_timeoutDate = DateTime.UtcNow.AddSeconds(10);
-				Data = data;
-			}
-		}
+		private readonly TimeSpan _storagePeriod;
 
 		private readonly ConcurrentDictionary<string, Entry> _data;
 		private readonly CancellationTokenSource _cancellationTokenSource;
 
-		public InMemoryPostDataTemporaryStore(ILogger logger)
+		public InMemoryPostDataTemporaryStore(ILogger logger, IConfiguration configuration)
 		{
-			_logger = logger;
+			if (configuration == null)
+				throw new ArgumentNullException(nameof(configuration));
+			if (configuration.TemporaryRequestStoragePeriod <= TimeSpan.Zero)
+				throw new ArgumentException($"{nameof(InMemoryPostDataTemporaryStore)}: Storage period must be positive. Provided value: {configuration.TemporaryRequestStoragePeriod}", nameof(configuration));
+
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_storagePeriod = configuration.TemporaryRequestStoragePeriod;
 			_data = new ConcurrentDictionary<string, Entry>();
 			_cancellationTokenSource = new CancellationTokenSource();
 
-			StartCleanUpTask();
+			StartCleanUpTask(_cancellationTokenSource.Token);
 		}
 
-		private void StartCleanUpTask()
+		private void StartCleanUpTask(CancellationToken token)
 		{
-			Task.Factory.StartNew(() =>
+			Task.Run(() =>
 			{
-				var cancellationToken = _cancellationTokenSource.Token;
-
-				while (!cancellationToken.IsCancellationRequested)
+				while (!token.IsCancellationRequested)
 				{
-					if (!cancellationToken.WaitHandle.WaitOne(1000))
-					{
+					if (!token.WaitHandle.WaitOne(1000))
 						CleanUp();
-					}
 				}
-			}, _cancellationTokenSource.Token);
+			}, token);
 		}
 
 		private void CleanUp()
 		{
 			foreach (var key in _data.Keys)
 			{
-				Entry entry;
-				if (_data.TryGetValue(key, out entry) && entry.IsTimedOut)
-				{
+				if (_data.TryGetValue(key, out var entry) && entry.IsTimedOut)
 					_data.TryRemove(key, out entry);
-				}
 			}
 		}
 
 		public void Save(string requestId, byte[] data)
 		{
-			_logger.Debug("Storing body for request id {0}", requestId);
+			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing body for request id {{0}}", requestId);
 
-			_data[requestId] = new Entry(data);
+			_data[requestId] = new Entry(data, _storagePeriod);
 		}
 
 		public byte[] Load(string requestId)
 		{
-			_logger.Debug("Loading body for request id {0}", requestId);
+			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading body for request id {{0}}", requestId);
 
-			Entry entry;
-			return _data.TryRemove(requestId, out entry) ? entry.Data : new byte[] { };
+			return _data.TryRemove(requestId, out var entry) ? entry.Data : new byte[] { };
 		}
-
-		public void Close()
-		{
-			_cancellationTokenSource.Cancel();
-		}
-
-		#region IDisposable
 
 		~InMemoryPostDataTemporaryStore()
 		{
@@ -97,9 +72,23 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public void Dispose()
 		{
-			Close();
+			_cancellationTokenSource.Cancel();
+			_cancellationTokenSource.Dispose();
 		}
 
-		#endregion
+		private class Entry
+		{
+			private readonly DateTime _timeoutDate;
+
+			public byte[] Data { get; }
+
+			public bool IsTimedOut => _timeoutDate < DateTime.UtcNow;
+
+			public Entry(byte[] data, TimeSpan storagePeriod)
+			{
+				_timeoutDate = DateTime.UtcNow.Add(storagePeriod);
+				Data = data;
+			}
+		}
 	}
 }

@@ -21,34 +21,12 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 			_maxRetries
 		};
 
-		protected override ConfigurationPropertyCollection Properties
-		{
-			get { return _properties; }
-		}
+		protected override ConfigurationPropertyCollection Properties => _properties;
 
-		public string BaseUrl
-		{
-			get { return (string)this[_baseUrl]; }
-		}
-
-		public TimeSpan RequestTimeout
-		{
-			get { return (TimeSpan)this[_requestTimeout]; }
-		}
-
-		public SecurityElement Security
-		{
-			get { return (SecurityElement)this[_security]; }
-		}
-
-		public OnPremiseTargetCollection OnPremiseTargets
-		{
-			get { return (OnPremiseTargetCollection)this[_onPremiseTargets]; }
-		}
-
-		public int MaxRetries
-		{
-			get { return (int)this[_maxRetries]; }
-		}
+		public string BaseUrl => (string)this[_baseUrl];
+		public TimeSpan RequestTimeout => (TimeSpan)this[_requestTimeout];
+		public SecurityElement Security => (SecurityElement)this[_security];
+		public OnPremiseTargetCollection OnPremiseTargets => (OnPremiseTargetCollection)this[_onPremiseTargets];
+		public int MaxRetries => (int)this[_maxRetries];
 	}
 }

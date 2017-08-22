@@ -80,8 +80,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 				finally
 				{
-					var disposable = handler as IDisposable;
-					if (disposable != null)
+					// ReSharper disable once SuspiciousTypeConversion.Global
+					if (handler is IDisposable disposable)
 					{
 						disposable.Dispose();
 					}
@@ -89,7 +89,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			}
 			catch (Exception ex)
 			{
-				_logger.Trace("Error creating handler. request-id={0}", ex, request.RequestId);
+				_logger.Trace(ex, "Error creating handler. request-id={0}", request.RequestId);
 
 				response.StatusCode = HttpStatusCode.InternalServerError;
 				response.HttpHeaders = new Dictionary<string, string>()

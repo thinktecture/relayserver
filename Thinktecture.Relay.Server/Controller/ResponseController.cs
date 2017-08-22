@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Results;
 using Autofac;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -21,7 +20,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_backendCommunication = scope.Resolve<IBackendCommunication>();
 		}
 
-		public async Task<OkResult> Forward(JToken message)
+		public async Task<IHttpActionResult> Forward(JToken message)
 		{
 			_logger.Trace("Forwarding {0}", message);
 

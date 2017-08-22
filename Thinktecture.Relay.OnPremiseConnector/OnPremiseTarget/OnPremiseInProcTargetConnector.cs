@@ -18,10 +18,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		public OnPremiseInProcTargetConnector(ILogger logger, int requestTimeout, Func<IOnPremiseInProcHandler> handlerFactory)
 			: base(logger, requestTimeout)
 		{
-			if (handlerFactory == null)
-				throw new ArgumentNullException(nameof(handlerFactory));
-
-			_handlerFactory = handlerFactory;
+			_handlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 		}
 
 		private static Func<IOnPremiseInProcHandler> CreateFactory(Type type)

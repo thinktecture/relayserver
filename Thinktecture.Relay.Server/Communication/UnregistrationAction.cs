@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Thinktecture.Relay.Server.Communication
 {
@@ -12,14 +12,9 @@ namespace Thinktecture.Relay.Server.Communication
 
 		public UnregistrationAction(string connectionId, Action action)
 		{
-			if (connectionId == null)
-				throw new ArgumentNullException(nameof(connectionId));
-			if (action == null)
-				throw new ArgumentNullException(nameof(action));
-
 			CreationDate = DateTime.UtcNow;
-			_action = action;
-			ConnectionId = connectionId;
+			_action = action ?? throw new ArgumentNullException(nameof(action));
+			ConnectionId = connectionId ?? throw new ArgumentNullException(nameof(connectionId));
 		}
 
 		public void Execute()

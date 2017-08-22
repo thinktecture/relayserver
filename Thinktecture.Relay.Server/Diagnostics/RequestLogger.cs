@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Dto;
@@ -19,12 +19,10 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			_pathSplitter = pathSplitter;
 		}
 
-		public void LogRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpStatusCode responseStatusCode, Guid linkId, string originId, string relayPath)
+		public void LogRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpStatusCode responseStatusCode, Guid linkId, Guid originId, string relayPath)
 		{
 			if (onPremiseConnectorRequest == null)
-			{
-				throw new ArgumentNullException("onPremiseConnectorRequest", "A client request must be set");
-			}
+				throw new ArgumentNullException(nameof(onPremiseConnectorRequest));
 
 			var onPremiseTargetInformation = GetOnPremiseTargetInformation(onPremiseTargetResponse);
 			var pathInformation = _pathSplitter.Split(relayPath);
@@ -39,7 +37,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				OnPremiseConnectorOutDate = onPremiseConnectorRequest.RequestFinished,
 				OnPremiseTargetInDate = onPremiseTargetInformation.OnPremiseTargetInDate,
 				OnPremiseTargetOutDate = onPremiseTargetInformation.OnPremiseTargetOutDate,
-				OriginId = Guid.Parse(originId),
+				OriginId = originId,
 				OnPremiseTargetKey = pathInformation.OnPremiseTargetKey,
 				LinkId = linkId
 			});

@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private static int _nextId;
 		private static readonly Random _random = new Random();
 
-		private int _heartbeatInterval;
+		private readonly object _lastHeartbeatLock;
 		private DateTime _lastHeartbeat = DateTime.MinValue;
 		private CancellationTokenSource _heartbeatCancellationTokenSource;
 
@@ -55,6 +55,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger;
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
+			_lastHeartbeatLock = new object();
 		}
 
 		public string RelayedRequestHeader { get; set; }
@@ -137,8 +138,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				key = key.Substring(0, key.Length - 1);
 			}
 
-			IOnPremiseTargetConnector old;
-			_connectors.TryRemove(key, out old);
+			_connectors.TryRemove(key, out var old);
 		}
 
 		private async Task<TokenResponse> GetAuthorizationTokenAsync()
@@ -180,7 +180,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				_eventsHooked = true;
 
 				Reconnecting += OnReconnecting;
-				Received += OnReceived;
+				Received += OnReceivedAsync;
 				Reconnected += OnReconnected;
 			}
 
@@ -250,7 +250,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger.Debug("Connection lost - trying to reconnect");
 		}
 
-		private async void OnReceived(string data)
+		private async void OnReceivedAsync(string data)
 		{
 			var ctx = new RequestContext();
 			OnPremiseTargetRequest request = null;
@@ -281,13 +281,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					return;
 				}
 
-				await Acknowledge(request);
+				await AcknowledgeAsync(request);
 
 				var key = request.Url.Split('/').FirstOrDefault();
 				if (key != null)
 				{
-					IOnPremiseTargetConnector connector;
-					if (_connectors.TryGetValue(key, out connector))
+					if (_connectors.TryGetValue(key, out var connector))
 					{
 						_logger.Trace("Found on-premise target. key={0}", key);
 
@@ -326,7 +325,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private async Task Acknowledge(IOnPremiseTargetRequest request)
+		private async Task AcknowledgeAsync(IOnPremiseTargetRequest request)
 		{
 			// older servers do not send acknowledge id, so we need to check for it not being null
 			if (!String.IsNullOrEmpty(request.AcknowledgeId))
@@ -346,36 +345,47 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				RequestId = request.RequestId,
 			}), Encoding.UTF8, "application/json"), CancellationToken.None);
 
-			await Acknowledge(request);
+			await AcknowledgeAsync(request);
 		}
 
 		private async Task HandleInitHeartbeatRequestAsync(IOnPremiseTargetRequest request)
 		{
-			_logger.Debug("Received initialize heartbeat from relay server #{0}", _id);
+			_logger.Debug($"{nameof(RelayServerConnection)}: Received initialize heartbeat from relay server #{{0}}", _id);
 
-			// cancel existing heartbeat if we already have one running
-			_heartbeatCancellationTokenSource?.Cancel(false);
+			_lastHeartbeat = DateTime.UtcNow;
+			request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
 
-			string heartbeatHeaderValue;
-			request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out heartbeatHeaderValue);
-
-			int heartbeatInterval;
-			if (Int32.TryParse(heartbeatHeaderValue, out heartbeatInterval))
+			if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
 			{
 				_logger.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
+				CancellationToken token;
 
-				_heartbeatInterval = heartbeatInterval;
-				_lastHeartbeat = DateTime.UtcNow;
-				_heartbeatCancellationTokenSource = new CancellationTokenSource();
+				lock (_lastHeartbeatLock)
+				{
+					// cancel existing heartbeat if we already have one running
+					TryDisposeCurrentCancellationTokenSource();
+					_heartbeatCancellationTokenSource = new CancellationTokenSource();
+
+					token = _heartbeatCancellationTokenSource.Token;
+				}
 
 #pragma warning disable 4014
 				// Justification: Heartbeat checking is intended to be done in background and not awaited
-				var token = _heartbeatCancellationTokenSource.Token;
-				Task.Delay(_heartbeatInterval * 1000, token).ContinueWith(_ => CheckHeartbeat(token), token);
+				CheckHeartbeatPeriodicallyAsync(TimeSpan.FromSeconds(heartbeatInterval), token);
 #pragma warning restore 4014
+
+			}
+			else
+			{
+				_logger.Warn("Heartbeat interval is not a valid integer: {0}", heartbeatHeaderValue);
+
+				lock (_lastHeartbeatLock)
+				{
+					TryDisposeCurrentCancellationTokenSource();
+				}
 			}
 
-			await Acknowledge(request);
+			await AcknowledgeAsync(request);
 		}
 
 		private async Task HandleHeartbeatRequestAsync(IOnPremiseTargetRequest request)
@@ -384,26 +394,39 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_lastHeartbeat = DateTime.UtcNow;
 
-			await Acknowledge(request);
+			await AcknowledgeAsync(request);
 		}
 
-		public Task CheckHeartbeat(CancellationToken token)
+		private async Task CheckHeartbeatPeriodicallyAsync(TimeSpan heartbeatInterval, CancellationToken token)
 		{
-			if (token.IsCancellationRequested)
-				return Task.CompletedTask;
-
-			_logger.Trace("Checking last heartbeat time. Interval: {0}s, last heartbeat: {1}", _heartbeatInterval, _lastHeartbeat);
-
-			// check if last heartbeat was within interval (and 10 seconds tolerance)
-			if (_lastHeartbeat <= DateTime.UtcNow.AddSeconds(-_heartbeatInterval - 10))
+			try
 			{
-				_logger.Warn("Last heartbeat was at {0}, and out of interval of {1}s. Forcing reconnect.", _lastHeartbeat, _heartbeatInterval);
-				ForceReconnect();
+				await Task.Run(async () =>
+				{
+					var intervalWithTolerance = heartbeatInterval.Add(TimeSpan.FromSeconds(2));
 
-				return Task.CompletedTask;
+					while (!token.IsCancellationRequested)
+					{
+						_logger.Trace("Checking last heartbeat time. Interval: {0}s, last heartbeat: {1}", heartbeatInterval, _lastHeartbeat);
+
+						if (_lastHeartbeat <= DateTime.UtcNow.Add(-intervalWithTolerance))
+						{
+							_logger.Warn("Last heartbeat was at {0}, and out of interval of {1}s. Forcing reconnect.", _lastHeartbeat, heartbeatInterval);
+
+							if (!_stopRequested)
+								ForceReconnect();
+
+							return;
+						}
+
+						await Task.Delay(heartbeatInterval, token);
+					}
+				}, token);
 			}
-
-			return Task.Delay(_heartbeatInterval * 1000, token).ContinueWith(_ => CheckHeartbeat(token), token);
+			catch (OperationCanceledException)
+			{
+				/* Cancellation has been requested */
+			}
 		}
 
 		private void ForceReconnect()
@@ -424,10 +447,20 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_stopRequested = true;
 			Stop();
 
-			_lastHeartbeat = DateTime.MinValue;
-			_heartbeatInterval = 0;
-			_heartbeatCancellationTokenSource?.Cancel();
-			_heartbeatCancellationTokenSource = null;
+			lock (_lastHeartbeatLock)
+			{
+				TryDisposeCurrentCancellationTokenSource();
+			}
+		}
+
+		private void TryDisposeCurrentCancellationTokenSource()
+		{
+			if (_heartbeatCancellationTokenSource != null)
+			{
+				_heartbeatCancellationTokenSource.Cancel();
+				_heartbeatCancellationTokenSource.Dispose();
+				_heartbeatCancellationTokenSource = null;
+			}
 		}
 
 		public List<string> GetOnPremiseTargetKeys()
@@ -454,7 +487,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger.Debug("Sending response from {0} to relay server", request.Url);
 
 			// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
-			Func<HttpContent> content = () => new StringContent(JsonConvert.SerializeObject(response), Encoding.UTF8, "application/json");
+			HttpContent GetContent() => new StringContent(JsonConvert.SerializeObject(response), Encoding.UTF8, "application/json");
 
 			var retryCount = 0;
 
@@ -462,7 +495,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				try
 				{
-					await PostToRelayAsync(ctx, content, cancellationToken);
+					await PostToRelayAsync(ctx, GetContent, cancellationToken);
 					return;
 				}
 				catch (Exception ex)
@@ -501,7 +534,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken)
 		{
-			return await SendToRelay(relativeUrl, HttpMethod.Get, setHeaders, null, cancellationToken);
+			return await SendToRelayAsync(relativeUrl, HttpMethod.Get, setHeaders, null, cancellationToken);
 		}
 
 		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Func<HttpContent> content, CancellationToken cancellationToken)
@@ -511,10 +544,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken)
 		{
-			return await SendToRelay(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
+			return await SendToRelayAsync(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
 		}
 
-		private async Task<HttpResponseMessage> SendToRelay(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> getContent,
+		private async Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> getContent,
 			CancellationToken cancellationToken)
 		{
 			if (String.IsNullOrWhiteSpace(relativeUrl))

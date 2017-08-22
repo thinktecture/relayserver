@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -32,12 +32,12 @@ namespace Thinktecture.Relay.Server.Repository
 		{
 			using (var context = new RelayContext())
 			{
-				var query = context.Links.AsQueryable();
+				var linksQuery = context.Links.AsQueryable();
 
 				if (!String.IsNullOrWhiteSpace(paging.SearchText))
 				{
 					var searchText = paging.SearchText.ToLower();
-					query = query.Where(w => w.UserName.ToLower().Contains(searchText) || w.SymbolicName.ToLower().Contains(searchText));
+					linksQuery = linksQuery.Where(w => w.UserName.Contains(searchText) || w.SymbolicName.Contains(searchText));
 				}
 
 				// Default sorting must be provided
@@ -47,24 +47,15 @@ namespace Thinktecture.Relay.Server.Repository
 					paging.SortDirection = SortDirection.Asc;
 				}
 
-				var count = query.Count();
+				var numberOfLinks = linksQuery.Count();
 
-				query = query.OrderByPropertyName(paging.SortField, paging.SortDirection);
-				query = query.ApplyPaging(paging);
-
-				var projection = query.Select(q => new
-				{
-					links = q,
-					connections = q.ActiveConnections.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout),
-				})
-					.ToList();
-
-				var queryResult = projection.Select(p => GetLinkFromDbLink(p.links)).ToList();
+				linksQuery = linksQuery.OrderByPropertyName(paging.SortField, paging.SortDirection);
+				linksQuery = linksQuery.ApplyPaging(paging);
 
 				var result = new PageResult<Link>()
 				{
-					Items = queryResult,
-					Count = count,
+					Items = GetLinkFromDbLink(linksQuery).ToList(),
+					Count = numberOfLinks,
 				};
 
 				return result;
@@ -75,21 +66,10 @@ namespace Thinktecture.Relay.Server.Repository
 		{
 			using (var context = new RelayContext())
 			{
-				var projection = context.Links
-					.Where(l => l.Id == linkId)
-					.Select(l => new
-					{
-						link = l,
-						connections = l.ActiveConnections.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout),
-					})
-					.SingleOrDefault();
+				var linkQuery = context.Links
+					.Where(l => l.Id == linkId);
 
-				if (projection == null || projection.link == null)
-				{
-					return null;
-				}
-
-				return GetLinkFromDbLink(projection.link);
+				return GetLinkFromDbLink(linkQuery).FirstOrDefault();
 			}
 		}
 
@@ -97,33 +77,36 @@ namespace Thinktecture.Relay.Server.Repository
 		{
 			using (var context = new RelayContext())
 			{
-				var link = context.Links.SingleOrDefault(p => p.UserName == linkName);
+				var linkQuery = context.Links
+					.Where(p => p.UserName == linkName);
 
-				if (link == null)
-				{
-					return null;
-				}
-
-				return GetLinkFromDbLink(link);
+				return GetLinkFromDbLink(linkQuery).FirstOrDefault();
 			}
 		}
 
-		private Link GetLinkFromDbLink(DbLink link)
+		private IQueryable<Link> GetLinkFromDbLink(IQueryable<DbLink> linksQuery)
 		{
-			return new Link
-			{
-				Id = link.Id,
-				CreationDate = link.CreationDate,
-				ForwardOnPremiseTargetErrorResponse = link.ForwardOnPremiseTargetErrorResponse,
-				IsDisabled = link.IsDisabled,
-				MaximumLinks = link.MaximumLinks,
-				Password = link.Password,
-				SymbolicName = link.SymbolicName,
-				UserName = link.UserName,
-				AllowLocalClientRequestsOnly = link.AllowLocalClientRequestsOnly,
-				Connections = link.ActiveConnections.Select(c => c.ConnectionId).ToList(),
-				IsConnected = link.ActiveConnections.Any(),
-			};
+			return linksQuery
+				.Select(l => new
+				{
+					link = l,
+					ActiveConnections = l.ActiveConnections
+						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
+						.Select(ac => ac.ConnectionId)
+				})
+				.Select(i => new Link
+				{
+					Id = i.link.Id,
+					CreationDate = i.link.CreationDate,
+					ForwardOnPremiseTargetErrorResponse = i.link.ForwardOnPremiseTargetErrorResponse,
+					IsDisabled = i.link.IsDisabled,
+					MaximumLinks = i.link.MaximumLinks,
+					Password = i.link.Password,
+					SymbolicName = i.link.SymbolicName,
+					UserName = i.link.UserName,
+					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
+					Connections = i.ActiveConnections.ToList()
+				});
 		}
 
 		public CreateLinkResult CreateLink(string symbolicName, string userName)
@@ -161,22 +144,20 @@ namespace Thinktecture.Relay.Server.Repository
 		{
 			using (var context = new RelayContext())
 			{
-				var itemToUpdate = context.Links.SingleOrDefault(p => p.Id == linkId.Id);
+				var link = context.Links.SingleOrDefault(p => p.Id == linkId.Id);
 
-				if (itemToUpdate == null)
-				{
+				if (link == null)
 					return false;
-				}
 
-				itemToUpdate.CreationDate = linkId.CreationDate;
-				itemToUpdate.AllowLocalClientRequestsOnly = linkId.AllowLocalClientRequestsOnly;
-				itemToUpdate.ForwardOnPremiseTargetErrorResponse = linkId.ForwardOnPremiseTargetErrorResponse;
-				itemToUpdate.IsDisabled = linkId.IsDisabled;
-				itemToUpdate.MaximumLinks = linkId.MaximumLinks;
-				itemToUpdate.SymbolicName = linkId.SymbolicName;
-				itemToUpdate.UserName = linkId.UserName;
+				link.CreationDate = linkId.CreationDate;
+				link.AllowLocalClientRequestsOnly = linkId.AllowLocalClientRequestsOnly;
+				link.ForwardOnPremiseTargetErrorResponse = linkId.ForwardOnPremiseTargetErrorResponse;
+				link.IsDisabled = linkId.IsDisabled;
+				link.MaximumLinks = linkId.MaximumLinks;
+				link.SymbolicName = linkId.SymbolicName;
+				link.UserName = linkId.UserName;
 
-				context.Entry(itemToUpdate).State = EntityState.Modified;
+				context.Entry(link).State = EntityState.Modified;
 
 				return context.SaveChanges() == 1;
 			}
@@ -202,7 +183,7 @@ namespace Thinktecture.Relay.Server.Repository
 		{
 			using (var context = new RelayContext())
 			{
-				return context.Links.ToList().Select(GetLinkFromDbLink).ToList();
+				return GetLinkFromDbLink(context.Links).ToList();
 			}
 		}
 
@@ -289,70 +270,57 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
-		public Task AddOrRenewActiveConnection(string linkId, string originId, string connectionId, int connectorVersion)
+		public Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion)
 		{
 			_logger.Trace("Adding or updating connection {0} for link {1} and origin {2} with connector version {3}", connectionId, linkId, originId, connectorVersion);
 
-			return Task.Run(() =>
-			{
-				AddOrRenewActiveConnection(new Guid(linkId), new Guid(originId), connectionId, connectorVersion);
-			});
+			return Task.Run(() => AddOrRenewActiveConnection(linkId, originId, connectionId, connectorVersion));
 		}
 
 		private void AddOrRenewActiveConnection(Guid linkId, Guid originId, string connectionId, int connectorVersion)
 		{
-			using (var context = new RelayContext())
+			try
 			{
-				var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId);
+				using (var context = new RelayContext())
+				{
+					var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId);
 
-				if (activeConnection != null)
-				{
-					activeConnection.LastActivity = DateTime.UtcNow;
-				}
-				else
-				{
-					context.ActiveConnections.Add(new DbActiveConnection()
+					if (activeConnection != null)
 					{
-						LinkId = linkId,
-						OriginId = originId,
-						ConnectionId = connectionId,
-						ConnectorVersion = connectorVersion,
-						LastActivity = DateTime.UtcNow,
-					});
-				}
+						activeConnection.LastActivity = DateTime.UtcNow;
+						activeConnection.ConnectorVersion = connectorVersion;
+					}
+					else
+					{
+						context.ActiveConnections.Add(new DbActiveConnection()
+						{
+							LinkId = linkId,
+							OriginId = originId,
+							ConnectionId = connectionId,
+							ConnectorVersion = connectorVersion,
+							LastActivity = DateTime.UtcNow
+						});
+					}
 
-				context.SaveChanges();
+					context.SaveChanges();
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, $"{nameof(LinkRepository)}: Error during AddOrRenewActiveConnection. LinkId = {{0}}, OriginId = {{1}}, ConnectionId = {{2}}, ConnectorVersion = {{3}}", linkId, originId, connectionId, connectorVersion);
 			}
 		}
 
-		public Task RenewActiveConnection(string connectionId)
+		public Task RenewActiveConnectionAsync(string connectionId)
 		{
 			_logger.Trace("Renewing last activity on connection {0}", connectionId);
 
-			return Task.Run(() =>
-			{
-				RenewActiveConnectionInternal(connectionId);
-			});
+			return Task.Run(() => RenewActiveConnectionInternal(connectionId));
 		}
 
 		private void RenewActiveConnectionInternal(string connectionId)
 		{
-			using (var context = new RelayContext())
-			{
-				var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.ConnectionId == connectionId);
-
-				if (activeConnection != null)
-				{
-					activeConnection.LastActivity = DateTime.UtcNow;
-					context.SaveChanges();
-				}
-			}
-		}
-
-		public Task RemoveActiveConnection(string connectionId)
-		{
-			_logger.Debug("Deleting active connection {0}", connectionId);
-			return Task.Run(() =>
+			try
 			{
 				using (var context = new RelayContext())
 				{
@@ -360,27 +328,60 @@ namespace Thinktecture.Relay.Server.Repository
 
 					if (activeConnection != null)
 					{
-						context.ActiveConnections.Remove(activeConnection);
+						activeConnection.LastActivity = DateTime.UtcNow;
 						context.SaveChanges();
 					}
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, $"{nameof(LinkRepository)}: Error during RenewActiveConnection. ConnectionId = {{0}}", connectionId);
+			}
+		}
+
+		public Task RemoveActiveConnectionAsync(string connectionId)
+		{
+			_logger.Debug("Deleting active connection {0}", connectionId);
+
+			return Task.Run(() =>
+			{
+				try
+				{
+					using (var context = new RelayContext())
+					{
+						var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.ConnectionId == connectionId);
+
+						if (activeConnection != null)
+						{
+							context.ActiveConnections.Remove(activeConnection);
+							context.SaveChanges();
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					_logger.Error(ex, $"{nameof(LinkRepository)}: Error during RemoveActiveConnectionAsync. ConnectionId = {{0}}", connectionId);
 				}
 			});
 		}
 
-		public void DeleteAllActiveConnectionsForOrigin(string originId)
+		public void DeleteAllConnectionsForOrigin(Guid originId)
 		{
 			_logger.Debug("Deleting all active connections for Origin {0}", originId);
-			DeleteAllActiveConnectionsForOrigin(new Guid(originId));
-		}
 
-		private void DeleteAllActiveConnectionsForOrigin(Guid originId)
-		{
-			using (var context = new RelayContext())
+			try
 			{
-				var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId);
-				context.ActiveConnections.RemoveRange(invalidConnections);
+				using (var context = new RelayContext())
+				{
+					var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId);
+					context.ActiveConnections.RemoveRange(invalidConnections);
 
-				context.SaveChanges();
+					context.SaveChanges();
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, $"{nameof(LinkRepository)}: Error during DeleteAllConnectionsForOrigin. OriginId = {{0}}", originId);
 			}
 		}
 	}

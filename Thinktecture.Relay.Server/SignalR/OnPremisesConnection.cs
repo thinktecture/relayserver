@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using NLog;
@@ -25,7 +26,13 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		protected override bool AuthorizeRequest(IRequest request)
 		{
-			return request.User?.Identity.IsAuthenticated ?? false;
+			if ((request.User?.Identity.IsAuthenticated ?? false) && request.User is ClaimsPrincipal principal)
+			{
+				var linkId = principal.FindFirst("OnPremiseId")?.Value;
+				return !String.IsNullOrWhiteSpace(linkId) && Guid.TryParse(linkId, out var _);
+			}
+
+			return false;
 		}
 
 		protected override Task OnConnected(IRequest request, string connectionId)
@@ -58,7 +65,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			return base.OnDisconnected(request, connectionId, stopCalled);
 		}
 
-		private async Task ForwardClientRequest(string connectionId, OnPremiseTargetRequest request)
+		private async Task ForwardClientRequestAsync(string connectionId, OnPremiseTargetRequest request, CancellationToken token)
 		{
 			_logger.Debug("Forwarding client request to connection {0}", connectionId);
 			_logger.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
@@ -71,7 +78,8 @@ namespace Thinktecture.Relay.Server.SignalR
 				request.Body = new byte[0];
 			}
 
-			await Connection.Send(connectionId, request);
+			// Connection.Send does not support cancellation token
+			await Task.Run(() => Connection.Send(connectionId, request), token);
 		}
 
 		protected override Task OnReceived(IRequest request, string connectionId, string data)
@@ -85,13 +93,13 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
 		{
-			var claims = ((ClaimsPrincipal)request.User).Claims;
+			var claimsPrincipal = (ClaimsPrincipal)request.User;
+			var onPremiseId = claimsPrincipal.FindFirst("OnPremiseId")?.Value;
 
-			return new OnPremiseClaims(
-				claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value,
-				claims.Single(c => c.Type == "OnPremiseId").Value,
-				claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
-			);
+			if (!Guid.TryParse(onPremiseId, out var linkId))
+				throw new ArgumentException($"The claim \"OnPremiseId\" is not a valid: {onPremiseId}.");
+
+			return new OnPremiseClaims(claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value, linkId, claimsPrincipal.FindFirst(ClaimTypes.Role)?.Value);
 		}
 
 		private void RegisterOnPremise(IRequest request, string connectionId, OnPremiseClaims claims)
@@ -102,7 +110,7 @@ namespace Thinktecture.Relay.Server.SignalR
 				LinkId = claims.OnPremiseId,
 				UserName = claims.UserName,
 				Role = claims.Role,
-				RequestAction = cr => ForwardClientRequest(connectionId, (OnPremiseTargetRequest)cr),
+				RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, (OnPremiseTargetRequest)cr, cancellationToken),
 				IpAddress = GetIpAddressFromOwinEnvironment(request.Environment),
 				ConnectorVersion = GetConnectorVersionFromRequest(request),
 			});
@@ -116,29 +124,26 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private int GetConnectorVersionFromRequest(IRequest request)
 		{
-			string queryArgument = request.QueryString["version"];
+			var queryArgument = request.QueryString["version"];
 
 			if (!String.IsNullOrWhiteSpace(queryArgument))
-			{
-				return int.Parse(queryArgument);
-			}
+				return Int32.Parse(queryArgument);
 
 			return 0;
 		}
 
 		private static T Get<T>(IDictionary<string, object> env, string key)
 		{
-			object value;
-			return env.TryGetValue(key, out value) ? (T)value : default(T);
+			return env.TryGetValue(key, out var value) ? (T)value : default;
 		}
 
 		private class OnPremiseClaims
 		{
 			public string UserName { get; }
-			public string OnPremiseId { get; }
+			public Guid OnPremiseId { get; }
 			public string Role { get; }
 
-			public OnPremiseClaims(string userName, string onPremiseId, string role)
+			public OnPremiseClaims(string userName, Guid onPremiseId, string role)
 			{
 				UserName = userName;
 				OnPremiseId = onPremiseId;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
@@ -9,7 +10,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		string Url { get; }
 		IDictionary<string, string> HttpHeaders { get; }
 		byte[] Body { get; }
-		string OriginId { get; }
+		Guid OriginId { get; }
 		string AcknowledgeId { get; }
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Http
 		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
 		{
 			public string RequestId { get; set; }
-			public string OriginId { get; set; }
+			public Guid OriginId { get; set; }
 			public IDictionary<string, string> HttpHeaders { get; set; }
 			public HttpStatusCode StatusCode { get; set; }
 			public byte[] Body { get; set; }

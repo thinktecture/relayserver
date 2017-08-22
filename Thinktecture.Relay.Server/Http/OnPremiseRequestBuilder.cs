@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Server.Http
 			_ignoredHeaders = new[] { "Host", "Connection" };
 		}
 
-		public async Task<IOnPremiseConnectorRequest> BuildFrom(HttpRequestMessage request, string originId, string pathWithoutUserName)
+		public async Task<IOnPremiseConnectorRequest> BuildFrom(HttpRequestMessage request, Guid originId, string pathWithoutUserName)
 		{
 			var onPremiseConnectorRequest = new OnPremiseConnectorRequest
 			{

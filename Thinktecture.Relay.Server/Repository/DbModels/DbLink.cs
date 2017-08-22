@@ -8,11 +8,6 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 	[Table("Links")]
 	internal class DbLink
 	{
-		public DbLink()
-		{
-			ActiveConnections = new HashSet<DbActiveConnection>();
-		}
-
 		[Index(IsClustered = true)]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int Identity { get; set; }
@@ -53,6 +48,11 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		[Required]
 		public DateTime CreationDate { get; set; }
 
-		public virtual ICollection<DbActiveConnection> ActiveConnections { get; set; }
+		private ICollection<DbActiveConnection> _activeConnections;
+		public virtual ICollection<DbActiveConnection> ActiveConnections
+		{
+			get => _activeConnections ?? (_activeConnections = new List<DbActiveConnection>());
+			set => _activeConnections = value;
+		}
 	}
 }

@@ -10,58 +10,65 @@ namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class FilePostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
+		private readonly TimeSpan _storagePeriod;
 		private readonly ILogger _logger;
 		private readonly string _path;
-
-
 		private readonly CancellationTokenSource _cancellationTokenSource;
 
 		public FilePostDataTemporaryStore(ILogger logger, IConfiguration configuration)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			if (configuration == null)
 				throw new ArgumentNullException(nameof(configuration));
-
-			_path = configuration?.TemporaryRequestStoragePath ?? throw new ArgumentNullException($"{nameof(configuration)}.{nameof(configuration.TemporaryRequestStoragePath)}");
-
-			if (!Directory.Exists(_path))
+			if (String.IsNullOrEmpty(configuration.TemporaryRequestStoragePath))
+				throw new ConfigurationErrorsException($"The path {nameof(configuration.TemporaryRequestStoragePath)} cannot be null or empty.");
+			if (!Directory.Exists(configuration.TemporaryRequestStoragePath))
 				throw new ConfigurationErrorsException($"{nameof(FilePostDataTemporaryStore)}: The configured directory does not exist: '{_path}'");
+			if (configuration.TemporaryRequestStoragePeriod <= TimeSpan.Zero)
+				throw new ArgumentException($"{nameof(FilePostDataTemporaryStore)}: Storage period must be positive. Provided value: {configuration.TemporaryRequestStoragePeriod}", nameof(configuration));
 
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_storagePeriod = configuration.TemporaryRequestStoragePeriod;
+			_path = configuration.TemporaryRequestStoragePath;
 			_cancellationTokenSource = new CancellationTokenSource();
-			StartCleanUpTask();
+
+			StartCleanUpTask(_cancellationTokenSource.Token);
 		}
 
-		private void StartCleanUpTask()
+		private void StartCleanUpTask(CancellationToken token)
 		{
-			Task.Factory.StartNew(() =>
+			Task.Run(() =>
 			{
-				var cancellationToken = _cancellationTokenSource.Token;
-
-				while (!cancellationToken.IsCancellationRequested)
+				while (!token.IsCancellationRequested)
 				{
-					if (!cancellationToken.WaitHandle.WaitOne(30 * 1000))
-					{
+					if (!token.WaitHandle.WaitOne(30 * 1000))
 						CleanUp();
-					}
 				}
-			}, _cancellationTokenSource.Token);
+			}, token);
 		}
 
 		private void CleanUp()
 		{
-			var timeOut = DateTime.UtcNow.AddSeconds(-10);
+			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
 
 			try
 			{
 				foreach (var fileName in Directory.GetFiles(_path))
 				{
-					if (File.GetCreationTimeUtc(fileName) < timeOut)
+					try
 					{
-						File.Delete(fileName);
+						if (File.GetCreationTimeUtc(fileName) < timeOut)
+							File.Delete(fileName);
+					}
+					catch (Exception ex)
+					{
+						_logger.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
 					}
 				}
 			}
-			catch (Exception) { } // silently catch, multiple services could try to delete files at the same time
+			catch (Exception ex)
+			{
+				_logger.Error(ex, $"{nameof(FilePostDataTemporaryStore)}: Error during cleanup");
+			}
 		}
 
 		public void Save(string requestId, byte[] data)
@@ -75,9 +82,17 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			_logger.Debug("Loading body for request id {0}", requestId);
 
-			var filename = GetFileName(requestId);
-			var data = File.ReadAllBytes(filename);
-			File.Delete(filename);
+			var fileName = GetFileName(requestId);
+			var data = File.ReadAllBytes(fileName);
+
+			try
+			{
+				File.Delete(fileName);
+			}
+			catch (Exception ex)
+			{
+				_logger.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+			}
 
 			return data;
 		}
@@ -87,13 +102,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			return Path.Combine(_path, requestId + ".req");
 		}
 
-		public void Close()
-		{
-			_cancellationTokenSource.Cancel();
-		}
-
-		#region IDisposable
-
 		~FilePostDataTemporaryStore()
 		{
 			GC.SuppressFinalize(this);
@@ -101,9 +109,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public void Dispose()
 		{
-			Close();
+			_cancellationTokenSource.Cancel();
+			_cancellationTokenSource.Dispose();
 		}
-
-		#endregion
 	}
 }

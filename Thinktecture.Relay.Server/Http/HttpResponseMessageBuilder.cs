@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
@@ -43,8 +43,7 @@ namespace Thinktecture.Relay.Server.Http
 				response.StatusCode = onPremiseTargetResponse.StatusCode;
 				response.Content = GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link);
 
-				string wwwAuthenticate;
-				if (onPremiseTargetResponse.HttpHeaders.TryGetValue("WWW-Authenticate", out wwwAuthenticate))
+				if (onPremiseTargetResponse.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
 					var parts = wwwAuthenticate.Split(' ');
 					response.Headers.WwwAuthenticate.Add(parts.Length == 2 ? new AuthenticationHeaderValue(parts[0], parts[1]) : new AuthenticationHeaderValue(wwwAuthenticate));
@@ -79,14 +78,9 @@ namespace Thinktecture.Relay.Server.Http
 
 			foreach (var httpHeader in httpHeaders)
 			{
-				Action<HttpContent, string> contentHeaderTranformation;
-
-				if (_contentHeaderTransformation.TryGetValue(httpHeader.Key, out contentHeaderTranformation))
+				if (_contentHeaderTransformation.TryGetValue(httpHeader.Key, out var contentHeaderTranformation))
 				{
-					if (contentHeaderTranformation != null)
-					{
-						contentHeaderTranformation(content, httpHeader.Value);
-					}
+					contentHeaderTranformation?.Invoke(content, httpHeader.Value);
 				}
 				else
 				{

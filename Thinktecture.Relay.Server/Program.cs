@@ -1,6 +1,5 @@
 using System;
 using System.Configuration;
-using System.Linq;
 using Topshelf;
 
 namespace Thinktecture.Relay.Server
@@ -10,8 +9,7 @@ namespace Thinktecture.Relay.Server
 		private static void Main(string[] args)
 		{
 			// TODO: Use configuration (see RELAY-68)
-			int port;
-			if (!Int32.TryParse(ConfigurationManager.AppSettings["Port"], out port))
+			if (!Int32.TryParse(ConfigurationManager.AppSettings["Port"], out var port))
 			{
 				port = 20000;
 			}

@@ -14,16 +14,9 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		public RabbitMqFactory(IConnectionFactory factory, IConfiguration configuration, ILogger logger)
 		{
-			if (factory == null)
-				throw new ArgumentNullException(nameof(factory));
-			if (configuration == null)
-				throw new ArgumentNullException(nameof(configuration));
-			if (logger == null)
-				throw new ArgumentNullException(nameof(logger));
-
-			_factory = factory;
-			_configuration = configuration;
-			_logger = logger;
+			_factory = factory ?? throw new ArgumentNullException(nameof(factory));
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		public IConnection CreateConnection()

@@ -14,35 +14,32 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 	{
 		private readonly ILogger _logger;
 		private readonly object _requestSubjectLookupLock;
-		private readonly Dictionary<string, RequestSubjectContext> _requestSubjectLookup;
-		private readonly ConcurrentDictionary<string, Subject<IOnPremiseTargetResponse>> _responseSubjectLookup;
+		private readonly Dictionary<Guid, RequestSubjectContext> _requestSubjectLookup;
+		private readonly ConcurrentDictionary<Guid, Subject<IOnPremiseTargetResponse>> _responseSubjectLookup;
 
 		private bool _disposed;
 
 		public InProcessMessageDispatcher(ILogger logger)
 		{
-			if (logger == null)
-				throw new ArgumentNullException(nameof(logger));
-
-			_logger = logger;
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestSubjectLookupLock = new object();
-			_requestSubjectLookup = new Dictionary<string, RequestSubjectContext>(StringComparer.OrdinalIgnoreCase);
-			_responseSubjectLookup = new ConcurrentDictionary<string, Subject<IOnPremiseTargetResponse>>(StringComparer.OrdinalIgnoreCase);
+			_requestSubjectLookup = new Dictionary<Guid, RequestSubjectContext>();
+			_responseSubjectLookup = new ConcurrentDictionary<Guid, Subject<IOnPremiseTargetResponse>>();
 		}
 
-		public IObservable<IOnPremiseTargetRequest> OnRequestReceived(string onPremiseId, string connectionId, bool noAck)
+		public IObservable<IOnPremiseTargetRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
 		{
 			if (connectionId == null)
 				throw new ArgumentNullException(nameof(connectionId));
-			if (onPremiseId == null)
-				throw new ArgumentNullException(nameof(onPremiseId));
+			if (linkId == null)
+				throw new ArgumentNullException(nameof(linkId));
 
 			CheckDisposed();
-			_logger.Info("Creating request subscription for OnPremiseId {0} and ConnectionId {1}", onPremiseId, connectionId);
+			_logger.Info("Creating request subscription for OnPremiseId {0} and ConnectionId {1}", linkId, connectionId);
 
 			return Observable.Create<IOnPremiseTargetRequest>(observer =>
 			{
-				var ctx = GetRequestSubjectContext(onPremiseId, connectionId);
+				var ctx = GetRequestSubjectContext(linkId, connectionId);
 				var subscription = ctx.Subject.Subscribe(observer.OnNext);
 
 				return new DelegatingDisposable(_logger, () =>
@@ -54,13 +51,13 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 						ctx.RemoveConnection(connectionId);
 
 						if (ctx.ConnectionCount == 0)
-							_requestSubjectLookup.Remove(onPremiseId);
+							_requestSubjectLookup.Remove(linkId);
 					}
 				});
 			});
 		}
 
-		public IObservable<IOnPremiseTargetResponse> OnResponseReceived(string originId)
+		public IObservable<IOnPremiseTargetResponse> OnResponseReceived(Guid originId)
 		{
 			if (originId == null)
 				throw new ArgumentNullException(nameof(originId));
@@ -76,34 +73,32 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				return new DelegatingDisposable(_logger, () =>
 				{
 					subscription.Dispose();
-
-					Subject<IOnPremiseTargetResponse> sub;
-					_responseSubjectLookup.TryRemove(originId, out sub);
+					_responseSubjectLookup.TryRemove(originId, out var sub);
 				});
 			});
 		}
 
-		public void AcknowledgeRequest(string onPremiseId, string acknowledgeId)
+		public void AcknowledgeRequest(Guid linkId, string acknowledgeId)
 		{
 			// no ack here
 		}
 
-		public Task DispatchRequest(string onPremiseId, IOnPremiseTargetRequest request)
+		public Task DispatchRequest(Guid linkId, IOnPremiseTargetRequest request)
 		{
-			if (onPremiseId == null)
-				throw new ArgumentNullException(nameof(onPremiseId));
+			if (linkId == null)
+				throw new ArgumentNullException(nameof(linkId));
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
 			CheckDisposed();
-			_logger.Debug("Dispatching request for OnPremiseId {0}. Request id: {1}, Http method {2}, Url: {3}", onPremiseId, request.RequestId, request.HttpMethod, request.Url);
+			_logger.Debug("Dispatching request for OnPremiseId {0}. Request id: {1}, Http method {2}, Url: {3}", linkId, request.RequestId, request.HttpMethod, request.Url);
 
-			TryGetRequestSubject(onPremiseId)?.OnNext(request);
+			TryGetRequestSubject(linkId)?.OnNext(request);
 
 			return Task.CompletedTask;
 		}
 
-		public Task DispatchResponse(string originId, IOnPremiseTargetResponse response)
+		public Task DispatchResponse(Guid originId, IOnPremiseTargetResponse response)
 		{
 			if (originId == null)
 				throw new ArgumentNullException(nameof(originId));
@@ -118,27 +113,25 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			return Task.CompletedTask;
 		}
 
-		private Subject<IOnPremiseTargetRequest> TryGetRequestSubject(string onPremiseId)
+		private Subject<IOnPremiseTargetRequest> TryGetRequestSubject(Guid linkId)
 		{
 			lock (_requestSubjectLookupLock)
 			{
-				RequestSubjectContext ctx;
-				if (_requestSubjectLookup.TryGetValue(onPremiseId, out ctx))
+				if (_requestSubjectLookup.TryGetValue(linkId, out var ctx))
 					return ctx.Subject;
 			}
 
 			return null;
 		}
 
-		private RequestSubjectContext GetRequestSubjectContext(string onPremiseId, string connectionId)
+		private RequestSubjectContext GetRequestSubjectContext(Guid linkId, string connectionId)
 		{
 			lock (_requestSubjectLookupLock)
 			{
-				RequestSubjectContext ctx;
-				if (!_requestSubjectLookup.TryGetValue(onPremiseId, out ctx))
+				if (!_requestSubjectLookup.TryGetValue(linkId, out var ctx))
 				{
 					ctx = new RequestSubjectContext();
-					_requestSubjectLookup.Add(onPremiseId, ctx);
+					_requestSubjectLookup.Add(linkId, ctx);
 				}
 
 				ctx.AddConnection(connectionId);
@@ -147,7 +140,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			}
 		}
 
-		private Subject<IOnPremiseTargetResponse> GetResponseSubject(string originId)
+		private Subject<IOnPremiseTargetResponse> GetResponseSubject(Guid originId)
 		{
 			return _responseSubjectLookup.GetOrAdd(originId, id => new Subject<IOnPremiseTargetResponse>());
 		}

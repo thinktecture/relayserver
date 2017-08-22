@@ -12,13 +12,8 @@ namespace Thinktecture.Relay.Server.Logging
 
 		public NLogTraceWriter(ILogger logger, ITraceLevelConverter traceLevelConverter)
 		{
-			if (logger == null)
-				throw new ArgumentNullException(nameof(logger));
-			if (traceLevelConverter == null)
-				throw new ArgumentNullException(nameof(traceLevelConverter));
-
-			_logger = logger;
-			_traceLevelConverter = traceLevelConverter;
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_traceLevelConverter = traceLevelConverter ?? throw new ArgumentNullException(nameof(traceLevelConverter));
 		}
 
 		public void Trace(HttpRequestMessage request, string category, TraceLevel level, Action<TraceRecord> traceAction)

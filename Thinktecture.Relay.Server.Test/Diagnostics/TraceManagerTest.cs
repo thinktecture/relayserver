@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
 		{
 			public string RequestId { get; set; }
-			public string OriginId { get; set; }
+			public Guid OriginId { get; set; }
 			public IDictionary<string, string> HttpHeaders { get; set; }
 			public HttpStatusCode StatusCode { get; set; }
 			public byte[] Body { get; set; }
@@ -48,6 +48,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public int Port { get; private set; }
 			public string ManagementWebLocation { get; private set; }
 			public string TemporaryRequestStoragePath { get; }
+			public TimeSpan TemporaryRequestStoragePeriod { get; }
 			public int ActiveConnectionTimeoutInSeconds { get; }
 
 			public Configuration()
@@ -169,7 +170,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 			sut.Trace(clientRequest, onPremiseTargetResponse, traceConfigurationId);
 
-			var ticks = new DateTime(long.Parse(clientRequestBodyFileName.Split('-').Skip(5).First().Split('.').First()));
+			var ticks = new DateTime(Int64.Parse(clientRequestBodyFileName.Split('-').Skip(5).First().Split('.').First()));
 			var expectedFileNamePrefix = Path.Combine("tracefiles", traceConfigurationId + "-" + ticks.Ticks);
 
 			traceFileWriterMock.VerifyAll();

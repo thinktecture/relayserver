@@ -6,32 +6,31 @@ namespace Thinktecture.Relay.Server.Configuration
 {
 	internal class Configuration : IConfiguration
 	{
-		public TimeSpan OnPremiseConnectorCallbackTimeout { get; private set; }
-		public string RabbitMqConnectionString { get; private set; }
-		public string TraceFileDirectory { get; private set; }
-		public int LinkPasswordLength { get; private set; }
-		public int DisconnectTimeout { get; private set; }
-		public int ConnectionTimeout { get; private set; }
-		public int KeepAliveInterval { get; private set; }
-		public bool UseInsecureHttp { get; private set; }
-		public bool EnableManagementWeb { get; private set; }
-		public bool EnableRelaying { get; private set; }
-		public bool EnableOnPremiseConnections { get; private set; }
-		public string HostName { get; private set; }
-		public int Port { get; private set; }
-		public string ManagementWebLocation { get; private set; }
-		public string TemporaryRequestStoragePath { get; private set; }
-		public int ActiveConnectionTimeoutInSeconds { get; private set; }
+		public TimeSpan OnPremiseConnectorCallbackTimeout { get; }
+		public string RabbitMqConnectionString { get; }
+		public string TraceFileDirectory { get; }
+		public int LinkPasswordLength { get; }
+		public int DisconnectTimeout { get; }
+		public int ConnectionTimeout { get; }
+		public int KeepAliveInterval { get; }
+		public bool UseInsecureHttp { get; }
+		public bool EnableManagementWeb { get; }
+		public bool EnableRelaying { get; }
+		public bool EnableOnPremiseConnections { get; }
+		public string HostName { get; }
+		public int Port { get; }
+		public string ManagementWebLocation { get; }
+		public TimeSpan TemporaryRequestStoragePeriod { get; }
+		public string TemporaryRequestStoragePath { get; }
+		public int ActiveConnectionTimeoutInSeconds { get; }
 
 		public Configuration(ILogger logger)
 		{
-			int tmpInt;
-			bool tmpBool;
-
-			if (!Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out tmpInt))
+			if (!Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out var tmpInt))
 			{
 				tmpInt = 30;
 			}
+
 			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
 
 			var settings = ConfigurationManager.ConnectionStrings["RabbitMQ"];
@@ -75,7 +74,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			}
 
 			EnableManagementWeb = true;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], out tmpBool))
+			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], out var tmpBool))
 			{
 				EnableManagementWeb = tmpBool;
 			}
@@ -110,6 +109,13 @@ namespace Thinktecture.Relay.Server.Configuration
 				TemporaryRequestStoragePath = null;
 			}
 
+			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["TemporaryRequestStoragePeriod"], out var tmpTimeSpan))
+			{
+				tmpTimeSpan = TimeSpan.FromSeconds(10);
+			}
+
+			TemporaryRequestStoragePeriod = tmpTimeSpan;
+
 			ActiveConnectionTimeoutInSeconds = 120;
 			if (Int32.TryParse(ConfigurationManager.AppSettings["ActiveConnectionTimeoutInSeconds"], out tmpInt))
 			{
@@ -135,6 +141,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			logger.Trace("Setting Port: {0}", Port);
 			logger.Trace("Setting ManagementWebLocation: {0}", ManagementWebLocation);
 			logger.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
+			logger.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
 			logger.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
 		}
 	}
