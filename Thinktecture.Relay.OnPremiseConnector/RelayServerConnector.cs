@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -29,10 +29,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 		public string RelayedRequestHeader
 		{
-			get { return _connection.RelayedRequestHeader; }
-			set { _connection.RelayedRequestHeader = value; }
+			get => _connection.RelayedRequestHeader;
+			set => _connection.RelayedRequestHeader = value;
 		}
-
 
 		private IRelayServerConnection _connection;
 		private bool _disposed;

@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 				catch (Exception ex)
 				{
-					_logger.Trace("Error requesting response. request-id={0}", ex, request.RequestId);
+					_logger.Trace(ex, "Error requesting response. request-id={0}", request.RequestId);
 
 					response.StatusCode = HttpStatusCode.InternalServerError;
 					response.HttpHeaders = new Dictionary<string, string>()

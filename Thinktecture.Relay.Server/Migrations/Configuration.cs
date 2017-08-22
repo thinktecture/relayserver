@@ -1,11 +1,8 @@
+using System.Data.Entity.Migrations;
+
 namespace Thinktecture.Relay.Server.Migrations
 {
-	using System;
-	using System.Data.Entity;
-	using System.Data.Entity.Migrations;
-	using System.Linq;
-
-	internal sealed class Configuration : DbMigrationsConfiguration<Thinktecture.Relay.Server.Repository.RelayContext>
+	internal sealed class Configuration : DbMigrationsConfiguration<Repository.RelayContext>
 	{
 		public Configuration()
 		{
@@ -13,7 +10,7 @@ namespace Thinktecture.Relay.Server.Migrations
 			ContextKey = "Thinktecture.Relay.Server.Repository.RelayContext";
 		}
 
-		protected override void Seed(Thinktecture.Relay.Server.Repository.RelayContext context)
+		protected override void Seed(Repository.RelayContext context)
 		{
 			//  This method will be called after migrating to the latest version.
 

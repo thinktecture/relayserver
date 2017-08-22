@@ -62,15 +62,10 @@ namespace Thinktecture.Relay.Server.Repository
 		{
 			using (var context = new RelayContext())
 			{
-				var traceConfiguration = context.TraceConfigurations.SingleOrDefault(t => t.StartDate < DateTime.UtcNow && t.EndDate > DateTime.UtcNow &&
-					t.LinkId == linkId);
+				var traceConfiguration = context.TraceConfigurations
+					.SingleOrDefault(t => t.StartDate < DateTime.UtcNow && t.EndDate > DateTime.UtcNow && t.LinkId == linkId);
 
-				if (traceConfiguration == null)
-				{
-					return null;
-				}
-
-				return traceConfiguration.Id;
+				return traceConfiguration?.Id;
 			}
 		}
 

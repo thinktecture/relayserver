@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
-			return Task.Run(() => WaitForOnPremiseTargetResponse(onPremiseConnectorCallback));
+			return Task.Run(() => WaitForOnPremiseTargetResponse(onPremiseConnectorCallback), _cancellationToken);
 		}
 
 		private IOnPremiseTargetResponse WaitForOnPremiseTargetResponse(IOnPremiseConnectorCallback onPremiseConnectorCallback)

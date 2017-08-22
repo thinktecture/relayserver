@@ -4,17 +4,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 
 namespace Thinktecture.Relay.Server.Diagnostics
 {
 	public class TraceTransformation : ITraceTransformation
 	{
-		private static readonly IEnumerable<string> RestrictedHeaders = new[]
-		{
-			"Content-Encoding"
-		};
-
 		public HttpResponseMessage CreateFromTraceFile(TraceFile traceFile)
 		{
 			var result = new HttpResponseMessage();
@@ -66,7 +60,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 					using (var resultStream = new MemoryStream())
 					{
 						var buffer = new byte[1024];
-						var bytesRead = 0;
+						int bytesRead;
 
 						while ((bytesRead = deflateStream.Read(buffer, 0, buffer.Length)) > 0)
 						{
@@ -88,7 +82,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 					using (var resultStream = new MemoryStream())
 					{
 						var buffer = new byte[1024];
-						var bytesRead = 0;
+						int bytesRead;
 
 						while ((bytesRead = deflateStream.Read(buffer, 0, buffer.Length)) > 0)
 						{

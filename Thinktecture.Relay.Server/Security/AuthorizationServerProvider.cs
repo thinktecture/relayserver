@@ -2,7 +2,6 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Owin.Security.OAuth;
-using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Security

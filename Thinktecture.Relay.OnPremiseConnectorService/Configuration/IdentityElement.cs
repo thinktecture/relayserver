@@ -14,19 +14,8 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 			_password
 		};
 
-		protected override ConfigurationPropertyCollection Properties
-		{
-			get { return _properties; }
-		}
-
-		public string UserName
-		{
-			get { return (string)this[_userName]; }
-		}
-
-		public string Password
-		{
-			get { return (string)this[_password]; }
-		}
+		protected override ConfigurationPropertyCollection Properties => _properties;
+		public string UserName => (string)this[_userName];
+		public string Password => (string)this[_password];
 	}
 }

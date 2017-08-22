@@ -13,19 +13,8 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 			_identity
 		};
 
-		protected override ConfigurationPropertyCollection Properties
-		{
-			get { return _properties; }
-		}
-
-		public AuthenticationType AuthenticationType
-		{
-			get { return (AuthenticationType)this[_authenticationType]; }
-		}
-
-		public IdentityElement Identity
-		{
-			get { return (IdentityElement)this[_identity]; }
-		}
+		protected override ConfigurationPropertyCollection Properties => _properties;
+		public AuthenticationType AuthenticationType => (AuthenticationType)this[_authenticationType];
+		public IdentityElement Identity => (IdentityElement)this[_identity];
 	}
 }

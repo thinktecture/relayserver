@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,10 +19,10 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		private readonly IConfiguration _configuration;
 		private readonly ILogger _logger;
 
-		private const string OnPremiseConnectorHeaderExtension = ".ct.headers";
-		private const string OnPremiseConnectorContentExtension = ".ct.content";
-		private const string OnPremiseTargetHeaderExtension = ".optt.headers";
-		private const string OnPremiseTargetContentExtension = ".optt.content";
+		private const string _ON_PREMISE_CONNECTOR_HEADER_EXTENSION = ".ct.headers";
+		private const string _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION = ".ct.content";
+		private const string _ON_PREMISE_TARGET_HEADER_EXTENSION = ".optt.headers";
+		private const string _ON_PREMISE_TARGET_CONTENT_EXTENSION = ".optt.content";
 
 		public TraceManager(ITraceRepository traceRepository, ITraceFileWriter traceFileWriter, ITraceFileReader traceFileReader, IConfiguration configuration, ILogger logger)
 		{
@@ -47,13 +47,13 @@ namespace Thinktecture.Relay.Server.Diagnostics
 					Directory.CreateDirectory(_configuration.TraceFileDirectory);
 				}
 
-				var filenamePrefix = String.Format("{0}-{1}", Path.Combine(_configuration.TraceFileDirectory, traceConfigurationId.ToString()), DateTime.Now.Ticks);
+				var filenamePrefix = $"{Path.Combine(_configuration.TraceFileDirectory, traceConfigurationId.ToString())}-{DateTime.Now.Ticks}";
 
-				_traceFileWriter.WriteHeaderFile(filenamePrefix + OnPremiseConnectorHeaderExtension, onPremiseConnectorRequest.HttpHeaders);
-				_traceFileWriter.WriteContentFile(filenamePrefix + OnPremiseConnectorContentExtension, onPremiseConnectorRequest.Body);
+				_traceFileWriter.WriteHeaderFile(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, onPremiseConnectorRequest.HttpHeaders);
+				_traceFileWriter.WriteContentFile(filenamePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, onPremiseConnectorRequest.Body);
 
-				_traceFileWriter.WriteHeaderFile(filenamePrefix + OnPremiseTargetHeaderExtension, onPremiseTargetResponse.HttpHeaders);
-				_traceFileWriter.WriteContentFile(filenamePrefix + OnPremiseTargetContentExtension, onPremiseTargetResponse.Body);
+				_traceFileWriter.WriteHeaderFile(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, onPremiseTargetResponse.HttpHeaders);
+				_traceFileWriter.WriteContentFile(filenamePrefix + _ON_PREMISE_TARGET_CONTENT_EXTENSION, onPremiseTargetResponse.Body);
 			}
 			catch (Exception ex)
 			{
@@ -69,10 +69,10 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				.ToList()
 				.Where(f => f.StartsWith(prefix))
 				.Select(f => Path.GetFileName(
-					f.Replace(OnPremiseConnectorHeaderExtension, String.Empty)
-						.Replace(OnPremiseConnectorContentExtension, String.Empty)
-						.Replace(OnPremiseTargetContentExtension, String.Empty)
-						.Replace(OnPremiseTargetHeaderExtension, String.Empty)))
+					f.Replace(_ON_PREMISE_CONNECTOR_HEADER_EXTENSION, String.Empty)
+						.Replace(_ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, String.Empty)
+						.Replace(_ON_PREMISE_TARGET_CONTENT_EXTENSION, String.Empty)
+						.Replace(_ON_PREMISE_TARGET_HEADER_EXTENSION, String.Empty)))
 				.Distinct().ToList();
 			var traceFileInfos = new List<Trace>();
 
@@ -103,11 +103,11 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			if (result.IsContentAvailable)
 			{
 				// TODO: Please refactor me :(
-				var contentPath = path.Replace(OnPremiseConnectorHeaderExtension, OnPremiseConnectorContentExtension);
+				var contentPath = path.Replace(_ON_PREMISE_CONNECTOR_HEADER_EXTENSION, _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION);
 
 				if (contentPath.Equals(path))
 				{
-					contentPath = path.Replace(OnPremiseTargetHeaderExtension, OnPremiseTargetContentExtension);
+					contentPath = path.Replace(_ON_PREMISE_TARGET_HEADER_EXTENSION, _ON_PREMISE_TARGET_CONTENT_EXTENSION);
 				}
 
 				result.Content = await _traceFileReader.ReadContentFileAsync(contentPath);
@@ -120,8 +120,8 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		{
 			var filePrefixWithDirectory = Path.Combine(_configuration.TraceFileDirectory, filePrefix);
 
-			var clientHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + OnPremiseConnectorHeaderExtension);
-			var onPremiseTargetHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + OnPremiseTargetHeaderExtension);
+			var clientHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION);
+			var onPremiseTargetHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_TARGET_HEADER_EXTENSION);
 
 			var tracingDate = new DateTime(long.Parse(filePrefix.Split('-').Last()));
 
@@ -129,14 +129,14 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			{
 				OnPremiseConnectorTrace = new TraceFile()
 				{
-					ContentFileName = filePrefix + OnPremiseConnectorContentExtension,
-					HeaderFileName = filePrefix + OnPremiseConnectorHeaderExtension,
+					ContentFileName = filePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION,
+					HeaderFileName = filePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION,
 					Headers = clientHeaders
 				},
 				OnPremiseTargetTrace = new TraceFile()
 				{
-					ContentFileName = filePrefix + OnPremiseTargetContentExtension,
-					HeaderFileName = filePrefix + OnPremiseTargetHeaderExtension,
+					ContentFileName = filePrefix + _ON_PREMISE_TARGET_CONTENT_EXTENSION,
+					HeaderFileName = filePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION,
 					Headers = onPremiseTargetHeaders
 				},
 				TracingDate = tracingDate

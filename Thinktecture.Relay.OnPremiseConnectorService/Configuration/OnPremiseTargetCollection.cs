@@ -5,10 +5,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 {
 	public class OnPremiseTargetCollection : ConfigurationElementCollection
 	{
-		public override ConfigurationElementCollectionType CollectionType
-		{
-			get { return ConfigurationElementCollectionType.BasicMap; }
-		}
+		public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
 		protected override ConfigurationElement CreateNewElement(string elementName)
 		{
@@ -18,9 +15,9 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 					return new OnPremiseWebTargetElement();
 				case "inProc":
 					return new OnPremiseInProcTargetElement();
+				default:
+					throw new ConfigurationErrorsException($"Invalid element name: {elementName}");
 			}
-
-			throw new ConfigurationErrorsException(String.Format("Invalid element name: {0}", elementName));
 		}
 
 		protected override ConfigurationElement CreateNewElement()
@@ -40,9 +37,9 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 				case "web":
 				case "inProc":
 					return true;
+				default:
+					return base.IsElementName(elementName);
 			}
-
-			return base.IsElementName(elementName);
 		}
 	}
 }

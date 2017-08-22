@@ -13,15 +13,12 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 		private readonly IUserRepository _userRepository;
 		private readonly ILinkRepository _linkRepository;
 		private readonly ILogRepository _logRepository;
-		private readonly ITraceRepository _traceRepository;
 
-		public FakeDataController(IUserRepository userRepository, ILinkRepository linkRepository, ILogRepository logRepository,
-			ITraceRepository traceRepository)
+		public FakeDataController(IUserRepository userRepository, ILinkRepository linkRepository, ILogRepository logRepository)
 		{
 			_userRepository = userRepository;
 			_linkRepository = linkRepository;
 			_logRepository = logRepository;
-			_traceRepository = traceRepository;
 		}
 
 		[HttpPost]

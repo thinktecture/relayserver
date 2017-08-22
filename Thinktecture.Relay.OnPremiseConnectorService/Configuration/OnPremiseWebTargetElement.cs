@@ -7,14 +7,10 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 		private readonly ConfigurationProperty _baseUrl = new ConfigurationProperty("baseUrl", typeof(string), null, ConfigurationPropertyOptions.IsRequired);
 
 		public OnPremiseWebTargetElement()
-			: base()
 		{
 			Properties.Add(_baseUrl);
 		}
 
-		public string BaseUrl
-		{
-			get { return (string)this[_baseUrl]; }
-		}
+		public string BaseUrl => (string)this[_baseUrl];
 	}
 }

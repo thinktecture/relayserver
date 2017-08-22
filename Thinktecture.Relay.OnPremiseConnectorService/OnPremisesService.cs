@@ -34,6 +34,9 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 							new Uri(section.BaseUrl), (int)section.RequestTimeout.TotalSeconds);
 						break;
 
+					case AuthenticationType.None:
+						throw new ConfigurationErrorsException("Authentication type 'None' is not a valid value.");
+
 					default:
 						throw new ArgumentOutOfRangeException();
 				}

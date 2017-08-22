@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Thinktecture.Relay.Server.Dto;
@@ -10,9 +10,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public PathInformation Split(string path)
 		{
 			if (path == null)
-			{
-				throw new ArgumentNullException("path", "Path cannot be null");
-			}
+				throw new ArgumentNullException(nameof(path), "Path cannot be null");
 
 			var splitPath = SplitPath(path).ToList();
 

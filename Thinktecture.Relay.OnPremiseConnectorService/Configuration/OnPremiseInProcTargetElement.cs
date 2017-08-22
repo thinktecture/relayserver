@@ -7,14 +7,10 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 		private readonly ConfigurationProperty _typeName = new ConfigurationProperty("typeName", typeof(string), null, ConfigurationPropertyOptions.IsRequired);
 
 		public OnPremiseInProcTargetElement()
-			: base()
 		{
 			Properties.Add(_typeName);
 		}
 
-		public string TypeName
-		{
-			get { return (string)this[_typeName]; }
-		}
+		public string TypeName => (string)this[_typeName];
 	}
 }

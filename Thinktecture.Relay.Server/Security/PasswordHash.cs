@@ -40,8 +40,8 @@ namespace Thinktecture.Relay.Server.Security
 	public class PasswordHash : IPasswordHash
 	{
 		// The following constants may be changed without breaking existing hashes.
-		private const int SALT_BYTE_SIZE = 24;
-		private const int HASH_BYTE_SIZE = 24;
+		private const int _SALT_BYTE_SIZE = 24;
+		private const int _HASH_BYTE_SIZE = 24;
 
 		private static readonly Random _random = new Random();
 
@@ -64,13 +64,13 @@ namespace Thinktecture.Relay.Server.Security
 		{
 			// Generate a random salt
 			var csprng = new RNGCryptoServiceProvider();
-			var salt = new byte[SALT_BYTE_SIZE];
+			var salt = new byte[_SALT_BYTE_SIZE];
 			csprng.GetBytes(salt);
 
 			var iterations = _random.Next(2500, 12500);
 
 			// Hash the password and encode the parameters
-			var hash = PBKDF2(password, salt, iterations, HASH_BYTE_SIZE);
+			var hash = PBKDF2(password, salt, iterations, _HASH_BYTE_SIZE);
 
 			return new PasswordInformation()
 			{
