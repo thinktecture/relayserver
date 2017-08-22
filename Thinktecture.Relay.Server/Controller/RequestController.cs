@@ -6,10 +6,12 @@ using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Controller
 {
-	public class RequestController : ApiController
-	{
-		private readonly IPostDataTemporaryStore _temporaryStore;
-		private readonly ILogger _logger;
+    [Authorize(Roles = "OnPremise")]
+    [OnPremiseConnectionModuleBindingFilter]
+    public class RequestController : ApiController
+    {
+        private readonly IPostDataTemporaryStore _temporaryStore;
+        private readonly ILogger _logger;
 
 		public RequestController(IPostDataTemporaryStore temporaryStore, ILogger logger)
 		{

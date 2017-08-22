@@ -41,9 +41,9 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public int ConnectionTimeout { get; private set; }
 			public int KeepAliveInterval { get; private set; }
 			public bool UseInsecureHttp { get; private set; }
-			public bool EnableManagementWeb { get; private set; }
-			public bool EnableRelaying { get; private set; }
-			public bool EnableOnPremiseConnections { get; private set; }
+			public ModuleBinding EnableManagementWeb { get; private set; }
+			public ModuleBinding EnableRelaying { get; private set; }
+			public ModuleBinding EnableOnPremiseConnections { get; private set; }
 			public string HostName { get; private set; }
 			public int Port { get; private set; }
 			public string ManagementWebLocation { get; private set; }

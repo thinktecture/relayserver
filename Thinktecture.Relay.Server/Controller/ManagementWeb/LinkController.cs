@@ -10,12 +10,13 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-	[Authorize(Roles = "Admin")]
-	public class LinkController : ApiController
-	{
-		private readonly ILinkRepository _linkRepository;
-		private readonly IBackendCommunication _backendCommunication;
-		private readonly IRequestLogger _requestLogger;
+    [Authorize(Roles = "Admin")]
+    [ManagementWebModuleBindingFilter]
+    public class LinkController : ApiController
+    {
+        private readonly ILinkRepository _linkRepository;
+        private readonly IBackendCommunication _backendCommunication;
+        private readonly IRequestLogger _requestLogger;
 
 		public LinkController(ILinkRepository linkRepository, IBackendCommunication backendCommunication, IRequestLogger requestLogger)
 		{

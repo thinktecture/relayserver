@@ -14,9 +14,9 @@ namespace Thinktecture.Relay.Server.Configuration
 		public int ConnectionTimeout { get; }
 		public int KeepAliveInterval { get; }
 		public bool UseInsecureHttp { get; }
-		public bool EnableManagementWeb { get; }
-		public bool EnableRelaying { get; }
-		public bool EnableOnPremiseConnections { get; }
+		public ModuleBinding EnableManagementWeb { get; }
+		public ModuleBinding EnableRelaying { get; }
+		public ModuleBinding EnableOnPremiseConnections { get; }
 		public string HostName { get; }
 		public int Port { get; }
 		public string ManagementWebLocation { get; }
@@ -73,22 +73,22 @@ namespace Thinktecture.Relay.Server.Configuration
 				Port = tmpInt;
 			}
 
-			EnableManagementWeb = true;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], out var tmpBool))
+			EnableManagementWeb = ModuleBinding.True;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], true, out var tmpModuleBinding))
 			{
-				EnableManagementWeb = tmpBool;
+				EnableManagementWeb = tmpModuleBinding;
 			}
 
-			EnableRelaying = true;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableRelaying"], out tmpBool))
+			EnableRelaying = ModuleBinding.True;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableRelaying"], true, out tmpModuleBinding))
 			{
-				EnableRelaying = tmpBool;
+				EnableRelaying = tmpModuleBinding;
 			}
 
-			EnableOnPremiseConnections = true;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["EnableOnPremiseConnections"], out tmpBool))
+			EnableOnPremiseConnections = ModuleBinding.True;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableOnPremiseConnections"], true, out tmpModuleBinding))
 			{
-				EnableOnPremiseConnections = tmpBool;
+				EnableOnPremiseConnections = tmpModuleBinding;
 			}
 
 			UseInsecureHttp = false;

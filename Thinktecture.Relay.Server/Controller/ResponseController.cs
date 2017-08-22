@@ -8,11 +8,12 @@ using Thinktecture.Relay.Server.Communication;
 
 namespace Thinktecture.Relay.Server.Controller
 {
-	[Authorize(Roles = "OnPremise")]
-	public class ResponseController : ApiController
-	{
-		private readonly ILogger _logger;
-		private readonly IBackendCommunication _backendCommunication;
+    [Authorize(Roles = "OnPremise")]
+    [OnPremiseConnectionModuleBindingFilter]
+    public class ResponseController : ApiController
+    {
+        private readonly ILogger _logger;
+        private readonly IBackendCommunication _backendCommunication;
 
 		public ResponseController(ILifetimeScope scope, ILogger logger)
 		{

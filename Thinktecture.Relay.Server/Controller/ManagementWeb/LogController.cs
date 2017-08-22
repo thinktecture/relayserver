@@ -5,9 +5,10 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-	public class LogController : ApiController
-	{
-		private readonly ILogRepository _logRepository;
+    [ManagementWebModuleBindingFilter]
+    public class LogController : ApiController
+    {
+        private readonly ILogRepository _logRepository;
 
 		public LogController(ILogRepository logRepository)
 		{

@@ -7,12 +7,14 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-	[AllowAnonymous]
-	public class FakeDataController : ApiController
-	{
-		private readonly IUserRepository _userRepository;
-		private readonly ILinkRepository _linkRepository;
-		private readonly ILogRepository _logRepository;
+    [AllowAnonymous]
+    [ManagementWebModuleBindingFilter]
+    public class FakeDataController : ApiController
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly ILinkRepository _linkRepository;
+        private readonly ILogRepository _logRepository;
+        private readonly ITraceRepository _traceRepository;
 
 		public FakeDataController(IUserRepository userRepository, ILinkRepository linkRepository, ILogRepository logRepository)
 		{

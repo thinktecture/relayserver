@@ -32,11 +32,10 @@ using Thinktecture.Relay.Server.Filters;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Logging;
+using Thinktecture.Relay.Server.Owin;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
-using ConnectionConfiguration = Microsoft.AspNet.SignalR.ConnectionConfiguration;
-using IContainer = Autofac.IContainer;
 
 namespace Thinktecture.Relay.Server
 {
@@ -117,17 +116,17 @@ namespace Thinktecture.Relay.Server
 
 			var builder = new ContainerBuilder();
 
-			if (configuration.EnableManagementWeb)
+			if (configuration.EnableManagementWeb != ModuleBinding.False)
 			{
 				builder.RegisterModule<ManagementWebModule>();
 			}
 
-			if (configuration.EnableRelaying)
+			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
 				builder.RegisterModule<RelayingModule>();
 			}
 
-			if (configuration.EnableOnPremiseConnections)
+			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
 				builder.RegisterModule<OnPremiseConnectionsModule>();
 			}
@@ -201,8 +200,9 @@ namespace Thinktecture.Relay.Server
 		private static void MapSignalR(IAppBuilder app, ILifetimeScope container)
 		{
 			var config = container.Resolve<IConfiguration>();
+			string path = "/signalr";
 
-			if (!config.EnableOnPremiseConnections)
+			if (config.EnableOnPremiseConnections == ModuleBinding.False)
 			{
 				return;
 			}
@@ -211,13 +211,18 @@ namespace Thinktecture.Relay.Server
 			GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(config.DisconnectTimeout);
 			GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
 
-			app.MapSignalR<OnPremisesConnection>("/signalr", new ConnectionConfiguration
+			if (config.EnableOnPremiseConnections == ModuleBinding.Local)
 			{
-				Resolver = new AutofacDependencyResolver(container)
+				app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
+			}
+
+			app.MapSignalR<OnPremisesConnection>(path, new ConnectionConfiguration
+			{
+				Resolver = new AutofacDependencyResolver(container),
 			});
 		}
 
-		private static void UseWebApi(IAppBuilder app, ILifetimeScope container)
+		private static void UseWebApi(IAppBuilder app, IContainer container)
 		{
 			var configuration = container.Resolve<IConfiguration>();
 			var logger = container.Resolve<ILogger>();
@@ -244,26 +249,30 @@ namespace Thinktecture.Relay.Server
 
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
-			if (configuration.EnableRelaying)
+			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
 				logger.Info("Relaying enabled");
 				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
 			}
 
-			if (configuration.EnableOnPremiseConnections)
+			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
 				logger.Info("On-premise connections enabled");
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
 			}
 
-			if (configuration.EnableManagementWeb)
+			if (configuration.EnableManagementWeb != ModuleBinding.False)
 			{
 				logger.Info("Management web enabled");
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
 			}
 
 			httpConfig.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+			var builder = new ContainerBuilder();
+			builder.RegisterWebApiFilterProvider(httpConfig);
+			builder.Update(container);
 
 			app.UseWebApi(httpConfig);
 		}
@@ -273,19 +282,26 @@ namespace Thinktecture.Relay.Server
 			var configuration = container.Resolve<IConfiguration>();
 			var logger = container.Resolve<ILogger>();
 
-			if (!configuration.EnableManagementWeb)
+			if (configuration.EnableManagementWeb == ModuleBinding.False)
 			{
 				return;
 			}
 
 			try
 			{
+				string path = "/managementweb";
+
 				var options = new FileServerOptions()
 				{
 					FileSystem = new PhysicalFileSystem(configuration.ManagementWebLocation),
-					RequestPath = new PathString("/managementweb"),
+					RequestPath = new PathString(path),
 				};
 				options.DefaultFilesOptions.DefaultFileNames.Add("index.html");
+
+				if (configuration.EnableManagementWeb == ModuleBinding.Local)
+				{
+					app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
+				}
 
 				app.UseFileServer(options);
 			}
