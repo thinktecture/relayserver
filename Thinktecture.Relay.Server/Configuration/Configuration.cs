@@ -74,7 +74,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			}
 
 			EnableManagementWeb = ModuleBinding.True;
-			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], true, out var tmpModuleBinding))
+			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], true, out ModuleBinding tmpModuleBinding))
 			{
 				EnableManagementWeb = tmpModuleBinding;
 			}
@@ -92,7 +92,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			}
 
 			UseInsecureHttp = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["UseInsecureHttp"], out tmpBool))
+			if (Boolean.TryParse(ConfigurationManager.AppSettings["UseInsecureHttp"], out var tmpBool))
 			{
 				UseInsecureHttp = tmpBool;
 			}
