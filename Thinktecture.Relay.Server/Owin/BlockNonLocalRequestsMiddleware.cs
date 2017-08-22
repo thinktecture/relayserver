@@ -7,7 +7,7 @@ namespace Thinktecture.Relay.Server.Owin
 	class BlockNonLocalRequestsMiddleware : OwinMiddleware
 	{
 		private readonly string _path;
-		
+
 		public BlockNonLocalRequestsMiddleware(OwinMiddleware next, string path)
 			: base(next)
 		{

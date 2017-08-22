@@ -4,11 +4,11 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-    [Authorize(Roles = "Admin")]
-    [ManagementWebModuleBindingFilter]
-    public class DashboardController : ApiController
-    {
-        private readonly ILogRepository _logRepository;
+	[Authorize(Roles = "Admin")]
+	[ManagementWebModuleBindingFilter]
+	public class DashboardController : ApiController
+	{
+		private readonly ILogRepository _logRepository;
 
 		public DashboardController(ILogRepository logRepository)
 		{

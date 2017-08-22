@@ -13,18 +13,18 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller
 {
-    [AllowAnonymous]
-    [RelayModuleBindingFilter]
-    public class ClientController : ApiController
-    {
-        private readonly IBackendCommunication _backendCommunication;
-        private readonly ILogger _logger;
-        private readonly ILinkRepository _linkRepository;
-        private readonly IRequestLogger _requestLogger;
-        private readonly IHttpResponseMessageBuilder _httpResponseMessageBuilder;
-        private readonly IOnPremiseRequestBuilder _onPremiseRequestBuilder;
-        private readonly IPathSplitter _pathSplitter;
-        private readonly ITraceManager _traceManager;
+	[AllowAnonymous]
+	[RelayModuleBindingFilter]
+	public class ClientController : ApiController
+	{
+		private readonly IBackendCommunication _backendCommunication;
+		private readonly ILogger _logger;
+		private readonly ILinkRepository _linkRepository;
+		private readonly IRequestLogger _requestLogger;
+		private readonly IHttpResponseMessageBuilder _httpResponseMessageBuilder;
+		private readonly IOnPremiseRequestBuilder _onPremiseRequestBuilder;
+		private readonly IPathSplitter _pathSplitter;
+		private readonly ITraceManager _traceManager;
 
 		public ClientController(IBackendCommunication backendCommunication, ILogger logger, ILinkRepository linkRepository, IRequestLogger requestLogger,
 			IHttpResponseMessageBuilder httpResponseMessageBuilder, IOnPremiseRequestBuilder onPremiseRequestBuilder, IPathSplitter pathSplitter,
