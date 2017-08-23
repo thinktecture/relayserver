@@ -90,8 +90,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_logger.Trace("{0}: Building on premise connector request. Origin Id: {1}, Path: {2}", link.Id, _backendCommunication.OriginId, path);
 			var onPremiseConnectorRequest = (OnPremiseConnectorRequest)await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName);
 
-			HttpResponseMessage response = null;
-			onPremiseConnectorRequest = PluginManager?.HandleRequest(onPremiseConnectorRequest, out response) ?? onPremiseConnectorRequest;
+			var response = PluginManager?.HandleRequest(onPremiseConnectorRequest);
 			if (response != null)
 			{
 				_logger.Debug("Plugins caused direct answering of request.");
@@ -116,8 +115,8 @@ namespace Thinktecture.Relay.Server.Controller
 				_logger.Trace("{0}: On-Premise timeout.", link.Id);
 			}
 
-			onPremiseTargetResponse = PluginManager?.HandleResponse(onPremiseTargetResponse, onPremiseConnectorRequest, out response) ?? onPremiseTargetResponse;
-			response = response ?? _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
+			response = PluginManager?.HandleResponse(onPremiseConnectorRequest, onPremiseTargetResponse)
+				?? _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
 
 			FinishRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response, link.Id, path);
 			return response;

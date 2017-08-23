@@ -23,14 +23,15 @@ namespace Thinktecture.Relay.Server.Plugins
 		public void LoadPlugins(IContainer container)
 		{
 			var assemblyPath = GetAssemblyPath();
-			if (string.IsNullOrWhiteSpace(assemblyPath))
+
+			if (String.IsNullOrWhiteSpace(assemblyPath))
 				return;
 
 			try
 			{
 				_logger.Trace($"{nameof(PluginLoader)}: Trying to load plugins from file '{{0}}'", assemblyPath);
 
-				Assembly pluginAssembly = Assembly.LoadFrom(assemblyPath);
+				var pluginAssembly = Assembly.LoadFrom(assemblyPath);
 
 				if (!RegisterPluginModule(pluginAssembly, container))
 				{
@@ -55,7 +56,7 @@ namespace Thinktecture.Relay.Server.Plugins
 		{
 			var path = _configuration.PluginAssembly;
 
-			if (string.IsNullOrWhiteSpace(path))
+			if (String.IsNullOrWhiteSpace(path))
 				return null;
 
 			if (!File.Exists(path))
@@ -69,7 +70,7 @@ namespace Thinktecture.Relay.Server.Plugins
 
 		private bool RegisterPluginModule(Assembly pluginAssembly, IContainer container)
 		{
-			Type pluginAutofacModule = LoadPluginModule(pluginAssembly);
+			var pluginAutofacModule = LoadPluginModule(pluginAssembly);
 			if (pluginAutofacModule == null)
 				return false;
 
@@ -101,7 +102,7 @@ namespace Thinktecture.Relay.Server.Plugins
 		{
 			var builder = new ContainerBuilder();
 
-			IModule module = (IModule)Activator.CreateInstance(pluginAutofacModule);
+			var module = (IModule)Activator.CreateInstance(pluginAutofacModule);
 			builder.RegisterModule(module);
 
 			builder.Update(container);
@@ -109,11 +110,10 @@ namespace Thinktecture.Relay.Server.Plugins
 
 		private bool RegisterIndividualPlugins(Assembly pluginAssembly, IContainer container)
 		{
-			var pluginInterfaceTypes = DeterminePluginInterfaces();
-
+			var pluginInterfaceTypes = new[] { typeof(IOnPremiseRequestInterceptor), typeof(IOnPremiseResponseInterceptor) };
 			var builder = new ContainerBuilder();
+			var registered = false;
 
-			bool registered = false;
 			foreach (var pluginInterfaceType in pluginInterfaceTypes)
 			{
 				_logger.Trace($"{nameof(PluginLoader)}: Trying to load plugins for type {{0}}", pluginInterfaceType.Name);
@@ -132,15 +132,6 @@ namespace Thinktecture.Relay.Server.Plugins
 			}
 
 			return registered;
-		}
-
-		private Type[] DeterminePluginInterfaces()
-		{
-			// find all interfaces in the Plugin namespace
-			var pluginType = typeof(IRequestMethodManipulator);
-			return pluginType.Assembly.GetTypes()
-				.Where(t => t.IsInterface && t.Namespace == pluginType.Namespace)
-				.ToArray();
 		}
 
 		private Type FindPluginType(Type pluginInterfaceType, Assembly pluginAssembly)

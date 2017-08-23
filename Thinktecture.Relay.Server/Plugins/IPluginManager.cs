@@ -6,7 +6,7 @@ namespace Thinktecture.Relay.Server.Plugins
 {
 	internal interface IPluginManager
 	{
-		OnPremiseConnectorRequest HandleRequest(OnPremiseConnectorRequest onPremiseConnectorRequest, out HttpResponseMessage response);
-		OnPremiseTargetResponse HandleResponse(OnPremiseTargetResponse onPremiseTargetResponse, IOnPremiseConnectorRequest onPremiseConnectorRequest, out HttpResponseMessage response);
+		HttpResponseMessage HandleRequest(OnPremiseConnectorRequest onPremiseConnectorRequest);
+		HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest onPremiseConnectorRequest, OnPremiseTargetResponse onPremiseTargetResponse);
 	}
 }

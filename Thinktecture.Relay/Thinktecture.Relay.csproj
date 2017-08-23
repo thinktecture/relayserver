@@ -43,13 +43,10 @@
     <Compile Include="OnPremiseConnector\OnPremiseTarget\IOnPremiseTargetRequest.cs" />
     <Compile Include="OnPremiseConnector\OnPremiseTarget\IOnPremiseTargetResponse.cs" />
     <Compile Include="Server\OnPremise\IOnPremiseConnectorRequest.cs" />
-    <Compile Include="Server\Plugins\IRequestBodyManipulator.cs" />
-    <Compile Include="Server\Plugins\IRequestHeaderManipulator.cs" />
-    <Compile Include="Server\Plugins\IRequestMethodManipulator.cs" />
-    <Compile Include="Server\Plugins\IRequestUrlManipulator.cs" />
-    <Compile Include="Server\Plugins\IResponseBodyManipulator.cs" />
-    <Compile Include="Server\Plugins\IResponseHeaderManipulator.cs" />
-    <Compile Include="Server\Plugins\IResponseStatusCodeManipulator.cs" />
+    <Compile Include="Server\Plugins\IInterceptedRequest.cs" />
+    <Compile Include="Server\Plugins\IInterceptedResponse.cs" />
+    <Compile Include="Server\Plugins\IOnPremiseRequestInterceptor.cs" />
+    <Compile Include="Server\Plugins\IOnPremiseResponseInterceptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

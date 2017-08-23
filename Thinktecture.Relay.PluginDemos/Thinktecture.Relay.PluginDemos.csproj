@@ -51,8 +51,7 @@
   <ItemGroup>
     <Compile Include="PluginModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequestHeaderManipulatorDemoPlugin.cs" />
-    <Compile Include="RequestMethodManipulatorDemoPlugin.cs" />
+    <Compile Include="DemoRequestInterceptor.cs" />
     <Compile Include="ResponseBodyManipulatorDemoPlugin.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Thinktecture.Relay.Server.Plugins;
 
 namespace Thinktecture.Relay.PluginDemos
@@ -19,9 +19,8 @@ namespace Thinktecture.Relay.PluginDemos
 		protected override void Load(ContainerBuilder builder)
 		{
 			// Each plugin that should be added needs to be registered with the container builder as its Interface type
-			builder.RegisterType<RequestHeaderManipulatorDemoPlugin>().As<IRequestHeaderManipulator>();
-			builder.RegisterType<RequestMethodManipulatorDemoPlugin>().As<IRequestMethodManipulator>();
-			builder.RegisterType<ResponseBodyManipulatorDemoPlugin>().As<IResponseBodyManipulator>();
+			builder.RegisterType<DemoRequestInterceptor>().As<IOnPremiseRequestInterceptor>();
+			builder.RegisterType<ResponseBodyManipulatorDemoPlugin>().As<IOnPremiseResponseInterceptor>();
 
 			base.Load(builder);
 		}
