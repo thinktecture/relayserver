@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Plugins
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 		}
 
-		public void LoadPlugins(IContainer container)
+		public void LoadPlugins(ContainerBuilder builder)
 		{
 			var assemblyPath = GetAssemblyPath();
 
@@ -33,11 +33,11 @@ namespace Thinktecture.Relay.Server.Plugins
 
 				var pluginAssembly = Assembly.LoadFrom(assemblyPath);
 
-				if (!RegisterPluginModule(pluginAssembly, container))
+				if (!RegisterPluginModule(pluginAssembly, builder))
 				{
 					_logger.Info($"{nameof(PluginLoader)}: Plugin assembly does not provide a DI module. Trying to load individual plugin types.");
 
-					if (!RegisterIndividualPlugins(pluginAssembly, container))
+					if (!RegisterIndividualPlugins(pluginAssembly, builder))
 					{
 						_logger.Warn($"{nameof(PluginLoader)}: No plugins could be registered from plugin assembly.");
 						return;
@@ -68,13 +68,14 @@ namespace Thinktecture.Relay.Server.Plugins
 			return path;
 		}
 
-		private bool RegisterPluginModule(Assembly pluginAssembly, IContainer container)
+		private bool RegisterPluginModule(Assembly pluginAssembly, ContainerBuilder builder)
 		{
 			var pluginAutofacModule = LoadPluginModule(pluginAssembly);
 			if (pluginAutofacModule == null)
 				return false;
 
-			RegisterModuleInContainer(pluginAutofacModule, container);
+			var module = (IModule)Activator.CreateInstance(pluginAutofacModule);
+			builder.RegisterModule(module);
 
 			return true;
 		}
@@ -98,20 +99,9 @@ namespace Thinktecture.Relay.Server.Plugins
 			return autofacModules.Single();
 		}
 
-		private void RegisterModuleInContainer(Type pluginAutofacModule, IContainer container)
-		{
-			var builder = new ContainerBuilder();
-
-			var module = (IModule)Activator.CreateInstance(pluginAutofacModule);
-			builder.RegisterModule(module);
-
-			builder.Update(container);
-		}
-
-		private bool RegisterIndividualPlugins(Assembly pluginAssembly, IContainer container)
+		private bool RegisterIndividualPlugins(Assembly pluginAssembly, ContainerBuilder builder)
 		{
 			var pluginInterfaceTypes = new[] { typeof(IOnPremiseRequestInterceptor), typeof(IOnPremiseResponseInterceptor) };
-			var builder = new ContainerBuilder();
 			var registered = false;
 
 			foreach (var pluginInterfaceType in pluginInterfaceTypes)
@@ -124,11 +114,6 @@ namespace Thinktecture.Relay.Server.Plugins
 					RegisterPluginType(pluginType, pluginInterfaceType, builder);
 					registered = true;
 				}
-			}
-
-			if (registered)
-			{
-				builder.Update(container);
 			}
 
 			return registered;

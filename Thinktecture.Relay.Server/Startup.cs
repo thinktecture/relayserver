@@ -50,11 +50,13 @@ namespace Thinktecture.Relay.Server
 			var config = container.Resolve<IConfiguration>();
 			var logger = container.Resolve<ILogger>();
 			var httpConfig = CreateHttpConfiguration(config, logger);
+			var pluginLoader = container.Resolve<IPluginLoader>();
 
 			var scope = container.BeginLifetimeScope(builder =>
 			{
 				builder.RegisterWebApiFilterProvider(httpConfig);
 				RegisterApiControllers(builder, config);
+				pluginLoader.LoadPlugins(builder);
 			});
 
 			app.UseAutofacMiddleware(scope);
@@ -114,8 +116,6 @@ namespace Thinktecture.Relay.Server
 
 			var container = builder.Build();
 
-			RegisterPlugins(container);
-
 			return container;
 		}
 
@@ -129,13 +129,6 @@ namespace Thinktecture.Relay.Server
 
 			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 				builder.RegisterModule<OnPremiseConnectionsModule>();
-		}
-
-		private static void RegisterPlugins(IContainer container)
-		{
-			var pluginLoader = container.Resolve<IPluginLoader>();
-
-			pluginLoader.LoadPlugins(container);
 		}
 
 		private static void UseOAuthSecurity(IAppBuilder app, AuthorizationServerProvider authProvider)
