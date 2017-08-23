@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.PluginDemos
 			// they are all registered in your plugins Autofac module
 			_logger = logger;
 		}
-		
+
 		public IDictionary<string, string> HandleHeaders(IOnPremiseConnectorRequest onPremiseConnectorRequest, out HttpResponseMessage response)
 		{
 			// set the response to null

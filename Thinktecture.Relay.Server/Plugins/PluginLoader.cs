@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Plugins
 				_logger.Trace($"{nameof(PluginLoader)}: Trying to load plugins from file '{{0}}'", assemblyPath);
 
 				Assembly pluginAssembly = Assembly.LoadFrom(assemblyPath);
-				
+
 				if (!RegisterPluginModule(pluginAssembly, container))
 				{
 					_logger.Info($"{nameof(PluginLoader)}: Plugin assembly does not provide a DI module. Trying to load individual plugin types.");
@@ -57,7 +57,7 @@ namespace Thinktecture.Relay.Server.Plugins
 
 			if (string.IsNullOrWhiteSpace(path))
 				return null;
-			
+
 			if (!File.Exists(path))
 			{
 				_logger.Warn($"{nameof(PluginLoader)}: A plugin assembly has been configured, but it is not available. Configured path: '{{0}}'", path);

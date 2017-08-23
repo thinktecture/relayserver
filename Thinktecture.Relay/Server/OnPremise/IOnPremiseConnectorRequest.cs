@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
 namespace Thinktecture.Relay.Server.OnPremise
