@@ -10,13 +10,23 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	{
 		public string RequestId { get; set; }
 		public Guid OriginId { get; set; }
-
-		public HttpStatusCode StatusCode { get; set; }
-		public IDictionary<string, string> HttpHeaders { get; set; }
-		IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => HttpHeaders != null ? new ReadOnlyDictionary<string, string>(HttpHeaders) : null;
 		public byte[] Body { get; set; }
-
 		public DateTime RequestStarted { get; set; }
 		public DateTime RequestFinished { get; set; }
+		public HttpStatusCode StatusCode { get; set; }
+
+		private IDictionary<string, string> _httpHeaders;
+		public IDictionary<string, string> HttpHeaders
+		{
+			get => _httpHeaders ?? (_httpHeaders = new Dictionary<string, string>());
+			set
+			{
+				_httpHeaders = value;
+				_readonlyHeaders = null;
+			}
+		}
+
+		private IReadOnlyDictionary<string, string> _readonlyHeaders;
+		IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => _readonlyHeaders ?? (_readonlyHeaders = new ReadOnlyDictionary<string, string>(HttpHeaders));
 	}
 }

@@ -373,7 +373,7 @@ namespace Thinktecture.Relay.Server.Repository
 			{
 				using (var context = new RelayContext())
 				{
-					var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId);
+					var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId).ToList();
 					context.ActiveConnections.RemoveRange(invalidConnections);
 
 					context.SaveChanges();

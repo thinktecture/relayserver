@@ -1,5 +1,4 @@
 using System.Net.Http;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Plugins
