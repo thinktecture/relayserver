@@ -6,6 +6,8 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using NLog;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Http
@@ -14,6 +16,18 @@ namespace Thinktecture.Relay.Server.Http
 	[TestClass]
 	public class ClientRequestBuilderTest
 	{
+		private readonly Mock<ILogger> _loggerMock;
+
+		public ClientRequestBuilderTest()
+		{
+			_loggerMock = new Mock<ILogger>();
+		}
+
+		private OnPremiseRequestBuilder CreateBuilder()
+		{
+			return new OnPremiseRequestBuilder(_loggerMock.Object);
+		}
+
 		[TestMethod]
 		public async Task BuildFrom_correctly_builds_a_ClientRequest_from_given_information()
 		{
@@ -24,7 +38,7 @@ namespace Thinktecture.Relay.Server.Http
 				RequestUri = new Uri("http://tt.invalid/?id=bla")
 			};
 			var startTime = DateTime.UtcNow;
-			IOnPremiseRequestBuilder sut = new OnPremiseRequestBuilder();
+			var sut = CreateBuilder();
 			IOnPremiseConnectorRequest result;
 
 			request.Headers.Host = "tt.invalid"; // should be discarded
@@ -51,7 +65,7 @@ namespace Thinktecture.Relay.Server.Http
 			{
 				Content = new ByteArrayContent(new byte[] { })
 			};
-			var sut = new OnPremiseRequestBuilder();
+			var sut = CreateBuilder();
 			byte[] result;
 
 			result = await sut.GetClientRequestBodyAsync(request.Content);
@@ -66,7 +80,7 @@ namespace Thinktecture.Relay.Server.Http
 			{
 				Content = new ByteArrayContent(new byte[] { 0, 0, 0 })
 			};
-			var sut = new OnPremiseRequestBuilder();
+			var sut = CreateBuilder();
 			byte[] result;
 
 			result = await sut.GetClientRequestBodyAsync(request.Content);
@@ -78,7 +92,7 @@ namespace Thinktecture.Relay.Server.Http
 		public void CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue_combines_multiple_HTTP_header_values_into_one()
 		{
 			var headerValues = new List<string> { "Foo", "Bar", "Baz" };
-			var sut = new OnPremiseRequestBuilder();
+			var sut = CreateBuilder();
 			string result;
 
 			result = sut.CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(headerValues);
@@ -100,7 +114,7 @@ namespace Thinktecture.Relay.Server.Http
 			{
 				Content = new ByteArrayContent(new byte[] { })
 			};
-			var sut = new OnPremiseRequestBuilder();
+			var sut = CreateBuilder();
 
 			request.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
 
@@ -122,7 +136,7 @@ namespace Thinktecture.Relay.Server.Http
 					{"Content-Length", "3"}
 				}
 			};
-			var sut = new OnPremiseRequestBuilder();
+			var sut = CreateBuilder();
 
 			sut.RemoveIgnoredHeaders(clientRequest);
 

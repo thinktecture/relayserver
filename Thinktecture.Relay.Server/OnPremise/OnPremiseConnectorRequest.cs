@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using Newtonsoft.Json;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
@@ -11,6 +12,6 @@ namespace Thinktecture.Relay.Server.OnPremise
 		[JsonIgnore]
 		public DateTime RequestFinished { get; set; }
 		[JsonIgnore]
-		public string ClientIpAddress { get; set; }
+		public IPAddress ClientIpAddress { get; set; }
 	}
 }

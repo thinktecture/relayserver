@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+using System;
+using System.Net;
+using System.Net.Http;
 using System.ServiceModel.Channels;
 using System.Web;
 using Microsoft.Owin;
@@ -7,30 +9,29 @@ namespace Thinktecture.Relay.Server.Http
 {
 	internal static class HttpRequestMessageExtensions
 	{
-		public static string GetClientIp(this HttpRequestMessage request)
+		public static IPAddress GetRemoteIpAddress(this HttpRequestMessage request)
 		{
+			string ip = null;
+
 			if (request.Properties.ContainsKey("MS_OwinContext"))
 			{
-				return ((OwinContext)request.Properties["MS_OwinContext"]).Request.RemoteIpAddress;
+				ip = ((OwinContext)request.Properties["MS_OwinContext"]).Request.RemoteIpAddress;
 			}
-
-			if (request.Properties.ContainsKey("MS_HttpContext"))
+			else if (request.Properties.ContainsKey("MS_HttpContext"))
 			{
-				return ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+				ip = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
 			}
-
-			if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
+			else if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
 			{
-				RemoteEndpointMessageProperty prop = (RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name];
-				return prop.Address;
+				var prop = (RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name];
+				ip = prop.Address;
 			}
-
-			if (HttpContext.Current != null)
+			else if (HttpContext.Current != null)
 			{
-				return HttpContext.Current.Request.UserHostAddress;
+				ip = HttpContext.Current.Request.UserHostAddress;
 			}
 
-			return null;
+			return String.IsNullOrWhiteSpace(ip) ? null : IPAddress.Parse(ip);
 		}
 	}
 }

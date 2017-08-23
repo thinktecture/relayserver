@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
@@ -22,6 +23,6 @@ namespace Thinktecture.Relay.Server.Plugins
 		/// <summary>
 		/// Gets the IP address of the client sending this request. May be an IPv4 or an IPv6 address.
 		/// </summary>
-		string ClientIpAddress { get; }
+		IPAddress ClientIpAddress { get; }
 	}
 }

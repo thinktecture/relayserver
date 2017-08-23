@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
@@ -28,7 +27,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			_responseSubjectLookup = new ConcurrentDictionary<Guid, Subject<IOnPremiseConnectorResponse>>();
 		}
 
-		public IObservable<IOnPremiseTargetRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
+		public IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
 		{
 			if (connectionId == null)
 				throw new ArgumentNullException(nameof(connectionId));
@@ -38,7 +37,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			CheckDisposed();
 			_logger.Info("Creating request subscription for OnPremiseId {0} and ConnectionId {1}", linkId, connectionId);
 
-			return Observable.Create<IOnPremiseTargetRequest>(observer =>
+			return Observable.Create<IOnPremiseConnectorRequest>(observer =>
 			{
 				var ctx = GetRequestSubjectContext(linkId, connectionId);
 				var subscription = ctx.Subject.Subscribe(observer.OnNext);
@@ -84,7 +83,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			// no ack here
 		}
 
-		public Task DispatchRequest(Guid linkId, IOnPremiseTargetRequest request)
+		public Task DispatchRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			if (linkId == null)
 				throw new ArgumentNullException(nameof(linkId));
@@ -114,7 +113,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			return Task.CompletedTask;
 		}
 
-		private Subject<IOnPremiseTargetRequest> TryGetRequestSubject(Guid linkId)
+		private Subject<IOnPremiseConnectorRequest> TryGetRequestSubject(Guid linkId)
 		{
 			lock (_requestSubjectLookupLock)
 			{

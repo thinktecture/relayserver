@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using NLog;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	internal class OnPremiseRequestBuilder : IOnPremiseRequestBuilder
 	{
+		private readonly ILogger _logger;
 		private readonly string[] _ignoredHeaders;
 
-		public OnPremiseRequestBuilder()
+		public OnPremiseRequestBuilder(ILogger logger)
 		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_ignoredHeaders = new[] { "Host", "Connection" };
 		}
 
@@ -21,20 +24,22 @@ namespace Thinktecture.Relay.Server.Http
 			var onPremiseConnectorRequest = new OnPremiseConnectorRequest
 			{
 				RequestId = Guid.NewGuid().ToString(),
-
 				Body = await GetClientRequestBodyAsync(request.Content),
-
 				HttpMethod = request.Method.Method,
 				Url = pathWithoutUserName + request.RequestUri.Query,
-
 				HttpHeaders = request.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
-
 				OriginId = originId,
-
 				RequestStarted = DateTime.UtcNow,
-
-				ClientIpAddress = request.GetClientIp(),
 			};
+
+			try
+			{
+				onPremiseConnectorRequest.ClientIpAddress = request.GetRemoteIpAddress();
+			}
+			catch (Exception ex)
+			{
+				_logger.Warn(ex, "Could not fetch remote IP address for request {0}", onPremiseConnectorRequest.RequestId);
+			}
 
 			AddContentHeaders(onPremiseConnectorRequest, request);
 			RemoveIgnoredHeaders(onPremiseConnectorRequest);
