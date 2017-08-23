@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
@@ -27,7 +28,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// <summary>
 		/// Gets the id of the relay server this request was sent to
 		/// </summary>
-		string OriginId { get; }
+		Guid OriginId { get; }
 		/// <summary>
 		/// Gets the Id the On Premise Connector should acknowledge with when it receives this request
 		/// </summary>
