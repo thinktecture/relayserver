@@ -31,7 +31,9 @@ namespace Thinktecture.Relay.Server.Http
 
 				OriginId = originId,
 
-				RequestStarted = DateTime.UtcNow
+				RequestStarted = DateTime.UtcNow,
+
+				ClientIpAddress = request.GetClientIp(),
 			};
 
 			AddContentHeaders(onPremiseConnectorRequest, request);

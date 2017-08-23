@@ -4,11 +4,13 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using NLog;
+using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.Plugins;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller
@@ -25,6 +27,8 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly IOnPremiseRequestBuilder _onPremiseRequestBuilder;
 		private readonly IPathSplitter _pathSplitter;
 		private readonly ITraceManager _traceManager;
+
+        internal IPluginManager PluginManager { get; set; }
 
 		public ClientController(IBackendCommunication backendCommunication, ILogger logger, ILinkRepository linkRepository, IRequestLogger requestLogger,
 			IHttpResponseMessageBuilder httpResponseMessageBuilder, IOnPremiseRequestBuilder onPremiseRequestBuilder, IPathSplitter pathSplitter,
@@ -83,16 +87,25 @@ namespace Thinktecture.Relay.Server.Controller
 				return NotFound();
 			}
 
-			_logger.Trace("{0}: Building on premise connector request. Origin Id: {1}, Path: {2}", link.Id, _backendCommunication.OriginId, path);
-			var onPremiseConnectorRequest = (OnPremiseConnectorRequest)await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName);
+            _logger.Trace("{0}: Building on premise connector request. Origin Id: {1}, Path: {2}", link.Id, _backendCommunication.OriginId, path);
+            var onPremiseConnectorRequest = (OnPremiseConnectorRequest)await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName);
 
-			var onPremiseTargetResponseTask = _backendCommunication.GetResponseAsync(onPremiseConnectorRequest.RequestId);
+            HttpResponseMessage response = null;
+            onPremiseConnectorRequest = PluginManager?.HandleRequest(onPremiseConnectorRequest, out response) ?? onPremiseConnectorRequest;
+            if (response != null)
+            {
+                _logger.Debug("Plugins caused direct answering of request.");
+                FinishRequest(onPremiseConnectorRequest, null, response, link.Id, path);
+                return response;
+            }
+
+            var onPremiseTargetResponseTask = _backendCommunication.GetResponseAsync(onPremiseConnectorRequest.RequestId);
 
 			_logger.Trace("{0}: Sending on premise connector request.", link.Id);
 			await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, onPremiseConnectorRequest);
 
-			_logger.Trace("{0}: Waiting for response. Request Id", onPremiseConnectorRequest.RequestId);
-			var onPremiseTargetResponse = await onPremiseTargetResponseTask;
+            _logger.Trace("{0}: Waiting for response. Request Id", onPremiseConnectorRequest.RequestId);
+            var onPremiseTargetResponse = (OnPremiseTargetResponse)await onPremiseTargetResponseTask;
 
 			if (onPremiseTargetResponse != null)
 			{
@@ -103,20 +116,25 @@ namespace Thinktecture.Relay.Server.Controller
 				_logger.Trace("{0}: On-Premise timeout.", link.Id);
 			}
 
-			var response = _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
+            onPremiseTargetResponse = PluginManager?.HandleResponse(onPremiseTargetResponse, onPremiseConnectorRequest, out response) ?? onPremiseTargetResponse;
+            response = response ?? _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
 
-			onPremiseConnectorRequest.RequestFinished = DateTime.UtcNow;
+            FinishRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response, link.Id, path);
+            return response;
+        }
 
-			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(link.Id);
-			if (currentTraceConfigurationId != null)
-			{
-				_traceManager.Trace(onPremiseConnectorRequest, onPremiseTargetResponse, currentTraceConfigurationId.Value);
-			}
+        private void FinishRequest(OnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpResponseMessage response, Guid linkId, string path)
+        {
+            onPremiseConnectorRequest.RequestFinished = DateTime.UtcNow;
 
-			_requestLogger.LogRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response.StatusCode, link.Id, _backendCommunication.OriginId, path);
+            var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);
+            if (currentTraceConfigurationId != null)
+            {
+                _traceManager.Trace(onPremiseConnectorRequest, onPremiseTargetResponse, currentTraceConfigurationId.Value);
+            }
 
-			return response;
-		}
+            _requestLogger.LogRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response.StatusCode, linkId, _backendCommunication.OriginId, path);
+        }
 
 		private new HttpResponseMessage NotFound()
 		{

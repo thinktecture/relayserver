@@ -25,18 +25,6 @@ namespace Thinktecture.Relay.Server.Controller
 	[TestClass]
 	public class ClientControllerTest
 	{
-		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
-		{
-			public string RequestId { get; set; }
-			public Guid OriginId { get; set; }
-			public IDictionary<string, string> HttpHeaders { get; set; }
-			IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => HttpHeaders != null ? new ReadOnlyDictionary<string, string>(HttpHeaders) : null;
-			public HttpStatusCode StatusCode { get; set; }
-			public byte[] Body { get; set; }
-			public DateTime RequestStarted { get; set; }
-			public DateTime RequestFinished { get; set; }
-		}
-
 		[TestMethod]
 		public async Task Relay_delegates_information_and_returns_valid_httpResponseMessage_when_entered_a_valid_path()
 		{

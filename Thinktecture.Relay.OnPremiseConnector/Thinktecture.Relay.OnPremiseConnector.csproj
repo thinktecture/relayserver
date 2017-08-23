@@ -70,8 +70,6 @@
     <Compile Include="IRelayServerConnector.cs" />
     <Compile Include="OnPremiseTarget\IOnPremiseTargetConnector.cs" />
     <Compile Include="OnPremiseTarget\IOnPremiseTargetConnectorFactory.cs" />
-    <Compile Include="OnPremiseTarget\IOnPremiseTargetRequest.cs" />
-    <Compile Include="OnPremiseTarget\IOnPremiseTargetResponse.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseInProcTargetConnector.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseInProcTargetConnectorBase.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseWebTargetConnector.cs" />
@@ -89,7 +87,12 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Thinktecture.Relay\Thinktecture.Relay.csproj">
+      <Project>{e34d846b-3b1e-4a97-a06f-f5502349f4f1}</Project>
+      <Name>Thinktecture.Relay</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">

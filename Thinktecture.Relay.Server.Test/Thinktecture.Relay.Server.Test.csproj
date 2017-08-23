@@ -121,6 +121,10 @@
       <Project>{41eeced0-e7c6-4c7c-8b7d-9b6a33da0150}</Project>
       <Name>Thinktecture.Relay.Server</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Thinktecture.Relay\Thinktecture.Relay.csproj">
+      <Project>{e34d846b-3b1e-4a97-a06f-f5502349f4f1}</Project>
+      <Name>Thinktecture.Relay</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -23,6 +23,7 @@ namespace Thinktecture.Relay.Server.Configuration
 		public TimeSpan TemporaryRequestStoragePeriod { get; }
 		public string TemporaryRequestStoragePath { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
+		public string PluginAssembly { get; private set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -122,6 +123,12 @@ namespace Thinktecture.Relay.Server.Configuration
 				ActiveConnectionTimeoutInSeconds = tmpInt;
 			}
 
+			PluginAssembly = ConfigurationManager.AppSettings["PluginAssembly"];
+			if (String.IsNullOrWhiteSpace(PluginAssembly))
+			{
+				PluginAssembly = null;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -143,6 +150,7 @@ namespace Thinktecture.Relay.Server.Configuration
 			logger.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
 			logger.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
 			logger.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
+			logger.Trace("Setting PluginAssembly: {0}", PluginAssembly);
 		}
 	}
 }

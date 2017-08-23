@@ -33,6 +33,7 @@ using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Logging;
 using Thinktecture.Relay.Server.Owin;
+using Thinktecture.Relay.Server.Plugins;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
@@ -97,6 +98,9 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
 			builder.RegisterType<PathSplitter>().As<IPathSplitter>();
 
+			builder.RegisterType<PluginLoader>().As<IPluginLoader>();
+			builder.RegisterType<PluginManager>().As<IPluginManager>();
+
 			builder.Register(context => LogManager.GetLogger("Server")).As<ILogger>().SingleInstance();
 
 			if (String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["TemporaryRequestStoragePath"]))
@@ -110,6 +114,7 @@ namespace Thinktecture.Relay.Server
 
 			var container = builder.Build();
 
+			RegisterPlugins(container);
 
 			return container;
 		}
@@ -124,6 +129,13 @@ namespace Thinktecture.Relay.Server
 
 			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 				builder.RegisterModule<OnPremiseConnectionsModule>();
+		}
+
+		private static void RegisterPlugins(IContainer container)
+		{
+			var pluginLoader = container.Resolve<IPluginLoader>();
+
+			pluginLoader.LoadPlugins(container);
 		}
 
 		private static void UseOAuthSecurity(IAppBuilder app, AuthorizationServerProvider authProvider)

@@ -52,6 +52,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public string TemporaryRequestStoragePath { get; }
 			public TimeSpan TemporaryRequestStoragePeriod { get; }
 			public int ActiveConnectionTimeoutInSeconds { get; }
+			public string PluginAssembly { get; private set; }
 
 			public Configuration()
 			{
