@@ -4,9 +4,9 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Plugins
 {
-	internal interface IPluginManager
+	public interface IPluginManager
 	{
-		HttpResponseMessage HandleRequest(OnPremiseConnectorRequest onPremiseConnectorRequest);
-		HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest onPremiseConnectorRequest, OnPremiseTargetResponse onPremiseTargetResponse);
+		HttpResponseMessage HandleRequest(IInterceptedRequest request);
+		HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IInterceptedResponse response);
 	}
 }

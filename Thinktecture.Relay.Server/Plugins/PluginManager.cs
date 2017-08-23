@@ -1,7 +1,6 @@
 using System;
 using System.Net.Http;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Plugins
@@ -20,24 +19,24 @@ namespace Thinktecture.Relay.Server.Plugins
 			_responseInterceptor = responseInterceptor;
 		}
 
-		public HttpResponseMessage HandleRequest(OnPremiseConnectorRequest onPremiseConnectorRequest)
+		public HttpResponseMessage HandleRequest(IInterceptedRequest request)
 		{
-			_logger.Trace($"{nameof(PluginManager)}: handling request {{0}}", onPremiseConnectorRequest.RequestId);
+			_logger.Trace($"{nameof(PluginManager)}: handling request {{0}}", request.RequestId);
 
 			try
 			{
-				return _requestInceptor?.OnRequestReceived(onPremiseConnectorRequest);
+				return _requestInceptor?.OnRequestReceived(request);
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_requestInceptor?.GetType().Name}.{nameof(IOnPremiseRequestInterceptor.OnRequestReceived)}()\" for request {{0}}", onPremiseConnectorRequest.RequestId);
+				_logger.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_requestInceptor?.GetType().Name}.{nameof(IOnPremiseRequestInterceptor.OnRequestReceived)}()\" for request {{0}}", request.RequestId);
 				return null;
 			}
 		}
 
-		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest onPremiseConnectorRequest, OnPremiseTargetResponse onPremiseTargetResponse)
+		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IInterceptedResponse response)
 		{
-			_logger.Trace($"{nameof(PluginManager)}: handling response for request {{0}}", onPremiseConnectorRequest.RequestId);
+			_logger.Trace($"{nameof(PluginManager)}: handling response for request {{0}}", request.RequestId);
 
 			try
 			{
@@ -45,15 +44,15 @@ namespace Thinktecture.Relay.Server.Plugins
 
 				if (interceptor != null)
 				{
-					if (onPremiseTargetResponse == null)
-						return interceptor.OnResponseReceived(onPremiseConnectorRequest);
+					if (response == null)
+						return interceptor.OnResponseReceived(request);
 
-					return interceptor.OnResponseReceived(onPremiseConnectorRequest, onPremiseTargetResponse);
+					return interceptor.OnResponseReceived(request, response);
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_responseInterceptor?.GetType().Name}.{nameof(IOnPremiseResponseInterceptor.OnResponseReceived)}()\" for request {{0}}", onPremiseConnectorRequest.RequestId);
+				_logger.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_responseInterceptor?.GetType().Name}.{nameof(IOnPremiseResponseInterceptor.OnResponseReceived)}()\" for request {{0}}", request.RequestId);
 			}
 
 			return null;

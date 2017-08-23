@@ -1,5 +1,4 @@
 using Autofac;
-using Thinktecture.Relay.Server.Autofac;
 
 namespace Thinktecture.Relay.Server.Controller
 {
@@ -7,7 +6,7 @@ namespace Thinktecture.Relay.Server.Controller
 	{
 		protected override void Load(ContainerBuilder builder)
 		{
-			builder.RegisterType<ClientController>().InjectPropertiesAsAutowired();
+			builder.RegisterType<ClientController>();
 
 			base.Load(builder);
 		}
