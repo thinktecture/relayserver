@@ -13,8 +13,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		public Guid OriginId { get; set; }
 		public string AcknowledgeId { get; set; }
 
-		private IDictionary<string, string> _httpHeaders;
-		public IDictionary<string, string> HttpHeaders
+		private Dictionary<string, string> _httpHeaders;
+		public Dictionary<string, string> HttpHeaders
 		{
 			get => _httpHeaders ?? (_httpHeaders = new Dictionary<string, string>());
 			set

@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 
 		private RelayServerConnector _connector;
 
-		public async Task Start()
+		public async Task StartAsync()
 		{
 			try
 			{

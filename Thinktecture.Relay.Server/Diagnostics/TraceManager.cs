@@ -123,7 +123,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			var clientHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION);
 			var onPremiseTargetHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_TARGET_HEADER_EXTENSION);
 
-			var tracingDate = new DateTime(long.Parse(filePrefix.Split('-').Last()));
+			var tracingDate = new DateTime(Int64.Parse(filePrefix.Split('-').Last()));
 
 			return new Trace()
 			{

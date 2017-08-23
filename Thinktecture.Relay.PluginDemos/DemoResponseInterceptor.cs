@@ -1,14 +1,13 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Plugins;
 
 namespace Thinktecture.Relay.PluginDemos
 {
-	public class ResponseBodyManipulatorDemoPlugin : IOnPremiseResponseInterceptor
+	public class DemoResponseInterceptor : IOnPremiseResponseInterceptor
 	{
-		public HttpResponseMessage OnResponseReceived(IOnPremiseConnectorRequest request)
+		public HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request)
 		{
 			return new HttpResponseMessage(HttpStatusCode.OK)
 			{
@@ -16,7 +15,7 @@ namespace Thinktecture.Relay.PluginDemos
 			};
 		}
 
-		public HttpResponseMessage OnResponseReceived(IOnPremiseConnectorRequest request, IInterceptedResponse response)
+		public HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request, IInterceptedResponse response)
 		{
 			if (request.Url.EndsWith("WhatIsTheAnswerToLiveTheUniverseAndEverything"))
 				response.Body = GetBody();

@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 
 			_logger.Trace("{0}: Building on premise connector request. Origin Id: {1}, Path: {2}", link.Id, _backendCommunication.OriginId, path);
-			var onPremiseConnectorRequest = (OnPremiseConnectorRequest)await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName);
+			var onPremiseConnectorRequest = await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName);
 
 			var response = _pluginManager.HandleRequest(onPremiseConnectorRequest);
 			if (response != null)
@@ -85,7 +85,7 @@ namespace Thinktecture.Relay.Server.Controller
 			await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, onPremiseConnectorRequest);
 
 			_logger.Trace("{0}: Waiting for response. Request Id", onPremiseConnectorRequest.RequestId);
-			var onPremiseTargetResponse = (OnPremiseTargetResponse)await onPremiseTargetResponseTask;
+			var onPremiseTargetResponse = await onPremiseTargetResponseTask;
 
 			if (onPremiseTargetResponse != null)
 			{
@@ -138,7 +138,7 @@ namespace Thinktecture.Relay.Server.Controller
 			return true;
 		}
 
-		private void FinishRequest(OnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpResponseMessage response, Guid linkId, string path)
+		private void FinishRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpResponseMessage response, Guid linkId, string path)
 		{
 			onPremiseConnectorRequest.RequestFinished = DateTime.UtcNow;
 

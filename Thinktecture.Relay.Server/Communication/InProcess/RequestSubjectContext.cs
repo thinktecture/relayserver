@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Concurrent;
 using System.Reactive.Subjects;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
 {
 	public class RequestSubjectContext : IDisposable
 	{
-		public Subject<IOnPremiseTargetRequest> Subject { get; }
+		public Subject<IOnPremiseConnectorRequest> Subject { get; }
 		public int ConnectionCount => _connectionIds.Count;
 
 		private readonly ConcurrentDictionary<string, string> _connectionIds;
 
 		public RequestSubjectContext()
 		{
-			Subject = new Subject<IOnPremiseTargetRequest>();
+			Subject = new Subject<IOnPremiseConnectorRequest>();
 			_connectionIds = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 		}
 

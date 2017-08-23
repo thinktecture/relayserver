@@ -52,7 +52,7 @@
     <Compile Include="PluginModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DemoRequestInterceptor.cs" />
-    <Compile Include="ResponseBodyManipulatorDemoPlugin.cs" />
+    <Compile Include="DemoResponseInterceptor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

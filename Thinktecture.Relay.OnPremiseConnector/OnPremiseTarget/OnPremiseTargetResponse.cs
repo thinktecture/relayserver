@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
-using Thinktecture.Relay.Server.Plugins;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
-	internal class OnPremiseTargetResponse : IOnPremiseTargetResponse, IInterceptedResponse
+	internal class OnPremiseTargetResponse : IOnPremiseTargetResponse
 	{
 		public string RequestId { get; set; }
 		public Guid OriginId { get; set; }

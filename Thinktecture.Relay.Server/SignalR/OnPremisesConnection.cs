@@ -8,6 +8,7 @@ using Microsoft.AspNet.SignalR;
 using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
@@ -65,7 +66,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			return base.OnDisconnected(request, connectionId, stopCalled);
 		}
 
-		private async Task ForwardClientRequestAsync(string connectionId, OnPremiseTargetRequest request, CancellationToken token)
+		private async Task ForwardClientRequestAsync(string connectionId, IOnPremiseConnectorRequest request, CancellationToken token)
 		{
 			_logger.Debug("Forwarding client request to connection {0}", connectionId);
 			_logger.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
@@ -110,7 +111,7 @@ namespace Thinktecture.Relay.Server.SignalR
 				LinkId = claims.OnPremiseId,
 				UserName = claims.UserName,
 				Role = claims.Role,
-				RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, (OnPremiseTargetRequest)cr, cancellationToken),
+				RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, cr, cancellationToken),
 				IpAddress = GetIpAddressFromOwinEnvironment(request.Environment),
 				ConnectorVersion = GetConnectorVersionFromRequest(request),
 			});

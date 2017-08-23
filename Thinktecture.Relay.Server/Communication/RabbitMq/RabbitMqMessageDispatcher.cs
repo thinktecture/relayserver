@@ -8,7 +8,6 @@ using NLog;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
@@ -35,9 +34,9 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			DeclareExchange(_EXCHANGE_NAME);
 		}
 
-		public IObservable<IOnPremiseTargetRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
+		public IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
 		{
-			return Observable.Create<IOnPremiseTargetRequest>(observer =>
+			return Observable.Create<IOnPremiseConnectorRequest>(observer =>
 			{
 				var queueName = "Request " + linkId;
 				DeclareQueue(queueName);
@@ -79,9 +78,9 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			});
 		}
 
-		public IObservable<IOnPremiseTargetResponse> OnResponseReceived(Guid originId)
+		public IObservable<IOnPremiseConnectorResponse> OnResponseReceived(Guid originId)
 		{
-			return Observable.Create<IOnPremiseTargetResponse>(observer =>
+			return Observable.Create<IOnPremiseConnectorResponse>(observer =>
 			{
 				var queueName = "Response " + originId;
 				DeclareQueue(queueName);
@@ -96,7 +95,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					try
 					{
 						var json = _encoding.GetString(args.Body);
-						var request = JsonConvert.DeserializeObject<OnPremiseTargetResponse>(json);
+						var request = JsonConvert.DeserializeObject<OnPremiseConnectorResponse>(json);
 
 						observer.OnNext(request);
 					}
@@ -123,7 +122,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				_model.BasicAck(deliveryTag, false);
 		}
 
-		public Task DispatchRequest(Guid linkId, IOnPremiseTargetRequest request)
+		public Task DispatchRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			var content = _encoding.GetBytes(JsonConvert.SerializeObject(request));
 			var props = new BasicProperties()
@@ -136,7 +135,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			return Task.CompletedTask;
 		}
 
-		public Task DispatchResponse(Guid originId, IOnPremiseTargetResponse response)
+		public Task DispatchResponse(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			var content = _encoding.GetBytes(JsonConvert.SerializeObject(response));
 			var props = new BasicProperties()

@@ -7,6 +7,7 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using NLog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
 {
@@ -15,7 +16,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 		private readonly ILogger _logger;
 		private readonly object _requestSubjectLookupLock;
 		private readonly Dictionary<Guid, RequestSubjectContext> _requestSubjectLookup;
-		private readonly ConcurrentDictionary<Guid, Subject<IOnPremiseTargetResponse>> _responseSubjectLookup;
+		private readonly ConcurrentDictionary<Guid, Subject<IOnPremiseConnectorResponse>> _responseSubjectLookup;
 
 		private bool _disposed;
 
@@ -24,7 +25,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestSubjectLookupLock = new object();
 			_requestSubjectLookup = new Dictionary<Guid, RequestSubjectContext>();
-			_responseSubjectLookup = new ConcurrentDictionary<Guid, Subject<IOnPremiseTargetResponse>>();
+			_responseSubjectLookup = new ConcurrentDictionary<Guid, Subject<IOnPremiseConnectorResponse>>();
 		}
 
 		public IObservable<IOnPremiseTargetRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
@@ -57,7 +58,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			});
 		}
 
-		public IObservable<IOnPremiseTargetResponse> OnResponseReceived(Guid originId)
+		public IObservable<IOnPremiseConnectorResponse> OnResponseReceived(Guid originId)
 		{
 			if (originId == null)
 				throw new ArgumentNullException(nameof(originId));
@@ -65,7 +66,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			CheckDisposed();
 			_logger.Info("Creating response subscription for OriginId {0}", originId);
 
-			return Observable.Create<IOnPremiseTargetResponse>(observer =>
+			return Observable.Create<IOnPremiseConnectorResponse>(observer =>
 			{
 				var subject = GetResponseSubject(originId);
 				var subscription = subject.Subscribe(observer.OnNext);
@@ -98,7 +99,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			return Task.CompletedTask;
 		}
 
-		public Task DispatchResponse(Guid originId, IOnPremiseTargetResponse response)
+		public Task DispatchResponse(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			if (originId == null)
 				throw new ArgumentNullException(nameof(originId));
@@ -140,9 +141,9 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			}
 		}
 
-		private Subject<IOnPremiseTargetResponse> GetResponseSubject(Guid originId)
+		private Subject<IOnPremiseConnectorResponse> GetResponseSubject(Guid originId)
 		{
-			return _responseSubjectLookup.GetOrAdd(originId, id => new Subject<IOnPremiseTargetResponse>());
+			return _responseSubjectLookup.GetOrAdd(originId, id => new Subject<IOnPremiseConnectorResponse>());
 		}
 
 		private void CheckDisposed()

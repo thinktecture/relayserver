@@ -1,17 +1,17 @@
 using System;
 using System.Threading.Tasks;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
 {
 	public interface IBackendCommunication
 	{
 		Guid OriginId { get; }
-		Task<IOnPremiseTargetResponse> GetResponseAsync(string requestId);
-		Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseTargetRequest onPremiseTargetRequest);
+		Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId);
+		Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request);
 		void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId);
 		void RegisterOnPremise(RegistrationInformation registrationInformation);
 		void UnregisterOnPremise(string connectionId);
-		Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseTargetResponse response);
+		Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response);
 	}
 }

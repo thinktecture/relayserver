@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Plugins
 			_responseInterceptor = responseInterceptor;
 		}
 
-		public HttpResponseMessage HandleRequest(IInterceptedRequest request)
+		public HttpResponseMessage HandleRequest(IOnPremiseConnectorRequest request)
 		{
 			_logger.Trace($"{nameof(PluginManager)}: handling request {{0}}", request.RequestId);
 
@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server.Plugins
 			}
 		}
 
-		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IInterceptedResponse response)
+		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response)
 		{
 			_logger.Trace($"{nameof(PluginManager)}: handling response for request {{0}}", request.RequestId);
 

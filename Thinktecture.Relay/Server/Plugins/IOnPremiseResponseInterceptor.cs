@@ -1,5 +1,4 @@
 using System.Net.Http;
-using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Plugins
 {
@@ -13,7 +12,7 @@ namespace Thinktecture.Relay.Server.Plugins
 		/// </summary>
 		/// <param name="request">The original request.</param>
 		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immidiately be send out to the client without any further processing.</returns>
-		HttpResponseMessage OnResponseReceived(IOnPremiseConnectorRequest request);
+		HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request);
 
 		/// <summary>
 		/// This method can modify the response and prevent further processing by returning an <see cref="HttpResponseMessage"/>.
@@ -21,6 +20,6 @@ namespace Thinktecture.Relay.Server.Plugins
 		/// <param name="request">The original request that the <paramref name="response"/> is meant for.</param>
 		/// <param name="response">The response from the remote location that is to be modified, or null if no response could be retrieved.</param>
 		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immidiately be send out to the client without any further processing.</returns>
-		HttpResponseMessage OnResponseReceived(IOnPremiseConnectorRequest request, IInterceptedResponse response);
+		HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request, IInterceptedResponse response);
 	}
 }

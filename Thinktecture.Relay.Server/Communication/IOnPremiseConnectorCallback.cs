@@ -1,5 +1,5 @@
-﻿using System.Threading;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using System.Threading;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
 {
@@ -7,6 +7,6 @@ namespace Thinktecture.Relay.Server.Communication
 	{
 		string RequestId { get; }
 		ManualResetEvent Handle { get; }
-		IOnPremiseTargetResponse Response { get; set; }
+		IOnPremiseConnectorResponse Response { get; set; }
 	}
 }

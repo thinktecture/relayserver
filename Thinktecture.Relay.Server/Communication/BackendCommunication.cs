@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
@@ -65,7 +64,7 @@ namespace Thinktecture.Relay.Server.Communication
 				throw new ObjectDisposedException(GetType().Name);
 		}
 
-		public Task<IOnPremiseTargetResponse> GetResponseAsync(string requestId)
+		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
 		{
 			CheckDisposed();
 			_logger.Debug("Waiting for response for request id {0}", requestId);
@@ -75,7 +74,7 @@ namespace Thinktecture.Relay.Server.Communication
 			return Task.Run(() => WaitForOnPremiseTargetResponse(onPremiseConnectorCallback), _cancellationToken);
 		}
 
-		private IOnPremiseTargetResponse WaitForOnPremiseTargetResponse(IOnPremiseConnectorCallback onPremiseConnectorCallback)
+		private IOnPremiseConnectorResponse WaitForOnPremiseTargetResponse(IOnPremiseConnectorCallback onPremiseConnectorCallback)
 		{
 			try
 			{
@@ -95,13 +94,13 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		public async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseTargetRequest onPremiseTargetRequest)
+		public async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			CheckDisposed();
 
 			_logger.Debug("Sending request for on-premise connector link {0} to message dispatcher", linkId);
 
-			await _messageDispatcher.DispatchRequest(linkId, onPremiseTargetRequest);
+			await _messageDispatcher.DispatchRequest(linkId, request);
 		}
 
 		public void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId)
@@ -155,7 +154,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		public async Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseTargetResponse response)
+		public async Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			CheckDisposed();
 
@@ -172,7 +171,7 @@ namespace Thinktecture.Relay.Server.Communication
 				.Subscribe(ForwardOnPremiseTargetResponse);
 		}
 
-		private void ForwardOnPremiseTargetResponse(IOnPremiseTargetResponse response)
+		private void ForwardOnPremiseTargetResponse(IOnPremiseConnectorResponse response)
 		{
 			if (_requestCompletedCallbacks.TryRemove(response.RequestId, out var onPremiseConnectorCallback))
 			{

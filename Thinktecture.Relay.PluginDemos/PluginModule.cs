@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.PluginDemos
 		{
 			// Each plugin that should be added needs to be registered with the container builder as its Interface type
 			builder.RegisterType<DemoRequestInterceptor>().As<IOnPremiseRequestInterceptor>();
-			builder.RegisterType<ResponseBodyManipulatorDemoPlugin>().As<IOnPremiseResponseInterceptor>();
+			builder.RegisterType<DemoResponseInterceptor>().As<IOnPremiseResponseInterceptor>();
 
 			base.Load(builder);
 		}

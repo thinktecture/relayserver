@@ -3,8 +3,8 @@ using System.Web.Http;
 using Autofac;
 using Newtonsoft.Json.Linq;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Controller
 {
@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			_logger.Trace("Forwarding {0}", message);
 
-			var onPremiseTargetResponse = message.ToObject<OnPremiseTargetResponse>();
+			var onPremiseTargetResponse = message.ToObject<OnPremiseConnectorResponse>();
 
 			await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetResponse.OriginId, onPremiseTargetResponse);
 

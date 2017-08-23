@@ -1,11 +1,10 @@
 using System;
 using Newtonsoft.Json;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
-using Thinktecture.Relay.Server.Plugins;
 
 namespace Thinktecture.Relay.Server.OnPremise
 {
-	internal class OnPremiseConnectorRequest : OnPremiseTargetRequest, IOnPremiseConnectorRequest, IInterceptedRequest
+	internal class OnPremiseConnectorRequest : OnPremiseTargetRequest, IOnPremiseConnectorRequest
 	{
 		[JsonIgnore]
 		public DateTime RequestStarted { get; set; }
