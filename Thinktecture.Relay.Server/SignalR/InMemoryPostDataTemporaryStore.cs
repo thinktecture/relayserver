@@ -15,7 +15,8 @@ namespace Thinktecture.Relay.Server.SignalR
 		private readonly ILogger _logger;
 		private readonly TimeSpan _storagePeriod;
 
-		private readonly ConcurrentDictionary<string, Entry> _data;
+		private readonly ConcurrentDictionary<string, Entry> _requestData;
+		private readonly ConcurrentDictionary<string, Entry> _responseData;
 		private readonly CancellationTokenSource _cancellationTokenSource;
 
 		public InMemoryPostDataTemporaryStore(ILogger logger, IConfiguration configuration)
@@ -27,7 +28,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 			_logger = logger;
 			_storagePeriod = configuration.TemporaryRequestStoragePeriod;
-			_data = new ConcurrentDictionary<string, Entry>();
+			_requestData = new ConcurrentDictionary<string, Entry>();
+			_responseData = new ConcurrentDictionary<string, Entry>();
 			_cancellationTokenSource = new CancellationTokenSource();
 
 			StartCleanUpTask(_cancellationTokenSource.Token);
@@ -50,25 +52,45 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp()
 		{
-			foreach (var kvp in _data)
+			foreach (var kvp in _requestData)
 			{
 				if (kvp.Value.IsTimedOut)
-					_data.TryRemove(kvp.Key, out var value);
+					_requestData.TryRemove(kvp.Key, out var value);
+			}
+
+			foreach (var kvp in _responseData)
+			{
+				if (kvp.Value.IsTimedOut)
+					_requestData.TryRemove(kvp.Key, out var value);
 			}
 		}
 
-		public void Save(string requestId, byte[] data)
+		public void SaveRequest(string requestId, byte[] data)
 		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing body for request id {{0}}", requestId);
+			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing request body for request id {{0}}", requestId);
 
-			_data[requestId] = new Entry(data, _storagePeriod);
+			_requestData[requestId] = new Entry(data, _storagePeriod);
+			}
+
+		public void SaveResponse(string requestId, byte[] data)
+		{
+			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing response body for request id {{0}}", requestId);
+
+			_responseData[requestId] = new Entry(data, _storagePeriod);
 		}
 
-		public byte[] Load(string requestId)
+		public byte[] LoadRequest(string requestId)
 		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading body for request id {{0}}", requestId);
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading request body for request id {{0}}", requestId);
 
-			return _data.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
+			return _requestData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
+		}
+
+		public byte[] LoadResponse(string requestId)
+		{
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading response body for request id {{0}}", requestId);
+
+			return _responseData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
 		}
 
 		~InMemoryPostDataTemporaryStore()

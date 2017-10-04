@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			_logger?.Trace("Getting data for request id {0}", requestId);
 
-			var data = _temporaryStore.Load(requestId);
+			var data = _temporaryStore.LoadRequest(requestId);
 			if (data.Length == 0)
 			{
 				_logger?.Warn("No data found for request id {0}", requestId);

@@ -73,7 +73,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			if (request.Body != null)
 			{
 				// always store request in temporary store
-				_temporaryStore.Save(request.RequestId, request.Body);
+				_temporaryStore.SaveRequest(request.RequestId, request.Body);
 				request.Body = new byte[0];
 			}
 

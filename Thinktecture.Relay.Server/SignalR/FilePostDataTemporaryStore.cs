@@ -74,20 +74,46 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				_logger?.Error(ex, $"{nameof(FilePostDataTemporaryStore)}: Error during cleanup");
 			}
+	    }
+
+		public void SaveRequest(string requestId, byte[] data)
+		{
+			_logger.Debug("Storing request body for request id {0}", requestId);
+
+			File.WriteAllBytes(GetRequestFileName(requestId), data);
 		}
 
-		public void Save(string requestId, byte[] data)
+		public void SaveResponse(string requestId, byte[] data)
 		{
-			_logger?.Debug("Storing body for request id {0}", requestId);
+			_logger.Debug("Storing response body for request id {0}", requestId);
 
-			File.WriteAllBytes(GetFileName(requestId), data);
+			File.WriteAllBytes(GetResponseFileName(requestId), data);
 		}
 
-		public byte[] Load(string requestId)
+		public byte[] LoadRequest(string requestId)
 		{
-			_logger?.Debug("Loading body for request id {0}", requestId);
+			_logger.Debug("Loading request body for request id {0}", requestId);
 
-			var fileName = GetFileName(requestId);
+			var fileName = GetRequestFileName(requestId);
+			var data = File.ReadAllBytes(fileName);
+
+			try
+			{
+				File.Delete(fileName);
+			}
+			catch (Exception ex)
+		    {
+				_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+			}
+
+			return data;
+		}
+
+		public byte[] LoadResponse(string requestId)
+		{
+			_logger?.Debug("Loading response body for request id {0}", requestId);
+
+			var fileName = GetResponseFileName(requestId);
 			var data = File.ReadAllBytes(fileName);
 
 			try
@@ -102,9 +128,19 @@ namespace Thinktecture.Relay.Server.SignalR
 			return data;
 		}
 
-		private string GetFileName(string requestId)
+		private string GetRequestFileName(string requestId)
 		{
-			return Path.Combine(_path, requestId + ".req");
+			return GetFileName(requestId, ".req");
+		}
+
+		private string GetResponseFileName(string requestId)
+		{
+			return GetFileName(requestId, ".res");
+		}
+
+		private string GetFileName(string requestId, string extension)
+		{
+			return Path.Combine(_path, requestId + extension);
 		}
 
 		~FilePostDataTemporaryStore()
