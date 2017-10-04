@@ -29,6 +29,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => HttpHeaders != null ? new ReadOnlyDictionary<string, string>(HttpHeaders) : null;
 			public HttpStatusCode StatusCode { get; set; }
 			public byte[] Body { get; set; }
+			public int BodyLength { get; set; }
 			public DateTime RequestStarted { get; set; }
 			public DateTime RequestFinished { get; set; }
 		}

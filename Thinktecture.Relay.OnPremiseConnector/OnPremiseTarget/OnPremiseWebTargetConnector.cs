@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				["Range"] = _nullAction,
 				["Referer"] = (r, v) => r.Referer = v,
 				["Transfer-Encoding"] = (r, v) => r.TransferEncoding = v,
-				["User-Agent"] = (r, v) => r.UserAgent = v
+				["User-Agent"] = (r, v) => r.UserAgent = v,
 			};
 		}
 
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			{
 				RequestId = request.RequestId,
 				OriginId = request.OriginId,
-				RequestStarted = DateTime.UtcNow
+				RequestStarted = DateTime.UtcNow,
 			};
 
 			var webRequest = await CreateOnPremiseTargetWebRequestAsync(url, request).ConfigureAwait(false);
@@ -86,7 +86,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 					response.StatusCode = HttpStatusCode.GatewayTimeout;
 					response.HttpHeaders = new Dictionary<string, string>()
 					{
-						["X-TTRELAY-TIMEOUT"] = "On-Premise Target"
+						["X-TTRELAY-TIMEOUT"] = "On-Premise Target",
 					};
 				}
 				else
@@ -103,6 +103,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 						}
 
 						response.Body = stream.ToArray();
+						response.BodyLength = response.Body.Length;
 					}
 				}
 

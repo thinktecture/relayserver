@@ -13,5 +13,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		IReadOnlyDictionary<string, string> HttpHeaders { get; }
 		HttpStatusCode StatusCode { get; }
 		byte[] Body { get; }
+		int BodyLength { get; }
 	}
 }

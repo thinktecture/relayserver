@@ -28,6 +28,7 @@ namespace Thinktecture.Relay.Server.Http
 			public byte[] Body { get; set; }
 			public DateTime RequestStarted { get; set; }
 			public DateTime RequestFinished { get; set; }
+			public int BodyLength { get; set; }
 		}
 
 		[TestMethod]

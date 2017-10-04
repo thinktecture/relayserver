@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -40,7 +39,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				RequestId = request.RequestId,
 				OriginId = request.OriginId,
 				RequestStarted = DateTime.UtcNow,
-				HttpHeaders = new Dictionary<string, string>()
+				HttpHeaders = new Dictionary<string, string>(),
 			};
 
 			try
@@ -61,9 +60,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 							response.StatusCode = HttpStatusCode.GatewayTimeout;
 							response.HttpHeaders = new Dictionary<string, string>()
 							{
-								["X-TTRELAY-TIMEOUT"] = "On-Premise Target"
+								["X-TTRELAY-TIMEOUT"] = "On-Premise Target",
 							};
 							response.Body = null;
+							response.BodyLength = 0;
 						}
 					}
 				}
@@ -74,9 +74,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 					response.StatusCode = HttpStatusCode.InternalServerError;
 					response.HttpHeaders = new Dictionary<string, string>()
 					{
-						["Content-Type"] = "text/plain"
+						["Content-Type"] = "text/plain",
 					};
 					response.Body = Encoding.UTF8.GetBytes(ex.ToString());
+					response.BodyLength = response.Body.Length;
 				}
 				finally
 				{
@@ -94,9 +95,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				response.StatusCode = HttpStatusCode.InternalServerError;
 				response.HttpHeaders = new Dictionary<string, string>()
 				{
-					["Content-Type"] = "text/plain"
+					["Content-Type"] = "text/plain",
 				};
 				response.Body = Encoding.UTF8.GetBytes(ex.ToString());
+				response.BodyLength = response.Body.Length;
 			}
 
 			response.RequestFinished = DateTime.UtcNow;
