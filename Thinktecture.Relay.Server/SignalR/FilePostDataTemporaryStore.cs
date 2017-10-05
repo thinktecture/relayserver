@@ -50,6 +50,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp(CancellationToken cancellationToken)
 		{
+			_logger?.Trace($"{nameof(FilePostDataTemporaryStore)}: Cleaning up old stored files");
+
 			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
 
 			try
@@ -78,23 +80,24 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public void SaveRequest(string requestId, byte[] data)
 		{
-			_logger.Debug("Storing request body for request id {0}", requestId);
+			var fileName = GetRequestFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Storing request body for request id {{0}} in {{1}}", requestId, fileName);
 
-			File.WriteAllBytes(GetRequestFileName(requestId), data);
+			File.WriteAllBytes(fileName, data);
 		}
 
 		public void SaveResponse(string requestId, byte[] data)
 		{
-			_logger.Debug("Storing response body for request id {0}", requestId);
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Storing response body for request id {{0}} in {{1}}", requestId, fileName);
 
-			File.WriteAllBytes(GetResponseFileName(requestId), data);
+			File.WriteAllBytes(fileName, data);
 		}
 
 		public byte[] LoadRequest(string requestId)
 		{
-			_logger.Debug("Loading request body for request id {0}", requestId);
-
 			var fileName = GetRequestFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Loading request body for request id {{0}} from {{1}}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
@@ -117,9 +120,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public byte[] LoadResponse(string requestId)
 		{
-			_logger?.Debug("Loading response body for request id {0}", requestId);
-
 			var fileName = GetResponseFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Loading response body for request id {{0}} from {{1}}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
