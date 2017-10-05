@@ -78,7 +78,7 @@ namespace Thinktecture.Relay.Server.Config
 			_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Store)}(): Stored setting OriginId: {{0}}", OriginId);
 		}
 
-		// ReSharper disable once ClassNeverInstantiated.Local; Justification: Its instanciated by deserialization through Newtonsoft
+		// ReSharper disable once ClassNeverInstantiated.Local; Justification: It is instanciated by deserialization through Newtonsoft.Json
 		private class PersistedSettings : IPersistedSettings
 		{
 			// ReSharper disable once UnusedAutoPropertyAccessor.Local

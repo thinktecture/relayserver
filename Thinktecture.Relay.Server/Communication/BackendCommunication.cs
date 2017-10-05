@@ -57,7 +57,6 @@ namespace Thinktecture.Relay.Server.Communication
 			_responseSubscription = StartReceivingResponses(OriginId);
 
 #pragma warning disable 4014
-
 			// dont await, heartbeat in the background
 			HeartbeatAllClientsAsync(_cts.Token);
 #pragma warning restore 4014
@@ -90,10 +89,10 @@ namespace Thinktecture.Relay.Server.Communication
 
 					using (token.Register(() => onPremiseConnectorCallback.Response.TrySetCanceled(token)))
 					{
-						var resposne = await onPremiseConnectorCallback.Response.Task.ConfigureAwait(false);
+						var response = await onPremiseConnectorCallback.Response.Task.ConfigureAwait(false);
 						_logger?.Debug("Received On-Premise response for request id {0}", onPremiseConnectorCallback.RequestId);
 
-						return resposne;
+						return response;
 					}
 				}
 			}
@@ -325,7 +324,7 @@ namespace Thinktecture.Relay.Server.Communication
 					AcknowledgeId = requestId,
 				};
 
-				// heartbeat do NOT go through the message dispatcher as we want to heartbeat the connections directly
+				// heartbeats do NOT go through the message dispatcher as we want to heartbeat the connections directly
 				await client.RequestAction(request, token).ConfigureAwait(false);
 			}
 			catch (Exception ex)

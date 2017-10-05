@@ -51,13 +51,14 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			var body = await content.ReadAsByteArrayAsync().ConfigureAwait(false);
 
-			return (body.LongLength == 0L) ? null : body;
+			return (body.LongLength == 0L)
+				? null
+				: body;
 		}
 
 		internal string CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(IEnumerable<string> headers)
 		{
 			// HTTP RFC2616 says, that multiple headers can be combined into a comma-separated single header
-
 			return headers.Aggregate(String.Empty, (s, v) => s + (String.IsNullOrWhiteSpace(s) ? String.Empty : ", ") + v);
 		}
 

@@ -67,14 +67,14 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public void SaveRequest(string requestId, byte[] data)
 		{
-			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing request body for request id {{0}}", requestId);
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing request body for request id {{0}}", requestId);
 
 			_requestData[requestId] = new Entry(data, _storagePeriod);
 			}
 
 		public void SaveResponse(string requestId, byte[] data)
 		{
-			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing response body for request id {{0}}", requestId);
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing response body for request id {{0}}", requestId);
 
 			_responseData[requestId] = new Entry(data, _storagePeriod);
 		}
