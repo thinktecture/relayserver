@@ -92,16 +92,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				else
 				{
 					response.StatusCode = webResponse.StatusCode;
+					response.HttpHeaders = webResponse.Headers.AllKeys.ToDictionary(n => n, n => webResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
 
+					using (var responseStream = webResponse.GetResponseStream() ?? Stream.Null)
 					using (var stream = new MemoryStream())
 					{
-						response.HttpHeaders = webResponse.Headers.AllKeys.ToDictionary(n => n, n => webResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
-
-						using (var responseStream = webResponse.GetResponseStream() ?? Stream.Null)
-						{
-							await responseStream.CopyToAsync(stream).ConfigureAwait(false);
-						}
-
+						await responseStream.CopyToAsync(stream).ConfigureAwait(false);
 						response.Body = stream.ToArray();
 					}
 				}

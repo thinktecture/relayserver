@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
-		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(1);
+		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
 		private static readonly byte[] _emptyByteArray = new byte[0];
 
 		private readonly ILogger _logger;
@@ -52,16 +52,22 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp()
 		{
+			_logger?.Trace($"{nameof(InMemoryPostDataTemporaryStore)}: Cleaning up old stored data");
+
 			foreach (var kvp in _requestData)
 			{
 				if (kvp.Value.IsTimedOut)
+				{
 					_requestData.TryRemove(kvp.Key, out var value);
+				}
 			}
 
 			foreach (var kvp in _responseData)
 			{
 				if (kvp.Value.IsTimedOut)
+				{
 					_requestData.TryRemove(kvp.Key, out var value);
+				}
 			}
 		}
 
@@ -108,7 +114,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			private readonly DateTime _timeoutDate;
 
-			public byte[] Data { get; }
+			public readonly byte[] Data;
 
 			public bool IsTimedOut => _timeoutDate < DateTime.UtcNow;
 
