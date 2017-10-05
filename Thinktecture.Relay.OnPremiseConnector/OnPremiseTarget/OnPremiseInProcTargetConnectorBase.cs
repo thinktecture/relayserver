@@ -63,7 +63,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 								["X-TTRELAY-TIMEOUT"] = "On-Premise Target",
 							};
 							response.Body = null;
-							response.BodyLength = 0;
 						}
 					}
 				}
@@ -77,7 +76,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 						["Content-Type"] = "text/plain",
 					};
 					response.Body = Encoding.UTF8.GetBytes(ex.ToString());
-					response.BodyLength = response.Body.Length;
 				}
 				finally
 				{
@@ -98,7 +96,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 					["Content-Type"] = "text/plain",
 				};
 				response.Body = Encoding.UTF8.GetBytes(ex.ToString());
-				response.BodyLength = response.Body.Length;
 			}
 
 			response.RequestFinished = DateTime.UtcNow;

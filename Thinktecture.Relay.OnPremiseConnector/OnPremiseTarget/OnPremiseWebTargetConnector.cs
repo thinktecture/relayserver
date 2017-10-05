@@ -103,7 +103,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 						}
 
 						response.Body = stream.ToArray();
-						response.BodyLength = response.Body.Length;
 					}
 				}
 

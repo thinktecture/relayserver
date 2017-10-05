@@ -10,7 +10,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		public string RequestId { get; set; }
 		public Guid OriginId { get; set; }
 		public byte[] Body { get; set; }
-		public int BodyLength { get; set; }
 		public DateTime RequestStarted { get; set; }
 		public DateTime RequestFinished { get; set; }
 		public HttpStatusCode StatusCode { get; set; }
