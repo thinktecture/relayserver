@@ -152,7 +152,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Trace("Setting HostName: {0}", HostName);
 			logger?.Trace("Setting Port: {0}", Port);
 			logger?.Trace("Setting ManagementWebLocation: {0}", ManagementWebLocation);
-			logger?.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
+			logger?.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath ?? "not defined - using in-memory store");
 			logger?.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
 			logger?.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
 			logger?.Trace("Setting InterceptorAssembly: {0}", InterceptorAssembly);
