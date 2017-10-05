@@ -6,15 +6,19 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	internal class HttpResponseMessageBuilder : IHttpResponseMessageBuilder
 	{
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly Dictionary<string, Action<HttpContent, string>> _contentHeaderTransformation;
 
-		public HttpResponseMessageBuilder()
+		public HttpResponseMessageBuilder(IPostDataTemporaryStore postDataTemporaryStore)
 		{
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
+
 			_contentHeaderTransformation = new Dictionary<string, Action<HttpContent, string>>()
 			{
 				["Content-Disposition"] = (r, v) => r.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(v),
@@ -24,7 +28,7 @@ namespace Thinktecture.Relay.Server.Http
 				["Content-Range"] = null,
 				["Content-Type"] = (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v),
 				["Expires"] = (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?)null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))),
-				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))
+				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)),
 			};
 		}
 
@@ -46,7 +50,10 @@ namespace Thinktecture.Relay.Server.Http
 				if (onPremiseTargetResponse.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
 					var parts = wwwAuthenticate.Split(' ');
-					response.Headers.WwwAuthenticate.Add(parts.Length == 2 ? new AuthenticationHeaderValue(parts[0], parts[1]) : new AuthenticationHeaderValue(wwwAuthenticate));
+					response.Headers.WwwAuthenticate.Add((parts.Length == 2)
+						? new AuthenticationHeaderValue(parts[0], parts[1])
+						: new AuthenticationHeaderValue(wwwAuthenticate)
+					);
 				}
 			}
 
@@ -63,9 +70,12 @@ namespace Thinktecture.Relay.Server.Http
 				return null;
 			}
 
-			var content = new ByteArrayContent(onPremiseTargetResponse.Body ?? new byte[] { });
-			SetHttpHeaders(onPremiseTargetResponse.HttpHeaders, content);
+			var content = new ByteArrayContent(onPremiseTargetResponse.Body
+				?? _postDataTemporaryStore.LoadResponse(onPremiseTargetResponse.RequestId)
+				?? new byte[] { }
+			);
 
+			SetHttpHeaders(onPremiseTargetResponse.HttpHeaders, content);
 			return content;
 		}
 

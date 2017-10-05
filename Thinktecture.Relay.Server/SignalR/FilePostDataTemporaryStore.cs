@@ -95,18 +95,24 @@ namespace Thinktecture.Relay.Server.SignalR
 			_logger.Debug("Loading request body for request id {0}", requestId);
 
 			var fileName = GetRequestFileName(requestId);
-			var data = File.ReadAllBytes(fileName);
 
-			try
+			if (File.Exists(fileName))
 			{
-				File.Delete(fileName);
-			}
-			catch (Exception ex)
-		    {
-				_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
-			}
+			    var data = File.ReadAllBytes(fileName);
 
-			return data;
+			    try
+			    {
+			    	File.Delete(fileName);
+			    }
+			    catch (Exception ex)
+		        {
+			    	_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+			    }
+
+			    return data;
+		    }
+
+			return null;
 		}
 
 		public byte[] LoadResponse(string requestId)
@@ -114,18 +120,24 @@ namespace Thinktecture.Relay.Server.SignalR
 			_logger?.Debug("Loading response body for request id {0}", requestId);
 
 			var fileName = GetResponseFileName(requestId);
-			var data = File.ReadAllBytes(fileName);
 
-			try
+			if (File.Exists(fileName))
 			{
-				File.Delete(fileName);
-			}
-			catch (Exception ex)
-			{
-				_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+			    var data = File.ReadAllBytes(fileName);
+
+			    try
+			    {
+				    File.Delete(fileName);
+			    }
+			    catch (Exception ex)
+			    {
+				    _logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+			    }
+
+			    return data;
 			}
 
-			return data;
+			return null;
 		}
 
 		private string GetRequestFileName(string requestId)

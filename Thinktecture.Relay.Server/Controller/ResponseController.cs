@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using NLog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Controller
 {
@@ -13,28 +14,26 @@ namespace Thinktecture.Relay.Server.Controller
 	public class ResponseController : ApiController
 	{
 		private readonly ILogger _logger;
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly IBackendCommunication _backendCommunication;
 
-		public ResponseController(IBackendCommunication backendCommunication, ILogger logger)
+		public ResponseController(IBackendCommunication backendCommunication, ILogger logger, IPostDataTemporaryStore postDataTemporaryStore)
 		{
 			_logger = logger;
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 		}
 
 		public async Task<IHttpActionResult> Forward(JToken message)
 		{
 			var onPremiseTargetResponse = message.ToObject<OnPremiseConnectorResponse>();
 
-			_logger?.Trace("{0}.{1} - Forwarding RequestId: {2}, OriginId: {3}, RequestStarted: {4}, RequestFinished: {5}, StatusCode: {6}, HttpHeaders: {7}",
-				nameof(ResponseController),
-				nameof(Forward),
-				onPremiseTargetResponse.RequestId,
-				onPremiseTargetResponse.OriginId,
-				onPremiseTargetResponse.RequestStarted,
-				onPremiseTargetResponse.RequestFinished,
-				onPremiseTargetResponse.StatusCode,
-				onPremiseTargetResponse.HttpHeaders
-			);
+			// Store response to file, if we get one and it is larger than 64 kByte
+			if ((onPremiseTargetResponse.Body != null) && (onPremiseTargetResponse.Body.Length >= 0x10000))
+			{
+				_postDataTemporaryStore.SaveResponse(onPremiseTargetResponse.RequestId, onPremiseTargetResponse.Body);
+				onPremiseTargetResponse.Body = null;
+			}
 
 			await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetResponse.OriginId, onPremiseTargetResponse).ConfigureAwait(false);
 
