@@ -70,10 +70,17 @@ namespace Thinktecture.Relay.Server.Http
 				return null;
 			}
 
-			var content = new ByteArrayContent(onPremiseTargetResponse.Body
-				?? _postDataTemporaryStore.LoadResponse(onPremiseTargetResponse.RequestId)
-				?? new byte[] { }
-			);
+			HttpContent content;
+
+			var stream = _postDataTemporaryStore.GetResponseStream(onPremiseTargetResponse.RequestId);
+			if (stream != null)
+			{
+				content = new StreamContent(stream);
+			}
+			else
+			{
+				content = new ByteArrayContent(onPremiseTargetResponse.Body ?? new byte[] { });
+			}
 
 			SetHttpHeaders(onPremiseTargetResponse.HttpHeaders, content);
 			return content;

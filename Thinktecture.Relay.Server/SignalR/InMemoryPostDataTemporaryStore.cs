@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -99,6 +100,32 @@ namespace Thinktecture.Relay.Server.SignalR
 			return _responseData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
 		}
 
+		public Stream CreateResponseStream(string requestId)
+		{
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating storage stream for response body for request id {{0}}", requestId);
+
+			var ms = new NotifyingMemoryStream();
+			ms.Disposing += (s,e) =>
+			{
+				_responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
+			};
+
+			return ms;
+		}
+
+		public Stream GetResponseStream(string requestId)
+		{
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating loading stream for response body for request id {{0}}", requestId);
+
+			if (_responseData.TryRemove(requestId, out var entry))
+			{
+				return new MemoryStream(entry.Data);
+			}
+
+			return null;
+		}
+
+
 		~InMemoryPostDataTemporaryStore()
 		{
 			GC.SuppressFinalize(this);
@@ -122,6 +149,23 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				_timeoutDate = DateTime.UtcNow.Add(storagePeriod);
 				Data = data;
+			}
+		}
+
+		private class NotifyingMemoryStream : MemoryStream
+		{
+			public event EventHandler Disposing;
+
+			private void OnDisposing()
+			{
+				Disposing?.Invoke(this, EventArgs.Empty);
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				OnDisposing();
+
+				base.Dispose(disposing);
 			}
 		}
 	}

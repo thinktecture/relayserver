@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -36,6 +37,18 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 
 			await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetResponse.OriginId, onPremiseTargetResponse).ConfigureAwait(false);
+
+			return Ok();
+		}
+
+		public async Task<IHttpActionResult> Upload(string requestId)
+		{
+			_logger?.Debug($"{nameof(ResponseController)}: Upload body called for request {{0}}", requestId);
+
+			using (var stream = _postDataTemporaryStore.CreateResponseStream(requestId))
+			{
+				await Request.Content.CopyToAsync(stream);
+			}
 
 			return Ok();
 		}

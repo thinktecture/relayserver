@@ -480,7 +480,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				request.Body = await webResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
 			}
 
-			var response = await connector.GetResponseAsync(url, request).ConfigureAwait(false);
+			var response = (OnPremiseTargetResponse)await connector.GetResponseAsync(url, request).ConfigureAwait(false);
 
 			_logger?.Debug("Sending response from {0} to relay server", request.Url);
 
@@ -504,8 +504,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger?.Error("Error communicating with relay server. Aborting response...");
 		}
 
-		private async Task PostToRelayAsync<T>(RequestContext ctx, T data, CancellationToken cancellationToken)
+		private async Task PostToRelayAsync(RequestContext ctx, OnPremiseTargetResponse data, CancellationToken cancellationToken)
 		{
+			if (data.Body?.Length > 0x10000) // when size is too big, use a separate request to upload body content to relay server
+			{
+				_logger.Debug($"{nameof(RelayServerConnection)}: Uploading body of request {{0}} in separate request because of size.", data.RequestId);
+				await PostToRelay($"/upload?requestId={data.RequestId}", () => new ByteArrayContent(data.Body), cancellationToken).ConfigureAwait(false);
+				data.Body = null;
+			}
+
 			await PostToRelay("/forward", () => new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;
 		}

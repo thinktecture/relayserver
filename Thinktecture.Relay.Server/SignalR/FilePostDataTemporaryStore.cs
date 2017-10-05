@@ -94,6 +94,27 @@ namespace Thinktecture.Relay.Server.SignalR
 			File.WriteAllBytes(fileName, data);
 		}
 
+		public Stream CreateResponseStream(string requestId)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating saving stream to response body for request id {{0}} in {{1}}", requestId, fileName);
+
+			return File.Open(fileName, FileMode.Create);
+		}
+
+		public Stream GetResponseStream(string requestId)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating loading stream to response body for request id {{0}} in {{1}}", requestId, fileName);
+
+			if (File.Exists(fileName))
+			{
+				return File.Open(fileName, FileMode.Open);
+			}
+
+			return null;
+		}
+
 		public byte[] LoadRequest(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
