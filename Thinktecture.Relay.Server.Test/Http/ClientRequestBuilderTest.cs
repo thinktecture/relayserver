@@ -8,7 +8,9 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NLog;
+using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
@@ -25,7 +27,7 @@ namespace Thinktecture.Relay.Server.Http
 
 		private OnPremiseRequestBuilder CreateBuilder()
 		{
-			return new OnPremiseRequestBuilder(_loggerMock.Object);
+			return new OnPremiseRequestBuilder(_loggerMock.Object, new InMemoryPostDataTemporaryStore(_loggerMock.Object, new ConfigurationDummy()));
 		}
 
 		[TestMethod]

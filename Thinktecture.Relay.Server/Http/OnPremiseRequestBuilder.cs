@@ -5,22 +5,26 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using NLog;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	internal class OnPremiseRequestBuilder : IOnPremiseRequestBuilder
 	{
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly ILogger _logger;
 		private readonly string[] _ignoredHeaders;
 
-		public OnPremiseRequestBuilder(ILogger logger)
+		public OnPremiseRequestBuilder(ILogger logger, IPostDataTemporaryStore postDataTemporaryStore)
 		{
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 			_logger = logger;
 			_ignoredHeaders = new[] { "Host", "Connection" };
 		}
 
 		public async Task<IOnPremiseConnectorRequest> BuildFrom(HttpRequestMessage request, Guid originId, string pathWithoutUserName)
 		{
+			// TODO: Directly stream to disk
 			var onPremiseConnectorRequest = new OnPremiseConnectorRequest
 			{
 				RequestId = Guid.NewGuid().ToString(),
@@ -31,6 +35,13 @@ namespace Thinktecture.Relay.Server.Http
 				OriginId = originId,
 				RequestStarted = DateTime.UtcNow,
 			};
+
+			// Store request body to file if it is larger than 64 kByte
+			if ((onPremiseConnectorRequest.Body != null) && (onPremiseConnectorRequest.Body.Length >= 0x10000))
+			{
+				_postDataTemporaryStore.SaveRequest(onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.Body);
+				onPremiseConnectorRequest.Body = new byte[] { };
+			}
 
 			try
 			{

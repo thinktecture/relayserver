@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
@@ -14,13 +13,11 @@ namespace Thinktecture.Relay.Server.SignalR
 	{
 		private readonly ILogger _logger;
 		private readonly IBackendCommunication _backendCommunication;
-		private readonly IPostDataTemporaryStore _temporaryStore;
 
-		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore)
+		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication)
 		{
 			_logger = logger;
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
-			_temporaryStore = temporaryStore ?? throw new ArgumentNullException(nameof(temporaryStore));
 		}
 
 		protected override bool AuthorizeRequest(IRequest request)
@@ -69,13 +66,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			_logger?.Debug("Forwarding client request to connection {0}", connectionId);
 			_logger?.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
 				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.Body?.Length ?? 0);
-
-			if (request.Body != null)
-			{
-				// always store request in temporary store
-				_temporaryStore.SaveRequest(request.RequestId, request.Body);
-				request.Body = new byte[0];
-			}
 
 			Connection.Send(connectionId, request);
 			return Task.CompletedTask;
