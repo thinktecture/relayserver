@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -18,7 +18,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
 		/// <param name="uri">An <see cref="Uri"/> containing the on-premise target's base url.</param>
-		void RegisterOnPremiseTarget(string key, Uri uri);
+		/// <param name="ignoreSslErrors">A <see cref="bool"/> defining whether SSL errors from target will be ignored.</param>
+		void RegisterOnPremiseTarget(string key, Uri uri, bool ignoreSslErrors);
 
 		/// <summary>
 		/// Registers a on-premise in-proc target.

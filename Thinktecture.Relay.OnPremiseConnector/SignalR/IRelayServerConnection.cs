@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal interface IRelayServerConnection : IDisposable
 	{
-		void RegisterOnPremiseTarget(string key, Uri baseUri);
+		void RegisterOnPremiseTarget(string key, Uri baseUri, bool ignoreSslErrors);
 		void RegisterOnPremiseTarget(string key, Type handlerType);
 		void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory);
 		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();
