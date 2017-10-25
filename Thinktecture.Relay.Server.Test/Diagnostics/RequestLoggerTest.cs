@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,24 +16,11 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	[TestClass]
 	public class RequestLoggerTest
 	{
-		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
-		{
-			public string RequestId { get; set; }
-			public Guid OriginId { get; set; }
-			public IDictionary<string, string> HttpHeaders { get; set; }
-			public HttpStatusCode StatusCode { get; set; }
-			public byte[] Body { get; set; }
-			public DateTime RequestStarted { get; set; }
-			public DateTime RequestFinished { get; set; }
-		}
-
 		[TestMethod]
 		public void GetContentByteCount_returns_0_when_content_byte_array_is_null()
 		{
 			var sut = new RequestLogger(null, null);
-			long result;
-
-			result = sut.GetContentByteCount(null);
+			var result = sut.GetContentByteCount(null);
 
 			result.Should().Be(0L);
 		}
@@ -43,9 +29,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		public void GetContentByteCount_returns_the_length_of_a_given_byte_array()
 		{
 			var sut = new RequestLogger(null, null);
-			long result;
-
-			result = sut.GetContentByteCount(new byte[] { 0, 0, 0, 0 });
+			var result = sut.GetContentByteCount(new byte[] { 0, 0, 0, 0 });
 
 			result.Should().Be(4L);
 		}
@@ -54,9 +38,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		public void GetOnPremiseTargetInformation_returns_default_values_if_OnPremiseTargetResult_is_null()
 		{
 			var sut = new RequestLogger(null, null);
-			RequestLogger.OnPremiseTargetInformation result;
-
-			result = sut.GetOnPremiseTargetInformation(null);
+			var result = sut.GetOnPremiseTargetInformation(null);
 
 			result.ContentBytesOut.Should().Be(0L);
 			result.OnPremiseTargetInDate.Should().Be(null);
@@ -72,9 +54,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				RequestFinished = new DateTime(2014, 1, 2)
 			};
 			var sut = new RequestLogger(null, null);
-			RequestLogger.OnPremiseTargetInformation result;
-
-			result = sut.GetOnPremiseTargetInformation(onPremiseTargetResponse);
+			var result = sut.GetOnPremiseTargetInformation(onPremiseTargetResponse);
 
 			result.ContentBytesOut.Should().Be(0L);
 			result.OnPremiseTargetInDate.Should().Be(new DateTime(2014, 1, 1));
@@ -91,9 +71,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				Body = new byte[] { 0, 0, 0, 0 }
 			};
 			var sut = new RequestLogger(null, null);
-			RequestLogger.OnPremiseTargetInformation result;
-
-			result = sut.GetOnPremiseTargetInformation(onPremiseTargetResponse);
+			var result = sut.GetOnPremiseTargetInformation(onPremiseTargetResponse);
 
 			result.ContentBytesOut.Should().Be(4L);
 			result.OnPremiseTargetInDate.Should().Be(new DateTime(2014, 1, 1));

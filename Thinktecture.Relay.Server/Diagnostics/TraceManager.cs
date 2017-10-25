@@ -49,11 +49,11 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 				var filenamePrefix = $"{Path.Combine(_configuration.TraceFileDirectory, traceConfigurationId.ToString())}-{DateTime.Now.Ticks}";
 
-				_traceFileWriter.WriteHeaderFile(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, onPremiseConnectorRequest.HttpHeaders);
-				_traceFileWriter.WriteContentFile(filenamePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, onPremiseConnectorRequest.Body);
+				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, onPremiseConnectorRequest.HttpHeaders);
+				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, onPremiseConnectorRequest.Body);
 
-				_traceFileWriter.WriteHeaderFile(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, onPremiseTargetResponse.HttpHeaders);
-				_traceFileWriter.WriteContentFile(filenamePrefix + _ON_PREMISE_TARGET_CONTENT_EXTENSION, onPremiseTargetResponse.Body);
+				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, onPremiseTargetResponse.HttpHeaders);
+				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_TARGET_CONTENT_EXTENSION, onPremiseTargetResponse.Body);
 			}
 			catch (Exception ex)
 			{
@@ -80,7 +80,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			{
 				try
 				{
-					traceFileInfos.Add(await GetTraceAsync(traceFilePrefix));
+					traceFileInfos.Add(await GetTraceAsync(traceFilePrefix).ConfigureAwait(false));
 				}
 				catch (Exception ex)
 				{
@@ -97,7 +97,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 			var result = new TraceFile()
 			{
-				Headers = await _traceFileReader.ReadHeaderFileAsync(path),
+				Headers = await _traceFileReader.ReadHeaderFileAsync(path).ConfigureAwait(false),
 			};
 
 			if (result.IsContentAvailable)
@@ -110,7 +110,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 					contentPath = path.Replace(_ON_PREMISE_TARGET_HEADER_EXTENSION, _ON_PREMISE_TARGET_CONTENT_EXTENSION);
 				}
 
-				result.Content = await _traceFileReader.ReadContentFileAsync(contentPath);
+				result.Content = await _traceFileReader.ReadContentFileAsync(contentPath).ConfigureAwait(false);
 			}
 
 			return result;
@@ -120,10 +120,10 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		{
 			var filePrefixWithDirectory = Path.Combine(_configuration.TraceFileDirectory, filePrefix);
 
-			var clientHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION);
-			var onPremiseTargetHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_TARGET_HEADER_EXTENSION);
+			var clientHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION).ConfigureAwait(false);
+			var onPremiseTargetHeaders = await _traceFileReader.ReadHeaderFileAsync(filePrefixWithDirectory + _ON_PREMISE_TARGET_HEADER_EXTENSION).ConfigureAwait(false);
 
-			var tracingDate = new DateTime(long.Parse(filePrefix.Split('-').Last()));
+			var tracingDate = new DateTime(Int64.Parse(filePrefix.Split('-').Last()));
 
 			return new Trace()
 			{

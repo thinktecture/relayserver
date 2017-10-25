@@ -15,11 +15,11 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			var traceFileWriter = new TraceFileWriter();
 			var headers = new Dictionary<string, string>()
 			{
-				{"Content-Length", "1000"},
-				{"Content-Type", "text/plain"}
+				["Content-Length"] = "1000",
+				["Content-Type"] = "text/plain"
 			};
 
-			await traceFileWriter.WriteHeaderFile("test.header.txt", headers);
+			await traceFileWriter.WriteHeaderFileAsync("test.header.txt", headers);
 
 			var sut = new TraceFileReader();
 			var result = sut.ReadHeaderFileAsync("test.header.txt").Result;

@@ -165,7 +165,6 @@ namespace Thinktecture.Relay.Server.Repository
 			return GetContentBytesChartDataItemsForLink(Guid.Empty, timeFrame);
 		}
 
-
 		private IQueryable<DbRequestLogEntry> CreateBasicChartDataQuery(RelayContext context, Guid id,
 			TimeFrame timeFrame)
 		{

@@ -18,19 +18,19 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		{
 			_requestHeaderTransformations = new Dictionary<string, Action<HttpWebRequest, string>>()
 			{
-				{"Accept", (r, v) => r.Accept = v},
-				{"Connection", (r, v) => r.Connection = v},
-				{"Content-Type", (r, v) => r.ContentType = v},
-				{"Content-Length", (r, v) => r.ContentLength = Int64.Parse(v)},
-				{"Date", (r, v) => r.Date = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)},
-				{"Expect", _nullAction},
-				{"Host", _nullAction},
-				{"If-Modified-Since", (r, v) => r.IfModifiedSince = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)},
-				{"Proxy-Connection", _nullAction},
-				{"Range", _nullAction},
-				{"Referer", (r, v) => r.Referer = v},
-				{"Transfer-Encoding", (r, v) => r.TransferEncoding = v},
-				{"User-Agent", (r, v) => r.UserAgent = v}
+				["Accept"] = (r, v) => r.Accept = v,
+				["Connection"] = (r, v) => r.Connection = v,
+				["Content-Type"] = (r, v) => r.ContentType = v,
+				["Content-Length"] = (r, v) => r.ContentLength = Int64.Parse(v),
+				["Date"] = (r, v) => r.Date = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
+				["Expect"] = _nullAction,
+				["Host"] = _nullAction,
+				["If-Modified-Since"] = (r, v) => r.IfModifiedSince = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
+				["Proxy-Connection"] = _nullAction,
+				["Range"] = _nullAction,
+				["Referer"] = (r, v) => r.Referer = v,
+				["Transfer-Encoding"] = (r, v) => r.TransferEncoding = v,
+				["User-Agent"] = (r, v) => r.UserAgent = v
 			};
 		}
 
@@ -57,14 +57,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				RequestStarted = DateTime.UtcNow
 			};
 
-			var webRequest = await CreateOnPremiseTargetWebRequestAsync(url, request);
+			var webRequest = await CreateOnPremiseTargetWebRequestAsync(url, request).ConfigureAwait(false);
 
 			HttpWebResponse webResponse = null;
 			try
 			{
 				try
 				{
-					webResponse = (HttpWebResponse)await webRequest.GetResponseAsync();
+					webResponse = (HttpWebResponse)await webRequest.GetResponseAsync().ConfigureAwait(false);
 				}
 				catch (WebException wex)
 				{
@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 					response.StatusCode = HttpStatusCode.GatewayTimeout;
 					response.HttpHeaders = new Dictionary<string, string>()
 					{
-						{"X-TTRELAY-TIMEOUT", "On-Premise Target"}
+						["X-TTRELAY-TIMEOUT"] = "On-Premise Target"
 					};
 				}
 				else
@@ -97,7 +97,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 						using (var responseStream = webResponse.GetResponseStream() ?? Stream.Null)
 						{
-							await responseStream.CopyToAsync(stream);
+							await responseStream.CopyToAsync(stream).ConfigureAwait(false);
 						}
 
 						response.Body = stream.ToArray();
@@ -143,9 +143,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			{
 				_logger.Trace("   adding request body. length={0}", onPremiseTargetRequest.Body.Length);
 
-				var requestStream = await webRequest.GetRequestStreamAsync();
-				await requestStream.WriteAsync(onPremiseTargetRequest.Body, 0, onPremiseTargetRequest.Body.Length);
-				await requestStream.FlushAsync();
+				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
+				await requestStream.WriteAsync(onPremiseTargetRequest.Body, 0, onPremiseTargetRequest.Body.Length).ConfigureAwait(false);
+				await requestStream.FlushAsync().ConfigureAwait(false);
 			}
 
 			return webRequest;

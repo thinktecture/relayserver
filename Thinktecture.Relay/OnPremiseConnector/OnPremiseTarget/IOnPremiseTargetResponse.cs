@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
@@ -8,10 +11,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	{
 		string RequestId { get; }
 		Guid OriginId { get; }
-		HttpStatusCode StatusCode { get; set; }
-		IDictionary<string, string> HttpHeaders { get; }
-		byte[] Body { get; set; }
 		DateTime RequestStarted { get; }
 		DateTime RequestFinished { get; }
+		IReadOnlyDictionary<string, string> HttpHeaders { get; }
+		HttpStatusCode StatusCode { get; }
+		byte[] Body { get; }
 	}
 }

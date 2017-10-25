@@ -33,6 +33,7 @@ using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Logging;
 using Thinktecture.Relay.Server.Owin;
+using Thinktecture.Relay.Server.Plugins;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
@@ -46,17 +47,29 @@ namespace Thinktecture.Relay.Server
 			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
 
 			var container = RegisterServices();
-			app.UseAutofacMiddleware(container);
+			var config = container.Resolve<IConfiguration>();
+			var logger = container.Resolve<ILogger>();
+			var httpConfig = CreateHttpConfiguration(config, logger);
+			var scope = RegisterAdditionalServices(container, httpConfig, config);
 
+			app.UseAutofacMiddleware(scope);
 			app.UseCors(CorsOptions.AllowAll);
+			UseOAuthSecurity(app, scope.Resolve<AuthorizationServerProvider>());
+			MapSignalR(app, scope, config);
+			UseWebApi(app, httpConfig, scope);
+			UseFileServer(app, config, logger);
+		}
 
-			UseOAuthSecurity(app, container);
+		private static ILifetimeScope RegisterAdditionalServices(IContainer container, HttpConfiguration httpConfig, IConfiguration config)
+		{
+			var pluginLoader = container.Resolve<IPluginLoader>();
 
-			MapSignalR(app, container);
-
-			UseWebApi(app, container);
-
-			UseFileServer(app, container);
+			return container.BeginLifetimeScope(builder =>
+			{
+				builder.RegisterWebApiFilterProvider(httpConfig);
+				RegisterApiControllers(builder, config);
+				pluginLoader.LoadPlugins(builder);
+			});
 		}
 
 		private static IContainer RegisterServices()
@@ -71,7 +84,10 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
 			builder.Register(ctx => ctx.Resolve<IRabbitMqFactory>().CreateConnection()).AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<RabbitMqMessageDispatcher>().AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance().AutoActivate(); // ensure that the BUS to rabbitMQ starts up before accepting connections
+
+			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance()
+				.OnActivated(args => args.Instance.Prepare())
+				.AutoActivate(); // ensure that the BUS to rabbitMQ starts up before accepting connections
 
 			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
 			builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
@@ -92,6 +108,9 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
 			builder.RegisterType<PathSplitter>().As<IPathSplitter>();
 
+			builder.RegisterType<PluginLoader>().As<IPluginLoader>();
+			builder.RegisterType<PluginManager>().As<IPluginManager>();
+
 			builder.Register(context => LogManager.GetLogger("Server")).As<ILogger>().SingleInstance();
 
 			if (String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["TemporaryRequestStoragePath"]))
@@ -105,43 +124,34 @@ namespace Thinktecture.Relay.Server
 
 			var container = builder.Build();
 
-			RegisterApiControllers(container);
-
 			return container;
 		}
 
-		private static void RegisterApiControllers(IContainer container)
+		private static void RegisterApiControllers(ContainerBuilder builder, IConfiguration configuration)
 		{
-			var configuration = container.Resolve<IConfiguration>();
-
-			var builder = new ContainerBuilder();
-
 			if (configuration.EnableManagementWeb != ModuleBinding.False)
-			{
 				builder.RegisterModule<ManagementWebModule>();
-			}
 
 			if (configuration.EnableRelaying != ModuleBinding.False)
-			{
 				builder.RegisterModule<RelayingModule>();
-			}
 
 			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
-			{
 				builder.RegisterModule<OnPremiseConnectionsModule>();
-			}
-
-			builder.Update(container);
 		}
 
-		private static void UseOAuthSecurity(IAppBuilder app, ILifetimeScope container)
+		private static void UseOAuthSecurity(IAppBuilder app, AuthorizationServerProvider authProvider)
 		{
+			if (app == null)
+				throw new ArgumentNullException(nameof(app));
+			if (authProvider == null)
+				throw new ArgumentNullException(nameof(authProvider));
+
 			var serverOptions = new OAuthAuthorizationServerOptions
 			{
 				AllowInsecureHttp = true,
 				TokenEndpointPath = new PathString("/token"),
 				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
-				Provider = container.Resolve<AuthorizationServerProvider>()
+				Provider = authProvider
 			};
 
 			var sharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
@@ -183,8 +193,8 @@ namespace Thinktecture.Relay.Server
 
 		private static void UseSharedSecret(IAppBuilder app, string sharedSecret, OAuthAuthorizationServerOptions serverOptions)
 		{
-			var issuer = "http://thinktecture.com/relayserver/sts";
-			var audience = "http://thinktecture.com/relayserver/consumers";
+			const string issuer = "http://thinktecture.com/relayserver/sts";
+			const string audience = "http://thinktecture.com/relayserver/consumers";
 			var key = Convert.FromBase64String(sharedSecret);
 
 			serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
@@ -197,16 +207,12 @@ namespace Thinktecture.Relay.Server
 			});
 		}
 
-		private static void MapSignalR(IAppBuilder app, ILifetimeScope container)
+		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config)
 		{
-			var config = container.Resolve<IConfiguration>();
-			string path = "/signalr";
-
 			if (config.EnableOnPremiseConnections == ModuleBinding.False)
-			{
 				return;
-			}
 
+			const string path = "/signalr";
 			GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(config.ConnectionTimeout);
 			GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(config.DisconnectTimeout);
 			GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
@@ -218,19 +224,22 @@ namespace Thinktecture.Relay.Server
 
 			app.MapSignalR<OnPremisesConnection>(path, new ConnectionConfiguration
 			{
-				Resolver = new AutofacDependencyResolver(container),
+				Resolver = new AutofacDependencyResolver(scope),
 			});
 		}
 
-		private static void UseWebApi(IAppBuilder app, IContainer container)
+		private static void UseWebApi(IAppBuilder app, HttpConfiguration httpConfig, ILifetimeScope scope)
 		{
-			var configuration = container.Resolve<IConfiguration>();
-			var logger = container.Resolve<ILogger>();
+			httpConfig.DependencyResolver = new AutofacWebApiDependencyResolver(scope);
 
+			app.UseWebApi(httpConfig);
+		}
+
+		private static HttpConfiguration CreateHttpConfiguration(IConfiguration configuration, ILogger logger)
+		{
 			var httpConfig = new HttpConfiguration
 			{
 				IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always,
-				DependencyResolver = new AutofacWebApiDependencyResolver(container)
 			};
 
 			httpConfig.EnableCors(new EnableCorsAttribute("*", "*", "*"));
@@ -270,26 +279,17 @@ namespace Thinktecture.Relay.Server
 
 			httpConfig.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
-			var builder = new ContainerBuilder();
-			builder.RegisterWebApiFilterProvider(httpConfig);
-			builder.Update(container);
-
-			app.UseWebApi(httpConfig);
+			return httpConfig;
 		}
 
-		private static void UseFileServer(IAppBuilder app, ILifetimeScope container)
+		private static void UseFileServer(IAppBuilder app, IConfiguration configuration, ILogger logger)
 		{
-			var configuration = container.Resolve<IConfiguration>();
-			var logger = container.Resolve<ILogger>();
-
 			if (configuration.EnableManagementWeb == ModuleBinding.False)
-			{
 				return;
-			}
 
 			try
 			{
-				string path = "/managementweb";
+				const string path = "/managementweb";
 
 				var options = new FileServerOptions()
 				{

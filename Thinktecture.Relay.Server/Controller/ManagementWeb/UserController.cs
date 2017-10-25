@@ -8,11 +8,11 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-    [Authorize(Roles = "Admin")]
-    [ManagementWebModuleBindingFilter]
-    public class UserController : ApiController
-    {
-        private readonly IUserRepository _userRepository;
+	[Authorize(Roles = "Admin")]
+	[ManagementWebModuleBindingFilter]
+	public class UserController : ApiController
+	{
+		private readonly IUserRepository _userRepository;
 
 		public UserController(IUserRepository userRepository)
 		{

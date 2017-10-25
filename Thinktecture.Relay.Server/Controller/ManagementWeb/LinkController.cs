@@ -10,13 +10,13 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-    [Authorize(Roles = "Admin")]
-    [ManagementWebModuleBindingFilter]
-    public class LinkController : ApiController
-    {
-        private readonly ILinkRepository _linkRepository;
-        private readonly IBackendCommunication _backendCommunication;
-        private readonly IRequestLogger _requestLogger;
+	[Authorize(Roles = "Admin")]
+	[ManagementWebModuleBindingFilter]
+	public class LinkController : ApiController
+	{
+		private readonly ILinkRepository _linkRepository;
+		private readonly IBackendCommunication _backendCommunication;
+		private readonly IRequestLogger _requestLogger;
 
 		public LinkController(ILinkRepository linkRepository, IBackendCommunication backendCommunication, IRequestLogger requestLogger)
 		{
@@ -29,7 +29,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 		[ActionName("links")]
 		public IHttpActionResult GetLinks([FromUri] PageRequest paging)
 		{
-			var result = _linkRepository.GetLinks(paging);
+			var result = _linkRepository.GetLinkDetails(paging);
 
 			return Ok(result);
 		}
@@ -38,12 +38,10 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 		[ActionName("link")]
 		public IHttpActionResult GetLink(Guid id)
 		{
-			var link = _linkRepository.GetLink(id);
+			var link = _linkRepository.GetLinkDetails(id);
 
 			if (link == null)
-			{
 				return BadRequest();
-			}
 
 			return Ok(link);
 		}
@@ -60,7 +58,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 		[HttpPut]
 		[ActionName("link")]
-		public IHttpActionResult UpdateLink(Link link)
+		public IHttpActionResult UpdateLink(LinkDetails link)
 		{
 			if (link == null)
 			{
@@ -98,16 +96,12 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 		public IHttpActionResult SetDisabledState(LinkState state)
 		{
 			if (state == null)
-			{
 				return BadRequest();
-			}
 
-			var link = _linkRepository.GetLink(state.Id);
+			var link = _linkRepository.GetLinkDetails(state.Id);
 
 			if (link == null)
-			{
 				return NotFound();
-			}
 
 			link.IsDisabled = state.IsDisabled;
 
@@ -130,9 +124,9 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				RequestId = requestId
 			};
 
-			await _backendCommunication.SendOnPremiseConnectorRequest(id, request);
+			await _backendCommunication.SendOnPremiseConnectorRequest(id, request).ConfigureAwait(false);
 
-			var response = await _backendCommunication.GetResponseAsync(requestId);
+			var response = await _backendCommunication.GetResponseAsync(requestId).ConfigureAwait(false);
 			request.RequestFinished = DateTime.UtcNow;
 
 			_requestLogger.LogRequest(request, response, HttpStatusCode.OK, id, _backendCommunication.OriginId, "DEBUG/PING/");

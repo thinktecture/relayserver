@@ -19,6 +19,9 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
+    <CodeAnalysisRuleSet>..\Thinktecture.Relay.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>7.1</LangVersion>
+    <NoWarn>IDE1006</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,8 +31,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>7.1</LangVersion>
-    <NoWarn>IDE1006</NoWarn>
+    <NoWarn>IDE1006;RCS1090</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -78,12 +80,29 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Reactive.Core, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Core.3.1.1\lib\net46\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Interfaces.3.1.1\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Linq.3.1.1\lib\net46\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.PlatformServices.3.1.1\lib\net46\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Windows.Threading, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Windows.Threading.3.1.1\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -98,6 +117,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Communication\BackendCommunicationTests\BackendCommunicationTestBase.cs" />
+    <Compile Include="Communication\BackendCommunicationTests\Ctor.cs" />
+    <Compile Include="Communication\BackendCommunicationTests\Prepare.cs" />
     <Compile Include="Controller\Admin\TraceControllerTest.cs" />
     <Compile Include="Controller\ClientControllerTest.cs" />
     <Compile Include="Diagnostics\RequestLoggerTest.cs" />
@@ -120,6 +142,10 @@
     <ProjectReference Include="..\Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj">
       <Project>{41eeced0-e7c6-4c7c-8b7d-9b6a33da0150}</Project>
       <Name>Thinktecture.Relay.Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Thinktecture.Relay\Thinktecture.Relay.csproj">
+      <Project>{e34d846b-3b1e-4a97-a06f-f5502349f4f1}</Project>
+      <Name>Thinktecture.Relay</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

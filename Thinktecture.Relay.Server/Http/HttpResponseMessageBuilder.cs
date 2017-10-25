@@ -17,14 +17,14 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			_contentHeaderTransformation = new Dictionary<string, Action<HttpContent, string>>()
 			{
-				{ "Content-Disposition", (r, v) => r.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(v) },
-				{ "Content-Length", (r, v) => r.Headers.ContentLength = Int64.Parse(v) },
-				{ "Content-Location", (r, v) => r.Headers.ContentLocation = new Uri(v) },
-				{ "Content-MD5", null },
-				{ "Content-Range", null },
-				{ "Content-Type", (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v) },
-				{ "Expires", (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?) null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))) },
-				{ "Last-Modified", (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)) }
+				["Content-Disposition"] = (r, v) => r.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(v),
+				["Content-Length"] = (r, v) => r.Headers.ContentLength = Int64.Parse(v),
+				["Content-Location"] = (r, v) => r.Headers.ContentLocation = new Uri(v),
+				["Content-MD5"] = null,
+				["Content-Range"] = null,
+				["Content-Type"] = (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v),
+				["Expires"] = (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?)null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))),
+				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))
 			};
 		}
 
@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.Server.Http
 			return content;
 		}
 
-		internal void SetHttpHeaders(IDictionary<string, string> httpHeaders, HttpContent content)
+		internal void SetHttpHeaders(IReadOnlyDictionary<string, string> httpHeaders, HttpContent content)
 		{
 			if (httpHeaders == null)
 			{

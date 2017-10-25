@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Repository
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 		}
 
-		public PageResult<Link> GetLinks(PageRequest paging)
+		public PageResult<LinkDetails> GetLinkDetails(PageRequest paging)
 		{
 			using (var context = new RelayContext())
 			{
@@ -52,13 +52,11 @@ namespace Thinktecture.Relay.Server.Repository
 				linksQuery = linksQuery.OrderByPropertyName(paging.SortField, paging.SortDirection);
 				linksQuery = linksQuery.ApplyPaging(paging);
 
-				var result = new PageResult<Link>()
+				return new PageResult<LinkDetails>()
 				{
-					Items = GetLinkFromDbLink(linksQuery).ToList(),
+					Items = GetLinkDetailsFromDbLink(linksQuery).ToList(),
 					Count = numberOfLinks,
 				};
-
-				return result;
 			}
 		}
 
@@ -70,6 +68,17 @@ namespace Thinktecture.Relay.Server.Repository
 					.Where(l => l.Id == linkId);
 
 				return GetLinkFromDbLink(linkQuery).FirstOrDefault();
+			}
+		}
+
+		public LinkDetails GetLinkDetails(Guid linkId)
+		{
+			using (var context = new RelayContext())
+			{
+				var linkQuery = context.Links
+					.Where(l => l.Id == linkId);
+
+				return GetLinkDetailsFromDbLink(linkQuery).FirstOrDefault();
 			}
 		}
 
@@ -95,6 +104,26 @@ namespace Thinktecture.Relay.Server.Repository
 						.Select(ac => ac.ConnectionId)
 				})
 				.Select(i => new Link
+				{
+					Id = i.link.Id,
+					ForwardOnPremiseTargetErrorResponse = i.link.ForwardOnPremiseTargetErrorResponse,
+					IsDisabled = i.link.IsDisabled,
+					SymbolicName = i.link.SymbolicName,
+					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
+				});
+		}
+
+		private IQueryable<LinkDetails> GetLinkDetailsFromDbLink(IQueryable<DbLink> linksQuery)
+		{
+			return linksQuery
+				.Select(l => new
+				{
+					link = l,
+					ActiveConnections = l.ActiveConnections
+						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
+						.Select(ac => ac.ConnectionId)
+				})
+				.Select(i => new LinkDetails
 				{
 					Id = i.link.Id,
 					CreationDate = i.link.CreationDate,
@@ -140,24 +169,24 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
-		public bool UpdateLink(Link linkId)
+		public bool UpdateLink(LinkDetails link)
 		{
 			using (var context = new RelayContext())
 			{
-				var link = context.Links.SingleOrDefault(p => p.Id == linkId.Id);
+				var linkEntity = context.Links.SingleOrDefault(p => p.Id == link.Id);
 
-				if (link == null)
+				if (linkEntity == null)
 					return false;
 
-				link.CreationDate = linkId.CreationDate;
-				link.AllowLocalClientRequestsOnly = linkId.AllowLocalClientRequestsOnly;
-				link.ForwardOnPremiseTargetErrorResponse = linkId.ForwardOnPremiseTargetErrorResponse;
-				link.IsDisabled = linkId.IsDisabled;
-				link.MaximumLinks = linkId.MaximumLinks;
-				link.SymbolicName = linkId.SymbolicName;
-				link.UserName = linkId.UserName;
+				linkEntity.CreationDate = link.CreationDate;
+				linkEntity.AllowLocalClientRequestsOnly = link.AllowLocalClientRequestsOnly;
+				linkEntity.ForwardOnPremiseTargetErrorResponse = link.ForwardOnPremiseTargetErrorResponse;
+				linkEntity.IsDisabled = link.IsDisabled;
+				linkEntity.MaximumLinks = link.MaximumLinks;
+				linkEntity.SymbolicName = link.SymbolicName;
+				linkEntity.UserName = link.UserName;
 
-				context.Entry(link).State = EntityState.Modified;
+				context.Entry(linkEntity).State = EntityState.Modified;
 
 				return context.SaveChanges() == 1;
 			}
@@ -179,11 +208,11 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
-		public IEnumerable<Link> GetLinks()
+		public IEnumerable<LinkDetails> GetLinkDetails()
 		{
 			using (var context = new RelayContext())
 			{
-				return GetLinkFromDbLink(context.Links).ToList();
+				return GetLinkDetailsFromDbLink(context.Links).ToList();
 			}
 		}
 
@@ -235,9 +264,9 @@ namespace Thinktecture.Relay.Server.Repository
 				// found in cache (NOTE: cache only contains successfully validated passwords to prevent DOS attacks!)
 				if (previousInfo != null)
 				{
-					if (previousInfo.Hash == passwordInformation.Hash &&
-						previousInfo.Iterations == passwordInformation.Iterations &&
-						previousInfo.Salt == passwordInformation.Salt)
+					if (previousInfo.Hash == passwordInformation.Hash
+						&& previousInfo.Iterations == passwordInformation.Iterations
+						&& previousInfo.Salt == passwordInformation.Salt)
 					{
 						linkId = link.Id;
 						return true;
@@ -270,20 +299,16 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
-		public Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion)
+		public async Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion)
 		{
 			_logger.Trace("Adding or updating connection {0} for link {1} and origin {2} with connector version {3}", connectionId, linkId, originId, connectorVersion);
 
-			return Task.Run(() => AddOrRenewActiveConnection(linkId, originId, connectionId, connectorVersion));
-		}
-
-		private void AddOrRenewActiveConnection(Guid linkId, Guid originId, string connectionId, int connectorVersion)
-		{
 			try
 			{
 				using (var context = new RelayContext())
 				{
-					var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId);
+					var activeConnection = await context.ActiveConnections
+							.FirstOrDefaultAsync(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId).ConfigureAwait(false);
 
 					if (activeConnection != null)
 					{
@@ -302,7 +327,7 @@ namespace Thinktecture.Relay.Server.Repository
 						});
 					}
 
-					context.SaveChanges();
+					await context.SaveChangesAsync().ConfigureAwait(false);
 				}
 			}
 			catch (Exception ex)
@@ -311,25 +336,20 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
-		public Task RenewActiveConnectionAsync(string connectionId)
+		public async Task RenewActiveConnectionAsync(string connectionId)
 		{
 			_logger.Trace("Renewing last activity on connection {0}", connectionId);
 
-			return Task.Run(() => RenewActiveConnectionInternal(connectionId));
-		}
-
-		private void RenewActiveConnectionInternal(string connectionId)
-		{
 			try
 			{
 				using (var context = new RelayContext())
 				{
-					var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.ConnectionId == connectionId);
+					var activeConnection = await context.ActiveConnections.FirstOrDefaultAsync(ac => ac.ConnectionId == connectionId).ConfigureAwait(false);
 
 					if (activeConnection != null)
 					{
 						activeConnection.LastActivity = DateTime.UtcNow;
-						context.SaveChanges();
+						await context.SaveChangesAsync().ConfigureAwait(false);
 					}
 				}
 			}
@@ -339,30 +359,27 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
-		public Task RemoveActiveConnectionAsync(string connectionId)
+		public async Task RemoveActiveConnectionAsync(string connectionId)
 		{
 			_logger.Debug("Deleting active connection {0}", connectionId);
 
-			return Task.Run(() =>
+			try
 			{
-				try
+				using (var context = new RelayContext())
 				{
-					using (var context = new RelayContext())
-					{
-						var activeConnection = context.ActiveConnections.FirstOrDefault(ac => ac.ConnectionId == connectionId);
+					var activeConnection = await context.ActiveConnections.FirstOrDefaultAsync(ac => ac.ConnectionId == connectionId).ConfigureAwait(false);
 
-						if (activeConnection != null)
-						{
-							context.ActiveConnections.Remove(activeConnection);
-							context.SaveChanges();
-						}
+					if (activeConnection != null)
+					{
+						context.ActiveConnections.Remove(activeConnection);
+						await context.SaveChangesAsync().ConfigureAwait(false);
 					}
 				}
-				catch (Exception ex)
-				{
-					_logger.Error(ex, $"{nameof(LinkRepository)}: Error during RemoveActiveConnectionAsync. ConnectionId = {{0}}", connectionId);
-				}
-			});
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, $"{nameof(LinkRepository)}: Error during RemoveActiveConnectionAsync. ConnectionId = {{0}}", connectionId);
+			}
 		}
 
 		public void DeleteAllConnectionsForOrigin(Guid originId)
@@ -373,7 +390,7 @@ namespace Thinktecture.Relay.Server.Repository
 			{
 				using (var context = new RelayContext())
 				{
-					var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId);
+					var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId).ToList();
 					context.ActiveConnections.RemoveRange(invalidConnections);
 
 					context.SaveChanges();

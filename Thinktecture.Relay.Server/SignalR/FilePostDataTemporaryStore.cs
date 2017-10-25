@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using System.IO;
 using System.Threading;
@@ -10,6 +10,8 @@ namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class FilePostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
+		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(30);
+
 		private readonly TimeSpan _storagePeriod;
 		private readonly ILogger _logger;
 		private readonly string _path;
@@ -36,17 +38,17 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void StartCleanUpTask(CancellationToken token)
 		{
-			Task.Run(() =>
+			Task.Run(async () =>
 			{
 				while (!token.IsCancellationRequested)
 				{
-					if (!token.WaitHandle.WaitOne(30 * 1000))
-						CleanUp();
+					CleanUp(token);
+					await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
 				}
 			}, token);
 		}
 
-		private void CleanUp()
+		private void CleanUp(CancellationToken cancellationToken)
 		{
 			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
 
@@ -54,6 +56,9 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				foreach (var fileName in Directory.GetFiles(_path))
 				{
+					if (cancellationToken.IsCancellationRequested)
+						return;
+
 					try
 					{
 						if (File.GetCreationTimeUtc(fileName) < timeOut)

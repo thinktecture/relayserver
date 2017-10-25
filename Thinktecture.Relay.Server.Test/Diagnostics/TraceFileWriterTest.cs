@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -19,12 +20,12 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			ITraceFileWriter sut = new TraceFileWriter();
 			IDictionary<string, string> headers = new Dictionary<string, string>
 			{
-				{"Content-Disposition", "attachment"},
-				{"Content-Length", "3"},
-				{"X-TTRELAY-TIMEOUT", "OnPremise"},
+				["Content-Disposition"] = "attachment",
+				["Content-Length"] = "3",
+				["X-TTRELAY-TIMEOUT"] = "OnPremise",
 			};
 
-			sut.WriteHeaderFile("test.headers.txt", headers);
+			sut.WriteHeaderFileAsync("test.headers.txt", new ReadOnlyDictionary<string, string>(headers));
 
 			Thread.Sleep(100); // File write is async
 
@@ -41,7 +42,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			ITraceFileWriter sut = new TraceFileWriter();
 			var content = new byte[] { 65, 66, 67 };
 
-			sut.WriteContentFile("test.content.txt", content);
+			sut.WriteContentFileAsync("test.content.txt", content);
 
 			Thread.Sleep(100); // File write is async
 
@@ -56,7 +57,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			ITraceFileWriter sut = new TraceFileWriter();
 			var content = new byte[] { 65, 66, 67 };
 
-			sut.WriteContentFile("test.content.txt", null);
+			sut.WriteContentFileAsync("test.content.txt", null);
 
 			Thread.Sleep(100); // File write is async
 

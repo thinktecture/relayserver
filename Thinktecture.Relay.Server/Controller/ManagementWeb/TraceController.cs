@@ -101,7 +101,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 		[ActionName("fileinformations")]
 		public async Task<IHttpActionResult> GetFileInformations(Guid traceConfigurationId)
 		{
-			var result = await _traceManager.GetTracesAsync(traceConfigurationId);
+			var result = await _traceManager.GetTracesAsync(traceConfigurationId).ConfigureAwait(false);
 
 			return Ok(result);
 		}
@@ -110,7 +110,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 		[ActionName("view")]
 		public async Task<HttpResponseMessage> ViewAsync(string headerFileName)
 		{
-			var trace = await _traceManager.GetTraceFileAsync(headerFileName);
+			var trace = await _traceManager.GetTraceFileAsync(headerFileName).ConfigureAwait(false);
 
 			var result = _traceTransformation.CreateFromTraceFile(trace);
 

@@ -1,4 +1,4 @@
-﻿using Topshelf;
+using Topshelf;
 
 namespace Thinktecture.Relay.OnPremiseConnectorService
 {
@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 				config.Service<OnPremisesService>(settings =>
 				{
 					settings.ConstructUsing(_ => new OnPremisesService());
-					settings.WhenStarted(async s => await s.Start());
+					settings.WhenStarted(async s => await s.StartAsync().ConfigureAwait(false));
 					settings.WhenStopped(s => s.Stop());
 				});
 				config.RunAsNetworkService();

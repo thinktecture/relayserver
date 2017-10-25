@@ -20,7 +20,6 @@ namespace Thinktecture.Relay.Server.Migrations
 				.PrimaryKey(t => new { t.LinkId, t.ConnectionId, t.OriginId })
 				.ForeignKey("dbo.Links", t => t.LinkId, cascadeDelete: true)
 				.Index(t => t.LinkId);
-
 		}
 
 		public override void Down()

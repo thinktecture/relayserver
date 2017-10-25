@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
@@ -65,7 +64,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			return base.OnDisconnected(request, connectionId, stopCalled);
 		}
 
-		private async Task ForwardClientRequestAsync(string connectionId, OnPremiseTargetRequest request, CancellationToken token)
+		private Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest request)
 		{
 			_logger.Debug("Forwarding client request to connection {0}", connectionId);
 			_logger.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
@@ -78,8 +77,8 @@ namespace Thinktecture.Relay.Server.SignalR
 				request.Body = new byte[0];
 			}
 
-			// Connection.Send does not support cancellation token
-			await Task.Run(() => Connection.Send(connectionId, request), token);
+			Connection.Send(connectionId, request);
+			return Task.CompletedTask;
 		}
 
 		protected override Task OnReceived(IRequest request, string connectionId, string data)
@@ -110,7 +109,7 @@ namespace Thinktecture.Relay.Server.SignalR
 				LinkId = claims.OnPremiseId,
 				UserName = claims.UserName,
 				Role = claims.Role,
-				RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, (OnPremiseTargetRequest)cr, cancellationToken),
+				RequestAction = (cr, cancellationToken) => ForwardClientRequest(connectionId, cr),
 				IpAddress = GetIpAddressFromOwinEnvironment(request.Environment),
 				ConnectorVersion = GetConnectorVersionFromRequest(request),
 			});

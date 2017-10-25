@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 
 		protected override ConfigurationElement CreateNewElement()
 		{
-			throw new NotImplementedException();
+			throw new NotSupportedException();
 		}
 
 		protected override object GetElementKey(ConfigurationElement element)

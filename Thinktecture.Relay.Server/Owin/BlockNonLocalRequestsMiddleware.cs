@@ -4,10 +4,10 @@ using Microsoft.Owin;
 
 namespace Thinktecture.Relay.Server.Owin
 {
-	class BlockNonLocalRequestsMiddleware : OwinMiddleware
+	internal class BlockNonLocalRequestsMiddleware : OwinMiddleware
 	{
 		private readonly string _path;
-		
+
 		public BlockNonLocalRequestsMiddleware(OwinMiddleware next, string path)
 			: base(next)
 		{
@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.Server.Owin
 			}
 			else
 			{
-				await Next.Invoke(context);
+				await Next.Invoke(context).ConfigureAwait(false);
 			}
 		}
 	}

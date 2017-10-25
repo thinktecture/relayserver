@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +9,9 @@ namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
+		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(1);
+		private static readonly byte[] _emptyByteArray = new byte[0];
+
 		private readonly ILogger _logger;
 		private readonly TimeSpan _storagePeriod;
 
@@ -32,22 +35,25 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void StartCleanUpTask(CancellationToken token)
 		{
-			Task.Run(() =>
+			Task.Run(async () =>
 			{
 				while (!token.IsCancellationRequested)
 				{
-					if (!token.WaitHandle.WaitOne(1000))
+					while (!token.IsCancellationRequested)
+					{
 						CleanUp();
+						await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
+					}
 				}
 			}, token);
 		}
 
 		private void CleanUp()
 		{
-			foreach (var key in _data.Keys)
+			foreach (var kvp in _data)
 			{
-				if (_data.TryGetValue(key, out var entry) && entry.IsTimedOut)
-					_data.TryRemove(key, out entry);
+				if (kvp.Value.IsTimedOut)
+					_data.TryRemove(kvp.Key, out var value);
 			}
 		}
 
@@ -62,7 +68,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading body for request id {{0}}", requestId);
 
-			return _data.TryRemove(requestId, out var entry) ? entry.Data : new byte[] { };
+			return _data.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
 		}
 
 		~InMemoryPostDataTemporaryStore()
