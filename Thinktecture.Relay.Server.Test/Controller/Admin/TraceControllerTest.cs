@@ -28,9 +28,8 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 		public void Create_returns_BadRequest_when_minutes_is_less_than_1()
 		{
 			var sut = new TraceController(null, null, null);
-			BadRequestErrorMessageResult result;
 
-			result = (BadRequestErrorMessageResult)sut.Create(new StartTrace()
+			var result = (BadRequestErrorMessageResult)sut.Create(new StartTrace()
 			{
 				LinkId = Guid.NewGuid(),
 				Minutes = 0
@@ -44,9 +43,8 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 		public void Create_returns_BadRequest_when_minutes_is_greater_than_10()
 		{
 			var sut = new TraceController(null, null, null);
-			BadRequestErrorMessageResult result;
 
-			result = (BadRequestErrorMessageResult)sut.Create(new StartTrace()
+			var result = (BadRequestErrorMessageResult)sut.Create(new StartTrace()
 			{
 				LinkId = Guid.NewGuid(),
 				Minutes = 11
@@ -95,7 +93,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 			result = sut.Disable(traceConnectionId);
 
 			traceRepositoryMock.VerifyAll();
-			(result as OkResult).Should().NotBeNull();
+			(result as OkResult)?.Should().NotBeNull();
 		}
 
 		[TestMethod]
@@ -111,7 +109,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 			result = sut.Disable(traceConnectionId);
 
 			traceRepositoryMock.VerifyAll();
-			(result as BadRequestResult).Should().NotBeNull();
+			(result as BadRequestResult)?.Should().NotBeNull();
 		}
 
 		[TestMethod]
@@ -243,7 +241,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 						HeaderFileName = Guid.NewGuid() + "cr.header",
 						Headers = new Dictionary<string, string>()
 						{
-							{"Content-Length", "100"}
+							["Content-Length"] = "100"
 						}
 					},
 					OnPremiseTargetTrace = new TraceFile()
@@ -252,7 +250,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 						HeaderFileName = Guid.NewGuid() + "ltr.header",
 						Headers = new Dictionary<string, string>()
 						{
-							{"Content-Length", "100"}
+							["Content-Length"] = "100"
 						}
 					},
 					TracingDate = DateTime.Now

@@ -41,7 +41,7 @@ namespace Thinktecture.Relay.Server.Security
 
 		public AuthenticationTicket Unprotect(string protectedText)
 		{
-			throw new NotImplementedException();
+			throw new NotSupportedException();
 		}
 	}
 }

@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.Server.Filters
 				throw new ArgumentNullException(nameof(continuation));
 
 			_logger.Debug("[Request] {0}: {1}. Arguments: {2}", actionContext.Request?.Method, actionContext.Request?.RequestUri, SerializeArguments(actionContext.ActionArguments));
-			var response = await continuation();
+			var response = await continuation().ConfigureAwait(false);
 			_logger.Debug("[Response] {0} - {1} ({2}): {3}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
 
 			return response;

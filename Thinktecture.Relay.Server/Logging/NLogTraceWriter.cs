@@ -25,6 +25,5 @@ namespace Thinktecture.Relay.Server.Logging
 				"Category: {0}, Operator: {1}, Kind: {2}, Operation: {3}, Properties: {4} Message: {5}, Exception: {6}",
 				category, record.Operator, record.Kind, record.Operation, record.Properties, record.Message ?? "-", record.Exception?.ToString() ?? "-");
 		}
-
 	}
 }

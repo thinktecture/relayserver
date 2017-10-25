@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <summary>
 		/// Connects to the relay server.
 		/// </summary>
-		Task Connect();
+		Task ConnectAsync();
 
 		/// <summary>
 		/// Disconnectes from the relay server.

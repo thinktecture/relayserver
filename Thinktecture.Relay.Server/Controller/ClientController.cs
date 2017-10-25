@@ -4,40 +4,45 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using NLog;
+using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
+using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.Plugins;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller
 {
-    [AllowAnonymous]
-    [RelayModuleBindingFilter]
-    public class ClientController : ApiController
-    {
-        private readonly IBackendCommunication _backendCommunication;
-        private readonly ILogger _logger;
-        private readonly ILinkRepository _linkRepository;
-        private readonly IRequestLogger _requestLogger;
-        private readonly IHttpResponseMessageBuilder _httpResponseMessageBuilder;
-        private readonly IOnPremiseRequestBuilder _onPremiseRequestBuilder;
-        private readonly IPathSplitter _pathSplitter;
-        private readonly ITraceManager _traceManager;
+	[AllowAnonymous]
+	[RelayModuleBindingFilter]
+	public class ClientController : ApiController
+	{
+		private readonly IBackendCommunication _backendCommunication;
+		private readonly ILogger _logger;
+		private readonly ILinkRepository _linkRepository;
+		private readonly IRequestLogger _requestLogger;
+		private readonly IHttpResponseMessageBuilder _httpResponseMessageBuilder;
+		private readonly IOnPremiseRequestBuilder _onPremiseRequestBuilder;
+		private readonly IPathSplitter _pathSplitter;
+		private readonly ITraceManager _traceManager;
+		private readonly IPluginManager _pluginManager;
 
 		public ClientController(IBackendCommunication backendCommunication, ILogger logger, ILinkRepository linkRepository, IRequestLogger requestLogger,
 			IHttpResponseMessageBuilder httpResponseMessageBuilder, IOnPremiseRequestBuilder onPremiseRequestBuilder, IPathSplitter pathSplitter,
-			ITraceManager traceManager)
+			ITraceManager traceManager, IPluginManager pluginManager)
 		{
-			_backendCommunication = backendCommunication;
-			_logger = logger;
-			_linkRepository = linkRepository;
-			_requestLogger = requestLogger;
-			_httpResponseMessageBuilder = httpResponseMessageBuilder;
-			_onPremiseRequestBuilder = onPremiseRequestBuilder;
-			_pathSplitter = pathSplitter;
-			_traceManager = traceManager;
+			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
+			_requestLogger = requestLogger ?? throw new ArgumentNullException(nameof(requestLogger));
+			_httpResponseMessageBuilder = httpResponseMessageBuilder ?? throw new ArgumentNullException(nameof(httpResponseMessageBuilder));
+			_onPremiseRequestBuilder = onPremiseRequestBuilder ?? throw new ArgumentNullException(nameof(onPremiseRequestBuilder));
+			_pathSplitter = pathSplitter ?? throw new ArgumentNullException(nameof(pathSplitter));
+			_traceManager = traceManager ?? throw new ArgumentNullException(nameof(traceManager));
+			_pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
 		}
 
 		[HttpDelete]
@@ -59,40 +64,27 @@ namespace Thinktecture.Relay.Server.Controller
 			var pathInformation = _pathSplitter.Split(path);
 			var link = _linkRepository.GetLink(pathInformation.UserName);
 
-			if (link == null)
-			{
-				_logger.Info("Link not found. Path: {0}", path);
+			if (!CanRequestBeHandled(path, pathInformation, link))
 				return NotFound();
-			}
-
-			if (link.IsDisabled)
-			{
-				_logger.Info("{0}: Link {1} is disabled.", link.Id, link.SymbolicName);
-				return NotFound();
-			}
-
-			if (String.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
-			{
-				_logger.Info("{0}: Path without user name is not found. Path: {1}", link.Id, path);
-				return NotFound();
-			}
-
-			if (link.AllowLocalClientRequestsOnly && !Request.IsLocal())
-			{
-				_logger.Info("{0}: Link {1} only allows local requests.", link.Id, link.SymbolicName);
-				return NotFound();
-			}
 
 			_logger.Trace("{0}: Building on premise connector request. Origin Id: {1}, Path: {2}", link.Id, _backendCommunication.OriginId, path);
-			var onPremiseConnectorRequest = (OnPremiseConnectorRequest)await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName);
+			var onPremiseConnectorRequest = await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName).ConfigureAwait(false);
+
+			var response = _pluginManager.HandleRequest(onPremiseConnectorRequest);
+			if (response != null)
+			{
+				_logger.Debug("Plugins caused direct answering of request.");
+				FinishRequest(onPremiseConnectorRequest, null, response, link.Id, path);
+				return response;
+			}
 
 			var onPremiseTargetResponseTask = _backendCommunication.GetResponseAsync(onPremiseConnectorRequest.RequestId);
 
 			_logger.Trace("{0}: Sending on premise connector request.", link.Id);
-			await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, onPremiseConnectorRequest);
+			await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, onPremiseConnectorRequest).ConfigureAwait(false);
 
 			_logger.Trace("{0}: Waiting for response. Request Id", onPremiseConnectorRequest.RequestId);
-			var onPremiseTargetResponse = await onPremiseTargetResponseTask;
+			var onPremiseTargetResponse = await onPremiseTargetResponseTask.ConfigureAwait(false);
 
 			if (onPremiseTargetResponse != null)
 			{
@@ -103,19 +95,59 @@ namespace Thinktecture.Relay.Server.Controller
 				_logger.Trace("{0}: On-Premise timeout.", link.Id);
 			}
 
-			var response = _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
+			response = _pluginManager.HandleResponse(onPremiseConnectorRequest, onPremiseTargetResponse)
+				?? _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
 
+			FinishRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response, link.Id, path);
+			return response;
+		}
+
+		private bool CanRequestBeHandled(string path, PathInformation pathInformation, Link link)
+		{
+			if (path == null)
+			{
+				_logger.Info("Path is not set.");
+				return false;
+			}
+
+			if (link == null)
+			{
+				_logger.Info("Link not found. Path: {0}", path);
+				return false;
+			}
+
+			if (link.IsDisabled)
+			{
+				_logger.Info("{0}: Link {1} is disabled.", link.Id, link.SymbolicName);
+				return false;
+			}
+
+			if (String.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
+			{
+				_logger.Info("{0}: Path without user name is not found. Path: {1}", link.Id, path);
+				return false;
+			}
+
+			if (link.AllowLocalClientRequestsOnly && !Request.IsLocal())
+			{
+				_logger.Info("{0}: Link {1} only allows local requests.", link.Id, link.SymbolicName);
+				return false;
+			}
+
+			return true;
+		}
+
+		private void FinishRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpResponseMessage response, Guid linkId, string path)
+		{
 			onPremiseConnectorRequest.RequestFinished = DateTime.UtcNow;
 
-			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(link.Id);
+			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);
 			if (currentTraceConfigurationId != null)
 			{
 				_traceManager.Trace(onPremiseConnectorRequest, onPremiseTargetResponse, currentTraceConfigurationId.Value);
 			}
 
-			_requestLogger.LogRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response.StatusCode, link.Id, _backendCommunication.OriginId, path);
-
-			return response;
+			_requestLogger.LogRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response.StatusCode, linkId, _backendCommunication.OriginId, path);
 		}
 
 		private new HttpResponseMessage NotFound()

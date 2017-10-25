@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			{
 				Headers = new Dictionary<string, string>()
 				{
-					{"Content-Type", "text/plain"},
+					["Content-Type"] = "text/plain",
 				}
 			};
 
@@ -54,11 +54,9 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			using (var memoryStream = new MemoryStream())
 			{
 				using (var deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress))
+				using (var writer = new StreamWriter(deflateStream))
 				{
-					using (var writer = new StreamWriter(deflateStream))
-					{
-						writer.Write("aabbcc");
-					}
+					writer.Write("aabbcc");
 				}
 
 				deflateContent = memoryStream.ToArray();
@@ -73,7 +71,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				Content = deflateContent,
 				Headers = new Dictionary<string, string>()
 				{
-					{"Content-Encoding", "deflate"}
+					["Content-Encoding"] = "deflate"
 				}
 			};
 
@@ -90,11 +88,9 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			using (var memoryStream = new MemoryStream())
 			{
 				using (var deflateStream = new GZipStream(memoryStream, CompressionMode.Compress))
+				using (var writer = new StreamWriter(deflateStream))
 				{
-					using (var writer = new StreamWriter(deflateStream))
-					{
-						writer.Write("aabbcc");
-					}
+					writer.Write("aabbcc");
 				}
 
 				deflateContent = memoryStream.ToArray();
@@ -109,7 +105,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				Content = deflateContent,
 				Headers = new Dictionary<string, string>()
 				{
-					{"Content-Encoding", "gzip"}
+					["Content-Encoding"] = "gzip"
 				}
 			};
 

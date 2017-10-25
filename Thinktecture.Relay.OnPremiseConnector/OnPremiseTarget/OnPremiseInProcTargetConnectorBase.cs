@@ -51,7 +51,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				{
 					using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_requestTimeout)))
 					{
-						await handler.ProcessRequest(request, response, cts.Token);
+						await handler.ProcessRequest(request, response, cts.Token).ConfigureAwait(false);
 
 						if (cts.IsCancellationRequested)
 						{
@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 							response.StatusCode = HttpStatusCode.GatewayTimeout;
 							response.HttpHeaders = new Dictionary<string, string>()
 							{
-								{"X-TTRELAY-TIMEOUT", "On-Premise Target"}
+								["X-TTRELAY-TIMEOUT"] = "On-Premise Target"
 							};
 							response.Body = null;
 						}
@@ -74,7 +74,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 					response.StatusCode = HttpStatusCode.InternalServerError;
 					response.HttpHeaders = new Dictionary<string, string>()
 					{
-						{"Content-Type", "text/plain"}
+						["Content-Type"] = "text/plain"
 					};
 					response.Body = Encoding.UTF8.GetBytes(ex.ToString());
 				}
@@ -94,7 +94,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				response.StatusCode = HttpStatusCode.InternalServerError;
 				response.HttpHeaders = new Dictionary<string, string>()
 				{
-					{"Content-Type", "text/plain"}
+					["Content-Type"] = "text/plain"
 				};
 				response.Body = Encoding.UTF8.GetBytes(ex.ToString());
 			}

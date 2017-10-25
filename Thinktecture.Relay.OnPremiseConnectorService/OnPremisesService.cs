@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 
 		private RelayServerConnector _connector;
 
-		public async Task Start()
+		public async Task StartAsync()
 		{
 			try
 			{
@@ -72,8 +72,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 					_connector.RegisterOnPremiseTarget(onPremiseTarget.Key, handlerType);
 				}
 
-
-				await _connector.Connect();
+				await _connector.ConnectAsync().ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{

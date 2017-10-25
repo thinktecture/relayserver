@@ -54,44 +54,24 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		private byte[] UncompressDeflate(byte[] content)
 		{
 			using (var memoryStream = new MemoryStream(content))
+			using (var deflateStream = new DeflateStream(memoryStream, CompressionMode.Decompress))
+			using (var resultStream = new MemoryStream())
 			{
-				using (var deflateStream = new DeflateStream(memoryStream, CompressionMode.Decompress))
-				{
-					using (var resultStream = new MemoryStream())
-					{
-						var buffer = new byte[1024];
-						int bytesRead;
+				deflateStream.CopyTo(resultStream, 1024);
 
-						while ((bytesRead = deflateStream.Read(buffer, 0, buffer.Length)) > 0)
-						{
-							resultStream.Write(buffer, 0, bytesRead);
-						}
-
-						return resultStream.ToArray();
-					}
-				}
+				return resultStream.ToArray();
 			}
 		}
 
 		private byte[] UncompressGZip(byte[] content)
 		{
 			using (var memoryStream = new MemoryStream(content))
+			using (var deflateStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+			using (var resultStream = new MemoryStream())
 			{
-				using (var deflateStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-				{
-					using (var resultStream = new MemoryStream())
-					{
-						var buffer = new byte[1024];
-						int bytesRead;
+				deflateStream.CopyTo(resultStream, 1024);
 
-						while ((bytesRead = deflateStream.Read(buffer, 0, buffer.Length)) > 0)
-						{
-							resultStream.Write(buffer, 0, bytesRead);
-						}
-
-						return resultStream.ToArray();
-					}
-				}
+				return resultStream.ToArray();
 			}
 		}
 	}

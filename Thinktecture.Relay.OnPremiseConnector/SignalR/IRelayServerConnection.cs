@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();
 		void RemoveOnPremiseTarget(string key);
 		string RelayedRequestHeader { get; set; }
-		Task Connect();
+		Task ConnectAsync();
 		void Disconnect();
 		List<string> GetOnPremiseTargetKeys();
 

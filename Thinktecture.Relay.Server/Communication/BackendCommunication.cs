@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
@@ -25,35 +25,39 @@ namespace Thinktecture.Relay.Server.Communication
 		private readonly ConcurrentDictionary<string, ConnectionInformation> _onPremises;
 		private readonly ConcurrentDictionary<string, HeartbeatInformation> _heartbeatableClients;
 
-		private readonly ConcurrentDictionary<string, IDisposable> _requestSubscriptions;
-		private readonly IDisposable _responseSubscription;
+		private readonly object _requestSubscriptionsLock;
+		private readonly Dictionary<string, IDisposable> _requestSubscriptions;
+		private IDisposable _responseSubscription;
 
 		public Guid OriginId { get; }
 
-		public BackendCommunication(IConfiguration configuration, IMessageDispatcher messageDispatcher, IOnPremiseConnectorCallbackFactory requesetCallbackFactory, ILogger logger, IPersistedSettings persistedSettings, ILinkRepository linkRepository)
+		public BackendCommunication(IConfiguration configuration, IMessageDispatcher messageDispatcher, IOnPremiseConnectorCallbackFactory requestCallbackFactory, ILogger logger, IPersistedSettings persistedSettings, ILinkRepository linkRepository)
 		{
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_messageDispatcher = messageDispatcher ?? throw new ArgumentNullException(nameof(messageDispatcher));
-			_requestCallbackFactory = requesetCallbackFactory ?? throw new ArgumentNullException(nameof(requesetCallbackFactory));
+			_requestCallbackFactory = requestCallbackFactory ?? throw new ArgumentNullException(nameof(requestCallbackFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
-
-			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
+			_onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
+			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
+			_heartbeatableClients = new ConcurrentDictionary<string, HeartbeatInformation>();
+			_requestSubscriptionsLock = new object();
+			_requestSubscriptions = new Dictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
-			_linkRepository.DeleteAllConnectionsForOrigin(OriginId);
+			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
 
 			logger.Trace("Creating backend communication with origin id {0}", OriginId);
 			logger.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
+		}
 
-			_onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
-			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
-			_requestSubscriptions = new ConcurrentDictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
-			_heartbeatableClients = new ConcurrentDictionary<string, HeartbeatInformation>();
-
+		public void Prepare()
+		{
+			_linkRepository.DeleteAllConnectionsForOrigin(OriginId);
 			_responseSubscription = StartReceivingResponses(OriginId);
 
 #pragma warning disable 4014
+
 			// dont await, heartbeat in the background
 			HeartbeatAllClientsAsync(_cts.Token);
 #pragma warning restore 4014
@@ -65,43 +69,57 @@ namespace Thinktecture.Relay.Server.Communication
 				throw new ObjectDisposedException(GetType().Name);
 		}
 
-		public Task<IOnPremiseTargetResponse> GetResponseAsync(string requestId)
+		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
 		{
 			CheckDisposed();
 			_logger.Debug("Waiting for response for request id {0}", requestId);
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
-			return Task.Run(() => WaitForOnPremiseTargetResponse(onPremiseConnectorCallback), _cancellationToken);
+			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, _cancellationToken);
 		}
 
-		private IOnPremiseTargetResponse WaitForOnPremiseTargetResponse(IOnPremiseConnectorCallback onPremiseConnectorCallback)
+		private async Task<IOnPremiseConnectorResponse> GetOnPremiseTargetResponseAsync(IOnPremiseConnectorCallback onPremiseConnectorCallback, CancellationToken cancellationToken)
 		{
 			try
 			{
-				if (onPremiseConnectorCallback.Handle.WaitOne(_configuration.OnPremiseConnectorCallbackTimeout))
+				using (var timeoutCts = new CancellationTokenSource(_configuration.OnPremiseConnectorCallbackTimeout))
+				using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
 				{
-					_logger.Debug("Received On-Premise response for request id {0}", onPremiseConnectorCallback.RequestId);
+					var token = cts.Token;
 
-					return onPremiseConnectorCallback.Response;
+					using (token.Register(() => onPremiseConnectorCallback.Response.TrySetCanceled(token)))
+					{
+						var resposne = await onPremiseConnectorCallback.Response.Task.ConfigureAwait(false);
+						_logger.Debug("Received On-Premise response for request id {0}", onPremiseConnectorCallback.RequestId);
+
+						return resposne;
+					}
 				}
-
+			}
+			catch (OperationCanceledException)
+			{
 				_logger.Debug("No response received within specified timeout {0}. Request id {1}", _configuration.OnPremiseConnectorCallbackTimeout, onPremiseConnectorCallback.RequestId);
-				return null;
+			}
+			catch (Exception ex)
+			{
+				_logger.Debug(ex, "Error during waiting for on-premise connector response. Request id {0}", onPremiseConnectorCallback.RequestId);
 			}
 			finally
 			{
 				_requestCompletedCallbacks.TryRemove(onPremiseConnectorCallback.RequestId, out onPremiseConnectorCallback);
 			}
+
+			return null;
 		}
 
-		public async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseTargetRequest onPremiseTargetRequest)
+		public async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			CheckDisposed();
 
 			_logger.Debug("Sending request for on-premise connector link {0} to message dispatcher", linkId);
 
-			await _messageDispatcher.DispatchRequest(linkId, onPremiseTargetRequest);
+			await _messageDispatcher.DispatchRequest(linkId, request).ConfigureAwait(false);
 		}
 
 		public void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId)
@@ -129,10 +147,13 @@ namespace Thinktecture.Relay.Server.Communication
 
 			RegisterForHeartbeat(registrationInformation, _cancellationToken);
 
-			if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
+			lock (_requestSubscriptionsLock)
 			{
-				_requestSubscriptions[registrationInformation.ConnectionId] = _messageDispatcher.OnRequestReceived(registrationInformation.LinkId, registrationInformation.ConnectionId, !registrationInformation.SupportsAck())
-					.Subscribe(request => registrationInformation.RequestAction(request, _cancellationToken));
+				if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
+				{
+					_requestSubscriptions[registrationInformation.ConnectionId] = _messageDispatcher.OnRequestReceived(registrationInformation.LinkId, registrationInformation.ConnectionId, !registrationInformation.SupportsAck())
+							.Subscribe(request => registrationInformation.RequestAction(request, _cancellationToken));
+				}
 			}
 		}
 
@@ -148,20 +169,27 @@ namespace Thinktecture.Relay.Server.Communication
 			_linkRepository.RemoveActiveConnectionAsync(connectionId);
 			UnregisterForHeartbeat(connectionId);
 
-			if (_requestSubscriptions.TryRemove(connectionId, out var requestSubscription))
+			IDisposable requestSubscription;
+			lock (_requestSubscriptionsLock)
+			{
+				if (_requestSubscriptions.TryGetValue(connectionId, out requestSubscription))
+					_requestSubscriptions.Remove(connectionId);
+			}
+
+			if (requestSubscription != null)
 			{
 				_logger.Debug("Disposing request subscription for OnPremise id {0} and connection id {1}", connectionInfo?.LinkId, connectionId);
 				requestSubscription.Dispose();
 			}
 		}
 
-		public async Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseTargetResponse response)
+		public async Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			CheckDisposed();
 
 			_logger.Debug("Sending response to origin id {0}", originId);
 
-			await _messageDispatcher.DispatchResponse(originId, response);
+			await _messageDispatcher.DispatchResponse(originId, response).ConfigureAwait(false);
 		}
 
 		private IDisposable StartReceivingResponses(Guid originId)
@@ -172,14 +200,12 @@ namespace Thinktecture.Relay.Server.Communication
 				.Subscribe(ForwardOnPremiseTargetResponse);
 		}
 
-		private void ForwardOnPremiseTargetResponse(IOnPremiseTargetResponse response)
+		private void ForwardOnPremiseTargetResponse(IOnPremiseConnectorResponse response)
 		{
 			if (_requestCompletedCallbacks.TryRemove(response.RequestId, out var onPremiseConnectorCallback))
 			{
 				_logger.Debug("Forwarding on-premise target response for request id {0}", response.RequestId);
-
-				onPremiseConnectorCallback.Response = response;
-				onPremiseConnectorCallback.Handle.Set();
+				onPremiseConnectorCallback.Response.SetResult(response);
 			}
 			else
 			{
@@ -232,14 +258,14 @@ namespace Thinktecture.Relay.Server.Communication
 				AcknowledgeId = requestId,
 				HttpHeaders = new Dictionary<string, string>()
 				{
-					{ "X-TTRELAY-HEARTBEATINTERVAL", (_configuration.ActiveConnectionTimeoutInSeconds / 2).ToString() },
+					["X-TTRELAY-HEARTBEATINTERVAL"] = (_configuration.ActiveConnectionTimeoutInSeconds / 2).ToString(),
 				},
 			};
 
 			var responseTask = GetResponseAsync(requestId);
-			await heartbeatInfo.RequestAction(request, token);
+			await heartbeatInfo.RequestAction(request, token).ConfigureAwait(false);
 
-			var response = await responseTask;
+			var response = await responseTask.ConfigureAwait(false);
 
 			if (response == null)
 			{
@@ -247,9 +273,9 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		private async Task HeartbeatAllClientsAsync(CancellationToken token)
+		private Task HeartbeatAllClientsAsync(CancellationToken token)
 		{
-			await Task.Run(async () =>
+			return Task.Run(async () =>
 			{
 				var delayBetweenHeartbeats = _configuration.ActiveConnectionTimeoutInSeconds / 2 * 1000;
 				Task[] heartbeatTasks = null;
@@ -271,10 +297,10 @@ namespace Thinktecture.Relay.Server.Communication
 							index++;
 						}
 
-						await Task.WhenAll(heartbeatTasks);
+						await Task.WhenAll(heartbeatTasks).ConfigureAwait(false);
 					}
 
-					await Task.Delay(delayBetweenHeartbeats, token);
+					await Task.Delay(delayBetweenHeartbeats, token).ConfigureAwait(false);
 				}
 			}, token);
 		}
@@ -300,7 +326,7 @@ namespace Thinktecture.Relay.Server.Communication
 				};
 
 				// heartbeat do NOT go through the message dispatcher as we want to heartbeat the connections directly
-				await client.RequestAction(request, token);
+				await client.RequestAction(request, token).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
@@ -322,9 +348,16 @@ namespace Thinktecture.Relay.Server.Communication
 				_cts.Cancel();
 				_cts.Dispose();
 
-				foreach (var consumer in _requestSubscriptions.Values)
+				List<IDisposable> subscriptions;
+
+				lock (_requestSubscriptionsLock)
 				{
-					consumer.Dispose();
+					subscriptions = _requestSubscriptions.Values.ToList();
+				}
+
+				foreach (var subscription in subscriptions)
+				{
+					subscription.Dispose();
 				}
 
 				_responseSubscription?.Dispose();

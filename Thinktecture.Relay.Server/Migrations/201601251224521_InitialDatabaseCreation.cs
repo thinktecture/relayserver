@@ -82,7 +82,6 @@ namespace Thinktecture.Relay.Server.Migrations
 				.PrimaryKey(t => t.Id, clustered: false)
 				.Index(t => t.Identity, clustered: true)
 				.Index(t => t.UserName, unique: true, name: "UserNameIndex");
-
 		}
 
 		public override void Down()

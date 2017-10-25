@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -8,6 +8,7 @@ using Thinktecture.Relay.Server.Configuration;
 
 namespace Thinktecture.Relay.Server.Controller
 {
+	[AttributeUsage(AttributeTargets.Class)]
 	public class CheckModuleBindingConfigurationAttribute : ActionFilterAttribute
 	{
 		public override bool AllowMultiple => true;
@@ -19,7 +20,6 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			_getPropertyFunc = getPropertyFunc;
 		}
-
 
 		public override void OnActionExecuting(HttpActionContext actionContext)
 		{

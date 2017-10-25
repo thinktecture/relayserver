@@ -21,5 +21,6 @@ namespace Thinktecture.Relay.Server.Configuration
 		string TemporaryRequestStoragePath { get; }
 		TimeSpan TemporaryRequestStoragePeriod { get; }
 		int ActiveConnectionTimeoutInSeconds { get; }
+		string PluginAssembly { get; }
 	}
 }
