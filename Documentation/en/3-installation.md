@@ -2,7 +2,7 @@
 
 ## Requirements
 
-The following software components must be installed on the Windows server used for the operation of the RelayServer:
+The following software components must be installed on the Windows Server used for the operation of the RelayServer:
 
 - Microsoft .Net Framework v4.5.1 or later
 - Microsoft SQL Server (Express) 2014
@@ -26,7 +26,7 @@ Now the web management of RabbitMQ can be found at [http://127.0.0.1:15672/](htt
 
 ![2-rabbitmq2.png](./assets/2-rabbitmq2.png)
 
-**Note**: If the RabbitMQ web management interface is not accessible, the associated service is probably not installed correctly during the installation of RabbitMQ. To do this, you must check whether the RabbitMQ service contains a description in the Windows service console. If the service description is missing as in the screenshot below, the RabbitMQ installer could not install the service correctly.
+**Note**: If the RabbitMQ web management interface is not accessible, the associated service is probably not installed correctly during the installation of RabbitMQ. To do this, you must check whether the RabbitMQ service contains a description in the Windows service console. If the service description is missing as in the screenshot below, the RabbitMQ installer was not able to install the service correctly.
 
 ![2-rabbitmq3.png](./assets/2-rabbitmq3.png)
 
@@ -42,7 +42,7 @@ net start rabbitmq
 
 After this correction, the service with description should be present in the Windows service console and the Web Management should be available.
 
-The default login data guest / guest is used to log in and RabbitMQ's status overview is displayed.
+The default login data `guest / guest` is used to log in and RabbitMQ's status overview is displayed.
 
 ![2-rabbitmq5.png](./assets/2-rabbitmq5.png)
 
@@ -56,22 +56,22 @@ https://github.com/thinktecture/relayserver/releases
 
 ![2-relayserver-download.png](./assets/2-relayserver-download.png)
 
-The Zip can be unpacked in the folder provided for the RelayServer. The folder must now be assigned rights for the Network Service via Windows Explorer / Properties Full Control. This is necessary for RelayServer to be started in this folder as a Windows service.
+The Zip package can be unpacked in the folder provided for the RelayServer. The folder must now be assigned rights for the Network Service via Windows Explorer / Properties Full Control. This is necessary for RelayServer to be started in this folder as a Windows service.
 
-In a command line window with administrator rights, you are now transferred to the created folder and the RelayServer is installed as a Windows service:
+In a command line window with administrator rights, change to the created folder and install the RelayServer as a Windows service using the following command:
 
 ```
 Thinktecture.Relay.Server.exe install
 ```
 
-If desired, the Windows Service Name as well as the Windows Service Display Name can be customized by parameter:
+If desired, the Windows Service Name as well as the Windows Service Display Name can be customized by additional, optional command line arguments:
 
 ```
 -servicename=ServiceName
 -displayname=DisplayName
 ```
 
-By default, the installation routine uses the name "TTRelayServer." The installation uses the RelayServer service to start automatically when Windows starts.
+By default, the installation routine uses the name "TTRelayServer." The installation configures the RelayServer service to start automatically when Windows starts.
 
 Before the first start of the currently installed RelayServer should be configured appropriately. Please refer to the next sections.
 
@@ -81,11 +81,11 @@ The RelayServer can be started either from the Windows service management consol
 Thinktecture.Relay.Server.exe start -servicename=ServiceName
 ```
 
-The parameter "-servicename" is necessary if there should be several RelayServer on the system.
+The parameter "-servicename" is necessary if there are several RelayServers installed on the system.
 
 ## Uninstallation
 
-To remove the RelayServer service, go to the folder of the RelayServer in a command line window with administrator rights and call this command:
+To remove the RelayServer service, navigate to the folder of the RelayServer in a command line window with administrator rights and call this command:
 
 ```
 Thinktecture.Relay.Server.exe uninstall
@@ -160,7 +160,7 @@ The default settings include:
 
 ### Configuring the URL ACL
 
-To operate the RelayServer with an HTTPS connection, a URL ACL must be set up in the loak Windows configuration. To do this, you must run this command from a command line with administrator privileges:
+To operate the RelayServer with an HTTPS connection, a URL ACL must be set up in the local Windows configuration. To do this, you must run this command from a command line with administrator privileges:
 
 ```
 netsh http add urlacl https://+:443/ user="NETWORK SERVICE"
@@ -172,7 +172,7 @@ If instead of an HTTPS connection a normal and thus unsecured http connection is
 
 ### Configuration of SSL
 
-The configuration of SSL is necessary if the RelayServer is to handle its traffic via secure HTTPS connections. The use of HTTPS is the default value and is strongly recommended.
+The configuration of SSL is necessary if the RelayServer sahould handle its traffic via secure HTTPS connections. The use of HTTPS is the default value and is strongly recommended.
 
 To install an SSL certificate, you must start the Microsoft Management Console:
 
@@ -197,7 +197,9 @@ run -> mmc
 
 The following command must be executed via a command line window with administration rights:
 
+```
 netsh http add sslcert ipport=0.0.0.0:443 certhash=thumbprint appid={guid}
+```
 
 It must be ensured that the port corresponds to the port from the configuration file of the RelayServer. The thumbprint must be replaced with the thumbprint from the SSL configuration. The GUID parameter must be replaced with a random GUID (for example, from https://www.guidgenerator.com/).
 
@@ -227,11 +229,11 @@ Click on User Mapping in the left list. Check Map in the row of the database you
 
 ## Requirements
 
-The following software components must be installed on the Windows server used for the operation of the RelayServer:
+The following software components must be installed on the Windows Server used for the operation of the RelayServer:
 
 - Microsoft .Net Framework v4.5.1 or later
 - Access to the service endpoints of the On-Premises application to be covered
-- Excessive access to the URL of the RelayServer
+- Outgoing https access to the URL of the RelayServer
 
 ## Installation
 
@@ -275,4 +277,4 @@ Only the <relayServer></ relayServer> section has to be edited in the configurat
 
 ### onPremiseTargets Element
 
-List of On-Premises Applications to be supplied with inquiries by the On-Premises Connector.
+List of On-Premises Applications that the On-Premises Connector should be able to send requests to.
