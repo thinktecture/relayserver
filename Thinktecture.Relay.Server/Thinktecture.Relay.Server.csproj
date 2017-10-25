@@ -193,6 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dto\LinkDetails.cs" />
+    <Compile Include="Logging\LoggingModule.cs" />
     <Compile Include="Migrations\201708250611298_ChangeUserNameIndex.cs" />
     <Compile Include="Migrations\201708250611298_ChangeUserNameIndex.Designer.cs">
       <DependentUpon>201708250611298_ChangeUserNameIndex.cs</DependentUpon>

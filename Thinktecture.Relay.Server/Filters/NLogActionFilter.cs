@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Filters
 
 		public NLogActionFilter(ILogger logger)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 
 			_jsonSettings = new JsonSerializerSettings()
 			{
@@ -35,9 +35,10 @@ namespace Thinktecture.Relay.Server.Filters
 			if (continuation == null)
 				throw new ArgumentNullException(nameof(continuation));
 
-			_logger.Debug("[Request] {0}: {1}. Arguments: {2}", actionContext.Request?.Method, actionContext.Request?.RequestUri, SerializeArguments(actionContext.ActionArguments));
+			// This serializes the complete request body to the log. For the time being, prevent that:
+			// _logger?.Trace("[Request] {0}: {1}. Arguments: {2}", actionContext.Request?.Method, actionContext.Request?.RequestUri, SerializeArguments(actionContext.ActionArguments));
 			var response = await continuation().ConfigureAwait(false);
-			_logger.Debug("[Response] {0} - {1} ({2}): {3}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
+			_logger?.Trace("[Response] {0} - {1} ({2}): {3}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
 
 			return response;
 		}
@@ -50,7 +51,7 @@ namespace Thinktecture.Relay.Server.Filters
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "Error during serializing action argements.");
+				_logger?.Error(ex, "Error during serializing action argements.");
 				return null;
 			}
 		}

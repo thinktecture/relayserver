@@ -21,19 +21,12 @@ using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
 using NLog;
 using Owin;
-using RabbitMQ.Client;
-using Thinktecture.Relay.Server.Communication;
-using Thinktecture.Relay.Server.Communication.RabbitMq;
 using Thinktecture.Relay.Server.Configuration;
 using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.Controller.ManagementWeb;
-using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Filters;
-using Thinktecture.Relay.Server.Helper;
-using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Logging;
 using Thinktecture.Relay.Server.Owin;
-using Thinktecture.Relay.Server.Plugins;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
@@ -42,89 +35,39 @@ namespace Thinktecture.Relay.Server
 {
 	internal class Startup
 	{
+		private readonly ILifetimeScope _rootScope;
+		private readonly ILogger _logger;
+
+		public Startup(ILogger logger, ILifetimeScope rootScope)
+		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_rootScope = rootScope ?? throw new ArgumentNullException(nameof(rootScope));
+		}
+
 		public void Configuration(IAppBuilder app)
 		{
 			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
 
-			var container = RegisterServices();
-			var config = container.Resolve<IConfiguration>();
-			var logger = container.Resolve<ILogger>();
-			var httpConfig = CreateHttpConfiguration(config, logger);
-			var scope = RegisterAdditionalServices(container, httpConfig, config);
+			var config = _rootScope.Resolve<IConfiguration>();
 
-			app.UseAutofacMiddleware(scope);
+			var httpConfig = CreateHttpConfiguration(config, _logger);
+			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, config);
+
+			app.UseAutofacMiddleware(innerScope);
 			app.UseCors(CorsOptions.AllowAll);
-			UseOAuthSecurity(app, scope.Resolve<AuthorizationServerProvider>());
-			MapSignalR(app, scope, config);
-			UseWebApi(app, httpConfig, scope);
-			UseFileServer(app, config, logger);
+			UseOAuthSecurity(app, innerScope.Resolve<AuthorizationServerProvider>());
+			MapSignalR(app, innerScope, config);
+			UseWebApi(app, httpConfig, innerScope);
+			UseFileServer(app, config, _logger);
 		}
 
-		private static ILifetimeScope RegisterAdditionalServices(IContainer container, HttpConfiguration httpConfig, IConfiguration config)
+		private static ILifetimeScope RegisterAdditionalServices(ILifetimeScope container, HttpConfiguration httpConfig, IConfiguration config)
 		{
-			var pluginLoader = container.Resolve<IPluginLoader>();
-
 			return container.BeginLifetimeScope(builder =>
 			{
 				builder.RegisterWebApiFilterProvider(httpConfig);
 				RegisterApiControllers(builder, config);
-				pluginLoader.LoadPlugins(builder);
 			});
-		}
-
-		private static IContainer RegisterServices()
-		{
-			var builder = new ContainerBuilder();
-
-			builder.RegisterType<OnPremisesConnection>().ExternallyOwned();
-			builder.RegisterType<AuthorizationServerProvider>().SingleInstance();
-			builder.RegisterType<PasswordHash>().As<IPasswordHash>();
-
-			builder.RegisterType<ConnectionFactory>().AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
-			builder.Register(ctx => ctx.Resolve<IRabbitMqFactory>().CreateConnection()).AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<RabbitMqMessageDispatcher>().AsImplementedInterfaces().SingleInstance();
-
-			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance()
-				.OnActivated(args => args.Instance.Prepare())
-				.AutoActivate(); // ensure that the BUS to rabbitMQ starts up before accepting connections
-
-			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
-			builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
-			builder.RegisterType<LocalAppDataPersistedSettings>().As<IPersistedSettings>().SingleInstance().AutoActivate(); // fail fast: load setting immediatelly
-
-			builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
-			builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
-			builder.RegisterType<LogRepository>().As<ILogRepository>().SingleInstance();
-			builder.RegisterType<TraceRepository>().As<ITraceRepository>().SingleInstance();
-
-			builder.RegisterType<RequestLogger>().As<IRequestLogger>().SingleInstance();
-			builder.RegisterType<TraceManager>().As<ITraceManager>().SingleInstance();
-			builder.RegisterType<TraceFileWriter>().As<ITraceFileWriter>().SingleInstance();
-			builder.RegisterType<TraceFileReader>().As<ITraceFileReader>().SingleInstance();
-			builder.RegisterType<TraceTransformation>().As<ITraceTransformation>().SingleInstance();
-
-			builder.RegisterType<HttpResponseMessageBuilder>().As<IHttpResponseMessageBuilder>();
-			builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
-			builder.RegisterType<PathSplitter>().As<IPathSplitter>();
-
-			builder.RegisterType<PluginLoader>().As<IPluginLoader>();
-			builder.RegisterType<PluginManager>().As<IPluginManager>();
-
-			builder.Register(context => LogManager.GetLogger("Server")).As<ILogger>().SingleInstance();
-
-			if (String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["TemporaryRequestStoragePath"]))
-			{
-				builder.RegisterType<InMemoryPostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
-			}
-			else
-			{
-				builder.RegisterType<FilePostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
-			}
-
-			var container = builder.Build();
-
-			return container;
 		}
 
 		private static void RegisterApiControllers(ContainerBuilder builder, IConfiguration configuration)
@@ -248,13 +191,13 @@ namespace Thinktecture.Relay.Server
 
 			var enableNLogTraceWriter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true");
 			if (enableNLogTraceWriter)
-				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(logger, new TraceLevelConverter()));
+				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(LogManager.GetLogger("HttpTraceLogger"), new TraceLevelConverter()));
 
-			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(logger));
+			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(LogManager.GetLogger("HttpExceptionLogger")));
 
 			var enableNLogActionFilter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogActionFilter"], "true");
 			if (enableNLogActionFilter)
-				httpConfig.Filters.Add(new NLogActionFilter(logger));
+				httpConfig.Filters.Add(new NLogActionFilter(LogManager.GetLogger("HttpActionFilterLogger")));
 
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 

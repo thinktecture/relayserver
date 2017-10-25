@@ -1,4 +1,5 @@
 using System;
+using Autofac;
 using Microsoft.Owin.Hosting;
 using NLog;
 
@@ -9,15 +10,18 @@ namespace Thinktecture.Relay.Server
 		private readonly string _hostName;
 		private readonly int _port;
 		private readonly bool _allowHttp;
-
+		private readonly ILifetimeScope _scope;
 		private readonly ILogger _logger;
+
 		private IDisposable _host;
 
-		public RelayService(string hostName, int port, bool allowHttp)
+		public RelayService(string hostName, int port, bool allowHttp, ILifetimeScope scope)
 		{
-			_hostName = hostName;
+			_hostName = hostName ?? throw new ArgumentNullException(nameof(hostName));
 			_port = port;
 			_allowHttp = allowHttp;
+			_scope = scope ?? throw new ArgumentNullException(nameof(scope));
+
 			_logger = LogManager.GetCurrentClassLogger();
 		}
 
@@ -31,7 +35,7 @@ namespace Thinktecture.Relay.Server
 				_logger.Info("Listening on: {0}", address);
 #endif
 
-				_host = WebApp.Start<Startup>(address);
+				_host = WebApp.Start(address, app =>  _scope.Resolve<Startup>().Configuration(app));
 			}
 			catch (Exception ex)
 			{
@@ -42,11 +46,8 @@ namespace Thinktecture.Relay.Server
 
 		public void Stop()
 		{
-			if (_host != null)
-			{
-				_host.Dispose();
-				_host = null;
-			}
+			_host?.Dispose();
+			_host = null;
 		}
 	}
 }
