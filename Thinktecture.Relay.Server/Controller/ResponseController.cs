@@ -1,9 +1,9 @@
-using System;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Http;
+using Autofac;
 using Newtonsoft.Json.Linq;
 using NLog;
+using System;
+using System.Threading.Tasks;
+using System.Web.Http;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
@@ -27,13 +27,16 @@ namespace Thinktecture.Relay.Server.Controller
 
 		public async Task<IHttpActionResult> Forward(JToken message)
 		{
+			// TODO check for header or fallback to legacy
+
+			// This is needed because the class is internal
 			var onPremiseTargetResponse = message.ToObject<OnPremiseConnectorResponse>();
 
 			// Store response to file, if we get one and it is larger than 64 kByte
-			if ((onPremiseTargetResponse.Body != null) && (onPremiseTargetResponse.Body.Length >= 0x10000))
+			if (onPremiseTargetResponse.Body?.Length >= 0x10000)
 			{
 				_postDataTemporaryStore.SaveResponse(onPremiseTargetResponse.RequestId, onPremiseTargetResponse.Body);
-				onPremiseTargetResponse.Body = null;
+				onPremiseTargetResponse.Body = new byte[0]; // this marks that there is a larger body available
 			}
 
 			await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetResponse.OriginId, onPremiseTargetResponse).ConfigureAwait(false);

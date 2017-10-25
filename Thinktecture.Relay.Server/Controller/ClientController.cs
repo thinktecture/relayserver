@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using NLog;
+using Thinktecture.Relay.OnPremiseConnector;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
@@ -141,6 +142,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			onPremiseConnectorRequest.RequestFinished = DateTime.UtcNow;
 
+			// TODO this may be debounced for e.g. 5 minutes to skip querying on each request
 			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);
 			if (currentTraceConfigurationId != null)
 			{

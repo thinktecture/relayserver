@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.IO;
 
-namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
+namespace Thinktecture.Relay.OnPremiseConnector
 {
 	public interface IOnPremiseTargetRequest
 	{
@@ -30,6 +31,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// Gets this request body
 		/// </summary>
 		byte[] Body { get; }
+
+		/// <summary>
+		/// Gets this request stream
+		/// </summary>
+		Stream Stream { get; }
 
 		/// <summary>
 		/// Gets the id of the relay server this request was sent to

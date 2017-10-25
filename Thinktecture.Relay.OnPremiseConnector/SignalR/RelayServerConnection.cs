@@ -29,15 +29,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
 		private readonly HttpClient _httpClient;
 		private readonly int _id;
+		private CancellationTokenSource _cts;
+		private DateTime _lastHeartbeat;
 		private string _accessToken;
 		private bool _stopRequested;
 
 		private static int _nextId;
 		private static readonly Random _random = new Random();
-
-		private readonly object _lastHeartbeatLock;
-		private DateTime _lastHeartbeat = DateTime.MinValue;
-		private CancellationTokenSource _heartbeatCancellationTokenSource;
 
 		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
 		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
@@ -55,7 +53,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger;
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
-			_lastHeartbeatLock = new object();
+			_cts = new CancellationTokenSource();
 
 			Reconnecting += OnReconnecting;
 			Reconnected += OnReconnected;
@@ -174,7 +172,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger?.Info("Connecting to relay server #{0}", _id);
 
 			if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
+			{
 				return;
+			}
 
 			try
 			{
@@ -193,7 +193,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			var tokenResponse = await GetAuthorizationTokenAsync().ConfigureAwait(false);
 
 			if (_stopRequested)
+			{
 				return false;
+			}
 
 			CheckResponseTokenForErrors(tokenResponse);
 
@@ -244,41 +246,39 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			base.OnMessageReceived(message);
 
-			OnReceivedAsync(message);
+			OnReceivedAsync(message).ConfigureAwait(false);
 		}
 
-		private async void OnReceivedAsync(JToken message)
+		private async Task OnReceivedAsync(JToken message)
 		{
 			var ctx = new RequestContext();
 			OnPremiseTargetRequest request = null;
 
 			try
 			{
-				_logger?.Trace("Received message from server. message=#{0}", message);
+				_logger?.Trace("Received message from server. message={0}", message);
 				_logger?.Debug("Received message from server");
 
-				// receive a client request from relay server
 				request = message.ToObject<OnPremiseTargetRequest>();
 
-				if (request.HttpMethod == "PING")
+				try
 				{
-					await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
-					return;
-				}
+				    if (request.HttpMethod == "PING")
+				    {
+					    await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
+					    return;
+				    }
 
-				if (request.HttpMethod == "INIT_HEARTBEAT")
+					if (request.HttpMethod == "HEARTBEAT")
+				    {
+						HandleHeartbeatRequest(ctx, request);
+					    return;
+					}
+				}
+				finally
 				{
-					await HandleInitHeartbeatRequestAsync(request).ConfigureAwait(false);
-					return;
+					await Send(request.AcknowledgeId).ConfigureAwait(false);
 				}
-
-				if (request.HttpMethod == "HEARTBEAT")
-				{
-					await HandleHeartbeatRequestAsync(request).ConfigureAwait(false);
-					return;
-				}
-
-				await AcknowledgeAsync(request).ConfigureAwait(false);
 
 				var key = request.Url.Split('/').FirstOrDefault();
 				if (key != null)
@@ -306,7 +306,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				if (!ctx.IsRelayServerNotified && request != null)
 				{
-					_logger?.Debug("Unhandled request #{0}", message);
+					_logger?.Debug("Unhandled request {0}", message);
 
 					var resp = new OnPremiseTargetResponse
 					{
@@ -320,13 +320,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					await PostToRelayAsync(ctx, resp, CancellationToken.None).ConfigureAwait(false);
 				}
 			}
-		}
-
-		private async Task AcknowledgeAsync(IOnPremiseTargetRequest request)
-		{
-			// older servers do not send acknowledge id, so we need to check for it not being null
-			if (!String.IsNullOrEmpty(request.AcknowledgeId))
-				await Send(request.AcknowledgeId).ConfigureAwait(false);
 		}
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
@@ -343,47 +336,21 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			};
 
 			await PostToRelayAsync(ctx, resp, CancellationToken.None).ConfigureAwait(false);
-			await AcknowledgeAsync(request).ConfigureAwait(false);
 		}
 
-		private async Task HandleInitHeartbeatRequestAsync(IOnPremiseTargetRequest request)
+		private void HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
-			_logger?.Debug($"{nameof(RelayServerConnection)}: Received initialize heartbeat from relay server #{{0}}", _id);
+			_logger?.Debug("Received heartbeat from relay server #{0}", _id);
 
-			_lastHeartbeat = DateTime.UtcNow;
-			request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
-
-			if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
+			if (_lastHeartbeat == DateTime.MinValue)
 			{
-				_logger?.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
-				CancellationToken token;
-
-				lock (_lastHeartbeatLock)
-				{
-					// cancel existing heartbeat if we already have one running
-					TryDisposeCurrentCancellationTokenSource();
-					_heartbeatCancellationTokenSource = new CancellationTokenSource();
-
-					token = _heartbeatCancellationTokenSource.Token;
-				}
-
-#pragma warning disable 4014
-				// Justification: Heartbeat checking is intended to be done in background and not awaited
-				CheckHeartbeatPeriodicallyAsync(TimeSpan.FromSeconds(heartbeatInterval), token);
-#pragma warning restore 4014
-
-			}
-			else
-			{
-				_logger?.Warn("Heartbeat interval is not a valid integer: {0}", heartbeatHeaderValue);
-
-				lock (_lastHeartbeatLock)
-				{
-					TryDisposeCurrentCancellationTokenSource();
-				}
-			}
-
-			await AcknowledgeAsync(request).ConfigureAwait(false);
+			    request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
+			    if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
+			    {
+				    _logger?.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
+					StartHeartbeatCheckLoop(TimeSpan.FromSeconds(heartbeatInterval), _cts.Token);
+			    }
+            }
 		}
 
 		private async Task HandleHeartbeatRequestAsync(IOnPremiseTargetRequest request)
@@ -392,40 +359,38 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_lastHeartbeat = DateTime.UtcNow;
 
-			await AcknowledgeAsync(request).ConfigureAwait(false);
+			ctx.IsRelayServerNotified = true;
 		}
 
-		private async Task CheckHeartbeatPeriodicallyAsync(TimeSpan heartbeatInterval, CancellationToken token)
+		private void StartHeartbeatCheckLoop(TimeSpan heartbeatInterval, CancellationToken token)
 		{
-			try
+			Task.Run(async () =>
 			{
-				await Task.Run(async () =>
-				{
-					var intervalWithTolerance = heartbeatInterval.Add(TimeSpan.FromSeconds(2));
+				var intervalWithTolerance = heartbeatInterval.Add(TimeSpan.FromSeconds(2));
 
-					while (!token.IsCancellationRequested)
+				while (!token.IsCancellationRequested)
+				{
+					if (_lastHeartbeat != DateTime.MinValue && _lastHeartbeat != DateTime.MaxValue)
 					{
 						_logger?.Trace("Checking last heartbeat time. Interval: {0}s, last heartbeat: {1}", heartbeatInterval, _lastHeartbeat);
 
 						if (_lastHeartbeat <= DateTime.UtcNow.Add(-intervalWithTolerance))
 						{
-							_logger?.Warn("Last heartbeat was at {0}, and out of interval of {1}s. Forcing reconnect.", _lastHeartbeat, heartbeatInterval);
+							_logger?.Warn("Last heartbeat was at {0} and out of interval of {1}s. Forcing reconnect.", _lastHeartbeat, heartbeatInterval);
+
+							_lastHeartbeat = DateTime.MaxValue;
 
 							if (!_stopRequested)
+							{
 								ForceReconnect();
-
-							return;
+							}
 						}
-
-						await Task.Delay(heartbeatInterval, token).ConfigureAwait(false);
 					}
+
+					await Task.Delay(heartbeatInterval, token).ConfigureAwait(false);
 				}, token).ConfigureAwait(false);
 			}
-			catch (OperationCanceledException)
-			{
-				/* Cancellation has been requested */
-			}
-		}
+        }
 
 		private void ForceReconnect()
 		{
@@ -444,21 +409,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_stopRequested = true;
 			Stop();
-
-			lock (_lastHeartbeatLock)
-			{
-				TryDisposeCurrentCancellationTokenSource();
-			}
 		}
 
-		private void TryDisposeCurrentCancellationTokenSource()
+		protected override void Dispose(bool disposing)
 		{
-			if (_heartbeatCancellationTokenSource != null)
+			if (_cts != null)
 			{
-				_heartbeatCancellationTokenSource.Cancel();
-				_heartbeatCancellationTokenSource.Dispose();
-				_heartbeatCancellationTokenSource = null;
+				_cts.Cancel();
+				_cts.Dispose();
+				_cts = null;
 			}
+
+			base.Dispose(disposing);
 		}
 
 		public List<string> GetOnPremiseTargetKeys()
@@ -477,43 +439,29 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				_logger?.Trace("Requesting body from relay server. relay-server={0}, request-id={1}", _relayServer, request.RequestId);
 				// request the body from the relay server (because SignalR cannot handle large messages)
 				var webResponse = await GetToRelay("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
-				request.Body = await webResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+				request.Stream = await webResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
 			}
 
-			var response = (OnPremiseTargetResponse)await connector.GetResponseAsync(url, request).ConfigureAwait(false);
+			var response = await connector.GetResponseAsync(url, request).ConfigureAwait(false);
 
 			_logger?.Debug("Sending response from {0} to relay server", request.Url);
 
-			var retryCount = 0;
-
-			while (!_stopRequested && retryCount++ < _maxRetries)
-			{
 				try
 				{
 					// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
 					await PostToRelayAsync(ctx, response, cancellationToken).ConfigureAwait(false);
-					return;
 				}
 				catch (Exception ex)
 				{
-					_logger?.Debug(ex, "Error while posting to relay server - retry {0} of {1}", retryCount, _maxRetries);
-					Thread.Sleep(1000);
+				    _logger?.Debug(ex, "Error while posting to relay server");
+				    _logger?.Error("Error communicating with relay server. Aborting response...");
 				}
 			}
 
-			_logger?.Error("Error communicating with relay server. Aborting response...");
-		}
-
-		private async Task PostToRelayAsync(RequestContext ctx, OnPremiseTargetResponse data, CancellationToken cancellationToken)
 		{
-			if (data.Body?.Length > 0x10000) // when size is too big, use a separate request to upload body content to relay server
-			{
-				_logger.Debug($"{nameof(RelayServerConnection)}: Uploading body of request {{0}} in separate request because of size.", data.RequestId);
-				await PostToRelay($"/upload?requestId={data.RequestId}", () => new ByteArrayContent(data.Body), cancellationToken).ConfigureAwait(false);
-				data.Body = null;
-			}
-
-			await PostToRelay("/forward", () => new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
+		private async Task PostToRelayAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
+        {
+			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;
 		}
 
@@ -541,18 +489,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			return SendToRelayAsync(relativeUrl, HttpMethod.Get, setHeaders, null, cancellationToken);
 		}
 
-		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, HttpContent content, CancellationToken cancellationToken)
 		{
 			return PostToRelay(relativeUrl, null, content, cancellationToken);
 		}
 
-		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			return SendToRelayAsync(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
 		}
 
-		private Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> getContent,
-			CancellationToken cancellationToken)
+		private Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			if (String.IsNullOrWhiteSpace(relativeUrl))
 				throw new ArgumentException("Relative url cannot be null or empty.");
@@ -562,35 +509,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			var url = new Uri(_relayServer, relativeUrl);
 
-			return ReplayHttpRequestIfNeededAsync(() =>
-			{
-				var request = new HttpRequestMessage(httpMethod, url);
+			var request = new HttpRequestMessage(httpMethod, url);
 
-				setHeaders?.Invoke(request.Headers);
+			setHeaders?.Invoke(request.Headers);
+			request.Content = content;
 
-				if (getContent != null)
-					request.Content = getContent();
-
-				return _httpClient.SendAsync(request, cancellationToken);
-			});
-		}
-
-		private async Task<HttpResponseMessage> ReplayHttpRequestIfNeededAsync(Func<Task<HttpResponseMessage>> httpRequest)
-		{
-			var result = await httpRequest().ConfigureAwait(false);
-
-			if (result.StatusCode == HttpStatusCode.Unauthorized)
-			{
-				// If we don't get a new token and stop is requested, we return the first request
-				if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
-				{
-					return result;
-				}
-
-				result = await httpRequest().ConfigureAwait(false);
-			}
-
-			return result;
+			return _httpClient.SendAsync(request, cancellationToken);
 		}
 
 		private TimeSpan GetRandomWaitTime()

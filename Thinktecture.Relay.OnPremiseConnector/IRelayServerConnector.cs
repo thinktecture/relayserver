@@ -40,8 +40,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
 		/// <typeparam name="T">The type of the handler.</typeparam>
-		void RegisterOnPremiseTarget<T>(string key)
-			where T : IOnPremiseInProcHandler, new();
+		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();
 
 		/// <summary>
 		/// Removes a on-premise target.
@@ -107,10 +106,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
 		/// <param name="relativeUrl">Url relative to the relay server url.</param>
-		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
-		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Func<HttpContent> content, CancellationToken cancellationToken);
+		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, HttpContent content, CancellationToken cancellationToken);
 
 		/// <summary>
 		/// Makes a POST request to relay server using the current authentication token.
@@ -118,9 +117,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="linkName">The name of the relay link.</param>
 		/// <param name="relativeUrl">Url relative to the relay server url.</param>
 		/// <param name="setHeaders">Callback for setting headers.</param>
-		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
-		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken);
+		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
 	}
 }

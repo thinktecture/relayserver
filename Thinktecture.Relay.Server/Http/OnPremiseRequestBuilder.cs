@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Protocols.WSTrust;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -24,11 +26,9 @@ namespace Thinktecture.Relay.Server.Http
 
 		public async Task<IOnPremiseConnectorRequest> BuildFrom(HttpRequestMessage request, Guid originId, string pathWithoutUserName)
 		{
-			// TODO: Directly stream to disk
 			var onPremiseConnectorRequest = new OnPremiseConnectorRequest
 			{
 				RequestId = Guid.NewGuid().ToString(),
-				Body = await GetClientRequestBodyAsync(request.Content).ConfigureAwait(false),
 				HttpMethod = request.Method.Method,
 				Url = pathWithoutUserName + request.RequestUri.Query,
 				HttpHeaders = request.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
@@ -36,11 +36,28 @@ namespace Thinktecture.Relay.Server.Http
 				RequestStarted = DateTime.UtcNow,
 			};
 
-			// Store request body to file if it is larger than 64 kByte
-			if ((onPremiseConnectorRequest.Body != null) && (onPremiseConnectorRequest.Body.Length >= 0x10000))
+			//if (request.Content != null)
 			{
-				_postDataTemporaryStore.SaveRequest(onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.Body);
-				onPremiseConnectorRequest.Body = new byte[] { };
+				if (request.Content.Headers.ContentLength.GetValueOrDefault(0x10000) >= 0x10000)
+				{
+					var content = await request.Content.ReadAsStreamAsync().ConfigureAwait(false);
+
+					using (var stream = _postDataTemporaryStore.CreateRequestStream(onPremiseConnectorRequest.RequestId))
+					{
+						await content.CopyToAsync(stream).ConfigureAwait(false);
+						if (stream.Length < 0x10000)
+						{
+							onPremiseConnectorRequest.Body = new byte[stream.Length];
+							stream.Position = 0;
+							await stream.ReadAsync(onPremiseConnectorRequest.Body, 0, (int)stream.Length).ConfigureAwait(false);
+							// TODO delete obsolete file now
+						}
+						else
+						{
+							onPremiseConnectorRequest.Body = new byte[0];
+						}
+					}
+				}
 			}
 
 			try
@@ -56,15 +73,6 @@ namespace Thinktecture.Relay.Server.Http
 			RemoveIgnoredHeaders(onPremiseConnectorRequest);
 
 			return onPremiseConnectorRequest;
-		}
-
-		internal async Task<byte[]> GetClientRequestBodyAsync(HttpContent content)
-		{
-			var body = await content.ReadAsByteArrayAsync().ConfigureAwait(false);
-
-			return (body.LongLength == 0L)
-				? null
-				: body;
 		}
 
 		internal string CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(IEnumerable<string> headers)

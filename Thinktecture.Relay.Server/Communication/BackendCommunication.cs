@@ -23,9 +23,8 @@ namespace Thinktecture.Relay.Server.Communication
 
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
 		private readonly ConcurrentDictionary<string, ConnectionInformation> _onPremises;
-		private readonly ConcurrentDictionary<string, HeartbeatInformation> _heartbeatableClients;
+		private readonly ConcurrentDictionary<string, HeartbeatInformation> _heartbeatClients;
 
-		private readonly object _requestSubscriptionsLock;
 		private readonly Dictionary<string, IDisposable> _requestSubscriptions;
 		private IDisposable _responseSubscription;
 
@@ -40,8 +39,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
 			_onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
 			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
-			_heartbeatableClients = new ConcurrentDictionary<string, HeartbeatInformation>();
-			_requestSubscriptionsLock = new object();
+			_heartbeatClients = new ConcurrentDictionary<string, HeartbeatInformation>();
 			_requestSubscriptions = new Dictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
@@ -56,16 +54,15 @@ namespace Thinktecture.Relay.Server.Communication
 			_linkRepository.DeleteAllConnectionsForOrigin(OriginId);
 			_responseSubscription = StartReceivingResponses(OriginId);
 
-#pragma warning disable 4014
-			// dont await, heartbeat in the background
-			HeartbeatAllClientsAsync(_cts.Token);
-#pragma warning restore 4014
+			StartSendHeartbeatsLoop(_cts.Token);
 		}
 
-		protected void CheckDisposed()
+		private void CheckDisposed()
 		{
 			if (_cts.IsCancellationRequested)
+			{
 				throw new ObjectDisposedException(GetType().Name);
+		}
 		}
 
 		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
@@ -137,16 +134,19 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger?.Debug("Registering on-premise link {0} via connection {1}. User name: {2}, Role: {3}, Connector Version: {4}", registrationInformation.LinkId, registrationInformation.ConnectionId, registrationInformation.UserName, registrationInformation.Role, registrationInformation.ConnectorVersion);
+			_logger?.Debug("Registering on-premise link {0} via connection {1}. User name: {2}, Role: {3}, Connector Version: {4}",
+				registrationInformation.LinkId,
+				registrationInformation.ConnectionId,
+				registrationInformation.UserName,
+				registrationInformation.Role,
+				registrationInformation.ConnectorVersion);
 
 			_linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
 
 			if (!_onPremises.ContainsKey(registrationInformation.ConnectionId))
 				_onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.LinkId, registrationInformation.UserName, registrationInformation.Role);
 
-			RegisterForHeartbeat(registrationInformation, _cancellationToken);
-
-			lock (_requestSubscriptionsLock)
+			lock (_requestSubscriptions)
 			{
 				if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
 				{
@@ -154,6 +154,8 @@ namespace Thinktecture.Relay.Server.Communication
 							.Subscribe(request => registrationInformation.RequestAction(request, _cancellationToken));
 				}
 			}
+
+			RegisterForHeartbeat(registrationInformation);
 		}
 
 		public void UnregisterOnPremise(string connectionId)
@@ -169,7 +171,7 @@ namespace Thinktecture.Relay.Server.Communication
 			UnregisterForHeartbeat(connectionId);
 
 			IDisposable requestSubscription;
-			lock (_requestSubscriptionsLock)
+			lock (_requestSubscriptions)
 			{
 				if (_requestSubscriptions.TryGetValue(connectionId, out requestSubscription))
 					_requestSubscriptions.Remove(connectionId);
@@ -195,8 +197,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			_logger?.Debug("Start receiving responses for origin id {0}", originId);
 
-			return _messageDispatcher.OnResponseReceived(originId)
-				.Subscribe(ForwardOnPremiseTargetResponse);
+			return _messageDispatcher.OnResponseReceived(originId).Subscribe(ForwardOnPremiseTargetResponse);
 		}
 
 		private void ForwardOnPremiseTargetResponse(IOnPremiseConnectorResponse response)
@@ -212,7 +213,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		private void RegisterForHeartbeat(RegistrationInformation registrationInformation, CancellationToken cancellationToken)
+		private void RegisterForHeartbeat(RegistrationInformation registrationInformation)
 		{
 			if (registrationInformation.SupportsHeartbeat())
 			{
@@ -226,8 +227,7 @@ namespace Thinktecture.Relay.Server.Communication
 					RequestAction = registrationInformation.RequestAction,
 				};
 
-				InitializeHeartbeatAsync(heartbeatInfo, cancellationToken);
-				_heartbeatableClients.TryAdd(registrationInformation.ConnectionId, heartbeatInfo);
+				_heartbeatClients.TryAdd(registrationInformation.ConnectionId, heartbeatInfo);
 			}
 			else
 			{
@@ -239,69 +239,22 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			_logger?.Trace($"Unregistering connection with id {connectionId} from heartbeating.");
 
-			_heartbeatableClients.TryRemove(connectionId, out var heartbeatInformation);
+			_heartbeatClients.TryRemove(connectionId, out var info);
 		}
 
-		private async void InitializeHeartbeatAsync(HeartbeatInformation heartbeatInfo, CancellationToken token)
+
+		private void StartSendHeartbeatsLoop(CancellationToken token)
 		{
-			_logger?.Trace($"Initializing heartbeat with connection {heartbeatInfo.ConnectionId}");
-
-			var requestId = Guid.NewGuid().ToString();
-			var request = new OnPremiseConnectorRequest()
+			Task.Run(async () =>
 			{
-				HttpMethod = "INIT_HEARTBEAT",
-				Url = String.Empty,
-				RequestStarted = DateTime.UtcNow,
-				OriginId = OriginId,
-				RequestId = requestId,
-				AcknowledgeId = requestId,
-				HttpHeaders = new Dictionary<string, string>()
-				{
-					["X-TTRELAY-HEARTBEATINTERVAL"] = (_configuration.ActiveConnectionTimeoutInSeconds / 2).ToString(),
-				},
-			};
-
-			var responseTask = GetResponseAsync(requestId);
-			await heartbeatInfo.RequestAction(request, token).ConfigureAwait(false);
-
-			var response = await responseTask.ConfigureAwait(false);
-
-			if (response == null)
-			{
-				_logger?.Warn($"Connection {heartbeatInfo.ConnectionId} did NOT respond to heartbeat in time.");
-			}
-		}
-
-		private Task HeartbeatAllClientsAsync(CancellationToken token)
-		{
-			return Task.Run(async () =>
-			{
-				var delayBetweenHeartbeats = _configuration.ActiveConnectionTimeoutInSeconds / 2 * 1000;
-				Task[] heartbeatTasks = null;
+				var delay = TimeSpan.FromSeconds(_configuration.ActiveConnectionTimeoutInSeconds / 2d);
 
 				while (!token.IsCancellationRequested)
 				{
-					var clients = _heartbeatableClients.Values;
-
-					if (clients.Count > 0)
-					{
-						if (heartbeatTasks?.Length != clients.Count)
-							heartbeatTasks = new Task[clients.Count];
-
-						var index = 0;
-
-						foreach (var client in clients)
-						{
-							heartbeatTasks[index] = SendHeartbeatAsync(client, token);
-							index++;
-						}
-
-						await Task.WhenAll(heartbeatTasks).ConfigureAwait(false);
-					}
-
-					await Task.Delay(delayBetweenHeartbeats, token).ConfigureAwait(false);
+					await Task.WhenAll(_heartbeatClients.Values.Select(heartbeatClient => SendHeartbeatAsync(heartbeatClient, token))).ConfigureAwait(false);
+					await Task.Delay(delay, token).ConfigureAwait(false);
 				}
-			}, token);
+			}, token).ConfigureAwait(false);
 		}
 
 		private async Task SendHeartbeatAsync(HeartbeatInformation client, CancellationToken token)
@@ -322,6 +275,7 @@ namespace Thinktecture.Relay.Server.Communication
 					OriginId = OriginId,
 					RequestId = requestId,
 					AcknowledgeId = requestId,
+					HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-HEARTBEATINTERVAL"] = (_configuration.ActiveConnectionTimeoutInSeconds / 2).ToString() },
 				};
 
 				// heartbeats do NOT go through the message dispatcher as we want to heartbeat the connections directly
@@ -349,7 +303,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 				List<IDisposable> subscriptions;
 
-				lock (_requestSubscriptionsLock)
+				lock (_requestSubscriptions)
 				{
 					subscriptions = _requestSubscriptions.Values.ToList();
 				}

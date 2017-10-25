@@ -10,5 +10,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		Stream GetResponseStream(string requestId);
 		byte[] LoadRequest(string requestId);
 		byte[] LoadResponse(string requestId);
+		Stream CreateRequestStream(string requestId);
+		Stream GetRequestStream(string requestId);
 	}
 }

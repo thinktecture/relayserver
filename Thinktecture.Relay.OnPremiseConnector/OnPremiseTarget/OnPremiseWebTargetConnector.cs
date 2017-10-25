@@ -93,13 +93,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				{
 					response.StatusCode = webResponse.StatusCode;
 					response.HttpHeaders = webResponse.Headers.AllKeys.ToDictionary(n => n, n => webResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
-
-					using (var responseStream = webResponse.GetResponseStream() ?? Stream.Null)
-					using (var stream = new MemoryStream())
-					{
-						await responseStream.CopyToAsync(stream).ConfigureAwait(false);
-						response.Body = stream.ToArray();
-					}
+					response.Stream = webResponse.GetResponseStream() ?? Stream.Null;
 				}
 
 				response.RequestFinished = DateTime.UtcNow;
@@ -142,13 +136,21 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 			}
 
-			if (onPremiseTargetRequest.Body != null)
+			if (onPremiseTargetRequest.Body?.Length == 0)
+			{
+				_logger.Trace("   adding request stream.");
+
+				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
+				await onPremiseTargetRequest.Stream.CopyToAsync(requestStream).ConfigureAwait(false);
+				// TODO await requestStream.FlushAsync().ConfigureAwait(false);
+			}
+			else if (onPremiseTargetRequest.Body != null)
 			{
 				_logger?.Trace("   adding request body. length={0}", onPremiseTargetRequest.Body.Length);
 
 				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
 				await requestStream.WriteAsync(onPremiseTargetRequest.Body, 0, onPremiseTargetRequest.Body.Length).ConfigureAwait(false);
-				await requestStream.FlushAsync().ConfigureAwait(false);
+				// TODO await requestStream.FlushAsync().ConfigureAwait(false);
 			}
 
 			return webRequest;

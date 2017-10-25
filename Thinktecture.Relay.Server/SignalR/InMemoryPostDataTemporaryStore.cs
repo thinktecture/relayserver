@@ -42,13 +42,10 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				while (!token.IsCancellationRequested)
 				{
-					while (!token.IsCancellationRequested)
-					{
-						CleanUp();
-						await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
-					}
+					CleanUp();
+					await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
 				}
-			}, token);
+			}, token).ConfigureAwait(false);
 		}
 
 		private void CleanUp()
@@ -105,11 +102,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating storage stream for response body for request id {{0}}", requestId);
 
 			var ms = new NotifyingMemoryStream();
-			ms.Disposing += (s,e) =>
-			{
-				_responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
-			};
-
+			ms.Disposing += (s, e) => _responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
 			return ms;
 		}
 
@@ -125,6 +118,26 @@ namespace Thinktecture.Relay.Server.SignalR
 			return null;
 		}
 
+		public Stream CreateRequestStream(string requestId)
+		{
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating storage stream for request body for request id {{0}}", requestId);
+
+			var ms = new NotifyingMemoryStream();
+			ms.Disposing += (s, e) => _requestData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
+			return ms;
+		}
+
+		public Stream GetRequestStream(string requestId)
+		{
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating loading stream for request body for request id {{0}}", requestId);
+
+			if (_requestData.TryRemove(requestId, out var entry))
+			{
+				return new MemoryStream(entry.Data);
+			}
+
+			return null;
+		}
 
 		~InMemoryPostDataTemporaryStore()
 		{
@@ -156,14 +169,11 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			public event EventHandler Disposing;
 
-			private void OnDisposing()
-			{
-				Disposing?.Invoke(this, EventArgs.Empty);
-			}
 
 			protected override void Dispose(bool disposing)
 			{
-				OnDisposing();
+				var handler = Disposing;
+				handler?.Invoke(this, EventArgs.Empty);
 
 				base.Dispose(disposing);
 			}

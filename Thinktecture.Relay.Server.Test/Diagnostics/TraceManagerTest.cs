@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -9,7 +8,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
@@ -26,8 +25,8 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public string RequestId { get; set; }
 			public Guid OriginId { get; set; }
 			public IDictionary<string, string> HttpHeaders { get; set; }
-			IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => HttpHeaders != null ? new ReadOnlyDictionary<string, string>(HttpHeaders) : null;
 			public HttpStatusCode StatusCode { get; set; }
+			public Stream Stream { get; set; }
 			public byte[] Body { get; set; }
 			public DateTime RequestStarted { get; set; }
 			public DateTime RequestFinished { get; set; }

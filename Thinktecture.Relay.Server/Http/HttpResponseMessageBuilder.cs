@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.SignalR;
 
@@ -39,7 +39,7 @@ namespace Thinktecture.Relay.Server.Http
 			if (onPremiseTargetResponse == null)
 			{
 				response.StatusCode = HttpStatusCode.GatewayTimeout;
-				response.Content = new ByteArrayContent(new byte[] { });
+				response.Content = new ByteArrayContent(new byte[0]);
 				response.Content.Headers.Add("X-TTRELAY-TIMEOUT", "On-Premise");
 			}
 			else
@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Server.Http
 				if (onPremiseTargetResponse.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
 					var parts = wwwAuthenticate.Split(' ');
-					response.Headers.WwwAuthenticate.Add((parts.Length == 2)
+					response.Headers.WwwAuthenticate.Add(parts.Length == 2
 						? new AuthenticationHeaderValue(parts[0], parts[1])
 						: new AuthenticationHeaderValue(wwwAuthenticate)
 					);
@@ -60,7 +60,7 @@ namespace Thinktecture.Relay.Server.Http
 			return response;
 		}
 
-		internal HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseTargetResponse onPremiseTargetResponse, Link link)
+		public HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseTargetResponse onPremiseTargetResponse, Link link)
 		{
 			if (onPremiseTargetResponse == null)
 				throw new ArgumentNullException(nameof(onPremiseTargetResponse), "On-premise target response cannot be null");
@@ -72,21 +72,32 @@ namespace Thinktecture.Relay.Server.Http
 
 			HttpContent content;
 
-			var stream = _postDataTemporaryStore.GetResponseStream(onPremiseTargetResponse.RequestId);
-			if (stream != null)
+			if (onPremiseTargetResponse.Body == null)
 			{
-				content = new StreamContent(stream);
+				content = new ByteArrayContent(new byte[0]);
 			}
 			else
 			{
-				content = new ByteArrayContent(onPremiseTargetResponse.Body ?? new byte[] { });
+				if (onPremiseTargetResponse.Body.Length == 0)
+				{
+					var stream = _postDataTemporaryStore.GetResponseStream(onPremiseTargetResponse.RequestId);
+					if (stream == null)
+					{
+						throw new InvalidOperationException("TODO"); // TODO what now?
+					}
+					content = new StreamContent(stream);
+				}
+				else
+				{
+					content = new ByteArrayContent(onPremiseTargetResponse.Body);
+				}
 			}
 
 			SetHttpHeaders(onPremiseTargetResponse.HttpHeaders, content);
 			return content;
 		}
 
-		internal void SetHttpHeaders(IReadOnlyDictionary<string, string> httpHeaders, HttpContent content)
+		public void SetHttpHeaders(IDictionary<string, string> httpHeaders, HttpContent content)
 		{
 			if (httpHeaders == null)
 			{

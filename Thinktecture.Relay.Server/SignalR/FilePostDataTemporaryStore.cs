@@ -45,7 +45,7 @@ namespace Thinktecture.Relay.Server.SignalR
 					CleanUp(token);
 					await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
 				}
-			}, token);
+			}, token).ConfigureAwait(false);
 		}
 
 		private void CleanUp(CancellationToken cancellationToken)
@@ -106,6 +106,26 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			var fileName = GetResponseFileName(requestId);
 			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating loading stream to response body for request id {{0}} in {{1}}", requestId, fileName);
+
+			if (File.Exists(fileName))
+			{
+				return File.Open(fileName, FileMode.Open);
+			}
+
+			return null;
+		}
+		public Stream CreateRequestStream(string requestId)
+		{
+			var fileName = GetRequestFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating saving stream to request body for request id {{0}} in {{1}}", requestId, fileName);
+
+			return File.Open(fileName, FileMode.Create);
+		}
+
+		public Stream GetRequestStream(string requestId)
+		{
+			var fileName = GetRequestFileName(requestId);
+			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating loading stream to request body for request id {{0}} in {{1}}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{

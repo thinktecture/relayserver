@@ -20,6 +20,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		List<string> GetOnPremiseTargetKeys();
 
 		Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
-		Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken);
+		Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
 	}
 }

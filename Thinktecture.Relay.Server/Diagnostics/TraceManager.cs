@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NLog;
+using Thinktecture.Relay.OnPremiseConnector;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;

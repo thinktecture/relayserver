@@ -61,32 +61,6 @@ namespace Thinktecture.Relay.Server.Http
 		}
 
 		[TestMethod]
-		public async Task GetClientRequestBodyAsync_returns_null_when_request_content_has_a_length_of_zero()
-		{
-			var request = new HttpRequestMessage
-			{
-				Content = new ByteArrayContent(new byte[] { })
-			};
-			var sut = CreateBuilder();
-			var result = await sut.GetClientRequestBodyAsync(request.Content);
-
-			result.Should().BeNull();
-		}
-
-		[TestMethod]
-		public async Task GetClientRequestBodyAsync_returns_byte_array_with_request_content_if_length_is_larger_than_zero()
-		{
-			var request = new HttpRequestMessage
-			{
-				Content = new ByteArrayContent(new byte[] { 0, 0, 0 })
-			};
-			var sut = CreateBuilder();
-			var result = await sut.GetClientRequestBodyAsync(request.Content);
-
-			result.LongLength.Should().Be(3L);
-		}
-
-		[TestMethod]
 		public void CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue_combines_multiple_HTTP_header_values_into_one()
 		{
 			var headerValues = new List<string> { "Foo", "Bar", "Baz" };

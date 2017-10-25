@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using Thinktecture.Relay.OnPremiseConnector;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Dto;
 

@@ -21,16 +21,16 @@ namespace Thinktecture.Relay.Server.Controller
 
 		public IHttpActionResult Get(string requestId)
 		{
-			_logger?.Trace("Getting data for request id {0}", requestId);
+			_logger?.Trace("Getting request data for request id {0}", requestId);
 
-			var data = _temporaryStore.LoadRequest(requestId);
-			if (data.Length == 0)
+			var stream = _temporaryStore.GetRequestStream(requestId);
+			if (stream == null)
 			{
-				_logger?.Warn("No data found for request id {0}", requestId);
+				_logger?.Warn("No request data found for request id {0}", requestId);
 				return NotFound();
 			}
 
-			return new ResponseMessageResult(new HttpResponseMessage() { Content = new ByteArrayContent(data) });
+			return new ResponseMessageResult(new HttpResponseMessage() { Content = new StreamContent(stream) });
 		}
 	}
 }

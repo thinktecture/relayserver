@@ -198,10 +198,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
 		/// <param name="relativeUrl">Url relative to the relay server url.</param>
-		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
-		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, HttpContent content, CancellationToken cancellationToken)
 		{
 			return PostViaRelay(linkName, relativeUrl, null, content, cancellationToken);
 		}
@@ -211,11 +211,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
 		/// <param name="relativeUrl">Url relative to the relay server url.</param>
-		/// <param name="setHeaders">Callback for setting headers.</param>
-		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="setHeaders">A Callback for setting headers.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
-		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			if (linkName == null)
 				throw new ArgumentNullException(nameof(linkName));
