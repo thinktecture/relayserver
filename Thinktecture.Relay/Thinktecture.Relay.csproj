@@ -21,7 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>    
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -44,12 +44,12 @@
   <ItemGroup>
     <Compile Include="OnPremiseConnector\OnPremiseTarget\IOnPremiseTargetRequest.cs" />
     <Compile Include="OnPremiseConnector\OnPremiseTarget\IOnPremiseTargetResponse.cs" />
-    <Compile Include="Server\Plugins\IInterceptedRequest.cs" />
-    <Compile Include="Server\Plugins\IInterceptedResponse.cs" />
-    <Compile Include="Server\Plugins\IOnPremiseRequestInterceptor.cs" />
-    <Compile Include="Server\Plugins\IOnPremiseResponseInterceptor.cs" />
+    <Compile Include="Server\Interceptors\IInterceptedRequest.cs" />
+    <Compile Include="Server\Interceptors\IInterceptedResponse.cs" />
+    <Compile Include="Server\Interceptors\IOnPremiseRequestInterceptor.cs" />
+    <Compile Include="Server\Interceptors\IOnPremiseResponseInterceptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server\Plugins\IReadOnlyInterceptedRequest.cs" />
+    <Compile Include="Server\Interceptors\IReadOnlyInterceptedRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

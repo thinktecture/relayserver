@@ -3,7 +3,7 @@ using Autofac;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Logging;
-using Thinktecture.Relay.Server.Plugins;
+using Thinktecture.Relay.Server.Interceptors;
 using Topshelf;
 using Topshelf.Autofac;
 
@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server
 
 			builder.RegisterModule<LoggingModule>();
 			builder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
-			builder.RegisterType<PluginLoader>().As<IPluginLoader>().SingleInstance();
+			builder.RegisterType<InterceptorLoader>().As<IInterceptorLoader>().SingleInstance();
 			builder.RegisterType<RelayServerModule>();
 
 			return builder.Build();

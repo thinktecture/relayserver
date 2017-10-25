@@ -8,6 +8,7 @@ using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
+using System.Collections.ObjectModel;
 
 namespace Thinktecture.Relay.Server.Diagnostics
 {
@@ -49,7 +50,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 				var filenamePrefix = $"{Path.Combine(_configuration.TraceFileDirectory, traceConfigurationId.ToString())}-{DateTime.Now.Ticks}";
 
-				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, onPremiseConnectorRequest.HttpHeaders);
+				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, new ReadOnlyDictionary<string, string>(onPremiseConnectorRequest.HttpHeaders));
 				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, onPremiseConnectorRequest.Body);
 
 				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, onPremiseTargetResponse.HttpHeaders);

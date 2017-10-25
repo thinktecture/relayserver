@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using Thinktecture.Relay.Server.Plugins;
+using Thinktecture.Relay.Server.Interceptors;
 
-namespace Thinktecture.Relay.PluginDemos
+namespace Thinktecture.Relay.InterceptorDemos
 {
 	public class DemoResponseInterceptor : IOnPremiseResponseInterceptor
 	{
@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.PluginDemos
 		public HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request, IInterceptedResponse response)
 		{
 			if (request.Url.EndsWith("WhatIsTheAnswerToLiveTheUniverseAndEverything"))
-				response.Body = GetBody();
+				response.StatusCode = HttpStatusCode.ExpectationFailed;
 
 			return null;
 		}

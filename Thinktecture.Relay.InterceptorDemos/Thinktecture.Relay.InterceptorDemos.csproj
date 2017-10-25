@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}</ProjectGuid>
+    <ProjectGuid>{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Thinktecture.Relay.PluginDemos</RootNamespace>
@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PluginModule.cs" />
+    <Compile Include="InterceptorModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DemoRequestInterceptor.cs" />
     <Compile Include="DemoResponseInterceptor.cs" />

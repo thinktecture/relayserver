@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan TemporaryRequestStoragePeriod { get; }
 		public string TemporaryRequestStoragePath { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
-		public string PluginAssembly { get; }
+		public string InterceptorAssembly { get; }
 		public string OAuthSharedSecret { get; set; }
 		public string OAuthCertificate { get; set; }
 
@@ -125,10 +125,10 @@ namespace Thinktecture.Relay.Server.Config
 				ActiveConnectionTimeoutInSeconds = tmpInt;
 			}
 
-			PluginAssembly = ConfigurationManager.AppSettings["PluginAssembly"];
-			if (String.IsNullOrWhiteSpace(PluginAssembly))
+			InterceptorAssembly = ConfigurationManager.AppSettings["InterceptorAssembly"];
+			if (String.IsNullOrWhiteSpace(InterceptorAssembly))
 			{
-				PluginAssembly = null;
+				InterceptorAssembly = null;
 			}
 
 			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
@@ -155,7 +155,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
 			logger?.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
 			logger?.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
-			logger?.Trace("Setting PluginAssembly: {0}", PluginAssembly);
+			logger?.Trace("Setting InterceptorAssembly: {0}", InterceptorAssembly);
 			logger?.Trace("Setting OAuthSharedSecret: {0}", OAuthSharedSecret);
 			logger?.Trace("Setting OAuthCertificate: {0}", OAuthCertificate);
 		}

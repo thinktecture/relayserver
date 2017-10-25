@@ -11,7 +11,7 @@ using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.Plugins;
+using Thinktecture.Relay.Server.Interceptors;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller
@@ -28,11 +28,11 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly IOnPremiseRequestBuilder _onPremiseRequestBuilder;
 		private readonly IPathSplitter _pathSplitter;
 		private readonly ITraceManager _traceManager;
-		private readonly IPluginManager _pluginManager;
+		private readonly IInterceptorManager _interceptorManager;
 
 		public ClientController(IBackendCommunication backendCommunication, ILogger logger, ILinkRepository linkRepository, IRequestLogger requestLogger,
 			IHttpResponseMessageBuilder httpResponseMessageBuilder, IOnPremiseRequestBuilder onPremiseRequestBuilder, IPathSplitter pathSplitter,
-			ITraceManager traceManager, IPluginManager pluginManager)
+			ITraceManager traceManager, IInterceptorManager interceptorManager)
 		{
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
 			_logger = logger;
@@ -42,7 +42,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_onPremiseRequestBuilder = onPremiseRequestBuilder ?? throw new ArgumentNullException(nameof(onPremiseRequestBuilder));
 			_pathSplitter = pathSplitter ?? throw new ArgumentNullException(nameof(pathSplitter));
 			_traceManager = traceManager ?? throw new ArgumentNullException(nameof(traceManager));
-			_pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
+			_interceptorManager = interceptorManager ?? throw new ArgumentNullException(nameof(interceptorManager));
 		}
 
 		[HttpDelete]
@@ -70,10 +70,10 @@ namespace Thinktecture.Relay.Server.Controller
 			_logger?.Trace("{0}: Building on premise connector request. Origin Id: {1}, Path: {2}", link.Id, _backendCommunication.OriginId, path);
 			var onPremiseConnectorRequest = await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName).ConfigureAwait(false);
 
-			var response = _pluginManager.HandleRequest(onPremiseConnectorRequest);
+			var response = _interceptorManager.HandleRequest(onPremiseConnectorRequest);
 			if (response != null)
 			{
-				_logger?.Debug("Plugins caused direct answering of request.");
+				_logger?.Debug("Interceptor caused direct answering of request.");
 				FinishRequest(onPremiseConnectorRequest, null, response, link.Id, path);
 				return response;
 			}
@@ -95,7 +95,7 @@ namespace Thinktecture.Relay.Server.Controller
 				_logger?.Trace("{0}: On-Premise timeout.", link.Id);
 			}
 
-			response = _pluginManager.HandleResponse(onPremiseConnectorRequest, onPremiseTargetResponse)
+			response = _interceptorManager.HandleResponse(onPremiseConnectorRequest, onPremiseTargetResponse)
 				?? _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
 
 			FinishRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response, link.Id, path);
