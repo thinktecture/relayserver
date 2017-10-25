@@ -4,11 +4,11 @@ The RelayServer Web Management is the graphical user interface for configuring a
 
 Analysis of operating problems is also accompanied by extensive logging and tracing on the packet level, if this feature has been selected during installation.
 
-For security reasons, the RelayServer Web Management is also only locally accessible and can not be activated for public access. The first start is by calling the URL http://localhost:20000/managementweb/. The web management should preferably be used with Chrome. The function with other browsers is not necessarily guaranteed.
+For security reasons, the RelayServer Web Management is also only locally accessible and can not be activated for public access. The first start is by calling the URL http://localhost:20000/managementweb/. The web management should preferably be used with Google Chrome. The function with other browsers is not necessarily guaranteed.
 
 ## Initial setup of the RelayServer Web Management
 
-When the RelayServer Management Web is first used, the initial configuration screen is displayed automatically. The initial administrator user and the corresponding password can be created here.
+When the RelayServer Management Web is accessed for the first time, the initial configuration screen is automatically displayed. The initial administrator user and the corresponding password can be created here.
 
 ![4-relayserver-management-web1.png](./assets/4-relayserver-management-web1.png)
 
@@ -16,7 +16,7 @@ After the creation of this administration user, the user is automatically redire
 
 ## Login to RelayServer Web Management
 
-If the user has not yet logged on to the RelayServer Web Management, the logon screen will appear.
+If the user has not yet logged on to the RelayServer Web Management, the log-on screen will appear.
 
 ![4-relayserver-management-web2.png](./assets/4-relayserver-management-web2.png)
 
@@ -37,7 +37,7 @@ The navigation bar of the RelayServer Web Management is divided into the areas
 
 After successful login, the user sees the Dashboard of the RelayServer Web Management. Here you get an overview of the whole system.
 
-The "Chart" tab shows graphically the incoming and outgoing data traffic of the last 7 days, each day being aggregated to one data point.
+The "Chart" tab shows the incoming and outgoing data traffic of the last 7 days, each day being aggregated to one data point.
 
 ![4-relayserver-management-web4.png](./assets/4-relayserver-management-web4.png)
 
@@ -73,7 +73,7 @@ A new link can be created in the RelayServer via the "CreateLink" button.
 
 ![4-relayserver-management-web7.png](./assets/4-relayserver-management-web7.png)
 
-To do this, a description and a short name must be entered in the dialog that opens. The name must be unique. An error message appears if the entered name is already used for another link.
+To do this, a description and a short name must be entered in the dialog. The name must be unique. An error message appears if the entered name is already in use for another link.
 
 After successful creation of a new link, a password for the connection setup is automatically generated and displayed by the On-Premises Connector. This password must be copied and saved to the configuration file of the On-Premises Connector. The password can not be queried or changed again.
 
@@ -81,7 +81,7 @@ After successful creation of a new link, a password for the connection setup is 
 
 ### Details of a link
 
-If the description of a link in the table is clicked, you get to the details page. This is divided into several areas, which are described in more detail below.
+If the description of a link in the table is clicked, you are directed to the details page. This is divided into several areas, which are described in more detail below.
 
 #### info
 
@@ -89,7 +89,7 @@ The first section of the detail information for a link is the info overview.
 
 ![4-relayserver-management-web9.png](./assets/4-relayserver-management-web9.png)
 
-The "Delete" button can be used to delete the selected link, and a corresponding security query will be displayed before the link is finally deleted, and all statistical information on the link will be removed from the database.
+The "Delete" button can be used to delete the selected link, and a corresponding security query will be displayed before the link is finally deleted. On deletion, all statistical information on the link will also be removed from the database.
 
 **Attention**: deleting a link can not be undone.
 
@@ -102,13 +102,13 @@ The following information and configuration options are available:
 | Description | A freely selectable name for the link to better distinction and administration|
 | Connectivity | Green: On-Premises Connector is connected Red: On-Premises Connector is not connected; Click the "Ping" button to send a ping from RelayServer to the On-Premises Connector |
 | Link active | Indicates whether the link is enabled or disabled. If a link is disabled, the RelayServer will not forward data to the link and therefore to the On-Premises Connector. |
-| Forward internal server error contents | By default, the RelayServer deletes the content body of messages from the On-Premises application when the status code 500 is sent. This prevents critical internal information from getting to the outside. If this information is required during debugging, the relay can be activated via this switch. It is not recommended to enable this option in productive mode. |
+| Forward internal server error contents | By default, the RelayServer deletes the content body of messages from the On-Premises application when a server error status code 500 is sent. This prevents critical internal information from getting to the outside. If this information is required during debugging, the relay of error messages can be activated via this switch. It is not recommended to enable this option in productive mode. |
 | Allow local client requests only | This option is off by default. If it is activated, this link will only forward requests from Localhost. This can be useful if a Web API runs before the RelayServer, which provides specific functions (for example, authentication and authorization) for the clients. |
 | Creation Date | Attachment date of the link |
 
 #### Charts
 
-The chart view shows graphically the incoming and outgoing traffic for the selected link. The date range to be displayed can be specified via date selection fields and the dropdown.
+The chart shows the incoming and outgoing traffic for the selected link. The date range to be displayed can be specified via date selection fields and the dropdown.
 
 ![4-relayserver-management-web10.png](./assets/4-relayserver-management-web10.png)
 
@@ -120,7 +120,7 @@ The "Logs" area shows the last 10 received client requests for the selected link
 
 ![4-relayserver-management-web11.png](./assets/4-relayserver-management-web11.png)
 
-A trace can be performed for a deeper debugging of connections between client and On-Premises application via RelayServer. If the tracing is activated, all HTTPS requests and responses are completely logged. In the following, header and content information can be viewed for each individual request.
+A trace can be performed for a further debugging of connections between client and On-Premises application via RelayServer. If the tracing is activated, all HTTPS requests and responses are logged with all details. In the following, header and content information can be viewed for each individual request.
 
 Note: the speed of a connection between the RelayServer and the corresponding link is adversely affected by an active trace operation.
 
@@ -153,8 +153,7 @@ Below is a table showing each request from the trace process. The table contains
 | On-Premises Target header | Header of the response of the On-Premises application |
 | Content view | Buttons to display or download the client request and the response of the On-Premises application |
 
-The buttons for displaying the client request or the response of the On-Premises application are only visible if the format of the element can be displayed directly (Content-type: text/\*). If it is not content that can be displayed in the browser, it is possible to download the corresponding element.
-
+The buttons for displaying the client request or the response of the On-Premises application are only visible if the format of the element can be displayed directly (Content-type: text/\*). If the content cannot be displayed in the browser (i.e. binary files), it is possible to download the corresponding element.
 
 ## Users
 
