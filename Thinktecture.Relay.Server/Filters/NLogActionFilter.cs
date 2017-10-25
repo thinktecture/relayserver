@@ -35,8 +35,6 @@ namespace Thinktecture.Relay.Server.Filters
 			if (continuation == null)
 				throw new ArgumentNullException(nameof(continuation));
 
-			// This serializes the complete request body to the log. For the time being, prevent that:
-			// _logger?.Trace("[Request] {0}: {1}. Arguments: {2}", actionContext.Request?.Method, actionContext.Request?.RequestUri, SerializeArguments(actionContext.ActionArguments));
 			var response = await continuation().ConfigureAwait(false);
 			_logger?.Trace("[Response] {0} - {1} ({2}): {3}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
 
