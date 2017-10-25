@@ -112,19 +112,14 @@ namespace Thinktecture.Relay.Server
 				builder.RegisterType<FilePostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
 			}
 
-			var container = builder.Build();
-
-			return container;
+			return builder.Build();
 		}
 
 		private static ILifetimeScope RegisterAdditionalDependencies(ILifetimeScope scope)
 		{
 			var pluginLoader = scope.Resolve<IPluginLoader>();
 
-			return scope.BeginLifetimeScope(builder =>
-			{
-				pluginLoader.LoadPlugins(builder);
-			});
+			return scope.BeginLifetimeScope(builder => pluginLoader.LoadPlugins(builder));
 		}
 	}
 }
