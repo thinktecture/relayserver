@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_messageDispatcher = messageDispatcher ?? throw new ArgumentNullException(nameof(messageDispatcher));
 			_requestCallbackFactory = requestCallbackFactory ?? throw new ArgumentNullException(nameof(requestCallbackFactory));
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
 			_onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
 			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
@@ -47,8 +47,8 @@ namespace Thinktecture.Relay.Server.Communication
 			_cancellationToken = _cts.Token;
 			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
 
-			logger.Trace("Creating backend communication with origin id {0}", OriginId);
-			logger.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
+			_logger?.Trace("Creating backend communication with origin id {0}", OriginId);
+			_logger?.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
 		}
 
 		public void Prepare()
@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.Communication
 		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
 		{
 			CheckDisposed();
-			_logger.Debug("Waiting for response for request id {0}", requestId);
+			_logger?.Debug("Waiting for response for request id {0}", requestId);
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
@@ -91,7 +91,7 @@ namespace Thinktecture.Relay.Server.Communication
 					using (token.Register(() => onPremiseConnectorCallback.Response.TrySetCanceled(token)))
 					{
 						var resposne = await onPremiseConnectorCallback.Response.Task.ConfigureAwait(false);
-						_logger.Debug("Received On-Premise response for request id {0}", onPremiseConnectorCallback.RequestId);
+						_logger?.Debug("Received On-Premise response for request id {0}", onPremiseConnectorCallback.RequestId);
 
 						return resposne;
 					}
@@ -99,11 +99,11 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (OperationCanceledException)
 			{
-				_logger.Debug("No response received within specified timeout {0}. Request id {1}", _configuration.OnPremiseConnectorCallbackTimeout, onPremiseConnectorCallback.RequestId);
+				_logger?.Debug("No response received within specified timeout {0}. Request id {1}", _configuration.OnPremiseConnectorCallbackTimeout, onPremiseConnectorCallback.RequestId);
 			}
 			catch (Exception ex)
 			{
-				_logger.Debug(ex, "Error during waiting for on-premise connector response. Request id {0}", onPremiseConnectorCallback.RequestId);
+				_logger?.Debug(ex, "Error during waiting for on-premise connector response. Request id {0}", onPremiseConnectorCallback.RequestId);
 			}
 			finally
 			{
@@ -117,7 +117,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger.Debug("Sending request for on-premise connector link {0} to message dispatcher", linkId);
+			_logger?.Debug("Sending request for on-premise connector link {0} to message dispatcher", linkId);
 
 			await _messageDispatcher.DispatchRequest(linkId, request).ConfigureAwait(false);
 		}
@@ -128,7 +128,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			if (_onPremises.TryGetValue(connectionId, out var connectionInfo))
 			{
-				_logger.Debug("Acknowledging {0} for on-premise connection id {1}. OnPremise Link Id: {2}", acknowledgeId, connectionId, connectionInfo.LinkId);
+				_logger?.Debug("Acknowledging {0} for on-premise connection id {1}. OnPremise Link Id: {2}", acknowledgeId, connectionId, connectionInfo.LinkId);
 				_messageDispatcher.AcknowledgeRequest(connectionInfo.LinkId, acknowledgeId);
 				_linkRepository.RenewActiveConnectionAsync(connectionId);
 			}
@@ -138,7 +138,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger.Debug("Registering on-premise link {0} via connection {1}. User name: {2}, Role: {3}, Connector Version: {4}", registrationInformation.LinkId, registrationInformation.ConnectionId, registrationInformation.UserName, registrationInformation.Role, registrationInformation.ConnectorVersion);
+			_logger?.Debug("Registering on-premise link {0} via connection {1}. User name: {2}, Role: {3}, Connector Version: {4}", registrationInformation.LinkId, registrationInformation.ConnectionId, registrationInformation.UserName, registrationInformation.Role, registrationInformation.ConnectorVersion);
 
 			_linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
 
@@ -163,7 +163,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			if (_onPremises.TryRemove(connectionId, out var connectionInfo))
 			{
-				_logger.Debug("Unregistered on-premise connection id {0}. OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, connectionInfo.LinkId, connectionInfo.UserName, connectionInfo.Role);
+				_logger?.Debug("Unregistered on-premise connection id {0}. OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, connectionInfo.LinkId, connectionInfo.UserName, connectionInfo.Role);
 			}
 
 			_linkRepository.RemoveActiveConnectionAsync(connectionId);
@@ -178,7 +178,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			if (requestSubscription != null)
 			{
-				_logger.Debug("Disposing request subscription for OnPremise id {0} and connection id {1}", connectionInfo?.LinkId, connectionId);
+				_logger?.Debug("Disposing request subscription for OnPremise id {0} and connection id {1}", connectionInfo?.LinkId, connectionId);
 				requestSubscription.Dispose();
 			}
 		}
@@ -187,14 +187,14 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger.Debug("Sending response to origin id {0}", originId);
+			_logger?.Debug("Sending response to origin id {0}", originId);
 
 			await _messageDispatcher.DispatchResponse(originId, response).ConfigureAwait(false);
 		}
 
 		private IDisposable StartReceivingResponses(Guid originId)
 		{
-			_logger.Debug("Start receiving responses for origin id {0}", originId);
+			_logger?.Debug("Start receiving responses for origin id {0}", originId);
 
 			return _messageDispatcher.OnResponseReceived(originId)
 				.Subscribe(ForwardOnPremiseTargetResponse);
@@ -204,12 +204,12 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			if (_requestCompletedCallbacks.TryRemove(response.RequestId, out var onPremiseConnectorCallback))
 			{
-				_logger.Debug("Forwarding on-premise target response for request id {0}", response.RequestId);
+				_logger?.Debug("Forwarding on-premise target response for request id {0}", response.RequestId);
 				onPremiseConnectorCallback.Response.SetResult(response);
 			}
 			else
 			{
-				_logger.Debug("Response received but no request callback found for request id {0}", response.RequestId);
+				_logger?.Debug("Response received but no request callback found for request id {0}", response.RequestId);
 			}
 		}
 
@@ -217,7 +217,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			if (registrationInformation.SupportsHeartbeat())
 			{
-				_logger.Trace($"{nameof(BackendCommunication)}: Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and will be registered for heartbeating.");
+				_logger?.Trace($"{nameof(BackendCommunication)}: Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and will be registered for heartbeating.");
 
 				var heartbeatInfo = new HeartbeatInformation()
 				{
@@ -232,20 +232,20 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			else
 			{
-				_logger.Trace($"Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and is not capable of heartbeating.");
+				_logger?.Trace($"Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and is not capable of heartbeating.");
 			}
 		}
 
 		private void UnregisterForHeartbeat(string connectionId)
 		{
-			_logger.Trace($"Unregistering connection with id {connectionId} from heartbeating.");
+			_logger?.Trace($"Unregistering connection with id {connectionId} from heartbeating.");
 
 			_heartbeatableClients.TryRemove(connectionId, out var heartbeatInformation);
 		}
 
 		private async void InitializeHeartbeatAsync(HeartbeatInformation heartbeatInfo, CancellationToken token)
 		{
-			_logger.Trace($"Initializing heartbeat with connection {heartbeatInfo.ConnectionId}");
+			_logger?.Trace($"Initializing heartbeat with connection {heartbeatInfo.ConnectionId}");
 
 			var requestId = Guid.NewGuid().ToString();
 			var request = new OnPremiseConnectorRequest()
@@ -269,7 +269,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			if (response == null)
 			{
-				_logger.Warn($"Connection {heartbeatInfo.ConnectionId} did NOT respond to heartbeat in time.");
+				_logger?.Warn($"Connection {heartbeatInfo.ConnectionId} did NOT respond to heartbeat in time.");
 			}
 		}
 
@@ -312,7 +312,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			try
 			{
-				_logger.Trace($"{nameof(BackendCommunication)}: Sending heartbeat to connection {client.ConnectionId}");
+				_logger?.Trace($"{nameof(BackendCommunication)}: Sending heartbeat to connection {client.ConnectionId}");
 
 				var requestId = Guid.NewGuid().ToString();
 				var request = new OnPremiseConnectorRequest()
@@ -330,7 +330,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, $"{nameof(BackendCommunication)}: Error during sending heartbeat to a client. LinkId = {{0}}, ConnectionId = {{1}}, ConnectorVersion = {{2}}", client.LinkId, client.ConnectionId, client.ConnectorVersion);
+				_logger?.Error(ex, $"{nameof(BackendCommunication)}: Error during sending heartbeat to a client. LinkId = {{0}}, ConnectionId = {{1}}, ConnectorVersion = {{2}}", client.LinkId, client.ConnectionId, client.ConnectorVersion);
 			}
 		}
 

@@ -40,7 +40,7 @@ namespace Thinktecture.Relay.Server
 
 		public Startup(ILogger logger, ILifetimeScope rootScope)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_rootScope = rootScope ?? throw new ArgumentNullException(nameof(rootScope));
 		}
 
@@ -203,20 +203,20 @@ namespace Thinktecture.Relay.Server
 
 			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
-				logger.Info("Relaying enabled");
+				logger?.Info("Relaying enabled");
 				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
 			}
 
 			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
-				logger.Info("On-premise connections enabled");
+				logger?.Info("On-premise connections enabled");
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
 			}
 
 			if (configuration.EnableManagementWeb != ModuleBinding.False)
 			{
-				logger.Info("Management web enabled");
+				logger?.Info("Management web enabled");
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
 			}
 
@@ -251,7 +251,7 @@ namespace Thinktecture.Relay.Server
 			catch (DirectoryNotFoundException)
 			{
 				// no admin web deployed - catch silently, but display info for the user
-				logger.Info("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
+				logger?.Info("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
 			}
 		}
 	}

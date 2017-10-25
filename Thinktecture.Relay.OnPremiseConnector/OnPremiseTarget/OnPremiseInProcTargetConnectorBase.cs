@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
 
 			_requestTimeout = requestTimeout;
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 		}
 
 		protected abstract IOnPremiseInProcHandler CreateHandler();
@@ -32,8 +32,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			_logger.Debug("Requesting response from on-premise in-proc target");
-			_logger.Trace("Requesting response from on-premise in-proc target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
+			_logger?.Debug("Requesting response from on-premise in-proc target");
+			_logger?.Trace("Requesting response from on-premise in-proc target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
 			{
@@ -55,8 +55,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 						if (cts.IsCancellationRequested)
 						{
-							_logger.Warn("Gateway timeout");
-							_logger.Trace("Gateway timeout. request-id={0}", request.RequestId);
+							_logger?.Warn("Gateway timeout");
+							_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
 
 							response.StatusCode = HttpStatusCode.GatewayTimeout;
 							response.HttpHeaders = new Dictionary<string, string>()
@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 				catch (Exception ex)
 				{
-					_logger.Trace(ex, "Error requesting response. request-id={0}", request.RequestId);
+					_logger?.Trace(ex, "Error requesting response. request-id={0}", request.RequestId);
 
 					response.StatusCode = HttpStatusCode.InternalServerError;
 					response.HttpHeaders = new Dictionary<string, string>()
@@ -89,7 +89,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			}
 			catch (Exception ex)
 			{
-				_logger.Trace(ex, "Error creating handler. request-id={0}", request.RequestId);
+				_logger?.Trace(ex, "Error creating handler. request-id={0}", request.RequestId);
 
 				response.StatusCode = HttpStatusCode.InternalServerError;
 				response.HttpHeaders = new Dictionary<string, string>()
@@ -101,7 +101,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			response.RequestFinished = DateTime.UtcNow;
 
-			_logger.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
+			_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
 
 			return response;
 		}

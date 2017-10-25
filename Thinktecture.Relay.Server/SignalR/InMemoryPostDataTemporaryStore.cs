@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			if (configuration.TemporaryRequestStoragePeriod <= TimeSpan.Zero)
 				throw new ArgumentException($"{nameof(InMemoryPostDataTemporaryStore)}: Storage period must be positive. Provided value: {configuration.TemporaryRequestStoragePeriod}", nameof(configuration));
 
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_storagePeriod = configuration.TemporaryRequestStoragePeriod;
 			_data = new ConcurrentDictionary<string, Entry>();
 			_cancellationTokenSource = new CancellationTokenSource();
@@ -59,14 +59,14 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public void Save(string requestId, byte[] data)
 		{
-			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing body for request id {{0}}", requestId);
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing body for request id {{0}}", requestId);
 
 			_data[requestId] = new Entry(data, _storagePeriod);
 		}
 
 		public byte[] Load(string requestId)
 		{
-			_logger.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading body for request id {{0}}", requestId);
+			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading body for request id {{0}}", requestId);
 
 			return _data.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
 		}

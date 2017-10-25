@@ -57,7 +57,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			}
 			catch (Exception ex)
 			{
-				_logger.Warn(ex, "Could not create trace");
+				_logger?.Warn(ex, "Could not create trace");
 			}
 		}
 
@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				}
 				catch (Exception ex)
 				{
-					_logger.Warn(ex, "Could not read trace file information for prefix {0}", traceFilePrefix);
+					_logger?.Warn(ex, "Could not read trace file information for prefix {0}", traceFilePrefix);
 				}
 			}
 

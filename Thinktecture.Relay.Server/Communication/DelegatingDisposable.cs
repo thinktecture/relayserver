@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 
 namespace Thinktecture.Relay.Server.Communication
@@ -14,7 +10,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 		public DelegatingDisposable(ILogger logger, Action callback)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_callback = callback ?? throw new ArgumentNullException(nameof(callback));
 		}
 
@@ -26,7 +22,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, $"{nameof(DelegatingDisposable)}: Error during dispose.");
+				_logger?.Error(ex, $"{nameof(DelegatingDisposable)}: Error during dispose.");
 			}
 		}
 	}

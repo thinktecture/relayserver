@@ -14,14 +14,14 @@ namespace Thinktecture.Relay.Server.Plugins
 
 		public PluginManager(ILogger logger, IOnPremiseRequestInterceptor requestInceptor = null, IOnPremiseResponseInterceptor responseInterceptor = null)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_requestInceptor = requestInceptor;
 			_responseInterceptor = responseInterceptor;
 		}
 
 		public HttpResponseMessage HandleRequest(IOnPremiseConnectorRequest request)
 		{
-			_logger.Trace($"{nameof(PluginManager)}: handling request {{0}}", request.RequestId);
+			_logger?.Trace($"{nameof(PluginManager)}: handling request {{0}}", request.RequestId);
 
 			try
 			{
@@ -29,14 +29,14 @@ namespace Thinktecture.Relay.Server.Plugins
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_requestInceptor?.GetType().Name}.{nameof(IOnPremiseRequestInterceptor.OnRequestReceived)}()\" for request {{0}}", request.RequestId);
+				_logger?.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_requestInceptor?.GetType().Name}.{nameof(IOnPremiseRequestInterceptor.OnRequestReceived)}()\" for request {{0}}", request.RequestId);
 				return null;
 			}
 		}
 
 		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response)
 		{
-			_logger.Trace($"{nameof(PluginManager)}: handling response for request {{0}}", request.RequestId);
+			_logger?.Trace($"{nameof(PluginManager)}: handling response for request {{0}}", request.RequestId);
 
 			try
 			{
@@ -52,7 +52,7 @@ namespace Thinktecture.Relay.Server.Plugins
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_responseInterceptor?.GetType().Name}.{nameof(IOnPremiseResponseInterceptor.OnResponseReceived)}()\" for request {{0}}", request.RequestId);
+				_logger?.Error(ex, $"{nameof(PluginManager)}: Error while executing the plugin \"{_responseInterceptor?.GetType().Name}.{nameof(IOnPremiseResponseInterceptor.OnResponseReceived)}()\" for request {{0}}", request.RequestId);
 			}
 
 			return null;

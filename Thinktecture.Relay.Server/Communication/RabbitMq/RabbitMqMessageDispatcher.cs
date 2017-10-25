@@ -42,7 +42,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				DeclareQueue(queueName);
 				_model.QueueBind(queueName, _EXCHANGE_NAME, linkId.ToString());
 
-				_logger.Debug("Creating request consumer. OnPremiseId: {0}, ConnectionId: {1}, supportsAck: {2}", linkId, connectionId, !noAck);
+				_logger?.Debug("Creating request consumer. OnPremiseId: {0}, ConnectionId: {1}, supportsAck: {2}", linkId, connectionId, !noAck);
 				var consumer = new EventingBasicConsumer(_model);
 
 				var consumerTag = _model.BasicConsume(queueName, noAck, consumer);
@@ -59,7 +59,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					}
 					catch (Exception ex)
 					{
-						_logger.Error(ex, "Error during reception of an request via RabbitMQ.");
+						_logger?.Error(ex, "Error during reception of an request via RabbitMQ.");
 						if (!noAck)
 						{
 							_model.BasicAck(args.DeliveryTag, false);
@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 				return new DelegatingDisposable(_logger, () =>
 				{
-					_logger.Debug("Disposing request consumer. OnPremiseId: {0}, ConnectionId: {1}", linkId, connectionId);
+					_logger?.Debug("Disposing request consumer. OnPremiseId: {0}, ConnectionId: {1}", linkId, connectionId);
 					consumer.Received -= OnReceived;
 					_model.BasicCancel(consumerTag);
 				});
@@ -86,7 +86,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				DeclareQueue(queueName);
 				_model.QueueBind(queueName, _EXCHANGE_NAME, originId.ToString());
 
-				_logger.Debug("Creating response consumer. OriginId: {0}", originId);
+				_logger?.Debug("Creating response consumer. OriginId: {0}", originId);
 				var consumer = new EventingBasicConsumer(_model);
 				var consumerTag = _model.BasicConsume(queueName, true, consumer);
 
@@ -101,7 +101,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					}
 					catch (Exception ex)
 					{
-						_logger.Error(ex, "Error during reception of an request via RabbitMQ.");
+						_logger?.Error(ex, "Error during reception of an request via RabbitMQ.");
 					}
 				}
 
@@ -109,7 +109,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 				return new DelegatingDisposable(_logger, () =>
 				{
-					_logger.Debug("Disposing response consumer. OriginId: {0}", originId);
+					_logger?.Debug("Disposing response consumer. OriginId: {0}", originId);
 					consumer.Received -= OnReceived;
 					_model.BasicCancel(consumerTag);
 				});
@@ -150,13 +150,13 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		private void DeclareExchange(string name)
 		{
-			_logger.Debug("Declaring exchange. Name {0}, Type: {1}", name, ExchangeType.Direct);
+			_logger?.Debug("Declaring exchange. Name {0}, Type: {1}", name, ExchangeType.Direct);
 			_model.ExchangeDeclare(name, ExchangeType.Direct);
 		}
 
 		private void DeclareQueue(string name)
 		{
-			_logger.Debug("Declaring queue. Name {0}, Expiration: {1} sec", name, _queueExpiration / 1000);
+			_logger?.Debug("Declaring queue. Name {0}, Expiration: {1} sec", name, _queueExpiration / 1000);
 			_model.QueueDeclare(name, true, false, false, new Dictionary<string, object>() { ["x-expires"] = _queueExpiration });
 		}
 

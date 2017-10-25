@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.PluginDemos
 		{
 			// You can also have the DI inject different custom dependencies, as long as
 			// they are all registered in your plugins Autofac module
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.PluginDemos
 		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immidiately be send out to the client without any further processing.</returns>
 		public HttpResponseMessage OnRequestReceived(IInterceptedRequest request)
 		{
-			_logger.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
+			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
 
 			// If a PUT is received, we immidiately reject and tell the user to use PATCH instead
 			if (String.Equals(request.HttpMethod, HttpMethod.Put.Method, StringComparison.InvariantCultureIgnoreCase))

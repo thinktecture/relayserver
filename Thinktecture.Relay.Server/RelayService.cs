@@ -32,14 +32,14 @@ namespace Thinktecture.Relay.Server
 				var address = $"{(_allowHttp ? "http" : "https")}://{_hostName}:{_port}";
 
 #if DEBUG
-				_logger.Info("Listening on: {0}", address);
+				_logger?.Info("Listening on: {0}", address);
 #endif
 
 				_host = WebApp.Start(address, app =>  _scope.Resolve<Startup>().Configuration(app));
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "Error during start of the relay server listener.");
+				_logger?.Error(ex, "Error during start of the relay server listener.");
 				throw;
 			}
 		}

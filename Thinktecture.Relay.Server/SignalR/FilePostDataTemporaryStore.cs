@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			if (configuration.TemporaryRequestStoragePeriod <= TimeSpan.Zero)
 				throw new ArgumentException($"{nameof(FilePostDataTemporaryStore)}: Storage period must be positive. Provided value: {configuration.TemporaryRequestStoragePeriod}", nameof(configuration));
 
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_storagePeriod = configuration.TemporaryRequestStoragePeriod;
 			_path = configuration.TemporaryRequestStoragePath;
 			_cancellationTokenSource = new CancellationTokenSource();
@@ -66,26 +66,26 @@ namespace Thinktecture.Relay.Server.SignalR
 					}
 					catch (Exception ex)
 					{
-						_logger.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+						_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, $"{nameof(FilePostDataTemporaryStore)}: Error during cleanup");
+				_logger?.Error(ex, $"{nameof(FilePostDataTemporaryStore)}: Error during cleanup");
 			}
 		}
 
 		public void Save(string requestId, byte[] data)
 		{
-			_logger.Debug("Storing body for request id {0}", requestId);
+			_logger?.Debug("Storing body for request id {0}", requestId);
 
 			File.WriteAllBytes(GetFileName(requestId), data);
 		}
 
 		public byte[] Load(string requestId)
 		{
-			_logger.Debug("Loading body for request id {0}", requestId);
+			_logger?.Debug("Loading body for request id {0}", requestId);
 
 			var fileName = GetFileName(requestId);
 			var data = File.ReadAllBytes(fileName);
@@ -96,7 +96,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			}
 			catch (Exception ex)
 			{
-				_logger.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+				_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
 			}
 
 			return data;

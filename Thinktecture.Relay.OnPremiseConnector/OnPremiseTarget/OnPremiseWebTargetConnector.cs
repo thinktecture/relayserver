@@ -47,8 +47,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		public async Task<IOnPremiseTargetResponse> GetResponseAsync(string url, IOnPremiseTargetRequest request)
 		{
-			_logger.Debug("Requesting response from on-premise web target");
-			_logger.Trace("Requesting response from on-premise web target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
+			_logger?.Debug("Requesting response from on-premise web target");
+			_logger?.Trace("Requesting response from on-premise web target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
 			{
@@ -68,7 +68,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 				catch (WebException wex)
 				{
-					_logger.Trace("Error requesting response. request-id={0}, exception: {1}", request.RequestId, wex);
+					_logger?.Trace("Error requesting response. request-id={0}, exception: {1}", request.RequestId, wex);
 
 					if (wex.Status == WebExceptionStatus.ProtocolError)
 					{
@@ -78,8 +78,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 				if (webResponse == null)
 				{
-					_logger.Warn("Gateway timeout!");
-					_logger.Trace("Gateway timeout. request-id={0}", request.RequestId);
+					_logger?.Warn("Gateway timeout!");
+					_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
 
 					response.StatusCode = HttpStatusCode.GatewayTimeout;
 					response.HttpHeaders = new Dictionary<string, string>()
@@ -106,7 +106,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 				response.RequestFinished = DateTime.UtcNow;
 
-				_logger.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
+				_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
 
 				return response;
 			}
@@ -118,7 +118,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		private async Task<HttpWebRequest> CreateOnPremiseTargetWebRequestAsync(string url, IOnPremiseTargetRequest onPremiseTargetRequest)
 		{
-			_logger.Trace("Creating web request");
+			_logger?.Trace("Creating web request");
 
 			var uri = String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url);
 			var webRequest = WebRequest.CreateHttp(uri);
@@ -127,7 +127,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			foreach (var httpHeader in onPremiseTargetRequest.HttpHeaders)
 			{
-				_logger.Trace("   adding header. header={0}, value={1}", httpHeader.Key, httpHeader.Value);
+				_logger?.Trace("   adding header. header={0}, value={1}", httpHeader.Key, httpHeader.Value);
 
 				if (_requestHeaderTransformations.TryGetValue(httpHeader.Key, out var restrictedHeader))
 				{
@@ -141,7 +141,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			if (onPremiseTargetRequest.Body != null)
 			{
-				_logger.Trace("   adding request body. length={0}", onPremiseTargetRequest.Body.Length);
+				_logger?.Trace("   adding request body. length={0}", onPremiseTargetRequest.Body.Length);
 
 				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
 				await requestStream.WriteAsync(onPremiseTargetRequest.Body, 0, onPremiseTargetRequest.Body.Length).ConfigureAwait(false);
