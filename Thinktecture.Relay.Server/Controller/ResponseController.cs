@@ -1,6 +1,6 @@
+using System;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Autofac;
 using Newtonsoft.Json.Linq;
 using NLog;
 using Thinktecture.Relay.Server.Communication;
@@ -15,10 +15,10 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly ILogger _logger;
 		private readonly IBackendCommunication _backendCommunication;
 
-		public ResponseController(ILifetimeScope scope, ILogger logger)
+		public ResponseController(IBackendCommunication backendCommunication, ILogger logger)
 		{
 			_logger = logger;
-			_backendCommunication = scope.Resolve<IBackendCommunication>();
+			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
 		}
 
 		public async Task<IHttpActionResult> Forward(JToken message)

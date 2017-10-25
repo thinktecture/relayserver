@@ -2,7 +2,7 @@ using System;
 using System.Configuration;
 using NLog;
 
-namespace Thinktecture.Relay.Server.Configuration
+namespace Thinktecture.Relay.Server.Config
 {
 	internal class Configuration : IConfiguration
 	{
@@ -24,6 +24,8 @@ namespace Thinktecture.Relay.Server.Configuration
 		public string TemporaryRequestStoragePath { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
 		public string PluginAssembly { get; }
+		public string OAuthSharedSecret { get; set; }
+		public string OAuthCertificate { get; set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -129,6 +131,9 @@ namespace Thinktecture.Relay.Server.Configuration
 				PluginAssembly = null;
 			}
 
+			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
+			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
+
 			LogSettings(logger);
 		}
 
@@ -151,6 +156,8 @@ namespace Thinktecture.Relay.Server.Configuration
 			logger?.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
 			logger?.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
 			logger?.Trace("Setting PluginAssembly: {0}", PluginAssembly);
+			logger?.Trace("Setting OAuthSharedSecret: {0}", OAuthSharedSecret);
+			logger?.Trace("Setting OAuthCertificate: {0}", OAuthCertificate);
 		}
 	}
 }

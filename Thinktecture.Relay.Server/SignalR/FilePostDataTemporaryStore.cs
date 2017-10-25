@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server.SignalR
 {

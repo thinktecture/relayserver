@@ -4,7 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using NLog;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository.DbModels;
 using Thinktecture.Relay.Server.Security;

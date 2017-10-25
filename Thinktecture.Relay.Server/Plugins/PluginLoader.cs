@@ -5,7 +5,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Core;
 using NLog;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server.Plugins
 {

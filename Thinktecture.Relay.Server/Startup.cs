@@ -21,7 +21,7 @@ using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
 using NLog;
 using Owin;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.Controller.ManagementWeb;
 using Thinktecture.Relay.Server.Filters;
@@ -33,14 +33,19 @@ using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server
 {
-	internal class Startup
+	internal class Startup : IStartup
 	{
 		private readonly ILifetimeScope _rootScope;
 		private readonly ILogger _logger;
+		private readonly IOAuthAuthorizationServerProvider _authorizationServerProvider;
+		private readonly IConfiguration _configuration;
 
-		public Startup(ILogger logger, ILifetimeScope rootScope)
+		public Startup(ILogger logger, IConfiguration configuration, IOAuthAuthorizationServerProvider authorizationServerProvider, ILifetimeScope rootScope)
 		{
 			_logger = logger;
+			
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_authorizationServerProvider = authorizationServerProvider ?? throw new ArgumentNullException(nameof(authorizationServerProvider));
 			_rootScope = rootScope ?? throw new ArgumentNullException(nameof(rootScope));
 		}
 
@@ -48,17 +53,15 @@ namespace Thinktecture.Relay.Server
 		{
 			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
 
-			var config = _rootScope.Resolve<IConfiguration>();
-
-			var httpConfig = CreateHttpConfiguration(config, _logger);
-			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, config);
+			var httpConfig = CreateHttpConfiguration(_configuration, _logger);
+			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, _configuration);
 
 			app.UseAutofacMiddleware(innerScope);
 			app.UseCors(CorsOptions.AllowAll);
-			UseOAuthSecurity(app, innerScope.Resolve<AuthorizationServerProvider>());
-			MapSignalR(app, innerScope, config);
+			UseOAuthSecurity(app, _configuration, _authorizationServerProvider);
+			MapSignalR(app, innerScope, _configuration);
 			UseWebApi(app, httpConfig, innerScope);
-			UseFileServer(app, config, _logger);
+			UseFileServer(app, _configuration, _logger);
 		}
 
 		private static ILifetimeScope RegisterAdditionalServices(ILifetimeScope container, HttpConfiguration httpConfig, IConfiguration config)
@@ -82,7 +85,7 @@ namespace Thinktecture.Relay.Server
 				builder.RegisterModule<OnPremiseConnectionsModule>();
 		}
 
-		private static void UseOAuthSecurity(IAppBuilder app, AuthorizationServerProvider authProvider)
+		private static void UseOAuthSecurity(IAppBuilder app, IConfiguration config, IOAuthAuthorizationServerProvider authProvider)
 		{
 			if (app == null)
 				throw new ArgumentNullException(nameof(app));
@@ -94,10 +97,10 @@ namespace Thinktecture.Relay.Server
 				AllowInsecureHttp = true,
 				TokenEndpointPath = new PathString("/token"),
 				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
-				Provider = authProvider
+				Provider = authProvider,
 			};
 
-			var sharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
+			var sharedSecret = config.OAuthSharedSecret;
 
 			if (!String.IsNullOrWhiteSpace(sharedSecret))
 			{
@@ -105,7 +108,7 @@ namespace Thinktecture.Relay.Server
 				return;
 			}
 
-			var certBase64 = ConfigurationManager.AppSettings["OAuthCertificate"];
+			var certBase64 = config.OAuthCertificate;
 			var authOptions = new OAuthBearerAuthenticationOptions();
 
 			if (!String.IsNullOrWhiteSpace(certBase64))
@@ -189,14 +192,12 @@ namespace Thinktecture.Relay.Server
 
 			httpConfig.SuppressDefaultHostAuthentication();
 
-			var enableNLogTraceWriter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true");
-			if (enableNLogTraceWriter)
+			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true"))
 				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(LogManager.GetLogger("HttpTraceLogger"), new TraceLevelConverter()));
 
 			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(LogManager.GetLogger("HttpExceptionLogger")));
 
-			var enableNLogActionFilter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogActionFilter"], "true");
-			if (enableNLogActionFilter)
+			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogActionFilter"], "true"))
 				httpConfig.Filters.Add(new NLogActionFilter(LogManager.GetLogger("HttpActionFilterLogger")));
 
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));

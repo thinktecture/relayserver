@@ -189,10 +189,15 @@
     <Reference Include="Topshelf, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <HintPath>..\packages\Topshelf.4.0.3\lib\net452\Topshelf.dll</HintPath>
     </Reference>
+    <Reference Include="Topshelf.Autofac, Version=2.0.0.0, Culture=neutral, PublicKeyToken=ebfabbe7fb167e88, processorArchitecture=MSIL">
+      <HintPath>..\packages\Topshelf.Autofac.3.1.1\lib\net452\Topshelf.Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DependencyInjection\RelayServerModule.cs" />
     <Compile Include="Dto\LinkDetails.cs" />
+    <Compile Include="IStartup.cs" />
     <Compile Include="Logging\LoggingModule.cs" />
     <Compile Include="Migrations\201708250611298_ChangeUserNameIndex.cs" />
     <Compile Include="Migrations\201708250611298_ChangeUserNameIndex.Designer.cs">
@@ -213,9 +218,9 @@
     <Compile Include="Communication\RegistrationAction.cs" />
     <Compile Include="Communication\UnregistrationAction.cs" />
     <Compile Include="Communication\RegistrationInformation.cs" />
-    <Compile Include="Configuration\IPersistedSettings.cs" />
-    <Compile Include="Configuration\LocalAppDataPersistedSettings.cs" />
-    <Compile Include="Configuration\ModuleBinding.cs" />
+    <Compile Include="Config\IPersistedSettings.cs" />
+    <Compile Include="Config\LocalAppDataPersistedSettings.cs" />
+    <Compile Include="Config\ModuleBinding.cs" />
     <Compile Include="Controller\CheckModuleBindingConfigurationAttribute.cs" />
     <Compile Include="Controller\ManagementWebModuleBindingFilter.cs" />
     <Compile Include="Controller\OnPremiseConnectionModuleBindingFilter.cs" />
@@ -251,8 +256,8 @@
     <Compile Include="Communication\OnPremiseConnectorCallbackFactory.cs" />
     <Compile Include="Communication\IOnPremiseConnectorCallback.cs" />
     <Compile Include="Communication\IOnPremiseConnectorCallbackFactory.cs" />
-    <Compile Include="Configuration\Configuration.cs" />
-    <Compile Include="Configuration\IConfiguration.cs" />
+    <Compile Include="Config\Configuration.cs" />
+    <Compile Include="Config\IConfiguration.cs" />
     <Compile Include="Communication\RabbitMq\IRabbitMqFactory.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqFactory.cs" />
     <Compile Include="Controller\ManagementWeb\DashboardController.cs" />
@@ -370,6 +375,9 @@
       <Project>{e34d846b-3b1e-4a97-a06f-f5502349f4f1}</Project>
       <Name>Thinktecture.Relay</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Configuration\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />

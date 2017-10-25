@@ -3,7 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using NLog;
 
-namespace Thinktecture.Relay.Server.Configuration
+namespace Thinktecture.Relay.Server.Config
 {
 	public class LocalAppDataPersistedSettings : IPersistedSettings
 	{

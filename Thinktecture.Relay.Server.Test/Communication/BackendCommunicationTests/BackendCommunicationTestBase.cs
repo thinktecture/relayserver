@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using NLog;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Communication.BackendCommunicationTests

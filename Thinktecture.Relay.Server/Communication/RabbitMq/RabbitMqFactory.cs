@@ -2,7 +2,7 @@ using System;
 using System.Configuration;
 using NLog;
 using RabbitMQ.Client;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
 {
