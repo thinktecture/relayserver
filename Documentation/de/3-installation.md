@@ -251,7 +251,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <add key="Test" baseUrl="http://localhost/" />
+    <web key="Test" baseUrl="http://localhost/" />
   </onPremiseTargets>
 </relayServer>
 ```
