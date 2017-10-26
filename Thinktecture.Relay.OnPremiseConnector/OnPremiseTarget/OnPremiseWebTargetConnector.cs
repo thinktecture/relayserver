@@ -4,6 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using NLog;
 
@@ -11,42 +14,121 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
 	internal class OnPremiseWebTargetConnector : IOnPremiseTargetConnector
 	{
-		private static readonly Dictionary<string, Action<HttpWebRequest, string>> _requestHeaderTransformations;
+		private static readonly string[] _ignoredHeaders = { "Host", "Connection", "Expect", "Proxy-Connection", "Proxy-Authorization",
+			"Range", "If-Range", "TransferEncoding", "Transfer-Encoding-Chunked", "Upgrade", "Via", "Warning", "Trailer", "Pragma" };
+		private static readonly Dictionary<string, Action<HttpRequestHeaders, string>> _requestHeadersTransformations;
+		private static readonly Dictionary<string, Action<HttpContentHeaders, string>> _contentHeadersTransformations;
 
 		static OnPremiseWebTargetConnector()
 		{
-			_requestHeaderTransformations = new Dictionary<string, Action<HttpWebRequest, string>>()
+			_requestHeadersTransformations = new Dictionary<string, Action<HttpRequestHeaders, string>>
 			{
-				["Accept"] = (r, v) => r.Accept = v,
-				["Connection"] = (r, v) => r.Connection = v,
-				["Content-Type"] = (r, v) => r.ContentType = v,
-				["Content-Length"] = (r, v) => r.ContentLength = Int64.Parse(v),
-				["Date"] = (r, v) => r.Date = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
-				["Expect"] = (r, v) => { },
-				["Host"] = (r, v) => { },
-				["If-Modified-Since"] = (r, v) => r.IfModifiedSince = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
-				["Proxy-Connection"] = (r, v) => { },
-				["Range"] = (r, v) => { },
-				["Referer"] = (r, v) => r.Referer = v,
-				["Transfer-Encoding"] = (r, v) => r.TransferEncoding = v,
-				["User-Agent"] = (r, v) => r.UserAgent = v,
+				["Accept"] = (r, v) =>
+				{
+					if (MediaTypeWithQualityHeaderValue.TryParse(v, out var value)) r.Accept.Add(value);
+				},
+				["Accept-Charset"] = (r, v) =>
+				{
+					if (StringWithQualityHeaderValue.TryParse(v, out var value)) r.AcceptCharset.Add(value);
+				},
+				["Accept-Enconding"] = (r, v) =>
+				{
+					if (StringWithQualityHeaderValue.TryParse(v, out var value)) r.AcceptEncoding.Add(value);
+				},
+				["Accept-Language"] = (r, v) =>
+				{
+					if (StringWithQualityHeaderValue.TryParse(v, out var value)) r.AcceptLanguage.Add(value);
+				},
+				["Authorization"] = (r, v) =>
+				{
+					if (AuthenticationHeaderValue.TryParse(v, out var value)) r.Authorization = value;
+				},
+				["Cache-Control"] = (r, v) =>
+				{
+					if (CacheControlHeaderValue.TryParse(v, out var value)) r.CacheControl = value;
+				},
+				["Date"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.Date = value;
+				},
+				["If-Match"] = (r, v) =>
+				{
+					if (EntityTagHeaderValue.TryParse(v, out var value)) r.IfMatch.Add(value);
+				},
+				["If-Modified-Since"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.IfModifiedSince = value;
+				},
+				["If-None-Match"] = (r, v) =>
+				{
+					if (EntityTagHeaderValue.TryParse(v, out var value)) r.IfNoneMatch.Add(value);
+				},
+				["If-Unmodified-Since"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.IfUnmodifiedSince = value;
+				},
+				["Max-Forwards"] = (r, v) =>
+				{
+					if (Int32.TryParse(v, out var value)) r.MaxForwards = value;
+				},
+				["Referer"] = (r, v) =>
+				{
+					if (Uri.TryCreate(v, UriKind.RelativeOrAbsolute, out var value)) r.Referrer = value;
+				},
+				["TE"] = (r, v) =>
+				{
+					if (TransferCodingWithQualityHeaderValue.TryParse(v, out var value)) r.TE.Add(value);
+				},
+				["User-Agent"] = (r, v) =>
+				{
+					if (ProductInfoHeaderValue.TryParse(v, out var value)) r.UserAgent.Add(value);
+				},
+			};
+			_contentHeadersTransformations = new Dictionary<string, Action<HttpContentHeaders, string>>
+			{
+				["Allow"] = (r, v) => r.Allow.Add(v),
+				["Content-Disposition"] = (r, v) =>
+				{
+					if (ContentDispositionHeaderValue.TryParse(v, out var value)) r.ContentDisposition = value;
+				},
+				["Content-Encoding"] = (r, v) => r.ContentEncoding.Add(v),
+				["Content-Language"] = (r, v) => r.ContentLanguage.Add(v),
+				["Content-Length"] = (r, v) =>
+				{
+					if (Int32.TryParse(v, out var value)) r.ContentLength = value;
+				},
+				["Content-Location"] = (r, v) =>
+				{
+					if (Uri.TryCreate(v, UriKind.RelativeOrAbsolute, out var value)) r.ContentLocation = value;
+				},
+				["Content-MD5"] = (r, v) => r.ContentMD5 = Encoding.ASCII.GetBytes(v),
+				["Content-Type"] = (r, v) =>
+				{
+					if (MediaTypeHeaderValue.TryParse(v, out var value)) r.ContentType = value;
+				},
+				["Expires"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.Expires = value;
+				},
+				["Last-Modified"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.LastModified = value;
+				},
 			};
 		}
 
 		private readonly Uri _baseUri;
-		private readonly int _requestTimeout;
-		private readonly bool _ignoreSslErrors;
 		private readonly ILogger _logger;
+		private readonly HttpClient _httpClient;
 
-		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, bool ignoreSslErrors, ILogger logger)
+		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, ILogger logger)
 		{
 			if (requestTimeout < 0)
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
 
 			_baseUri = baseUri ?? throw new ArgumentNullException(nameof(baseUri));
-			_requestTimeout = (int)TimeSpan.FromSeconds(requestTimeout).TotalMilliseconds;
-			_ignoreSslErrors = ignoreSslErrors;
 			_logger = logger;
+			_httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
 		}
 
 		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
@@ -65,26 +147,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				RequestStarted = DateTime.UtcNow,
 			};
 
-			var localTargetRequest = await CreateLocalTargetWebRequestAsync(url, request, relayedRequestHeader).ConfigureAwait(false);
-
 			try
 			{
-				// the web response must be disposed later (otherwise the response stream is lost)
-				var localTargetResponse = (HttpWebResponse)await localTargetRequest.GetResponseAsync().ConfigureAwait(false);
+				var message = await CreateLocalTargetRequestAsync(url, request, relayedRequestHeader).ConfigureAwait(false);
 
-				response.StatusCode = localTargetResponse.StatusCode;
-				response.HttpHeaders = localTargetResponse.Headers.AllKeys.ToDictionary(n => n, n => localTargetResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
-				response.Stream = localTargetResponse.GetResponseStream();
-				response.WebResponse = localTargetResponse;
+				response.StatusCode = message.StatusCode;
+				response.HttpHeaders = message.Headers.ToDictionary(kvp => kvp.Key, kvp => String.Join(" ", kvp.Value));
+				response.Stream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
+				response.HttpResponseMessage = message;
 			}
-			catch (WebException wex)
+			catch (Exception ex)
 			{
-				_logger?.Trace("Error requesting response from local target. request-id={0}, exception: {1}", request.RequestId, wex);
-
-				if (wex.Status == WebExceptionStatus.ProtocolError)
-				{
-					response.WebResponse = (HttpWebResponse)wex.Response;
-				}
+				_logger?.Error(ex, "Error requesting response from local target. RequestId = {0}", request.RequestId);
 
 				_logger?.Warn("Gateway timeout");
 				_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
@@ -100,48 +174,52 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			return response;
 		}
 
-		private async Task<HttpWebRequest> CreateLocalTargetWebRequestAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
+
+		private async Task<HttpResponseMessage> CreateLocalTargetRequestAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
 			_logger?.Trace("Creating web request");
 
-			var localTargetRequest = WebRequest.CreateHttp(String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url));
-			localTargetRequest.Method = request.HttpMethod;
-			localTargetRequest.Timeout = _requestTimeout;
-
-			if (_ignoreSslErrors)
+			var message = new HttpRequestMessage(new HttpMethod(request.HttpMethod), String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url));
+			if (request.Stream != Stream.Null)
 			{
-				localTargetRequest.ServerCertificateValidationCallback += (sender, cert, chain, policy) => true;
+				_logger?.Trace("   adding request stream");
+				message.Content = new StreamContent(request.Stream);
 			}
 
-			foreach (var httpHeader in request.HttpHeaders)
+			foreach (var httpHeader in request.HttpHeaders.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key)))
 			{
 				_logger?.Trace("   adding header. header={0}, value={1}", httpHeader.Key, httpHeader.Value);
 
-				if (_requestHeaderTransformations.TryGetValue(httpHeader.Key, out var restrictedHeader))
+				try
 				{
-					restrictedHeader(localTargetRequest, httpHeader.Value);
+					if (_requestHeadersTransformations.TryGetValue(httpHeader.Key, out var requestHeader))
+					{
+						requestHeader(message.Headers, httpHeader.Value);
+					}
+					else if (_contentHeadersTransformations.TryGetValue(httpHeader.Key, out var contentHeader))
+					{
+						if (request.Stream != Stream.Null)
+						{
+							contentHeader(message.Content.Headers, httpHeader.Value);
+						}
+					}
+					else
+					{
+						message.Headers.Add(httpHeader.Key, httpHeader.Value);
+					}
 				}
-				else
+				catch (Exception ex)
 				{
-					localTargetRequest.Headers.Add(httpHeader.Key, httpHeader.Value);
+					_logger?.Error(ex, "Could not add header. Header = {0}", httpHeader.Key);
 				}
 			}
 
 			if (!String.IsNullOrWhiteSpace(relayedRequestHeader))
 			{
-				localTargetRequest.Headers.Add(relayedRequestHeader, "true");
+				message.Headers.Add(relayedRequestHeader, "true");
 			}
 
-			if (request.Stream != Stream.Null)
-			{
-				_logger?.Trace("   adding request stream");
-
-				var localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await request.Stream.CopyToAsync(localTargetStream).ConfigureAwait(false);
-				//await localTargetStream.FlushAsync().ConfigureAwait(false);
-			}
-
-			return localTargetRequest;
+			return await _httpClient.SendAsync(message).ConfigureAwait(false);
 		}
 	}
 }

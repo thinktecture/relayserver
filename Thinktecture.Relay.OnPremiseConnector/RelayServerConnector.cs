@@ -54,11 +54,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
 		/// <param name="uri">An <see cref="Uri"/> containing the on-premise target's base url.</param>
-		/// <param name="ignoreSslErrors">A <see cref="bool"/> defining whether SSL errors from target will be ignored.</param>
-		public void RegisterOnPremiseTarget(string key, Uri uri, bool ignoreSslErrors)
+		public void RegisterOnPremiseTarget(string key, Uri uri)
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget(key, uri, ignoreSslErrors);
+			_connection.RegisterOnPremiseTarget(key, uri);
 		}
 
 		/// <summary>

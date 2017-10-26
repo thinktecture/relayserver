@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
@@ -21,9 +22,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		[JsonIgnore]
 		public WebResponse WebResponse { get; set; }
 
+		[JsonIgnore]
+		public HttpResponseMessage HttpResponseMessage { get; set; }
+
 		public void Dispose()
 		{
 			WebResponse?.Dispose();
+			HttpResponseMessage?.Dispose();
 		}
 	}
 }

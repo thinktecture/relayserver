@@ -12,9 +12,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger = logger;
 		}
 
-		public IOnPremiseTargetConnector Create(Uri baseUri, int requestTimeout, bool ignoreSslErrors)
+		public IOnPremiseTargetConnector Create(Uri baseUri, int requestTimeout)
 		{
-			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, ignoreSslErrors, _logger);
+			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger);
 		}
 
 		public IOnPremiseTargetConnector Create(Type handlerType, int requestTimeout)
