@@ -251,7 +251,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <web key="Test" baseUrl="http://localhost/" />
+    <web key="Test" baseUrl="http://localhost/" ignoreSslErrors="false"/>
   </onPremiseTargets>
 </relayServer>
 ```
@@ -278,3 +278,9 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 ### onPremiseTargets Element
 
 Liste von On-Premises Applikationen, die vom On-Premises Connector mit Anfragen versorgt werden sollen.
+
+|  Attribut | Beschreibung |
+| --- | --- |
+| key | On-Premises-Anwendungsname |
+| baseUrl | URL des On-Premises Applikation |
+| ignoreSslErrors | Akzeptiert Antworten der On-Premises Applikation Anwendung mit einem selbstsignierten SSL-Zertifikat |
