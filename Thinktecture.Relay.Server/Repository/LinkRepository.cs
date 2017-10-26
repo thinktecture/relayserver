@@ -301,7 +301,7 @@ namespace Thinktecture.Relay.Server.Repository
 
 		public async Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion)
 		{
-			_logger?.Trace("Adding or updating connection {0} for link {1} and origin {2} with connector version {3}", connectionId, linkId, originId, connectorVersion);
+			_logger?.Trace("Adding or updating connection. connection-id={0}, link-id={1}, connector-version={2}", connectionId, linkId, connectorVersion);
 
 			try
 			{
@@ -332,13 +332,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(LinkRepository)}: Error during AddOrRenewActiveConnection. LinkId = {{0}}, OriginId = {{1}}, ConnectionId = {{2}}, ConnectorVersion = {{3}}", linkId, originId, connectionId, connectorVersion);
+				_logger?.Error(ex, "Error during AddOrRenewActiveConnection. LinkId = {0}, ConnectionId = {1}, ConnectorVersion = {2}", linkId, connectionId, connectorVersion);
 			}
 		}
 
 		public async Task RenewActiveConnectionAsync(string connectionId)
 		{
-			_logger?.Trace("Renewing last activity on connection {0}", connectionId);
+			_logger?.Trace("Renewing last activity. connection-id={0}", connectionId);
 
 			try
 			{
@@ -355,13 +355,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(LinkRepository)}: Error during RenewActiveConnection. ConnectionId = {{0}}", connectionId);
+				_logger?.Error(ex, "Error during RenewActiveConnection. ConnectionId = {0}", connectionId);
 			}
 		}
 
 		public async Task RemoveActiveConnectionAsync(string connectionId)
 		{
-			_logger?.Debug("Deleting active connection {0}", connectionId);
+			_logger?.Trace("Deleting active connection, connection-id={0}", connectionId);
 
 			try
 			{
@@ -378,13 +378,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(LinkRepository)}: Error during RemoveActiveConnectionAsync. ConnectionId = {{0}}", connectionId);
+				_logger?.Error(ex, "Error during RemoveActiveConnectionAsync. ConnectionId = {0}", connectionId);
 			}
 		}
 
 		public void DeleteAllConnectionsForOrigin(Guid originId)
 		{
-			_logger?.Debug("Deleting all active connections for Origin {0}", originId);
+			_logger?.Trace("Deleting all active connections");
 
 			try
 			{
@@ -398,7 +398,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(LinkRepository)}: Error during DeleteAllConnectionsForOrigin. OriginId = {{0}}", originId);
+				_logger?.Error(ex, "Error during DeleteAllConnectionsForOrigin");
 			}
 		}
 	}

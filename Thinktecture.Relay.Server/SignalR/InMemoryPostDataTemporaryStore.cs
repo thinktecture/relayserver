@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp()
 		{
-			_logger?.Trace($"{nameof(InMemoryPostDataTemporaryStore)}: Cleaning up old stored data");
+			_logger?.Trace("Cleaning up old stored data.");
 
 			foreach (var kvp in _requestData)
 			{
@@ -69,58 +69,16 @@ namespace Thinktecture.Relay.Server.SignalR
 			}
 		}
 
-		public void SaveRequest(string requestId, byte[] data)
-		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing request body for request id {{0}}", requestId);
-
-			_requestData[requestId] = new Entry(data, _storagePeriod);
-			}
-
-		public void SaveResponse(string requestId, byte[] data)
-		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing response body for request id {{0}}", requestId);
-
-			_responseData[requestId] = new Entry(data, _storagePeriod);
-		}
-
 		public byte[] LoadRequest(string requestId)
 		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading request body for request id {{0}}", requestId);
+			_logger?.Trace("Loading request body. request-id={0}", requestId);
 
 			return _requestData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
 		}
 
-		public byte[] LoadResponse(string requestId)
-		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading response body for request id {{0}}", requestId);
-
-			return _responseData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
-		}
-
-		public Stream CreateResponseStream(string requestId)
-		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating storage stream for response body for request id {{0}}", requestId);
-
-			var ms = new NotifyingMemoryStream();
-			ms.Disposing += (s, e) => _responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
-			return ms;
-		}
-
-		public Stream GetResponseStream(string requestId)
-		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating loading stream for response body for request id {{0}}", requestId);
-
-			if (_responseData.TryRemove(requestId, out var entry))
-			{
-				return new MemoryStream(entry.Data);
-			}
-
-			return null;
-		}
-
 		public Stream CreateRequestStream(string requestId)
 		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating storage stream for request body for request id {{0}}", requestId);
+			_logger?.Trace("Creating stream for storing request body. request-id={0}", requestId);
 
 			var ms = new NotifyingMemoryStream();
 			ms.Disposing += (s, e) => _requestData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
@@ -129,9 +87,37 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public Stream GetRequestStream(string requestId)
 		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Creating loading stream for request body for request id {{0}}", requestId);
+			_logger?.Trace("Creating stream for stored request body. request-id={0}", requestId);
 
 			if (_requestData.TryRemove(requestId, out var entry))
+			{
+				return new MemoryStream(entry.Data);
+			}
+
+			return null;
+		}
+
+		public void SaveResponse(string requestId, byte[] data)
+		{
+			_logger?.Trace("Storing response body. request id={0}", requestId);
+
+			_responseData[requestId] = new Entry(data, _storagePeriod);
+		}
+
+		public Stream CreateResponseStream(string requestId)
+		{
+			_logger?.Trace("Creating stream for storing response body. request-id={0}", requestId);
+
+			var ms = new NotifyingMemoryStream();
+			ms.Disposing += (s, e) => _responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
+			return ms;
+		}
+
+		public Stream GetResponseStream(string requestId)
+		{
+			_logger?.Trace("Creating stream for stored response body. request-id={0}", requestId);
+
+			if (_responseData.TryRemove(requestId, out var entry))
 			{
 				return new MemoryStream(entry.Data);
 			}

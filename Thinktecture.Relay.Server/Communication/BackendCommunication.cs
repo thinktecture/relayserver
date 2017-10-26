@@ -45,7 +45,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_cancellationToken = _cts.Token;
 			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
 
-			_logger?.Trace("Creating backend communication with origin id {0}", OriginId);
+			_logger?.Trace("Creating backend communication. origin-id={0}", OriginId);
 			_logger?.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
 		}
 
@@ -75,7 +75,7 @@ namespace Thinktecture.Relay.Server.Communication
 			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, _cancellationToken);
 		}
 
-		private async Task<IOnPremiseConnectorResponse> GetOnPremiseTargetResponseAsync(IOnPremiseConnectorCallback onPremiseConnectorCallback, CancellationToken cancellationToken)
+		private async Task<IOnPremiseConnectorResponse> GetOnPremiseTargetResponseAsync(IOnPremiseConnectorCallback callback, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -84,10 +84,10 @@ namespace Thinktecture.Relay.Server.Communication
 				{
 					var token = cts.Token;
 
-					using (token.Register(() => onPremiseConnectorCallback.Response.TrySetCanceled(token)))
+					using (token.Register(() => callback.Response.TrySetCanceled(token)))
 					{
-						var response = await onPremiseConnectorCallback.Response.Task.ConfigureAwait(false);
-						_logger?.Debug("Received On-Premise response for request id {0}", onPremiseConnectorCallback.RequestId);
+						var response = await callback.Response.Task.ConfigureAwait(false);
+						_logger?.Debug("Received On-Premise response for request id {0}", callback.RequestId);
 
 						return response;
 					}
@@ -95,15 +95,15 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (OperationCanceledException)
 			{
-				_logger?.Debug("No response received within specified timeout {0}. Request id {1}", _configuration.OnPremiseConnectorCallbackTimeout, onPremiseConnectorCallback.RequestId);
+				_logger?.Debug("No response received within specified timeout {0}. Request id {1}", _configuration.OnPremiseConnectorCallbackTimeout, callback.RequestId);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Debug(ex, "Error during waiting for on-premise connector response. Request id {0}", onPremiseConnectorCallback.RequestId);
+				_logger?.Debug(ex, "Error during waiting for on-premise connector response. Request id {0}", callback.RequestId);
 			}
 			finally
 			{
-				_requestCompletedCallbacks.TryRemove(onPremiseConnectorCallback.RequestId, out onPremiseConnectorCallback);
+				_requestCompletedCallbacks.TryRemove(callback.RequestId, out var removed);
 			}
 
 			return null;
@@ -217,7 +217,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			if (registrationInformation.SupportsHeartbeat())
 			{
-				_logger?.Trace($"{nameof(BackendCommunication)}: Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and will be registered for heartbeating.");
+				_logger?.Trace("Registration supports heartbeat. connection-id={0}, version={1}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
 
 				var heartbeatInfo = new HeartbeatInformation()
 				{
@@ -231,13 +231,13 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			else
 			{
-				_logger?.Trace($"Connection with id {registrationInformation.ConnectionId} has connector version {registrationInformation.ConnectorVersion} and is not capable of heartbeating.");
+				_logger?.Trace("Registration has no heartbeat support. connection-id={0}, version={1}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
 			}
 		}
 
 		private void UnregisterForHeartbeat(string connectionId)
 		{
-			_logger?.Trace($"Unregistering connection with id {connectionId} from heartbeating.");
+			_logger?.Trace("Unregistering from heartbeating. connection-id={0}", connectionId);
 
 			_heartbeatClients.TryRemove(connectionId, out var info);
 		}
@@ -264,7 +264,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			try
 			{
-				_logger?.Trace($"{nameof(BackendCommunication)}: Sending heartbeat to connection {client.ConnectionId}");
+				_logger?.Trace("Sending heartbeat. connection-id={0}", client.ConnectionId);
 
 				var requestId = Guid.NewGuid().ToString();
 				var request = new OnPremiseConnectorRequest()
@@ -283,7 +283,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(BackendCommunication)}: Error during sending heartbeat to a client. LinkId = {{0}}, ConnectionId = {{1}}, ConnectorVersion = {{2}}", client.LinkId, client.ConnectionId, client.ConnectorVersion);
+				_logger?.Error(ex, $"Error during sending heartbeat to a client. LinkId = {{0}}, ConnectionId = {{1}}, ConnectorVersion = {{2}}", client.LinkId, client.ConnectionId, client.ConnectorVersion);
 			}
 		}
 

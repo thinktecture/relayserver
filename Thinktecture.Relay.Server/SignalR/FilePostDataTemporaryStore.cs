@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp(CancellationToken cancellationToken)
 		{
-			_logger?.Trace($"{nameof(FilePostDataTemporaryStore)}: Cleaning up old stored files");
+			_logger?.Trace("Cleaning up old stored files.");
 
 			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
 
@@ -59,65 +59,57 @@ namespace Thinktecture.Relay.Server.SignalR
 				foreach (var fileName in Directory.GetFiles(_path))
 				{
 					if (cancellationToken.IsCancellationRequested)
+					{
 						return;
+					}
 
 					try
 					{
 						if (File.GetCreationTimeUtc(fileName) < timeOut)
+						{
 							File.Delete(fileName);
+						}
 					}
 					catch (Exception ex)
 					{
-						_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+						_logger?.Error(ex, "Could not delete file '{0}'", fileName);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(FilePostDataTemporaryStore)}: Error during cleanup");
+				_logger?.Error(ex, "Error during cleanup.");
 			}
-	    }
+		}
 
-		public void SaveRequest(string requestId, byte[] data)
+		public byte[] LoadRequest(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Storing request body for request id {{0}} in {{1}}", requestId, fileName);
-
-			File.WriteAllBytes(fileName, data);
-		}
-
-		public void SaveResponse(string requestId, byte[] data)
-		{
-			var fileName = GetResponseFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Storing response body for request id {{0}} in {{1}}", requestId, fileName);
-
-			File.WriteAllBytes(fileName, data);
-		}
-
-		public Stream CreateResponseStream(string requestId)
-		{
-			var fileName = GetResponseFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating saving stream to response body for request id {{0}} in {{1}}", requestId, fileName);
-
-			return File.Open(fileName, FileMode.Create);
-		}
-
-		public Stream GetResponseStream(string requestId)
-		{
-			var fileName = GetResponseFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating loading stream to response body for request id {{0}} in {{1}}", requestId, fileName);
+			_logger?.Trace("Loading request body. request-id={0}, file-name={1}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
-				return File.Open(fileName, FileMode.Open);
+				var data = File.ReadAllBytes(fileName);
+
+				try
+				{
+					File.Delete(fileName);
+				}
+				catch (Exception ex)
+				{
+					_logger?.Error(ex, "Could not delete file {0}", fileName);
+				}
+
+				return data;
 			}
 
 			return null;
 		}
+
 		public Stream CreateRequestStream(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating saving stream to request body for request id {{0}} in {{1}}", requestId, fileName);
+			_logger?.Trace("Creating stream for storing request body. request-id={0}, file-name={1}", requestId, fileName);
 
 			return File.Open(fileName, FileMode.Create);
 		}
@@ -125,7 +117,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		public Stream GetRequestStream(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Creating loading stream to request body for request id {{0}} in {{1}}", requestId, fileName);
+			_logger?.Trace("Creating stream for stored request body. request-id={0}, file-name={1}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
@@ -135,49 +127,30 @@ namespace Thinktecture.Relay.Server.SignalR
 			return null;
 		}
 
-		public byte[] LoadRequest(string requestId)
-		{
-			var fileName = GetRequestFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Loading request body for request id {{0}} from {{1}}", requestId, fileName);
-
-			if (File.Exists(fileName))
-			{
-			    var data = File.ReadAllBytes(fileName);
-
-			    try
-			    {
-			    	File.Delete(fileName);
-			    }
-			    catch (Exception ex)
-		        {
-			    	_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
-			    }
-
-			    return data;
-		    }
-
-			return null;
-		}
-
-		public byte[] LoadResponse(string requestId)
+		public void SaveResponse(string requestId, byte[] data)
 		{
 			var fileName = GetResponseFileName(requestId);
-			_logger?.Debug($"{nameof(FilePostDataTemporaryStore)}: Loading response body for request id {{0}} from {{1}}", requestId, fileName);
+			_logger?.Trace("Storing response body. request id={0}, file-name={1}", requestId, fileName);
+
+			File.WriteAllBytes(fileName, data);
+		}
+
+		public Stream CreateResponseStream(string requestId)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Trace("Creating stream for storing response body. request-id={0}, file-name={1}", requestId, fileName);
+
+			return File.Open(fileName, FileMode.Create);
+		}
+
+		public Stream GetResponseStream(string requestId)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Trace("Creating stream for stored response body. request-id={0}, file-name={1}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
-			    var data = File.ReadAllBytes(fileName);
-
-			    try
-			    {
-				    File.Delete(fileName);
-			    }
-			    catch (Exception ex)
-			    {
-				    _logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
-			    }
-
-			    return data;
+				return File.Open(fileName, FileMode.Open);
 			}
 
 			return null;

@@ -425,6 +425,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				if (request.Body.Length == 0)
 				{
+					// a length of 0 indicates that there is a larger body available on the server
 					_logger?.Trace("Requesting body from relay server. relay-server={0}, request-id={1}", _relayServer, request.RequestId);
 					// request the body from the relay server (because SignalR cannot handle large messages)
 					var webResponse = await GetToRelay("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
@@ -432,11 +433,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				else
 				{
+					// the body is small enough to be used directly
 					request.Stream = new MemoryStream(request.Body);
 				}
 			}
 			else
 			{
+				// no body available (e.g. GET request)
 				request.Stream = Stream.Null;
 			}
 

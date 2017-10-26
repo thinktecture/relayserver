@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.Server.Http
 			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 			request.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
 
-			result = await sut.BuildFrom(request, new Guid("276b39f9-f0be-42b7-bcc1-1c2a24289689"), "Google/services/");
+			result = await sut.BuildFromHttpRequest(request, new Guid("276b39f9-f0be-42b7-bcc1-1c2a24289689"), "Google/services/");
 
 			result.OriginId.Should().Be("276b39f9-f0be-42b7-bcc1-1c2a24289689");
 			result.Body.LongLength.Should().Be(3L);

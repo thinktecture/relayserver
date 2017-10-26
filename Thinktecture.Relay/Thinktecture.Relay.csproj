@@ -42,12 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Server\Interceptors\IInterceptedRequest.cs" />
-    <Compile Include="Server\Interceptors\IInterceptedResponse.cs" />
-    <Compile Include="Server\Interceptors\IOnPremiseRequestInterceptor.cs" />
-    <Compile Include="Server\Interceptors\IOnPremiseResponseInterceptor.cs" />
+    <Compile Include="Server\Interceptor\IInterceptedRequest.cs" />
+    <Compile Include="Server\Interceptor\IInterceptedResponse.cs" />
+    <Compile Include="Server\Interceptor\IOnPremiseRequestInterceptor.cs" />
+    <Compile Include="Server\Interceptor\IOnPremiseResponseInterceptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Server\Interceptors\IReadOnlyInterceptedRequest.cs" />
+    <Compile Include="Server\Interceptor\IReadOnlyInterceptedRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Thinktecture.Relay.OnPremiseConnector;
+using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.SignalR;
@@ -30,6 +31,10 @@ namespace Thinktecture.Relay.Server.Http
 			public byte[] Body { get; set; }
 			public DateTime RequestStarted { get; set; }
 			public DateTime RequestFinished { get; set; }
+
+			public void Dispose()
+			{
+			}
 		}
 
 		private IPostDataTemporaryStore GetInMemoryStore()
@@ -42,7 +47,7 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			IHttpResponseMessageBuilder sut = new HttpResponseMessageBuilder(GetInMemoryStore());
 
-			using (var result = sut.BuildFrom(null, null))
+			using (var result = sut.BuildFromConnectorResponse(null, null))
 			{
 				result.StatusCode.Should().Be(HttpStatusCode.GatewayTimeout);
 				result.Content.Headers.Count().Should().Be(1);
@@ -67,7 +72,7 @@ namespace Thinktecture.Relay.Server.Http
 			};
 			var link = new Link();
 
-			using (var result = sut.BuildFrom(onPremiseTargetRequest, link))
+			using (var result = sut.BuildFromConnectorResponse(onPremiseTargetRequest, link))
 			{
 				var content = await result.Content.ReadAsByteArrayAsync();
 				result.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -83,7 +88,7 @@ namespace Thinktecture.Relay.Server.Http
 			var sut = new HttpResponseMessageBuilder(GetInMemoryStore());
 			var httpContent = new ByteArrayContent(new byte[] { });
 
-			sut.SetHttpHeaders(null, httpContent);
+			sut.AddContentHttpHeaders(httpContent, null);
 
 			httpContent.Headers.Should().BeEmpty();
 		}
@@ -105,7 +110,7 @@ namespace Thinktecture.Relay.Server.Http
 			};
 			var httpContent = new ByteArrayContent(new byte[] { });
 
-			sut.SetHttpHeaders(httpHeaders, httpContent);
+			sut.AddContentHttpHeaders(httpContent, httpHeaders);
 
 			httpContent.Headers.Should().HaveCount(6);
 			httpContent.Headers.ContentMD5.Should().BeNull();
@@ -129,7 +134,7 @@ namespace Thinktecture.Relay.Server.Http
 			};
 			var httpContent = new ByteArrayContent(new byte[] { });
 
-			sut.SetHttpHeaders(httpHeaders, httpContent);
+			sut.AddContentHttpHeaders(httpContent, httpHeaders);
 
 			httpContent.Headers.Should().HaveCount(2);
 			httpContent.Headers.GetValues("X-Foo").Single().Should().Be("X-Bar");

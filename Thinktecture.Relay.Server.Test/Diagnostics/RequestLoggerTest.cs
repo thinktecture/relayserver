@@ -95,7 +95,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			logRepositoryMock.Setup(r => r.LogRequest(It.IsAny<RequestLogEntry>())).Callback<RequestLogEntry>(r => result = r);
 			pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { OnPremiseTargetKey = "that", LocalUrl = "/file.html" });
 
-			sut.LogRequest(clientRequest, null, HttpStatusCode.PaymentRequired, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html");
+			sut.LogRequest(clientRequest, null, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html");
 
 			logRepositoryMock.Verify(r => r.LogRequest(It.IsAny<RequestLogEntry>()));
 			result.HttpStatusCode.Should().Be(HttpStatusCode.PaymentRequired);
@@ -134,7 +134,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			logRepositoryMock.Setup(r => r.LogRequest(It.IsAny<RequestLogEntry>())).Callback<RequestLogEntry>(r => result = r);
 			pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { OnPremiseTargetKey = "that", LocalUrl = "/file.html" });
 
-			sut.LogRequest(clientRequest, onPremiseTargetResponse, HttpStatusCode.PaymentRequired, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html");
+			sut.LogRequest(clientRequest, onPremiseTargetResponse, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html");
 
 			logRepositoryMock.Verify(r => r.LogRequest(It.IsAny<RequestLogEntry>()));
 			result.HttpStatusCode.Should().Be(HttpStatusCode.PaymentRequired);
@@ -156,7 +156,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		{
 			IRequestLogger sut = new RequestLogger(null, null);
 
-			sut.LogRequest(null, null, HttpStatusCode.PaymentRequired, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html");
+			sut.LogRequest(null, null, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html");
 		}
 	}
 }

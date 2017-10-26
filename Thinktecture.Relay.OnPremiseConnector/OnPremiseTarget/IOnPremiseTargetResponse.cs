@@ -5,10 +5,13 @@ using System.Net;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
+	/// <summary>
+	/// This is the pendant for the server interface IOnPremiseConnectorResponse and should be kept separate
+	/// </summary>
 	public interface IOnPremiseTargetResponse : IDisposable
 	{
 		/// <summary>
-		/// Gets the internal ID of this request.
+		/// Gets the internal ID of this request
 		/// </summary>
 		string RequestId { get; }
 

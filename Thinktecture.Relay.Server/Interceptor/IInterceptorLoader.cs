@@ -1,6 +1,6 @@
 using Autofac;
 
-namespace Thinktecture.Relay.Server.Interceptors
+namespace Thinktecture.Relay.Server.Interceptor
 {
 	internal interface IInterceptorLoader
 	{

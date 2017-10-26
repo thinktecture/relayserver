@@ -3,7 +3,7 @@ using Autofac;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Logging;
-using Thinktecture.Relay.Server.Interceptors;
+using Thinktecture.Relay.Server.Interceptor;
 using Topshelf;
 using Topshelf.Autofac;
 

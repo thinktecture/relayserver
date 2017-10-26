@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Thinktecture.Relay.Server.Communication;
@@ -129,7 +128,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 			var response = await _backendCommunication.GetResponseAsync(requestId).ConfigureAwait(false);
 			request.RequestFinished = DateTime.UtcNow;
 
-			_requestLogger.LogRequest(request, response, HttpStatusCode.OK, id, _backendCommunication.OriginId, "DEBUG/PING/");
+			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response.StatusCode);
 
 			return Ok();
 		}

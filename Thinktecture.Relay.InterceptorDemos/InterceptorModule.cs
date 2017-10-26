@@ -1,5 +1,5 @@
 using Autofac;
-using Thinktecture.Relay.Server.Interceptors;
+using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.InterceptorDemos
 {

@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using NLog;
-using Thinktecture.Relay.Server.Interceptors;
+using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.InterceptorDemos
 {
@@ -48,7 +50,9 @@ namespace Thinktecture.Relay.InterceptorDemos
 				request.HttpMethod = HttpMethod.Put.Method;
 
 			// Add an HTTP header
-			request.HttpHeaders.Add("X-ThinkectureRelay-Example", $"Added by {nameof(DemoRequestInterceptor)}");
+			var headers = request.CloneHttpHeaders();
+			headers.Add("X-ThinkectureRelay-Example", $"Added by {nameof(DemoRequestInterceptor)}");
+			request.HttpHeaders = headers;
 
 			return null;
 		}

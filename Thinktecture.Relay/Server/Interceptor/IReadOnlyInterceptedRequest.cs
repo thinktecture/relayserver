@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Net;
 
-namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
+namespace Thinktecture.Relay.Server.Interceptor
 {
-	/// <summary>
-	/// This is the pendant for the server interface IOnPremiseConnectorRequest and should be kept separate
-	/// </summary>
-	public interface IOnPremiseTargetRequest
+	public interface IReadOnlyInterceptedRequest
 	{
 		/// <summary>
 		/// Gets the internal ID of this request
@@ -18,11 +15,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// Gets the id of the relay server this request was sent to
 		/// </summary>
 		Guid OriginId { get; }
-
-		/// <summary>
-		/// Gets the Id the On Premise Connector should acknowledge with when it receives this request
-		/// </summary>
-		string AcknowledgeId { get; }
 
 		/// <summary>
 		/// Gets the method of this request
@@ -40,13 +32,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		IReadOnlyDictionary<string, string> HttpHeaders { get; }
 
 		/// <summary>
-		/// Gets the request body if small enough
+		/// Gets the IP address of the requesting client
 		/// </summary>
-		byte[] Body { get; }
-
-		/// <summary>
-		/// Gets the request stream if the body is too large (was requested by a second request)
-		/// </summary>
-		Stream Stream { get; }
+		IPAddress ClientIpAddress { get; }
 	}
 }

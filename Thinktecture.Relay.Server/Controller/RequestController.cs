@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 		public IHttpActionResult Get(string requestId)
 		{
-			_logger?.Trace("Getting request data for request id {0}", requestId);
+			_logger?.Trace("Getting request data. request-id={0}", requestId);
 
 			var stream = _temporaryStore.GetRequestStream(requestId);
 			if (stream == null)
