@@ -10,16 +10,20 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	{
 		public string RequestId { get; set; }
 		public Guid OriginId { get; set; }
-		public HttpStatusCode StatusCode { get; set; }
-		public IDictionary<string, string> HttpHeaders { get; set; }
 		public DateTime RequestStarted { get; set; }
 		public DateTime RequestFinished { get; set; }
+		public HttpStatusCode StatusCode { get; set; }
+		public IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
 
 		[JsonIgnore]
 		public Stream Stream { get; set; }
 
-		[Obsolete("This is a legacy property for v1 OnPremiseConnector")]
-		public byte[] Body { get; set; }
+		[JsonIgnore]
+		public WebResponse WebResponse { get; set; }
 
+		public void Dispose()
+		{
+			WebResponse?.Dispose();
+		}
 	}
 }

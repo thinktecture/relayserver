@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		protected abstract IOnPremiseInProcHandler CreateHandler();
 
-		public async Task<IOnPremiseTargetResponse> GetResponseAsync(string url, IOnPremiseTargetRequest request)
+		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request)
 		{
 			if (url == null)
 				throw new ArgumentNullException(nameof(url));

@@ -12,7 +12,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	internal class OnPremiseWebTargetConnector : IOnPremiseTargetConnector
 	{
 		private static readonly Dictionary<string, Action<HttpWebRequest, string>> _requestHeaderTransformations;
-		private static readonly Action<HttpWebRequest, string> _nullAction = (r, v) => { };
 
 		static OnPremiseWebTargetConnector()
 		{
@@ -23,11 +22,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				["Content-Type"] = (r, v) => r.ContentType = v,
 				["Content-Length"] = (r, v) => r.ContentLength = Int64.Parse(v),
 				["Date"] = (r, v) => r.Date = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
-				["Expect"] = _nullAction,
-				["Host"] = _nullAction,
+				["Expect"] = (r, v) => { },
+				["Host"] = (r, v) => { },
 				["If-Modified-Since"] = (r, v) => r.IfModifiedSince = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
-				["Proxy-Connection"] = _nullAction,
-				["Range"] = _nullAction,
+				["Proxy-Connection"] = (r, v) => { },
+				["Range"] = (r, v) => { },
 				["Referer"] = (r, v) => r.Referer = v,
 				["Transfer-Encoding"] = (r, v) => r.TransferEncoding = v,
 				["User-Agent"] = (r, v) => r.UserAgent = v,
@@ -47,7 +46,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger = logger;
 		}
 
-		public async Task<IOnPremiseTargetResponse> GetResponseAsync(string url, IOnPremiseTargetRequest request)
+		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request)
 		{
 			_logger?.Debug("Requesting response from on-premise web target");
 			_logger?.Trace("Requesting response from on-premise web target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
@@ -59,67 +58,53 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				RequestStarted = DateTime.UtcNow,
 			};
 
-			var webRequest = await CreateOnPremiseTargetWebRequestAsync(url, request).ConfigureAwait(false);
+			var localTargetRequest = await CreateLocalTargetWebRequestAsync(url, request).ConfigureAwait(false);
 
-			HttpWebResponse webResponse = null;
 			try
 			{
-				try
-				{
-					webResponse = (HttpWebResponse)await webRequest.GetResponseAsync().ConfigureAwait(false);
-				}
-				catch (WebException wex)
-				{
-					_logger?.Trace("Error requesting response. request-id={0}, exception: {1}", request.RequestId, wex);
+				// the web response must be disposed later (otherwise the response stream is lost)
+				var localTargetResponse = (HttpWebResponse)await localTargetRequest.GetResponseAsync().ConfigureAwait(false);
 
-					if (wex.Status == WebExceptionStatus.ProtocolError)
-					{
-						webResponse = (HttpWebResponse)wex.Response;
-					}
-				}
-
-				if (webResponse == null)
-				{
-					_logger?.Warn("Gateway timeout!");
-					_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
-
-					response.StatusCode = HttpStatusCode.GatewayTimeout;
-					response.HttpHeaders = new Dictionary<string, string>()
-					{
-						["X-TTRELAY-TIMEOUT"] = "On-Premise Target",
-					};
-				}
-				else
-				{
-					response.StatusCode = webResponse.StatusCode;
-					response.HttpHeaders = webResponse.Headers.AllKeys.ToDictionary(n => n, n => webResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
-					response.Stream = webResponse.GetResponseStream() ?? Stream.Null;
-				}
-
-				response.RequestFinished = DateTime.UtcNow;
-
-				_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
-
-				return response;
+				response.StatusCode = localTargetResponse.StatusCode;
+				response.HttpHeaders = localTargetResponse.Headers.AllKeys.ToDictionary(n => n, n => localTargetResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
+				response.Stream = localTargetResponse.GetResponseStream() ?? Stream.Null;
+				response.WebResponse = localTargetResponse;
 			}
-			finally
+			catch (WebException wex)
 			{
-				//webResponse?.Dispose();
+				_logger?.Trace("Error requesting response from local target. request-id={0}, exception: {1}", request.RequestId, wex);
+
+				if (wex.Status == WebExceptionStatus.ProtocolError)
+				{
+					response.WebResponse = (HttpWebResponse)wex.Response;
+				}
+
+				_logger?.Warn("Gateway timeout");
+				_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
+
+				response.StatusCode = HttpStatusCode.GatewayTimeout;
+				response.HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-TIMEOUT"] = "On-Premise Target" };
+				response.Stream = Stream.Null;
 			}
+
+			response.RequestFinished = DateTime.UtcNow;
+
+			_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
+
+			return response;
 		}
 
-		private async Task<HttpWebRequest> CreateOnPremiseTargetWebRequestAsync(string url, IOnPremiseTargetRequest request)
+		private async Task<HttpWebRequest> CreateLocalTargetWebRequestAsync(string url, IOnPremiseTargetRequest request)
 		{
 			_logger?.Trace("Creating web request");
 
-			var uri = String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url);
-			var webRequest = WebRequest.CreateHttp(uri);
-			webRequest.Method = request.HttpMethod;
-			webRequest.Timeout = _requestTimeout * 1000;
+			var localTargetRequest = WebRequest.CreateHttp(String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url));
+			localTargetRequest.Method = request.HttpMethod;
+			localTargetRequest.Timeout = _requestTimeout * 1000;
 
 			if (_ignoreSslErrors)
 			{
-				webRequest.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+				localTargetRequest.ServerCertificateValidationCallback += (sender, cert, chain, policy) => true;
 			}
 
 			foreach (var httpHeader in request.HttpHeaders)
@@ -128,32 +113,33 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 				if (_requestHeaderTransformations.TryGetValue(httpHeader.Key, out var restrictedHeader))
 				{
-					restrictedHeader(webRequest, httpHeader.Value);
+					restrictedHeader(localTargetRequest, httpHeader.Value);
 				}
 				else
 				{
-					webRequest.Headers.Add(httpHeader.Key, httpHeader.Value);
+					localTargetRequest.Headers.Add(httpHeader.Key, httpHeader.Value);
 				}
 			}
 
+			var localTargetStream = Stream.Null;
 			if (request.Body?.Length == 0)
 			{
 				_logger?.Trace("   adding request stream.");
 
-				var webRequestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await request.Stream.CopyToAsync(webRequestStream).ConfigureAwait(false);
-				await webRequestStream.FlushAsync().ConfigureAwait(false);
+				localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
+				await request.Stream.CopyToAsync(localTargetStream).ConfigureAwait(false);
 			}
 			else if (request.Body != null)
 			{
 				_logger?.Trace("   adding request body. length={0}", request.Body.Length);
 
-				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await requestStream.WriteAsync(request.Body, 0, request.Body.Length).ConfigureAwait(false);
-				await requestStream.FlushAsync().ConfigureAwait(false);
+				localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
+				await localTargetStream.WriteAsync(request.Body, 0, request.Body.Length).ConfigureAwait(false);
 			}
 
-			return webRequest;
+			await localTargetStream.FlushAsync().ConfigureAwait(false); // TODO check if needed
+
+			return localTargetRequest;
 		}
 	}
 }

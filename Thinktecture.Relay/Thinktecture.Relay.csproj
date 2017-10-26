@@ -42,8 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OnPremiseConnector\IOnPremiseTargetRequest.cs" />
-    <Compile Include="OnPremiseConnector\IOnPremiseTargetResponse.cs" />
     <Compile Include="Server\Interceptors\IInterceptedRequest.cs" />
     <Compile Include="Server\Interceptors\IInterceptedResponse.cs" />
     <Compile Include="Server\Interceptors\IOnPremiseRequestInterceptor.cs" />

@@ -4,6 +4,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
 	internal interface IOnPremiseTargetConnector
 	{
-		Task<IOnPremiseTargetResponse> GetResponseAsync(string url, IOnPremiseTargetRequest request);
+		Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request);
 	}
 }

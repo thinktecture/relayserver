@@ -431,7 +431,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				request.Stream = await webResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
 			}
 
-			var response = await connector.GetResponseAsync(url, request).ConfigureAwait(false);
+			var response = await connector.GetResponseFromLocalTargetAsync(url, request).ConfigureAwait(false);
 
 			_logger?.Debug("Sending response from {0} to relay server", request.Url);
 
