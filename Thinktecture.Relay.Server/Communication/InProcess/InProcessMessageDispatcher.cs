@@ -10,10 +10,9 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
 {
-	public class InProcessMessageDispatcher : IMessageDispatcher, IDisposable
+	internal class InProcessMessageDispatcher : IMessageDispatcher, IDisposable
 	{
 		private readonly ILogger _logger;
-		private readonly object _requestSubjectLookupLock;
 		private readonly Dictionary<Guid, RequestSubjectContext> _requestSubjectLookup;
 		private readonly ConcurrentDictionary<Guid, Subject<IOnPremiseConnectorResponse>> _responseSubjectLookup;
 
@@ -22,7 +21,6 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 		public InProcessMessageDispatcher(ILogger logger)
 		{
 			_logger = logger;
-			_requestSubjectLookupLock = new object();
 			_requestSubjectLookup = new Dictionary<Guid, RequestSubjectContext>();
 			_responseSubjectLookup = new ConcurrentDictionary<Guid, Subject<IOnPremiseConnectorResponse>>();
 		}
@@ -44,7 +42,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				{
 					subscription.Dispose();
 
-					lock (_requestSubjectLookupLock)
+					lock (_requestSubjectLookup)
 					{
 						ctx.RemoveConnection(connectionId);
 
@@ -106,7 +104,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 
 		private Subject<IOnPremiseConnectorRequest> TryGetRequestSubject(Guid linkId)
 		{
-			lock (_requestSubjectLookupLock)
+			lock (_requestSubjectLookup)
 			{
 				if (_requestSubjectLookup.TryGetValue(linkId, out var ctx))
 					return ctx.Subject;
@@ -117,7 +115,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 
 		private RequestSubjectContext GetRequestSubjectContext(Guid linkId, string connectionId)
 		{
-			lock (_requestSubjectLookupLock)
+			lock (_requestSubjectLookup)
 			{
 				if (!_requestSubjectLookup.TryGetValue(linkId, out var ctx))
 				{
@@ -149,7 +147,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				_disposed = true;
 
 				IEnumerable<IDisposable> disposables;
-				lock (_requestSubjectLookupLock)
+				lock (_requestSubjectLookup)
 				{
 					disposables = _requestSubjectLookup.Values.ToArray();
 				}

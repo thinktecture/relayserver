@@ -434,22 +434,24 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				request.Stream = Stream.Null;
 			}
 
-			var response = await connector.GetResponseFromLocalTargetAsync(url, request, RelayedRequestHeader).ConfigureAwait(false);
-			if (response.Stream == null)
+			using (var response = await connector.GetResponseFromLocalTargetAsync(url, request, RelayedRequestHeader).ConfigureAwait(false))
 			{
-				response.Stream = Stream.Null;
-			}
+				if (response.Stream == null)
+				{
+					response.Stream = Stream.Null;
+				}
 
-			_logger?.Debug("Sending response from {0} to relay server", request.Url);
+				_logger?.Debug("Sending response from {0} to relay server", request.Url);
 
-			try
-			{
-				// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
-				await PostToRelayAsync(ctx, response, cancellationToken).ConfigureAwait(false);
-			}
-			catch (Exception ex)
-			{
-				_logger?.Error(ex, "Error communicating with relay server. Aborting response...");
+				try
+				{
+					// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
+					await PostToRelayAsync(ctx, response, cancellationToken).ConfigureAwait(false);
+				}
+				catch (Exception ex)
+				{
+					_logger?.Error(ex, "Error communicating with relay server. Aborting response...");
+				}
 			}
 		}
 

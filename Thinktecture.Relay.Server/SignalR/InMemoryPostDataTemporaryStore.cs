@@ -155,7 +155,6 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			public event EventHandler Disposing;
 
-
 			protected override void Dispose(bool disposing)
 			{
 				var handler = Disposing;

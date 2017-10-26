@@ -142,7 +142,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			request.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Trace("Finishing request. request-id={0}, link-id={1}, on-premise-duration={2}, global-duration={3}", request.RequestId, linkId, response.RequestFinished - response.RequestStarted, request.RequestFinished - request.RequestStarted);
+			_logger?.Trace("Finishing request. request-id={0}, link-id={1}, on-premise-duration={2}, global-duration={3}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
 
 			// TODO this may be debounced for e.g. 5 minutes to skip querying on each request in future release
 			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);
