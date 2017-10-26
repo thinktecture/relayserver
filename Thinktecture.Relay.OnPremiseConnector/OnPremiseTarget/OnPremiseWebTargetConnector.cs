@@ -36,12 +36,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		private readonly Uri _baseUri;
 		private readonly int _requestTimeout;
+		private readonly bool _ignoreSslErrors;
 		private readonly ILogger _logger;
 
-		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, ILogger logger)
+		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, bool ignoreSslErrors, ILogger logger)
 		{
 			_baseUri = baseUri;
 			_requestTimeout = requestTimeout;
+			_ignoreSslErrors = ignoreSslErrors;
 			_logger = logger;
 		}
 
@@ -124,6 +126,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			var webRequest = WebRequest.CreateHttp(uri);
 			webRequest.Method = onPremiseTargetRequest.HttpMethod;
 			webRequest.Timeout = _requestTimeout * 1000;
+
+			if (_ignoreSslErrors)
+			{
+				webRequest.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+			}
 
 			foreach (var httpHeader in onPremiseTargetRequest.HttpHeaders)
 			{
