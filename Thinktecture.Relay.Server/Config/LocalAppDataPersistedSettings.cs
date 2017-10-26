@@ -3,7 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using NLog;
 
-namespace Thinktecture.Relay.Server.Configuration
+namespace Thinktecture.Relay.Server.Config
 {
 	public class LocalAppDataPersistedSettings : IPersistedSettings
 	{
@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Server.Configuration
 
 		public LocalAppDataPersistedSettings(ILogger logger, IConfiguration configuration)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
 			_settingsFileName = DetermineSettingsFileName();
@@ -45,7 +45,7 @@ namespace Thinktecture.Relay.Server.Configuration
 
 			var fileName = Path.Combine(path, "Thinktecure", "RelayServer", $"settings_{_configuration.Port}.config.json");
 
-			_logger.Trace($"{nameof(LocalAppDataPersistedSettings)} using settings file '{{0}}'", fileName);
+			_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)} using settings file '{{0}}'", fileName);
 			return fileName;
 		}
 
@@ -57,11 +57,11 @@ namespace Thinktecture.Relay.Server.Configuration
 				var configFromFile = JsonConvert.DeserializeObject<PersistedSettings>(fileContents);
 
 				OriginId = configFromFile.OriginId;
-				_logger.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Load)}(): Loaded setting OriginId: {{0}}", OriginId);
+				_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Load)}(): Loaded setting OriginId: {{0}}", OriginId);
 			}
 			else
 			{
-				_logger.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Load)}(): Didn't find setting file");
+				_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Load)}(): Didn't find setting file");
 			}
 		}
 
@@ -75,7 +75,7 @@ namespace Thinktecture.Relay.Server.Configuration
 
 			File.WriteAllText(_settingsFileName, configData);
 
-			_logger.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Store)}(): Stored setting OriginId: {{0}}", OriginId);
+			_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Store)}(): Stored setting OriginId: {{0}}", OriginId);
 		}
 
 		// ReSharper disable once ClassNeverInstantiated.Local; Justification: Its instanciated by deserialization through Newtonsoft

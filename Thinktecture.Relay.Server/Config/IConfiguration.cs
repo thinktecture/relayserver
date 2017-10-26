@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Configuration
+namespace Thinktecture.Relay.Server.Config
 {
 	public interface IConfiguration
 	{
@@ -22,5 +22,7 @@ namespace Thinktecture.Relay.Server.Configuration
 		TimeSpan TemporaryRequestStoragePeriod { get; }
 		int ActiveConnectionTimeoutInSeconds { get; }
 		string PluginAssembly { get; }
+		string OAuthSharedSecret { get; }
+		string OAuthCertificate { get; }
 	}
 }

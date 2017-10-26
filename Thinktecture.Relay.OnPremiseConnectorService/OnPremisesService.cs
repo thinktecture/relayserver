@@ -76,7 +76,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 			}
 			catch (Exception ex)
 			{
-				_logger.Fatal(ex, "Fatal exception occured");
+				_logger?.Fatal(ex, "Fatal exception occured");
 				throw;
 			}
 		}

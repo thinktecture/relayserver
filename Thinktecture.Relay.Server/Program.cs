@@ -1,6 +1,11 @@
 using System;
-using System.Configuration;
+using Autofac;
+using Thinktecture.Relay.Server.Config;
+using Thinktecture.Relay.Server.DependencyInjection;
+using Thinktecture.Relay.Server.Logging;
+using Thinktecture.Relay.Server.Plugins;
 using Topshelf;
+using Topshelf.Autofac;
 
 namespace Thinktecture.Relay.Server
 {
@@ -8,30 +13,56 @@ namespace Thinktecture.Relay.Server
 	{
 		private static void Main(string[] args)
 		{
-			// TODO: Use configuration (see RELAY-68)
-			if (!Int32.TryParse(ConfigurationManager.AppSettings["Port"], out var port))
-			{
-				port = 20000;
-			}
-
-			var hostName = ConfigurationManager.AppSettings["HostName"] ?? "+";
-			var allowHttp = String.Equals(ConfigurationManager.AppSettings["UseInsecureHttp"], "true", StringComparison.OrdinalIgnoreCase);
-
 			HostFactory.Run(config =>
 			{
+				var programScope = BuildProgramScope();
+				var relayServerScope = BuildRelayServerScope(programScope);
+
+				config.UseAutofacContainer(relayServerScope);
 				config.Service<RelayService>(settings =>
 				{
-					settings.ConstructUsing(_ => new RelayService(hostName, port, allowHttp));
+					settings.ConstructUsingAutofacContainer();
 					settings.WhenStarted(s => s.Start());
-					settings.WhenStopped(s => s.Stop());
+					settings.WhenStopped(s =>
+					{
+						s.Stop();
+						relayServerScope.Dispose();
+						programScope.Dispose();
+					});
 				});
-				config.RunAsNetworkService();
 
+				config.RunAsNetworkService();
 				config.SetDescription("Thinktecture Relay Server Process");
 				config.SetDisplayName("Thinktecture Relay Server");
 				config.SetServiceName("TTRelayServer");
 				config.ApplyCommandLine();
 			});
+
+#if DEBUG
+			if (System.Diagnostics.Debugger.IsAttached)
+			{
+				// ReSharper disable once LocalizableElement
+				Console.WriteLine("\nPress any key to close application window...");
+				Console.ReadKey(true);
+			}
+#endif
+		}
+
+		private static ILifetimeScope BuildProgramScope()
+		{
+			var builder = new ContainerBuilder();
+
+			builder.RegisterModule<LoggingModule>();
+			builder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
+			builder.RegisterType<PluginLoader>().As<IPluginLoader>().SingleInstance();
+			builder.RegisterType<RelayServerModule>();
+
+			return builder.Build();
+		}
+
+		private static ILifetimeScope BuildRelayServerScope(ILifetimeScope programScope)
+		{
+			return programScope.BeginLifetimeScope(builder => builder.RegisterModule(programScope.Resolve<RelayServerModule>()));
 		}
 	}
 }

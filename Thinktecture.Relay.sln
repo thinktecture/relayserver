@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -16,8 +16,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.OnPremis
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.OnPremiseConnectorService", "Thinktecture.Relay.OnPremiseConnectorService\Thinktecture.Relay.OnPremiseConnectorService.csproj", "{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7286C586-743A-443C-BF95-5394EE8E49F4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configs", "Configs", "{7286C586-743A-443C-BF95-5394EE8E49F4}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
@@ -37,11 +38,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "de", "de", "{C930A0EE-45E1-
 		Documentation\de\5-relayserver-plugin-entwicklung.md = Documentation\de\5-relayserver-plugin-entwicklung.md
 		Documentation\de\6-entwicklungssetup.md = Documentation\de\6-entwicklungssetup.md
 		Documentation\de\relayserver.md = Documentation\de\relayserver.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{FFFB495D-B5B3-49C6-B30D-7F24F0FB06BB}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.PluginDemos", "Thinktecture.Relay.PluginDemos\Thinktecture.Relay.PluginDemos.csproj", "{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}"

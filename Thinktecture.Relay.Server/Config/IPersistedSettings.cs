@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Configuration
+namespace Thinktecture.Relay.Server.Config
 {
 	public interface IPersistedSettings
 	{

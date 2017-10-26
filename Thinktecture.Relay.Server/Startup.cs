@@ -21,110 +21,56 @@ using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
 using NLog;
 using Owin;
-using RabbitMQ.Client;
-using Thinktecture.Relay.Server.Communication;
-using Thinktecture.Relay.Server.Communication.RabbitMq;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.Controller.ManagementWeb;
-using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Filters;
-using Thinktecture.Relay.Server.Helper;
-using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Logging;
 using Thinktecture.Relay.Server.Owin;
-using Thinktecture.Relay.Server.Plugins;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server
 {
-	internal class Startup
+	internal class Startup : IStartup
 	{
+		private readonly ILifetimeScope _rootScope;
+		private readonly ILogger _logger;
+		private readonly IOAuthAuthorizationServerProvider _authorizationServerProvider;
+		private readonly IConfiguration _configuration;
+
+		public Startup(ILogger logger, IConfiguration configuration, IOAuthAuthorizationServerProvider authorizationServerProvider, ILifetimeScope rootScope)
+		{
+			_logger = logger;
+			
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_authorizationServerProvider = authorizationServerProvider ?? throw new ArgumentNullException(nameof(authorizationServerProvider));
+			_rootScope = rootScope ?? throw new ArgumentNullException(nameof(rootScope));
+		}
+
 		public void Configuration(IAppBuilder app)
 		{
 			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
 
-			var container = RegisterServices();
-			var config = container.Resolve<IConfiguration>();
-			var logger = container.Resolve<ILogger>();
-			var httpConfig = CreateHttpConfiguration(config, logger);
-			var scope = RegisterAdditionalServices(container, httpConfig, config);
+			var httpConfig = CreateHttpConfiguration(_configuration, _logger);
+			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, _configuration);
 
-			app.UseAutofacMiddleware(scope);
+			app.UseAutofacMiddleware(innerScope);
 			app.UseCors(CorsOptions.AllowAll);
-			UseOAuthSecurity(app, scope.Resolve<AuthorizationServerProvider>());
-			MapSignalR(app, scope, config);
-			UseWebApi(app, httpConfig, scope);
-			UseFileServer(app, config, logger);
+			UseOAuthSecurity(app, _configuration, _authorizationServerProvider);
+			MapSignalR(app, innerScope, _configuration);
+			UseWebApi(app, httpConfig, innerScope);
+			UseFileServer(app, _configuration, _logger);
 		}
 
-		private static ILifetimeScope RegisterAdditionalServices(IContainer container, HttpConfiguration httpConfig, IConfiguration config)
+		private static ILifetimeScope RegisterAdditionalServices(ILifetimeScope container, HttpConfiguration httpConfig, IConfiguration config)
 		{
-			var pluginLoader = container.Resolve<IPluginLoader>();
-
 			return container.BeginLifetimeScope(builder =>
 			{
 				builder.RegisterWebApiFilterProvider(httpConfig);
 				RegisterApiControllers(builder, config);
-				pluginLoader.LoadPlugins(builder);
 			});
-		}
-
-		private static IContainer RegisterServices()
-		{
-			var builder = new ContainerBuilder();
-
-			builder.RegisterType<OnPremisesConnection>().ExternallyOwned();
-			builder.RegisterType<AuthorizationServerProvider>().SingleInstance();
-			builder.RegisterType<PasswordHash>().As<IPasswordHash>();
-
-			builder.RegisterType<ConnectionFactory>().AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
-			builder.Register(ctx => ctx.Resolve<IRabbitMqFactory>().CreateConnection()).AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<RabbitMqMessageDispatcher>().AsImplementedInterfaces().SingleInstance();
-
-			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance()
-				.OnActivated(args => args.Instance.Prepare())
-				.AutoActivate(); // ensure that the BUS to rabbitMQ starts up before accepting connections
-
-			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
-			builder.RegisterType<Configuration.Configuration>().As<IConfiguration>().SingleInstance();
-			builder.RegisterType<LocalAppDataPersistedSettings>().As<IPersistedSettings>().SingleInstance().AutoActivate(); // fail fast: load setting immediatelly
-
-			builder.RegisterType<LinkRepository>().As<ILinkRepository>().SingleInstance();
-			builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
-			builder.RegisterType<LogRepository>().As<ILogRepository>().SingleInstance();
-			builder.RegisterType<TraceRepository>().As<ITraceRepository>().SingleInstance();
-
-			builder.RegisterType<RequestLogger>().As<IRequestLogger>().SingleInstance();
-			builder.RegisterType<TraceManager>().As<ITraceManager>().SingleInstance();
-			builder.RegisterType<TraceFileWriter>().As<ITraceFileWriter>().SingleInstance();
-			builder.RegisterType<TraceFileReader>().As<ITraceFileReader>().SingleInstance();
-			builder.RegisterType<TraceTransformation>().As<ITraceTransformation>().SingleInstance();
-
-			builder.RegisterType<HttpResponseMessageBuilder>().As<IHttpResponseMessageBuilder>();
-			builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
-			builder.RegisterType<PathSplitter>().As<IPathSplitter>();
-
-			builder.RegisterType<PluginLoader>().As<IPluginLoader>();
-			builder.RegisterType<PluginManager>().As<IPluginManager>();
-
-			builder.Register(context => LogManager.GetLogger("Server")).As<ILogger>().SingleInstance();
-
-			if (String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["TemporaryRequestStoragePath"]))
-			{
-				builder.RegisterType<InMemoryPostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
-			}
-			else
-			{
-				builder.RegisterType<FilePostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
-			}
-
-			var container = builder.Build();
-
-			return container;
 		}
 
 		private static void RegisterApiControllers(ContainerBuilder builder, IConfiguration configuration)
@@ -139,7 +85,7 @@ namespace Thinktecture.Relay.Server
 				builder.RegisterModule<OnPremiseConnectionsModule>();
 		}
 
-		private static void UseOAuthSecurity(IAppBuilder app, AuthorizationServerProvider authProvider)
+		private static void UseOAuthSecurity(IAppBuilder app, IConfiguration config, IOAuthAuthorizationServerProvider authProvider)
 		{
 			if (app == null)
 				throw new ArgumentNullException(nameof(app));
@@ -151,10 +97,10 @@ namespace Thinktecture.Relay.Server
 				AllowInsecureHttp = true,
 				TokenEndpointPath = new PathString("/token"),
 				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
-				Provider = authProvider
+				Provider = authProvider,
 			};
 
-			var sharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
+			var sharedSecret = config.OAuthSharedSecret;
 
 			if (!String.IsNullOrWhiteSpace(sharedSecret))
 			{
@@ -162,7 +108,7 @@ namespace Thinktecture.Relay.Server
 				return;
 			}
 
-			var certBase64 = ConfigurationManager.AppSettings["OAuthCertificate"];
+			var certBase64 = config.OAuthCertificate;
 			var authOptions = new OAuthBearerAuthenticationOptions();
 
 			if (!String.IsNullOrWhiteSpace(certBase64))
@@ -246,34 +192,32 @@ namespace Thinktecture.Relay.Server
 
 			httpConfig.SuppressDefaultHostAuthentication();
 
-			var enableNLogTraceWriter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true");
-			if (enableNLogTraceWriter)
-				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(logger, new TraceLevelConverter()));
+			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true"))
+				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(LogManager.GetLogger("HttpTraceLogger"), new TraceLevelConverter()));
 
-			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(logger));
+			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(LogManager.GetLogger("HttpExceptionLogger")));
 
-			var enableNLogActionFilter = StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogActionFilter"], "true");
-			if (enableNLogActionFilter)
-				httpConfig.Filters.Add(new NLogActionFilter(logger));
+			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogActionFilter"], "true"))
+				httpConfig.Filters.Add(new NLogActionFilter(LogManager.GetLogger("HttpActionFilterLogger")));
 
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
 			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
-				logger.Info("Relaying enabled");
+				logger?.Info("Relaying enabled");
 				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
 			}
 
 			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
-				logger.Info("On-premise connections enabled");
+				logger?.Info("On-premise connections enabled");
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
 			}
 
 			if (configuration.EnableManagementWeb != ModuleBinding.False)
 			{
-				logger.Info("Management web enabled");
+				logger?.Info("Management web enabled");
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
 			}
 
@@ -308,7 +252,7 @@ namespace Thinktecture.Relay.Server
 			catch (DirectoryNotFoundException)
 			{
 				// no admin web deployed - catch silently, but display info for the user
-				logger.Info("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
+				logger?.Info("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
 			}
 		}
 	}

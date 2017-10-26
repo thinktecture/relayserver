@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Server.Http
 
 		public OnPremiseRequestBuilder(ILogger logger)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_ignoredHeaders = new[] { "Host", "Connection" };
 		}
 
@@ -38,7 +38,7 @@ namespace Thinktecture.Relay.Server.Http
 			}
 			catch (Exception ex)
 			{
-				_logger.Warn(ex, "Could not fetch remote IP address for request {0}", onPremiseConnectorRequest.RequestId);
+				_logger?.Warn(ex, "Could not fetch remote IP address for request {0}", onPremiseConnectorRequest.RequestId);
 			}
 
 			AddContentHeaders(onPremiseConnectorRequest, request);

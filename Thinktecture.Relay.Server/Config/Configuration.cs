@@ -2,7 +2,7 @@ using System;
 using System.Configuration;
 using NLog;
 
-namespace Thinktecture.Relay.Server.Configuration
+namespace Thinktecture.Relay.Server.Config
 {
 	internal class Configuration : IConfiguration
 	{
@@ -24,6 +24,8 @@ namespace Thinktecture.Relay.Server.Configuration
 		public string TemporaryRequestStoragePath { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
 		public string PluginAssembly { get; }
+		public string OAuthSharedSecret { get; set; }
+		public string OAuthCertificate { get; set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -129,28 +131,33 @@ namespace Thinktecture.Relay.Server.Configuration
 				PluginAssembly = null;
 			}
 
+			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
+			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
+
 			LogSettings(logger);
 		}
 
 		private void LogSettings(ILogger logger)
 		{
-			logger.Trace("Setting OnPremiseConnectorCallbackTimeout: {0}", OnPremiseConnectorCallbackTimeout);
-			logger.Trace("Setting RabbitMqConnectionString: {0}", RabbitMqConnectionString);
-			logger.Trace("Setting TraceFileDirectory: {0}", TraceFileDirectory);
-			logger.Trace("Setting LinkPasswordLength: {0}", LinkPasswordLength);
-			logger.Trace("Setting DisconnectTimeout: {0}", DisconnectTimeout);
-			logger.Trace("Setting ConnectionTimeout: {0}", ConnectionTimeout);
-			logger.Trace("Setting UseInsecureHttp: {0}", UseInsecureHttp);
-			logger.Trace("Setting EnableManagementWeb: {0}", EnableManagementWeb);
-			logger.Trace("Setting EnableRelaying: {0}", EnableRelaying);
-			logger.Trace("Setting EnableOnPremiseConnections: {0}", EnableOnPremiseConnections);
-			logger.Trace("Setting HostName: {0}", HostName);
-			logger.Trace("Setting Port: {0}", Port);
-			logger.Trace("Setting ManagementWebLocation: {0}", ManagementWebLocation);
-			logger.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
-			logger.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
-			logger.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
-			logger.Trace("Setting PluginAssembly: {0}", PluginAssembly);
+			logger?.Trace("Setting OnPremiseConnectorCallbackTimeout: {0}", OnPremiseConnectorCallbackTimeout);
+			logger?.Trace("Setting RabbitMqConnectionString: {0}", RabbitMqConnectionString);
+			logger?.Trace("Setting TraceFileDirectory: {0}", TraceFileDirectory);
+			logger?.Trace("Setting LinkPasswordLength: {0}", LinkPasswordLength);
+			logger?.Trace("Setting DisconnectTimeout: {0}", DisconnectTimeout);
+			logger?.Trace("Setting ConnectionTimeout: {0}", ConnectionTimeout);
+			logger?.Trace("Setting UseInsecureHttp: {0}", UseInsecureHttp);
+			logger?.Trace("Setting EnableManagementWeb: {0}", EnableManagementWeb);
+			logger?.Trace("Setting EnableRelaying: {0}", EnableRelaying);
+			logger?.Trace("Setting EnableOnPremiseConnections: {0}", EnableOnPremiseConnections);
+			logger?.Trace("Setting HostName: {0}", HostName);
+			logger?.Trace("Setting Port: {0}", Port);
+			logger?.Trace("Setting ManagementWebLocation: {0}", ManagementWebLocation);
+			logger?.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath);
+			logger?.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
+			logger?.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
+			logger?.Trace("Setting PluginAssembly: {0}", PluginAssembly);
+			logger?.Trace("Setting OAuthSharedSecret: {0}", OAuthSharedSecret);
+			logger?.Trace("Setting OAuthCertificate: {0}", OAuthCertificate);
 		}
 	}
 }

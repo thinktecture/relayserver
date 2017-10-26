@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Logging
 
 		public NLogTraceWriter(ILogger logger, ITraceLevelConverter traceLevelConverter)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_logger = logger;
 			_traceLevelConverter = traceLevelConverter ?? throw new ArgumentNullException(nameof(traceLevelConverter));
 		}
 
@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.Server.Logging
 			var record = new TraceRecord(request, category, level);
 			traceAction(record);
 
-			_logger.Log(_traceLevelConverter.Convert(level), null, null,
+			_logger?.Log(_traceLevelConverter.Convert(level), null, null,
 				"Category: {0}, Operator: {1}, Kind: {2}, Operation: {3}, Properties: {4} Message: {5}, Exception: {6}",
 				category, record.Operator, record.Kind, record.Operation, record.Properties, record.Message ?? "-", record.Exception?.ToString() ?? "-");
 		}
