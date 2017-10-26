@@ -42,7 +42,6 @@ namespace Thinktecture.Relay.Server.OnPremise
 
 		/// <summary>
 		/// Gets the request body if small enough
-		/// <remarks>Will only be used by legacy on premise connectors (v1)</remarks>
 		/// </summary>
 		byte[] Body { get; }
 

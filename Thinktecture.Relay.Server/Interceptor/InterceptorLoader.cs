@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "There was an error loading the interceptor assembly '{0}'", assemblyPath);
+				_logger?.Error(ex, "There was an error loading the interceptor assembly. AssemblyPath = '{0}'", assemblyPath);
 			}
 		}
 
@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			if (!File.Exists(path))
 			{
-				_logger?.Warn("An interceptor assembly has been configured, but it is not available. Configured path: '{0}'", path);
+				_logger?.Warn("An interceptor assembly has been configured, but it is not available at the configured path '{0}'", path);
 				return null;
 			}
 

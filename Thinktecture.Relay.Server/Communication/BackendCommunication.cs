@@ -68,7 +68,7 @@ namespace Thinktecture.Relay.Server.Communication
 		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
 		{
 			CheckDisposed();
-			_logger?.Debug("Waiting for response for request id {0}", requestId);
+			_logger?.Debug("Waiting for response for request {0}", requestId);
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
@@ -87,7 +87,7 @@ namespace Thinktecture.Relay.Server.Communication
 					using (token.Register(() => callback.Response.TrySetCanceled(token)))
 					{
 						var response = await callback.Response.Task.ConfigureAwait(false);
-						_logger?.Debug("Received On-Premise response for request id {0}", callback.RequestId);
+						_logger?.Debug("Received on-premise response for request {0}", callback.RequestId);
 
 						return response;
 					}
@@ -95,11 +95,11 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (OperationCanceledException)
 			{
-				_logger?.Debug("No response received within specified timeout {0}. Request id {1}", _configuration.OnPremiseConnectorCallbackTimeout, callback.RequestId);
+				_logger?.Debug("No response received within specified timeout {0} for request {1}", _configuration.OnPremiseConnectorCallbackTimeout, callback.RequestId);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Debug(ex, "Error during waiting for on-premise connector response. Request id {0}", callback.RequestId);
+				_logger?.Debug(ex, "Error during waiting for on-premise connector response for request {0}", callback.RequestId);
 			}
 			finally
 			{
@@ -113,7 +113,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger?.Debug("Sending request for on-premise connector link {0} to message dispatcher", linkId);
+			_logger?.Debug("Dispatching request {0} for link {1}", request.RequestId, linkId);
 
 			await _messageDispatcher.DispatchRequest(linkId, request).ConfigureAwait(false);
 		}
@@ -124,7 +124,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			if (_onPremises.TryGetValue(connectionId, out var connectionInfo))
 			{
-				_logger?.Debug("Acknowledging {0} for on-premise connection id {1}. OnPremise Link Id: {2}", acknowledgeId, connectionId, connectionInfo.LinkId);
+				_logger?.Debug("Acknowledging {0} for connection {1}", acknowledgeId, connectionId);
 				_messageDispatcher.AcknowledgeRequest(connectionInfo.LinkId, acknowledgeId);
 				_linkRepository.RenewActiveConnectionAsync(connectionId);
 			}
@@ -134,7 +134,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger?.Debug("Registering on-premise link {0} via connection {1}. User name: {2}, Role: {3}, Connector Version: {4}",
+			_logger?.Debug("Registering link {0} via connection {1} with user name '{2}', role '{3}' and connector version {4}",
 				registrationInformation.LinkId,
 				registrationInformation.ConnectionId,
 				registrationInformation.UserName,
@@ -164,7 +164,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			if (_onPremises.TryRemove(connectionId, out var connectionInfo))
 			{
-				_logger?.Debug("Unregistered on-premise connection id {0}. OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, connectionInfo.LinkId, connectionInfo.UserName, connectionInfo.Role);
+				_logger?.Debug("Unregistered on-premise link {0} via connection {1}, user name {2}, role {3}", connectionInfo.LinkId, connectionId, connectionInfo.UserName, connectionInfo.Role);
 			}
 
 			_linkRepository.RemoveActiveConnectionAsync(connectionId);
@@ -179,7 +179,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			if (requestSubscription != null)
 			{
-				_logger?.Debug("Disposing request subscription for OnPremise id {0} and connection id {1}", connectionInfo?.LinkId, connectionId);
+				_logger?.Debug("Disposing request subscription for link {0} for connection {1}", connectionInfo?.LinkId, connectionId);
 				requestSubscription.Dispose();
 			}
 		}
@@ -188,14 +188,14 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger?.Debug("Sending response to origin id {0}", originId);
+			_logger?.Debug("Dispatching response to origin {0}", originId);
 
 			await _messageDispatcher.DispatchResponse(originId, response).ConfigureAwait(false);
 		}
 
 		private IDisposable StartReceivingResponses(Guid originId)
 		{
-			_logger?.Debug("Start receiving responses for origin id {0}", originId);
+			_logger?.Debug("Start receiving responses from dispatcher");
 
 			return _messageDispatcher.OnResponseReceived(originId).Subscribe(ForwardOnPremiseTargetResponse);
 		}
@@ -204,12 +204,12 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			if (_requestCompletedCallbacks.TryRemove(response.RequestId, out var onPremiseConnectorCallback))
 			{
-				_logger?.Debug("Forwarding on-premise target response for request id {0}", response.RequestId);
+				_logger?.Debug("Forwarding on-premise target response for request {0}", response.RequestId);
 				onPremiseConnectorCallback.Response.SetResult(response);
 			}
 			else
 			{
-				_logger?.Debug("Response received but no request callback found for request id {0}", response.RequestId);
+				_logger?.Debug("Response received but no request callback found for request {0}", response.RequestId);
 			}
 		}
 
@@ -283,7 +283,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"Error during sending heartbeat to a client. LinkId = {{0}}, ConnectionId = {{1}}, ConnectorVersion = {{2}}", client.LinkId, client.ConnectionId, client.ConnectorVersion);
+				_logger?.Error(ex, "Error during sending heartbeat to a client. LinkId = {0}, ConnectionId = {1}, ConnectorVersion = {2}", client.LinkId, client.ConnectionId, client.ConnectorVersion);
 			}
 		}
 

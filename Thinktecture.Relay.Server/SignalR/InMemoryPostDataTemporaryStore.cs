@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp()
 		{
-			_logger?.Trace("Cleaning up old stored data.");
+			_logger?.Trace("Cleaning up old stored data");
 
 			foreach (var kvp in _requestData)
 			{

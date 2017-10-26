@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnConnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise connected. Connection Id: {0}, OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise connected with connection {0}, link {1}, user name '{2}', role '{3}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			RegisterOnPremise(request, connectionId, onPremiseClaims);
 
@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnReconnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise reconnected. Connection Id: {0}, OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise reconnected with connection {0}, link {1}, user name '{2}', role '{3}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			RegisterOnPremise(request, connectionId, onPremiseClaims);
 
@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise disconnected. Connection Id: {0}, OnPremise Id: {1}, User name: {2}, Role: {3}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise disconnected with connection {0}, link {1}, user name '{2}', role '{3}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			_backendCommunication.UnregisterOnPremise(connectionId);
 
@@ -63,9 +63,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest request)
 		{
-			_logger?.Debug("Forwarding client request to connection {0}", connectionId);
 			_logger?.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
-				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.Body?.Length ?? 0);
+				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.ContentLength);
 
 			Connection.Send(connectionId, request);
 			return Task.CompletedTask;

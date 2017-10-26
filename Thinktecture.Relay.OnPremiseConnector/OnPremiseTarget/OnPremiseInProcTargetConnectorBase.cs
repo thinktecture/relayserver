@@ -32,7 +32,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			_logger?.Debug("Requesting response from on-premise in-proc target");
 			_logger?.Trace("Requesting response from on-premise in-proc target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
@@ -88,7 +87,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			response.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
+			_logger?.Trace("Got in-proc response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
 
 			return response;
 		}

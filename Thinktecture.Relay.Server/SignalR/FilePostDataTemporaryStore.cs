@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp(CancellationToken cancellationToken)
 		{
-			_logger?.Trace("Cleaning up old stored files.");
+			_logger?.Trace("Cleaning up old stored files");
 
 			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
 
@@ -72,13 +72,13 @@ namespace Thinktecture.Relay.Server.SignalR
 					}
 					catch (Exception ex)
 					{
-						_logger?.Error(ex, "Could not delete file '{0}'", fileName);
+						_logger?.Error(ex, "Could not delete file. FileName = '{0}'", fileName);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during cleanup.");
+				_logger?.Error(ex, "Error during cleanup");
 			}
 		}
 
@@ -97,7 +97,7 @@ namespace Thinktecture.Relay.Server.SignalR
 				}
 				catch (Exception ex)
 				{
-					_logger?.Error(ex, "Could not delete file {0}", fileName);
+					_logger?.Error(ex, "Could not delete file. FileName = '{0}'", fileName);
 				}
 
 				return data;

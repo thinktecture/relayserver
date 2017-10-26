@@ -45,7 +45,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"Error while executing the response interceptor \"{_requestInceptor?.GetType().Name}.{nameof(IOnPremiseRequestInterceptor.OnRequestReceived)}()\" for request {{0}}", request.RequestId);
+				_logger?.Error(ex, "Error while executing the request interceptor. TypeName = {0}, RequestId = {1}", _requestInceptor?.GetType().Name, request.RequestId);
 				return null;
 			}
 		}
@@ -70,7 +70,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"Error while executing the response interceptor \"{_responseInterceptor?.GetType().Name}.{nameof(IOnPremiseResponseInterceptor.OnResponseReceived)}()\" for request {{0}}", request.RequestId);
+				_logger?.Error(ex, "Error while executing the response interceptor. TypeName = {0}, RequestId = {1}", _requestInceptor?.GetType().Name, request.RequestId);
 				return null;
 			}
 		}

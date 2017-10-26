@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Server.Controller
 			var stream = _temporaryStore.GetRequestStream(requestId);
 			if (stream == null)
 			{
-				_logger?.Warn("No request data found for request id {0}", requestId);
+				_logger?.Warn("No request data found for request {0}", requestId);
 				return NotFound();
 			}
 

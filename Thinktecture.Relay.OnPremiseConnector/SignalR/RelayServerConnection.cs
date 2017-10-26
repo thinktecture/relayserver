@@ -68,8 +68,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Debug("Registering on-premise web target");
-			_logger?.Trace("Registering on-premise web target. key={0}, baseUri={1}, ignoreSslErrors={2}", key, baseUri, ignoreSslErrors);
+			_logger?.Trace("Registering on-premise web target. key={0}, base-uri={1}, ignore-ssl-errors={2}", key, baseUri, ignoreSslErrors ? "yes" : "no");
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout, ignoreSslErrors);
 		}
@@ -83,7 +82,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Debug("Registering on-premise in-proc target");
 			_logger?.Trace("Registering on-premise in-proc target. key={0}, type={1}", key, handlerType);
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
@@ -98,7 +96,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Debug("Registering on-premise in-proc target");
 			_logger?.Trace("Registering on-premise in-proc target using a handler factory. key={0}", key);
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
@@ -111,7 +108,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Debug("Registering on-premise in-proc target");
 			_logger?.Trace("Registering on-premise in-proc target. key={0}, type={1}", key, typeof(T));
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
@@ -144,7 +140,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				try
 				{
-					_logger?.Debug("Requesting authorization token");
 					_logger?.Trace("Requesting authorization token. relay-server={0}, id={1}", _relayServer, _id);
 
 					var response = await client.RequestResourceOwnerPasswordAsync(_userName, _password).ConfigureAwait(false);
@@ -152,12 +147,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					_logger?.Trace("Received token. relay-server={0}, id={1}", _relayServer, _id);
 					return response;
 				}
-				catch (Exception ex)
+				catch
 				{
 					var randomWaitTime = GetRandomWaitTime();
 					_logger?.Info("Could not authenticate with relay server - re-trying in {0} seconds", randomWaitTime.TotalSeconds);
-					_logger?.Trace(ex, "Could not authenticate with relay server - re-trying in {0} seconds", randomWaitTime.TotalSeconds);
-					await Task.Delay(randomWaitTime).ConfigureAwait(false);
+					await Task.Delay(randomWaitTime, _cts.Token).ConfigureAwait(false);
 				}
 			}
 
@@ -178,10 +172,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				await Start().ConfigureAwait(false);
 				_logger?.Info("Connected to relay server #{0}", _id);
 			}
-			catch (Exception ex)
+			catch
 			{
 				_logger?.Info("Error while connecting to relay server #{0}", _id);
-				_logger?.Trace(ex, "Error while connecting to relay server #{0}", _id);
 			}
 		}
 
@@ -207,14 +200,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			Headers["Authorization"] = $"{tokenResponse.TokenType} {_accessToken}";
 
-			_logger?.Trace("Setting bearer token. access-token={0}", _accessToken);
+			_logger?.Trace("Setting access token. access-token={0}", _accessToken);
 		}
 
 		private void CheckResponseTokenForErrors(TokenResponse token)
 		{
 			if (token.IsHttpError)
 			{
-				_logger?.Warn("Could not authenticate with relay server.");
+				_logger?.Warn("Could not authenticate with relay server");
 				_logger?.Trace("Could not authenticate with relay server: status-code={0}, reason={1}", token.HttpErrorStatusCode, token.HttpErrorReason);
 				throw new Exception("Could not authenticate with relay server: " + token.HttpErrorReason);
 			}
@@ -229,13 +222,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void OnReconnected()
 		{
-			_logger?.Debug("Connection restored");
 			_logger?.Trace("Connection restored. relay-server={0}", _relayServer);
 		}
 
 		private void OnReconnecting()
 		{
-			_logger?.Debug("Connection lost - trying to reconnect");
 			_logger?.Trace("Connection lost - trying to reconnect. relay-server={0}", _relayServer);
 		}
 
@@ -253,7 +244,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			try
 			{
-				_logger?.Debug("Received message from server");
 				_logger?.Trace("Received message from server. message={0}", message);
 
 				request = message.ToObject<OnPremiseTargetRequest>();
@@ -290,17 +280,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 
 				_logger?.Trace("No connector found for local server. request-id={0}, url={1}", request.RequestId, request.Url);
-				_logger?.Debug("No connector found for local server {0} of request {1}", request.Url, request.RequestId);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during handling received message.");
+				_logger?.Error(ex, "Error during handling received message. Message = {0}", message);
 			}
 			finally
 			{
 				if (!ctx.IsRelayServerNotified && request != null)
 				{
-					_logger?.Debug("Unhandled request {0}", message);
+					_logger?.Trace("Unhandled request. message={0}", message);
 
 					var response = new OnPremiseTargetResponse
 					{
@@ -318,7 +307,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
-			_logger?.Info("Received ping from relay server #{0}", _id);
+			_logger?.Debug("Received ping from relay server #{0}", _id);
 
 			var resp = new OnPremiseTargetResponse
 			{
@@ -341,7 +330,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
 				if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
 				{
-					_logger?.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
+					_logger?.Info("Heartbeat interval set to {0} seconds", heartbeatInterval);
 					StartHeartbeatCheckLoop(TimeSpan.FromSeconds(heartbeatInterval), _cts.Token);
 				}
 			}
@@ -359,11 +348,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					if (_lastHeartbeat != DateTime.MinValue && _lastHeartbeat != DateTime.MaxValue)
 					{
-						_logger?.Trace("Checking last heartbeat time. Interval: {0}s, last heartbeat: {1}", heartbeatInterval, _lastHeartbeat);
+						_logger?.Trace("Checking last heartbeat time. last-heartbeat={0}", _lastHeartbeat);
 
 						if (_lastHeartbeat <= DateTime.UtcNow.Add(-intervalWithTolerance))
 						{
-							_logger?.Warn("Last heartbeat was at {0} and out of interval of {1}s. Forcing reconnect.", _lastHeartbeat, heartbeatInterval);
+							_logger?.Warn("Last heartbeat was at {0} and out of an interval of {1} secconds", _lastHeartbeat, heartbeatInterval.TotalSeconds);
 
 							_lastHeartbeat = DateTime.MaxValue;
 
@@ -381,6 +370,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void ForceReconnect()
 		{
+			_logger?.Debug("Forcing reconnect");
+
 			Disconnect();
 
 			Task.Delay(1500).ContinueWith(_ =>
@@ -417,7 +408,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, OnPremiseTargetRequest request, CancellationToken cancellationToken)
 		{
-			_logger?.Debug("Requesting local server {0} for request id {1}", request.Url, request.RequestId);
+			_logger?.Debug("Requesting local server {0} for request {1}", request.Url, request.RequestId);
 
 			var url = (request.Url.Length > key.Length) ? request.Url.Substring(key.Length + 1) : String.Empty;
 
@@ -458,8 +449,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 			catch (Exception ex)
 			{
-				_logger?.Debug(ex, "Error while posting to relay server");
-				_logger?.Error("Error communicating with relay server. Aborting response...");
+				_logger?.Error(ex, "Error communicating with relay server. Aborting response...");
 			}
 		}
 

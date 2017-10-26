@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Http
 {
 	internal class OnPremiseRequestBuilder : IOnPremiseRequestBuilder
 	{
-		private static readonly string[] _ignoredHeaders = {"Host", "Connection"};
+		private static readonly string[] _ignoredHeaders = { "Host", "Connection" };
 
 		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly ILogger _logger;
@@ -54,6 +54,7 @@ namespace Thinktecture.Relay.Server.Http
 							storeStream.Position = 0;
 							await storeStream.ReadAsync(request.Body, 0, (int)storeStream.Length).ConfigureAwait(false);
 						}
+
 						// TODO delete obsolete file now
 					}
 					else
@@ -61,6 +62,8 @@ namespace Thinktecture.Relay.Server.Http
 						// a length of 0 indicates that there is a larger body available on the server
 						request.Body = new byte[0];
 					}
+
+					request.ContentLength = storeStream.Length;
 				}
 			}
 

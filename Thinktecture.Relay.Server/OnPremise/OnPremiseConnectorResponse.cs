@@ -14,14 +14,11 @@ namespace Thinktecture.Relay.Server.OnPremise
 		public DateTime RequestFinished { get; set; }
 		public HttpStatusCode StatusCode { get; set; }
 		public IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
-
-		[Obsolete("Will only be used by legacy on premise connectors (v1)")]
 		public byte[] Body { get; set; }
 
 		[JsonIgnore]
 		public Stream Stream { get; set; }
 
-		[JsonIgnore]
 		public long ContentLength { get; set; }
 	}
 }

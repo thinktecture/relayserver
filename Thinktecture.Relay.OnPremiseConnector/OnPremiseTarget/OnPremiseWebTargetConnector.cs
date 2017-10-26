@@ -56,7 +56,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			_logger?.Debug("Requesting response from on-premise web target");
 			_logger?.Trace("Requesting response from on-premise web target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
@@ -96,7 +95,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			response.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
+			_logger?.Trace("Got web response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
 
 			return response;
 		}
@@ -135,12 +134,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			if (request.Stream != Stream.Null)
 			{
-				_logger?.Trace("   adding request stream.");
+				_logger?.Trace("   adding request stream");
 
 				var localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
 				await request.Stream.CopyToAsync(localTargetStream).ContinueWith(_ => localTargetStream.FlushAsync()).ConfigureAwait(false); // TODO check if flush is needed
 			}
-
 
 			return localTargetRequest;
 		}

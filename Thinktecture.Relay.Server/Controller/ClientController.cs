@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			if (path == null)
 			{
-				_logger?.Info("Path is not set.");
+				_logger?.Info("Path is not set");
 				return NotFound();
 			}
 
@@ -113,7 +113,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			if (link == null)
 			{
-				_logger?.Info("Link not found. Path: {0}", path);
+				_logger?.Info("Link for path {0} not found", path);
 				return false;
 			}
 
@@ -125,13 +125,13 @@ namespace Thinktecture.Relay.Server.Controller
 
 			if (String.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
 			{
-				_logger?.Info("Path for link {0} without user name is not found. Path: {1}", link.SymbolicName, path);
+				_logger?.Info("Path {0} for link {1} without user name is not found", path, link.SymbolicName);
 				return false;
 			}
 
 			if (link.AllowLocalClientRequestsOnly && !Request.IsLocal())
 			{
-				_logger?.Info("Link {0} only allows local requests.", link.SymbolicName);
+				_logger?.Info("Link {0} only allows local requests", link.SymbolicName);
 				return false;
 			}
 
@@ -140,9 +140,9 @@ namespace Thinktecture.Relay.Server.Controller
 
 		private void FinishRequest(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid linkId, string path, HttpStatusCode statusCode)
 		{
-			_logger?.Trace("Finishing request. request-id={0}, link-id={1}", request.RequestId, linkId);
-
 			request.RequestFinished = DateTime.UtcNow;
+
+			_logger?.Trace("Finishing request. request-id={0}, link-id={1}, on-premise-duration={2}, global-duration={3}", request.RequestId, linkId, response.RequestFinished - response.RequestStarted, request.RequestFinished - request.RequestStarted);
 
 			// TODO this may be debounced for e.g. 5 minutes to skip querying on each request in future release
 			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);

@@ -77,31 +77,29 @@ namespace Thinktecture.Relay.Server.Http
 
 			HttpContent content;
 
-			if (response.Body == null)
+			if (response.ContentLength == 0)
 			{
 				_logger?.Trace("Received no body. request-id={0}", response.RequestId);
 
 				content = new ByteArrayContent(new byte[0]);
 			}
+			else if (response.Body != null)
+			{
+				_logger?.Trace("Received small body with data. request-id={0}, body-length={1}", response.RequestId, response.Body.Length);
+
+				content = new ByteArrayContent(response.Body);
+			}
 			else
 			{
-				if (response.Body.Length == 0)
-				{
-					_logger?.Trace("Received body with zero length. request-id={0}", response.RequestId);
+				_logger?.Trace("Received body. request-id={0}, content-length={1}", response.RequestId, response.ContentLength);
 
-					var stream = _postDataTemporaryStore.GetResponseStream(response.RequestId);
-					if (stream == null)
-					{
-						throw new InvalidOperationException(); // TODO what now?
-					}
-					content = new StreamContent(stream);
-				}
-				else
+				var stream = _postDataTemporaryStore.GetResponseStream(response.RequestId);
+				if (stream == null)
 				{
-					_logger?.Trace("Received body with data. request-id={0}, body-length={1}", response.RequestId, response.Body.Length);
-
-					content = new ByteArrayContent(response.Body);
+					throw new InvalidOperationException(); // TODO what now?
 				}
+
+				content = new StreamContent(stream);
 			}
 
 			AddContentHttpHeaders(content, response.HttpHeaders);

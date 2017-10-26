@@ -332,7 +332,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during AddOrRenewActiveConnection. LinkId = {0}, ConnectionId = {1}, ConnectorVersion = {2}", linkId, connectionId, connectorVersion);
+				_logger?.Error(ex, "Error during adding or renewing an active connection. LinkId = {0}, ConnectionId = {1}, ConnectorVersion = {2}", linkId, connectionId, connectorVersion);
 			}
 		}
 
@@ -355,7 +355,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during RenewActiveConnection. ConnectionId = {0}", connectionId);
+				_logger?.Error(ex, "Error during renewing an active connection. ConnectionId = {0}", connectionId);
 			}
 		}
 
@@ -378,7 +378,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during RemoveActiveConnectionAsync. ConnectionId = {0}", connectionId);
+				_logger?.Error(ex, "Error during removing an active connection. ConnectionId = {0}", connectionId);
 			}
 		}
 
@@ -398,7 +398,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during DeleteAllConnectionsForOrigin");
+				_logger?.Error(ex, "Error during deleting of all active connections");
 			}
 		}
 	}

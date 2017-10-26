@@ -29,18 +29,20 @@ namespace Thinktecture.Relay.Server.Controller
 
 		public async Task<IHttpActionResult> Forward()
 		{
-			var response = Request.Headers.TryGetValues("X-TTRELAY-METADATA", out var headerValues)
-				? JsonConvert.DeserializeObject<OnPremiseConnectorResponse>(headerValues.First())
-				: JToken.Parse(await Request.Content.ReadAsStringAsync().ConfigureAwait(false)).ToObject<OnPremiseConnectorResponse>();
+			var message = JToken.Parse(Request.Headers.TryGetValues("X-TTRELAY-METADATA", out var headerValues) ? headerValues.First() : await Request.Content.ReadAsStringAsync().ConfigureAwait(false));
 
-			if (response.Body != null)
+			var response = message.ToObject<OnPremiseConnectorResponse>();
+
+			if (headerValues == null)
 			{
-				// this is used by v1 OnPremiseConnectors only
-				if (response.Body.Length >= 0x10000)
+				// this is a legacy on premise connector (v1)
+				if (response.Body?.Length >= 0x10000)
 				{
 					_postDataTemporaryStore.SaveResponse(response.RequestId, response.Body);
-					response.Body = new byte[0]; // this marks that there is a larger body available in the store
+					response.Body = null; // free the memory a.s.a.p.
 				}
+
+				response.ContentLength = response.Body?.Length ?? 0;
 			}
 			else
 			{
@@ -48,13 +50,16 @@ namespace Thinktecture.Relay.Server.Controller
 				{
 					var requestStream = await Request.Content.ReadAsStreamAsync().ConfigureAwait(false);
 					await requestStream.CopyToAsync(stream).ConfigureAwait(false);
+
+					response.ContentLength = stream.Length;
 				}
 			}
+
+			_logger?.Trace("Received on-premise response. request-id={0}, message={1}", response.RequestId, message);
 
 			await _backendCommunication.SendOnPremiseTargetResponse(response.OriginId, response).ConfigureAwait(false);
 
 			return Ok();
 		}
-	
 	}
 }
