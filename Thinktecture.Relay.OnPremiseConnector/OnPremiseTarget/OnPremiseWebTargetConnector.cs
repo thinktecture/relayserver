@@ -137,7 +137,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				_logger?.Trace("   adding request stream");
 
 				var localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await request.Stream.CopyToAsync(localTargetStream).ContinueWith(_ => localTargetStream.FlushAsync()).ConfigureAwait(false); // TODO check if flush is needed
+				await request.Stream.CopyToAsync(localTargetStream).ConfigureAwait(false);
+				//await localTargetStream.FlushAsync().ConfigureAwait(false);
 			}
 
 			return localTargetRequest;
