@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		protected abstract IOnPremiseInProcHandler CreateHandler();
 
-		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request)
+		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
 			if (url == null)
 				throw new ArgumentNullException(nameof(url));
@@ -59,43 +59,30 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 							_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
 
 							response.StatusCode = HttpStatusCode.GatewayTimeout;
-							response.HttpHeaders = new Dictionary<string, string>()
-							{
-								["X-TTRELAY-TIMEOUT"] = "On-Premise Target",
-							};
-							response.Stream = new MemoryStream();
+							response.HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-TIMEOUT"] = "On-Premise Target" };
 						}
 					}
 				}
 				catch (Exception ex)
 				{
-					_logger?.Trace(ex, "Error requesting response. request-id={0}", request.RequestId);
+					_logger?.Trace(ex, "Error requesting response from in-proc target. request-id={0}", request.RequestId);
 
 					response.StatusCode = HttpStatusCode.InternalServerError;
-					response.HttpHeaders = new Dictionary<string, string>()
-					{
-						["Content-Type"] = "text/plain",
-					};
+					response.HttpHeaders = new Dictionary<string, string> { ["Content-Type"] = "text/plain" };
 					response.Stream = new MemoryStream(Encoding.UTF8.GetBytes(ex.ToString()));
 				}
 				finally
 				{
 					// ReSharper disable once SuspiciousTypeConversion.Global
-					if (handler is IDisposable disposable)
-					{
-						disposable.Dispose();
-					}
+					(handler as IDisposable)?.Dispose();
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger?.Trace(ex, "Error creating handler. request-id={0}", request.RequestId);
+				_logger?.Trace(ex, "Error creating in-proc handler. request-id={0}", request.RequestId);
 
 				response.StatusCode = HttpStatusCode.InternalServerError;
-				response.HttpHeaders = new Dictionary<string, string>()
-				{
-					["Content-Type"] = "text/plain",
-				};
+				response.HttpHeaders = new Dictionary<string, string> { ["Content-Type"] = "text/plain" };
 				response.Stream = new MemoryStream(Encoding.UTF8.GetBytes(ex.ToString()));
 			}
 

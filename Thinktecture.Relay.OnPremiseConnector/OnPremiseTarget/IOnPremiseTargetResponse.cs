@@ -29,17 +29,20 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		/// <summary>
 		/// Gets the HTTP status code received from the local target
+		/// <remarks>This can be set by an in-proc handler</remarks>
 		/// </summary>
-		HttpStatusCode StatusCode { get; }
+		HttpStatusCode StatusCode { get; set; }
 
 		/// <summary>
 		/// Gets the HTTP headers received from the local target
+		/// <remarks>This can be set by an in-proc handler</remarks>
 		/// </summary>
-		IReadOnlyDictionary<string, string> HttpHeaders { get; }
+		IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
 
 		/// <summary>
 		/// Gets the response stream containing the data from the local target
+		/// <remarks>This can be set by an in-proc handler</remarks>
 		/// </summary>
-		Stream Stream { get; }
+		Stream Stream { get; set; }
 	}
 }

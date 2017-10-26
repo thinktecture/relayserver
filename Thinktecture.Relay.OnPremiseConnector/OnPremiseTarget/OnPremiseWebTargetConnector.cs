@@ -40,14 +40,22 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, bool ignoreSslErrors, ILogger logger)
 		{
-			_baseUri = baseUri;
-			_requestTimeout = requestTimeout;
+			if (requestTimeout < 0)
+				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
+
+			_baseUri = baseUri ?? throw new ArgumentNullException(nameof(baseUri));
+			_requestTimeout = (int)TimeSpan.FromSeconds(requestTimeout).TotalMilliseconds;
 			_ignoreSslErrors = ignoreSslErrors;
 			_logger = logger;
 		}
 
-		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request)
+		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
+			if (url == null)
+				throw new ArgumentNullException(nameof(url));
+			if (request == null)
+				throw new ArgumentNullException(nameof(request));
+
 			_logger?.Debug("Requesting response from on-premise web target");
 			_logger?.Trace("Requesting response from on-premise web target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
 
@@ -58,7 +66,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				RequestStarted = DateTime.UtcNow,
 			};
 
-			var localTargetRequest = await CreateLocalTargetWebRequestAsync(url, request).ConfigureAwait(false);
+			var localTargetRequest = await CreateLocalTargetWebRequestAsync(url, request, relayedRequestHeader).ConfigureAwait(false);
 
 			try
 			{
@@ -67,7 +75,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 				response.StatusCode = localTargetResponse.StatusCode;
 				response.HttpHeaders = localTargetResponse.Headers.AllKeys.ToDictionary(n => n, n => localTargetResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
-				response.Stream = localTargetResponse.GetResponseStream() ?? Stream.Null;
+				response.Stream = localTargetResponse.GetResponseStream();
 				response.WebResponse = localTargetResponse;
 			}
 			catch (WebException wex)
@@ -84,7 +92,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 				response.StatusCode = HttpStatusCode.GatewayTimeout;
 				response.HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-TIMEOUT"] = "On-Premise Target" };
-				response.Stream = Stream.Null;
 			}
 
 			response.RequestFinished = DateTime.UtcNow;
@@ -94,13 +101,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			return response;
 		}
 
-		private async Task<HttpWebRequest> CreateLocalTargetWebRequestAsync(string url, IOnPremiseTargetRequest request)
+		private async Task<HttpWebRequest> CreateLocalTargetWebRequestAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
 			_logger?.Trace("Creating web request");
 
 			var localTargetRequest = WebRequest.CreateHttp(String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url));
 			localTargetRequest.Method = request.HttpMethod;
-			localTargetRequest.Timeout = _requestTimeout * 1000;
+			localTargetRequest.Timeout = _requestTimeout;
 
 			if (_ignoreSslErrors)
 			{
@@ -121,23 +128,19 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 			}
 
-			var localTargetStream = Stream.Null;
-			if (request.Body?.Length == 0)
+			if (!String.IsNullOrWhiteSpace(relayedRequestHeader))
+			{
+				localTargetRequest.Headers.Add(relayedRequestHeader, "true");
+			}
+
+			if (request.Stream != Stream.Null)
 			{
 				_logger?.Trace("   adding request stream.");
 
-				localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await request.Stream.CopyToAsync(localTargetStream).ConfigureAwait(false);
-			}
-			else if (request.Body != null)
-			{
-				_logger?.Trace("   adding request body. length={0}", request.Body.Length);
-
-				localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await localTargetStream.WriteAsync(request.Body, 0, request.Body.Length).ConfigureAwait(false);
+				var localTargetStream = await localTargetRequest.GetRequestStreamAsync().ConfigureAwait(false);
+				await request.Stream.CopyToAsync(localTargetStream).ContinueWith(_ => localTargetStream.FlushAsync()).ConfigureAwait(false); // TODO check if flush is needed
 			}
 
-			await localTargetStream.FlushAsync().ConfigureAwait(false); // TODO check if needed
 
 			return localTargetRequest;
 		}
