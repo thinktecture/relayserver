@@ -230,14 +230,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger?.Trace("Connection lost - trying to reconnect. relay-server={0}", _relayServer);
 		}
 
-		protected override void OnMessageReceived(JToken message)
-		{
-			base.OnMessageReceived(message);
-
-			OnReceivedAsync(message).ConfigureAwait(false);
-		}
-
-		private async Task OnReceivedAsync(JToken message)
+		protected override async void OnMessageReceived(JToken message)
 		{
 			var ctx = new RequestContext();
 			OnPremiseTargetRequest request = null;
@@ -300,7 +293,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 						RequestId = request.RequestId,
 					};
 
-					await PostToRelayAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+					try
+					{
+						await PostToRelayAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+					}
+					catch (Exception ex)
+					{
+						_logger?.Error(ex, "Error during posting to relay");
+					}
 				}
 			}
 		}
@@ -450,7 +450,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				catch (Exception ex)
 				{
-					_logger?.Error(ex, "Error communicating with relay server. Aborting response...");
+					_logger?.Error(ex, "Error during posting to relay");
 				}
 			}
 		}
