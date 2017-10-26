@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector;
 
 namespace Thinktecture.Relay.Server.OnPremise
 {

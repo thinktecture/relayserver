@@ -104,17 +104,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			}
 			finally
 			{
-				webResponse?.Dispose();
+				//webResponse?.Dispose();
 			}
 		}
 
-		private async Task<HttpWebRequest> CreateOnPremiseTargetWebRequestAsync(string url, IOnPremiseTargetRequest onPremiseTargetRequest)
+		private async Task<HttpWebRequest> CreateOnPremiseTargetWebRequestAsync(string url, IOnPremiseTargetRequest request)
 		{
 			_logger?.Trace("Creating web request");
 
 			var uri = String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url);
 			var webRequest = WebRequest.CreateHttp(uri);
-			webRequest.Method = onPremiseTargetRequest.HttpMethod;
+			webRequest.Method = request.HttpMethod;
 			webRequest.Timeout = _requestTimeout * 1000;
 
 			if (_ignoreSslErrors)
@@ -122,7 +122,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				webRequest.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
 			}
 
-			foreach (var httpHeader in onPremiseTargetRequest.HttpHeaders)
+			foreach (var httpHeader in request.HttpHeaders)
 			{
 				_logger?.Trace("   adding header. header={0}, value={1}", httpHeader.Key, httpHeader.Value);
 
@@ -136,21 +136,21 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 			}
 
-			if (onPremiseTargetRequest.Body?.Length == 0)
+			if (request.Body?.Length == 0)
 			{
-				_logger.Trace("   adding request stream.");
+				_logger?.Trace("   adding request stream.");
 
-				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await onPremiseTargetRequest.Stream.CopyToAsync(requestStream).ConfigureAwait(false);
-				// TODO await requestStream.FlushAsync().ConfigureAwait(false);
+				var webRequestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
+				await request.Stream.CopyToAsync(webRequestStream).ConfigureAwait(false);
+				await webRequestStream.FlushAsync().ConfigureAwait(false);
 			}
-			else if (onPremiseTargetRequest.Body != null)
+			else if (request.Body != null)
 			{
-				_logger?.Trace("   adding request body. length={0}", onPremiseTargetRequest.Body.Length);
+				_logger?.Trace("   adding request body. length={0}", request.Body.Length);
 
 				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await requestStream.WriteAsync(onPremiseTargetRequest.Body, 0, onPremiseTargetRequest.Body.Length).ConfigureAwait(false);
-				// TODO await requestStream.FlushAsync().ConfigureAwait(false);
+				await requestStream.WriteAsync(request.Body, 0, request.Body.Length).ConfigureAwait(false);
+				await requestStream.FlushAsync().ConfigureAwait(false);
 			}
 
 			return webRequest;

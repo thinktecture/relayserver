@@ -5,7 +5,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 {
 	public interface ITraceFileWriter
 	{
-		Task WriteHeaderFileAsync(string fileName, IDictionary<string, string> headers);
+		Task WriteHeaderFileAsync(string fileName, IReadOnlyDictionary<string, string> headers);
 		Task WriteContentFileAsync(string fileName, byte[] content);
 	}
 }

@@ -1,5 +1,5 @@
 using System;
-using Thinktecture.Relay.Server.Configuration;
+using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server.Helper
 {
@@ -22,7 +22,9 @@ namespace Thinktecture.Relay.Server.Helper
 		public string TemporaryRequestStoragePath { get; set; }
 		public TimeSpan TemporaryRequestStoragePeriod { get; set; }
 		public int ActiveConnectionTimeoutInSeconds { get; set; }
-		public string PluginAssembly { get; set; }
+		public string InterceptorAssembly { get; }
+		public string OAuthSharedSecret { get; }
+		public string OAuthCertificate { get; }
 
 		public ConfigurationDummy()
 		{

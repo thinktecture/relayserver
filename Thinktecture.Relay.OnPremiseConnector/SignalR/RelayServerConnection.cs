@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR.Client;
@@ -106,8 +105,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
 		}
 
-		public void RegisterOnPremiseTarget<T>(string key)
-			where T : IOnPremiseInProcHandler, new()
+		public void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new()
 		{
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
@@ -263,16 +261,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 				try
 				{
-				    if (request.HttpMethod == "PING")
-				    {
-					    await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
-					    return;
-				    }
+					if (request.HttpMethod == "PING")
+					{
+						await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
+						return;
+					}
 
 					if (request.HttpMethod == "HEARTBEAT")
-				    {
+					{
 						HandleHeartbeatRequest(ctx, request);
-					    return;
+						return;
 					}
 				}
 				finally
@@ -344,22 +342,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (_lastHeartbeat == DateTime.MinValue)
 			{
-			    request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
-			    if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
-			    {
-				    _logger?.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
+				request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
+				if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
+				{
+					_logger?.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
 					StartHeartbeatCheckLoop(TimeSpan.FromSeconds(heartbeatInterval), _cts.Token);
-			    }
-            }
-		}
-
-		private async Task HandleHeartbeatRequestAsync(IOnPremiseTargetRequest request)
-		{
-			_logger?.Debug("Received heartbeat from relay server #{0}", _id);
-
-			_lastHeartbeat = DateTime.UtcNow;
-
-			ctx.IsRelayServerNotified = true;
+				}
+			}
 		}
 
 		private void StartHeartbeatCheckLoop(TimeSpan heartbeatInterval, CancellationToken token)
@@ -388,9 +377,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 
 					await Task.Delay(heartbeatInterval, token).ConfigureAwait(false);
-				}, token).ConfigureAwait(false);
-			}
-        }
+				}
+			}, token).ConfigureAwait(false);
+		}
 
 		private void ForceReconnect()
 		{
@@ -446,21 +435,20 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Debug("Sending response from {0} to relay server", request.Url);
 
-				try
-				{
-					// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
-					await PostToRelayAsync(ctx, response, cancellationToken).ConfigureAwait(false);
-				}
-				catch (Exception ex)
-				{
-				    _logger?.Debug(ex, "Error while posting to relay server");
-				    _logger?.Error("Error communicating with relay server. Aborting response...");
-				}
+			try
+			{
+				// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
+				await PostToRelayAsync(ctx, response, cancellationToken).ConfigureAwait(false);
 			}
+			catch (Exception ex)
+			{
+				_logger?.Debug(ex, "Error while posting to relay server");
+				_logger?.Error("Error communicating with relay server. Aborting response...");
+			}
+		}
 
-		{
 		private async Task PostToRelayAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
-        {
+		{
 			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;
 		}

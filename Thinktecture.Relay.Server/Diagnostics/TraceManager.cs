@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, new ReadOnlyDictionary<string, string>(onPremiseConnectorRequest.HttpHeaders));
 				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, onPremiseConnectorRequest.Body);
 
-				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, onPremiseTargetResponse.HttpHeaders);
+				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, new ReadOnlyDictionary<string, string>(onPremiseTargetResponse.HttpHeaders));
 				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_TARGET_CONTENT_EXTENSION, onPremiseTargetResponse.Body);
 			}
 			catch (Exception ex)

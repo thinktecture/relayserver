@@ -2,8 +2,10 @@ using Autofac;
 using Newtonsoft.Json.Linq;
 using NLog;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Newtonsoft.Json;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
@@ -25,35 +27,34 @@ namespace Thinktecture.Relay.Server.Controller
 			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 		}
 
-		public async Task<IHttpActionResult> Forward(JToken message)
+		public async Task<IHttpActionResult> Forward()
 		{
-			// TODO check for header or fallback to legacy
+			var response = Request.Headers.TryGetValues("X-TTRELAY-METADATA", out var headerValues)
+				? JsonConvert.DeserializeObject<OnPremiseConnectorResponse>(headerValues.First())
+				: JToken.Parse(await Request.Content.ReadAsStringAsync().ConfigureAwait(false)).ToObject<OnPremiseConnectorResponse>();
 
-			// This is needed because the class is internal
-			var onPremiseTargetResponse = message.ToObject<OnPremiseConnectorResponse>();
-
-			// Store response to file, if we get one and it is larger than 64 kByte
-			if (onPremiseTargetResponse.Body?.Length >= 0x10000)
+			if (response.Body != null)
 			{
-				_postDataTemporaryStore.SaveResponse(onPremiseTargetResponse.RequestId, onPremiseTargetResponse.Body);
-				onPremiseTargetResponse.Body = new byte[0]; // this marks that there is a larger body available
+				// this is used by v1 OnPremiseConnectors only
+				if (response.Body.Length >= 0x10000)
+				{
+					_postDataTemporaryStore.SaveResponse(response.RequestId, response.Body);
+					response.Body = new byte[0]; // this marks that there is a larger body available in the store
+				}
+			}
+			else
+			{
+				using (var stream = _postDataTemporaryStore.CreateResponseStream(response.RequestId))
+				{
+					var requestStream = await Request.Content.ReadAsStreamAsync().ConfigureAwait(false);
+					await requestStream.CopyToAsync(stream).ConfigureAwait(false);
+				}
 			}
 
-			await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetResponse.OriginId, onPremiseTargetResponse).ConfigureAwait(false);
+			await _backendCommunication.SendOnPremiseTargetResponse(response.OriginId, response).ConfigureAwait(false);
 
 			return Ok();
 		}
-
-		public async Task<IHttpActionResult> Upload(string requestId)
-		{
-			_logger?.Debug($"{nameof(ResponseController)}: Upload body called for request {{0}}", requestId);
-
-			using (var stream = _postDataTemporaryStore.CreateResponseStream(requestId))
-			{
-				await Request.Content.CopyToAsync(stream);
-			}
-
-			return Ok();
-		}
+	
 	}
 }

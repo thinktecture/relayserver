@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -62,7 +63,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 							{
 								["X-TTRELAY-TIMEOUT"] = "On-Premise Target",
 							};
-							response.Body = null;
+							response.Stream = new MemoryStream();
 						}
 					}
 				}
@@ -75,7 +76,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 					{
 						["Content-Type"] = "text/plain",
 					};
-					response.Body = Encoding.UTF8.GetBytes(ex.ToString());
+					response.Stream = new MemoryStream(Encoding.UTF8.GetBytes(ex.ToString()));
 				}
 				finally
 				{
@@ -95,7 +96,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				{
 					["Content-Type"] = "text/plain",
 				};
-				response.Body = Encoding.UTF8.GetBytes(ex.ToString());
+				response.Stream = new MemoryStream(Encoding.UTF8.GetBytes(ex.ToString()));
 			}
 
 			response.RequestFinished = DateTime.UtcNow;
