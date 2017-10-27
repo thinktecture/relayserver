@@ -1,3 +1,4 @@
+/// <binding BeforeBuild='managementweb:build' />
 'use strict';
 
 var gulp = require('gulp');
