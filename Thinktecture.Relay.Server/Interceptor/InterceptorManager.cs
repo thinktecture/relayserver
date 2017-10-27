@@ -20,11 +20,12 @@ namespace Thinktecture.Relay.Server.Interceptor
 			_responseInterceptor = responseInterceptor;
 		}
 
-		public HttpResponseMessage HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message)
+		public IOnPremiseConnectorRequest HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, out HttpResponseMessage immidateResponse)
 		{
+			immidateResponse = null;
 			if (_requestInceptor == null)
 			{
-				return null;
+				return request;
 			}
 
 			_logger?.Trace("Handling request. request-id={0}", request.RequestId);
@@ -41,13 +42,17 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			try
 			{
-				return _requestInceptor.OnRequestReceived(new InterceptedRequest(request) { ClientIpAddress = ipAddress });
+				var replacedRequest = new InterceptedRequest(request) { ClientIpAddress = ipAddress };
+				immidateResponse = _requestInceptor.OnRequestReceived(replacedRequest);
+
+				return replacedRequest;
 			}
 			catch (Exception ex)
 			{
 				_logger?.Error(ex, "Error while executing the request interceptor. TypeName = {0}, RequestId = {1}", _requestInceptor?.GetType().Name, request.RequestId);
-				return null;
 			}
+
+			return request;
 		}
 
 		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response)

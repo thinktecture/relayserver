@@ -75,7 +75,7 @@ namespace Thinktecture.Relay.Server.Controller
 			IOnPremiseConnectorResponse response = null;
 			try
 			{
-				var message = _interceptorManager.HandleRequest(request, Request);
+				request = _interceptorManager.HandleRequest(request, Request, out var message);
 				if (message != null)
 				{
 					_logger?.Trace("Interceptor caused direct answering of request. request-id={0}, status-code={1}", request.RequestId, message.StatusCode);
