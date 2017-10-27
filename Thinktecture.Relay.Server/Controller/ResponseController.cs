@@ -50,7 +50,6 @@ namespace Thinktecture.Relay.Server.Controller
 				{
 					var requestStream = await Request.Content.ReadAsStreamAsync().ConfigureAwait(false);
 					await requestStream.CopyToAsync(stream).ConfigureAwait(false);
-					//await stream.FlushAsync().ConfigureAwait(false);
 
 					response.ContentLength = stream.Length;
 				}
