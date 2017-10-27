@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.Server.OnPremise
 		/// Gets the end time of the incoming request
 		/// <remarks>This will be set when request is finished</remarks>
 		/// </summary>
-		DateTime RequestFinished { get; set;  }
+		DateTime RequestFinished { get; set; }
 
 		/// <summary>
 		/// Gets the method of this request
