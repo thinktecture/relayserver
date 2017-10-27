@@ -68,7 +68,8 @@ namespace Thinktecture.Relay.Server.Http
 			}
 
 
-			request.HttpHeaders = message.Content.Headers
+			request.HttpHeaders = message.Headers
+				.Union(message.Content.Headers)
 				.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key))
 				.Select(kvp => new { Name = kvp.Key, Value = CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value) })
 				.ToDictionary(header => header.Name, header => header.Value);
