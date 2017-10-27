@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Controller
 				}
 			}
 
-			_logger?.Trace("Received on-premise response. request-id={0}, message={1}", response.RequestId, message);
+			_logger?.Trace("Received legacy on-premise response. request-id={0}, message={1}", response.RequestId, response);
 
 			await _backendCommunication.SendOnPremiseTargetResponse(response.OriginId, response).ConfigureAwait(false);
 
