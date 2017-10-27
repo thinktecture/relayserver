@@ -1,12 +1,13 @@
 using System.Collections.Generic;
-using System.Net;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
 namespace Thinktecture.Relay.Server.OnPremise
 {
-	public interface IOnPremiseConnectorResponse : IOnPremiseTargetResponse
+	public interface IWriteableOnPremiseTargetRequest : IOnPremiseTargetRequest
 	{
+		new string HttpMethod { get; set; }
+		new string Url { get; set; }
 		new IDictionary<string, string> HttpHeaders { get; }
-		new HttpStatusCode StatusCode { get; set; }
+		new byte[] Body { get; set; }
 	}
 }

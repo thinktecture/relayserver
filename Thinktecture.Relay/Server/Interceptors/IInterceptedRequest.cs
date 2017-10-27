@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Thinktecture.Relay.Server.Plugins
+namespace Thinktecture.Relay.Server.Interceptors
 {
 	/// <summary>
 	/// A request being provided to <see cref="IOnPremiseRequestInterceptor"/>.
@@ -12,14 +8,9 @@ namespace Thinktecture.Relay.Server.Plugins
 	public interface IInterceptedRequest : IReadOnlyInterceptedRequest
 	{
 		/// <summary>
-		/// Gets or sets this request body
-		/// </summary>
-		new byte[] Body { get; set; }
-
-		/// <summary>
 		/// Gets or sets the HTTP headers sent along with this request
 		/// </summary>
-		new Dictionary<string, string> HttpHeaders { get; set; }
+		new IDictionary<string, string> HttpHeaders { get; }
 
 		/// <summary>
 		/// Gets or sets the method of this request. May be GET, PUT, POST, PATCH, DELETE, OPTIONS

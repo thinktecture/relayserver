@@ -1,9 +1,9 @@
 using System.Net.Http;
 
-namespace Thinktecture.Relay.Server.Plugins
+namespace Thinktecture.Relay.Server.Interceptors
 {
 	/// <summary>
-	/// Interface for plugins that are capable of modifying the incoming request before it gets relayed to its destination.
+	/// Interface for interceptors that are capable of modifying the incoming request before it gets relayed to its destination.
 	/// </summary>
 	public interface IOnPremiseRequestInterceptor
 	{

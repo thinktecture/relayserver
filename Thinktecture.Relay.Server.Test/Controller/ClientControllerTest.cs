@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -14,7 +13,7 @@ using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.Plugins;
+using Thinktecture.Relay.Server.Interceptors;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller
@@ -32,7 +31,7 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly Mock<IHttpResponseMessageBuilder> _httpResponseMessageBuilderMock;
 		private readonly Mock<IRequestLogger> _requestLoggerMock;
 		private readonly Mock<ITraceManager> _traceManagerMock;
-		private readonly Mock<IPluginManager> _pluginManager;
+		private readonly Mock<IInterceptorManager> _interceptorManager;
 
 		public ClientControllerTest()
 		{
@@ -44,13 +43,13 @@ namespace Thinktecture.Relay.Server.Controller
 			_httpResponseMessageBuilderMock = new Mock<IHttpResponseMessageBuilder>();
 			_requestLoggerMock = new Mock<IRequestLogger>();
 			_traceManagerMock = new Mock<ITraceManager>();
-			_pluginManager = new Mock<IPluginManager>();
+			_interceptorManager = new Mock<IInterceptorManager>();
 		}
 
 		private ClientController CreateClientController()
 		{
 			return new ClientController(_backendCommunicationMock.Object, _loggerMock.Object, _relayRepositoryMock.Object, _requestLoggerMock.Object,
-				_httpResponseMessageBuilderMock.Object, _clientRequestBuilderMock.Object, _pathSplitterMock.Object, _traceManagerMock.Object, _pluginManager.Object);
+				_httpResponseMessageBuilderMock.Object, _clientRequestBuilderMock.Object, _pathSplitterMock.Object, _traceManagerMock.Object, _interceptorManager.Object);
 		}
 
 		[TestMethod]

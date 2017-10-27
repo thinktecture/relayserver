@@ -8,7 +8,7 @@ using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
-using Thinktecture.Relay.Server.Plugins;
+using Thinktecture.Relay.Server.Interceptors;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
@@ -18,12 +18,12 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 	class RelayServerModule : Module
 	{
 		private readonly IConfiguration _configuration;
-		private readonly IPluginLoader _pluginLoader;
+		private readonly InterceptorLoader _interceptorLoader;
 
-		public RelayServerModule(IConfiguration configuration, IPluginLoader pluginLoader)
+		public RelayServerModule(IConfiguration configuration, InterceptorLoader interceptorLoader)
 		{
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-			_pluginLoader = pluginLoader ?? throw new ArgumentNullException(nameof(pluginLoader));
+			_interceptorLoader = interceptorLoader ?? throw new ArgumentNullException(nameof(interceptorLoader));
 		}
 
 		protected override void Load(ContainerBuilder builder)
@@ -65,7 +65,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 			builder.RegisterType<OnPremiseRequestBuilder>().As<IOnPremiseRequestBuilder>();
 			builder.RegisterType<PathSplitter>().As<IPathSplitter>();
 
-			builder.RegisterType<PluginManager>().As<IPluginManager>();
+			builder.RegisterType<InterceptorManager>().As<IInterceptorManager>();
 
 			if (String.IsNullOrWhiteSpace(_configuration.TemporaryRequestStoragePath))
 			{
@@ -76,7 +76,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 				builder.RegisterType<FilePostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
 			}
 
-			_pluginLoader.LoadPlugins(builder);
+			_interceptorLoader.LoadInterceptors(builder);
 		}
 	}
 }

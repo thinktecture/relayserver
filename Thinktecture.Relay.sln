@@ -1,12 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3} = {F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}"
 EndProject
@@ -35,14 +32,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "de", "de", "{C930A0EE-45E1-
 		Documentation\de\2-architektur.md = Documentation\de\2-architektur.md
 		Documentation\de\3-installation.md = Documentation\de\3-installation.md
 		Documentation\de\4-relayserver-management-web.md = Documentation\de\4-relayserver-management-web.md
-		Documentation\de\5-relayserver-plugin-entwicklung.md = Documentation\de\5-relayserver-plugin-entwicklung.md
+		Documentation\de\5-relayserver-interceptor-entwicklung.md = Documentation\de\5-relayserver-interceptor-entwicklung.md
 		Documentation\de\6-entwicklungssetup.md = Documentation\de\6-entwicklungssetup.md
 		Documentation\de\relayserver.md = Documentation\de\relayserver.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.PluginDemos", "Thinktecture.Relay.PluginDemos\Thinktecture.Relay.PluginDemos.csproj", "{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{FFFB495D-B5B3-49C6-B30D-7F24F0FB06BB}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay", "Thinktecture.Relay\Thinktecture.Relay.csproj", "{E34D846B-3B1E-4A97-A06F-F5502349F4F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.InterceptorDemos", "Thinktecture.Relay.InterceptorDemos\Thinktecture.Relay.InterceptorDemos.csproj", "{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,14 +68,14 @@ Global
 		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F3B433B1-6C7B-4CB2-8ABE-9753DEA477C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

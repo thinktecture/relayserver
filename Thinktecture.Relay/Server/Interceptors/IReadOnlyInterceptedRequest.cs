@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
+namespace Thinktecture.Relay.Server.Interceptors
 {
-	public interface IOnPremiseTargetRequest
+	public interface IReadOnlyInterceptedRequest
 	{
 		/// <summary>
 		/// Gets the internal ID of this request.
@@ -42,7 +42,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		string AcknowledgeId { get; }
 
 		/// <summary>
-		/// Gets the IP Address of the client
+		/// Gets the IP address of the client sending this request. May be an IPv4 or an IPv6 address.
 		/// </summary>
 		IPAddress ClientIpAddress { get; }
 	}

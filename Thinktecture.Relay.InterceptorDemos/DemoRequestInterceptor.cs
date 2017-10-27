@@ -2,13 +2,13 @@ using System;
 using System.Net;
 using System.Net.Http;
 using NLog;
-using Thinktecture.Relay.Server.Plugins;
+using Thinktecture.Relay.Server.Interceptors;
 
-namespace Thinktecture.Relay.PluginDemos
+namespace Thinktecture.Relay.InterceptorDemos
 {
 	/// <inheritdoc />
 	/// <summary>
-	/// Example implementation of a plugin that modifies the request headers
+	/// Example implementation of an interceptor that modifies the request headers
 	/// </summary>
 	public class DemoRequestInterceptor : IOnPremiseRequestInterceptor
 	{
@@ -17,11 +17,11 @@ namespace Thinktecture.Relay.PluginDemos
 		/// <summary>
 		/// Creates a new instance of the <see cref="DemoRequestInterceptor"/>
 		/// </summary>
-		/// <param name="logger">An instance of an <see cref="ILogger"/>, that will be injected by Autofac when this plugin is created</param>
+		/// <param name="logger">An instance of an <see cref="ILogger"/>, that will be injected by Autofac when this interceptor is created</param>
 		public DemoRequestInterceptor(ILogger logger)
 		{
 			// You can also have the DI inject different custom dependencies, as long as
-			// they are all registered in your plugins Autofac module
+			// they are all registered in your interceptors Autofac module
 			_logger = logger;
 		}
 
