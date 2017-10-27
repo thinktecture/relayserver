@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
+using Newtonsoft.Json;
 using NLog;
 using Thinktecture.Relay.Server.Interceptor;
 
@@ -49,11 +48,15 @@ namespace Thinktecture.Relay.InterceptorDemos
 			if (String.Equals(request.HttpMethod, "PATCH", StringComparison.InvariantCultureIgnoreCase))
 				request.HttpMethod = HttpMethod.Put.Method;
 
+			// Append something to the url
+			request.Url += request.Url.Contains("?") ? "&" : "?" + "parameterAddedFromDemoInterceptor=valueAddedFromDemoInterceptor";
+
 			// Add an HTTP header
 			var headers = request.CloneHttpHeaders();
 			headers.Add("X-ThinkectureRelay-Example", $"Added by {nameof(DemoRequestInterceptor)}");
 			request.HttpHeaders = headers;
 
+			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} modified request: " + JsonConvert.SerializeObject(request));
 			return null;
 		}
 	}

@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.InterceptorDemos
 	{
 		public HttpResponseMessage OnResponseReceived(IInterceptedRequest request)
 		{
-			return new HttpResponseMessage(HttpStatusCode.OK)
+			return new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
 			{
 				Content = new ByteArrayContent(GetBody())
 			};
