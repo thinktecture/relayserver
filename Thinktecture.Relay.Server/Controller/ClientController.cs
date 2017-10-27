@@ -44,12 +44,13 @@ namespace Thinktecture.Relay.Server.Controller
 			_interceptorManager = interceptorManager ?? throw new ArgumentNullException(nameof(interceptorManager));
 		}
 
-		[HttpDelete]
-		[HttpGet]
-		[HttpHead]
-		[HttpPost]
-		[HttpPut]
 		[HttpOptions]
+		[HttpPost]
+		[HttpGet]
+		[HttpPut]
+		[HttpPatch]
+		[HttpDelete]
+		[HttpHead]
 		public async Task<HttpResponseMessage> Relay(string path)
 		{
 			_logger?.Debug("Relaying {0} {1}", path, ControllerContext.Request.Method);
