@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(DelegatingDisposable)}: Error during dispose.");
+				_logger?.Error(ex, "Error during dispose");
 			}
 		}
 	}

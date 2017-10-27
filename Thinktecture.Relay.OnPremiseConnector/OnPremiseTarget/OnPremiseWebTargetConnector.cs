@@ -4,6 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using NLog;
 
@@ -11,151 +14,212 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
 	internal class OnPremiseWebTargetConnector : IOnPremiseTargetConnector
 	{
-		private static readonly Dictionary<string, Action<HttpWebRequest, string>> _requestHeaderTransformations;
-		private static readonly Action<HttpWebRequest, string> _nullAction = (r, v) => { };
+		private static readonly string[] _ignoredHeaders = { "Host", "Connection", "Expect", "Proxy-Connection", "Proxy-Authorization",
+			"Range", "If-Range", "TransferEncoding", "Transfer-Encoding-Chunked", "Upgrade", "Via", "Warning", "Trailer", "Pragma" };
+		private static readonly Dictionary<string, Action<HttpRequestHeaders, string>> _requestHeadersTransformations;
+		private static readonly Dictionary<string, Action<HttpContentHeaders, string>> _contentHeadersTransformations;
 
 		static OnPremiseWebTargetConnector()
 		{
-			_requestHeaderTransformations = new Dictionary<string, Action<HttpWebRequest, string>>()
+			_requestHeadersTransformations = new Dictionary<string, Action<HttpRequestHeaders, string>>
 			{
-				["Accept"] = (r, v) => r.Accept = v,
-				["Connection"] = (r, v) => r.Connection = v,
-				["Content-Type"] = (r, v) => r.ContentType = v,
-				["Content-Length"] = (r, v) => r.ContentLength = Int64.Parse(v),
-				["Date"] = (r, v) => r.Date = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
-				["Expect"] = _nullAction,
-				["Host"] = _nullAction,
-				["If-Modified-Since"] = (r, v) => r.IfModifiedSince = DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture),
-				["Proxy-Connection"] = _nullAction,
-				["Range"] = _nullAction,
-				["Referer"] = (r, v) => r.Referer = v,
-				["Transfer-Encoding"] = (r, v) => r.TransferEncoding = v,
-				["User-Agent"] = (r, v) => r.UserAgent = v
+				["Accept"] = (r, v) =>
+				{
+					if (MediaTypeWithQualityHeaderValue.TryParse(v, out var value)) r.Accept.Add(value);
+				},
+				["Accept-Charset"] = (r, v) =>
+				{
+					if (StringWithQualityHeaderValue.TryParse(v, out var value)) r.AcceptCharset.Add(value);
+				},
+				["Accept-Enconding"] = (r, v) =>
+				{
+					if (StringWithQualityHeaderValue.TryParse(v, out var value)) r.AcceptEncoding.Add(value);
+				},
+				["Accept-Language"] = (r, v) =>
+				{
+					if (StringWithQualityHeaderValue.TryParse(v, out var value)) r.AcceptLanguage.Add(value);
+				},
+				["Authorization"] = (r, v) =>
+				{
+					if (AuthenticationHeaderValue.TryParse(v, out var value)) r.Authorization = value;
+				},
+				["Cache-Control"] = (r, v) =>
+				{
+					if (CacheControlHeaderValue.TryParse(v, out var value)) r.CacheControl = value;
+				},
+				["Date"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.Date = value;
+				},
+				["If-Match"] = (r, v) =>
+				{
+					if (EntityTagHeaderValue.TryParse(v, out var value)) r.IfMatch.Add(value);
+				},
+				["If-Modified-Since"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.IfModifiedSince = value;
+				},
+				["If-None-Match"] = (r, v) =>
+				{
+					if (EntityTagHeaderValue.TryParse(v, out var value)) r.IfNoneMatch.Add(value);
+				},
+				["If-Unmodified-Since"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.IfUnmodifiedSince = value;
+				},
+				["Max-Forwards"] = (r, v) =>
+				{
+					if (Int32.TryParse(v, out var value)) r.MaxForwards = value;
+				},
+				["Referer"] = (r, v) =>
+				{
+					if (Uri.TryCreate(v, UriKind.RelativeOrAbsolute, out var value)) r.Referrer = value;
+				},
+				["TE"] = (r, v) =>
+				{
+					if (TransferCodingWithQualityHeaderValue.TryParse(v, out var value)) r.TE.Add(value);
+				},
+				["User-Agent"] = (r, v) =>
+				{
+					if (ProductInfoHeaderValue.TryParse(v, out var value)) r.UserAgent.Add(value);
+				},
+			};
+			_contentHeadersTransformations = new Dictionary<string, Action<HttpContentHeaders, string>>
+			{
+				["Allow"] = (r, v) => r.Allow.Add(v),
+				["Content-Disposition"] = (r, v) =>
+				{
+					if (ContentDispositionHeaderValue.TryParse(v, out var value)) r.ContentDisposition = value;
+				},
+				["Content-Encoding"] = (r, v) => r.ContentEncoding.Add(v),
+				["Content-Language"] = (r, v) => r.ContentLanguage.Add(v),
+				["Content-Length"] = (r, v) =>
+				{
+					if (Int32.TryParse(v, out var value)) r.ContentLength = value;
+				},
+				["Content-Location"] = (r, v) =>
+				{
+					if (Uri.TryCreate(v, UriKind.RelativeOrAbsolute, out var value)) r.ContentLocation = value;
+				},
+				["Content-MD5"] = (r, v) => r.ContentMD5 = Encoding.ASCII.GetBytes(v),
+				["Content-Type"] = (r, v) =>
+				{
+					if (MediaTypeHeaderValue.TryParse(v, out var value)) r.ContentType = value;
+				},
+				["Expires"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.Expires = value;
+				},
+				["Last-Modified"] = (r, v) =>
+				{
+					if (DateTimeOffset.TryParseExact(v, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) r.LastModified = value;
+				},
 			};
 		}
 
 		private readonly Uri _baseUri;
-		private readonly int _requestTimeout;
-		private readonly bool _ignoreSslErrors;
 		private readonly ILogger _logger;
+		private readonly HttpClient _httpClient;
 
-		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, bool ignoreSslErrors, ILogger logger)
+		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, ILogger logger)
 		{
-			_baseUri = baseUri;
-			_requestTimeout = requestTimeout;
-			_ignoreSslErrors = ignoreSslErrors;
+			if (requestTimeout < 0)
+				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
+
+			_baseUri = baseUri ?? throw new ArgumentNullException(nameof(baseUri));
 			_logger = logger;
+			_httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
 		}
 
-		public async Task<IOnPremiseTargetResponse> GetResponseAsync(string url, IOnPremiseTargetRequest request)
+		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
-			_logger?.Debug("Requesting response from on-premise web target");
+			if (url == null)
+				throw new ArgumentNullException(nameof(url));
+			if (request == null)
+				throw new ArgumentNullException(nameof(request));
+
 			_logger?.Trace("Requesting response from on-premise web target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
 			{
 				RequestId = request.RequestId,
 				OriginId = request.OriginId,
-				RequestStarted = DateTime.UtcNow
+				RequestStarted = DateTime.UtcNow,
 			};
 
-			var webRequest = await CreateOnPremiseTargetWebRequestAsync(url, request).ConfigureAwait(false);
-
-			HttpWebResponse webResponse = null;
 			try
 			{
-				try
-				{
-					webResponse = (HttpWebResponse)await webRequest.GetResponseAsync().ConfigureAwait(false);
-				}
-				catch (WebException wex)
-				{
-					_logger?.Trace("Error requesting response. request-id={0}, exception: {1}", request.RequestId, wex);
+				var message = await CreateLocalTargetRequestAsync(url, request, relayedRequestHeader).ConfigureAwait(false);
 
-					if (wex.Status == WebExceptionStatus.ProtocolError)
-					{
-						webResponse = (HttpWebResponse)wex.Response;
-					}
-				}
-
-				if (webResponse == null)
-				{
-					_logger?.Warn("Gateway timeout!");
-					_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
-
-					response.StatusCode = HttpStatusCode.GatewayTimeout;
-					response.HttpHeaders = new Dictionary<string, string>()
-					{
-						["X-TTRELAY-TIMEOUT"] = "On-Premise Target"
-					};
-				}
-				else
-				{
-					response.StatusCode = webResponse.StatusCode;
-
-					using (var stream = new MemoryStream())
-					{
-						response.HttpHeaders = webResponse.Headers.AllKeys.ToDictionary(n => n, n => webResponse.Headers.Get(n), StringComparer.OrdinalIgnoreCase);
-
-						using (var responseStream = webResponse.GetResponseStream() ?? Stream.Null)
-						{
-							await responseStream.CopyToAsync(stream).ConfigureAwait(false);
-						}
-
-						response.Body = stream.ToArray();
-					}
-				}
-
-				response.RequestFinished = DateTime.UtcNow;
-
-				_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
-
-				return response;
+				response.StatusCode = message.StatusCode;
+				response.HttpHeaders = message.Headers.ToDictionary(kvp => kvp.Key, kvp => String.Join(" ", kvp.Value));
+				response.Stream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
+				response.HttpResponseMessage = message;
 			}
-			finally
+			catch (Exception ex)
 			{
-				webResponse?.Dispose();
+				_logger?.Error(ex, "Error requesting response from local target. RequestId = {0}", request.RequestId);
+
+				_logger?.Warn("Gateway timeout");
+				_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
+
+				response.StatusCode = HttpStatusCode.GatewayTimeout;
+				response.HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-TIMEOUT"] = "On-Premise Target" };
 			}
+
+			response.RequestFinished = DateTime.UtcNow;
+
+			_logger?.Trace("Got web response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
+
+			return response;
 		}
 
-		private async Task<HttpWebRequest> CreateOnPremiseTargetWebRequestAsync(string url, IOnPremiseTargetRequest onPremiseTargetRequest)
+
+		private async Task<HttpResponseMessage> CreateLocalTargetRequestAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
 			_logger?.Trace("Creating web request");
 
-			var uri = String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url);
-			var webRequest = WebRequest.CreateHttp(uri);
-			webRequest.Method = onPremiseTargetRequest.HttpMethod;
-			webRequest.Timeout = _requestTimeout * 1000;
-
-			if (_ignoreSslErrors)
+			var message = new HttpRequestMessage(new HttpMethod(request.HttpMethod), String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url));
+			if (request.Stream != Stream.Null)
 			{
-				webRequest.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+				_logger?.Trace("   adding request stream");
+				message.Content = new StreamContent(request.Stream);
 			}
 
-			foreach (var httpHeader in onPremiseTargetRequest.HttpHeaders)
+			foreach (var httpHeader in request.HttpHeaders.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key)))
 			{
 				_logger?.Trace("   adding header. header={0}, value={1}", httpHeader.Key, httpHeader.Value);
 
-				if (_requestHeaderTransformations.TryGetValue(httpHeader.Key, out var restrictedHeader))
+				try
 				{
-					restrictedHeader(webRequest, httpHeader.Value);
+					if (_requestHeadersTransformations.TryGetValue(httpHeader.Key, out var requestHeader))
+					{
+						requestHeader(message.Headers, httpHeader.Value);
+					}
+					else if (_contentHeadersTransformations.TryGetValue(httpHeader.Key, out var contentHeader))
+					{
+						if (request.Stream != Stream.Null)
+						{
+							contentHeader(message.Content.Headers, httpHeader.Value);
+						}
+					}
+					else
+					{
+						message.Headers.Add(httpHeader.Key, httpHeader.Value);
+					}
 				}
-				else
+				catch (Exception ex)
 				{
-					webRequest.Headers.Add(httpHeader.Key, httpHeader.Value);
+					_logger?.Error(ex, "Could not add header. Header = {0}", httpHeader.Key);
 				}
 			}
 
-			if (onPremiseTargetRequest.Body != null)
+			if (!String.IsNullOrWhiteSpace(relayedRequestHeader))
 			{
-				_logger?.Trace("   adding request body. length={0}", onPremiseTargetRequest.Body.Length);
-
-				var requestStream = await webRequest.GetRequestStreamAsync().ConfigureAwait(false);
-				await requestStream.WriteAsync(onPremiseTargetRequest.Body, 0, onPremiseTargetRequest.Body.Length).ConfigureAwait(false);
-				await requestStream.FlushAsync().ConfigureAwait(false);
+				message.Headers.Add(relayedRequestHeader, "true");
 			}
 
-			return webRequest;
+			return await _httpClient.SendAsync(message).ConfigureAwait(false);
 		}
 	}
 }

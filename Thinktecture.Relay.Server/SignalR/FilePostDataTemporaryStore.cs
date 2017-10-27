@@ -45,11 +45,13 @@ namespace Thinktecture.Relay.Server.SignalR
 					CleanUp(token);
 					await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
 				}
-			}, token);
+			}, token).ConfigureAwait(false);
 		}
 
 		private void CleanUp(CancellationToken cancellationToken)
 		{
+			_logger?.Trace("Cleaning up old stored files");
+
 			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
 
 			try
@@ -57,54 +59,116 @@ namespace Thinktecture.Relay.Server.SignalR
 				foreach (var fileName in Directory.GetFiles(_path))
 				{
 					if (cancellationToken.IsCancellationRequested)
+					{
 						return;
+					}
 
 					try
 					{
 						if (File.GetCreationTimeUtc(fileName) < timeOut)
+						{
 							File.Delete(fileName);
+						}
 					}
 					catch (Exception ex)
 					{
-						_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+						_logger?.Error(ex, "Could not delete file. FileName = '{0}'", fileName);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, $"{nameof(FilePostDataTemporaryStore)}: Error during cleanup");
+				_logger?.Error(ex, "Error during cleanup");
 			}
 		}
 
-		public void Save(string requestId, byte[] data)
+		public byte[] LoadRequest(string requestId)
 		{
-			_logger?.Debug("Storing body for request id {0}", requestId);
+			var fileName = GetRequestFileName(requestId);
+			_logger?.Trace("Loading request body. request-id={0}, file-name={1}", requestId, fileName);
 
-			File.WriteAllBytes(GetFileName(requestId), data);
-		}
-
-		public byte[] Load(string requestId)
-		{
-			_logger?.Debug("Loading body for request id {0}", requestId);
-
-			var fileName = GetFileName(requestId);
-			var data = File.ReadAllBytes(fileName);
-
-			try
+			if (File.Exists(fileName))
 			{
-				File.Delete(fileName);
-			}
-			catch (Exception ex)
-			{
-				_logger?.Trace(ex, $"{nameof(FilePostDataTemporaryStore)}: Could not delete temp file {{0}}", fileName);
+				var data = File.ReadAllBytes(fileName);
+
+				try
+				{
+					File.Delete(fileName);
+				}
+				catch (Exception ex)
+				{
+					_logger?.Error(ex, "Could not delete file. FileName = '{0}'", fileName);
+				}
+
+				return data;
 			}
 
-			return data;
+			return null;
 		}
 
-		private string GetFileName(string requestId)
+		public Stream CreateRequestStream(string requestId)
 		{
-			return Path.Combine(_path, requestId + ".req");
+			var fileName = GetRequestFileName(requestId);
+			_logger?.Trace("Creating stream for storing request body. request-id={0}, file-name={1}", requestId, fileName);
+
+			return File.Open(fileName, FileMode.Create);
+		}
+
+		public Stream GetRequestStream(string requestId)
+		{
+			var fileName = GetRequestFileName(requestId);
+			_logger?.Trace("Creating stream for stored request body. request-id={0}, file-name={1}", requestId, fileName);
+
+			if (File.Exists(fileName))
+			{
+				return File.Open(fileName, FileMode.Open);
+			}
+
+			return null;
+		}
+
+		public void SaveResponse(string requestId, byte[] data)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Trace("Storing response body. request id={0}, file-name={1}", requestId, fileName);
+
+			File.WriteAllBytes(fileName, data);
+		}
+
+		public Stream CreateResponseStream(string requestId)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Trace("Creating stream for storing response body. request-id={0}, file-name={1}", requestId, fileName);
+
+			return File.Open(fileName, FileMode.Create);
+		}
+
+		public Stream GetResponseStream(string requestId)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Trace("Creating stream for stored response body. request-id={0}, file-name={1}", requestId, fileName);
+
+			if (File.Exists(fileName))
+			{
+				return File.Open(fileName, FileMode.Open);
+			}
+
+			return null;
+		}
+
+		private string GetRequestFileName(string requestId)
+		{
+			return GetFileName(requestId, ".req");
+		}
+
+		private string GetResponseFileName(string requestId)
+		{
+			return GetFileName(requestId, ".res");
+		}
+
+		private string GetFileName(string requestId, string extension)
+		{
+			return Path.Combine(_path, requestId + extension);
 		}
 
 		~FilePostDataTemporaryStore()

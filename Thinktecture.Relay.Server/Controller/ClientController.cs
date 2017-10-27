@@ -4,14 +4,13 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.Interceptors;
+using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller
@@ -45,19 +44,20 @@ namespace Thinktecture.Relay.Server.Controller
 			_interceptorManager = interceptorManager ?? throw new ArgumentNullException(nameof(interceptorManager));
 		}
 
-		[HttpDelete]
-		[HttpGet]
-		[HttpHead]
-		[HttpPost]
-		[HttpPut]
 		[HttpOptions]
+		[HttpPost]
+		[HttpGet]
+		[HttpPut]
+		[HttpPatch]
+		[HttpDelete]
+		[HttpHead]
 		public async Task<HttpResponseMessage> Relay(string path)
 		{
-			_logger?.Trace("Relaying http {0} {1}", path, ControllerContext.Request.Method);
+			_logger?.Debug("Relaying {0} {1}", path, ControllerContext.Request.Method);
 
 			if (path == null)
 			{
-				_logger?.Info("Path is not set.");
+				_logger?.Info("Path is not set");
 				return NotFound();
 			}
 
@@ -65,89 +65,94 @@ namespace Thinktecture.Relay.Server.Controller
 			var link = _linkRepository.GetLink(pathInformation.UserName);
 
 			if (!CanRequestBeHandled(path, pathInformation, link))
+			{
 				return NotFound();
-
-			_logger?.Trace("{0}: Building on premise connector request. Origin Id: {1}, Path: {2}", link.Id, _backendCommunication.OriginId, path);
-			var onPremiseConnectorRequest = await _onPremiseRequestBuilder.BuildFrom(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName).ConfigureAwait(false);
-
-			var response = _interceptorManager.HandleRequest(onPremiseConnectorRequest);
-			if (response != null)
-			{
-				_logger?.Debug("Interceptor caused direct answering of request.");
-				FinishRequest(onPremiseConnectorRequest, null, response, link.Id, path);
-				return response;
 			}
 
-			var onPremiseTargetResponseTask = _backendCommunication.GetResponseAsync(onPremiseConnectorRequest.RequestId);
+			var request = await _onPremiseRequestBuilder.BuildFromHttpRequest(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName).ConfigureAwait(false);
 
-			_logger?.Trace("{0}: Sending on premise connector request.", link.Id);
-			await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, onPremiseConnectorRequest).ConfigureAwait(false);
-
-			_logger?.Trace("{0}: Waiting for response. Request Id", onPremiseConnectorRequest.RequestId);
-			var onPremiseTargetResponse = await onPremiseTargetResponseTask.ConfigureAwait(false);
-
-			if (onPremiseTargetResponse != null)
+			var statusCode = HttpStatusCode.GatewayTimeout;
+			IOnPremiseConnectorResponse response = null;
+			try
 			{
-				_logger?.Trace("{0}: Response received. From: {1}", link.Id, onPremiseTargetResponse.RequestId);
+				request = _interceptorManager.HandleRequest(request, Request, out var message);
+				if (message != null)
+				{
+					_logger?.Trace("Interceptor caused direct answering of request. request-id={0}, status-code={1}", request.RequestId, message.StatusCode);
+
+					statusCode = message.StatusCode;
+					return message;
+				}
+
+				var task = _backendCommunication.GetResponseAsync(request.RequestId);
+
+				_logger?.Trace("Sending on premise connector request. request-id={0}, link-id={1}", request.RequestId, link.Id);
+				await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
+
+				_logger?.Trace("Waiting for response. request-id={0}, link-id={1}", request.RequestId, link.Id);
+				response = await task.ConfigureAwait(false);
+
+				if (response != null)
+				{
+					_logger?.Trace("Response received. request-id={0}, link-id={1}", request.RequestId, link.Id);
+					statusCode = response.StatusCode;
+				}
+				else
+				{
+					_logger?.Trace("On-Premise timeout. request-id={0}, link-id={1}", request.RequestId, link.Id);
+				}
+
+				return _interceptorManager.HandleResponse(request, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);
 			}
-			else
+			finally
 			{
-				_logger?.Trace("{0}: On-Premise timeout.", link.Id);
+				FinishRequest(request, response, link.Id, path, statusCode);
 			}
-
-			response = _interceptorManager.HandleResponse(onPremiseConnectorRequest, onPremiseTargetResponse)
-				?? _httpResponseMessageBuilder.BuildFrom(onPremiseTargetResponse, link);
-
-			FinishRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response, link.Id, path);
-			return response;
 		}
 
 		private bool CanRequestBeHandled(string path, PathInformation pathInformation, Link link)
 		{
-			if (path == null)
-			{
-				_logger?.Info("Path is not set.");
-				return false;
-			}
-
 			if (link == null)
 			{
-				_logger?.Info("Link not found. Path: {0}", path);
+				_logger?.Info("Link for path {0} not found", path);
 				return false;
 			}
 
 			if (link.IsDisabled)
 			{
-				_logger?.Info("{0}: Link {1} is disabled.", link.Id, link.SymbolicName);
+				_logger?.Info("Link {0} is disabled", link.SymbolicName);
 				return false;
 			}
 
 			if (String.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
 			{
-				_logger?.Info("{0}: Path without user name is not found. Path: {1}", link.Id, path);
+				_logger?.Info("Path {0} for link {1} without user name is not found", path, link.SymbolicName);
 				return false;
 			}
 
 			if (link.AllowLocalClientRequestsOnly && !Request.IsLocal())
 			{
-				_logger?.Info("{0}: Link {1} only allows local requests.", link.Id, link.SymbolicName);
+				_logger?.Info("Link {0} only allows local requests", link.SymbolicName);
 				return false;
 			}
 
 			return true;
 		}
 
-		private void FinishRequest(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, HttpResponseMessage response, Guid linkId, string path)
+		private void FinishRequest(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid linkId, string path, HttpStatusCode statusCode)
 		{
-			onPremiseConnectorRequest.RequestFinished = DateTime.UtcNow;
+			request.RequestFinished = DateTime.UtcNow;
 
+			_logger?.Trace("Finishing request. request-id={0}, link-id={1}, on-premise-duration={2}, global-duration={3}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
+
+			// TODO this may be debounced for e.g. 5 minutes to skip querying on each request in future release
 			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);
 			if (currentTraceConfigurationId != null)
 			{
-				_traceManager.Trace(onPremiseConnectorRequest, onPremiseTargetResponse, currentTraceConfigurationId.Value);
+				_traceManager.Trace(request, response, currentTraceConfigurationId.Value);
 			}
 
-			_requestLogger.LogRequest(onPremiseConnectorRequest, onPremiseTargetResponse, response.StatusCode, linkId, _backendCommunication.OriginId, path);
+			_requestLogger.LogRequest(request, response, linkId, _backendCommunication.OriginId, path, statusCode);
 		}
 
 		private new HttpResponseMessage NotFound()

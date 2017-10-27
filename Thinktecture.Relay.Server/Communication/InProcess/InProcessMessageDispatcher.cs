@@ -10,10 +10,9 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
 {
-	public class InProcessMessageDispatcher : IMessageDispatcher, IDisposable
+	internal class InProcessMessageDispatcher : IMessageDispatcher, IDisposable
 	{
 		private readonly ILogger _logger;
-		private readonly object _requestSubjectLookupLock;
 		private readonly Dictionary<Guid, RequestSubjectContext> _requestSubjectLookup;
 		private readonly ConcurrentDictionary<Guid, Subject<IOnPremiseConnectorResponse>> _responseSubjectLookup;
 
@@ -22,7 +21,6 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 		public InProcessMessageDispatcher(ILogger logger)
 		{
 			_logger = logger;
-			_requestSubjectLookupLock = new object();
 			_requestSubjectLookup = new Dictionary<Guid, RequestSubjectContext>();
 			_responseSubjectLookup = new ConcurrentDictionary<Guid, Subject<IOnPremiseConnectorResponse>>();
 		}
@@ -33,7 +31,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(connectionId));
 
 			CheckDisposed();
-			_logger?.Info("Creating request subscription for OnPremiseId {0} and ConnectionId {1}", linkId, connectionId);
+			_logger?.Info("Creating request subscription for link {0} and connection {1}", linkId, connectionId);
 
 			return Observable.Create<IOnPremiseConnectorRequest>(observer =>
 			{
@@ -44,7 +42,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				{
 					subscription.Dispose();
 
-					lock (_requestSubjectLookupLock)
+					lock (_requestSubjectLookup)
 					{
 						ctx.RemoveConnection(connectionId);
 
@@ -58,7 +56,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 		public IObservable<IOnPremiseConnectorResponse> OnResponseReceived(Guid originId)
 		{
 			CheckDisposed();
-			_logger?.Info("Creating response subscription for OriginId {0}", originId);
+			_logger?.Info("Creating response subscription");
 
 			return Observable.Create<IOnPremiseConnectorResponse>(observer =>
 			{
@@ -84,7 +82,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(request));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching request for OnPremiseId {0}. Request id: {1}, Http method {2}, Url: {3}", linkId, request.RequestId, request.HttpMethod, request.Url);
+			_logger?.Debug("Dispatching request for link {0}, request {1}, HTTP method {2}, url '{3}'", linkId, request.RequestId, request.HttpMethod, request.Url);
 
 			TryGetRequestSubject(linkId)?.OnNext(request);
 
@@ -97,7 +95,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(response));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching response for OriginId {0}. Request id: {1}, Status code: {2}", originId, response.RequestId, response.StatusCode);
+			_logger?.Debug("Dispatching response for origin {0}, request {1}, status code {2}", originId, response.RequestId, response.StatusCode);
 
 			GetResponseSubject(originId).OnNext(response);
 
@@ -106,7 +104,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 
 		private Subject<IOnPremiseConnectorRequest> TryGetRequestSubject(Guid linkId)
 		{
-			lock (_requestSubjectLookupLock)
+			lock (_requestSubjectLookup)
 			{
 				if (_requestSubjectLookup.TryGetValue(linkId, out var ctx))
 					return ctx.Subject;
@@ -117,7 +115,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 
 		private RequestSubjectContext GetRequestSubjectContext(Guid linkId, string connectionId)
 		{
-			lock (_requestSubjectLookupLock)
+			lock (_requestSubjectLookup)
 			{
 				if (!_requestSubjectLookup.TryGetValue(linkId, out var ctx))
 				{
@@ -149,7 +147,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				_disposed = true;
 
 				IEnumerable<IDisposable> disposables;
-				lock (_requestSubjectLookupLock)
+				lock (_requestSubjectLookup)
 				{
 					disposables = _requestSubjectLookup.Values.ToArray();
 				}
@@ -170,7 +168,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during disposing of a subject.");
+				_logger?.Error(ex, "Error during disposing of a subject");
 			}
 		}
 	}

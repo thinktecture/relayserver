@@ -1,11 +1,11 @@
-﻿using System.Net.Http;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using System.Net.Http;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	public interface IHttpResponseMessageBuilder
 	{
-		HttpResponseMessage BuildFrom(IOnPremiseTargetResponse onPremiseTargetResponse, Link link);
+		HttpResponseMessage BuildFromConnectorResponse(IOnPremiseConnectorResponse response, Link link, string requestId);
 	}
 }

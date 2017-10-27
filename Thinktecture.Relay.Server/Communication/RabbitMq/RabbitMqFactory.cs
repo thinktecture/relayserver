@@ -24,11 +24,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			var connectionString = _configuration.RabbitMqConnectionString;
 			if (connectionString == null)
 			{
-				_logger?.Fatal("Not connection string found for RabbitMq. Can not create a bus. Aborting...");
+				_logger?.Fatal("Not connection string found for RabbitMQ. Can not create a bus. Aborting...");
 				throw new ConfigurationErrorsException("Could not find a connection string for RabbitMQ. Please add a connection string in the <connectionStrings> section of the application's configuration file. For example: <add name=\"RabbitMQ\" connectionString=\"host=localhost\" />");
 			}
 
-			_logger?.Trace("Creating RabbitMq Bus with connection string {0}", _configuration.RabbitMqConnectionString);
+			_logger?.Trace("Creating RabbitMQ Bus. connection-string={0}", _configuration.RabbitMqConnectionString);
 
 			return _factory.CreateConnection(connectionString);
 		}

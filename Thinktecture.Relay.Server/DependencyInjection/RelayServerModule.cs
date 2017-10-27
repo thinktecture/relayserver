@@ -8,7 +8,7 @@ using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
-using Thinktecture.Relay.Server.Interceptors;
+using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
@@ -18,9 +18,9 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 	class RelayServerModule : Module
 	{
 		private readonly IConfiguration _configuration;
-		private readonly InterceptorLoader _interceptorLoader;
+		private readonly IInterceptorLoader _interceptorLoader;
 
-		public RelayServerModule(IConfiguration configuration, InterceptorLoader interceptorLoader)
+		public RelayServerModule(IConfiguration configuration, IInterceptorLoader interceptorLoader)
 		{
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_interceptorLoader = interceptorLoader ?? throw new ArgumentNullException(nameof(interceptorLoader));

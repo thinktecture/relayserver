@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NLog;
+using Thinktecture.Relay.OnPremiseConnector;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
@@ -26,8 +27,8 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public string RequestId { get; set; }
 			public Guid OriginId { get; set; }
 			public IDictionary<string, string> HttpHeaders { get; set; }
-			IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => HttpHeaders != null ? new ReadOnlyDictionary<string, string>(HttpHeaders) : null;
 			public HttpStatusCode StatusCode { get; set; }
+			public Stream Stream { get; set; }
 			public byte[] Body { get; set; }
 			public DateTime RequestStarted { get; set; }
 			public DateTime RequestFinished { get; set; }
@@ -125,7 +126,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			traceFileWriterMock.Setup(t => t.WriteContentFileAsync(It.IsAny<string>(), clientRequest.Body));
 			traceFileWriterMock.Setup(t => t.WriteContentFileAsync(It.IsAny<string>(), onPremiseTargetResponse.Body));
 			traceFileWriterMock.Setup(t => t.WriteHeaderFileAsync(It.IsAny<string>(), ((IOnPremiseTargetRequest)clientRequest).HttpHeaders));
-			traceFileWriterMock.Setup(t => t.WriteHeaderFileAsync(It.IsAny<string>(), ((IOnPremiseTargetResponse)onPremiseTargetResponse).HttpHeaders));
+			traceFileWriterMock.Setup(t => t.WriteHeaderFileAsync(It.IsAny<string>(), new ReadOnlyDictionary<string, string>(((IOnPremiseTargetResponse)onPremiseTargetResponse).HttpHeaders)));
 
 			sut.Trace(clientRequest, onPremiseTargetResponse, traceConfigurationId);
 
@@ -171,7 +172,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			traceFileWriterMock.Setup(t => t.WriteContentFileAsync(It.IsAny<string>(), clientRequest.Body)).Callback((string f, byte[] c) => clientRequestBodyFileName = f);
 			traceFileWriterMock.Setup(t => t.WriteContentFileAsync(It.IsAny<string>(), onPremiseTargetResponse.Body)).Callback((string f, byte[] c) => onPremiseTargetResponseBodyFileName = f);
 			traceFileWriterMock.Setup(t => t.WriteHeaderFileAsync(It.IsAny<string>(), ((IOnPremiseTargetRequest)clientRequest).HttpHeaders)).Callback((string f, IReadOnlyDictionary<string, string> c) => clientRequestHeadersFileName = f);
-			traceFileWriterMock.Setup(t => t.WriteHeaderFileAsync(It.IsAny<string>(), ((IOnPremiseTargetResponse)onPremiseTargetResponse).HttpHeaders)).Callback((string f, IReadOnlyDictionary<string, string> c) => onPremiseTargetResponseHeadersFileName = f);
+			traceFileWriterMock.Setup(t => t.WriteHeaderFileAsync(It.IsAny<string>(), new ReadOnlyDictionary<string, string>(((IOnPremiseTargetResponse)onPremiseTargetResponse).HttpHeaders))).Callback((string f, IReadOnlyDictionary<string, string> c) => onPremiseTargetResponseHeadersFileName = f);
 
 			sut.Trace(clientRequest, onPremiseTargetResponse, traceConfigurationId);
 

@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
 using System.Collections.ObjectModel;
+using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.Server.Diagnostics
 {
@@ -39,7 +39,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			return _traceRepository.GetCurrentTraceConfigurationId(linkId);
 		}
 
-		public void Trace(IOnPremiseConnectorRequest onPremiseConnectorRequest, IOnPremiseTargetResponse onPremiseTargetResponse, Guid traceConfigurationId)
+		public void Trace(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid traceConfigurationId)
 		{
 			try
 			{
@@ -49,12 +49,11 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				}
 
 				var filenamePrefix = $"{Path.Combine(_configuration.TraceFileDirectory, traceConfigurationId.ToString())}-{DateTime.Now.Ticks}";
+				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, request.HttpHeaders);
+				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, request.Body);
 
-				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_HEADER_EXTENSION, new ReadOnlyDictionary<string, string>(onPremiseConnectorRequest.HttpHeaders));
-				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_CONNECTOR_CONTENT_EXTENSION, onPremiseConnectorRequest.Body);
-
-				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, onPremiseTargetResponse.HttpHeaders);
-				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_TARGET_CONTENT_EXTENSION, onPremiseTargetResponse.Body);
+				_traceFileWriter.WriteHeaderFileAsync(filenamePrefix + _ON_PREMISE_TARGET_HEADER_EXTENSION, response.HttpHeaders);
+				_traceFileWriter.WriteContentFileAsync(filenamePrefix + _ON_PREMISE_TARGET_CONTENT_EXTENSION, response.Body);
 			}
 			catch (Exception ex)
 			{

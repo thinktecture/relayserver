@@ -1,9 +1,8 @@
 using Autofac;
-using Thinktecture.Relay.Server.Interceptors;
+using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.InterceptorDemos
 {
-	/*
 	/// <inheritdoc />
 	/// <summary>
 	/// A relay server Interceptor assembly needs to provide a single AutoFac Module, that will register all
@@ -25,5 +24,4 @@ namespace Thinktecture.Relay.InterceptorDemos
 			base.Load(builder);
 		}
 	}
-	*/
 }

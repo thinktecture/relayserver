@@ -1,3 +1,4 @@
+using System;
 using Topshelf;
 
 namespace Thinktecture.Relay.OnPremiseConnectorService
@@ -20,6 +21,15 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 				config.SetDisplayName("Thinktecture Relay OnPremises Service");
 				config.SetServiceName("TTRelayOnPremisesService");
 			});
+
+#if DEBUG
+			if (System.Diagnostics.Debugger.IsAttached)
+			{
+				// ReSharper disable once LocalizableElement
+				Console.WriteLine("\nPress any key to close application window...");
+				Console.ReadKey(true);
+			}
+#endif
 		}
 	}
 }

@@ -1,6 +1,6 @@
 using System.Net.Http;
 
-namespace Thinktecture.Relay.Server.Interceptors
+namespace Thinktecture.Relay.Server.Interceptor
 {
 	/// <summary>
 	/// Interface for interceptors that are capable of modifying the incoming request before it gets relayed to its destination.

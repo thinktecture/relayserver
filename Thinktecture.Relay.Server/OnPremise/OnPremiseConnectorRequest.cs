@@ -1,20 +1,26 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
+using System.IO;
 using Newtonsoft.Json;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
 namespace Thinktecture.Relay.Server.OnPremise
 {
-	internal class OnPremiseConnectorRequest : OnPremiseTargetRequest, IOnPremiseConnectorRequest
+	internal class OnPremiseConnectorRequest : IOnPremiseConnectorRequest
 	{
-		[JsonIgnore]
+		public string RequestId { get; set; }
+		public Guid OriginId { get; set; }
+		public string AcknowledgeId { get; set; }
 		public DateTime RequestStarted { get; set; }
-		[JsonIgnore]
 		public DateTime RequestFinished { get; set; }
-		[JsonIgnore]
-		public IPAddress ClientIpAddress { get; set; }
+		public string HttpMethod { get; set; }
+		public string Url { get; set; }
+		public IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
+		public byte[] Body { get; set; }
 
-		IDictionary<string, string> IWriteableOnPremiseTargetRequest.HttpHeaders => HttpHeaders;
+		[JsonIgnore]
+		public Stream Stream { get; set; }
+
+		[JsonIgnore]
+		public long ContentLength { get; set; }
 	}
 }

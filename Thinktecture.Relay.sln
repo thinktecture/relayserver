@@ -1,11 +1,8 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Test", "Thinktecture.Relay.Server.Test\Thinktecture.Relay.Server.Test.csproj", "{FC928931-8741-48E1-9061-343CF009C903}"
 EndProject
@@ -37,14 +34,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "de", "de", "{C930A0EE-45E1-
 		Documentation\de\relayserver.md = Documentation\de\relayserver.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{FFFB495D-B5B3-49C6-B30D-7F24F0FB06BB}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay", "Thinktecture.Relay\Thinktecture.Relay.csproj", "{E34D846B-3B1E-4A97-A06F-F5502349F4F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.InterceptorDemos", "Thinktecture.Relay.InterceptorDemos\Thinktecture.Relay.InterceptorDemos.csproj", "{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "en", "en", "{EB57D91E-69B1-4779-BE64-0729A2600DB7}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\en\1-what-is-thinktecture-relayserver.md = Documentation\en\1-what-is-thinktecture-relayserver.md
+		Documentation\en\2-architecture.md = Documentation\en\2-architecture.md
+		Documentation\en\3-installation.md = Documentation\en\3-installation.md
+		Documentation\en\4-relayserver-web-management.md = Documentation\en\4-relayserver-web-management.md
+		Documentation\en\5-relayserver-interceptor-development.md = Documentation\en\5-relayserver-interceptor-development.md
+		Documentation\en\6-development-setup.md = Documentation\en\6-development-setup.md
+		Documentation\en\relayserver.md = Documentation\en\relayserver.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,7 +60,6 @@ Global
 		{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FC928931-8741-48E1-9061-343CF009C903}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FC928931-8741-48E1-9061-343CF009C903}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC928931-8741-48E1-9061-343CF009C903}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC928931-8741-48E1-9061-343CF009C903}.Release|Any CPU.Build.0 = Release|Any CPU
 		{63D02790-C22D-479B-BC30-1A45F2B832E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -81,9 +83,9 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FC928931-8741-48E1-9061-343CF009C903} = {C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}
 		{0961D429-E302-46AC-BB14-198240900C5A} = {5E5C3493-0D98-4B1D-A50B-1E760782DE2D}
 		{C930A0EE-45E1-4815-93BF-65B1F87DC9E0} = {0961D429-E302-46AC-BB14-198240900C5A}
+		{EB57D91E-69B1-4779-BE64-0729A2600DB7} = {0961D429-E302-46AC-BB14-198240900C5A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E1834A6-24E4-4305-B777-6C2E875789DA}

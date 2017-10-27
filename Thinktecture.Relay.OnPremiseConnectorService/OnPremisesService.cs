@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using NLog;
@@ -24,6 +25,11 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 				if (section.OnPremiseTargets.Count == 0)
 					throw new ConfigurationErrorsException("At least one on-premise target needs to be configured");
 
+				if (section.IgnoreSslErrors)
+				{
+					ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, errors) => true;
+				}
+
 				switch (section.Security.AuthenticationType)
 				{
 					case AuthenticationType.Identity:
@@ -45,7 +51,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 
 				foreach (var onPremiseTarget in section.OnPremiseTargets.OfType<OnPremiseWebTargetElement>())
 				{
-					_connector.RegisterOnPremiseTarget(onPremiseTarget.Key, new Uri(onPremiseTarget.BaseUrl), onPremiseTarget.IgnoreSslErrors);
+					_connector.RegisterOnPremiseTarget(onPremiseTarget.Key, new Uri(onPremiseTarget.BaseUrl));
 				}
 
 				foreach (var onPremiseTarget in section.OnPremiseTargets.OfType<OnPremiseInProcTargetElement>())

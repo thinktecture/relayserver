@@ -43,11 +43,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="password">A <see cref="String"/> containing the password.</param>
 		/// <param name="relayServer">An <see cref="Uri"/> containing the relay server's base url.</param>
 		/// <param name="requestTimeout">An <see cref="Int32"/> defining the timeout in seconds.</param>
-		/// <param name="maxRetries">An <see cref="Int32"/> defining how much retries the connector should do for posting the answer back to the relay server.</param>
-		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 10, int maxRetries = 3)
+		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 10)
 		{
 			var factory = _container.Resolve<IRelayServerConnectionFactory>();
-			_connection = factory.Create(userName, password, relayServer, requestTimeout, maxRetries);
+			_connection = factory.Create(userName, password, relayServer, requestTimeout);
 		}
 
 		/// <summary>
@@ -55,11 +54,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
 		/// <param name="uri">An <see cref="Uri"/> containing the on-premise target's base url.</param>
-		/// <param name="ignoreSslErrors">A <see cref="bool"/> defining whether SSL errors from target will be ignored.</param>
-		public void RegisterOnPremiseTarget(string key, Uri uri, bool ignoreSslErrors)
+		public void RegisterOnPremiseTarget(string key, Uri uri)
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget(key, uri, ignoreSslErrors);
+			_connection.RegisterOnPremiseTarget(key, uri);
 		}
 
 		/// <summary>
@@ -198,10 +196,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
 		/// <param name="relativeUrl">Url relative to the relay server url.</param>
-		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
-		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, HttpContent content, CancellationToken cancellationToken)
 		{
 			return PostViaRelay(linkName, relativeUrl, null, content, cancellationToken);
 		}
@@ -211,11 +209,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
 		/// <param name="relativeUrl">Url relative to the relay server url.</param>
-		/// <param name="setHeaders">Callback for setting headers.</param>
-		/// <param name="content">A callback for getting the content to post. This callback may be called multiple times on retries.</param>
+		/// <param name="setHeaders">A Callback for setting headers.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
-		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			if (linkName == null)
 				throw new ArgumentNullException(nameof(linkName));

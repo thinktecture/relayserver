@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal interface IRelayServerConnection : IDisposable
 	{
-		void RegisterOnPremiseTarget(string key, Uri baseUri, bool ignoreSslErrors);
+		void RegisterOnPremiseTarget(string key, Uri baseUri);
 		void RegisterOnPremiseTarget(string key, Type handlerType);
 		void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory);
 		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();
@@ -20,6 +20,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		List<string> GetOnPremiseTargetKeys();
 
 		Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
-		Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken);
+		Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
 	}
 }

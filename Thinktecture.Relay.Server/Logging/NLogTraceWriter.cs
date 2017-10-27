@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Server.Logging
 			traceAction(record);
 
 			_logger?.Log(_traceLevelConverter.Convert(level), null, null,
-				"Category: {0}, Operator: {1}, Kind: {2}, Operation: {3}, Properties: {4} Message: {5}, Exception: {6}",
+				"Category: {0}, Operator: {1}, Kind: {2}, Operation: {3}, Properties: {4}, Message: {5}, Exception: {6}",
 				category, record.Operator, record.Kind, record.Operation, record.Properties, record.Message ?? "-", record.Exception?.ToString() ?? "-");
 		}
 	}

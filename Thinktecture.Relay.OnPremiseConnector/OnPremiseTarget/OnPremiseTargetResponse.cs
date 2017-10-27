@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.IO;
 using System.Net;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
@@ -9,23 +11,24 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	{
 		public string RequestId { get; set; }
 		public Guid OriginId { get; set; }
-		public byte[] Body { get; set; }
 		public DateTime RequestStarted { get; set; }
 		public DateTime RequestFinished { get; set; }
 		public HttpStatusCode StatusCode { get; set; }
+		public IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
 
-		private IDictionary<string, string> _httpHeaders;
-		public IDictionary<string, string> HttpHeaders
+		[JsonIgnore]
+		public Stream Stream { get; set; }
+
+		[JsonIgnore]
+		public WebResponse WebResponse { get; set; }
+
+		[JsonIgnore]
+		public HttpResponseMessage HttpResponseMessage { get; set; }
+
+		public void Dispose()
 		{
-			get => _httpHeaders ?? (_httpHeaders = new Dictionary<string, string>());
-			set
-			{
-				_httpHeaders = value;
-				_readonlyHeaders = null;
-			}
+			WebResponse?.Dispose();
+			HttpResponseMessage?.Dispose();
 		}
-
-		private IReadOnlyDictionary<string, string> _readonlyHeaders;
-		IReadOnlyDictionary<string, string> IOnPremiseTargetResponse.HttpHeaders => _readonlyHeaders ?? (_readonlyHeaders = new ReadOnlyDictionary<string, string>(HttpHeaders));
 	}
 }

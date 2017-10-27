@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -9,13 +10,14 @@ namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
-		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(1);
+		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
 		private static readonly byte[] _emptyByteArray = new byte[0];
 
 		private readonly ILogger _logger;
 		private readonly TimeSpan _storagePeriod;
 
-		private readonly ConcurrentDictionary<string, Entry> _data;
+		private readonly ConcurrentDictionary<string, Entry> _requestData;
+		private readonly ConcurrentDictionary<string, Entry> _responseData;
 		private readonly CancellationTokenSource _cancellationTokenSource;
 
 		public InMemoryPostDataTemporaryStore(ILogger logger, IConfiguration configuration)
@@ -27,7 +29,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 			_logger = logger;
 			_storagePeriod = configuration.TemporaryRequestStoragePeriod;
-			_data = new ConcurrentDictionary<string, Entry>();
+			_requestData = new ConcurrentDictionary<string, Entry>();
+			_responseData = new ConcurrentDictionary<string, Entry>();
 			_cancellationTokenSource = new CancellationTokenSource();
 
 			StartCleanUpTask(_cancellationTokenSource.Token);
@@ -39,36 +42,87 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				while (!token.IsCancellationRequested)
 				{
-					while (!token.IsCancellationRequested)
-					{
-						CleanUp();
-						await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
-					}
+					CleanUp();
+					await Task.Delay(_cleanupInterval, token).ConfigureAwait(false);
 				}
-			}, token);
+			}, token).ConfigureAwait(false);
 		}
 
 		private void CleanUp()
 		{
-			foreach (var kvp in _data)
+			_logger?.Trace("Cleaning up old stored data");
+
+			foreach (var kvp in _requestData)
 			{
 				if (kvp.Value.IsTimedOut)
-					_data.TryRemove(kvp.Key, out var value);
+				{
+					_requestData.TryRemove(kvp.Key, out var value);
+				}
+			}
+
+			foreach (var kvp in _responseData)
+			{
+				if (kvp.Value.IsTimedOut)
+				{
+					_requestData.TryRemove(kvp.Key, out var value);
+				}
 			}
 		}
 
-		public void Save(string requestId, byte[] data)
+		public byte[] LoadRequest(string requestId)
 		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Storing body for request id {{0}}", requestId);
+			_logger?.Trace("Loading request body. request-id={0}", requestId);
 
-			_data[requestId] = new Entry(data, _storagePeriod);
+			return _requestData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
 		}
 
-		public byte[] Load(string requestId)
+		public Stream CreateRequestStream(string requestId)
 		{
-			_logger?.Debug($"{nameof(InMemoryPostDataTemporaryStore)}: Loading body for request id {{0}}", requestId);
+			_logger?.Trace("Creating stream for storing request body. request-id={0}", requestId);
 
-			return _data.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
+			var ms = new NotifyingMemoryStream();
+			ms.Disposing += (s, e) => _requestData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
+			return ms;
+		}
+
+		public Stream GetRequestStream(string requestId)
+		{
+			_logger?.Trace("Creating stream for stored request body. request-id={0}", requestId);
+
+			if (_requestData.TryRemove(requestId, out var entry))
+			{
+				return new MemoryStream(entry.Data);
+			}
+
+			return null;
+		}
+
+		public void SaveResponse(string requestId, byte[] data)
+		{
+			_logger?.Trace("Storing response body. request id={0}", requestId);
+
+			_responseData[requestId] = new Entry(data, _storagePeriod);
+		}
+
+		public Stream CreateResponseStream(string requestId)
+		{
+			_logger?.Trace("Creating stream for storing response body. request-id={0}", requestId);
+
+			var ms = new NotifyingMemoryStream();
+			ms.Disposing += (s, e) => _responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
+			return ms;
+		}
+
+		public Stream GetResponseStream(string requestId)
+		{
+			_logger?.Trace("Creating stream for stored response body. request-id={0}", requestId);
+
+			if (_responseData.TryRemove(requestId, out var entry))
+			{
+				return new MemoryStream(entry.Data);
+			}
+
+			return null;
 		}
 
 		~InMemoryPostDataTemporaryStore()
@@ -86,7 +140,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			private readonly DateTime _timeoutDate;
 
-			public byte[] Data { get; }
+			public readonly byte[] Data;
 
 			public bool IsTimedOut => _timeoutDate < DateTime.UtcNow;
 
@@ -94,6 +148,19 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				_timeoutDate = DateTime.UtcNow.Add(storagePeriod);
 				Data = data;
+			}
+		}
+
+		private class NotifyingMemoryStream : MemoryStream
+		{
+			public event EventHandler Disposing;
+
+			protected override void Dispose(bool disposing)
+			{
+				var handler = Disposing;
+				handler?.Invoke(this, EventArgs.Empty);
+
+				base.Dispose(disposing);
 			}
 		}
 	}

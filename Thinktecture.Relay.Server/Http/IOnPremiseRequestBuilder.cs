@@ -7,6 +7,6 @@ namespace Thinktecture.Relay.Server.Http
 {
 	public interface IOnPremiseRequestBuilder
 	{
-		Task<IOnPremiseConnectorRequest> BuildFrom(HttpRequestMessage request, Guid originId, string pathWithoutUserName);
+		Task<IOnPremiseConnectorRequest> BuildFromHttpRequest(HttpRequestMessage message, Guid originId, string pathWithoutUserName);
 	}
 }

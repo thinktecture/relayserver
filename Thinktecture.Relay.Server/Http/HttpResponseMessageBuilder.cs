@@ -4,17 +4,24 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using NLog;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	internal class HttpResponseMessageBuilder : IHttpResponseMessageBuilder
 	{
+		private readonly ILogger _logger;
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly Dictionary<string, Action<HttpContent, string>> _contentHeaderTransformation;
 
-		public HttpResponseMessageBuilder()
+		public HttpResponseMessageBuilder(ILogger logger, IPostDataTemporaryStore postDataTemporaryStore)
 		{
+			_logger = logger;
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
+
 			_contentHeaderTransformation = new Dictionary<string, Action<HttpContent, string>>()
 			{
 				["Content-Disposition"] = (r, v) => r.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(v),
@@ -24,52 +31,83 @@ namespace Thinktecture.Relay.Server.Http
 				["Content-Range"] = null,
 				["Content-Type"] = (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v),
 				["Expires"] = (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?)null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))),
-				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))
+				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)),
 			};
 		}
 
-		public HttpResponseMessage BuildFrom(IOnPremiseTargetResponse onPremiseTargetResponse, Link link)
+		public HttpResponseMessage BuildFromConnectorResponse(IOnPremiseConnectorResponse response, Link link, string requestId)
 		{
-			var response = new HttpResponseMessage();
+			var message = new HttpResponseMessage();
 
-			if (onPremiseTargetResponse == null)
+			if (response == null)
 			{
-				response.StatusCode = HttpStatusCode.GatewayTimeout;
-				response.Content = new ByteArrayContent(new byte[] { });
-				response.Content.Headers.Add("X-TTRELAY-TIMEOUT", "On-Premise");
+				_logger?.Trace("Received no response. request-id={0}", requestId);
+
+				message.StatusCode = HttpStatusCode.GatewayTimeout;
+				message.Content = new ByteArrayContent(new byte[0]);
+				message.Content.Headers.Add("X-TTRELAY-TIMEOUT", "On-Premise");
 			}
 			else
 			{
-				response.StatusCode = onPremiseTargetResponse.StatusCode;
-				response.Content = GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link);
+				message.StatusCode = response.StatusCode;
+				message.Content = GetResponseContentForOnPremiseTargetResponse(response, link);
 
-				if (onPremiseTargetResponse.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
+				if (response.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
 					var parts = wwwAuthenticate.Split(' ');
-					response.Headers.WwwAuthenticate.Add(parts.Length == 2 ? new AuthenticationHeaderValue(parts[0], parts[1]) : new AuthenticationHeaderValue(wwwAuthenticate));
+					message.Headers.WwwAuthenticate.Add(parts.Length == 2
+						? new AuthenticationHeaderValue(parts[0], parts[1])
+						: new AuthenticationHeaderValue(wwwAuthenticate)
+					);
 				}
 			}
 
-			return response;
+			return message;
 		}
 
-		internal HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseTargetResponse onPremiseTargetResponse, Link link)
+		public HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseConnectorResponse response, Link link)
 		{
-			if (onPremiseTargetResponse == null)
-				throw new ArgumentNullException(nameof(onPremiseTargetResponse), "On-premise target response cannot be null");
+			if (response == null)
+				throw new ArgumentNullException(nameof(response));
 
-			if (onPremiseTargetResponse.StatusCode == HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
+			if (response.StatusCode == HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
 			{
 				return null;
 			}
 
-			var content = new ByteArrayContent(onPremiseTargetResponse.Body ?? new byte[] { });
-			SetHttpHeaders(onPremiseTargetResponse.HttpHeaders, content);
+			HttpContent content;
+
+			if (response.ContentLength == 0)
+			{
+				_logger?.Trace("Received no body. request-id={0}", response.RequestId);
+
+				content = new ByteArrayContent(new byte[0]);
+			}
+			else if (response.Body != null)
+			{
+				_logger?.Trace("Received small body with data. request-id={0}, body-length={1}", response.RequestId, response.Body.Length);
+
+				content = new ByteArrayContent(response.Body);
+			}
+			else
+			{
+				_logger?.Trace("Received body. request-id={0}, content-length={1}", response.RequestId, response.ContentLength);
+
+				var stream = _postDataTemporaryStore.GetResponseStream(response.RequestId);
+				if (stream == null)
+				{
+					throw new InvalidOperationException(); // TODO what now?
+				}
+
+				content = new StreamContent(stream);
+			}
+
+			AddContentHttpHeaders(content, response.HttpHeaders);
 
 			return content;
 		}
 
-		internal void SetHttpHeaders(IReadOnlyDictionary<string, string> httpHeaders, HttpContent content)
+		public void AddContentHttpHeaders(HttpContent content, IReadOnlyDictionary<string, string> httpHeaders)
 		{
 			if (httpHeaders == null)
 			{

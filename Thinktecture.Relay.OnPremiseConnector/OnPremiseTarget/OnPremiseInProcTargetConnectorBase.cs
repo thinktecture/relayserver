@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -25,14 +25,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		protected abstract IOnPremiseInProcHandler CreateHandler();
 
-		public async Task<IOnPremiseTargetResponse> GetResponseAsync(string url, IOnPremiseTargetRequest request)
+		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
 			if (url == null)
 				throw new ArgumentNullException(nameof(url));
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			_logger?.Debug("Requesting response from on-premise in-proc target");
 			_logger?.Trace("Requesting response from on-premise in-proc target. request-id={0}, url={1}, origin-id={2}", request.RequestId, url, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
@@ -40,7 +39,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				RequestId = request.RequestId,
 				OriginId = request.OriginId,
 				RequestStarted = DateTime.UtcNow,
-				HttpHeaders = new Dictionary<string, string>()
+				HttpHeaders = new Dictionary<string, string>(),
 			};
 
 			try
@@ -59,49 +58,36 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 							_logger?.Trace("Gateway timeout. request-id={0}", request.RequestId);
 
 							response.StatusCode = HttpStatusCode.GatewayTimeout;
-							response.HttpHeaders = new Dictionary<string, string>()
-							{
-								["X-TTRELAY-TIMEOUT"] = "On-Premise Target"
-							};
-							response.Body = null;
+							response.HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-TIMEOUT"] = "On-Premise Target" };
 						}
 					}
 				}
 				catch (Exception ex)
 				{
-					_logger?.Trace(ex, "Error requesting response. request-id={0}", request.RequestId);
+					_logger?.Trace(ex, "Error requesting response from in-proc target. request-id={0}", request.RequestId);
 
 					response.StatusCode = HttpStatusCode.InternalServerError;
-					response.HttpHeaders = new Dictionary<string, string>()
-					{
-						["Content-Type"] = "text/plain"
-					};
-					response.Body = Encoding.UTF8.GetBytes(ex.ToString());
+					response.HttpHeaders = new Dictionary<string, string> { ["Content-Type"] = "text/plain" };
+					response.Stream = new MemoryStream(Encoding.UTF8.GetBytes(ex.ToString()));
 				}
 				finally
 				{
 					// ReSharper disable once SuspiciousTypeConversion.Global
-					if (handler is IDisposable disposable)
-					{
-						disposable.Dispose();
-					}
+					(handler as IDisposable)?.Dispose();
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger?.Trace(ex, "Error creating handler. request-id={0}", request.RequestId);
+				_logger?.Trace(ex, "Error creating in-proc handler. request-id={0}", request.RequestId);
 
 				response.StatusCode = HttpStatusCode.InternalServerError;
-				response.HttpHeaders = new Dictionary<string, string>()
-				{
-					["Content-Type"] = "text/plain"
-				};
-				response.Body = Encoding.UTF8.GetBytes(ex.ToString());
+				response.HttpHeaders = new Dictionary<string, string> { ["Content-Type"] = "text/plain" };
+				response.Stream = new MemoryStream(Encoding.UTF8.GetBytes(ex.ToString()));
 			}
 
 			response.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Trace("Got response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
+			_logger?.Trace("Got in-proc response. request-id={0}, status-code={1}", response.RequestId, response.StatusCode);
 
 			return response;
 		}

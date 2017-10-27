@@ -44,8 +44,9 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			var fileName = Path.Combine(path, "Thinktecure", "RelayServer", $"settings_{_configuration.Port}.config.json");
+		
+			_logger?.Debug("Using settings file '{0}'", fileName);
 
-			_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)} using settings file '{{0}}'", fileName);
 			return fileName;
 		}
 
@@ -57,11 +58,11 @@ namespace Thinktecture.Relay.Server.Config
 				var configFromFile = JsonConvert.DeserializeObject<PersistedSettings>(fileContents);
 
 				OriginId = configFromFile.OriginId;
-				_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Load)}(): Loaded setting OriginId: {{0}}", OriginId);
+				_logger?.Debug("Loaded setting with origin id {0}", OriginId);
 			}
 			else
 			{
-				_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Load)}(): Didn't find setting file");
+				_logger?.Debug("No setting file available");
 			}
 		}
 
@@ -71,14 +72,16 @@ namespace Thinktecture.Relay.Server.Config
 			var directory = Path.GetDirectoryName(_settingsFileName);
 
 			if (!Directory.Exists(directory))
+			{
 				Directory.CreateDirectory(directory);
+			}
 
 			File.WriteAllText(_settingsFileName, configData);
 
-			_logger?.Trace($"{nameof(LocalAppDataPersistedSettings)}.{nameof(Store)}(): Stored setting OriginId: {{0}}", OriginId);
+			_logger?.Debug("Stored setting with origin id {0}", OriginId);
 		}
 
-		// ReSharper disable once ClassNeverInstantiated.Local; Justification: Its instanciated by deserialization through Newtonsoft
+		// ReSharper disable once ClassNeverInstantiated.Local; Justification: It is instanciated by deserialization through Newtonsoft.Json
 		private class PersistedSettings : IPersistedSettings
 		{
 			// ReSharper disable once UnusedAutoPropertyAccessor.Local

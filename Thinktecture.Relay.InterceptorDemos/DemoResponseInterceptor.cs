@@ -1,21 +1,21 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using Thinktecture.Relay.Server.Interceptors;
+using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.InterceptorDemos
 {
 	public class DemoResponseInterceptor : IOnPremiseResponseInterceptor
 	{
-		public HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request)
+		public HttpResponseMessage OnResponseReceived(IInterceptedRequest request)
 		{
-			return new HttpResponseMessage(HttpStatusCode.OK)
+			return new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
 			{
 				Content = new ByteArrayContent(GetBody())
 			};
 		}
 
-		public HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request, IInterceptedResponse response)
+		public HttpResponseMessage OnResponseReceived(IInterceptedRequest request, IInterceptedResponse response)
 		{
 			if (request.Url.EndsWith("WhatIsTheAnswerToLiveTheUniverseAndEverything"))
 				response.StatusCode = HttpStatusCode.ExpectationFailed;

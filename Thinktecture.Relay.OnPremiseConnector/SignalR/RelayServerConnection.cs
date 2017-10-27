@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR.Client;
@@ -23,26 +23,23 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private readonly string _password;
 		private readonly Uri _relayServer;
 		private readonly int _requestTimeout;
-		private readonly int _maxRetries;
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
 		private readonly HttpClient _httpClient;
 		private readonly int _id;
+		private CancellationTokenSource _cts;
+		private DateTime _lastHeartbeat;
 		private string _accessToken;
 		private bool _stopRequested;
 
 		private static int _nextId;
 		private static readonly Random _random = new Random();
 
-		private readonly object _lastHeartbeatLock;
-		private DateTime _lastHeartbeat = DateTime.MinValue;
-		private CancellationTokenSource _heartbeatCancellationTokenSource;
-
 		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
 		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
 
-		public RelayServerConnection(string userName, string password, Uri relayServer, int requestTimeout, int maxRetries, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+		public RelayServerConnection(string userName, string password, Uri relayServer, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
 			: base(new Uri(relayServer, "/signalr").AbsoluteUri, "version=2")
 		{
 			_id = Interlocked.Increment(ref _nextId);
@@ -50,12 +47,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_password = password;
 			_relayServer = relayServer;
 			_requestTimeout = requestTimeout;
-			_maxRetries = maxRetries;
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_logger = logger;
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
-			_lastHeartbeatLock = new object();
+			_cts = new CancellationTokenSource();
 
 			Reconnecting += OnReconnecting;
 			Reconnected += OnReconnected;
@@ -63,7 +59,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public string RelayedRequestHeader { get; set; }
 
-		public void RegisterOnPremiseTarget(string key, Uri baseUri, bool ignoreSslErrors)
+		public void RegisterOnPremiseTarget(string key, Uri baseUri)
 		{
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
@@ -72,10 +68,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Trace("Registering on-premise web target. key={0}, baseUri={1}, ignoreSslErrors={2}", key, baseUri, ignoreSslErrors);
-			_logger?.Debug("Registering on-premise web target");
+			_logger?.Trace("Registering on-premise web target. key={0}, base-uri={1}", key, baseUri);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout, ignoreSslErrors);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
@@ -88,7 +83,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			key = RemoveTrailingSlashes(key);
 
 			_logger?.Trace("Registering on-premise in-proc target. key={0}, type={1}", key, handlerType);
-			_logger?.Debug("Registering on-premise in-proc target");
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
 		}
@@ -103,13 +97,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			key = RemoveTrailingSlashes(key);
 
 			_logger?.Trace("Registering on-premise in-proc target using a handler factory. key={0}", key);
-			_logger?.Debug("Registering on-premise in-proc target");
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
 		}
 
-		public void RegisterOnPremiseTarget<T>(string key)
-			where T : IOnPremiseInProcHandler, new()
+		public void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new()
 		{
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
@@ -117,7 +109,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			key = RemoveTrailingSlashes(key);
 
 			_logger?.Trace("Registering on-premise in-proc target. key={0}, type={1}", key, typeof(T));
-			_logger?.Debug("Registering on-premise in-proc target");
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
 		}
@@ -150,19 +141,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				try
 				{
 					_logger?.Trace("Requesting authorization token. relay-server={0}, id={1}", _relayServer, _id);
-					_logger?.Debug("Requesting authorization token");
 
 					var response = await client.RequestResourceOwnerPasswordAsync(_userName, _password).ConfigureAwait(false);
 
 					_logger?.Trace("Received token. relay-server={0}, id={1}", _relayServer, _id);
 					return response;
 				}
-				catch (Exception ex)
+				catch
 				{
 					var randomWaitTime = GetRandomWaitTime();
 					_logger?.Info("Could not authenticate with relay server - re-trying in {0} seconds", randomWaitTime.TotalSeconds);
-					_logger?.Trace(ex, "Could not authenticate with relay server - re-trying in {0} seconds", randomWaitTime.TotalSeconds);
-					await Task.Delay(randomWaitTime).ConfigureAwait(false);
+					await Task.Delay(randomWaitTime, _cts.Token).ConfigureAwait(false);
 				}
 			}
 
@@ -174,17 +163,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger?.Info("Connecting to relay server #{0}", _id);
 
 			if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
+			{
 				return;
+			}
 
 			try
 			{
 				await Start().ConfigureAwait(false);
 				_logger?.Info("Connected to relay server #{0}", _id);
 			}
-			catch (Exception ex)
+			catch
 			{
 				_logger?.Info("Error while connecting to relay server #{0}", _id);
-				_logger?.Trace(ex, "Error while connecting to relay server #{0}", _id);
 			}
 		}
 
@@ -193,7 +183,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			var tokenResponse = await GetAuthorizationTokenAsync().ConfigureAwait(false);
 
 			if (_stopRequested)
+			{
 				return false;
+			}
 
 			CheckResponseTokenForErrors(tokenResponse);
 
@@ -208,22 +200,22 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			Headers["Authorization"] = $"{tokenResponse.TokenType} {_accessToken}";
 
-			_logger?.Trace("Setting bearer token. access-token={0}", _accessToken);
+			_logger?.Trace("Setting access token. access-token={0}", _accessToken);
 		}
 
 		private void CheckResponseTokenForErrors(TokenResponse token)
 		{
 			if (token.IsHttpError)
 			{
+				_logger?.Warn("Could not authenticate with relay server");
 				_logger?.Trace("Could not authenticate with relay server: status-code={0}, reason={1}", token.HttpErrorStatusCode, token.HttpErrorReason);
-				_logger?.Warn("Could not authenticate with relay server.");
 				throw new Exception("Could not authenticate with relay server: " + token.HttpErrorReason);
 			}
 
 			if (token.IsError)
 			{
-				_logger?.Trace("Could not authenticate with relay server. reason={0}", token.Error);
 				_logger?.Warn("Could not authenticate with relay server");
+				_logger?.Trace("Could not authenticate with relay server. reason={0}", token.Error);
 				throw new Exception("Could not authenticate with relay server: " + token.Error);
 			}
 		}
@@ -231,54 +223,42 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private void OnReconnected()
 		{
 			_logger?.Trace("Connection restored. relay-server={0}", _relayServer);
-			_logger?.Debug("Connection restored");
 		}
 
 		private void OnReconnecting()
 		{
 			_logger?.Trace("Connection lost - trying to reconnect. relay-server={0}", _relayServer);
-			_logger?.Debug("Connection lost - trying to reconnect");
 		}
 
-		protected override void OnMessageReceived(JToken message)
-		{
-			base.OnMessageReceived(message);
-
-			OnReceivedAsync(message);
-		}
-
-		private async void OnReceivedAsync(JToken message)
+		protected override async void OnMessageReceived(JToken message)
 		{
 			var ctx = new RequestContext();
 			OnPremiseTargetRequest request = null;
 
 			try
 			{
-				_logger?.Trace("Received message from server. message=#{0}", message);
-				_logger?.Debug("Received message from server");
+				_logger?.Trace("Received message from server. message={0}", message);
 
-				// receive a client request from relay server
 				request = message.ToObject<OnPremiseTargetRequest>();
 
-				if (request.HttpMethod == "PING")
+				try
 				{
-					await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
-					return;
-				}
+					if (request.HttpMethod == "PING")
+					{
+						await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
+						return;
+					}
 
-				if (request.HttpMethod == "INIT_HEARTBEAT")
+					if (request.HttpMethod == "HEARTBEAT")
+					{
+						HandleHeartbeatRequest(ctx, request);
+						return;
+					}
+				}
+				finally
 				{
-					await HandleInitHeartbeatRequestAsync(request).ConfigureAwait(false);
-					return;
+					await Send(request.AcknowledgeId).ConfigureAwait(false);
 				}
-
-				if (request.HttpMethod == "HEARTBEAT")
-				{
-					await HandleHeartbeatRequestAsync(request).ConfigureAwait(false);
-					return;
-				}
-
-				await AcknowledgeAsync(request).ConfigureAwait(false);
 
 				var key = request.Url.Split('/').FirstOrDefault();
 				if (key != null)
@@ -287,28 +267,24 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					{
 						_logger?.Trace("Found on-premise target. key={0}", key);
 
-						if (RelayedRequestHeader != null)
-							request.HttpHeaders[RelayedRequestHeader] = "true";
-
-						await RequestOnPremiseTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false);
+						await RequestLocalTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false);
 						return;
 					}
 				}
 
 				_logger?.Trace("No connector found for local server. request-id={0}, url={1}", request.RequestId, request.Url);
-				_logger?.Debug("No connector found for local server {0} of request {1}", request.Url, request.RequestId);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during handling received message.");
+				_logger?.Error(ex, "Error during handling received message. Message = {0}", message);
 			}
 			finally
 			{
 				if (!ctx.IsRelayServerNotified && request != null)
 				{
-					_logger?.Debug("Unhandled request #{0}", message);
+					_logger?.Trace("Unhandled request. message={0}", message);
 
-					var resp = new OnPremiseTargetResponse
+					var response = new OnPremiseTargetResponse
 					{
 						RequestStarted = ctx.StartDate,
 						RequestFinished = DateTime.UtcNow,
@@ -317,21 +293,21 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 						RequestId = request.RequestId,
 					};
 
-					await PostToRelayAsync(ctx, resp, CancellationToken.None).ConfigureAwait(false);
+					try
+					{
+						await PostToRelayAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+					}
+					catch (Exception ex)
+					{
+						_logger?.Error(ex, "Error during posting to relay");
+					}
 				}
 			}
 		}
 
-		private async Task AcknowledgeAsync(IOnPremiseTargetRequest request)
-		{
-			// older servers do not send acknowledge id, so we need to check for it not being null
-			if (!String.IsNullOrEmpty(request.AcknowledgeId))
-				await Send(request.AcknowledgeId).ConfigureAwait(false);
-		}
-
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
-			_logger?.Info("Received ping from relay server #{0}", _id);
+			_logger?.Debug("Received ping from relay server #{0}", _id);
 
 			var resp = new OnPremiseTargetResponse
 			{
@@ -343,99 +319,66 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			};
 
 			await PostToRelayAsync(ctx, resp, CancellationToken.None).ConfigureAwait(false);
-			await AcknowledgeAsync(request).ConfigureAwait(false);
 		}
 
-		private async Task HandleInitHeartbeatRequestAsync(IOnPremiseTargetRequest request)
-		{
-			_logger?.Debug($"{nameof(RelayServerConnection)}: Received initialize heartbeat from relay server #{{0}}", _id);
-
-			_lastHeartbeat = DateTime.UtcNow;
-			request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
-
-			if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
-			{
-				_logger?.Info("Heartbeat interval set to {0}s, starting checking of heartbeat.", heartbeatInterval);
-				CancellationToken token;
-
-				lock (_lastHeartbeatLock)
-				{
-					// cancel existing heartbeat if we already have one running
-					TryDisposeCurrentCancellationTokenSource();
-					_heartbeatCancellationTokenSource = new CancellationTokenSource();
-
-					token = _heartbeatCancellationTokenSource.Token;
-				}
-
-#pragma warning disable 4014
-				// Justification: Heartbeat checking is intended to be done in background and not awaited
-				CheckHeartbeatPeriodicallyAsync(TimeSpan.FromSeconds(heartbeatInterval), token);
-#pragma warning restore 4014
-
-			}
-			else
-			{
-				_logger?.Warn("Heartbeat interval is not a valid integer: {0}", heartbeatHeaderValue);
-
-				lock (_lastHeartbeatLock)
-				{
-					TryDisposeCurrentCancellationTokenSource();
-				}
-			}
-
-			await AcknowledgeAsync(request).ConfigureAwait(false);
-		}
-
-		private async Task HandleHeartbeatRequestAsync(IOnPremiseTargetRequest request)
+		private void HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
 			_logger?.Debug("Received heartbeat from relay server #{0}", _id);
 
-			_lastHeartbeat = DateTime.UtcNow;
+			if (_lastHeartbeat == DateTime.MinValue)
+			{
+				request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
+				if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
+				{
+					_logger?.Info("Heartbeat interval set to {0} seconds", heartbeatInterval);
+					StartHeartbeatCheckLoop(TimeSpan.FromSeconds(heartbeatInterval), _cts.Token);
+				}
+			}
 
-			await AcknowledgeAsync(request).ConfigureAwait(false);
+			ctx.IsRelayServerNotified = true;
 		}
 
-		private async Task CheckHeartbeatPeriodicallyAsync(TimeSpan heartbeatInterval, CancellationToken token)
+		private void StartHeartbeatCheckLoop(TimeSpan heartbeatInterval, CancellationToken token)
 		{
-			try
+			Task.Run(async () =>
 			{
-				await Task.Run(async () =>
-				{
-					var intervalWithTolerance = heartbeatInterval.Add(TimeSpan.FromSeconds(2));
+				var intervalWithTolerance = heartbeatInterval.Add(TimeSpan.FromSeconds(2));
 
-					while (!token.IsCancellationRequested)
+				while (!token.IsCancellationRequested)
+				{
+					if (_lastHeartbeat != DateTime.MinValue && _lastHeartbeat != DateTime.MaxValue)
 					{
-						_logger?.Trace("Checking last heartbeat time. Interval: {0}s, last heartbeat: {1}", heartbeatInterval, _lastHeartbeat);
+						_logger?.Trace("Checking last heartbeat time. last-heartbeat={0}", _lastHeartbeat);
 
 						if (_lastHeartbeat <= DateTime.UtcNow.Add(-intervalWithTolerance))
 						{
-							_logger?.Warn("Last heartbeat was at {0}, and out of interval of {1}s. Forcing reconnect.", _lastHeartbeat, heartbeatInterval);
+							_logger?.Warn("Last heartbeat was at {0} and out of an interval of {1} secconds", _lastHeartbeat, heartbeatInterval.TotalSeconds);
+
+							_lastHeartbeat = DateTime.MaxValue;
 
 							if (!_stopRequested)
+							{
 								ForceReconnect();
-
-							return;
+							}
 						}
-
-						await Task.Delay(heartbeatInterval, token).ConfigureAwait(false);
 					}
-				}, token).ConfigureAwait(false);
-			}
-			catch (OperationCanceledException)
-			{
-				/* Cancellation has been requested */
-			}
+
+					await Task.Delay(heartbeatInterval, token).ConfigureAwait(false);
+				}
+			}, token).ConfigureAwait(false);
 		}
 
 		private void ForceReconnect()
 		{
+			_logger?.Debug("Forcing reconnect");
+
 			Disconnect();
 
 			Task.Delay(1500).ContinueWith(_ =>
 			{
 				_stopRequested = false;
-				return ConnectAsync();
-			});
+				return ConnectAsync().ConfigureAwait(false);
+			}).ConfigureAwait(false);
 		}
 
 		public void Disconnect()
@@ -444,21 +387,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_stopRequested = true;
 			Stop();
-
-			lock (_lastHeartbeatLock)
-			{
-				TryDisposeCurrentCancellationTokenSource();
-			}
 		}
 
-		private void TryDisposeCurrentCancellationTokenSource()
+		protected override void Dispose(bool disposing)
 		{
-			if (_heartbeatCancellationTokenSource != null)
+			if (_cts != null)
 			{
-				_heartbeatCancellationTokenSource.Cancel();
-				_heartbeatCancellationTokenSource.Dispose();
-				_heartbeatCancellationTokenSource = null;
+				_cts.Cancel();
+				_cts.Dispose();
+				_cts = null;
 			}
+
+			base.Dispose(disposing);
 		}
 
 		public List<string> GetOnPremiseTargetKeys()
@@ -466,47 +406,58 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			return _connectors.Keys.ToList();
 		}
 
-		private async Task RequestOnPremiseTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, OnPremiseTargetRequest request, CancellationToken cancellationToken)
+		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, OnPremiseTargetRequest request, CancellationToken cancellationToken)
 		{
-			_logger?.Debug("Requesting local server {0} for request id {1}", request.Url, request.RequestId);
+			_logger?.Debug("Requesting local server {0} for request {1}", request.Url, request.RequestId);
 
 			var url = (request.Url.Length > key.Length) ? request.Url.Substring(key.Length + 1) : String.Empty;
 
-			if (request.Body?.Length == 0)
+			if (request.Body != null)
 			{
-				_logger?.Trace("Requesting body from relay server. relay-server={0}, request-id={1}", _relayServer, request.RequestId);
-				// request the body from the relay server (because SignalR cannot handle large messages)
-				var webResponse = await GetToRelay("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
-				request.Body = await webResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+				if (request.Body.Length == 0)
+				{
+					// a length of 0 indicates that there is a larger body available on the server
+					_logger?.Trace("Requesting body from relay server. relay-server={0}, request-id={1}", _relayServer, request.RequestId);
+					// request the body from the relay server (because SignalR cannot handle large messages)
+					var webResponse = await GetToRelay("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
+					request.Stream = await webResponse.Content.ReadAsStreamAsync().ConfigureAwait(false); // this stream should not be disposed (owned by the Framework)
+				}
+				else
+				{
+					// the body is small enough to be used directly
+					request.Stream = new MemoryStream(request.Body);
+				}
+			}
+			else
+			{
+				// no body available (e.g. GET request)
+				request.Stream = Stream.Null;
 			}
 
-			var response = await connector.GetResponseAsync(url, request).ConfigureAwait(false);
-
-			_logger?.Debug("Sending response from {0} to relay server", request.Url);
-
-			var retryCount = 0;
-
-			while (!_stopRequested && retryCount++ < _maxRetries)
+			using (var response = await connector.GetResponseFromLocalTargetAsync(url, request, RelayedRequestHeader).ConfigureAwait(false))
 			{
+				if (response.Stream == null)
+				{
+					response.Stream = Stream.Null;
+				}
+
+				_logger?.Debug("Sending response from {0} to relay server", request.Url);
+
 				try
 				{
 					// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
 					await PostToRelayAsync(ctx, response, cancellationToken).ConfigureAwait(false);
-					return;
 				}
 				catch (Exception ex)
 				{
-					_logger?.Debug(ex, "Error while posting to relay server - retry {0} of {1}", retryCount, _maxRetries);
-					Thread.Sleep(1000);
+					_logger?.Error(ex, "Error during posting to relay");
 				}
 			}
-
-			_logger?.Error("Error communicating with relay server. Aborting response...");
 		}
 
-		private async Task PostToRelayAsync<T>(RequestContext ctx, T data, CancellationToken cancellationToken)
+		private async Task PostToRelayAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
 		{
-			await PostToRelay("/forward", () => new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
+			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;
 		}
 
@@ -534,18 +485,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			return SendToRelayAsync(relativeUrl, HttpMethod.Get, setHeaders, null, cancellationToken);
 		}
 
-		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, HttpContent content, CancellationToken cancellationToken)
 		{
 			return PostToRelay(relativeUrl, null, content, cancellationToken);
 		}
 
-		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			return SendToRelayAsync(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
 		}
 
-		private Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, Func<HttpContent> getContent,
-			CancellationToken cancellationToken)
+		private Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			if (String.IsNullOrWhiteSpace(relativeUrl))
 				throw new ArgumentException("Relative url cannot be null or empty.");
@@ -555,35 +505,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			var url = new Uri(_relayServer, relativeUrl);
 
-			return ReplayHttpRequestIfNeededAsync(() =>
-			{
-				var request = new HttpRequestMessage(httpMethod, url);
+			var request = new HttpRequestMessage(httpMethod, url);
 
-				setHeaders?.Invoke(request.Headers);
+			setHeaders?.Invoke(request.Headers);
+			request.Content = content;
 
-				if (getContent != null)
-					request.Content = getContent();
-
-				return _httpClient.SendAsync(request, cancellationToken);
-			});
-		}
-
-		private async Task<HttpResponseMessage> ReplayHttpRequestIfNeededAsync(Func<Task<HttpResponseMessage>> httpRequest)
-		{
-			var result = await httpRequest().ConfigureAwait(false);
-
-			if (result.StatusCode == HttpStatusCode.Unauthorized)
-			{
-				// If we don't get a new token and stop is requested, we return the first request
-				if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
-				{
-					return result;
-				}
-
-				result = await httpRequest().ConfigureAwait(false);
-			}
-
-			return result;
+			return _httpClient.SendAsync(request, cancellationToken);
 		}
 
 		private TimeSpan GetRandomWaitTime()
