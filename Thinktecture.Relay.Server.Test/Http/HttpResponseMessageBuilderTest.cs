@@ -64,8 +64,9 @@ namespace Thinktecture.Relay.Server.Http
 				HttpHeaders = new Dictionary<string, string>
 				{
 					["Content-Length"] = "4",
-					["X-Foo"] = "X-Bar"
-				}
+					["X-Foo"] = "X-Bar",
+				},
+				ContentLength = 4,
 			};
 			var link = new Link();
 
@@ -164,7 +165,7 @@ namespace Thinktecture.Relay.Server.Http
 		public async Task GetResponseContentForOnPremiseTargetResponse_discloses_content_when_InternalServerError_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_on()
 		{
 			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
-			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.InternalServerError, Body = new byte[] { 0, 0, 0 } };
+			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.InternalServerError, Body = new byte[] { 0, 0, 0 }, ContentLength = 3, };
 			var link = new Link { ForwardOnPremiseTargetErrorResponse = true };
 
 			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
@@ -179,7 +180,7 @@ namespace Thinktecture.Relay.Server.Http
 		public async Task GetResponseContentForOnPremiseTargetResponse_sets_StatusCode_accordingly_and_discloses_content()
 		{
 			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
-			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.OK, Body = new byte[] { 0, 0, 0, 0 } };
+			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.OK, Body = new byte[] { 0, 0, 0, 0 }, ContentLength = 4, };
 			var link = new Link();
 
 			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
