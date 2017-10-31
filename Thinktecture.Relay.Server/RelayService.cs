@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server
 			try
 			{
 				var address = $"{(_configuration.UseInsecureHttp ? "http" : "https")}://{_configuration.HostName}:{_configuration.Port}";
-				_logger?.Information("Listening on {0}", address);
+				_logger?.Information("Listening on {listening-address}", address);
 
 				_host = WebApp.Start(address, app => _startup.Configuration(app));
 			}

@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(connectionId));
 
 			CheckDisposed();
-			_logger?.Information("Creating request subscription for link {0} and connection {1}", linkId, connectionId);
+			_logger?.Information("Creating request subscription for link {link-id} and connection {connection-id}", linkId, connectionId);
 
 			return Observable.Create<IOnPremiseConnectorRequest>(observer =>
 			{
@@ -82,7 +82,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(request));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching request for link {0}, request {1}, HTTP method {2}, url '{3}'", linkId, request.RequestId, request.HttpMethod, request.Url);
+			_logger?.Debug("Dispatching request for link {link-id}, request {request-id}, HTTP method {http-method}, url '{request-url}'", linkId, request.RequestId, request.HttpMethod, request.Url);
 
 			TryGetRequestSubject(linkId)?.OnNext(request);
 
@@ -95,7 +95,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(response));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching response for origin {0}, request {1}, status code {2}", originId, response.RequestId, response.StatusCode);
+			_logger?.Debug("Dispatching response for origin {origin-id}, request {request-id}, status code {response-status-code}", originId, response.RequestId, response.StatusCode);
 
 			GetResponseSubject(originId).OnNext(response);
 

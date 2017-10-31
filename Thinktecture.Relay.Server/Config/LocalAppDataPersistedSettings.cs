@@ -45,7 +45,7 @@ namespace Thinktecture.Relay.Server.Config
 
 			var fileName = Path.Combine(path, "Thinktecure", "RelayServer", $"settings_{_configuration.Port}.config.json");
 		
-			_logger?.Debug("Using settings file '{0}'", fileName);
+			_logger?.Debug("Using settings file '{settings-file-name}'", fileName);
 
 			return fileName;
 		}
@@ -58,7 +58,7 @@ namespace Thinktecture.Relay.Server.Config
 				var configFromFile = JsonConvert.DeserializeObject<PersistedSettings>(fileContents);
 
 				OriginId = configFromFile.OriginId;
-				_logger?.Debug("Loaded setting with origin id {0}", OriginId);
+				_logger?.Debug("Loaded setting with origin id {origin-id}", OriginId);
 			}
 			else
 			{
@@ -78,7 +78,7 @@ namespace Thinktecture.Relay.Server.Config
 
 			File.WriteAllText(_settingsFileName, configData);
 
-			_logger?.Debug("Stored setting with origin id {0}", OriginId);
+			_logger?.Debug("Stored setting with origin id {origin-id}", OriginId);
 		}
 
 		// ReSharper disable once ClassNeverInstantiated.Local; Justification: It is instanciated by deserialization through Newtonsoft.Json

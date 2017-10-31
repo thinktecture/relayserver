@@ -301,7 +301,7 @@ namespace Thinktecture.Relay.Server.Repository
 
 		public async Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion)
 		{
-			_logger?.Verbose("Adding or updating connection. connection-id={0}, link-id={1}, connector-version={2}", connectionId, linkId, connectorVersion);
+			_logger?.Verbose("Adding or updating connection. connection-id={connection-id}, link-id={link-id}, connector-version={connector-version}", connectionId, linkId, connectorVersion);
 
 			try
 			{
@@ -332,13 +332,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during adding or renewing an active connection. LinkId = {0}, ConnectionId = {1}, ConnectorVersion = {2}", linkId, connectionId, connectorVersion);
+				_logger?.Error(ex, "Error during adding or renewing an active connection. LinkId = {link-id}, ConnectionId = {connection-id}, ConnectorVersion = {connector-version}", linkId, connectionId, connectorVersion);
 			}
 		}
 
 		public async Task RenewActiveConnectionAsync(string connectionId)
 		{
-			_logger?.Verbose("Renewing last activity. connection-id={0}", connectionId);
+			_logger?.Verbose("Renewing last activity. connection-id={connection-id}", connectionId);
 
 			try
 			{
@@ -355,13 +355,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during renewing an active connection. ConnectionId = {0}", connectionId);
+				_logger?.Error(ex, "Error during renewing an active connection. ConnectionId = {connection-id}", connectionId);
 			}
 		}
 
 		public async Task RemoveActiveConnectionAsync(string connectionId)
 		{
-			_logger?.Verbose("Deleting active connection, connection-id={0}", connectionId);
+			_logger?.Verbose("Deleting active connection, connection-id={connection-id}", connectionId);
 
 			try
 			{
@@ -378,7 +378,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during removing an active connection. ConnectionId = {0}", connectionId);
+				_logger?.Error(ex, "Error during removing an active connection. ConnectionId = {connection-id}", connectionId);
 			}
 		}
 

@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 				return request;
 			}
 
-			_logger?.Verbose("Handling request. request-id={0}", request.RequestId);
+			_logger?.Verbose("Handling request. request-id={request-id}", request.RequestId);
 
 			IPAddress ipAddress = null;
 			try
@@ -37,7 +37,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Warning(ex, "Could not fetch remote IP address for request {0}", request.RequestId);
+				_logger?.Warning(ex, "Could not fetch remote IP address for request {request-id}", request.RequestId);
 			}
 
 			try
@@ -49,7 +49,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while executing the request interceptor. TypeName = {0}, RequestId = {1}", _requestInceptor?.GetType().Name, request.RequestId);
+				_logger?.Error(ex, "Error while executing the request interceptor. TypeName = {interceptor-type}, RequestId = {request-id}", _requestInceptor?.GetType().Name, request.RequestId);
 			}
 
 			return request;
@@ -62,7 +62,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 				return null;
 			}
 
-			_logger?.Verbose("Handling response. request-id={0}", request.RequestId);
+			_logger?.Verbose("Handling response. request-id={request-id}", request.RequestId);
 
 			try
 			{
@@ -75,7 +75,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while executing the response interceptor. TypeName = {0}, RequestId = {1}", _requestInceptor?.GetType().Name, request.RequestId);
+				_logger?.Error(ex, "Error while executing the response interceptor. TypeName = {interceptor-type}, RequestId = {request-id}", _requestInceptor?.GetType().Name, request.RequestId);
 				return null;
 			}
 		}
