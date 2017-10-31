@@ -26,14 +26,15 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			{
 				Body = new byte[] { 0, 0, 0 },
 				RequestStarted = new DateTime(2014, 1, 1),
-				RequestFinished = new DateTime(2014, 1, 2)
+				RequestFinished = new DateTime(2014, 1, 2),
+				ContentLength = 3,
 			};
 			RequestLogEntry result = null;
 
 			logRepositoryMock.Setup(r => r.LogRequest(It.IsAny<RequestLogEntry>())).Callback<RequestLogEntry>(r => result = r);
 			pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { OnPremiseTargetKey = "that", LocalUrl = "/file.html" });
 
-			sut.LogRequest(clientRequest, null, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html", HttpStatusCode.OK);
+			sut.LogRequest(clientRequest, null, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html", HttpStatusCode.PaymentRequired);
 
 			logRepositoryMock.Verify(r => r.LogRequest(It.IsAny<RequestLogEntry>()));
 			result.HttpStatusCode.Should().Be(HttpStatusCode.PaymentRequired);
@@ -59,19 +60,21 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			{
 				Body = new byte[] { 0, 0, 0 },
 				RequestStarted = new DateTime(2014, 1, 1),
-				RequestFinished = new DateTime(2014, 1, 2)
+				RequestFinished = new DateTime(2014, 1, 2),
+				ContentLength = 3,
 			};
 			var onPremiseConnectorResponse = new OnPremiseConnectorResponse
 			{
 				RequestStarted = new DateTime(2014, 1, 3),
 				RequestFinished = new DateTime(2014, 1, 4),
+				ContentLength = 2,
 			};
 			RequestLogEntry result = null;
 
 			logRepositoryMock.Setup(r => r.LogRequest(It.IsAny<RequestLogEntry>())).Callback<RequestLogEntry>(r => result = r);
 			pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { OnPremiseTargetKey = "that", LocalUrl = "/file.html" });
 
-			sut.LogRequest(clientRequest, onPremiseConnectorResponse, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html", HttpStatusCode.OK);
+			sut.LogRequest(clientRequest, onPremiseConnectorResponse, Guid.Parse("4bb4ff98-ba03-49ee-bd83-5a229f63fade"), new Guid("35eff886-2d7c-4265-a6a4-f3f471ab93e8"), "gimme/that/file.html", HttpStatusCode.PaymentRequired);
 
 			logRepositoryMock.Verify(r => r.LogRequest(It.IsAny<RequestLogEntry>()));
 			result.HttpStatusCode.Should().Be(HttpStatusCode.PaymentRequired);
