@@ -5,7 +5,8 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
-using NLog;
+using AutofacSerilogIntegration;
+using Serilog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
@@ -19,10 +20,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			var builder = new ContainerBuilder();
 
+			builder.RegisterLogger();
 			builder.RegisterType<RelayServerConnectionFactory>().As<IRelayServerConnectionFactory>();
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
-
-			builder.Register(context => LogManager.GetLogger("ClientLogger")).As<ILogger>().SingleInstance();
 
 			_container = builder.Build();
 		}

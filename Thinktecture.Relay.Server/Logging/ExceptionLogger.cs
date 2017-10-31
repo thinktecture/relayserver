@@ -2,15 +2,15 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.ExceptionHandling;
-using NLog;
+using Serilog;
 
 namespace Thinktecture.Relay.Server.Logging
 {
-	public class NLogExceptionLogger : IExceptionLogger
+	public class ExceptionLogger : IExceptionLogger
 	{
 		private readonly ILogger _logger;
 
-		public NLogExceptionLogger(ILogger logger)
+		public ExceptionLogger(ILogger logger)
 		{
 			_logger = logger;
 		}

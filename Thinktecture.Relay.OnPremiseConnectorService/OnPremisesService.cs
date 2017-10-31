@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.OnPremiseConnector;
 using Thinktecture.Relay.OnPremiseConnectorService.Configuration;
 
@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 {
 	internal class OnPremisesService
 	{
-		private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+		private readonly ILogger _logger = Log.Logger;
 
 		private RelayServerConnector _connector;
 

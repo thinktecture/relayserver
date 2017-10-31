@@ -1,27 +1,27 @@
 using System;
 using System.Web.Http.Tracing;
-using NLog;
+using Serilog.Events;
 
 namespace Thinktecture.Relay.Server.Logging
 {
 	public class TraceLevelConverter : ITraceLevelConverter
 	{
-		public LogLevel Convert(TraceLevel level)
+		public LogEventLevel Convert(TraceLevel level)
 		{
 			switch (level)
 			{
 				case TraceLevel.Off:
-					return LogLevel.Off;
+					return LogEventLevel.Verbose;
 				case TraceLevel.Debug:
-					return LogLevel.Debug;
+					return LogEventLevel.Debug;
 				case TraceLevel.Info:
-					return LogLevel.Info;
+					return LogEventLevel.Information;
 				case TraceLevel.Warn:
-					return LogLevel.Warn;
+					return LogEventLevel.Warning;
 				case TraceLevel.Error:
-					return LogLevel.Error;
+					return LogEventLevel.Error;
 				case TraceLevel.Fatal:
-					return LogLevel.Fatal;
+					return LogEventLevel.Fatal;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(level), level, null);
 			}

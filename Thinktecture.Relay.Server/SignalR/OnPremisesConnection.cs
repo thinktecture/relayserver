@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.OnPremise;
 
@@ -63,7 +63,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest request)
 		{
-			_logger?.Trace("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
+			_logger?.Verbose("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
 				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.ContentLength);
 
 			Connection.Send(connectionId, request);

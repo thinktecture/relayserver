@@ -6,7 +6,7 @@ using System.Web.Http.Controllers;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Server.Controller
 			var localConfigurationGuid = Guid.NewGuid();
 			var originId = new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5");
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 			_backendCommunicationMock.SetupGet(b => b.OriginId).Returns(originId);
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(linkFake);
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { PathWithoutUserName = "Bar/Baz" });
@@ -107,7 +107,7 @@ namespace Thinktecture.Relay.Server.Controller
 			sut.ControllerContext = new HttpControllerContext { Request = new HttpRequestMessage { Method = HttpMethod.Post } };
 			HttpResponseMessage result;
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 
 			result = await sut.Relay(null);
 
@@ -121,7 +121,7 @@ namespace Thinktecture.Relay.Server.Controller
 			sut.ControllerContext = new HttpControllerContext { Request = new HttpRequestMessage { Method = HttpMethod.Post } };
 			HttpResponseMessage result;
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(() => null);
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation());
 
@@ -139,7 +139,7 @@ namespace Thinktecture.Relay.Server.Controller
 			sut.ControllerContext = new HttpControllerContext { Request = new HttpRequestMessage { Method = HttpMethod.Post } };
 			HttpResponseMessage result;
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(new Link { IsDisabled = true });
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation());
 
@@ -157,7 +157,7 @@ namespace Thinktecture.Relay.Server.Controller
 			sut.ControllerContext = new HttpControllerContext { Request = new HttpRequestMessage { Method = HttpMethod.Post } };
 			HttpResponseMessage result;
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(new Link());
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation());
 
@@ -175,7 +175,7 @@ namespace Thinktecture.Relay.Server.Controller
 			sut.ControllerContext = new HttpControllerContext { Request = new HttpRequestMessage { Method = HttpMethod.Post } };
 			HttpResponseMessage result;
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(new Link());
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { PathWithoutUserName = "    " });
 
@@ -194,7 +194,7 @@ namespace Thinktecture.Relay.Server.Controller
 			sut.Request = new HttpRequestMessage();
 			HttpResponseMessage result;
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(new Link { AllowLocalClientRequestsOnly = true });
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { PathWithoutUserName = "Bar/Baz" });
 
@@ -219,7 +219,7 @@ namespace Thinktecture.Relay.Server.Controller
 			var onPremiseTargetReponseFake = new OnPremiseConnectorResponse();
 			var httpResponseMessageFake = new HttpResponseMessage { StatusCode = HttpStatusCode.Found };
 
-			_loggerMock.Setup(l => l.Trace(It.IsAny<string>));
+			_loggerMock.Setup(l => l.Verbose(It.IsAny<string>()));
 			_backendCommunicationMock.SetupGet(b => b.OriginId).Returns(new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"));
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(linkFake);
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { PathWithoutUserName = "Bar/Baz" });

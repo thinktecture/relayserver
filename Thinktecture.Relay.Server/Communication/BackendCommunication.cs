@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
@@ -45,8 +45,8 @@ namespace Thinktecture.Relay.Server.Communication
 			_cancellationToken = _cts.Token;
 			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
 
-			_logger?.Trace("Creating backend communication. origin-id={0}", OriginId);
-			_logger?.Info("Backend communication is using {0}", messageDispatcher.GetType().Name);
+			_logger?.Verbose("Creating backend communication. origin-id={0}", OriginId);
+			_logger?.Information("Backend communication is using {0}", messageDispatcher.GetType().Name);
 		}
 
 		public void Prepare()
@@ -217,7 +217,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			if (registrationInformation.SupportsHeartbeat())
 			{
-				_logger?.Trace("Registration supports heartbeat. connection-id={0}, version={1}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
+				_logger?.Verbose("Registration supports heartbeat. connection-id={0}, version={1}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
 
 				var heartbeatInfo = new HeartbeatInformation()
 				{
@@ -231,13 +231,13 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			else
 			{
-				_logger?.Trace("Registration has no heartbeat support. connection-id={0}, version={1}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
+				_logger?.Verbose("Registration has no heartbeat support. connection-id={0}, version={1}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
 			}
 		}
 
 		private void UnregisterForHeartbeat(string connectionId)
 		{
-			_logger?.Trace("Unregistering from heartbeating. connection-id={0}", connectionId);
+			_logger?.Verbose("Unregistering from heartbeating. connection-id={0}", connectionId);
 
 			_heartbeatClients.TryRemove(connectionId, out var info);
 		}
@@ -264,7 +264,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			try
 			{
-				_logger?.Trace("Sending heartbeat. connection-id={0}", client.ConnectionId);
+				_logger?.Verbose("Sending heartbeat. connection-id={0}", client.ConnectionId);
 
 				var requestId = Guid.NewGuid().ToString();
 				var request = new OnPremiseConnectorRequest()

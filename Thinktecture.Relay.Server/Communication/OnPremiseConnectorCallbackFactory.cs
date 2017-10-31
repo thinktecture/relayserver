@@ -1,4 +1,4 @@
-using NLog;
+using Serilog;
 
 namespace Thinktecture.Relay.Server.Communication
 {
@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 		public IOnPremiseConnectorCallback Create(string requestId)
 		{
-			_logger?.Trace("Creating on premise connector callback. request-id={0}", requestId);
+			_logger?.Verbose("Creating on premise connector callback. request-id={0}", requestId);
 
 			return new OnPremiseConnectorCallback(requestId);
 		}

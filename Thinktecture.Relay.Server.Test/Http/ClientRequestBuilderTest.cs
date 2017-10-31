@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;

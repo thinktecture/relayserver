@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.InterceptorDemos

@@ -26,7 +26,7 @@ Für diesen Fall ist es allerdings _nicht_ erlaubt, mehr als ein DI-Modul bereit
 Der RelayServer schaut zuerst nach einem DI-Modul (siehe unten). Wird genau ein DI-Modul gefunden, wird dieses registriert. Hiermit ist es möglich, auch eigene weitere Abhängigkeiten im Dependency Injection Container zu registrieren und diese in den eigenen Interceptoren zu verwenden.
 
 Sollte kein DI-Modul gefunden werden, wird der RelayServer versuchen im Interceptor-Assembly die Klassen zu ermitteln, die mindestens eine der Interceptor-Schnittstellen implementieren. Wird genau eine pro Schnittstelle gefunden, wird diese Klasse automatisch in der DI registriert.
-In diesem Fall kann eine Interceptor-Klasse lediglich die standardmäßig zur Verfügung stehenden Abhängigkeiten nutzen, wie z.b. den `Nlog.ILogger`.
+In diesem Fall kann eine Interceptor-Klasse lediglich die standardmäßig zur Verfügung stehenden Abhängigkeiten nutzen, wie z.b. den `Serilog.ILogger`.
 
 
 ### Modifizieren des Requests
