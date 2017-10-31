@@ -75,10 +75,10 @@ namespace Thinktecture.Relay.Server.Controller
 			_clientRequestBuilderMock.Setup(c => c.BuildFromHttpRequest(sut.Request, new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Bar/Baz")).ReturnsAsync(clientRequestFake);
 			_backendCommunicationMock.Setup(b => b.SendOnPremiseConnectorRequest(new Guid("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), clientRequestFake)).Returns(Task.FromResult(0));
 			_backendCommunicationMock.Setup(b => b.GetResponseAsync("239b6e03-9795-450d-bdd1-ab72900f1a98")).ReturnsAsync(onPremiseTargetReponseFake);
-			_httpResponseMessageBuilderMock.Setup(h => h.BuildFromConnectorResponse(onPremiseTargetReponseFake, linkFake)).Returns(httpResponseMessageFake);
+			_httpResponseMessageBuilderMock.Setup(h => h.BuildFromConnectorResponse(onPremiseTargetReponseFake, linkFake, "")).Returns(httpResponseMessageFake);
 			_traceManagerMock.Setup(t => t.GetCurrentTraceConfigurationId(linkFake.Id)).Returns(localConfigurationGuid);
 			_traceManagerMock.Setup(t => t.Trace(clientRequestFake, onPremiseTargetReponseFake, localConfigurationGuid));
-			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Foo/Bar/Baz"));
+			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Foo/Bar/Baz", HttpStatusCode.OK));
 
 			result = await sut.Relay("Foo/Bar/Baz");
 
@@ -219,9 +219,9 @@ namespace Thinktecture.Relay.Server.Controller
 			_clientRequestBuilderMock.Setup(c => c.BuildFromHttpRequest(sut.Request, new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Bar/Baz")).ReturnsAsync(clientRequestFake);
 			_backendCommunicationMock.Setup(b => b.SendOnPremiseConnectorRequest(new Guid("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), clientRequestFake)).Returns(Task.FromResult(0));
 			_backendCommunicationMock.Setup(b => b.GetResponseAsync("239b6e03-9795-450d-bdd1-ab72900f1a98")).ReturnsAsync(onPremiseTargetReponseFake);
-			_httpResponseMessageBuilderMock.Setup(h => h.BuildFromConnectorResponse(onPremiseTargetReponseFake, linkFake)).Returns(httpResponseMessageFake);
+			_httpResponseMessageBuilderMock.Setup(h => h.BuildFromConnectorResponse(onPremiseTargetReponseFake, linkFake, "")).Returns(httpResponseMessageFake);
 			_traceManagerMock.Setup(t => t.GetCurrentTraceConfigurationId(linkFake.Id)).Returns((Guid?)null);
-			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Foo/Bar/Baz"));
+			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Foo/Bar/Baz", HttpStatusCode.OK));
 
 			result = await sut.Relay("Foo/Bar/Baz");
 
