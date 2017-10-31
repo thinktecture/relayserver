@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using NLog;
+using Serilog;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				DeclareQueue(queueName);
 				_model.QueueBind(queueName, _EXCHANGE_NAME, linkId.ToString());
 
-				_logger?.Trace("Creating request consumer. link-id={0}, connection-id={1}, supports-ack={2}", linkId, connectionId, noAck ? "no": "yes");
+				_logger?.Verbose("Creating request consumer. link-id={0}, connection-id={1}, supports-ack={2}", linkId, connectionId, noAck ? "no": "yes");
 
 				var consumer = new EventingBasicConsumer(_model);
 
@@ -154,13 +154,13 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		private void DeclareExchange(string name)
 		{
-			_logger?.Trace("Declaring exchange. name={0}, type={1}", name, ExchangeType.Direct);
+			_logger?.Verbose("Declaring exchange. name={0}, type={1}", name, ExchangeType.Direct);
 			_model.ExchangeDeclare(name, ExchangeType.Direct);
 		}
 
 		private void DeclareQueue(string name)
 		{
-			_logger?.Trace("Declaring queue. name={0}, expiration={1} sec", name, _queueExpiration / 1000);
+			_logger?.Verbose("Declaring queue. name={0}, expiration={1} sec", name, _queueExpiration / 1000);
 			_model.QueueDeclare(name, true, false, false, new Dictionary<string, object>() { ["x-expires"] = _queueExpiration });
 		}
 

@@ -1,5 +1,7 @@
 using System;
 using Autofac;
+using AutofacSerilogIntegration;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Logging;
@@ -13,8 +15,13 @@ namespace Thinktecture.Relay.Server
 	{
 		private static void Main(string[] args)
 		{
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.AppSettings()
+				.CreateLogger();
+
 			HostFactory.Run(config =>
 			{
+				config.UseSerilog();
 				var programScope = BuildProgramScope();
 				var relayServerScope = BuildRelayServerScope(programScope);
 
@@ -52,7 +59,7 @@ namespace Thinktecture.Relay.Server
 		{
 			var builder = new ContainerBuilder();
 
-			builder.RegisterModule<LoggingModule>();
+			builder.RegisterLogger();
 			builder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
 			builder.RegisterType<InterceptorLoader>().As<IInterceptorLoader>().SingleInstance();
 			builder.RegisterType<RelayServerModule>();

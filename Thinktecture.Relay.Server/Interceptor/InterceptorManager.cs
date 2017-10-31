@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.OnPremise;
 
@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 				return request;
 			}
 
-			_logger?.Trace("Handling request. request-id={0}", request.RequestId);
+			_logger?.Verbose("Handling request. request-id={0}", request.RequestId);
 
 			IPAddress ipAddress = null;
 			try
@@ -37,7 +37,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Warn(ex, "Could not fetch remote IP address for request {0}", request.RequestId);
+				_logger?.Warning(ex, "Could not fetch remote IP address for request {0}", request.RequestId);
 			}
 
 			try
@@ -62,7 +62,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 				return null;
 			}
 
-			_logger?.Trace("Handling response. request-id={0}", request.RequestId);
+			_logger?.Verbose("Handling response. request-id={0}", request.RequestId);
 
 			try
 			{

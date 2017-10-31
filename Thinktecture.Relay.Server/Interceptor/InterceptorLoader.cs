@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Autofac;
 using Autofac.Core;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server.Interceptor
@@ -35,16 +35,16 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 				if (!RegisterInterceptorModule(interceptorAssembly, builder))
 				{
-					_logger?.Info("Interceptor assembly does not provide a DI module. Trying to load individual interceptor types.");
+					_logger?.Information("Interceptor assembly does not provide a DI module. Trying to load individual interceptor types.");
 
 					if (!RegisterIndividualInterceptors(interceptorAssembly, builder))
 					{
-						_logger?.Warn("No interceptors could be registered from interceptor assembly.");
+						_logger?.Warning("No interceptors could be registered from interceptor assembly.");
 						return;
 					}
 				}
 
-				_logger?.Info("Successfully loaded interceptor assembly");
+				_logger?.Information("Successfully loaded interceptor assembly");
 			}
 			catch (Exception ex)
 			{
@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			if (!File.Exists(path))
 			{
-				_logger?.Warn("An interceptor assembly has been configured, but it is not available at the configured path '{0}'", path);
+				_logger?.Warning("An interceptor assembly has been configured, but it is not available at the configured path '{0}'", path);
 				return null;
 			}
 
@@ -92,7 +92,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			if (autofacModules.Length > 1)
 			{
-				_logger?.Warn("The interceptor assembly needs to provide at maximum of one (1) Autofac Module, but {0} were found", autofacModules.Length);
+				_logger?.Warning("The interceptor assembly needs to provide at maximum of one (1) Autofac Module, but {0} were found", autofacModules.Length);
 				return null;
 			}
 
@@ -106,7 +106,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			foreach (var interceptorInterfaceType in interceptorInterfaceTypes)
 			{
-				_logger?.Trace("Trying to load interceptor. type={0}", interceptorInterfaceType.Name);
+				_logger?.Verbose("Trying to load interceptor. type={0}", interceptorInterfaceType.Name);
 
 				var interceptorType = FindInterceptorType(interceptorInterfaceType, interceptorAssembly);
 				if (interceptorType != null)
@@ -133,7 +133,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			if (foundInterceptors.Length > 1)
 			{
-				_logger?.Warn("One kind of interceptor can only be registered once, but interceptor assembly provides {0} types that implement the {1} interceptor", foundInterceptors.Length, interceptorInterfaceType.Name);
+				_logger?.Warning("One kind of interceptor can only be registered once, but interceptor assembly provides {0} types that implement the {1} interceptor", foundInterceptors.Length, interceptorInterfaceType.Name);
 				return null;
 			}
 
@@ -142,7 +142,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 		private void RegisterInterceptorType(Type interceptorType, Type interceptorInterfaceType, ContainerBuilder builder)
 		{
-			_logger?.Trace("Registering interceptor. type={0}', interface={1}", interceptorType.Name, interceptorInterfaceType.Name);
+			_logger?.Verbose("Registering interceptor. type={0}', interface={1}", interceptorType.Name, interceptorInterfaceType.Name);
 			builder.RegisterType(interceptorType).As(interceptorInterfaceType);
 		}
 	}

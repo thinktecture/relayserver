@@ -1,6 +1,6 @@
 using Autofac;
 using Newtonsoft.Json.Linq;
-using NLog;
+using Serilog;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,7 +55,7 @@ namespace Thinktecture.Relay.Server.Controller
 				}
 			}
 
-			_logger?.Trace("Received legacy on-premise response. request-id={0}, response-length={1}", response.RequestId, response.ContentLength);
+			_logger?.Verbose("Received legacy on-premise response. request-id={0}, response-length={1}", response.RequestId, response.ContentLength);
 
 			await _backendCommunication.SendOnPremiseTargetResponse(response.OriginId, response).ConfigureAwait(false);
 

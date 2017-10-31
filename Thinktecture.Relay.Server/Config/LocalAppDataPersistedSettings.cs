@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using Newtonsoft.Json;
-using NLog;
+using Serilog;
 
 namespace Thinktecture.Relay.Server.Config
 {

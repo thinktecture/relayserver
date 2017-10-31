@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(connectionId));
 
 			CheckDisposed();
-			_logger?.Info("Creating request subscription for link {0} and connection {1}", linkId, connectionId);
+			_logger?.Information("Creating request subscription for link {0} and connection {1}", linkId, connectionId);
 
 			return Observable.Create<IOnPremiseConnectorRequest>(observer =>
 			{
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 		public IObservable<IOnPremiseConnectorResponse> OnResponseReceived(Guid originId)
 		{
 			CheckDisposed();
-			_logger?.Info("Creating response subscription");
+			_logger?.Information("Creating response subscription");
 
 			return Observable.Create<IOnPremiseConnectorResponse>(observer =>
 			{

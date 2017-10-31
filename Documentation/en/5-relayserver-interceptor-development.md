@@ -27,7 +27,7 @@ The RelayServer first looks for a DI module (see below). If exactly one DI modul
 
 If no DI module is found, the RelayServer will attempt to automatically determine the classes that implement at least one of the interceptor interfaces from the interceptor assembly. If exactly one class per interface is found, this class is automatically registered in the DI.
 
-In this case, an interceptor class can only use the dependencies that are available as a standard, such as the `Nlog.Logger`.
+In this case, an interceptor class can only use the dependencies that are available as a standard, such as the `Serilog.Logger`.
 
 ### Modify the request
 

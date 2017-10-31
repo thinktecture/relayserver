@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Moq;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Repository;
 
