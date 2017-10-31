@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Logging
 			if (ctx == null)
 				throw new ArgumentNullException(nameof(ctx));
 
-			_logger?.Error(ctx.Exception, "Action: {0}.{1}, Request: {2}: {3}.",
+			_logger?.Error(ctx.Exception, "Action: {action-controller}.{action-action}, Request: {request-method}: {request-url}.",
 				ctx.ExceptionContext.ControllerContext?.Controller.GetType().Name ?? "none",
 				ctx.ExceptionContext.ActionContext?.ActionDescriptor.ActionName ?? "none",
 				ctx.Request?.Method,

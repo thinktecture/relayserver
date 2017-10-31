@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnConnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise connected with connection {0}, link {1}, user name '{2}', role '{3}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise connected with connection {connection-id}, link {link-id}, user name '{user-name}', role '{role}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			RegisterOnPremise(request, connectionId, onPremiseClaims);
 
@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnReconnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise reconnected with connection {0}, link {1}, user name '{2}', role '{3}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise reconnected with connection {connection-id}, link {link-id}, user name '{user-name}', role '{role}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			RegisterOnPremise(request, connectionId, onPremiseClaims);
 
@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise disconnected with connection {0}, link {1}, user name '{2}', role '{3}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise disconnected with connection {connection-id}, link {link-id}, user name '{user-name}', role '{role}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			_backendCommunication.UnregisterOnPremise(connectionId);
 
@@ -63,7 +63,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest request)
 		{
-			_logger?.Verbose("Forwarding client request to connection. connection-id={0}, request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
+			_logger?.Verbose("Forwarding client request to connection. connection-id={connection-id}, request-id={request-id}, http-method={request-method}, url={request-url}, origin-id={origin-id}, body-length={request-content-length}",
 				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.ContentLength);
 
 			Connection.Send(connectionId, request);
@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		protected override Task OnReceived(IRequest request, string connectionId, string data)
 		{
-			_logger?.Debug("Acknowledge from connection {0} for {1}", connectionId, data);
+			_logger?.Debug("Acknowledge from connection {connection-id} for {data}", connectionId, data);
 
 			_backendCommunication.AcknowledgeOnPremiseConnectorRequest(connectionId, data);
 
@@ -85,7 +85,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			var onPremiseId = claimsPrincipal.FindFirst("OnPremiseId")?.Value;
 
 			if (!Guid.TryParse(onPremiseId, out var linkId))
-				throw new ArgumentException($"The claim \"OnPremiseId\" is not a valid: {onPremiseId}.");
+				throw new ArgumentException($"The claim \"OnPremiseId\" is not valid: {onPremiseId}.");
 
 			return new OnPremiseClaims(claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value, linkId, claimsPrincipal.FindFirst(ClaimTypes.Role)?.Value);
 		}

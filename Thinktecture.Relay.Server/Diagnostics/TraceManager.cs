@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				}
 				catch (Exception ex)
 				{
-					_logger?.Warning(ex, "Could not read trace file information for prefix {0}", traceFilePrefix);
+					_logger?.Warning(ex, "Could not read trace file information for prefix {trace-file-prefix}", traceFilePrefix);
 				}
 			}
 

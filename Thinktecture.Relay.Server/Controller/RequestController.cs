@@ -21,12 +21,12 @@ namespace Thinktecture.Relay.Server.Controller
 
 		public IHttpActionResult Get(string requestId)
 		{
-			_logger?.Verbose("Getting request data. request-id={0}", requestId);
+			_logger?.Verbose("Getting request data. request-id={request-id}", requestId);
 
 			var stream = _temporaryStore.GetRequestStream(requestId);
 			if (stream == null)
 			{
-				_logger?.Warning("No request data found for request {0}", requestId);
+				_logger?.Warning("No request data found for request {request-id}", requestId);
 				return NotFound();
 			}
 

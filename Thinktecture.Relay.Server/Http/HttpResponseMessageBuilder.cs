@@ -41,7 +41,7 @@ namespace Thinktecture.Relay.Server.Http
 
 			if (response == null)
 			{
-				_logger?.Verbose("Received no response. request-id={0}", requestId);
+				_logger?.Verbose("Received no response. request-id={request-id}", requestId);
 
 				message.StatusCode = HttpStatusCode.GatewayTimeout;
 				message.Content = new ByteArrayContent(new byte[0]);
@@ -79,19 +79,19 @@ namespace Thinktecture.Relay.Server.Http
 
 			if (response.ContentLength == 0)
 			{
-				_logger?.Verbose("Received no body. request-id={0}", response.RequestId);
+				_logger?.Verbose("Received no body. request-id={request-id}", response.RequestId);
 
 				content = new ByteArrayContent(new byte[0]);
 			}
 			else if (response.Body != null)
 			{
-				_logger?.Verbose("Received small body with data. request-id={0}, body-length={1}", response.RequestId, response.Body.Length);
+				_logger?.Verbose("Received small body with data. request-id={request-id}, body-length={response-content-length}", response.RequestId, response.Body.Length);
 
 				content = new ByteArrayContent(response.Body);
 			}
 			else
 			{
-				_logger?.Verbose("Received body. request-id={0}, content-length={1}", response.RequestId, response.ContentLength);
+				_logger?.Verbose("Received body. request-id={request-id}, content-length={response-content-length}", response.RequestId, response.ContentLength);
 
 				var stream = _postDataTemporaryStore.GetResponseStream(response.RequestId);
 				if (stream == null)
