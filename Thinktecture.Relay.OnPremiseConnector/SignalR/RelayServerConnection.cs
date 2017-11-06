@@ -457,7 +457,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task PostToRelayAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
 		{
-			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream), cancellationToken).ConfigureAwait(false);
+			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;
 		}
 
