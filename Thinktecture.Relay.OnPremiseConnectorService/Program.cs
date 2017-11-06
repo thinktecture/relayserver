@@ -28,6 +28,8 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 				config.SetServiceName("TTRelayOnPremisesService");
 			});
 
+			Log.CloseAndFlush();
+
 #if DEBUG
 			if (System.Diagnostics.Debugger.IsAttached)
 			{

@@ -45,6 +45,8 @@ namespace Thinktecture.Relay.Server
 				config.ApplyCommandLine();
 			});
 
+			Log.CloseAndFlush();
+
 #if DEBUG
 			if (System.Diagnostics.Debugger.IsAttached)
 			{
