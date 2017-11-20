@@ -20,7 +20,8 @@ namespace Thinktecture.Relay.Server.Helper
 				OnPremiseTargetKey = GetTargetKey(splitPath),
 				LocalUrl = GetLocalUrl(splitPath),
 				PathWithoutUserName = GetPathWithoutUserName(splitPath),
-				UserName = GetUserName(splitPath)
+				UserName = GetUserName(splitPath),
+				BasePath = GetBasePath(splitPath)
 			};
 		}
 
@@ -62,6 +63,11 @@ namespace Thinktecture.Relay.Server.Helper
 		internal string GetUserName(List<string> splitPath)
 		{
 			return splitPath[0];
+		}
+
+		internal string GetBasePath(List<string> splitPath)
+		{
+			return $"/relay/{GetUserName(splitPath)}/{GetTargetKey(splitPath)}";
 		}
 	}
 }

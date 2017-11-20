@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.Server.Controller
 				return NotFound();
 			}
 
-			var request = await _onPremiseRequestBuilder.BuildFromHttpRequest(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName).ConfigureAwait(false);
+			var request = await _onPremiseRequestBuilder.BuildFromHttpRequest(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName, pathInformation.BasePath).ConfigureAwait(false);
 
 			var statusCode = HttpStatusCode.GatewayTimeout;
 			IOnPremiseConnectorResponse response = null;

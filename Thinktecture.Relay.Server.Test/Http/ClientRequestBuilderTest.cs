@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Http
 		}
 
 		[TestMethod]
-		public async Task BuildFrom_correctly_builds_a_ClientRequest_from_given_information()
+		public async Task BuildFromHttpRequest_correctly_builds_a_ClientRequest_from_given_information()
 		{
 			var request = new HttpRequestMessage
 			{
@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.Server.Http
 			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 			request.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
 
-			result = await sut.BuildFromHttpRequest(request, new Guid("276b39f9-f0be-42b7-bcc1-1c2a24289689"), "Google/services/");
+			result = await sut.BuildFromHttpRequest(request, new Guid("276b39f9-f0be-42b7-bcc1-1c2a24289689"), "Google/services/", "/relay/Foo/Google");
 
 			result.OriginId.Should().Be("276b39f9-f0be-42b7-bcc1-1c2a24289689");
 			result.Body.LongLength.Should().Be(3L);
@@ -71,47 +71,110 @@ namespace Thinktecture.Relay.Server.Http
 		}
 
 		[TestMethod]
-		public void AddContentHeaders_adds_content_headers_to_ClientRequest_headers()
+		public async Task BuildFromHttpRequest_correctly_adds_forwarded_header_with_standard_port()
 		{
-			var clientRequest = new OnPremiseConnectorRequest
-			{
-				HttpHeaders = new Dictionary<string, string>
-				{
-					["Content-Length"] = "3"
-				}
-			};
+			// arrange
+			var sut = CreateBuilder();
 			var request = new HttpRequestMessage
 			{
-				Content = new ByteArrayContent(new byte[] { })
+				Method = HttpMethod.Get,
+				RequestUri = new Uri("https://tt.invalid/relay/tenantusername/targetname/local/url?id=bla"),
+				Content = new ByteArrayContent(new byte[] { 0, 0, 0 })
 			};
-			var sut = CreateBuilder();
 
-			request.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+			// act
+			var result = await sut.BuildFromHttpRequest(request, new Guid(), "targetname/local/url?id=bla", "/relay/tenantusername/targetname");
 
-			sut.AddContentHeaders(clientRequest, request);
+			// assert
+			var forwardedParameters = result.HttpHeaders["Forwarded"]
+				.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+				.Select(p => p.Split('='))
+				.ToDictionary(kvp => kvp[0].Trim(), kvp => kvp[1].Trim());
 
-			clientRequest.HttpHeaders.Should().HaveCount(2);
-			clientRequest.HttpHeaders.Last().Key.Should().Be("Content-Disposition");
+			forwardedParameters["proto"].Should().Be("https");
+			forwardedParameters["host"].Should().Be("tt.invalid");
+			forwardedParameters["path"].Should().Be("/relay/tenantusername/targetname");
 		}
 
 		[TestMethod]
-		public void RemoveIgnoredHeaders_removes_ignored_headers_from_ClientRequest()
+		public async Task BuildFromHttpRequest_correctly_adds_forwarded_header_with_non_standard_port()
 		{
-			var clientRequest = new OnPremiseConnectorRequest
-			{
-				HttpHeaders = new Dictionary<string, string>
-				{
-					["Host"] = "tt.invalid",
-					["Connection"] = "close",
-					["Content-Length"] = "3"
-				}
-			};
+			// arrange
 			var sut = CreateBuilder();
+			var request = new HttpRequestMessage
+			{
+				Method = HttpMethod.Get,
+				RequestUri = new Uri("http://tt.invalid:12345/relay/tenantusername/targetname/local/url?id=bla"),
+				Content = new ByteArrayContent(new byte[] { 0, 0, 0 })
+			};
 
-			sut.RemoveIgnoredHeaders(clientRequest);
+			// act
+			var result = await sut.BuildFromHttpRequest(request, new Guid(), "targetname/local/url?id=bla", "/relay/tenantusername/targetname");
 
-			clientRequest.HttpHeaders.Should().HaveCount(1);
-			clientRequest.HttpHeaders.Single().Key.Should().Be("Content-Length");
+			// assert
+			var forwardedParameters = result.HttpHeaders["Forwarded"]
+				.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+				.Select(p => p.Split('='))
+				.ToDictionary(kvp => kvp[0].Trim(), kvp => kvp[1].Trim());
+
+			forwardedParameters["proto"].Should().Be("http");
+			forwardedParameters["host"].Should().Be("tt.invalid:12345");
+			forwardedParameters["path"].Should().Be("/relay/tenantusername/targetname");
+		}
+
+
+		[TestMethod]
+		public async Task BuildFromHttpRequest_correctly_adds_forwarded_header_when_request_already_has_a_forwarded_header_without_host_parameter()
+		{
+			// arrange
+			var sut = CreateBuilder();
+			var request = new HttpRequestMessage
+			{
+				Method = HttpMethod.Get,
+				RequestUri = new Uri("http://tt.invalid:12345/relay/tenantusername/targetname/local/url?id=bla"),
+				Content = new ByteArrayContent(new byte[] { 0, 0, 0 }),
+			};
+			request.Headers.Add("Forwarded", "for=8.8.8.8, proto=https");
+
+			// act
+			var result = await sut.BuildFromHttpRequest(request, new Guid(), "targetname/local/url?id=bla", "/relay/tenantusername/targetname");
+
+			// assert
+			var forwardedParameters = result.HttpHeaders["Forwarded"]
+				.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+				.Select(p => p.Split('='))
+				.ToDictionary(kvp => kvp[0].Trim(), kvp => kvp[1].Trim());
+
+			forwardedParameters["proto"].Should().Be("http");
+			forwardedParameters["host"].Should().Be("tt.invalid:12345");
+			forwardedParameters["path"].Should().Be("/relay/tenantusername/targetname");
+		}
+
+		[TestMethod]
+		public async Task BuildFromHttpRequest_leaves_existing_forwarded_header()
+		{
+			// arrange
+			var sut = CreateBuilder();
+			var request = new HttpRequestMessage
+			{
+				Method = HttpMethod.Get,
+				RequestUri = new Uri("http://tt.invalid:12345/relay/tenantusername/targetname/local/url?id=bla"),
+				Content = new ByteArrayContent(new byte[] { 0, 0, 0 }),
+			};
+			request.Headers.Add("Forwarded", "host=tt.cdn,proto=https,path=/test");
+
+			// act
+			var result = await sut.BuildFromHttpRequest(request, new Guid(), "targetname/local/url?id=bla", "/relay/tenantusername/targetname");
+
+			// assert
+			var forwardedParameters = result.HttpHeaders["Forwarded"]
+				.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+				.Select(p => p.Split('='))
+				.ToDictionary(kvp => kvp[0].Trim(), kvp => kvp[1].Trim());
+
+			forwardedParameters["proto"].Should().Be("https");
+			forwardedParameters["host"].Should().Be("tt.cdn");
+			forwardedParameters["path"].Should().Be("/test");
 		}
 	}
 }
