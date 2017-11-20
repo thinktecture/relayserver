@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Server.Http
 			_logger = logger;
 		}
 
-		public async Task<IOnPremiseConnectorRequest> BuildFromHttpRequest(HttpRequestMessage message, Guid originId, string pathWithoutUserName)
+		public async Task<IOnPremiseConnectorRequest> BuildFromHttpRequest(HttpRequestMessage message, Guid originId, string pathWithoutUserName, string basePath)
 		{
 			var request = new OnPremiseConnectorRequest
 			{
@@ -76,11 +76,13 @@ namespace Thinktecture.Relay.Server.Http
 				await contentStream.ReadAsync(request.Body, 0, (int)message.Content.Headers.ContentLength.Value).ConfigureAwait(false);
 			}
 
-			request.HttpHeaders = message.Headers
+			var headers = message.Headers
 				.Union(message.Content.Headers)
 				.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key))
 				.Select(kvp => new { Name = kvp.Key, Value = CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value) })
 				.ToDictionary(header => header.Name, header => header.Value);
+			ApplyForwardedHeader(headers, request, message, basePath);
+			request.HttpHeaders = headers;
 
 			return request;
 		}
@@ -89,6 +91,41 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			// HTTP RFC2616 says, that multiple headers can be combined into a comma-separated single header
 			return headers.Aggregate(String.Empty, (s, v) => s + (String.IsNullOrWhiteSpace(s) ? String.Empty : ", ") + v);
+		}
+
+		internal void ApplyForwardedHeader(IDictionary<string, string> headers, OnPremiseConnectorRequest request, HttpRequestMessage message, string forwardedPath)
+		{
+			const string forwardedHeader = "Forwarded";
+			var forwardedProto = message.RequestUri.Scheme;
+			var forwardedHost = message.RequestUri.Host;
+			var forwardedPort = message.RequestUri.Port.ToString();
+
+			// Only include port if it is non-standard to reduce length of header
+			if (forwardedProto == "http" && forwardedPort == "80" || forwardedProto == "https" && forwardedPort == "443")
+				forwardedPort = String.Empty;
+			else
+				forwardedPort = $":{forwardedPort}";
+
+			// Add with Forwarded HTTP Extension RFC7239
+			var forwardedHeaderValue = $"host={forwardedHost}{forwardedPort},proto={forwardedProto},path={forwardedPath}";
+			if (!headers.ContainsKey(forwardedHeader))
+			{
+				headers.Add(forwardedHeader, forwardedHeaderValue);
+			}
+			else
+			{
+				var existingForwardedHeader = headers["Forwarded"]
+					.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)
+					.Select(p => p.Split('='))
+					.ToDictionary(kvp => kvp[0].Trim(), kvp => kvp[1].Trim());
+				if (existingForwardedHeader.ContainsKey("host"))
+					return;
+				// host parameter is missing so add it and replace all other parameters too as they are useless without host
+				existingForwardedHeader["host"] = $"{forwardedHost}{forwardedPort}";
+				existingForwardedHeader["proto"] = forwardedProto;
+				existingForwardedHeader["path"] = forwardedPath;
+				headers["Forwarded"] = String.Join(",", existingForwardedHeader.Select(kvp => String.Format($"{kvp.Key}={kvp.Value}")));
+			}
 		}
 	}
 }

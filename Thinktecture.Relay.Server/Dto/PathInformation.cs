@@ -7,5 +7,6 @@
 		public string OnPremiseTargetKey { get; set; }
 		public string PathWithoutUserName { get; set; }
 		public string LocalUrl { get; set; }
+		public string BasePath { get; set; }
 	}
 }

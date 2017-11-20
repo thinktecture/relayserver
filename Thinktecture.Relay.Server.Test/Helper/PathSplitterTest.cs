@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Thinktecture.Relay.Server.Dto;
 
 namespace Thinktecture.Relay.Server.Helper
 {
@@ -22,6 +21,7 @@ namespace Thinktecture.Relay.Server.Helper
 			result.LocalUrl.Should().Be("/services/index.html");
 			result.UserName.Should().Be("userName");
 			result.PathWithoutUserName.Should().Be("targetKey/services/index.html");
+			result.BasePath.Should().Be("/relay/userName/targetKey");
 		}
 
 		[TestMethod]
