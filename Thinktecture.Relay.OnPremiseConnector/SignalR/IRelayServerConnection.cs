@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		event EventHandler Disposing;
 
-		void RegisterOnPremiseTarget(string key, Uri baseUri);
+		void RegisterOnPremiseTarget(string key, Uri baseUri, bool relayRedirects);
 		void RegisterOnPremiseTarget(string key, Type handlerType);
 		void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory);
 		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();

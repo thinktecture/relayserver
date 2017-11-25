@@ -17,9 +17,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 		}
 
-		public IOnPremiseTargetConnector Create(Uri baseUri, TimeSpan requestTimeout)
+		public IOnPremiseTargetConnector Create(Uri baseUri, TimeSpan requestTimeout, bool relayRedirects)
 		{
-			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger, _requestMessageBuilderFactory(), _httpClientFactory);
+			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger, _requestMessageBuilderFactory(), _httpClientFactory, relayRedirects);
 		}
 
 		public IOnPremiseTargetConnector Create(Type handlerType, TimeSpan requestTimeout)

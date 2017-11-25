@@ -289,7 +289,7 @@ Only the <relayServer></relayServer> section has to be edited in the configurati
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <web key="Test" baseUrl="http://localhost/" />
+    <web key="Test" baseUrl="http://localhost/" relayRedirects="false" />
   </onPremiseTargets>
 </relayServer>
 ```
@@ -319,3 +319,11 @@ Only the <relayServer></relayServer> section has to be edited in the configurati
 ### onPremiseTargets Element
 
 List of on-premise applications that the On-Premise Connector should be able to send requests to.
+
+### web Element
+
+|  Attribute | Description |
+| --- | --- |
+| key | On-Premise application name |
+| baseUrl | URL of the On-Premise application |
+| relayRedirects | Auto redirect locally or relay redirects |

@@ -56,9 +56,22 @@ namespace Thinktecture.Relay.Server.Http
 				{
 					message.Headers.Add("WWW-Authenticate", wwwAuthenticate);
 				}
+
+				if (IsRedirectStatusCode(response.StatusCode))
+				{
+					if (response.HttpHeaders.TryGetValue("Location", out var location))
+					{
+						message.Headers.Location = new Uri(location, UriKind.RelativeOrAbsolute);
+					}
+				}
 			}
 
 			return message;
+		}
+
+		private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
+		{
+			 return ((int)statusCode >= 300) && ((int)statusCode <= 399);
 		}
 
 		public HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseConnectorResponse response, Link link)

@@ -9,7 +9,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.Net.Http
 		///<inheritdoc/>
 		public HttpClient CreateClient(String name)
 		{
-			// We ignore the name here, as this should be as simple as it gets.
+			if (name == "RedirectableWebTarget")
+				return new HttpClient(new HttpClientHandler() { AllowAutoRedirect = true});
 			return new HttpClient();
 		}
 	}

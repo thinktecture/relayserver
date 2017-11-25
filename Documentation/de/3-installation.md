@@ -291,7 +291,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <web key="Test" baseUrl="http://localhost/"/>
+    <web key="Test" baseUrl="http://localhost/" relayRedirects="false" />
   </onPremiseTargets>
 </relayServer>
 ```
@@ -322,7 +322,10 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 
 Liste von On-Premises Applikationen, die vom On-Premises Connector mit Anfragen versorgt werden sollen.
 
+### web Element
+
 |  Attribut | Beschreibung |
 | --- | --- |
 | key | On-Premises-Anwendungsname |
 | baseUrl | URL des On-Premises Applikation |
+| relayRedirects | Automatische lokale Weiterleitung oder Remote-Weiterleitung |
