@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				DeclareQueue(queueName);
 				_model.QueueBind(queueName, _EXCHANGE_NAME, linkId.ToString());
 
-				_logger?.Verbose("Creating request consumer. link-id={link-id}, connection-id={connection-id}, supports-ack={connection-supports-ack}", linkId, connectionId, noAck ? "no": "yes");
+				_logger?.Verbose("Creating request consumer. link-id={LinkId}, connection-id={ConnectionId}, supports-ack={ConnectionSupportsAck}", linkId, connectionId, !noAck);
 
 				var consumer = new EventingBasicConsumer(_model);
 
@@ -73,7 +73,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 				return new DelegatingDisposable(_logger, () =>
 				{
-					_logger?.Debug("Disposing request consumer for link {link-id} and connection {connection-id}", linkId, connectionId);
+					_logger?.Debug("Disposing request consumer for link {LinkId} and connection {ConnectionId}", linkId, connectionId);
 					consumer.Received -= OnReceived;
 					_model.BasicCancel(consumerTag);
 				});
@@ -154,19 +154,27 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		private void DeclareExchange(string name)
 		{
-			_logger?.Verbose("Declaring exchange. name={exchange-name}, type={exchange-type}", name, ExchangeType.Direct);
+			_logger?.Verbose("Declaring exchange. name={ExchangeName}, type={ExchangeType}", name, ExchangeType.Direct);
 			_model.ExchangeDeclare(name, ExchangeType.Direct);
 		}
 
 		private void DeclareQueue(string name)
 		{
-			_logger?.Verbose("Declaring queue. name={queue-name}, expiration={queue-expiration} sec", name, _queueExpiration / 1000);
+			_logger?.Verbose("Declaring queue. name={QueueName}, expiration={QueueExpiration} sec", name, _queueExpiration / 1000);
 			_model.QueueDeclare(name, true, false, false, new Dictionary<string, object>() { ["x-expires"] = _queueExpiration });
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				_model?.Dispose();
+			}
 		}
 
 		public void Dispose()
 		{
-			_model?.Dispose();
+			Dispose(true);
 		}
 	}
 }

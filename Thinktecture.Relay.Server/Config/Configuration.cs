@@ -139,25 +139,25 @@ namespace Thinktecture.Relay.Server.Config
 
 		private void LogSettings(ILogger logger)
 		{
-			logger?.Verbose("Setting OnPremiseConnectorCallbackTimeout: {callback-timeout}", OnPremiseConnectorCallbackTimeout);
-			logger?.Verbose("Setting RabbitMqConnectionString: {rabbit-connection-string}", RabbitMqConnectionString);
-			logger?.Verbose("Setting TraceFileDirectory: {trace-file-directory}", TraceFileDirectory);
-			logger?.Verbose("Setting LinkPasswordLength: {link-password-length}", LinkPasswordLength);
-			logger?.Verbose("Setting DisconnectTimeout: {disconnect-timeout}", DisconnectTimeout);
-			logger?.Verbose("Setting ConnectionTimeout: {connection-timeout}", ConnectionTimeout);
-			logger?.Verbose("Setting UseInsecureHttp: {use-insecure-http}", UseInsecureHttp);
-			logger?.Verbose("Setting EnableManagementWeb: {enable-managementweb}", EnableManagementWeb);
-			logger?.Verbose("Setting EnableRelaying: {enable-relay}", EnableRelaying);
-			logger?.Verbose("Setting EnableOnPremiseConnections: {enable-onpremise-connections}", EnableOnPremiseConnections);
-			logger?.Verbose("Setting HostName: {hostname}", HostName);
-			logger?.Verbose("Setting Port: {port}", Port);
-			logger?.Verbose("Setting ManagementWebLocation: {managementweb-location}", ManagementWebLocation);
-			logger?.Verbose("Setting TemporaryRequestStoragePath: {temp-storage-path}", TemporaryRequestStoragePath ?? "not defined - using in-memory store");
-			logger?.Verbose("Setting TemporaryRequestStoragePeriod: {temp-storage-period}", TemporaryRequestStoragePeriod);
-			logger?.Verbose("Setting ActiveConnectionTimeoutInSeconds: {connection-timeout}", ActiveConnectionTimeoutInSeconds);
-			logger?.Verbose("Setting InterceptorAssembly: {interceptor-assembly}", InterceptorAssembly);
-			logger?.Verbose("Setting OAuthSharedSecret: {oauth-shared-secret}", OAuthSharedSecret);
-			logger?.Verbose("Setting OAuthCertificate: {oauth-certificate}", OAuthCertificate);
+			logger?.Verbose("Setting OnPremiseConnectorCallbackTimeout: {CallbackTimeout}", OnPremiseConnectorCallbackTimeout);
+			logger?.Verbose("Setting RabbitMqConnectionString: {RabbitConnectionString}", RabbitMqConnectionString);
+			logger?.Verbose("Setting TraceFileDirectory: {TraceFileDirectory}", TraceFileDirectory);
+			logger?.Verbose("Setting LinkPasswordLength: {LinkPasswordLength}", LinkPasswordLength);
+			logger?.Verbose("Setting DisconnectTimeout: {DisconnectTimeout}", DisconnectTimeout);
+			logger?.Verbose("Setting ConnectionTimeout: {ConnectionTimeout}", ConnectionTimeout);
+			logger?.Verbose("Setting UseInsecureHttp: {UseInsecureHttp}", UseInsecureHttp);
+			logger?.Verbose("Setting EnableManagementWeb: {EnableManagementweb}", EnableManagementWeb);
+			logger?.Verbose("Setting EnableRelaying: {EnableRelay}", EnableRelaying);
+			logger?.Verbose("Setting EnableOnPremiseConnections: {EnableOnpremiseConnections}", EnableOnPremiseConnections);
+			logger?.Verbose("Setting HostName: {Hostname}", HostName);
+			logger?.Verbose("Setting Port: {Port}", Port);
+			logger?.Verbose("Setting ManagementWebLocation: {ManagementwebLocation}", ManagementWebLocation);
+			logger?.Verbose("Setting TemporaryRequestStoragePath: {TempStoragePath}", TemporaryRequestStoragePath ?? "not defined - using in-memory store");
+			logger?.Verbose("Setting TemporaryRequestStoragePeriod: {TempStoragePeriod}", TemporaryRequestStoragePeriod);
+			logger?.Verbose("Setting ActiveConnectionTimeoutInSeconds: {ActiveConnectionTimeout}", ActiveConnectionTimeoutInSeconds);
+			logger?.Verbose("Setting InterceptorAssembly: {InterceptorAssembly}", InterceptorAssembly);
+			logger?.Verbose("Setting OAuthSharedSecret: {OauthSharedSecret}", OAuthSharedSecret);
+			logger?.Verbose("Setting OAuthCertificate: {OauthCertificate}", OAuthCertificate);
 		}
 	}
 }

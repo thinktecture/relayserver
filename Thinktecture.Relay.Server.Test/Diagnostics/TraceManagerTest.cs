@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
@@ -20,23 +18,6 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	[TestClass]
 	public class TraceManagerTest
 	{
-		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
-		{
-			public string RequestId { get; set; }
-			public Guid OriginId { get; set; }
-			public IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
-			public HttpStatusCode StatusCode { get; set; }
-			public Stream Stream { get; set; }
-			public byte[] Body { get; set; }
-			public DateTime RequestStarted { get; set; }
-			public DateTime RequestFinished { get; set; }
-
-			public void Dispose()
-			{
-				Stream?.Dispose();
-			}
-		}
-
 		private class Configuration : IConfiguration
 		{
 			public TimeSpan OnPremiseConnectorCallbackTimeout { get; }
@@ -292,13 +273,13 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			await traceFileWriter.WriteHeaderFileAsync("tracefiles/" + filePrefix2 + ".crxxxxxxx.headers", clientHeaders);
 			await traceFileWriter.WriteHeaderFileAsync("tracefiles/" + filePrefix2 + ".ltrxxxxxxx.headers", onPremiseTargetHeaders);
 
-			loggerMock.Setup(l => l.Warning(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<object[]>()));
+			loggerMock.Setup(l => l.Warning<string>(It.IsAny<FileNotFoundException>(), It.IsAny<string>(), It.IsAny<string>()));
 
 			result = await sut.GetTracesAsync(Guid.Parse("7975999f-54d9-4b21-a093-4502ea372723"));
 
 			Directory.Delete("tracefiles", true);
 
-			loggerMock.VerifyAll();
+			loggerMock.Verify(m => m.Warning(It.IsAny<FileNotFoundException>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
 			result.Count().Should().Be(1);
 		}
 	}

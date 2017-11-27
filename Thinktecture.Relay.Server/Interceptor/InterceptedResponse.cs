@@ -14,7 +14,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			RequestFinished = other.RequestFinished;
 			StatusCode = other.StatusCode;
 			HttpHeaders = other.HttpHeaders;
-#pragma warning disable 618
+#pragma warning disable 618 // do not warn using property marked as obsolete
 			Body = other.Body; // this is because of legacy on premise connectors (v1)
 #pragma warning restore 618
 			Stream = other.Stream;

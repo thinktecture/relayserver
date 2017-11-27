@@ -21,13 +21,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 	{
 		private readonly string _userName;
 		private readonly string _password;
-		private readonly Uri _relayServer;
+		private readonly Uri _relayServerUri;
 		private readonly int _requestTimeout;
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
 		private readonly HttpClient _httpClient;
-		private readonly int _id;
+		private readonly int _relayServerConnectionId;
 		private CancellationTokenSource _cts;
 		private DateTime _lastHeartbeat;
 		private string _accessToken;
@@ -39,13 +39,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
 		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
 
-		public RelayServerConnection(string userName, string password, Uri relayServer, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-			: base(new Uri(relayServer, "/signalr").AbsoluteUri, "version=2")
+		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, "version=2")
 		{
-			_id = Interlocked.Increment(ref _nextId);
+			_relayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;
 			_password = password;
-			_relayServer = relayServer;
+			_relayServerUri = relayServerUri;
 			_requestTimeout = requestTimeout;
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_logger = logger;
@@ -68,7 +68,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Verbose("Registering on-premise web target. key={handler-key}, base-uri={base-url}", key, baseUri);
+			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}", key, baseUri);
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout);
 		}
@@ -82,7 +82,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Verbose("Registering on-premise in-proc target. key={handler-key}, type={handler-type}", key, handlerType);
+			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, handlerType);
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
 		}
@@ -96,7 +96,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Verbose("Registering on-premise in-proc target using a handler factory. key={handler-key}", key);
+			_logger?.Verbose("Registering on-premise in-proc target using a handler factory. handler-key={HandlerKey}", key);
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
 		}
@@ -108,7 +108,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Verbose("Registering on-premise in-proc target. key={handler-key}, type={handler-type}", key, typeof(T));
+			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, typeof(T).Name);
 
 			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
 		}
@@ -134,23 +134,23 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task<TokenResponse> GetAuthorizationTokenAsync()
 		{
-			var client = new OAuth2Client(new Uri(_relayServer, "/token"));
+			var client = new OAuth2Client(new Uri(_relayServerUri, "/token"));
 
 			while (!_stopRequested)
 			{
 				try
 				{
-					_logger?.Verbose("Requesting authorization token. relay-server={relay-server}, id={relay-server-id}", _relayServer, _id);
+					_logger?.Verbose("Requesting authorization token. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 					var response = await client.RequestResourceOwnerPasswordAsync(_userName, _password).ConfigureAwait(false);
 
-					_logger?.Verbose("Received token. relay-server={relay-server}, id={relay-server-id}", _relayServer, _id);
+					_logger?.Verbose("Received token. relay-server={RelayServerUri}, id={RelayServerId}", _relayServerUri, _relayServerConnectionId);
 					return response;
 				}
 				catch
 				{
 					var randomWaitTime = GetRandomWaitTime();
-					_logger?.Information("Could not authenticate with relay server - re-trying in {retry-seconds} seconds", randomWaitTime.TotalSeconds);
+					_logger?.Information("Could not authenticate with relay server - re-trying in {RetryWaitTime} seconds", randomWaitTime.TotalSeconds);
 					await Task.Delay(randomWaitTime, _cts.Token).ConfigureAwait(false);
 				}
 			}
@@ -160,7 +160,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task ConnectAsync()
 		{
-			_logger?.Information("Connecting to relay server {relay-server-id}", _id);
+			_logger?.Information("Connecting to relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
 			{
@@ -170,11 +170,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			try
 			{
 				await Start().ConfigureAwait(false);
-				_logger?.Information("Connected to relay server {relay-server-id}", _id);
+				_logger?.Information("Connected to relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 			}
 			catch
 			{
-				_logger?.Information("Error while connecting to relay server {relay-server-id}", _id);
+				_logger?.Information("Error while connecting to relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 			}
 		}
 
@@ -200,32 +200,32 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			Headers["Authorization"] = $"{tokenResponse.TokenType} {_accessToken}";
 
-			_logger?.Verbose("Setting access token. access-token={access-token}", _accessToken);
+			_logger?.Verbose("Setting access token");
 		}
 
 		private void CheckResponseTokenForErrors(TokenResponse token)
 		{
 			if (token.IsHttpError)
 			{
-				_logger?.Warning("Could not authenticate with relay server {relay-server-id}: status-code={connection-http-status-code}, reason={connection-reason}", _id, token.HttpErrorStatusCode, token.HttpErrorReason);
+				_logger?.Warning("Could not authenticate with relay server {RelayServerId}: status-code={ConnectionHttpStatusCode}, reason={ConnectionErrorReason}", _relayServerConnectionId, token.HttpErrorStatusCode, token.HttpErrorReason);
 				throw new Exception("Could not authenticate with relay server: " + token.HttpErrorReason);
 			}
 
 			if (token.IsError)
 			{
-				_logger?.Warning("Could not authenticate with relay server {relay-server-id}. reason={connection-reason}", _id, token.Error);
+				_logger?.Warning("Could not authenticate with relay server {RelayServerId}. reason={ConnectionErrorReason}", _relayServerConnectionId, token.Error);
 				throw new Exception("Could not authenticate with relay server: " + token.Error);
 			}
 		}
 
 		private void OnReconnected()
 		{
-			_logger?.Verbose("Connection restored. relay-server={relay-server}", _relayServer);
+			_logger?.Verbose("Connection restored with relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 		}
 
 		private void OnReconnecting()
 		{
-			_logger?.Verbose("Connection lost - trying to reconnect. relay-server={relay-server}", _relayServer);
+			_logger?.Verbose("Connection lost - trying to reconnect with relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 		}
 
 		protected override async void OnMessageReceived(JToken message)
@@ -235,7 +235,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			try
 			{
-				_logger?.Verbose("Received message from server. message={message}", message);
+				_logger?.Verbose("Received message from server. message={Message}", message);
 
 				request = message.ToObject<OnPremiseTargetRequest>();
 
@@ -263,24 +263,24 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					if (_connectors.TryGetValue(key, out var connector))
 					{
-						_logger?.Verbose("Found on-premise target. key={key}", key);
+						_logger?.Verbose("Found on-premise target, key={OnPremiseTargetKey}", key);
 
 						await RequestLocalTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false);
 						return;
 					}
 				}
 
-				_logger?.Verbose("No connector found for local server. request-id={request-id}, url={request-url}", request.RequestId, request.Url);
+				_logger?.Verbose("No connector found for local server. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, request.Url);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during handling received message. Message = {message}", message);
+				_logger?.Error(ex, "Error during handling received message, message={Message}", message);
 			}
 			finally
 			{
 				if (!ctx.IsRelayServerNotified && request != null)
 				{
-					_logger?.Verbose("Unhandled request. message={message}", message);
+					_logger?.Verbose("Unhandled request, message={message}", message);
 
 					var response = new OnPremiseTargetResponse
 					{
@@ -305,7 +305,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
-			_logger?.Debug("Received ping from relay server {relay-server-id}", _id);
+			_logger?.Debug("Received ping from relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			var resp = new OnPremiseTargetResponse
 			{
@@ -321,14 +321,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
-			_logger?.Debug("Received heartbeat from relay server {relay-server-id}", _id);
+			_logger?.Debug("Received heartbeat from relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			if (_lastHeartbeat == DateTime.MinValue)
 			{
 				request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
 				if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
 				{
-					_logger?.Information("Heartbeat interval set to {heartbeat-interval} seconds", heartbeatInterval);
+					_logger?.Information("Heartbeat interval set to {HeartbeatInterval} seconds", heartbeatInterval);
 					StartHeartbeatCheckLoop(TimeSpan.FromSeconds(heartbeatInterval), _cts.Token);
 				}
 			}
@@ -346,11 +346,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					if (_lastHeartbeat != DateTime.MinValue && _lastHeartbeat != DateTime.MaxValue)
 					{
-						_logger?.Verbose("Checking last heartbeat time. last-heartbeat={last-heartbeat}", _lastHeartbeat);
+						_logger?.Verbose("Checking last heartbeat time. last-heartbeat={LastHeartbeat}", _lastHeartbeat);
 
 						if (_lastHeartbeat <= DateTime.UtcNow.Add(-intervalWithTolerance))
 						{
-							_logger?.Warning("Last heartbeat was at {last-heartbeat} and out of an interval of {heartbeat-interval} secconds", _lastHeartbeat, heartbeatInterval.TotalSeconds);
+							_logger?.Warning("Last heartbeat was at {LastHeartbeat} and out of an interval of {HeartbeatInterval} secconds", _lastHeartbeat, heartbeatInterval.TotalSeconds);
 
 							_lastHeartbeat = DateTime.MaxValue;
 
@@ -368,7 +368,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void ForceReconnect()
 		{
-			_logger?.Debug("Forcing reconnect");
+			_logger?.Debug("Forcing reconnect to relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			Disconnect();
 
@@ -381,7 +381,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public void Disconnect()
 		{
-			_logger?.Information("Disconnecting from relay server {relay-server-id}", _id);
+			_logger?.Information("Disconnecting from relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			_stopRequested = true;
 			Stop();
@@ -406,7 +406,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, OnPremiseTargetRequest request, CancellationToken cancellationToken)
 		{
-			_logger?.Debug("Requesting local server {request-url} for request {request-id}", request.Url, request.RequestId);
+			_logger?.Debug("Requesting local server {RequestUrl} for request {RequestId}", request.Url, request.RequestId);
 
 			var url = (request.Url.Length > key.Length) ? request.Url.Substring(key.Length + 1) : String.Empty;
 
@@ -415,7 +415,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				if (request.Body.Length == 0)
 				{
 					// a length of 0 indicates that there is a larger body available on the server
-					_logger?.Verbose("Requesting body from relay server. relay-server={relay-server}, request-id={request-id}", _relayServer, request.RequestId);
+					_logger?.Verbose("Requesting body from relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId} for request-id={RequestId}", _relayServerUri, _relayServerConnectionId, request.RequestId);
 					// request the body from the relay server (because SignalR cannot handle large messages)
 					var webResponse = await GetToRelay("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
 					request.Stream = await webResponse.Content.ReadAsStreamAsync().ConfigureAwait(false); // this stream should not be disposed (owned by the Framework)
@@ -439,7 +439,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					response.Stream = Stream.Null;
 				}
 
-				_logger?.Debug("Sending response from {request-url} to relay server", request.Url);
+				_logger?.Debug("Sending response from {RequestUrl} to relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", request.Url, _relayServerUri, _relayServerConnectionId);
 
 				try
 				{
@@ -461,14 +461,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		protected override void OnClosed()
 		{
-			_logger?.Information("Connection closed {relay-server-id}", _id);
+			_logger?.Information("Connection closed to relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			base.OnClosed();
 
 			if (!_stopRequested)
 			{
 				var randomWaitTime = GetRandomWaitTime();
-				_logger?.Debug("Reconnecting in {reconnect-wait-time} seconds", randomWaitTime.TotalSeconds);
+				_logger?.Debug("Reconnecting in {ReconnectWaitTime} seconds", randomWaitTime.TotalSeconds);
 				Task.Delay(randomWaitTime).ContinueWith(_ => ConnectAsync());
 			}
 		}
@@ -501,7 +501,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
 
-			var url = new Uri(_relayServer, relativeUrl);
+			var url = new Uri(_relayServerUri, relativeUrl);
 
 			var request = new HttpRequestMessage(httpMethod, url);
 

@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Repository
 					Id = Guid.NewGuid(),
 					Link = link,
 					LinkId = traceConfiguration.LinkId,
-					StartDate = traceConfiguration.StartDate
+					StartDate = traceConfiguration.StartDate,
 				});
 
 				context.SaveChanges();
@@ -81,7 +81,7 @@ namespace Thinktecture.Relay.Server.Repository
 						EndDate = d.EndDate,
 						Id = d.Id,
 						LinkId = d.LinkId,
-						StartDate = d.StartDate
+						StartDate = d.StartDate,
 					})
 					.ToList();
 			}
@@ -106,7 +106,7 @@ namespace Thinktecture.Relay.Server.Repository
 						EndDate = d.EndDate,
 						Id = d.Id,
 						LinkId = d.LinkId,
-						StartDate = d.StartDate
+						StartDate = d.StartDate,
 					}).SingleOrDefault();
 			}
 		}
@@ -123,7 +123,7 @@ namespace Thinktecture.Relay.Server.Repository
 						EndDate = t.EndDate,
 						Id = t.Id,
 						LinkId = t.LinkId,
-						StartDate = t.StartDate
+						StartDate = t.StartDate,
 					}).SingleOrDefault();
 			}
 		}
