@@ -263,7 +263,6 @@
     <Compile Include="Communication\RabbitMq\IRabbitMqFactory.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqFactory.cs" />
     <Compile Include="Controller\ManagementWeb\DashboardController.cs" />
-    <Compile Include="Controller\ManagementWeb\FakeDataController.cs" />
     <Compile Include="Controller\ManagementWeb\LogController.cs" />
     <Compile Include="Controller\ManagementWeb\LinkController.cs" />
     <Compile Include="Controller\ManagementWeb\ManagementWebModule.cs" />
