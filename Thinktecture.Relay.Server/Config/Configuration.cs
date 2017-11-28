@@ -26,6 +26,7 @@ namespace Thinktecture.Relay.Server.Config
 		public string InterceptorAssembly { get; }
 		public string OAuthSharedSecret { get; set; }
 		public string OAuthCertificate { get; set; }
+		public TimeSpan AccessTokenLifetime { get; set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -134,6 +135,13 @@ namespace Thinktecture.Relay.Server.Config
 			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
 			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
 
+			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["AccessTokenLifetime"], out tmpTimeSpan))
+			{
+				tmpTimeSpan = TimeSpan.FromDays(365);
+			}
+
+			AccessTokenLifetime = tmpTimeSpan;
+
 			LogSettings(logger);
 		}
 
@@ -158,6 +166,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting InterceptorAssembly: {InterceptorAssembly}", InterceptorAssembly);
 			logger?.Verbose("Setting OAuthSharedSecret: {OauthSharedSecret}", OAuthSharedSecret);
 			logger?.Verbose("Setting OAuthCertificate: {OauthCertificate}", OAuthCertificate);
+			logger?.Verbose("Setting AccessTokenLifetime: {AccessTokenLifetime}", AccessTokenLifetime);
 		}
 	}
 }
