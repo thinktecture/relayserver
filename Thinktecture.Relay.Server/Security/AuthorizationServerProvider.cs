@@ -1,4 +1,3 @@
-using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Owin.Security.OAuth;
@@ -22,6 +21,19 @@ namespace Thinktecture.Relay.Server.Security
 			context.Validated();
 
 			return base.ValidateClientAuthentication(context);
+		}
+
+		public override Task GrantCustomExtension(OAuthGrantCustomExtensionContext context)
+		{
+			if ((context.GrantType == "renew_token")
+			    && (context.OwinContext.Authentication.User?.Identity is ClaimsIdentity identity)
+			    && identity.IsAuthenticated)
+			{
+				// If we still have a valid token for this user, issue a new one
+				context.Validated(identity);
+			}
+			
+			return base.GrantCustomExtension(context);
 		}
 
 		public override Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)

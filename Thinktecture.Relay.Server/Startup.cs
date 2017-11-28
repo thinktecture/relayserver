@@ -134,8 +134,8 @@ namespace Thinktecture.Relay.Server
 				}
 			};
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseOAuthBearerAuthentication(authOptions);
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void UseSharedSecret(IAppBuilder app, string sharedSecret, OAuthAuthorizationServerOptions serverOptions)
@@ -146,12 +146,12 @@ namespace Thinktecture.Relay.Server
 
 			serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
 			{
 				AllowedAudiences = new[] { audience },
 				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
 			});
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config)
