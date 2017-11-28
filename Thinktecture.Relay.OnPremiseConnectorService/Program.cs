@@ -12,21 +12,32 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 				.ReadFrom.AppSettings()
 				.CreateLogger();
 
-			HostFactory.Run(config =>
+			try
 			{
-				config.UseSerilog();
-				config.Service<OnPremisesService>(settings =>
+				HostFactory.Run(config =>
 				{
-					settings.ConstructUsing(_ => new OnPremisesService());
-					settings.WhenStarted(async s => await s.StartAsync().ConfigureAwait(false));
-					settings.WhenStopped(s => s.Stop());
-				});
-				config.RunAsNetworkService();
+					config.UseSerilog();
+					config.Service<OnPremisesService>(settings =>
+					{
+						settings.ConstructUsing(_ => new OnPremisesService());
+						settings.WhenStarted(async s => await s.StartAsync().ConfigureAwait(false));
+						settings.WhenStopped(s => s.Stop());
+					});
+					config.RunAsNetworkService();
 
-				config.SetDescription("Thinktecture Relay OnPremises Service");
-				config.SetDisplayName("Thinktecture Relay OnPremises Service");
-				config.SetServiceName("TTRelayOnPremisesService");
-			});
+					config.SetDescription("Thinktecture Relay OnPremises Service");
+					config.SetDisplayName("Thinktecture Relay OnPremises Service");
+					config.SetServiceName("TTRelayOnPremisesService");
+				});
+			}
+			catch (Exception ex)
+			{
+				Log.Logger.Fatal(ex, "Service crashed");
+			}
+			finally
+			{
+				Log.CloseAndFlush();
+			}
 
 #if DEBUG
 			if (System.Diagnostics.Debugger.IsAttached)

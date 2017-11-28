@@ -18,31 +18,42 @@ namespace Thinktecture.Relay.Server
 				.ReadFrom.AppSettings()
 				.CreateLogger();
 
-			HostFactory.Run(config =>
+			try
 			{
-				config.UseSerilog();
-				var programScope = BuildProgramScope();
-				var relayServerScope = BuildRelayServerScope(programScope);
-
-				config.UseAutofacContainer(relayServerScope);
-				config.Service<RelayService>(settings =>
+				HostFactory.Run(config =>
 				{
-					settings.ConstructUsingAutofacContainer();
-					settings.WhenStarted(s => s.Start());
-					settings.WhenStopped(s =>
-					{
-						s.Stop();
-						relayServerScope.Dispose();
-						programScope.Dispose();
-					});
-				});
+					config.UseSerilog();
+					var programScope = BuildProgramScope();
+					var relayServerScope = BuildRelayServerScope(programScope);
 
-				config.RunAsNetworkService();
-				config.SetDescription("Thinktecture Relay Server Process");
-				config.SetDisplayName("Thinktecture Relay Server");
-				config.SetServiceName("TTRelayServer");
-				config.ApplyCommandLine();
-			});
+					config.UseAutofacContainer(relayServerScope);
+					config.Service<RelayService>(settings =>
+					{
+						settings.ConstructUsingAutofacContainer();
+						settings.WhenStarted(s => s.Start());
+						settings.WhenStopped(s =>
+						{
+							s.Stop();
+							relayServerScope.Dispose();
+							programScope.Dispose();
+						});
+					});
+
+					config.RunAsNetworkService();
+					config.SetDescription("Thinktecture Relay Server Process");
+					config.SetDisplayName("Thinktecture Relay Server");
+					config.SetServiceName("TTRelayServer");
+					config.ApplyCommandLine();
+				});
+			}
+			catch (Exception ex)
+			{
+				Log.Logger.Fatal(ex, "Service crashed");
+			}
+			finally
+			{
+				Log.CloseAndFlush();
+			}
 
 #if DEBUG
 			if (System.Diagnostics.Debugger.IsAttached)
