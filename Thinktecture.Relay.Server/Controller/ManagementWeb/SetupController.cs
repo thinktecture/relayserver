@@ -1,12 +1,14 @@
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Results;
+using Thinktecture.Relay.Server.Http.ActionFilters;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
 	[AllowAnonymous]
 	[ManagementWebModuleBindingFilter]
+	[NoCache]
 	public class SetupController : ApiController
 	{
 		private readonly IUserRepository _userRepository;

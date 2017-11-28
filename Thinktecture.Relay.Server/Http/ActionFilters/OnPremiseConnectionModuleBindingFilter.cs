@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Controller
+namespace Thinktecture.Relay.Server.Http.ActionFilters
 {
 	[AttributeUsage(AttributeTargets.Class)]
 	public class OnPremiseConnectionModuleBindingFilter : CheckModuleBindingConfigurationAttribute
