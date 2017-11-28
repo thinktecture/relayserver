@@ -97,7 +97,7 @@ namespace Thinktecture.Relay.Server
 			{
 				AllowInsecureHttp = true,
 				TokenEndpointPath = new PathString("/token"),
-				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
+				AccessTokenExpireTimeSpan = config.AccessTokenLifetime,
 				Provider = authProvider,
 			};
 
@@ -150,7 +150,7 @@ namespace Thinktecture.Relay.Server
 			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
 			{
 				AllowedAudiences = new[] { audience },
-				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) }
+				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
 			});
 		}
 
