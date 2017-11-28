@@ -36,6 +36,7 @@ namespace Thinktecture.Relay.Server.Config
 		public bool SecureClientController { get; }
 		public TimeSpan QueueExpiration { get; }
 		public TimeSpan RequestExpiration { get; }
+		public TimeSpan AccessTokenLifetime { get; }
 
 		public Configuration(ILogger logger)
 		{
@@ -195,6 +196,12 @@ namespace Thinktecture.Relay.Server.Config
 				RequestExpiration = tmpTimeSpan;
 			}
 
+            AccessTokenLifetime = TimeSpan.FromDays(365);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(AccessTokenLifetime)], out tmpTimeSpan))
+			{
+				AccessTokenLifetime = tmpTimeSpan;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -227,6 +234,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SecureClientController), SecureClientController);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(QueueExpiration), QueueExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RequestExpiration), RequestExpiration);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(AccessTokenLifetime), AccessTokenLifetime);
 		}
 	}
 }
