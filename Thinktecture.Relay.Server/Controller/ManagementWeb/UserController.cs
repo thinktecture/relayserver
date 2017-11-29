@@ -50,6 +50,12 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return BadRequest();
 			}
 
+			// new password and repetition need to match
+			if (user.Password != user.Password2)
+			{
+				return BadRequest("New password and verification do not match");
+			}
+
 			var id = _userRepository.Create(user.UserName, user.Password);
 
 			if (id == Guid.Empty)
