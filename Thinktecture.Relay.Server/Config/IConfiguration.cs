@@ -1,4 +1,5 @@
 using System;
+using System.Web.Http;
 
 namespace Thinktecture.Relay.Server.Config
 {
@@ -27,5 +28,6 @@ namespace Thinktecture.Relay.Server.Config
 		TimeSpan AccessTokenLifetime { get; set; }
 		TimeSpan HstsHeaderMaxAge { get; set; }
 		bool HstsIncludeSubdomains { get; set; }
+		IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
 	}
 }

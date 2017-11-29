@@ -145,6 +145,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="AccessTokenLifetime" value="365.00:00:00" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
+    <add key="IncludeErrorDetailPolicy" value="default" />
 </appSettings>
 ```
 
@@ -163,6 +164,7 @@ Die Standardeinstellungen umfassen dabei:
 | AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für OPremise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) |
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
 | HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der Optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
+| IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default'). Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
 
 ## netsh settings
 

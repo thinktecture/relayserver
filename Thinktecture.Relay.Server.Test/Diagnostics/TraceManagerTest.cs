@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -43,6 +44,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public TimeSpan AccessTokenLifetime { get; set; }
 			public TimeSpan HstsHeaderMaxAge { get; set; }
 			public bool HstsIncludeSubdomains { get; set; }
+			public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
 
 			public Configuration()
 			{

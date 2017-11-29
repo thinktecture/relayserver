@@ -188,7 +188,7 @@ namespace Thinktecture.Relay.Server
 		{
 			var httpConfig = new HttpConfiguration
 			{
-				IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always,
+				IncludeErrorDetailPolicy = configuration.IncludeErrorDetailPolicy,
 			};
 
 			httpConfig.EnableCors(new EnableCorsAttribute("*", "*", "*"));

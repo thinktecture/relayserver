@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.Web.Http;
 using Serilog;
 
 namespace Thinktecture.Relay.Server.Config
@@ -29,6 +30,7 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan AccessTokenLifetime { get; set; }
 		public TimeSpan HstsHeaderMaxAge { get; set; }
 		public bool HstsIncludeSubdomains { get; set; }
+		public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -157,6 +159,12 @@ namespace Thinktecture.Relay.Server.Config
 				HstsIncludeSubdomains = tmpBool;
 			}
 
+			IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Default;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["IncludeErrorDetailPolicy"], true, out IncludeErrorDetailPolicy tmpIncludeErrorDetailPolicy))
+			{
+				IncludeErrorDetailPolicy = tmpIncludeErrorDetailPolicy;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -184,6 +192,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting AccessTokenLifetime: {AccessTokenLifetime}", AccessTokenLifetime);
 			logger?.Verbose("Setting HstsHeaderMaxAge: {HstsHeaderMaxAge}", HstsHeaderMaxAge);
 			logger?.Verbose("Setting HstsIncludeSubdomains: {HstsIncludeSubdomains}", HstsIncludeSubdomains);
+			logger?.Verbose("Setting IncludeErrorDetailPolicy: {IncludeErrorDetailPolicy}", IncludeErrorDetailPolicy);
 		}
 	}
 }
