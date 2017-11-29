@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
+using Serilog;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository.DbModels;
 using Thinktecture.Relay.Server.Security;
@@ -11,11 +13,16 @@ namespace Thinktecture.Relay.Server.Repository
 {
 	public class UserRepository : IUserRepository
 	{
+		private readonly ILogger _logger;
 		private readonly IPasswordHash _passwordHash;
+		private readonly IConfiguration _configuration;
 
-		public UserRepository(IPasswordHash passwordHash)
+		public UserRepository(ILogger logger, IPasswordHash passwordHash, IConfiguration configuration)
 		{
-			_passwordHash = passwordHash;
+			_logger = logger;
+
+			_passwordHash = passwordHash ?? throw new ArgumentNullException(nameof(passwordHash));
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 		}
 
 		public Guid Create(string userName, string password)
@@ -54,12 +61,11 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 
 			DbUser user;
-
 			using (var context = new RelayContext())
 			{
 				user = context.Users.SingleOrDefault(u => u.UserName == userName);
 
-				if (user == null)
+				if (user == null || IsUserLockedOut(user))
 				{
 					return null;
 				}
@@ -74,6 +80,12 @@ namespace Thinktecture.Relay.Server.Repository
 
 			if (_passwordHash.ValidatePassword(Encoding.UTF8.GetBytes(password), passwordInformation))
 			{
+				if (user.FailedLoginAttempts.HasValue || user.LastFailedLoginAttempt.HasValue)
+				{
+					// login was successful, so reset potential previous failed attempts
+					UnlockUser(user.Id, user.UserName);
+				}
+
 				return new User()
 				{
 					UserName = user.UserName,
@@ -82,6 +94,8 @@ namespace Thinktecture.Relay.Server.Repository
 				};
 			}
 
+			// We found a user, but validation failed, so record this failed attempt
+			RecordFailedLoginAttempt(user);
 			return null;
 		}
 
@@ -178,6 +192,79 @@ namespace Thinktecture.Relay.Server.Repository
 				var user = context.Users.SingleOrDefault(u => u.UserName == userName);
 
 				return user == null;
+			}
+		}
+
+		private bool IsUserLockedOut(DbUser user)
+		{
+			if (!user.FailedLoginAttempts.HasValue)
+				return false;
+
+			if (user.FailedLoginAttempts < _configuration.MaxFailedLoginAttempts)
+				return false;
+
+			// this weould be data garbage, but check nevertheless
+			if (!user.LastFailedLoginAttempt.HasValue)
+			{
+				_logger?.Error("User {UserName} has a failed login attempt count of {FailedLoginAttempts}, but no last failed timestamp. This should not be the case.", user.UserName, user.FailedLoginAttempts);
+				return true;
+			}
+
+			if (user.LastFailedLoginAttempt.Value + _configuration.FailedLoginLockoutPeriod < DateTime.UtcNow)
+				return false;
+
+			_logger?.Information("User {UserName} is locked out til {LockoutEnd} due to {FailedLoginAttempts} failed login attempts since {LastFailedLoginAttempt}",
+				user.UserName,
+				user.LastFailedLoginAttempt + _configuration.FailedLoginLockoutPeriod,
+				user.FailedLoginAttempts,
+				user.LastFailedLoginAttempt
+			);
+
+			return true;
+		}
+
+		private void RecordFailedLoginAttempt(DbUser user)
+		{
+			using (var ctx = new RelayContext())
+			{
+				var entity = new DbUser()
+				{
+					Id = user.Id,
+				};
+
+				ctx.Users.Attach(entity);
+
+				entity.LastFailedLoginAttempt = DateTime.UtcNow;
+				entity.FailedLoginAttempts = (user.FailedLoginAttempts ?? 0) + 1;
+
+				ctx.Entry(entity).State = EntityState.Modified;
+				ctx.SaveChanges();
+
+				_logger?.Information("User {UserName} failed logging in. Failed attempts: {FailedLoginAttempts}",
+					user.UserName,
+					user.FailedLoginAttempts
+				);
+			}
+		}
+
+		private void UnlockUser(Guid userId, string userName)
+		{
+			using (var ctx = new RelayContext())
+			{
+				var entity = new DbUser()
+				{
+					Id = userId,
+				};
+
+				ctx.Users.Attach(entity);
+
+				entity.LastFailedLoginAttempt = null;
+				entity.FailedLoginAttempts = null;
+
+				ctx.Entry(entity).State = EntityState.Modified;
+				ctx.SaveChanges();
+
+				_logger?.Information("Unlocking user account for {UserName} ", userName);
 			}
 		}
 	}
