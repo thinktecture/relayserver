@@ -93,6 +93,18 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return BadRequest();
 			}
 
+			// OldPassword needs to be correct
+			if (_userRepository.Authenticate(user.UserName, user.PasswordOld) == null)
+			{
+				return BadRequest("Old password not okay");
+			}
+
+			// new password and repetition need to match
+			if (user.Password != user.Password2)
+			{
+				return BadRequest("New password and verification do not match");
+			}
+
 			var result = _userRepository.Update(user.Id, user.Password);
 
 			return result ? (IHttpActionResult)Ok() : BadRequest();
