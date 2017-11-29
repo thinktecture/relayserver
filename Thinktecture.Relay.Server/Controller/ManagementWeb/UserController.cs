@@ -6,6 +6,7 @@ using System.Web.Http.Results;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.Repository;
+using Thinktecture.Relay.Server.Security;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
@@ -15,10 +16,12 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 	public class UserController : ApiController
 	{
 		private readonly IUserRepository _userRepository;
+		private readonly IPasswordComplexityValidator _passwordComplexityValidator;
 
-		public UserController(IUserRepository userRepository)
+		public UserController(IUserRepository userRepository, IPasswordComplexityValidator passwordComplexityValidator)
 		{
-			_userRepository = userRepository;
+			_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+			_passwordComplexityValidator = passwordComplexityValidator ?? throw new ArgumentNullException(nameof(passwordComplexityValidator));
 		}
 
 		[AllowAnonymous]
@@ -54,6 +57,12 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 			if (user.Password != user.Password2)
 			{
 				return BadRequest("New password and verification do not match");
+			}
+
+			// validate password complexity by other rules
+			if (!_passwordComplexityValidator.ValidatePassword(user.UserName, user.Password, out var errorMessage))
+			{
+				return BadRequest(errorMessage);
 			}
 
 			var id = _userRepository.Create(user.UserName, user.Password);
@@ -100,7 +109,8 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 			}
 
 			// OldPassword needs to be correct
-			if (_userRepository.Authenticate(user.UserName, user.PasswordOld) == null)
+			var authenticatedUser = _userRepository.Authenticate(user.UserName, user.PasswordOld);
+			if (authenticatedUser == null)
 			{
 				return BadRequest("Old password not okay");
 			}
@@ -111,7 +121,18 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return BadRequest("New password and verification do not match");
 			}
 
-			var result = _userRepository.Update(user.Id, user.Password);
+			if (user.PasswordOld == user.Password)
+			{
+				return BadRequest("New password must be different from old one.");
+			}
+
+			// validate password complexity by other rules
+			if (!_passwordComplexityValidator.ValidatePassword(authenticatedUser.UserName, user.Password, out var errorMessage))
+			{
+				return BadRequest(errorMessage);
+			}
+
+			var result = _userRepository.Update(authenticatedUser.Id, user.Password);
 
 			return result ? (IHttpActionResult)Ok() : BadRequest();
 		}

@@ -13,7 +13,8 @@
         $scope.createUser = function () {
             var data = {
                 username: $scope.username,
-                password: $scope.password
+                password: $scope.password,
+                password2: $scope.password2
             };
             user.createFirstTimeUser(data)
                 .then(function () {
@@ -22,10 +23,16 @@
                             $state.go('login');
                             notificationService.success(text);
                         });
-                }, function () {
+                }, function (error) {
+                    
+                        var details = '';
+                        if (error.data && error.data.message) {
+                            details = '\r\n' + error.data.message;
+                        }
+
                     $translate('SETUP.USER_NOT_CREATED')
                         .then(function (text) {
-                            notificationService.error(text);
+                            notificationService.error(text + details);
                         });
                 });
         };

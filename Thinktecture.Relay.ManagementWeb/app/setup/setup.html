@@ -14,17 +14,24 @@
                            name="username" ng-model="username"
                            autofocus required/>
                 </div>
+                <span class="text-danger" ng-show="createUserForm.username.$error.required && createUserForm.username.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+
                 <div class="input-group">
                     <span class="input-group-addon"><i class="fa fa-lock"></i></span>
                     <input type="password" class="form-control" placeholder="{{'COMMON.PASSWORD' | translate}}"
                            ng-model="password"
                            name="password" required/>
                 </div>
+                <span class="text-danger" ng-show="createUserForm.password.$error.required && createUserForm.password.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+ 
                 <div class="input-group">
                     <span class="input-group-addon"><i class="fa fa-lock"></i></span>
                     <input type="password" class="form-control" placeholder="{{'COMMON.VERIFY_PASSWORD' | translate }}"
                             name="password2" ng-model="password2" required/>
                 </div>
+                <span class="text-danger" ng-show="createUserForm.password2.$error.required && createUserForm.password2.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+                <span class="text-danger" ng-show="passwordsDoNotMatch && createUserForm.password2.$dirty && !createUserForm.password2.$error.required" translate>COMMON.ERRORS.PASSWORDS_DO_NOT_MATCH</span>
+ 
                 <button class="pull-right btn btn-primary btn-block" ng-click="createUser()"
                         ng-disabled="createUserForm.$invalid || passwordsDoNotMatch" translate>SETUP.CREATE_USER
                 </button>

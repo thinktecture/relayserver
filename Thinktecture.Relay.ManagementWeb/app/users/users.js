@@ -62,9 +62,15 @@
                     reloadUsers();
                 }, function (error) {
                     if (error !== 'cancel' && error !== 'backdrop click' && error !== 'escape key press') {
+
+                        var details = '';
+                        if (error.data && error.data.message) {
+                            details = '\r\n' + error.data.message;
+                        }
+
                         $translate('USERS.NOTIFICATIONS.CREATE_ERROR')
                             .then(function (text) {
-                                notificationService.error(text);
+                                notificationService.error(text + details);
                             });
                     }
                 });
