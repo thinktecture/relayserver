@@ -30,5 +30,9 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 
 		[Required]
 		public DateTime CreationDate { get; set; }
+
+		public DateTime? LastFailedLoginAttempt { get; set; }
+
+		public int? FailedLoginAttempts { get; set; }
 	}
 }
