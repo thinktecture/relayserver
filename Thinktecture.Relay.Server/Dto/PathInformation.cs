@@ -1,4 +1,4 @@
-﻿namespace Thinktecture.Relay.Server.Dto
+namespace Thinktecture.Relay.Server.Dto
 {
 	public class PathInformation
 	{

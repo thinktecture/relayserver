@@ -19,7 +19,7 @@ using Microsoft.Owin.Security.Jwt;
 using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
-using NLog;
+using Serilog;
 using Owin;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Controller;
@@ -27,10 +27,10 @@ using Thinktecture.Relay.Server.Controller.ManagementWeb;
 using Thinktecture.Relay.Server.Filters;
 using Thinktecture.Relay.Server.Logging;
 using Thinktecture.Relay.Server.Owin;
-using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Repository;
 using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.SignalR;
+using ExceptionLogger = Thinktecture.Relay.Server.Logging.ExceptionLogger;
 
 namespace Thinktecture.Relay.Server
 {
@@ -97,7 +97,7 @@ namespace Thinktecture.Relay.Server
 			{
 				AllowInsecureHttp = true,
 				TokenEndpointPath = new PathString("/token"),
-				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
+				AccessTokenExpireTimeSpan = config.AccessTokenLifetime,
 				Provider = authProvider,
 			};
 
@@ -134,8 +134,8 @@ namespace Thinktecture.Relay.Server
 				}
 			};
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseOAuthBearerAuthentication(authOptions);
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void UseSharedSecret(IAppBuilder app, string sharedSecret, OAuthAuthorizationServerOptions serverOptions)
@@ -146,12 +146,12 @@ namespace Thinktecture.Relay.Server
 
 			serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
 			{
 				AllowedAudiences = new[] { audience },
-				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) }
+				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
 			});
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config)
@@ -193,32 +193,32 @@ namespace Thinktecture.Relay.Server
 
 			httpConfig.SuppressDefaultHostAuthentication();
 
-			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogTraceWriter"], "true"))
-				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new NLogTraceWriter(LogManager.GetLogger("HttpTraceLogger"), new TraceLevelConverter()));
+			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableTraceWriter"], "true"))
+				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new TraceWriter(logger?.ForContext<TraceWriter>(), new TraceLevelConverter()));
 
-			httpConfig.Services.Add(typeof(IExceptionLogger), new NLogExceptionLogger(LogManager.GetLogger("HttpExceptionLogger")));
+			httpConfig.Services.Add(typeof(IExceptionLogger), new ExceptionLogger(logger?.ForContext<ExceptionLogger>()));
 
-			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableNLogActionFilter"], "true"))
-				httpConfig.Filters.Add(new NLogActionFilter(LogManager.GetLogger("HttpActionFilterLogger")));
+			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableActionFilter"], "true"))
+				httpConfig.Filters.Add(new LogActionFilter(logger?.ForContext<LogActionFilter>()));
 
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
 			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
-				logger?.Info("Relaying enabled");
+				logger?.Information("Relaying enabled");
 				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
 			}
 
 			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
-				logger?.Info("On-premise connections enabled");
+				logger?.Information("On-premise connections enabled");
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
 			}
 
 			if (configuration.EnableManagementWeb != ModuleBinding.False)
 			{
-				logger?.Info("Management web enabled");
+				logger?.Information("Management web enabled");
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
 			}
 
@@ -253,7 +253,7 @@ namespace Thinktecture.Relay.Server
 			catch (DirectoryNotFoundException)
 			{
 				// no admin web deployed - catch silently, but display info for the user
-				logger?.Info("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
+				logger?.Information("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
 			}
 		}
 	}

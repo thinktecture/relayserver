@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Net.Http.Headers;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

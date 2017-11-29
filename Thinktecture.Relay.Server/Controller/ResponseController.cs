@@ -1,12 +1,11 @@
-using Autofac;
 using Newtonsoft.Json.Linq;
-using NLog;
+using Serilog;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Newtonsoft.Json;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Http.ActionFilters;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
 
@@ -14,6 +13,7 @@ namespace Thinktecture.Relay.Server.Controller
 {
 	[Authorize(Roles = "OnPremise")]
 	[OnPremiseConnectionModuleBindingFilter]
+	[NoCache]
 	public class ResponseController : ApiController
 	{
 		private readonly ILogger _logger;
@@ -55,7 +55,7 @@ namespace Thinktecture.Relay.Server.Controller
 				}
 			}
 
-			_logger?.Trace("Received legacy on-premise response. request-id={0}, response-length={1}", response.RequestId, response.ContentLength);
+			_logger?.Verbose("Received legacy on-premise response. request-id={RequestId}, response-length={ResponseContentLength}", response.RequestId, response.ContentLength);
 
 			await _backendCommunication.SendOnPremiseTargetResponse(response.OriginId, response).ConfigureAwait(false);
 

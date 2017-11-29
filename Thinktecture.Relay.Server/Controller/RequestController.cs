@@ -1,13 +1,15 @@
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
-using NLog;
+using Serilog;
+using Thinktecture.Relay.Server.Http.ActionFilters;
 using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Controller
 {
 	[Authorize(Roles = "OnPremise")]
 	[OnPremiseConnectionModuleBindingFilter]
+	[NoCache]
 	public class RequestController : ApiController
 	{
 		private readonly IPostDataTemporaryStore _temporaryStore;
@@ -21,12 +23,12 @@ namespace Thinktecture.Relay.Server.Controller
 
 		public IHttpActionResult Get(string requestId)
 		{
-			_logger?.Trace("Getting request data. request-id={0}", requestId);
+			_logger?.Verbose("Getting request data. request-id={RequestId}", requestId);
 
 			var stream = _temporaryStore.GetRequestStream(requestId);
 			if (stream == null)
 			{
-				_logger?.Warn("No request data found for request {0}", requestId);
+				_logger?.Warning("No request data found for request {RequestId}", requestId);
 				return NotFound();
 			}
 

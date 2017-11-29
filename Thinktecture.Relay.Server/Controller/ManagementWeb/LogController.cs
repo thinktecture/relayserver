@@ -1,11 +1,13 @@
 using System;
 using System.Web.Http;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.Http.ActionFilters;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
 	[ManagementWebModuleBindingFilter]
+	[NoCache]
 	public class LogController : ApiController
 	{
 		private readonly ILogRepository _logRepository;

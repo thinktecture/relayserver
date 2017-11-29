@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
@@ -68,50 +67,6 @@ namespace Thinktecture.Relay.Server.Http
 			var result = sut.CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(headerValues);
 
 			result.Should().Be("Foo, Bar, Baz");
-		}
-
-		[TestMethod]
-		public void AddContentHeaders_adds_content_headers_to_ClientRequest_headers()
-		{
-			var clientRequest = new OnPremiseConnectorRequest
-			{
-				HttpHeaders = new Dictionary<string, string>
-				{
-					["Content-Length"] = "3"
-				}
-			};
-			var request = new HttpRequestMessage
-			{
-				Content = new ByteArrayContent(new byte[] { })
-			};
-			var sut = CreateBuilder();
-
-			request.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
-
-			sut.AddContentHeaders(clientRequest, request);
-
-			clientRequest.HttpHeaders.Should().HaveCount(2);
-			clientRequest.HttpHeaders.Last().Key.Should().Be("Content-Disposition");
-		}
-
-		[TestMethod]
-		public void RemoveIgnoredHeaders_removes_ignored_headers_from_ClientRequest()
-		{
-			var clientRequest = new OnPremiseConnectorRequest
-			{
-				HttpHeaders = new Dictionary<string, string>
-				{
-					["Host"] = "tt.invalid",
-					["Connection"] = "close",
-					["Content-Length"] = "3"
-				}
-			};
-			var sut = CreateBuilder();
-
-			sut.RemoveIgnoredHeaders(clientRequest);
-
-			clientRequest.HttpHeaders.Should().HaveCount(1);
-			clientRequest.HttpHeaders.Single().Key.Should().Be("Content-Length");
 		}
 	}
 }

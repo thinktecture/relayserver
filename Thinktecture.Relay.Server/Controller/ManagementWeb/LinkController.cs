@@ -4,6 +4,7 @@ using System.Web.Http;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.Http.ActionFilters;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
 
@@ -11,6 +12,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
 	[Authorize(Roles = "Admin")]
 	[ManagementWebModuleBindingFilter]
+	[NoCache]
 	public class LinkController : ApiController
 	{
 		private readonly ILinkRepository _linkRepository;

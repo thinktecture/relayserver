@@ -1,16 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Newtonsoft.Json;
-using NLog;
+using Serilog;
 
 namespace Thinktecture.Relay.Server.Filters
 {
-	public class NLogActionFilter : IActionFilter
+	public class LogActionFilter : IActionFilter
 	{
 		private readonly ILogger _logger;
 		private readonly JsonSerializerSettings _jsonSettings;
@@ -18,7 +17,7 @@ namespace Thinktecture.Relay.Server.Filters
 		/// <inheritdoc />
 		public bool AllowMultiple => true;
 
-		public NLogActionFilter(ILogger logger)
+		public LogActionFilter(ILogger logger)
 		{
 			_logger = logger;
 
@@ -36,22 +35,9 @@ namespace Thinktecture.Relay.Server.Filters
 				throw new ArgumentNullException(nameof(continuation));
 
 			var response = await continuation().ConfigureAwait(false);
-			_logger?.Trace("[Response] {0} - {1} ({2}): {3}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
+			_logger?.Verbose("[Response] {RequestMethod} - {ResponseStatusCode} ({ResponseStatusCodeInt}): {RequestUrl}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
 
 			return response;
-		}
-
-		private string SerializeArguments(Dictionary<string, object> arguments)
-		{
-			try
-			{
-				return JsonConvert.SerializeObject(arguments, _jsonSettings);
-			}
-			catch (Exception ex)
-			{
-				_logger?.Error(ex, "Error during serializing action argements.");
-				return null;
-			}
 		}
 	}
 }

@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
-using System.Collections.ObjectModel;
-using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.Server.Diagnostics
 {
@@ -57,7 +55,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			}
 			catch (Exception ex)
 			{
-				_logger?.Warn(ex, "Could not create trace");
+				_logger?.Warning(ex, "Could not create trace");
 			}
 		}
 
@@ -84,7 +82,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				}
 				catch (Exception ex)
 				{
-					_logger?.Warn(ex, "Could not read trace file information for prefix {0}", traceFilePrefix);
+					_logger?.Warning(ex, "Could not read trace file information for prefix {TraceFilePrefix}", traceFilePrefix);
 				}
 			}
 

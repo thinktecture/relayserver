@@ -1,6 +1,6 @@
 using System;
 using System.Configuration;
-using NLog;
+using Serilog;
 
 namespace Thinktecture.Relay.Server.Config
 {
@@ -26,6 +26,7 @@ namespace Thinktecture.Relay.Server.Config
 		public string InterceptorAssembly { get; }
 		public string OAuthSharedSecret { get; set; }
 		public string OAuthCertificate { get; set; }
+		public TimeSpan AccessTokenLifetime { get; set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -134,30 +135,38 @@ namespace Thinktecture.Relay.Server.Config
 			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
 			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
 
+			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["AccessTokenLifetime"], out tmpTimeSpan))
+			{
+				tmpTimeSpan = TimeSpan.FromDays(365);
+			}
+
+			AccessTokenLifetime = tmpTimeSpan;
+
 			LogSettings(logger);
 		}
 
 		private void LogSettings(ILogger logger)
 		{
-			logger?.Trace("Setting OnPremiseConnectorCallbackTimeout: {0}", OnPremiseConnectorCallbackTimeout);
-			logger?.Trace("Setting RabbitMqConnectionString: {0}", RabbitMqConnectionString);
-			logger?.Trace("Setting TraceFileDirectory: {0}", TraceFileDirectory);
-			logger?.Trace("Setting LinkPasswordLength: {0}", LinkPasswordLength);
-			logger?.Trace("Setting DisconnectTimeout: {0}", DisconnectTimeout);
-			logger?.Trace("Setting ConnectionTimeout: {0}", ConnectionTimeout);
-			logger?.Trace("Setting UseInsecureHttp: {0}", UseInsecureHttp);
-			logger?.Trace("Setting EnableManagementWeb: {0}", EnableManagementWeb);
-			logger?.Trace("Setting EnableRelaying: {0}", EnableRelaying);
-			logger?.Trace("Setting EnableOnPremiseConnections: {0}", EnableOnPremiseConnections);
-			logger?.Trace("Setting HostName: {0}", HostName);
-			logger?.Trace("Setting Port: {0}", Port);
-			logger?.Trace("Setting ManagementWebLocation: {0}", ManagementWebLocation);
-			logger?.Trace("Setting TemporaryRequestStoragePath: {0}", TemporaryRequestStoragePath ?? "not defined - using in-memory store");
-			logger?.Trace("Setting TemporaryRequestStoragePeriod: {0}", TemporaryRequestStoragePeriod);
-			logger?.Trace("Setting ActiveConnectionTimeoutInSeconds: {0}", ActiveConnectionTimeoutInSeconds);
-			logger?.Trace("Setting InterceptorAssembly: {0}", InterceptorAssembly);
-			logger?.Trace("Setting OAuthSharedSecret: {0}", OAuthSharedSecret);
-			logger?.Trace("Setting OAuthCertificate: {0}", OAuthCertificate);
+			logger?.Verbose("Setting OnPremiseConnectorCallbackTimeout: {CallbackTimeout}", OnPremiseConnectorCallbackTimeout);
+			logger?.Verbose("Setting RabbitMqConnectionString: {RabbitConnectionString}", RabbitMqConnectionString);
+			logger?.Verbose("Setting TraceFileDirectory: {TraceFileDirectory}", TraceFileDirectory);
+			logger?.Verbose("Setting LinkPasswordLength: {LinkPasswordLength}", LinkPasswordLength);
+			logger?.Verbose("Setting DisconnectTimeout: {DisconnectTimeout}", DisconnectTimeout);
+			logger?.Verbose("Setting ConnectionTimeout: {ConnectionTimeout}", ConnectionTimeout);
+			logger?.Verbose("Setting UseInsecureHttp: {UseInsecureHttp}", UseInsecureHttp);
+			logger?.Verbose("Setting EnableManagementWeb: {EnableManagementweb}", EnableManagementWeb);
+			logger?.Verbose("Setting EnableRelaying: {EnableRelay}", EnableRelaying);
+			logger?.Verbose("Setting EnableOnPremiseConnections: {EnableOnpremiseConnections}", EnableOnPremiseConnections);
+			logger?.Verbose("Setting HostName: {Hostname}", HostName);
+			logger?.Verbose("Setting Port: {Port}", Port);
+			logger?.Verbose("Setting ManagementWebLocation: {ManagementwebLocation}", ManagementWebLocation);
+			logger?.Verbose("Setting TemporaryRequestStoragePath: {TempStoragePath}", TemporaryRequestStoragePath ?? "not defined - using in-memory store");
+			logger?.Verbose("Setting TemporaryRequestStoragePeriod: {TempStoragePeriod}", TemporaryRequestStoragePeriod);
+			logger?.Verbose("Setting ActiveConnectionTimeoutInSeconds: {ActiveConnectionTimeout}", ActiveConnectionTimeoutInSeconds);
+			logger?.Verbose("Setting InterceptorAssembly: {InterceptorAssembly}", InterceptorAssembly);
+			logger?.Verbose("Setting OAuthSharedSecret: {OauthSharedSecret}", OAuthSharedSecret);
+			logger?.Verbose("Setting OAuthCertificate: {OauthCertificate}", OAuthCertificate);
+			logger?.Verbose("Setting AccessTokenLifetime: {AccessTokenLifetime}", AccessTokenLifetime);
 		}
 	}
 }

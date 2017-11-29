@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository.DbModels;
@@ -301,7 +301,7 @@ namespace Thinktecture.Relay.Server.Repository
 
 		public async Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion)
 		{
-			_logger?.Trace("Adding or updating connection. connection-id={0}, link-id={1}, connector-version={2}", connectionId, linkId, connectorVersion);
+			_logger?.Verbose("Adding or updating connection. connection-id={ConnectionId}, link-id={LinkId}, connector-version={ConnectorVersion}", connectionId, linkId, connectorVersion);
 
 			try
 			{
@@ -332,13 +332,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during adding or renewing an active connection. LinkId = {0}, ConnectionId = {1}, ConnectorVersion = {2}", linkId, connectionId, connectorVersion);
+				_logger?.Error(ex, "Error during adding or renewing an active connection. LinkId = {LinkId}, ConnectionId = {ConnectionId}, ConnectorVersion = {ConnectorVersion}", linkId, connectionId, connectorVersion);
 			}
 		}
 
 		public async Task RenewActiveConnectionAsync(string connectionId)
 		{
-			_logger?.Trace("Renewing last activity. connection-id={0}", connectionId);
+			_logger?.Verbose("Renewing last activity. connection-id={ConnectionId}", connectionId);
 
 			try
 			{
@@ -355,13 +355,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during renewing an active connection. ConnectionId = {0}", connectionId);
+				_logger?.Error(ex, "Error during renewing an active connection. ConnectionId = {ConnectionId}", connectionId);
 			}
 		}
 
 		public async Task RemoveActiveConnectionAsync(string connectionId)
 		{
-			_logger?.Trace("Deleting active connection, connection-id={0}", connectionId);
+			_logger?.Verbose("Deleting active connection, connection-id={ConnectionId}", connectionId);
 
 			try
 			{
@@ -378,13 +378,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during removing an active connection. ConnectionId = {0}", connectionId);
+				_logger?.Error(ex, "Error during removing an active connection. ConnectionId = {ConnectionId}", connectionId);
 			}
 		}
 
 		public void DeleteAllConnectionsForOrigin(Guid originId)
 		{
-			_logger?.Trace("Deleting all active connections");
+			_logger?.Verbose("Deleting all active connections");
 
 			try
 			{

@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Helper
 				OnPremiseTargetKey = GetTargetKey(splitPath),
 				LocalUrl = GetLocalUrl(splitPath),
 				PathWithoutUserName = GetPathWithoutUserName(splitPath),
-				UserName = GetUserName(splitPath)
+				UserName = GetUserName(splitPath),
 			};
 		}
 

@@ -3,12 +3,13 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
+using Thinktecture.Relay.Server.Http.ActionFilters;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Repository;
@@ -53,11 +54,11 @@ namespace Thinktecture.Relay.Server.Controller
 		[HttpHead]
 		public async Task<HttpResponseMessage> Relay(string path)
 		{
-			_logger?.Debug("Relaying {0} {1}", path, ControllerContext.Request.Method);
+			_logger?.Debug("Relaying {RequestMethod} {RequestPath}", ControllerContext.Request.Method, path);
 
 			if (path == null)
 			{
-				_logger?.Info("Path is not set");
+				_logger?.Information("Path is not set");
 				return NotFound();
 			}
 
@@ -66,6 +67,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			if (!CanRequestBeHandled(path, pathInformation, link))
 			{
+				_logger?.Information("Request cannot be handled.");
 				return NotFound();
 			}
 
@@ -78,7 +80,7 @@ namespace Thinktecture.Relay.Server.Controller
 				request = _interceptorManager.HandleRequest(request, Request, out var message);
 				if (message != null)
 				{
-					_logger?.Trace("Interceptor caused direct answering of request. request-id={0}, status-code={1}", request.RequestId, message.StatusCode);
+					_logger?.Verbose("Interceptor caused direct answering of request. request-id={RequestId}, status-code={ResponseStatusCode}", request.RequestId, message.StatusCode);
 
 					statusCode = message.StatusCode;
 					return message;
@@ -86,20 +88,20 @@ namespace Thinktecture.Relay.Server.Controller
 
 				var task = _backendCommunication.GetResponseAsync(request.RequestId);
 
-				_logger?.Trace("Sending on premise connector request. request-id={0}, link-id={1}", request.RequestId, link.Id);
+				_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
 
-				_logger?.Trace("Waiting for response. request-id={0}, link-id={1}", request.RequestId, link.Id);
+				_logger?.Verbose("Waiting for response. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				response = await task.ConfigureAwait(false);
 
 				if (response != null)
 				{
-					_logger?.Trace("Response received. request-id={0}, link-id={1}", request.RequestId, link.Id);
+					_logger?.Verbose("Response received. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 					statusCode = response.StatusCode;
 				}
 				else
 				{
-					_logger?.Trace("On-Premise timeout. request-id={0}, link-id={1}", request.RequestId, link.Id);
+					_logger?.Verbose("On-Premise timeout. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				}
 
 				return _interceptorManager.HandleResponse(request, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);
@@ -114,25 +116,25 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			if (link == null)
 			{
-				_logger?.Info("Link for path {0} not found", path);
+				_logger?.Information("Link for path {RequestPath} not found", path);
 				return false;
 			}
 
 			if (link.IsDisabled)
 			{
-				_logger?.Info("Link {0} is disabled", link.SymbolicName);
+				_logger?.Information("Link {LinkName} is disabled", link.SymbolicName);
 				return false;
 			}
 
 			if (String.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
 			{
-				_logger?.Info("Path {0} for link {1} without user name is not found", path, link.SymbolicName);
+				_logger?.Information("Path {RequestPath} for link {LinkName} without user name is not found", path, link.SymbolicName);
 				return false;
 			}
 
 			if (link.AllowLocalClientRequestsOnly && !Request.IsLocal())
 			{
-				_logger?.Info("Link {0} only allows local requests", link.SymbolicName);
+				_logger?.Information("Link {LinkName} only allows local requests", link.SymbolicName);
 				return false;
 			}
 
@@ -143,7 +145,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			request.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Trace("Finishing request. request-id={0}, link-id={1}, on-premise-duration={2}, global-duration={3}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
+			_logger?.Verbose("Finishing request. request-id={RequestId}, link-id={LinkId}, on-premise-duration={RemoteDuration}, global-duration={GlobalDuration}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
 
 			// TODO this may be debounced for e.g. 5 minutes to skip querying on each request in future release
 			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);

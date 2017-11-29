@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.InProcess
@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(connectionId));
 
 			CheckDisposed();
-			_logger?.Info("Creating request subscription for link {0} and connection {1}", linkId, connectionId);
+			_logger?.Information("Creating request subscription for link {LinkId} and connection {ConnectionId}", linkId, connectionId);
 
 			return Observable.Create<IOnPremiseConnectorRequest>(observer =>
 			{
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 		public IObservable<IOnPremiseConnectorResponse> OnResponseReceived(Guid originId)
 		{
 			CheckDisposed();
-			_logger?.Info("Creating response subscription");
+			_logger?.Information("Creating response subscription");
 
 			return Observable.Create<IOnPremiseConnectorResponse>(observer =>
 			{
@@ -82,7 +82,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(request));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching request for link {0}, request {1}, HTTP method {2}, url '{3}'", linkId, request.RequestId, request.HttpMethod, request.Url);
+			_logger?.Debug("Dispatching request for link {LinkId}, request {RequestId}, HTTP method {HttpMethod}, url {RequestUrl}", linkId, request.RequestId, request.HttpMethod, request.Url);
 
 			TryGetRequestSubject(linkId)?.OnNext(request);
 
@@ -95,7 +95,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(response));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching response for origin {0}, request {1}, status code {2}", originId, response.RequestId, response.StatusCode);
+			_logger?.Debug("Dispatching response for origin {OriginId}, request {RequestId}, status code {ResponseStatusCode}", originId, response.RequestId, response.StatusCode);
 
 			GetResponseSubject(originId).OnNext(response);
 

@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.InterceptorDemos
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.InterceptorDemos
 			headers.Add("X-ThinkectureRelay-Example", $"Added by {nameof(DemoRequestInterceptor)}");
 			request.HttpHeaders = headers;
 
-			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} modified request: " + JsonConvert.SerializeObject(request));
+			_logger?.Debug("Demo interceptor modified request: {@Request} " + request);
 			return null;
 		}
 	}

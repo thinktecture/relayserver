@@ -1,8 +1,9 @@
 using System;
 using Autofac;
+using AutofacSerilogIntegration;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.DependencyInjection;
-using Thinktecture.Relay.Server.Logging;
 using Thinktecture.Relay.Server.Interceptor;
 using Topshelf;
 using Topshelf.Autofac;
@@ -13,30 +14,46 @@ namespace Thinktecture.Relay.Server
 	{
 		private static void Main(string[] args)
 		{
-			HostFactory.Run(config =>
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.AppSettings()
+				.CreateLogger();
+
+			try
 			{
-				var programScope = BuildProgramScope();
-				var relayServerScope = BuildRelayServerScope(programScope);
-
-				config.UseAutofacContainer(relayServerScope);
-				config.Service<RelayService>(settings =>
+				HostFactory.Run(config =>
 				{
-					settings.ConstructUsingAutofacContainer();
-					settings.WhenStarted(s => s.Start());
-					settings.WhenStopped(s =>
-					{
-						s.Stop();
-						relayServerScope.Dispose();
-						programScope.Dispose();
-					});
-				});
+					config.UseSerilog();
+					var programScope = BuildProgramScope();
+					var relayServerScope = BuildRelayServerScope(programScope);
 
-				config.RunAsNetworkService();
-				config.SetDescription("Thinktecture Relay Server Process");
-				config.SetDisplayName("Thinktecture Relay Server");
-				config.SetServiceName("TTRelayServer");
-				config.ApplyCommandLine();
-			});
+					config.UseAutofacContainer(relayServerScope);
+					config.Service<RelayService>(settings =>
+					{
+						settings.ConstructUsingAutofacContainer();
+						settings.WhenStarted(s => s.Start());
+						settings.WhenStopped(s =>
+						{
+							s.Stop();
+							relayServerScope.Dispose();
+							programScope.Dispose();
+						});
+					});
+
+					config.RunAsNetworkService();
+					config.SetDescription("Thinktecture Relay Server Process");
+					config.SetDisplayName("Thinktecture Relay Server");
+					config.SetServiceName("TTRelayServer");
+					config.ApplyCommandLine();
+				});
+			}
+			catch (Exception ex)
+			{
+				Log.Logger.Fatal(ex, "Service crashed");
+			}
+			finally
+			{
+				Log.CloseAndFlush();
+			}
 
 #if DEBUG
 			if (System.Diagnostics.Debugger.IsAttached)
@@ -52,7 +69,7 @@ namespace Thinktecture.Relay.Server
 		{
 			var builder = new ContainerBuilder();
 
-			builder.RegisterModule<LoggingModule>();
+			builder.RegisterLogger();
 			builder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
 			builder.RegisterType<InterceptorLoader>().As<IInterceptorLoader>().SingleInstance();
 			builder.RegisterType<RelayServerModule>();
