@@ -141,6 +141,8 @@ The default settings include:
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
     <add key=PluginAssembly" value="" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
+    <add key="HstsHeaderMaxAge" value="365.00:00:00" />
+    <add key="HstsIncludeSubdomains" value="false" />
 </appSettings>
 ```
 
@@ -157,6 +159,8 @@ The default settings include:
 | ActiveConnectionTimeoutInSeconds | Time after which a connection between an OnPremise Connector and the RelayServer is no longer active (default 120 seconds) |
 | PluginAssembly | Path to an assembly that implements plugins. Either absolutely or relative to the RelayServer. |
 | AccessTokenLifetime | Time span that an issued access token for OnPremise Connectors and Management Web Users will be valid (default 365 days) |
+| HstsHeaderMaxAge | Value that will be set in the HTTP Strict Transport Security Header for `max-age` (default 365 days) |
+| HstsIncludeSubdomains | Determines, whether the optional parameter `includeSubDomains` will be set on the HTTP Strict Transport Security Header (default false) |
 
 ## netsh settings
 

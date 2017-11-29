@@ -143,6 +143,8 @@ Die Standardeinstellungen umfassen dabei:
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
     <add key="InterceptorAssembly" value="" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
+    <add key="HstsHeaderMaxAge" value="365.00:00:00" />
+    <add key="HstsIncludeSubdomains" value="false" />
 </appSettings>
 ```
 
@@ -159,6 +161,8 @@ Die Standardeinstellungen umfassen dabei:
 | ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem Relay Server als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
 | InterceptorAssembly | Pfad zu einem Assembly, in dem Interceptor implementiert sind. Entweder absolut oder relativ zum RelayServer. |
 | AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für OPremise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) |
+| HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
+| HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der Optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
 
 ## netsh settings
 
