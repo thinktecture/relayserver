@@ -58,6 +58,8 @@ namespace Thinktecture.Relay.Server
 			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, _configuration);
 
 			app.UseAutofacMiddleware(innerScope);
+
+			app.UseHsts(_configuration.HstsHeaderMaxAge, _configuration.HstsIncludeSubdomains);
 			app.UseCors(CorsOptions.AllowAll);
 			UseOAuthSecurity(app, _configuration, _authorizationServerProvider);
 			MapSignalR(app, innerScope, _configuration);
@@ -95,7 +97,7 @@ namespace Thinktecture.Relay.Server
 
 			var serverOptions = new OAuthAuthorizationServerOptions
 			{
-				AllowInsecureHttp = true,
+				AllowInsecureHttp = config.UseInsecureHttp,
 				TokenEndpointPath = new PathString("/token"),
 				AccessTokenExpireTimeSpan = config.AccessTokenLifetime,
 				Provider = authProvider,
