@@ -1,7 +1,9 @@
 using System;
 using System.Configuration;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -52,7 +54,7 @@ namespace Thinktecture.Relay.Server
 
 		public void Configuration(IAppBuilder app)
 		{
-			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
+			InitializeAndMigrateDatabase();
 
 			var httpConfig = CreateHttpConfiguration(_configuration, _logger);
 			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, _configuration);
@@ -65,6 +67,22 @@ namespace Thinktecture.Relay.Server
 			MapSignalR(app, innerScope, _configuration);
 			UseWebApi(app, httpConfig, innerScope);
 			UseFileServer(app, _configuration, _logger);
+		}
+
+		private static void InitializeAndMigrateDatabase()
+		{
+			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
+
+			var migrator  = new DbMigrator(new Migrations.Configuration
+			{
+				AutomaticMigrationsEnabled = true,
+				AutomaticMigrationDataLossAllowed = false
+			});
+
+			if (migrator.GetPendingMigrations().Any())
+			{
+				migrator.Update();
+			}
 		}
 
 		private static ILifetimeScope RegisterAdditionalServices(ILifetimeScope container, HttpConfiguration httpConfig, IConfiguration config)
