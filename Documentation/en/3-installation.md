@@ -140,6 +140,7 @@ The default settings include:
     <add key="UseInsecureHttp" value="false" />
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
     <add key=PluginAssembly" value="" />
+    <add key="AccessTokenLifetime" value="365.00:00:00" />
 </appSettings>
 ```
 
@@ -155,6 +156,7 @@ The default settings include:
 | TemporaryRequestStoragePath | Path to a directory where the data of the requests are temporarily stored. In multi-server mode this directory must be readable and described by all nodes. If no value is specified (default), the requests are kept in memory, and no multi-server operation is possible. |
 | ActiveConnectionTimeoutInSeconds | Time after which a connection between an OnPremise Connector and the RelayServer is no longer active (default 120 seconds) |
 | PluginAssembly | Path to an assembly that implements plugins. Either absolutely or relative to the RelayServer. |
+| AccessTokenLifetime | Time span that an issued access token for OnPremise Connectors and Management Web Users will be valid (default 365 days) |
 
 ## netsh settings
 
@@ -243,11 +245,11 @@ In typical deployment scenarios of the RelayServer, the On-Premises Connector is
 
 To configure the On-Premises Connector, open the Thinktecture.Relay.OnPremiseConnector.exe.config configuration file in the installation folder (default: C:\Program Files\Thinktecture\On-Premises Connector) of the On-Premises Connector in any editor.
 
-Only the <relayServer></ relayServer> section has to be edited in the configuration file:
+Only the <relayServer></relayServer> section has to be edited in the configuration file:
 
 ```
-<relayServer baseUrl="https://relay.company.example/">
-  <security authenticationType="Identity">
+<relayServer baseUrl="https://relay.company.example/" >
+  <security authenticationType="Identity" accessTokenRefreshWindow="00:01:00" >
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
@@ -267,6 +269,7 @@ Only the <relayServer></ relayServer> section has to be edited in the configurat
 |  Attribute | Description |
 | --- | --- |
 | authenticationType | In the current version of the RelayServer only the mode *Identity* is supported|
+| accessTokenRefreshWindow | When the current AccessToken will expire in this time span, an attempt will be made to renew the token. Defaults to 1 minute. |
 
 ### identity Element
 
