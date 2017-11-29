@@ -4,6 +4,7 @@
     app.module.constant('translationsEn', {
         "COMMON": {
             "CREATE": "Create",
+            "UPDATE": "Update",
             "CLOSE": "Close",
             "CANCEL": "Cancel",
             "USERNAME": "Username",
