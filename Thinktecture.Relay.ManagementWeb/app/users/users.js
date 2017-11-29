@@ -17,16 +17,22 @@
                 {
                     displayName: $translate.instant('COMMON.USERNAME'),
                     field: 'userName',
-                    width: '80%',
+                    width: '50%',
                     sort: {
                         direction: uiGridConstants.ASC
                     }
                 },
                 {
+                    displayName: $translate.instant('USERS.LOCKEDOUT_UNTIL'),
+                    field: 'lockedUntil',
+                    cellFilter: 'date:"yyyy-MM-dd HH:mm:ss UTC"',
+                    width: '25%',
+                },
+                {
                     displayName: $translate.instant('USERS.OPTIONS'),
                     name: 'options',
                     cellTemplate: 'app/users/userOptionsCellTemplate.html',
-                    width: '20%'
+                    width: '25%'
                 }
             ]
         };

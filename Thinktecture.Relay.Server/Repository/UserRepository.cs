@@ -60,55 +60,65 @@ namespace Thinktecture.Relay.Server.Repository
 				return null;
 			}
 
-			DbUser user;
 			using (var context = new RelayContext())
 			{
-				user = context.Users.SingleOrDefault(u => u.UserName == userName);
+				var user = context.Users.SingleOrDefault(u => u.UserName == userName);
 
 				if (user == null || IsUserLockedOut(user))
 				{
 					return null;
 				}
-			}
 
-			var passwordInformation = new PasswordInformation
-			{
-				Hash = user.Password,
-				Salt = user.Salt,
-				Iterations = user.Iterations,
-			};
-
-			if (_passwordHash.ValidatePassword(Encoding.UTF8.GetBytes(password), passwordInformation))
-			{
-				if (user.FailedLoginAttempts.HasValue || user.LastFailedLoginAttempt.HasValue)
+				var passwordInformation = new PasswordInformation
 				{
-					// login was successful, so reset potential previous failed attempts
-					UnlockUser(user.Id, user.UserName);
+					Hash = user.Password,
+					Salt = user.Salt,
+					Iterations = user.Iterations,
+				};
+
+				if (_passwordHash.ValidatePassword(Encoding.UTF8.GetBytes(password), passwordInformation))
+				{
+					if (user.FailedLoginAttempts.HasValue || user.LastFailedLoginAttempt.HasValue)
+					{
+						// login was successful, so reset potential previous failed attempts
+						UnlockUser(context, user);
+					}
+
+					return new User()
+					{
+						UserName = user.UserName,
+						Id = user.Id,
+						CreationDate = user.CreationDate,
+					};
 				}
 
-				return new User()
-				{
-					UserName = user.UserName,
-					Id = user.Id,
-					CreationDate = user.CreationDate,
-				};
+				// We found a user, but validation failed, so record this failed attempt
+				RecordFailedLoginAttempt(context, user);
+				return null;
 			}
-
-			// We found a user, but validation failed, so record this failed attempt
-			RecordFailedLoginAttempt(user);
-			return null;
 		}
 
 		public IEnumerable<User> List()
 		{
 			using (var context = new RelayContext())
 			{
-				return context.Users.Select(u => new User
+				return context.Users.Select(u => new
+				{
+					u.Id,
+					u.UserName,
+					u.CreationDate,
+					u.FailedLoginAttempts,
+					u.LastFailedLoginAttempt,
+				})
+				.ToList()
+				.Select(u => new User()
 				{
 					Id = u.Id,
 					UserName = u.UserName,
 					CreationDate = u.CreationDate,
-				}).ToList();
+					LockedUntil = LockedOutUntil(u.FailedLoginAttempts, u.LastFailedLoginAttempt),
+				})
+				.ToList();
 			}
 		}
 
@@ -195,27 +205,32 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
+		private DateTime? LockedOutUntil(int? failedAttempts, DateTime? lastFailedAttempt)
+		{
+			if (!failedAttempts.HasValue)
+				return null;
+
+			if (failedAttempts < _configuration.MaxFailedLoginAttempts)
+				return null;
+
+			if (!lastFailedAttempt.HasValue)
+				return null;
+
+			if (lastFailedAttempt + _configuration.FailedLoginLockoutPeriod < DateTime.UtcNow)
+				return null;
+
+			return lastFailedAttempt + _configuration.FailedLoginLockoutPeriod;
+		}
+
 		private bool IsUserLockedOut(DbUser user)
 		{
-			if (!user.FailedLoginAttempts.HasValue)
-				return false;
-
-			if (user.FailedLoginAttempts < _configuration.MaxFailedLoginAttempts)
-				return false;
-
-			// this weould be data garbage, but check nevertheless
-			if (!user.LastFailedLoginAttempt.HasValue)
-			{
-				_logger?.Error("User {UserName} has a failed login attempt count of {FailedLoginAttempts}, but no last failed timestamp. This should not be the case.", user.UserName, user.FailedLoginAttempts);
-				return true;
-			}
-
-			if (user.LastFailedLoginAttempt.Value + _configuration.FailedLoginLockoutPeriod < DateTime.UtcNow)
+			var lockedOutUntil = LockedOutUntil(user.FailedLoginAttempts, user.LastFailedLoginAttempt);
+			if (!lockedOutUntil.HasValue)
 				return false;
 
 			_logger?.Information("User {UserName} is locked out til {LockoutEnd} due to {FailedLoginAttempts} failed login attempts since {LastFailedLoginAttempt}",
 				user.UserName,
-				user.LastFailedLoginAttempt + _configuration.FailedLoginLockoutPeriod,
+				lockedOutUntil,
 				user.FailedLoginAttempts,
 				user.LastFailedLoginAttempt
 			);
@@ -223,49 +238,29 @@ namespace Thinktecture.Relay.Server.Repository
 			return true;
 		}
 
-		private void RecordFailedLoginAttempt(DbUser user)
+		private void RecordFailedLoginAttempt(RelayContext ctx, DbUser user)
 		{
-			using (var ctx = new RelayContext())
-			{
-				var entity = new DbUser()
-				{
-					Id = user.Id,
-				};
+			user.LastFailedLoginAttempt = DateTime.UtcNow;
+			user.FailedLoginAttempts = (user.FailedLoginAttempts ?? 0) + 1;
 
-				ctx.Users.Attach(entity);
+			ctx.Entry(user).State = EntityState.Modified;
+			ctx.SaveChanges();
 
-				entity.LastFailedLoginAttempt = DateTime.UtcNow;
-				entity.FailedLoginAttempts = (user.FailedLoginAttempts ?? 0) + 1;
-
-				ctx.Entry(entity).State = EntityState.Modified;
-				ctx.SaveChanges();
-
-				_logger?.Information("User {UserName} failed logging in. Failed attempts: {FailedLoginAttempts}",
-					user.UserName,
-					user.FailedLoginAttempts
-				);
-			}
+			_logger?.Information("User {UserName} failed logging in. Failed attempts: {FailedLoginAttempts}",
+				user.UserName,
+				user.FailedLoginAttempts
+			);
 		}
 
-		private void UnlockUser(Guid userId, string userName)
+		private void UnlockUser(RelayContext ctx, DbUser user)
 		{
-			using (var ctx = new RelayContext())
-			{
-				var entity = new DbUser()
-				{
-					Id = userId,
-				};
+			user.LastFailedLoginAttempt = null;
+			user.FailedLoginAttempts = null;
 
-				ctx.Users.Attach(entity);
+			ctx.Entry(user).State = EntityState.Modified;
+			ctx.SaveChanges();
 
-				entity.LastFailedLoginAttempt = null;
-				entity.FailedLoginAttempts = null;
-
-				ctx.Entry(entity).State = EntityState.Modified;
-				ctx.SaveChanges();
-
-				_logger?.Information("Unlocking user account for {UserName} ", userName);
-			}
+			_logger?.Information("Unlocking user account for {UserName}", user.UserName);
 		}
 	}
 }

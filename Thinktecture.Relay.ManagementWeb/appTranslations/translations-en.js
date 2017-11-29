@@ -133,6 +133,7 @@
             "TITLE": "Users",
             "ADD_USER": "Add User",
             "OPTIONS": "Options",
+            "LOCKEDOUT_UNTIL": "Locked until",
             "NOTIFICATIONS": {
                 "CREATE_SUCCESS": "User created successfully.",
                 "CREATE_ERROR": "User could not be created.",
