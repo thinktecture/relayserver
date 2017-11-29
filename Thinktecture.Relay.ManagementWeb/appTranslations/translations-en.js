@@ -8,6 +8,7 @@
             "CANCEL": "Cancel",
             "USERNAME": "Username",
             "PASSWORD": "Password",
+            "PASSWORD_OLD": "Current password",
             "DELETE": "Delete",
             "EDIT": "Edit",
             "DATE": "Date",
