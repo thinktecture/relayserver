@@ -71,17 +71,18 @@
         };
 
         $scope.deleteUser = function (userToDelete) {
+            var userCopy = JSON.parse(JSON.stringify(userToDelete));
             var modal = $uibModal.open({
                 templateUrl: 'app/users/deleteUserModal.html',
                 controller: 'deleteUserModalController',
                 resolve: {
-                    affectedUser: function () { return userToDelete; }
+                    affectedUser: function () { return userCopy; }
                 }
             });
 
             modal.result
                 .then(function () {
-                    return user.delete(userToDelete.id);
+                    return user.delete(userCopy.id);
                 })
                 .then(function () {
                     $translate('USERS.NOTIFICATIONS.DELETE_SUCCESS')
@@ -100,11 +101,12 @@
         };
 
          $scope.editPasswordForUser = function(userToEdit) {
+            var userCopy = JSON.parse(JSON.stringify(userToEdit));
             var modal = $uibModal.open({
                 templateUrl: 'app/users/createUserModal.html',
                 controller: 'createUserModalController',
                 resolve: {
-                    affectedUser: function () { return userToEdit; }
+                    affectedUser: function () { return userCopy; }
                 }
             });
 
