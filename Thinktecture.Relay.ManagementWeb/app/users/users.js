@@ -70,7 +70,7 @@
                 });
         };
 
-        function deleteUser (userToDelete) {
+        $scope.deleteUser = function (userToDelete) {
             var modal = $uibModal.open({
                 templateUrl: 'app/users/deleteUserModal.html',
                 controller: 'deleteUserModalController',
@@ -97,9 +97,9 @@
                             });
                     }
                 });
-        }
+        };
 
-        function editPasswordForUser (userToEdit) {
+         $scope.editPasswordForUser = function(userToEdit) {
             var modal = $uibModal.open({
                 templateUrl: 'app/users/createUserModal.html',
                 controller: 'createUserModalController',
@@ -126,15 +126,6 @@
                             });
                     }
                 });
-        }
-
-        $scope.externalScope = {
-            deleteUser: function (user) {
-                deleteUser(user);
-            },
-            editPasswordForUser: function (user) {
-                editPasswordForUser(user);
-            }
         };
     }
 
