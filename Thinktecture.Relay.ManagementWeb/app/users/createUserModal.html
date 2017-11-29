@@ -5,7 +5,7 @@
         <h3 class="modal-title" translate ng-if="isEditMode">USERS.MODAL_EDIT_PASSWORD.TITLE</h3>
     </div>
     <div class="modal-body">
-        <p ng-if="isEditMode">{{ 'USERS.MODAL_EDIT_PASSWORD.DESCRIPTION' | translate:user }}</p>
+        <p ng-if="isEditMode" translate="USERS.MODAL_EDIT_PASSWORD.DESCRIPTION" translate-values="{ userName: user.userName}"></p>
         <div class="form-group" ng-class="{'has-error':(createUserForm.username.$invalid && createUserForm.username.$dirty) || userNameUnavailable, 'has-success': userNameAvailable}" ng-if="!isEditMode">
             <label for="username" class="col-sm-2 control-label" translate>COMMON.USERNAME</label>
             <div class="col-sm-10">
@@ -41,7 +41,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" ng-disabled="createUserForm.$invalid || userNameUnavailable || passwordsDoNotMatch" translate>COMMON.CREATE</button>
+        <button ng-if="!isEditMode" type="submit" class="btn btn-primary" ng-disabled="createUserForm.$invalid || userNameUnavailable || passwordsDoNotMatch" translate>COMMON.CREATE</button>
+        <button ng-if="isEditMode" type="submit" class="btn btn-primary" ng-disabled="createUserForm.$invalid || userNameUnavailable || passwordsDoNotMatch" translate>COMMON.UPDATE</button>
         <button class="btn btn-default" ng-click="cancel()" translate>COMMON.CANCEL</button>
     </div>
 </form>
