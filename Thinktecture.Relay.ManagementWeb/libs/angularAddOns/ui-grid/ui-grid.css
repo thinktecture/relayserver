@@ -1,6 +1,6 @@
 /*!
- * ui-grid - v3.2.9 - 2016-09-21
- * Copyright (c) 2016 ; License: MIT 
+ * ui-grid - v4.0.11 - 2017-11-20
+ * Copyright (c) 2017 ; License: MIT 
  */
  #ui-grid-twbs #ui-grid-twbs .form-horizontal .form-group:before,
  #ui-grid-twbs #ui-grid-twbs .form-horizontal .form-group:after,
@@ -352,6 +352,9 @@
 	position: relative;
 	padding-top: 1px;
  }
+ .ui-grid-row {
+	clear: both;
+ }
  .ui-grid-row:nth-child(odd) .ui-grid-cell {
 	background-color: #fdfdfd;
  }
@@ -578,127 +581,6 @@
 	-moz-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), inset 0 12px 12px -14px rgba(0, 0, 0, 0.2);
 	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), inset 0 12px 12px -14px rgba(0, 0, 0, 0.2);
  }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button {
-	position: absolute;
-	right: 0px;
-	top: 0px;
-	display: inline-block;
-	margin-bottom: 0;
-	font-weight: normal;
-	text-align: center;
-	vertical-align: middle;
-	touch-action: manipulation;
-	cursor: pointer;
-	background-image: none;
-	border: 1px solid transparent;
-	white-space: nowrap;
-	padding: 6px 12px;
-	font-size: 14px;
-	line-height: 1.42857143;
-	border-radius: 4px;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	padding: 1px 1px;
-	font-size: 10px;
-	line-height: 1;
-	border-radius: 2px;
-	color: transparent;
-	background-color: transparent;
-	border-color: transparent;
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active.focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active.focus {
-	outline: 5px auto -webkit-focus-ring-color;
-	outline-offset: -2px;
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:hover,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.focus {
-	color: #333333;
-	text-decoration: none;
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active {
-	outline: 0;
-	background-image: none;
-	-webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-	box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.disabled,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button[disabled],
- fieldset[disabled] .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button {
-	cursor: not-allowed;
-	opacity: 0.65;
-	filter: alpha(opacity=65);
-	-webkit-box-shadow: none;
-	box-shadow: none;
- }
- a.ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.disabled,
- fieldset[disabled] a.ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button {
-	pointer-events: none;
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.focus {
-	color: transparent;
-	background-color: rgba(0, 0, 0, 0);
-	border-color: rgba(0, 0, 0, 0);
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:hover {
-	color: transparent;
-	background-color: rgba(0, 0, 0, 0);
-	border-color: rgba(0, 0, 0, 0);
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active,
- .open > .dropdown-toggle.ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button {
-	color: transparent;
-	background-color: rgba(0, 0, 0, 0);
-	border-color: rgba(0, 0, 0, 0);
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active:hover,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active:hover,
- .open > .dropdown-toggle.ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:hover,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active:focus,
- .open > .dropdown-toggle.ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active.focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active.focus,
- .open > .dropdown-toggle.ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.focus {
-	color: transparent;
-	background-color: rgba(0, 0, 0, 0);
-	border-color: rgba(0, 0, 0, 0);
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:active,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.active,
- .open > .dropdown-toggle.ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button {
-	background-image: none;
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.disabled:hover,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button[disabled]:hover,
- fieldset[disabled] .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:hover,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.disabled:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button[disabled]:focus,
- fieldset[disabled] .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button:focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.disabled.focus,
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button[disabled].focus,
- fieldset[disabled] .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button.focus {
-	background-color: transparent;
-	border-color: transparent;
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button .badge {
-	color: transparent;
-	background-color: transparent;
- }
- .ui-grid-menu .ui-grid-menu-inner .ui-grid-menu-close-button > i {
-	opacity: 0.75;
-	color: black;
- }
  .ui-grid-menu .ui-grid-menu-inner ul {
 	margin: 0;
 	padding: 0;
@@ -789,6 +671,75 @@
  .ui-grid-icon-blank::before {
 	width: 1em;
 	content: ' ';
+ }
+ .ui-grid-icon-plus-squared:before {
+	content: '\c350';
+ }
+ .ui-grid-icon-minus-squared:before {
+	content: '\c351';
+ }
+ .ui-grid-icon-search:before {
+	content: '\c352';
+ }
+ .ui-grid-icon-cancel:before {
+	content: '\c353';
+ }
+ .ui-grid-icon-info-circled:before {
+	content: '\c354';
+ }
+ .ui-grid-icon-lock:before {
+	content: '\c355';
+ }
+ .ui-grid-icon-lock-open:before {
+	content: '\c356';
+ }
+ .ui-grid-icon-pencil:before {
+	content: '\c357';
+ }
+ .ui-grid-icon-down-dir:before {
+	content: '\c358';
+ }
+ .ui-grid-icon-up-dir:before {
+	content: '\c359';
+ }
+ .ui-grid-icon-left-dir:before {
+	content: '\c35a';
+ }
+ .ui-grid-icon-right-dir:before {
+	content: '\c35b';
+ }
+ .ui-grid-icon-left-open:before {
+	content: '\c35c';
+ }
+ .ui-grid-icon-right-open:before {
+	content: '\c35d';
+ }
+ .ui-grid-icon-angle-down:before {
+	content: '\c35e';
+ }
+ .ui-grid-icon-filter:before {
+	content: '\c35f';
+ }
+ .ui-grid-icon-sort-alt-up:before {
+	content: '\c360';
+ }
+ .ui-grid-icon-sort-alt-down:before {
+	content: '\c361';
+ }
+ .ui-grid-icon-ok:before {
+	content: '\c362';
+ }
+ .ui-grid-icon-menu:before {
+	content: '\c363';
+ }
+ .ui-grid-icon-indent-left:before {
+	content: '\e800';
+ }
+ .ui-grid-icon-indent-right:before {
+	content: '\e801';
+ }
+ .ui-grid-icon-spin5:before {
+	content: '\ea61';
  }
  /*
  * RTL Styles
@@ -1060,6 +1011,36 @@
  }
  div.ui-grid-cell input.ng-valid {
 	border: 1px solid #d4d4d4;
+ }
+ 
+ /* This file contains variable declarations (do not remove this line) */
+ /*-- VARIABLES (DO NOT REMOVE THESE COMMENTS) --*/
+ /**
+ * @section Grid styles
+ */
+ /**
+ * @section Header styles
+ */
+ /** @description Colors for header gradient */
+ /**
+ * @section Grid body styles
+ */
+ /** @description Colors used for row alternation */
+ /**
+ * @section Sort arrow colors
+ */
+ /**
+ * @section Scrollbar styles
+ */
+ /**
+ * @section font library path
+ */
+ /*-- END VARIABLES (DO NOT REMOVE THESE COMMENTS) --*/
+ .ui-grid-viewport .ui-grid-empty-base-layer-container {
+	position: absolute;
+	overflow: hidden;
+	pointer-events: none;
+	z-index: -1;
  }
  
  /* This file contains variable declarations (do not remove this line) */
@@ -1808,12 +1789,12 @@
  }
  .ui-grid-selection-row-header-buttons {
 	cursor: pointer;
+ }
+ .ui-grid-selection-row-header-buttons::before {
 	opacity: 0.1;
  }
- .ui-grid-selection-row-header-buttons.ui-grid-row-selected {
-	opacity: 1;
- }
- .ui-grid-selection-row-header-buttons.ui-grid-all-selected {
+ .ui-grid-selection-row-header-buttons.ui-grid-row-selected::before,
+ .ui-grid-selection-row-header-buttons.ui-grid-all-selected::before {
 	opacity: 1;
  }
  
@@ -1901,96 +1882,3 @@
  div.ui-grid-cell-contents.invalid {
 	border: 1px solid #fc8f8f;
  }
- 
- .ui-grid-icon-plus-squared:before {
-	content: '\c350';
- }
- /* '썐' */
- .ui-grid-icon-minus-squared:before {
-	content: '\c351';
- }
- /* '썑' */
- .ui-grid-icon-search:before {
-	content: '\c352';
- }
- /* '썒' */
- .ui-grid-icon-cancel:before {
-	content: '\c353';
- }
- /* '썓' */
- .ui-grid-icon-info-circled:before {
-	content: '\c354';
- }
- /* '썔' */
- .ui-grid-icon-lock:before {
-	content: '\c355';
- }
- /* '썕' */
- .ui-grid-icon-lock-open:before {
-	content: '\c356';
- }
- /* '썖' */
- .ui-grid-icon-pencil:before {
-	content: '\c357';
- }
- /* '썗' */
- .ui-grid-icon-down-dir:before {
-	content: '\c358';
- }
- /* '썘' */
- .ui-grid-icon-up-dir:before {
-	content: '\c359';
- }
- /* '썙' */
- .ui-grid-icon-left-dir:before {
-	content: '\c35a';
- }
- /* '썚' */
- .ui-grid-icon-right-dir:before {
-	content: '\c35b';
- }
- /* '썛' */
- .ui-grid-icon-left-open:before {
-	content: '\c35c';
- }
- /* '썜' */
- .ui-grid-icon-right-open:before {
-	content: '\c35d';
- }
- /* '썝' */
- .ui-grid-icon-angle-down:before {
-	content: '\c35e';
- }
- /* '썞' */
- .ui-grid-icon-filter:before {
-	content: '\c35f';
- }
- /* '썟' */
- .ui-grid-icon-sort-alt-up:before {
-	content: '\c360';
- }
- /* '썠' */
- .ui-grid-icon-sort-alt-down:before {
-	content: '\c361';
- }
- /* '썡' */
- .ui-grid-icon-ok:before {
-	content: '\c362';
- }
- /* '썢' */
- .ui-grid-icon-menu:before {
-	content: '\c363';
- }
- /* '썣' */
- .ui-grid-icon-indent-left:before {
-	content: '\e800';
- }
- /* '' */
- .ui-grid-icon-indent-right:before {
-	content: '\e801';
- }
- /* '' */
- .ui-grid-icon-spin5:before {
-	content: '\ea61';
- }
- /* '' */
