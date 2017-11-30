@@ -66,14 +66,13 @@
                 return true;
             }
 
-             // $scope.tabs.info.active = true;
              $scope.activeTabIndex = 0;
         }
 
         function trySetTabActive(tabName) {
-            angular.forEach($scope.tabs, function (tab, index) {
+            return angular.forEach($scope.tabs, function (tab, index) {
                 if (tab.name === tabName) {
-                    $scope.activeTabIndex = index;
+                    $scope.activeTabIndex = $scope.tabs.indexOf(tab);
                     return true;
                 }
             });
@@ -103,12 +102,21 @@
         function closeResultTab(event, tabId) {
             event.preventDefault();
             event.stopPropagation();
-
-            $scope.setActiveTab($scope.tabs.info.name);
-            delete $scope.tabs[tabId];
-
+           
+            // remove result from tabs
             var arrayIndex = -1;
+            $scope.tabs.forEach(function (tab, index) {
+                if (tab.name === tabId) {
+                    arrayIndex = index;
+                }
+            });
 
+            if (arrayIndex > -1) {
+                $scope.tabs.splice(arrayIndex, 1);
+            }
+
+            // remove result from traceResults
+            arrayIndex = -1;
             $scope.traceResults.forEach(function (item, index) {
                 if (item.id === tabId) {
                     arrayIndex = index;
@@ -117,8 +125,15 @@
 
             if (arrayIndex > -1) {
                 $scope.traceResults.splice(arrayIndex, 1);
-                setActiveTab($scope.tabs.trace.name);
             }
+        }
+
+        function getIndex(tabName) {
+            $scope.tabs.forEach(function (tab, index) {
+                if (tab.name === tabName) {
+                    return index;
+                }
+            });
         }
 
         link.getLink(data)
@@ -143,6 +158,7 @@
         $scope.traceResults = [];
         $scope.closeResultTab = closeResultTab;
         $scope.activeTabIndex = 0;
+        $scope.getIndex = getIndex;
         
         initialize();
     }

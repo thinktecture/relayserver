@@ -143,13 +143,17 @@
 
                         return trace.getConfiguration(params)
                             .then(function (data) {
-                                scope.tabs[data.id] = {
-                                    name: data.id
-                                };
+                                scope.tabs.push({
+                                    name: data.id,
+                                });
 
                                 // TODO: Needs refactoring for communication with linkTraceTab-directive
                                 scope.traceResults.push(data);
-                                scope.setActiveTab(data.id);
+
+                                $timeout(function(){
+                                    // select tab
+                                    scope.setActiveTab(data.id);
+                                });
                             });
                     }
 

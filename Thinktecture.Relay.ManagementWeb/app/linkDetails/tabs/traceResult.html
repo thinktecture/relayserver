@@ -41,9 +41,7 @@
         </td>
         <td>
             <button class="btn btn-default" ng-click="viewContent(log.onPremiseConnectorTrace.headerFileName)" ng-show="log.onPremiseConnectorTrace.isViewable && log.onPremiseConnectorTrace.isContentAvailable"><i class="fa fa-eye"></i> <span translate>LINK_DETAILS.TRACE.REQUEST_CONTENT</span></button>
-            <!--<a class="btn btn-default" href="{{ getDownloadUrl(log.clientTrace.filePrefix) }}"><i class="fa fa-download"></i> Client Content</a>-->
             <button class="btn btn-default" ng-click="viewContent(log.onPremiseTargetTrace.headerFileName)" ng-show="log.onPremiseTargetTrace.isViewable && log.onPremiseTargetTrace.isContentAvailable"><i class="fa fa-eye"></i> <span translate>LINK_DETAILS.TRACE.RESPONSE_CONTENT</span></button>
-            <!--<a class="btn btn-default" href="{{ getDownloadUrl(log.onPremiseTargetTrace.filePrefix) }}"><i class="fa fa-download"></i>  Local Target Content</a>-->
         </td>
     </tr>
     </tbody>

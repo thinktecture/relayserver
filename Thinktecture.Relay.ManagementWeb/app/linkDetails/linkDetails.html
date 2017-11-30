@@ -20,7 +20,7 @@
     </uib-tab>
 
     <uib-tab ng-repeat="trace in traceResults" class="resultTab-{{trace.id}}" select="invokeOnTabActivate()" >
-        <tab-heading>{{ trace.id }} <i class="fa fa-times" ng-click="closeResultTab($event, trace.id)"></i> </tab-heading>
+        <uib-tab-heading>{{ trace.id }} <i class="fa fa-times" style="cursor: pointer" ng-click="closeResultTab($event, trace.id)"></i></uib-tab-heading>
         <link-trace-result-tab></link-trace-result-tab>
     </uib-tab>
 
