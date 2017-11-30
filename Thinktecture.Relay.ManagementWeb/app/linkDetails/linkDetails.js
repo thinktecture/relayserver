@@ -19,29 +19,29 @@
             id: linkId
         };
 
-        $scope.tabs = {
-            info: {
+        $scope.tabs = [
+            {
                 name: 'info'
             },
-            chart: {
+            {
                 name: 'chart',
                 onActivate: function () {
                     $scope.$broadcast(appEvents.reloadChart);
                 }
             },
-            logs: {
+            {
                 name: 'logs',
                 onActivate: function () {
                     $scope.$broadcast(appEvents.reloadLogs);
                 }
             },
-            trace: {
+            {
                 name: 'trace',
                 onActivate: function () {
                     $scope.$broadcast(appEvents.reloadTraces);
                 }
             }
-        };
+        ];
 
         function initialize() {
             if ($stateParams.tab) {
@@ -58,34 +58,38 @@
         }
 
         function setActiveTab(tabName) {
-            if (tabName) {
-                return angular.forEach($scope.tabs, function (tab) {
-                    tab.active = tab.name === tabName
-                });
+            if (tabName && trySetTabActive(tabName)) {
+                return true;
             }
 
-            if ($stateParams.tab && $scope.tabs[$stateParams.tab]) {
-                return $scope.tabs[$stateParams.tab].active = true;
+            if ($stateParams.tab && trySetTabActive($stateParams.tab)) {
+                return true;
             }
 
-            $scope.tabs.info.active = true;
+             // $scope.tabs.info.active = true;
+             $scope.activeTabIndex = 0;
+        }
+
+        function trySetTabActive(tabName) {
+            angular.forEach($scope.tabs, function (tab, index) {
+                if (tab.name === tabName) {
+                    $scope.activeTabIndex = index;
+                    return true;
+                }
+            });
+
+            return false;
         }
 
         function onTabActivated() {
             // Needs to be done in a timeout, so uibootstrap has time for invalidating tab selection
             $timeout(function () {
-                var activatedTab;
-                angular.forEach($scope.tabs, function (tab) {
-                    if (!activatedTab && tab.active) {
-                        activatedTab = tab;
-
-                        if (tab.onActivate) {
-                            tab.onActivate();
-                        }
-                    }
-                });
-
+                var activatedTab = $scope.tabs[$scope.activeTabIndex];
                 if (activatedTab) {
+                    if (activatedTab.onActivate) {
+                        activatedTab.onActivate();
+                    }
+
                     $state.go('.', {
                         id: linkId,
                         tab: activatedTab.name
@@ -138,7 +142,8 @@
         $scope.onTabActivated = onTabActivated;
         $scope.traceResults = [];
         $scope.closeResultTab = closeResultTab;
-
+        $scope.activeTabIndex = 0;
+        
         initialize();
     }
 

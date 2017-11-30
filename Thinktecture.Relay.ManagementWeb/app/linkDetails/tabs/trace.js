@@ -174,7 +174,7 @@
                     // Happens, when the user reloads the app while viewing the traces
                     // "TabActivated" Broadcast will be executed before scope.$on in this directive is executed
                     var unwatch = scope.$watch('link', function (newVal) {
-                        if (newVal && scope.tabs.trace.active) {
+                        if (newVal && scope.activeTabIndex === 3) {
                             unwatch();
                             reloadTracingData();
                             reloadRunningTracingData();
