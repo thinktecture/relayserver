@@ -34,6 +34,11 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return new StatusCodeResult(HttpStatusCode.Forbidden, Request);
 			}
 
+			if (!CheckPasswordAndVerification(user, out var result))
+			{
+				return result;
+			}
+
 			return Create(user);
 		}
 
@@ -53,10 +58,9 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return BadRequest();
 			}
 
-			// new password and repetition need to match
-			if (user.Password != user.Password2)
+			if (!CheckPasswordAndVerification(user, out var result))
 			{
-				return BadRequest("New password and verification do not match");
+				return result;
 			}
 
 			// validate password complexity by other rules
@@ -74,6 +78,20 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 			// TODO: Location
 			return Created("", id);
+		}
+
+		private bool CheckPasswordAndVerification(CreateUser user, out IHttpActionResult httpActionResult)
+		{
+			httpActionResult = null;
+
+			// new password and repetition need to match
+			if (user.Password != user.PasswordVerification)
+			{
+				httpActionResult = BadRequest("New password and verification do not match");
+				return false;
+			}
+
+			return true;
 		}
 
 		[HttpGet]
@@ -116,7 +134,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 			}
 
 			// new password and repetition need to match
-			if (user.Password != user.Password2)
+			if (user.Password != user.PasswordVerification)
 			{
 				return BadRequest("New password and verification do not match");
 			}

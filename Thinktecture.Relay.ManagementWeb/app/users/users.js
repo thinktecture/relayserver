@@ -164,7 +164,7 @@
         $scope.$watch(function () {
             $scope.userNameUnavailable = !$scope.userNameCheck.available && $scope.user.userName !== undefined && $scope.userNameCheck.performed;
             $scope.userNameAvailable = $scope.userNameCheck.available && $scope.user.userName !== undefined;
-            $scope.passwordsDoNotMatch = $scope.user.password !== $scope.user.password2;
+            $scope.passwordsDoNotMatch = $scope.user.password !== $scope.user.passwordVerification;
         }, function (newVar, oldVar) {
         });
 
