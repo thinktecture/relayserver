@@ -248,6 +248,11 @@ namespace Thinktecture.Relay.Server
 					app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
 				}
 
+				options.StaticFileOptions.OnPrepareResponse = (ctx) =>
+				{
+					ctx.OwinContext.Response.Headers.Append("X-Frame-Options", "DENY");
+				};
+
 				app.UseFileServer(options);
 			}
 			catch (DirectoryNotFoundException)
