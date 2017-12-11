@@ -55,15 +55,13 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 		}
 
 		[TestMethod]
-		public async Task Create_returns_Created_result_with_properly_set_DTO()
+		public void Create_returns_Created_result_with_properly_set_DTO()
 		{
 			var traceRepositoryMock = new Mock<ITraceRepository>();
 			var sut = new TraceController(traceRepositoryMock.Object, null, null);
 			CreatedNegotiatedContentResult<TraceConfiguration> result;
 			var startDate = DateTime.UtcNow;
 			var linkId = Guid.NewGuid();
-
-			await Task.Delay(1);
 
 			traceRepositoryMock.Setup(t => t.Create(It.IsAny<TraceConfiguration>()));
 
@@ -75,7 +73,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 
 			traceRepositoryMock.VerifyAll();
 			result.Should().NotBeNull();
-			result.Content.StartDate.Should().BeAfter(startDate).And.BeOnOrBefore(DateTime.UtcNow);
+			result.Content.StartDate.Should().BeOnOrAfter(startDate).And.BeOnOrBefore(DateTime.UtcNow);
 			result.Content.EndDate.Should().BeAfter(startDate.AddMinutes(5)).And.BeBefore(DateTime.UtcNow.AddMinutes(5));
 			result.Content.LinkId.Should().Be(linkId);
 		}
