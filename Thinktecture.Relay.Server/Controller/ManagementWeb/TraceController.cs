@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
-using Thinktecture.Relay.Server.Http.ActionFilters;
+using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb

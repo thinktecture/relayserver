@@ -2,7 +2,7 @@ using System;
 using System.Net.Http.Headers;
 using System.Web.Http.Filters;
 
-namespace Thinktecture.Relay.Server.Http.ActionFilters
+namespace Thinktecture.Relay.Server.Http.Filters
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class NoCacheAttribute : ActionFilterAttribute

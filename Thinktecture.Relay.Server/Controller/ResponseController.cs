@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Thinktecture.Relay.Server.Communication;
-using Thinktecture.Relay.Server.Http.ActionFilters;
+using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
 

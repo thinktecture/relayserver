@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Http.ActionFilters
+namespace Thinktecture.Relay.Server.Http.Filters
 {
 	[AttributeUsage(AttributeTargets.Class)]
 	public class RelayModuleBindingFilter : CheckModuleBindingConfigurationAttribute
