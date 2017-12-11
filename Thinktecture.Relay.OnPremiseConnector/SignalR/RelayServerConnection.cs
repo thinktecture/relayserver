@@ -314,7 +314,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			_logger?.Debug("Received ping from relay server. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
-			var resp = new OnPremiseTargetResponse
+			var response = new OnPremiseTargetResponse()
 			{
 				RequestStarted = DateTime.UtcNow,
 				RequestFinished = DateTime.UtcNow,
@@ -323,7 +323,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				RequestId = request.RequestId,
 			};
 
-			await PostToRelayAsync(ctx, resp, CancellationToken.None).ConfigureAwait(false);
+			await PostToRelayAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
 		}
 
 		private void HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
