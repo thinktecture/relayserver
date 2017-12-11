@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnConnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise connected with connection {connection-id}, link {link-id}, user name '{user-name}', role '{role}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise connected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			RegisterOnPremise(request, connectionId, onPremiseClaims);
 
@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnReconnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise reconnected with connection {connection-id}, link {link-id}, user name '{user-name}', role '{role}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise reconnected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			RegisterOnPremise(request, connectionId, onPremiseClaims);
 
@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		protected override Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
-			_logger?.Debug("On-premise disconnected with connection {connection-id}, link {link-id}, user name '{user-name}', role '{role}'", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
+			_logger?.Debug("On-premise disconnected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
 			_backendCommunication.UnregisterOnPremise(connectionId);
 
@@ -63,7 +63,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest request)
 		{
-			_logger?.Verbose("Forwarding client request to connection. connection-id={connection-id}, request-id={request-id}, http-method={request-method}, url={request-url}, origin-id={origin-id}, body-length={request-content-length}",
+			_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
 				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.ContentLength);
 
 			Connection.Send(connectionId, request);
@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		protected override Task OnReceived(IRequest request, string connectionId, string data)
 		{
-			_logger?.Debug("Acknowledge from connection {connection-id} for {data}", connectionId, data);
+			_logger?.Debug("Acknowledge received. connection-id={ConnectionId}, data={Data}", connectionId, data);
 
 			_backendCommunication.AcknowledgeOnPremiseConnectorRequest(connectionId, data);
 

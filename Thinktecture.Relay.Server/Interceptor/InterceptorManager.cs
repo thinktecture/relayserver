@@ -20,15 +20,15 @@ namespace Thinktecture.Relay.Server.Interceptor
 			_responseInterceptor = responseInterceptor;
 		}
 
-		public IOnPremiseConnectorRequest HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, out HttpResponseMessage immidateResponse)
+		public IOnPremiseConnectorRequest HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, out HttpResponseMessage immediateResponse)
 		{
-			immidateResponse = null;
+			immediateResponse = null;
 			if (_requestInceptor == null)
 			{
 				return request;
 			}
 
-			_logger?.Verbose("Handling request. request-id={request-id}", request.RequestId);
+			_logger?.Verbose("Handling request. request-id={RequestId}", request.RequestId);
 
 			IPAddress ipAddress = null;
 			try
@@ -37,19 +37,19 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Warning(ex, "Could not fetch remote IP address for request {request-id}", request.RequestId);
+				_logger?.Warning(ex, "Could not fetch remote IP address for request {RequestId}", request.RequestId);
 			}
 
 			try
 			{
 				var replacedRequest = new InterceptedRequest(request) { ClientIpAddress = ipAddress };
-				immidateResponse = _requestInceptor.OnRequestReceived(replacedRequest);
+				immediateResponse = _requestInceptor.OnRequestReceived(replacedRequest);
 
 				return replacedRequest;
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while executing the request interceptor. TypeName = {interceptor-type}, RequestId = {request-id}", _requestInceptor?.GetType().Name, request.RequestId);
+				_logger?.Error(ex, "Error while executing the request interceptor. type-name={InterceptorType}, request-id={RequestId}", _requestInceptor?.GetType().Name, request.RequestId);
 			}
 
 			return request;
@@ -62,7 +62,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 				return null;
 			}
 
-			_logger?.Verbose("Handling response. request-id={request-id}", request.RequestId);
+			_logger?.Verbose("Handling response. request-id={RequestId}", request.RequestId);
 
 			try
 			{
@@ -75,7 +75,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while executing the response interceptor. TypeName = {interceptor-type}, RequestId = {request-id}", _requestInceptor?.GetType().Name, request.RequestId);
+				_logger?.Error(ex, "Error while executing the response interceptor. type-name={InterceptorType}, request-id={RequestId}", _requestInceptor?.GetType().Name, request.RequestId);
 				return null;
 			}
 		}

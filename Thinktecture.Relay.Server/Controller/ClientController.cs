@@ -53,7 +53,7 @@ namespace Thinktecture.Relay.Server.Controller
 		[HttpHead]
 		public async Task<HttpResponseMessage> Relay(string path)
 		{
-			_logger?.Debug("Relaying {request-path} {request-method}", path, ControllerContext.Request.Method);
+			_logger?.Debug("Relaying request. method={RequestMethod}, path={RequestPath}", ControllerContext.Request.Method, path);
 
 			if (path == null)
 			{
@@ -66,6 +66,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			if (!CanRequestBeHandled(path, pathInformation, link))
 			{
+				_logger?.Information("Request cannot be handled");
 				return NotFound();
 			}
 
@@ -78,7 +79,7 @@ namespace Thinktecture.Relay.Server.Controller
 				request = _interceptorManager.HandleRequest(request, Request, out var message);
 				if (message != null)
 				{
-					_logger?.Verbose("Interceptor caused direct answering of request. request-id={request-id}, status-code={response-status-code}", request.RequestId, message.StatusCode);
+					_logger?.Verbose("Interceptor caused direct answering of request. request-id={RequestId}, status-code={ResponseStatusCode}", request.RequestId, message.StatusCode);
 
 					statusCode = message.StatusCode;
 					return message;
@@ -86,20 +87,20 @@ namespace Thinktecture.Relay.Server.Controller
 
 				var task = _backendCommunication.GetResponseAsync(request.RequestId);
 
-				_logger?.Verbose("Sending on premise connector request. request-id={request-id}, link-id={link-id}", request.RequestId, link.Id);
+				_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
 
-				_logger?.Verbose("Waiting for response. request-id={request-id}, link-id={link-id}", request.RequestId, link.Id);
+				_logger?.Verbose("Waiting for response. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				response = await task.ConfigureAwait(false);
 
 				if (response != null)
 				{
-					_logger?.Verbose("Response received. request-id={request-id}, link-id={link-id}", request.RequestId, link.Id);
+					_logger?.Verbose("Response received. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 					statusCode = response.StatusCode;
 				}
 				else
 				{
-					_logger?.Verbose("On-Premise timeout. request-id={request-id}, link-id={link-id}", request.RequestId, link.Id);
+					_logger?.Verbose("On-Premise timeout. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				}
 
 				return _interceptorManager.HandleResponse(request, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);
@@ -114,25 +115,25 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			if (link == null)
 			{
-				_logger?.Information("Link for path {request-path} not found", path);
+				_logger?.Information("Link for path {RequestPath} not found", path);
 				return false;
 			}
 
 			if (link.IsDisabled)
 			{
-				_logger?.Information("Link {link-name} is disabled", link.SymbolicName);
+				_logger?.Information("Link {LinkName} is disabled", link.SymbolicName);
 				return false;
 			}
 
 			if (String.IsNullOrWhiteSpace(pathInformation.PathWithoutUserName))
 			{
-				_logger?.Information("Path {request-path} for link {link-name} without user name is not found", path, link.SymbolicName);
+				_logger?.Information("Path {RequestPath} for link {LinkName} without user name is not found", path, link.SymbolicName);
 				return false;
 			}
 
 			if (link.AllowLocalClientRequestsOnly && !Request.IsLocal())
 			{
-				_logger?.Information("Link {link-name} only allows local requests", link.SymbolicName);
+				_logger?.Information("Link {LinkName} only allows local requests", link.SymbolicName);
 				return false;
 			}
 
@@ -143,7 +144,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			request.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Verbose("Finishing request. request-id={request-id}, link-id={link-id}, on-premise-duration={remote-duration}, global-duration={global-duration}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
+			_logger?.Verbose("Finishing request. request-id={RequestId}, link-id={LinkId}, on-premise-duration={RemoteDuration}, global-duration={GlobalDuration}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
 
 			// TODO this may be debounced for e.g. 5 minutes to skip querying on each request in future release
 			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);

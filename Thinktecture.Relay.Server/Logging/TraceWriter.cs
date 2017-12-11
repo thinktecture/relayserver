@@ -21,8 +21,8 @@ namespace Thinktecture.Relay.Server.Logging
 			var record = new TraceRecord(request, category, level);
 			traceAction(record);
 
-			_logger?.Write(_traceLevelConverter.Convert(level), null, null,
-				"Category: {category}, Operator: {operator}, Kind: {kind}, Operation: {operation}, Properties: {properties}, Message: {message}, Exception: {exception}",
+			_logger?.Write(_traceLevelConverter.Convert(level), record.Exception, null,
+				"Category: {Category}, Operator: {Operator}, Kind: {Kind}, Operation: {Operation}, Properties: {Properties}, Message: {Message}, Exception: {Exception}",
 				category, record.Operator, record.Kind, record.Operation, record.Properties, record.Message ?? "-", record.Exception?.ToString() ?? "-");
 		}
 	}

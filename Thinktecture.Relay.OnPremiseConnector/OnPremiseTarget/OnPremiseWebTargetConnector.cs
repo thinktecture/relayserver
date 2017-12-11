@@ -138,7 +138,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			_logger?.Verbose("Requesting response from on-premise web target. request-id={request-id}, url={request-url}, origin-id={origin-id}", request.RequestId, url, request.OriginId);
+			_logger?.Verbose("Requesting response from on-premise web target. request-id={RequestId}, url={RequestUrl}, origin-id={OriginId}", request.RequestId, url, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
 			{
@@ -158,7 +158,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error requesting response from local target. RequestId = {request-id}", request.RequestId);
+				_logger?.Error(ex, "Error requesting response from local target. request-id={RequestId}", request.RequestId);
 
 				response.StatusCode = HttpStatusCode.GatewayTimeout;
 				response.HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-TIMEOUT"] = "On-Premise Target" };
@@ -166,7 +166,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			response.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Verbose("Got web response. request-id={request-id}, status-code={response-status-code}", response.RequestId, response.StatusCode);
+			_logger?.Verbose("Got web response. request-id={RequestId}, status-code={ResponseStatusCode}", response.RequestId, response.StatusCode);
 
 			return response;
 		}
@@ -174,18 +174,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		private async Task<HttpResponseMessage> CreateLocalTargetRequestAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
-			_logger?.Verbose("Creating web request for request-id={request-id}", request.RequestId);
+			_logger?.Verbose("Creating web request for request-id={RequestId}", request.RequestId);
 
 			var message = new HttpRequestMessage(new HttpMethod(request.HttpMethod), String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url));
 			if (request.Stream != Stream.Null)
 			{
-				_logger?.Verbose("Adding request stream to request {request-id}", request.RequestId);
+				_logger?.Verbose("Adding request stream to request. request-id={RequestId}", request.RequestId);
 				message.Content = new StreamContent(request.Stream);
 			}
 
 			foreach (var httpHeader in request.HttpHeaders.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key)))
 			{
-				_logger?.Verbose("Adding header to request. request-id={request-id} header-name={header-name}, header-value={header-value}", request.RequestId, httpHeader.Key, httpHeader.Value);
+				_logger?.Verbose("Adding header to request. request-id={RequestId} header-name={HeaderName}, header-value={HeaderValue}", request.RequestId, httpHeader.Key, httpHeader.Value);
 
 				try
 				{
@@ -207,7 +207,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				}
 				catch (Exception ex)
 				{
-					_logger?.Error(ex, "Could not add header. Header = {header-name}", httpHeader.Key);
+					_logger?.Error(ex, "Could not add header. header-name={HeaderName}", httpHeader.Key);
 				}
 			}
 

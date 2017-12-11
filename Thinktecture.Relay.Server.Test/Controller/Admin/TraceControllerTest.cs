@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
@@ -239,7 +235,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 						HeaderFileName = Guid.NewGuid() + "cr.header",
 						Headers = new Dictionary<string, string>()
 						{
-							["Content-Length"] = "100"
+							["Content-Length"] = "100",
 						}
 					},
 					OnPremiseTargetTrace = new TraceFile()
@@ -248,7 +244,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 						HeaderFileName = Guid.NewGuid() + "ltr.header",
 						Headers = new Dictionary<string, string>()
 						{
-							["Content-Length"] = "100"
+							["Content-Length"] = "100",
 						}
 					},
 					TracingDate = DateTime.Now

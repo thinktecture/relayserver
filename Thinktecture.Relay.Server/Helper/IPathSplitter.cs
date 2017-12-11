@@ -1,4 +1,4 @@
-﻿using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.Dto;
 
 namespace Thinktecture.Relay.Server.Helper
 {

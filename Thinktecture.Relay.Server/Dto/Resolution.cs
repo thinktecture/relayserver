@@ -4,6 +4,6 @@ namespace Thinktecture.Relay.Server.Dto
 	{
 		Daily,
 		Monthly,
-		Yearly
+		Yearly,
 	}
 }
