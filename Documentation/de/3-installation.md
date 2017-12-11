@@ -160,7 +160,7 @@ Die Standardeinstellungen umfassen dabei:
 | ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem Relay Server als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
 | InterceptorAssembly | Pfad zu einem Assembly, in dem Interceptor implementiert sind. Entweder absolut oder relativ zum RelayServer. |
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
-| HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der Optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
+| HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
 
 ## netsh settings
 
