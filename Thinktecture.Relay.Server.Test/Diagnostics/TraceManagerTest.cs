@@ -57,9 +57,9 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public string OAuthCertificate { get; }
 			public TimeSpan HstsHeaderMaxAge { get; }
 			public bool HstsIncludeSubdomains { get; }
-			public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
-			public int MaxFailedLoginAttempts { get; set; }
-			public TimeSpan FailedLoginLockoutPeriod { get; set; }
+			public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; }
+			public int MaxFailedLoginAttempts { get; }
+			public TimeSpan FailedLoginLockoutPeriod { get; }
 
 			public Configuration()
 			{

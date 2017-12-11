@@ -162,12 +162,11 @@ namespace Thinktecture.Relay.Server.Config
 				MaxFailedLoginAttempts = tmpInt;
 			}
 
-			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["FailedLoginLockoutPeriod"], out tmpTimeSpan))
+			FailedLoginLockoutPeriod = TimeSpan.FromMinutes(15);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["FailedLoginLockoutPeriod"], out tmpTimeSpan))
 			{
-				tmpTimeSpan = TimeSpan.FromMinutes(15);
+				FailedLoginLockoutPeriod = tmpTimeSpan;
 			}
-
-			FailedLoginLockoutPeriod = tmpTimeSpan;
 
 			LogSettings(logger);
 		}
