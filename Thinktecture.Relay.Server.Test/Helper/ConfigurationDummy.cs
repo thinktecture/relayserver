@@ -1,4 +1,5 @@
 using System;
+using System.Web.Http;
 using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server.Helper
@@ -27,6 +28,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public string OAuthCertificate { get; set; }
 		public TimeSpan HstsHeaderMaxAge { get; set; }
 		public bool HstsIncludeSubdomains { get; set; }
+		public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
 
 		public ConfigurationDummy()
 		{

@@ -1,4 +1,5 @@
 using System;
+using System.Web.Http;
 
 namespace Thinktecture.Relay.Server.Config
 {
@@ -26,5 +27,6 @@ namespace Thinktecture.Relay.Server.Config
 		string OAuthCertificate { get; }
 		TimeSpan HstsHeaderMaxAge { get; }
 		bool HstsIncludeSubdomains { get; }
+		IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; }
 	}
 }

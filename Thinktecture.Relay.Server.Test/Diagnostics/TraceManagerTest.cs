@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web.Http;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -56,6 +57,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public string OAuthCertificate { get; }
 			public TimeSpan HstsHeaderMaxAge { get; }
 			public bool HstsIncludeSubdomains { get; }
+			public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
 
 			public Configuration()
 			{
