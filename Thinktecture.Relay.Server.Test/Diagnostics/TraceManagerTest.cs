@@ -8,7 +8,6 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NLog;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
@@ -20,21 +19,17 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	[TestClass]
 	public class TraceManagerTest
 	{
-		private class OnPremiseTargetResponse : IOnPremiseTargetResponse
+		private class OnPremiseConnectorResponse : IOnPremiseConnectorResponse
 		{
 			public string RequestId { get; set; }
 			public Guid OriginId { get; set; }
-			public IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
-			public HttpStatusCode StatusCode { get; set; }
-			public Stream Stream { get; set; }
-			public byte[] Body { get; set; }
 			public DateTime RequestStarted { get; set; }
 			public DateTime RequestFinished { get; set; }
-
-			public void Dispose()
-			{
-				Stream?.Dispose();
-			}
+			public HttpStatusCode StatusCode { get; set; }
+			public IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
+			public byte[] Body { get; set; }
+			public Stream Stream { get; set; }
+			public long ContentLength { get; set; }
 		}
 
 		private class Configuration : IConfiguration
