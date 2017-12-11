@@ -228,6 +228,10 @@
     <Compile Include="Migrations\201708250611298_ChangeUserNameIndex.Designer.cs">
       <DependentUpon>201708250611298_ChangeUserNameIndex.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201711291411337_AddAccountLockoutData.cs" />
+    <Compile Include="Migrations\201711291411337_AddAccountLockoutData.Designer.cs">
+      <DependentUpon>201711291411337_AddAccountLockoutData.cs</DependentUpon>
+    </Compile>
     <Compile Include="OnPremise\IOnPremiseConnectorRequest.cs" />
     <Compile Include="OnPremise\IOnPremiseConnectorResponse.cs" />
     <Compile Include="OnPremise\OnPremiseConnectorResponse.cs" />
@@ -385,6 +389,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201708250611298_ChangeUserNameIndex.resx">
       <DependentUpon>201708250611298_ChangeUserNameIndex.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711291411337_AddAccountLockoutData.resx">
+      <DependentUpon>201711291411337_AddAccountLockoutData.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

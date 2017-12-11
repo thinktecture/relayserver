@@ -30,6 +30,8 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan HstsHeaderMaxAge { get; }
 		public bool HstsIncludeSubdomains { get; }
 		public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; }
+		public int MaxFailedLoginAttempts { get; }
+		public TimeSpan FailedLoginLockoutPeriod { get; }
 
 		public Configuration(ILogger logger)
 		{
@@ -154,6 +156,18 @@ namespace Thinktecture.Relay.Server.Config
 				IncludeErrorDetailPolicy = tmpIncludeErrorDetailPolicy;
 			}
 
+			MaxFailedLoginAttempts = 5;
+			if (Int32.TryParse(ConfigurationManager.AppSettings["MaxFailedLoginAttempts"], out tmpInt))
+			{
+				MaxFailedLoginAttempts = tmpInt;
+			}
+
+			FailedLoginLockoutPeriod = TimeSpan.FromMinutes(15);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["FailedLoginLockoutPeriod"], out tmpTimeSpan))
+			{
+				FailedLoginLockoutPeriod = tmpTimeSpan;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -181,6 +195,8 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting HstsHeaderMaxAge: {HstsHeaderMaxAge}", HstsHeaderMaxAge);
 			logger?.Verbose("Setting HstsIncludeSubdomains: {HstsIncludeSubdomains}", HstsIncludeSubdomains);
 			logger?.Verbose("Setting IncludeErrorDetailPolicy: {IncludeErrorDetailPolicy}", IncludeErrorDetailPolicy);
+			logger?.Verbose("Setting MaxFailedLoginAttempts: {MaxFailedLoginAttempts}", MaxFailedLoginAttempts);
+			logger?.Verbose("Setting FailedLoginLockoutPeriod: {FailedLoginLockoutPeriod}", FailedLoginLockoutPeriod);
 		}
 	}
 }

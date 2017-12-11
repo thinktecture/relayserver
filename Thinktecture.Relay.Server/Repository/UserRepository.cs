@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
+using Serilog;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository.DbModels;
 using Thinktecture.Relay.Server.Security;
@@ -11,11 +13,16 @@ namespace Thinktecture.Relay.Server.Repository
 {
 	public class UserRepository : IUserRepository
 	{
+		private readonly ILogger _logger;
 		private readonly IPasswordHash _passwordHash;
+		private readonly IConfiguration _configuration;
 
-		public UserRepository(IPasswordHash passwordHash)
+		public UserRepository(ILogger logger, IPasswordHash passwordHash, IConfiguration configuration)
 		{
-			_passwordHash = passwordHash;
+			_logger = logger;
+
+			_passwordHash = passwordHash ?? throw new ArgumentNullException(nameof(passwordHash));
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 		}
 
 		public Guid Create(string userName, string password)
@@ -53,48 +60,64 @@ namespace Thinktecture.Relay.Server.Repository
 				return null;
 			}
 
-			DbUser user;
-
 			using (var context = new RelayContext())
 			{
-				user = context.Users.SingleOrDefault(u => u.UserName == userName);
+				var user = context.Users.SingleOrDefault(u => u.UserName == userName);
 
-				if (user == null)
+				if (user == null || IsUserLockedOut(user))
 				{
 					return null;
 				}
-			}
 
-			var passwordInformation = new PasswordInformation
-			{
-				Hash = user.Password,
-				Salt = user.Salt,
-				Iterations = user.Iterations,
-			};
-
-			if (_passwordHash.ValidatePassword(Encoding.UTF8.GetBytes(password), passwordInformation))
-			{
-				return new User()
+				var passwordInformation = new PasswordInformation
 				{
-					UserName = user.UserName,
-					Id = user.Id,
-					CreationDate = user.CreationDate,
+					Hash = user.Password,
+					Salt = user.Salt,
+					Iterations = user.Iterations,
 				};
-			}
 
-			return null;
+				if (_passwordHash.ValidatePassword(Encoding.UTF8.GetBytes(password), passwordInformation))
+				{
+					if (user.FailedLoginAttempts.HasValue || user.LastFailedLoginAttempt.HasValue)
+					{
+						// login was successful, so reset potential previous failed attempts
+						UnlockUser(context, user);
+					}
+
+					return new User()
+					{
+						UserName = user.UserName,
+						Id = user.Id,
+						CreationDate = user.CreationDate,
+					};
+				}
+
+				// We found a user, but validation failed, so record this failed attempt
+				RecordFailedLoginAttempt(context, user);
+				return null;
+			}
 		}
 
 		public IEnumerable<User> List()
 		{
 			using (var context = new RelayContext())
 			{
-				return context.Users.Select(u => new User
+				return context.Users.Select(u => new
+				{
+					u.Id,
+					u.UserName,
+					u.CreationDate,
+					u.FailedLoginAttempts,
+					u.LastFailedLoginAttempt,
+				})
+				.ToList()
+				.Select(u => new User()
 				{
 					Id = u.Id,
 					UserName = u.UserName,
 					CreationDate = u.CreationDate,
-				}).ToList();
+					LockedUntil = LockedOutUntil(u.FailedLoginAttempts, u.LastFailedLoginAttempt),
+				});
 			}
 		}
 
@@ -179,6 +202,65 @@ namespace Thinktecture.Relay.Server.Repository
 
 				return user == null;
 			}
+		}
+
+		private DateTime? LockedOutUntil(int? failedAttempts, DateTime? lastFailedAttempt)
+		{
+			if (!failedAttempts.HasValue)
+				return null;
+
+			if (failedAttempts < _configuration.MaxFailedLoginAttempts)
+				return null;
+
+			if (!lastFailedAttempt.HasValue)
+				return null;
+
+			var result = lastFailedAttempt + _configuration.FailedLoginLockoutPeriod;
+			if (result < DateTime.UtcNow)
+				return null;
+
+			return result;
+		}
+
+		private bool IsUserLockedOut(DbUser user)
+		{
+			var lockedOutUntil = LockedOutUntil(user.FailedLoginAttempts, user.LastFailedLoginAttempt);
+			if (!lockedOutUntil.HasValue)
+				return false;
+
+			_logger?.Information("User {UserName} is locked out until {LockoutEnd} due to {FailedLoginAttempts} failed login attempts (last try was at {LastFailedLoginAttempt})",
+				user.UserName,
+				lockedOutUntil,
+				user.FailedLoginAttempts,
+				user.LastFailedLoginAttempt
+			);
+
+			return true;
+		}
+
+		private void RecordFailedLoginAttempt(RelayContext ctx, DbUser user)
+		{
+			user.LastFailedLoginAttempt = DateTime.UtcNow;
+			user.FailedLoginAttempts = user.FailedLoginAttempts.GetValueOrDefault() + 1;
+
+			ctx.Entry(user).State = EntityState.Modified;
+			ctx.SaveChanges();
+
+			_logger?.Information("User {UserName} failed logging in for {FailedLoginAttempts} attempts",
+				user.UserName,
+				user.FailedLoginAttempts
+			);
+		}
+
+		private void UnlockUser(RelayContext ctx, DbUser user)
+		{
+			user.LastFailedLoginAttempt = null;
+			user.FailedLoginAttempts = null;
+
+			ctx.Entry(user).State = EntityState.Modified;
+			ctx.SaveChanges();
+
+			_logger?.Information("Unlocking user account {UserName}", user.UserName);
 		}
 	}
 }
