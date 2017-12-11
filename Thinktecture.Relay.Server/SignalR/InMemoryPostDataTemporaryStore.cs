@@ -130,11 +130,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			Dispose(true);
 		}
 
-		~InMemoryPostDataTemporaryStore()
-		{
-			Dispose(false);
-		}
-
 		private void Dispose(bool disposing)
 		{
 			if (disposing)
@@ -142,8 +137,6 @@ namespace Thinktecture.Relay.Server.SignalR
 				_cancellationTokenSource.Cancel();
 				_cancellationTokenSource.Dispose();
 			}
-
-			GC.SuppressFinalize(this);
 		}
 
 		private class Entry
