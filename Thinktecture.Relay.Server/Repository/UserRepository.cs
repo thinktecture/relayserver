@@ -215,10 +215,11 @@ namespace Thinktecture.Relay.Server.Repository
 			if (!lastFailedAttempt.HasValue)
 				return null;
 
-			if (lastFailedAttempt + _configuration.FailedLoginLockoutPeriod < DateTime.UtcNow)
+			var result = lastFailedAttempt + _configuration.FailedLoginLockoutPeriod;
+			if (result < DateTime.UtcNow)
 				return null;
 
-			return lastFailedAttempt + _configuration.FailedLoginLockoutPeriod;
+			return result;
 		}
 
 		private bool IsUserLockedOut(DbUser user)
