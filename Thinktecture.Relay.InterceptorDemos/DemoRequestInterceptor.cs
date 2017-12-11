@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.InterceptorDemos
 			headers.Add("X-ThinkectureRelay-Example", $"Added by {nameof(DemoRequestInterceptor)}");
 			request.HttpHeaders = headers;
 
-			_logger?.Debug("Demo interceptor modified request: {@Request} " + request);
+			_logger?.Debug("Demo interceptor modified request: {@Request}", request);
 			return null;
 		}
 	}
