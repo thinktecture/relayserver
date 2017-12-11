@@ -19,38 +19,47 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal class RelayServerConnection : Connection, IRelayServerConnection
 	{
+		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
+		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
+
+		private static int _nextId;
+		private static readonly Random _random = new Random();
+
 		private readonly string _userName;
 		private readonly string _password;
 		private readonly Uri _relayServerUri;
-		private readonly int _requestTimeout;
+		private readonly int _requestTimeoutInSeconds;
+		private readonly TimeSpan _tokenRefreshWindowInSeconds;
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
 		private readonly HttpClient _httpClient;
 		private readonly int _relayServerConnectionId;
+
 		private CancellationTokenSource _cts;
 		private DateTime _lastHeartbeat;
-		private string _accessToken;
 		private bool _stopRequested;
+		private string _accessToken;
+		private DateTime _tokenExpiry = DateTime.MaxValue;
 
-		private static int _nextId;
-		private static readonly Random _random = new Random();
-
-		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
-		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
-
-		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeoutInSecondsInSeconds,
+			int tokenRefreshWindowInSeconds, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, "version=2")
 		{
 			_relayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;
 			_password = password;
 			_relayServerUri = relayServerUri;
-			_requestTimeout = requestTimeout;
+			_requestTimeoutInSeconds = requestTimeoutInSecondsInSeconds;
+			_tokenRefreshWindowInSeconds = TimeSpan.FromSeconds(tokenRefreshWindowInSeconds);
+
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_logger = logger;
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
-			_httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
+			_httpClient = new HttpClient()
+			{
+				Timeout = TimeSpan.FromSeconds(requestTimeoutInSecondsInSeconds),
+			};
 			_cts = new CancellationTokenSource();
 
 			Reconnecting += OnReconnecting;
@@ -70,7 +79,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}", key, baseUri);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeoutInSeconds);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
@@ -84,7 +93,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, handlerType);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeoutInSeconds);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory)
@@ -98,7 +107,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target using a handler factory. handler-key={HandlerKey}", key);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeoutInSeconds);
 		}
 
 		public void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new()
@@ -110,7 +119,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, typeof(T).Name);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeoutInSeconds);
 		}
 
 		private static string RemoveTrailingSlashes(string key)
@@ -169,6 +178,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			try
 			{
+				StartTokenRefreshLoop(TimeSpan.FromSeconds(1), _cts.Token);
+
 				await Start().ConfigureAwait(false);
 				_logger?.Information("Connected to relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 			}
@@ -188,19 +199,21 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 
 			CheckResponseTokenForErrors(tokenResponse);
-
 			SetBearerToken(tokenResponse);
+
 			return true;
 		}
 
 		private void SetBearerToken(TokenResponse tokenResponse)
 		{
 			_accessToken = tokenResponse.AccessToken;
+			_tokenExpiry = DateTime.UtcNow + TimeSpan.FromSeconds(tokenResponse.ExpiresIn);
+
 			_httpClient.SetBearerToken(_accessToken);
 
 			Headers["Authorization"] = $"{tokenResponse.TokenType} {_accessToken}";
 
-			_logger?.Verbose("Setting access token");
+			_logger?.Verbose("Setting access token. Token expires at {TokenExpiry}", _tokenExpiry);
 		}
 
 		private void CheckResponseTokenForErrors(TokenResponse token)
@@ -366,6 +379,37 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}, token).ConfigureAwait(false);
 		}
 
+		private void StartTokenRefreshLoop(TimeSpan checkInterval, CancellationToken token)
+		{
+			Task.Run(async () =>
+			{
+				while (!token.IsCancellationRequested)
+				{
+					if (!await CheckTokenExpiry())
+					{
+						_logger.Warning("Could not renew access token. Trying a hard reconnect for for relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+						ForceReconnect();
+
+						// break loop to stop this task, as ForceReconnect calls ConnectAsync which will start a new TokenRefreshLoop after connecting
+						break;
+					}
+
+					await Task.Delay(checkInterval, token).ConfigureAwait(false);
+				}
+			}, token).ConfigureAwait(false);
+		}
+
+		private async Task<bool> CheckTokenExpiry()
+		{
+			if (!_stopRequested && (_tokenExpiry - _tokenRefreshWindowInSeconds <= DateTime.UtcNow))
+			{
+				_logger.Information("Access token is going to expire soon. Trying to refresh token for relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+				return await TryRequestAuthorizationTokenAsync().ConfigureAwait(false);
+			}
+
+			return true;
+		}
+
 		private void ForceReconnect()
 		{
 			_logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
@@ -389,11 +433,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		protected override void Dispose(bool disposing)
 		{
-			if (_cts != null)
+			if (disposing)
 			{
-				_cts.Cancel();
-				_cts.Dispose();
-				_cts = null;
+				if (_cts != null)
+				{
+					_cts.Cancel();
+					_cts.Dispose();
+					_cts = null;
+				}
 			}
 
 			base.Dispose(disposing);
@@ -493,7 +540,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			return SendToRelayAsync(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
 		}
 
-		private Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
+		private async Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			if (String.IsNullOrWhiteSpace(relativeUrl))
 				throw new ArgumentException("Relative url cannot be null or empty.");
@@ -508,7 +555,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			setHeaders?.Invoke(request.Headers);
 			request.Content = content;
 
-			return _httpClient.SendAsync(request, cancellationToken);
+			return await _httpClient.SendAsync(request, cancellationToken);
 		}
 
 		private TimeSpan GetRandomWaitTime()

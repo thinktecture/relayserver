@@ -58,6 +58,8 @@ namespace Thinktecture.Relay.Server
 			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, _configuration);
 
 			app.UseAutofacMiddleware(innerScope);
+
+			app.UseHsts(_configuration.HstsHeaderMaxAge, _configuration.HstsIncludeSubdomains);
 			app.UseCors(CorsOptions.AllowAll);
 			UseOAuthSecurity(app, _configuration, _authorizationServerProvider);
 			MapSignalR(app, innerScope, _configuration);
@@ -95,9 +97,9 @@ namespace Thinktecture.Relay.Server
 
 			var serverOptions = new OAuthAuthorizationServerOptions
 			{
-				AllowInsecureHttp = true,
+				AllowInsecureHttp = config.UseInsecureHttp,
 				TokenEndpointPath = new PathString("/token"),
-				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
+				AccessTokenExpireTimeSpan = config.AccessTokenLifetime,
 				Provider = authProvider,
 			};
 
@@ -134,8 +136,8 @@ namespace Thinktecture.Relay.Server
 				}
 			};
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseOAuthBearerAuthentication(authOptions);
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void UseSharedSecret(IAppBuilder app, string sharedSecret, OAuthAuthorizationServerOptions serverOptions)
@@ -146,12 +148,12 @@ namespace Thinktecture.Relay.Server
 
 			serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
 			{
 				AllowedAudiences = new[] { audience },
-				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) }
+				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
 			});
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config)

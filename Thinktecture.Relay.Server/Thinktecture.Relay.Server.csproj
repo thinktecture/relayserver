@@ -256,6 +256,7 @@
     <Compile Include="Migrations\201707240650482_AddActiveConnectionsTable.Designer.cs">
       <DependentUpon>201707240650482_AddActiveConnectionsTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Owin\HstsAppBuilderExtensions.cs" />
     <Compile Include="Repository\DbModels\DbActiveConnection.cs" />
     <Compile Include="Controller\RelayModuleBindingFilter.cs" />
     <Compile Include="Interceptor\InterceptorLoader.cs" />

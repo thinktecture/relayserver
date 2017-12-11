@@ -26,6 +26,9 @@ namespace Thinktecture.Relay.Server.Config
 		public string InterceptorAssembly { get; }
 		public string OAuthSharedSecret { get; set; }
 		public string OAuthCertificate { get; set; }
+		public TimeSpan AccessTokenLifetime { get; set; }
+		public TimeSpan HstsHeaderMaxAge { get; set; }
+		public bool HstsIncludeSubdomains { get; set; }
 
 		public Configuration(ILogger logger)
 		{
@@ -134,6 +137,26 @@ namespace Thinktecture.Relay.Server.Config
 			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
 			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
 
+			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["AccessTokenLifetime"], out tmpTimeSpan))
+			{
+				tmpTimeSpan = TimeSpan.FromDays(365);
+			}
+
+			AccessTokenLifetime = tmpTimeSpan;
+
+			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["HstsHeaderMaxAge"], out tmpTimeSpan))
+			{
+				tmpTimeSpan = TimeSpan.FromDays(365);
+			}
+
+			HstsHeaderMaxAge = tmpTimeSpan;
+
+			HstsIncludeSubdomains = false;
+			if (Boolean.TryParse(ConfigurationManager.AppSettings["HstsIncludeSubdomains"], out tmpBool))
+			{
+				HstsIncludeSubdomains = tmpBool;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -158,6 +181,9 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting InterceptorAssembly: {InterceptorAssembly}", InterceptorAssembly);
 			logger?.Verbose("Setting OAuthSharedSecret: {OauthSharedSecret}", OAuthSharedSecret);
 			logger?.Verbose("Setting OAuthCertificate: {OauthCertificate}", OAuthCertificate);
+			logger?.Verbose("Setting AccessTokenLifetime: {AccessTokenLifetime}", AccessTokenLifetime);
+			logger?.Verbose("Setting HstsHeaderMaxAge: {HstsHeaderMaxAge}", HstsHeaderMaxAge);
+			logger?.Verbose("Setting HstsIncludeSubdomains: {HstsIncludeSubdomains}", HstsIncludeSubdomains);
 		}
 	}
 }
