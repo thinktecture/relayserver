@@ -157,6 +157,7 @@ The default settings include:
     <add key="SecureClientController" value="false" />
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
+    <add key="AccessTokenLifetime" value="365.00:00:00" />
 </appSettings>
 ```
 
@@ -189,6 +190,7 @@ The default settings include:
 | SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid OnPremiseConnector / Link access token (default false) |
 | QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
 | RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
+| AccessTokenLifetime | Time span that an issued access token for OnPremise Connectors and Management Web Users will be valid (default 365 days) |
 
 ## netsh settings
 
@@ -277,11 +279,11 @@ In typical deployment scenarios of the RelayServer, the On-Premises Connector is
 
 To configure the On-Premises Connector, open the Thinktecture.Relay.OnPremiseConnector.exe.config configuration file in the installation folder (default: C:\Program Files\Thinktecture\On-Premises Connector) of the On-Premises Connector in any editor.
 
-Only the <relayServer></ relayServer> section has to be edited in the configuration file:
+Only the <relayServer></relayServer> section has to be edited in the configuration file:
 
 ```
 <relayServer baseUrl="https://relay.company.example/" ignoreSslErrors="false" timeout="00:00:30" >
-  <security authenticationType="Identity">
+  <security authenticationType="Identity" accessTokenRefreshWindow="00:01:00" >
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
@@ -303,6 +305,7 @@ Only the <relayServer></ relayServer> section has to be edited in the configurat
 |  Attribute | Description |
 | --- | --- |
 | authenticationType | In the current version of the RelayServer only the mode *Identity* is supported|
+| accessTokenRefreshWindow | When the current AccessToken will expire in this time span, an attempt will be made to renew the token. Defaults to 1 minute. |
 
 ### identity Element
 
