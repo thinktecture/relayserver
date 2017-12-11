@@ -117,8 +117,7 @@ namespace Thinktecture.Relay.Server.Repository
 					UserName = u.UserName,
 					CreationDate = u.CreationDate,
 					LockedUntil = LockedOutUntil(u.FailedLoginAttempts, u.LastFailedLoginAttempt),
-				})
-				.ToList();
+				});
 			}
 		}
 
