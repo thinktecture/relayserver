@@ -251,6 +251,7 @@ namespace Thinktecture.Relay.Server
 				options.StaticFileOptions.OnPrepareResponse = (ctx) =>
 				{
 					ctx.OwinContext.Response.Headers.Append("X-Frame-Options", "DENY");
+					ctx.OwinContext.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
 				};
 
 				app.UseFileServer(options);
