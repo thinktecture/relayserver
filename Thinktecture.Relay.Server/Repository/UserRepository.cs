@@ -228,7 +228,7 @@ namespace Thinktecture.Relay.Server.Repository
 			if (!lockedOutUntil.HasValue)
 				return false;
 
-			_logger?.Information("User {UserName} is locked out til {LockoutEnd} due to {FailedLoginAttempts} failed login attempts since {LastFailedLoginAttempt}",
+			_logger?.Information("User {UserName} is locked out until {LockoutEnd} due to {FailedLoginAttempts} failed login attempts (last try was at {LastFailedLoginAttempt})",
 				user.UserName,
 				lockedOutUntil,
 				user.FailedLoginAttempts,
@@ -246,7 +246,7 @@ namespace Thinktecture.Relay.Server.Repository
 			ctx.Entry(user).State = EntityState.Modified;
 			ctx.SaveChanges();
 
-			_logger?.Information("User {UserName} failed logging in. Failed attempts: {FailedLoginAttempts}",
+			_logger?.Information("User {UserName} failed logging in for {FailedLoginAttempts} attempts",
 				user.UserName,
 				user.FailedLoginAttempts
 			);
@@ -260,7 +260,7 @@ namespace Thinktecture.Relay.Server.Repository
 			ctx.Entry(user).State = EntityState.Modified;
 			ctx.SaveChanges();
 
-			_logger?.Information("Unlocking user account for {UserName}", user.UserName);
+			_logger?.Information("Unlocking user account {UserName}", user.UserName);
 		}
 	}
 }
