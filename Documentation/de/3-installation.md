@@ -144,6 +144,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="InterceptorAssembly" value="" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
+    <add key="IncludeErrorDetailPolicy" value="default" />
 </appSettings>
 ```
 
@@ -161,6 +162,7 @@ Die Standardeinstellungen umfassen dabei:
 | InterceptorAssembly | Pfad zu einem Assembly, in dem Interceptor implementiert sind. Entweder absolut oder relativ zum RelayServer. |
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
 | HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
+| IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default'). Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
 
 ## netsh settings
 

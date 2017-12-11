@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.Web.Http;
 using Serilog;
 
 namespace Thinktecture.Relay.Server.Config
@@ -28,6 +29,7 @@ namespace Thinktecture.Relay.Server.Config
 		public string OAuthCertificate { get; }
 		public TimeSpan HstsHeaderMaxAge { get; }
 		public bool HstsIncludeSubdomains { get; }
+		public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; }
 
 		public Configuration(ILogger logger)
 		{
@@ -146,6 +148,12 @@ namespace Thinktecture.Relay.Server.Config
 				HstsIncludeSubdomains = tmpBool;
 			}
 
+			IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Default;
+			if (Enum.TryParse(ConfigurationManager.AppSettings["IncludeErrorDetailPolicy"], true, out IncludeErrorDetailPolicy tmpIncludeErrorDetailPolicy))
+			{
+				IncludeErrorDetailPolicy = tmpIncludeErrorDetailPolicy;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -172,6 +180,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting OAuthCertificate: {OauthCertificate}", OAuthCertificate);
 			logger?.Verbose("Setting HstsHeaderMaxAge: {HstsHeaderMaxAge}", HstsHeaderMaxAge);
 			logger?.Verbose("Setting HstsIncludeSubdomains: {HstsIncludeSubdomains}", HstsIncludeSubdomains);
+			logger?.Verbose("Setting IncludeErrorDetailPolicy: {IncludeErrorDetailPolicy}", IncludeErrorDetailPolicy);
 		}
 	}
 }

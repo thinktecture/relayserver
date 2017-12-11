@@ -142,6 +142,7 @@ The default settings include:
     <add key=PluginAssembly" value="" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
+    <add key="IncludeErrorDetailPolicy" value="default" />
 </appSettings>
 ```
 
@@ -159,6 +160,7 @@ The default settings include:
 | PluginAssembly | Path to an assembly that implements plugins. Either absolutely or relative to the RelayServer. |
 | HstsHeaderMaxAge | Value that will be set in the HTTP Strict Transport Security Header for `max-age` (default 365 days) |
 | HstsIncludeSubdomains | Determines, whether the optional parameter `includeSubDomains` will be set on the HTTP Strict Transport Security Header (default false) |
+| IncludeErrorDetailPolicy | Determines whether error details (Stacktrace, Exception Messages) will be returned (default 'default'). For an explanation of possible values see [MSDN](https://msdn.microsoft.com/en-us/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
 
 ## netsh settings
 
