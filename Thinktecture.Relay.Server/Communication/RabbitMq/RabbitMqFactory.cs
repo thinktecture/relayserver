@@ -1,6 +1,6 @@
 using System;
 using System.Configuration;
-using NLog;
+using Serilog;
 using RabbitMQ.Client;
 using Thinktecture.Relay.Server.Config;
 
@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				throw new ConfigurationErrorsException("Could not find a connection string for RabbitMQ. Please add a connection string in the <connectionStrings> section of the application's configuration file. For example: <add name=\"RabbitMQ\" connectionString=\"host=localhost\" />");
 			}
 
-			_logger?.Trace("Creating RabbitMQ Bus. connection-string={0}", _configuration.RabbitMqConnectionString);
+			_logger?.Verbose("Creating RabbitMQ Bus. connection-string={rabbit-connection-string}", _configuration.RabbitMqConnectionString);
 
 			return _factory.CreateConnection(connectionString);
 		}

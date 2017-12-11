@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Newtonsoft.Json;
-using NLog;
+using Serilog;
 
 namespace Thinktecture.Relay.Server.Filters
 {
-	public class NLogActionFilter : IActionFilter
+	public class LogActionFilter : IActionFilter
 	{
 		private readonly ILogger _logger;
 		private readonly JsonSerializerSettings _jsonSettings;
@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Server.Filters
 		/// <inheritdoc />
 		public bool AllowMultiple => true;
 
-		public NLogActionFilter(ILogger logger)
+		public LogActionFilter(ILogger logger)
 		{
 			_logger = logger;
 
@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.Server.Filters
 				throw new ArgumentNullException(nameof(continuation));
 
 			var response = await continuation().ConfigureAwait(false);
-			_logger?.Trace("[Response] {0} - {1} ({2}): {3}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
+			_logger?.Verbose("[Response] {request-method} - {response-status-code} ({response-status-code-int}): {request-url}", actionContext.Request?.Method, response.StatusCode, (int)response.StatusCode, actionContext.Request?.RequestUri);
 
 			return response;
 		}

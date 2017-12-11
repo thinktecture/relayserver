@@ -1,4 +1,5 @@
 using System;
+using Serilog;
 using Topshelf;
 
 namespace Thinktecture.Relay.OnPremiseConnectorService
@@ -7,8 +8,13 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 	{
 		private static void Main(string[] args)
 		{
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.AppSettings()
+				.CreateLogger();
+
 			HostFactory.Run(config =>
 			{
+				config.UseSerilog();
 				config.Service<OnPremisesService>(settings =>
 				{
 					settings.ConstructUsing(_ => new OnPremisesService());
@@ -21,6 +27,8 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 				config.SetDisplayName("Thinktecture Relay OnPremises Service");
 				config.SetServiceName("TTRelayOnPremisesService");
 			});
+
+			Log.CloseAndFlush();
 
 #if DEBUG
 			if (System.Diagnostics.Debugger.IsAttached)

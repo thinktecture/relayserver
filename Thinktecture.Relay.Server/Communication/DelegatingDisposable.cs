@@ -1,5 +1,5 @@
 using System;
-using NLog;
+using Serilog;
 
 namespace Thinktecture.Relay.Server.Communication
 {

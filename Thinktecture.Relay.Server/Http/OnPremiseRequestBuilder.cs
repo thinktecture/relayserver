@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
 
