@@ -66,7 +66,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			if (!CanRequestBeHandled(path, pathInformation, link))
 			{
-				_logger?.Information("Request cannot be handled.");
+				_logger?.Information("Request cannot be handled");
 				return NotFound();
 			}
 
