@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="password">A <see cref="String"/> containing the password.</param>
 		/// <param name="relayServer">An <see cref="Uri"/> containing the relay server's base url.</param>
 		/// <param name="requestTimeout">An <see cref="Int32"/> defining the timeout in seconds.</param>
-		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 10)
+		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 30)
 		{
 			var factory = _container.Resolve<IRelayServerConnectionFactory>();
 			_connection = factory.Create(userName, password, relayServer, requestTimeout);

@@ -246,7 +246,7 @@ To configure the On-Premises Connector, open the Thinktecture.Relay.OnPremiseCon
 Only the <relayServer></ relayServer> section has to be edited in the configuration file:
 
 ```
-<relayServer baseUrl="https://relay.company.example/">
+<relayServer baseUrl="https://relay.company.example/" ignoreSslErrors="false" timeout="00:00:30" >
   <security authenticationType="Identity">
     <identity userName="userName" password="password" />
   </security>
@@ -261,6 +261,8 @@ Only the <relayServer></ relayServer> section has to be edited in the configurat
 |  Attribute | Description |
 | --- | --- |
 | baseUrl | RelayServer URL |
+| ignoreSslErrors | Accepts responses of the on-premises application with a self-signed ssl certificate |
+| timeout | Timeout, after which requests to the on-premises application will be aborted |
 
 ### security Element
 

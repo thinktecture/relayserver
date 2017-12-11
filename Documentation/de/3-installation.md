@@ -246,7 +246,7 @@ Zur Konfiguration des On-Premises Connectors wird die Konfigurationsdatei Thinkt
 In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> bearbeitet werden:
 
 ```
-<relayServer baseUrl="https://relay.company.example/" ignoreSslErrors="false">
+<relayServer baseUrl="https://relay.company.example/" ignoreSslErrors="false" timeout="00:00:30" >
   <security authenticationType="Identity">
     <identity userName="userName" password="password" />
   </security>
@@ -262,6 +262,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 | --- | --- |
 | baseUrl | URL des RelayServer |
 | ignoreSslErrors | Akzeptiert Antworten der On-Premises Applikation Anwendung mit einem selbstsignierten SSL-Zertifikat |
+| timeout | Timeout, nach dem Anfragen an die On-Premises-Applikation abgebrochen werden |
 
 ### security Element
 
