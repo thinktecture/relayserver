@@ -6,6 +6,7 @@ using System.Web.Http.Results;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.Repository;
+using Thinktecture.Relay.Server.Security;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
@@ -15,10 +16,12 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 	public class UserController : ApiController
 	{
 		private readonly IUserRepository _userRepository;
+		private readonly IPasswordComplexityValidator _passwordComplexityValidator;
 
-		public UserController(IUserRepository userRepository)
+		public UserController(IUserRepository userRepository, IPasswordComplexityValidator passwordComplexityValidator)
 		{
-			_userRepository = userRepository;
+			_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+			_passwordComplexityValidator = passwordComplexityValidator ?? throw new ArgumentNullException(nameof(passwordComplexityValidator));
 		}
 
 		[AllowAnonymous]
@@ -29,6 +32,11 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 			if (_userRepository.Any())
 			{
 				return new StatusCodeResult(HttpStatusCode.Forbidden, Request);
+			}
+
+			if (!CheckPasswordAndVerification(user, out var result))
+			{
+				return result;
 			}
 
 			return Create(user);
@@ -50,10 +58,9 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return BadRequest();
 			}
 
-			// new password and repetition need to match
-			if (user.Password != user.Password2)
+			if (!CheckPasswordAndVerification(user, out var result))
 			{
-				return BadRequest("New password and verification do not match");
+				return result;
 			}
 
 			var id = _userRepository.Create(user.UserName, user.Password);
@@ -65,6 +72,27 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 			// TODO: Location
 			return Created("", id);
+		}
+
+		private bool CheckPasswordAndVerification(CreateUser user, out IHttpActionResult httpActionResult)
+		{
+			httpActionResult = null;
+
+			// new password and repetition need to match
+			if (user.Password != user.PasswordVerification)
+			{
+				httpActionResult = BadRequest("New password and verification do not match");
+				return false;
+			}
+
+			// validate password complexity by other rules
+			if (!_passwordComplexityValidator.ValidatePassword(user.UserName, user.Password, out var errorMessage))
+			{
+				httpActionResult = BadRequest(errorMessage);
+				return false;
+			}
+
+			return true;
 		}
 
 		[HttpGet]
@@ -100,18 +128,23 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 			}
 
 			// OldPassword needs to be correct
-			if (_userRepository.Authenticate(user.UserName, user.PasswordOld) == null)
+			var authenticatedUser = _userRepository.Authenticate(user.UserName, user.PasswordOld);
+			if (authenticatedUser == null)
 			{
 				return BadRequest("Old password not okay");
 			}
 
-			// new password and repetition need to match
-			if (user.Password != user.Password2)
+			if (user.PasswordOld == user.Password)
 			{
-				return BadRequest("New password and verification do not match");
+				return BadRequest("New password must be different from old one");
 			}
 
-			var result = _userRepository.Update(user.Id, user.Password);
+			if (!CheckPasswordAndVerification(user, out var error))
+			{
+				return error;
+			}
+
+			var result = _userRepository.Update(authenticatedUser.Id, user.Password);
 
 			return result ? (IHttpActionResult)Ok() : BadRequest();
 		}

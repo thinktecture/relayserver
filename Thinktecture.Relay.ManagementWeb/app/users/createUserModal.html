@@ -1,15 +1,20 @@
 <form novalidate class="form-horizontal" role="form" name="createUserForm" ng-submit="submit()">
     <div class="modal-header">
-        <button type="button" class="close" ng-click="cancel()" tabindex="-1"><span>&times;</span><span class="sr-only" translate>COMMON.CLOSE</span></button>
+        <button type="button" class="close" ng-click="cancel()" tabindex="-1">
+            <span>&times;</span>
+            <span class="sr-only" translate>COMMON.CLOSE</span>
+        </button>
         <h3 class="modal-title" translate ng-if="!isEditMode">USERS.MODAL_CREATE.TITLE</h3>
         <h3 class="modal-title" translate ng-if="isEditMode">USERS.MODAL_EDIT_PASSWORD.TITLE</h3>
     </div>
     <div class="modal-body">
         <p ng-if="isEditMode" translate="USERS.MODAL_EDIT_PASSWORD.DESCRIPTION" translate-values="{ userName: user.userName}"></p>
-        <div class="form-group" ng-class="{'has-error':(createUserForm.username.$invalid && createUserForm.username.$dirty) || userNameUnavailable, 'has-success': userNameAvailable}" ng-if="!isEditMode">
+        <div class="form-group" ng-class="{'has-error':(createUserForm.username.$invalid && createUserForm.username.$dirty) || userNameUnavailable, 'has-success': userNameAvailable}"
+            ng-if="!isEditMode">
             <label for="username" class="col-sm-2 control-label" translate>COMMON.USERNAME</label>
             <div class="col-sm-10">
-                <input id="username" name="username" class="form-control" ng-model="user.userName" ng-model-options="{debounce: 100}" placeholder="{{ 'COMMON.USERNAME' | translate }}" maxlength="250" required />
+                <input id="username" name="username" class="form-control" ng-model="user.userName" ng-model-options="{debounce: 100}" placeholder="{{ 'COMMON.USERNAME' | translate }}"
+                    maxlength="250" required />
                 <span class="fa fa-check form-control-feedback" ng-show="userNameAvailable"></span>
                 <span class="text-danger" ng-show="userNameUnavailable" translate>COMMON.ERRORS.USER_NAME_UNAVAILABLE</span>
                 <span class="text-danger" ng-show="createUserForm.username.$error.required && createUserForm.username.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
@@ -19,7 +24,8 @@
         <div ng-if="isEditMode" class="form-group" ng-class="{'has-error':createUserForm.passwordOld.$error.required && createUserForm.passwordOld.$dirty}">
             <label for="passwordOld" class="col-sm-2 control-label" translate>COMMON.PASSWORD_OLD</label>
             <div class="col-sm-10">
-                <input type="password" id="passwordOld" name="passwordOld" class="form-control" ng-model="user.passwordOld" placeholder="{{ 'COMMON.PASSWORD_OLD' | translate }}" required />
+                <input type="password" id="passwordOld" name="passwordOld" class="form-control" ng-model="user.passwordOld" placeholder="{{ 'COMMON.PASSWORD_OLD' | translate }}"
+                    required />
                 <span class="text-danger" ng-show="createUserForm.password.$error.required && createUserForm.password.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
             </div>
         </div>
@@ -27,22 +33,27 @@
         <div class="form-group" ng-class="{'has-error':createUserForm.password.$error.required && createUserForm.password.$dirty}">
             <label for="password" class="col-sm-2 control-label" translate>COMMON.PASSWORD</label>
             <div class="col-sm-10">
-                <input type="password" id="password" name="password" class="form-control" ng-model="user.password" placeholder="{{ 'COMMON.PASSWORD' | translate }}" required />
+                <input type="password" id="password" name="password" class="form-control" ng-model="user.password" placeholder="{{ 'COMMON.PASSWORD' | translate }}"
+                    required />
                 <span class="text-danger" ng-show="createUserForm.password.$error.required && createUserForm.password.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
             </div>
         </div>
-        <div class="form-group" ng-class="{'has-error':createUserForm.password2.$error.required && createUserForm.password2.$dirty}">
-            <label for="password2" class="col-sm-2 control-label" translate>COMMON.VERIFY_PASSWORD</label>
+        <div class="form-group" ng-class="{'has-error':createUserForm.passwordVerification.$error.required && createUserForm.passwordVerification.$dirty}">
+            <label for="passwordVerification" class="col-sm-2 control-label" translate>COMMON.VERIFY_PASSWORD</label>
             <div class="col-sm-10">
-                <input type="password" id="password2" name="password2" class="form-control" ng-model="user.password2" placeholder="{{ 'COMMON.VERIFY_PASSWORD' | translate }}" required />
-                <span class="text-danger" ng-show="createUserForm.password2.$error.required && createUserForm.password2.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
-                <span class="text-danger" ng-show="passwordsDoNotMatch && createUserForm.password2.$dirty" translate>COMMON.ERRORS.PASSWORDS_DO_NOT_MATCH</span>
+                <input type="password" id="passwordVerification" name="passwordVerification" class="form-control" ng-model="user.passwordVerification"
+                    placeholder="{{ 'COMMON.VERIFY_PASSWORD' | translate }}" required />
+                <span class="text-danger" ng-show="createUserForm.passwordVerification.$error.required && createUserForm.passwordVerification.$dirty"
+                    translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+                <span class="text-danger" ng-show="passwordsDoNotMatch && createUserForm.passwordVerification.$dirty" translate>COMMON.ERRORS.PASSWORDS_DO_NOT_MATCH</span>
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button ng-if="!isEditMode" type="submit" class="btn btn-primary" ng-disabled="createUserForm.$invalid || userNameUnavailable || passwordsDoNotMatch" translate>COMMON.CREATE</button>
-        <button ng-if="isEditMode" type="submit" class="btn btn-primary" ng-disabled="createUserForm.$invalid || userNameUnavailable || passwordsDoNotMatch" translate>COMMON.UPDATE</button>
+        <button ng-if="!isEditMode" type="submit" class="btn btn-primary" ng-disabled="createUserForm.$invalid || userNameUnavailable || passwordsDoNotMatch"
+            translate>COMMON.CREATE</button>
+        <button ng-if="isEditMode" type="submit" class="btn btn-primary" ng-disabled="createUserForm.$invalid || userNameUnavailable || passwordsDoNotMatch"
+            translate>COMMON.UPDATE</button>
         <button class="btn btn-default" ng-click="cancel()" translate>COMMON.CANCEL</button>
     </div>
 </form>

@@ -128,6 +128,7 @@
     <Compile Include="Http\ClientRequestBuilderTest.cs" />
     <Compile Include="Http\HttpResponseMessageBuilderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\PasswordComplexityValidatorTests.cs" />
     <Compile Include="Security\PasswordHashTest.cs" />
   </ItemGroup>
   <ItemGroup>

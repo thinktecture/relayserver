@@ -352,7 +352,9 @@
     <Compile Include="Repository\LinkRepository.cs" />
     <Compile Include="Repository\TraceRepository.cs" />
     <Compile Include="Repository\UserRepository.cs" />
+    <Compile Include="Security\IPasswordComplexityValidator.cs" />
     <Compile Include="Security\IPasswordHash.cs" />
+    <Compile Include="Security\PasswordComplexityValidator.cs" />
     <Compile Include="Security\PasswordHash.cs" />
     <Compile Include="Security\PasswordInformation.cs" />
     <Compile Include="Security\RsaDataProtector.cs" />

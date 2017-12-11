@@ -62,9 +62,15 @@
                     reloadUsers();
                 }, function (error) {
                     if (error !== 'cancel' && error !== 'backdrop click' && error !== 'escape key press') {
+
+                        var details = '';
+                        if (error.data && error.data.message) {
+                            details = '\r\n' + error.data.message;
+                        }
+
                         $translate('USERS.NOTIFICATIONS.CREATE_ERROR')
                             .then(function (text) {
-                                notificationService.error(text);
+                                notificationService.error(text + details);
                             });
                     }
                 });
@@ -158,7 +164,7 @@
         $scope.$watch(function () {
             $scope.userNameUnavailable = !$scope.userNameCheck.available && $scope.user.userName !== undefined && $scope.userNameCheck.performed;
             $scope.userNameAvailable = $scope.userNameCheck.available && $scope.user.userName !== undefined;
-            $scope.passwordsDoNotMatch = $scope.user.password !== $scope.user.password2;
+            $scope.passwordsDoNotMatch = $scope.user.password !== $scope.user.passwordVerification;
         }, function (newVar, oldVar) {
         });
 
