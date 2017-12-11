@@ -2,12 +2,14 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Serilog;
+using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Controller
 {
 	[Authorize(Roles = "OnPremise")]
 	[OnPremiseConnectionModuleBindingFilter]
+	[NoCache]
 	public class RequestController : ApiController
 	{
 		private readonly IPostDataTemporaryStore _temporaryStore;

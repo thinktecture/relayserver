@@ -1,12 +1,11 @@
-using Autofac;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Newtonsoft.Json;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
 
@@ -14,6 +13,7 @@ namespace Thinktecture.Relay.Server.Controller
 {
 	[Authorize(Roles = "OnPremise")]
 	[OnPremiseConnectionModuleBindingFilter]
+	[NoCache]
 	public class ResponseController : ApiController
 	{
 		private readonly ILogger _logger;

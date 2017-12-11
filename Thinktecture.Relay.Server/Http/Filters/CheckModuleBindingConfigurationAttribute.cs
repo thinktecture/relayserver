@@ -6,7 +6,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Thinktecture.Relay.Server.Config;
 
-namespace Thinktecture.Relay.Server.Controller
+namespace Thinktecture.Relay.Server.Http.Filters
 {
 	[AttributeUsage(AttributeTargets.Class)]
 	public class CheckModuleBindingConfigurationAttribute : ActionFilterAttribute

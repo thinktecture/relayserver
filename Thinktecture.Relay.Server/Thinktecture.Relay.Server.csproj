@@ -218,6 +218,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Http\Filters\NoCacheAttribute.cs" />
     <Compile Include="DependencyInjection\RelayServerModule.cs" />
     <Compile Include="Dto\LinkDetails.cs" />
     <Compile Include="IStartup.cs" />
@@ -245,9 +246,9 @@
     <Compile Include="Config\IPersistedSettings.cs" />
     <Compile Include="Config\LocalAppDataPersistedSettings.cs" />
     <Compile Include="Config\ModuleBinding.cs" />
-    <Compile Include="Controller\CheckModuleBindingConfigurationAttribute.cs" />
-    <Compile Include="Controller\ManagementWebModuleBindingFilter.cs" />
-    <Compile Include="Controller\OnPremiseConnectionModuleBindingFilter.cs" />
+    <Compile Include="Http\Filters\CheckModuleBindingConfigurationAttribute.cs" />
+    <Compile Include="Http\Filters\ManagementWebModuleBindingFilter.cs" />
+    <Compile Include="Http\Filters\OnPremiseConnectionModuleBindingFilter.cs" />
     <Compile Include="Http\HttpRequestMessageExtensions.cs" />
     <Compile Include="Interceptor\IInterceptorLoader.cs" />
     <Compile Include="Interceptor\IInterceptorManager.cs" />
@@ -257,7 +258,7 @@
       <DependentUpon>201707240650482_AddActiveConnectionsTable.cs</DependentUpon>
     </Compile>
     <Compile Include="Repository\DbModels\DbActiveConnection.cs" />
-    <Compile Include="Controller\RelayModuleBindingFilter.cs" />
+    <Compile Include="Http\Filters\RelayModuleBindingFilter.cs" />
     <Compile Include="Interceptor\InterceptorLoader.cs" />
     <Compile Include="Interceptor\InterceptorManager.cs" />
     <Compile Include="Security\CustomJwtFormat.cs" />
