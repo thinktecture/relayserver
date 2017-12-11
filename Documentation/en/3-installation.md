@@ -140,6 +140,8 @@ The default settings include:
     <add key="UseInsecureHttp" value="false" />
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
     <add key=PluginAssembly" value="" />
+    <add key="HstsHeaderMaxAge" value="365.00:00:00" />
+    <add key="HstsIncludeSubdomains" value="false" />
 </appSettings>
 ```
 
@@ -155,6 +157,8 @@ The default settings include:
 | TemporaryRequestStoragePath | Path to a directory where the data of the requests are temporarily stored. In multi-server mode this directory must be readable and described by all nodes. If no value is specified (default), the requests are kept in memory, and no multi-server operation is possible. |
 | ActiveConnectionTimeoutInSeconds | Time after which a connection between an OnPremise Connector and the RelayServer is no longer active (default 120 seconds) |
 | PluginAssembly | Path to an assembly that implements plugins. Either absolutely or relative to the RelayServer. |
+| HstsHeaderMaxAge | Value that will be set in the HTTP Strict Transport Security Header for `max-age` (default 365 days) |
+| HstsIncludeSubdomains | Determines, whether the optional parameter `includeSubDomains` will be set on the HTTP Strict Transport Security Header (default false) |
 
 ## netsh settings
 

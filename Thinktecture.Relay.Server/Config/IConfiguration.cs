@@ -24,5 +24,7 @@ namespace Thinktecture.Relay.Server.Config
 		string InterceptorAssembly { get; }
 		string OAuthSharedSecret { get; }
 		string OAuthCertificate { get; }
+		TimeSpan HstsHeaderMaxAge { get; }
+		bool HstsIncludeSubdomains { get; }
 	}
 }

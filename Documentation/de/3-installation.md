@@ -142,6 +142,8 @@ Die Standardeinstellungen umfassen dabei:
     <add key="UseInsecureHttp" value="false" />
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
     <add key="InterceptorAssembly" value="" />
+    <add key="HstsHeaderMaxAge" value="365.00:00:00" />
+    <add key="HstsIncludeSubdomains" value="false" />
 </appSettings>
 ```
 
@@ -157,6 +159,8 @@ Die Standardeinstellungen umfassen dabei:
 | TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden. Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist (default) werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
 | ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem Relay Server als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
 | InterceptorAssembly | Pfad zu einem Assembly, in dem Interceptor implementiert sind. Entweder absolut oder relativ zum RelayServer. |
+| HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
+| HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
 
 ## netsh settings
 

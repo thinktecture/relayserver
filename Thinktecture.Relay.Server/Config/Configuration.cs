@@ -24,17 +24,18 @@ namespace Thinktecture.Relay.Server.Config
 		public string TemporaryRequestStoragePath { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
 		public string InterceptorAssembly { get; }
-		public string OAuthSharedSecret { get; set; }
-		public string OAuthCertificate { get; set; }
+		public string OAuthSharedSecret { get; }
+		public string OAuthCertificate { get; }
+		public TimeSpan HstsHeaderMaxAge { get; }
+		public bool HstsIncludeSubdomains { get; }
 
 		public Configuration(ILogger logger)
 		{
-			if (!Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out var tmpInt))
+			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
+			if (Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out var tmpInt))
 			{
-				tmpInt = 30;
+				OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
 			}
-
-			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
 
 			var settings = ConfigurationManager.ConnectionStrings["RabbitMQ"];
 			if (settings != null)
@@ -112,12 +113,11 @@ namespace Thinktecture.Relay.Server.Config
 				TemporaryRequestStoragePath = null;
 			}
 
-			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["TemporaryRequestStoragePeriod"], out var tmpTimeSpan))
+			TemporaryRequestStoragePeriod = TimeSpan.FromSeconds(10);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["TemporaryRequestStoragePeriod"], out var tmpTimeSpan))
 			{
-				tmpTimeSpan = TimeSpan.FromSeconds(10);
+				TemporaryRequestStoragePeriod = tmpTimeSpan;
 			}
-
-			TemporaryRequestStoragePeriod = tmpTimeSpan;
 
 			ActiveConnectionTimeoutInSeconds = 120;
 			if (Int32.TryParse(ConfigurationManager.AppSettings["ActiveConnectionTimeoutInSeconds"], out tmpInt))
@@ -133,6 +133,18 @@ namespace Thinktecture.Relay.Server.Config
 
 			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
 			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
+
+			HstsHeaderMaxAge = TimeSpan.FromDays(365);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["HstsHeaderMaxAge"], out tmpTimeSpan))
+			{
+				HstsHeaderMaxAge = tmpTimeSpan;
+			}
+
+			HstsIncludeSubdomains = false;
+			if (Boolean.TryParse(ConfigurationManager.AppSettings["HstsIncludeSubdomains"], out tmpBool))
+			{
+				HstsIncludeSubdomains = tmpBool;
+			}
 
 			LogSettings(logger);
 		}
@@ -158,6 +170,8 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting InterceptorAssembly: {InterceptorAssembly}", InterceptorAssembly);
 			logger?.Verbose("Setting OAuthSharedSecret: {OauthSharedSecret}", OAuthSharedSecret);
 			logger?.Verbose("Setting OAuthCertificate: {OauthCertificate}", OAuthCertificate);
+			logger?.Verbose("Setting HstsHeaderMaxAge: {HstsHeaderMaxAge}", HstsHeaderMaxAge);
+			logger?.Verbose("Setting HstsIncludeSubdomains: {HstsIncludeSubdomains}", HstsIncludeSubdomains);
 		}
 	}
 }
