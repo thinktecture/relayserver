@@ -24,10 +24,10 @@ namespace Thinktecture.Relay.Server.Config
 		public string TemporaryRequestStoragePath { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
 		public string InterceptorAssembly { get; }
-		public string OAuthSharedSecret { get; set; }
-		public string OAuthCertificate { get; set; }
-		public TimeSpan HstsHeaderMaxAge { get; set; }
-		public bool HstsIncludeSubdomains { get; set; }
+		public string OAuthSharedSecret { get; }
+		public string OAuthCertificate { get; }
+		public TimeSpan HstsHeaderMaxAge { get; }
+		public bool HstsIncludeSubdomains { get; }
 
 		public Configuration(ILogger logger)
 		{
