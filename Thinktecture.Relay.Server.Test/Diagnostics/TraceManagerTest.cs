@@ -287,7 +287,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			await traceFileWriter.WriteHeaderFileAsync("tracefiles/" + filePrefix2 + ".crxxxxxxx.headers", clientHeaders);
 			await traceFileWriter.WriteHeaderFileAsync("tracefiles/" + filePrefix2 + ".ltrxxxxxxx.headers", onPremiseTargetHeaders);
 
-			loggerMock.Setup(l => l.Warning(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<object[]>()));
+			loggerMock.Setup(l => l.Warning(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<string>()));
 
 			result = await sut.GetTracesAsync(Guid.Parse("7975999f-54d9-4b21-a093-4502ea372723"));
 
