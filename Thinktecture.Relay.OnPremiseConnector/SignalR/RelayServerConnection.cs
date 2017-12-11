@@ -160,7 +160,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task ConnectAsync()
 		{
-			_logger?.Information("Connecting to relay server. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Information("Connecting to relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
 			{
@@ -220,12 +220,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void OnReconnected()
 		{
-			_logger?.Verbose("Connection restored with relay server. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Verbose("Connection restored. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 		}
 
 		private void OnReconnecting()
 		{
-			_logger?.Verbose("Connection lost - trying to reconnect with relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Verbose("Connection lost. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 		}
 
 		protected override async void OnMessageReceived(JToken message)
