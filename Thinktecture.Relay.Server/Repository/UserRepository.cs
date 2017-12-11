@@ -241,7 +241,7 @@ namespace Thinktecture.Relay.Server.Repository
 		private void RecordFailedLoginAttempt(RelayContext ctx, DbUser user)
 		{
 			user.LastFailedLoginAttempt = DateTime.UtcNow;
-			user.FailedLoginAttempts = (user.FailedLoginAttempts ?? 0) + 1;
+			user.FailedLoginAttempts = user.FailedLoginAttempts.GetValueOrDefault() + 1;
 
 			ctx.Entry(user).State = EntityState.Modified;
 			ctx.SaveChanges();
