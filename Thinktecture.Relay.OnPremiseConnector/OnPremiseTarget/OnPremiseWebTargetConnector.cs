@@ -179,7 +179,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			var message = new HttpRequestMessage(new HttpMethod(request.HttpMethod), String.IsNullOrWhiteSpace(url) ? _baseUri : new Uri(_baseUri, url));
 			if (request.Stream != Stream.Null)
 			{
-				_logger?.Verbose("Adding request stream to request request-id={RequestId}", request.RequestId);
+				_logger?.Verbose("Adding request stream to request. request-id={RequestId}", request.RequestId);
 				message.Content = new StreamContent(request.Stream);
 			}
 
