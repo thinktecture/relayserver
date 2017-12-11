@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server.Security
 		{
 			errorMessage = null;
 
-			// user must not use his username as password
+			// user must not use the username as password
 			if (userName.Equals(password, StringComparison.InvariantCultureIgnoreCase))
 			{
 				errorMessage += "Username and password must not be the same.\r\n";
