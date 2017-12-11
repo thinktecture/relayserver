@@ -29,6 +29,8 @@ namespace Thinktecture.Relay.Server.Helper
 		public TimeSpan HstsHeaderMaxAge { get; set; }
 		public bool HstsIncludeSubdomains { get; set; }
 		public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
+		public int MaxFailedLoginAttempts { get; set; }
+		public TimeSpan FailedLoginLockoutPeriod { get; set; }
 
 		public ConfigurationDummy()
 		{

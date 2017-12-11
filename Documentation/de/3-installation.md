@@ -145,6 +145,8 @@ Die Standardeinstellungen umfassen dabei:
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
     <add key="IncludeErrorDetailPolicy" value="default" />
+    <add key="MaxFailedLoginAttempts" value="5" />
+    <add key="FailedLoginLockoutPeriod" value="00:15:00" />
 </appSettings>
 ```
 
@@ -163,6 +165,8 @@ Die Standardeinstellungen umfassen dabei:
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
 | HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
 | IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default'). Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
+| MaxFailedLoginAttempts | Anzahl von erfolglosen Login-Versuchen für einen User, bevor dieser temporär gesperrt wird (default 5) |
+| FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
 
 ## netsh settings
 
