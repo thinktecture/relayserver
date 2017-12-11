@@ -53,7 +53,7 @@ namespace Thinktecture.Relay.Server.Controller
 		[HttpHead]
 		public async Task<HttpResponseMessage> Relay(string path)
 		{
-			_logger?.Debug("Relaying {RequestMethod} {RequestPath}", ControllerContext.Request.Method, path);
+			_logger?.Debug("Relaying request. method={RequestMethod}, path={RequestPath}", ControllerContext.Request.Method, path);
 
 			if (path == null)
 			{

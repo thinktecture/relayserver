@@ -73,7 +73,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 				return new DelegatingDisposable(_logger, () =>
 				{
-					_logger?.Debug("Disposing request consumer for link {LinkId} and connection {ConnectionId}", linkId, connectionId);
+					_logger?.Debug("Disposing request consumer. link-id={LinkId}, connection-id={ConnectionId}", linkId, connectionId);
 					consumer.Received -= OnReceived;
 					_model.BasicCancel(consumerTag);
 				});

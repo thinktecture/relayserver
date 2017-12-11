@@ -82,7 +82,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(request));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching request for link {LinkId}, request {RequestId}, HTTP method {HttpMethod}, url {RequestUrl}", linkId, request.RequestId, request.HttpMethod, request.Url);
+			_logger?.Debug("Dispatching request. link-id={LinkId}, request-id={RequestId}, method={HttpMethod}, url={RequestUrl}", linkId, request.RequestId, request.HttpMethod, request.Url);
 
 			TryGetRequestSubject(linkId)?.OnNext(request);
 
@@ -95,7 +95,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 				throw new ArgumentNullException(nameof(response));
 
 			CheckDisposed();
-			_logger?.Debug("Dispatching response for origin {OriginId}, request {RequestId}, status code {ResponseStatusCode}", originId, response.RequestId, response.StatusCode);
+			_logger?.Debug("Dispatching response. origin-id={OriginId}, request-id={RequestId}, status-code={ResponseStatusCode}", originId, response.RequestId, response.StatusCode);
 
 			GetResponseSubject(originId).OnNext(response);
 

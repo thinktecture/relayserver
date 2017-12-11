@@ -29,7 +29,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			try
 			{
-				_logger?.Debug("Trying to load interceptors from file {InterceptorAssembly}", assemblyPath);
+				_logger?.Debug("Trying to load interceptors from file. interceptor-assembly={InterceptorAssembly}", assemblyPath);
 
 				var interceptorAssembly = Assembly.LoadFrom(assemblyPath);
 
@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "There was an error loading the interceptor assembly. AssemblyPath = {InterceptorAssemblyPath}", assemblyPath);
+				_logger?.Error(ex, "There was an error loading the interceptor assembly. assembly-path={InterceptorAssemblyPath}", assemblyPath);
 			}
 		}
 
@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			if (!File.Exists(path))
 			{
-				_logger?.Warning("An interceptor assembly has been configured, but it is not available at the configured path {InterceptorAssemblyPath}", path);
+				_logger?.Warning("An interceptor assembly has been configured, but it is not available at the configured path. assembly-path={InterceptorAssemblyPath}", path);
 				return null;
 			}
 
@@ -92,7 +92,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			if (autofacModules.Length > 1)
 			{
-				_logger?.Warning("The interceptor assembly needs to provide at maximum of one (1) Autofac Module, but {InterceptorModuleCount} were found", autofacModules.Length);
+				_logger?.Warning("The interceptor assembly needs to provide at maximum of one (1) Autofac Module, but more were found. interceptor-module-count={InterceptorModuleCount}", autofacModules.Length);
 				return null;
 			}
 
@@ -127,13 +127,13 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			if (foundInterceptors.Length == 0)
 			{
-				_logger?.Debug("Did not find a interceptor of type {InterceptorInterface} in interceptor assembly", interceptorInterfaceType.Name);
+				_logger?.Debug("Did not find an interceptor in interceptor assembly. interceptor-type={InterceptorInterface}", interceptorInterfaceType.Name);
 				return null;
 			}
 
 			if (foundInterceptors.Length > 1)
 			{
-				_logger?.Warning("One kind of interceptor can only be registered once, but interceptor assembly provides {InterceptorAmount} types that implement the {InterceptorInterface} interceptor", foundInterceptors.Length, interceptorInterfaceType.Name);
+				_logger?.Warning("One kind of interceptor can only be registered once, but interceptor assembly provides multiple types that implement an interceptor. interceptor-amount={InterceptorAmount}, interceptor-interface={InterceptorInterface}", foundInterceptors.Length, interceptorInterfaceType.Name);
 				return null;
 			}
 

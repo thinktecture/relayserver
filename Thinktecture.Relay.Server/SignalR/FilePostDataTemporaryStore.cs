@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.SignalR
 					}
 					catch (Exception ex)
 					{
-						_logger?.Error(ex, "Could not delete file. FileName = {FileName}", fileName);
+						_logger?.Error(ex, "Could not delete file. file-name={FileName}", fileName);
 					}
 				}
 			}
@@ -97,7 +97,7 @@ namespace Thinktecture.Relay.Server.SignalR
 				}
 				catch (Exception ex)
 				{
-					_logger?.Error(ex, "Could not delete file. FileName = {FileName}", fileName);
+					_logger?.Error(ex, "Could not delete file. file-name={FileName}", fileName);
 				}
 
 				return data;
@@ -130,7 +130,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		public void SaveResponse(string requestId, byte[] data)
 		{
 			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Storing response body. request id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Storing response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			File.WriteAllBytes(fileName, data);
 		}
@@ -177,11 +177,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			
 		}
 
-		~FilePostDataTemporaryStore()
-		{
-			Dispose(false);
-		}
-
 		private void Dispose(bool disposing)
 		{
 			if (disposing)
@@ -189,8 +184,6 @@ namespace Thinktecture.Relay.Server.SignalR
 				_cancellationTokenSource.Cancel();
 				_cancellationTokenSource.Dispose();
 			}
-
-			GC.SuppressFinalize(this);
 		}
 	}
 }

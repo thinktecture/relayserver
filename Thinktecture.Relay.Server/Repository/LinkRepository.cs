@@ -332,7 +332,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during adding or renewing an active connection. LinkId = {LinkId}, ConnectionId = {ConnectionId}, ConnectorVersion = {ConnectorVersion}", linkId, connectionId, connectorVersion);
+				_logger?.Error(ex, "Error during adding or renewing an active connection. link-id={LinkId}, connection-id={ConnectionId}, connector-version={ConnectorVersion}", linkId, connectionId, connectorVersion);
 			}
 		}
 
@@ -355,13 +355,13 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during renewing an active connection. ConnectionId = {ConnectionId}", connectionId);
+				_logger?.Error(ex, "Error during renewing an active connection. connection-id={ConnectionId}", connectionId);
 			}
 		}
 
 		public async Task RemoveActiveConnectionAsync(string connectionId)
 		{
-			_logger?.Verbose("Deleting active connection, connection-id={ConnectionId}", connectionId);
+			_logger?.Verbose("Deleting active connection. connection-id={ConnectionId}", connectionId);
 
 			try
 			{
@@ -378,7 +378,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during removing an active connection. ConnectionId = {ConnectionId}", connectionId);
+				_logger?.Error(ex, "Error during removing an active connection. connection-id={ConnectionId}", connectionId);
 			}
 		}
 

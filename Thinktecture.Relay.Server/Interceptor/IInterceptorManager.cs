@@ -5,7 +5,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 {
 	public interface IInterceptorManager
 	{
-		IOnPremiseConnectorRequest HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, out HttpResponseMessage immidiateResponse);
+		IOnPremiseConnectorRequest HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, out HttpResponseMessage immediateResponse);
 		HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response);
 	}
 }
