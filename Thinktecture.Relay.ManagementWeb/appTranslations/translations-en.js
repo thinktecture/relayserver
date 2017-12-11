@@ -4,10 +4,12 @@
     app.module.constant('translationsEn', {
         "COMMON": {
             "CREATE": "Create",
+            "UPDATE": "Update",
             "CLOSE": "Close",
             "CANCEL": "Cancel",
             "USERNAME": "Username",
             "PASSWORD": "Password",
+            "PASSWORD_OLD": "Current password",
             "DELETE": "Delete",
             "EDIT": "Edit",
             "DATE": "Date",

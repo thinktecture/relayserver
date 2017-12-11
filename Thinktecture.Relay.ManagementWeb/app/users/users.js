@@ -70,18 +70,19 @@
                 });
         };
 
-        function deleteUser (userToDelete) {
+        $scope.deleteUser = function (userToDelete) {
+            var userCopy = JSON.parse(JSON.stringify(userToDelete));
             var modal = $uibModal.open({
                 templateUrl: 'app/users/deleteUserModal.html',
                 controller: 'deleteUserModalController',
                 resolve: {
-                    affectedUser: function () { return userToDelete; }
+                    affectedUser: function () { return userCopy; }
                 }
             });
 
             modal.result
                 .then(function () {
-                    return user.delete(userToDelete.id);
+                    return user.delete(userCopy.id);
                 })
                 .then(function () {
                     $translate('USERS.NOTIFICATIONS.DELETE_SUCCESS')
@@ -97,14 +98,15 @@
                             });
                     }
                 });
-        }
+        };
 
-        function editPasswordForUser (userToEdit) {
+         $scope.editPasswordForUser = function(userToEdit) {
+            var userCopy = JSON.parse(JSON.stringify(userToEdit));
             var modal = $uibModal.open({
                 templateUrl: 'app/users/createUserModal.html',
                 controller: 'createUserModalController',
                 resolve: {
-                    affectedUser: function () { return userToEdit; }
+                    affectedUser: function () { return userCopy; }
                 }
             });
 
@@ -120,21 +122,18 @@
                     reloadUsers();
                 }, function (error) {
                     if (error !== 'cancel' && error !== 'backdrop click' && error !== 'escape key press') {
+
+                        var details = '';
+                        if (error.data && error.data.message) {
+                            details = '\r\n' + error.data.message;
+                        }
+
                         $translate('USERS.NOTIFICATIONS.EDIT_PASSWORD_ERROR')
                             .then(function (text) {
-                                notificationService.error(text);
+                                notificationService.error(text + details);
                             });
                     }
                 });
-        }
-
-        $scope.externalScope = {
-            deleteUser: function (user) {
-                deleteUser(user);
-            },
-            editPasswordForUser: function (user) {
-                editPasswordForUser(user);
-            }
         };
     }
 
