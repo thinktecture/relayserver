@@ -104,7 +104,7 @@ namespace Thinktecture.Relay.Server.Http
 				["Content-Location"] = "http://tt.invalid",
 				["Content-Type"] = "application/json",
 				["Expires"] = "Thu, 01 Dec 1994 16:00:00 GMT",
-				["Last-Modified"] = "Thu, 01 Dec 1994 15:00:00 GMT"
+				["Last-Modified"] = "Thu, 01 Dec 1994 15:00:00 GMT",
 			};
 			var httpContent = new ByteArrayContent(new byte[] { });
 
@@ -128,7 +128,7 @@ namespace Thinktecture.Relay.Server.Http
 			var httpHeaders = new Dictionary<string, string>
 			{
 				["X-Foo"] = "X-Bar",
-				["Foo"] = "Bar"
+				["Foo"] = "Bar",
 			};
 			var httpContent = new ByteArrayContent(new byte[] { });
 

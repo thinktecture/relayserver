@@ -71,14 +71,14 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public byte[] LoadRequest(string requestId)
 		{
-			_logger?.Verbose("Loading request body. request-id={request-id}", requestId);
+			_logger?.Verbose("Loading request body. request-id={RequestId}", requestId);
 
 			return _requestData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
 		}
 
 		public Stream CreateRequestStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for storing request body. request-id={request-id}", requestId);
+			_logger?.Verbose("Creating stream for storing request body. request-id={RequestId}", requestId);
 
 			var ms = new NotifyingMemoryStream();
 			ms.Disposing += (s, e) => _requestData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
@@ -87,7 +87,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public Stream GetRequestStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for stored request body. request-id={request-id}", requestId);
+			_logger?.Verbose("Creating stream for stored request body. request-id={RequestId}", requestId);
 
 			if (_requestData.TryRemove(requestId, out var entry))
 			{
@@ -99,14 +99,14 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public void SaveResponse(string requestId, byte[] data)
 		{
-			_logger?.Verbose("Storing response body. request id={request-id}", requestId);
+			_logger?.Verbose("Storing response body. request id={RequestId}", requestId);
 
 			_responseData[requestId] = new Entry(data, _storagePeriod);
 		}
 
 		public Stream CreateResponseStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for storing response body. request-id={request-id}", requestId);
+			_logger?.Verbose("Creating stream for storing response body. request-id={RequestId}", requestId);
 
 			var ms = new NotifyingMemoryStream();
 			ms.Disposing += (s, e) => _responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
@@ -115,7 +115,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public Stream GetResponseStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for stored response body. request-id={request-id}", requestId);
+			_logger?.Verbose("Creating stream for stored response body. request-id={RequestId}", requestId);
 
 			if (_responseData.TryRemove(requestId, out var entry))
 			{
@@ -125,15 +125,25 @@ namespace Thinktecture.Relay.Server.SignalR
 			return null;
 		}
 
-		~InMemoryPostDataTemporaryStore()
-		{
-			GC.SuppressFinalize(this);
-		}
-
 		public void Dispose()
 		{
-			_cancellationTokenSource.Cancel();
-			_cancellationTokenSource.Dispose();
+			Dispose(true);
+		}
+
+		~InMemoryPostDataTemporaryStore()
+		{
+			Dispose(false);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				_cancellationTokenSource.Cancel();
+				_cancellationTokenSource.Dispose();
+			}
+
+			GC.SuppressFinalize(this);
 		}
 
 		private class Entry

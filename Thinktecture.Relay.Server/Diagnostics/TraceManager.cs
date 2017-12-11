@@ -7,8 +7,6 @@ using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
-using System.Collections.ObjectModel;
-using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.Server.Diagnostics
 {
@@ -84,7 +82,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				}
 				catch (Exception ex)
 				{
-					_logger?.Warning(ex, "Could not read trace file information for prefix {trace-file-prefix}", traceFilePrefix);
+					_logger?.Warning(ex, "Could not read trace file information for prefix {TraceFilePrefix}", traceFilePrefix);
 				}
 			}
 

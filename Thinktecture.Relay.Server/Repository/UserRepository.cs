@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server.Repository
 				Password = passwordInformation.Hash,
 				Salt = passwordInformation.Salt,
 				UserName = userName,
-				CreationDate = DateTime.Now
+				CreationDate = DateTime.Now,
 			};
 
 			using (var context = new RelayContext())
@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.Server.Repository
 			{
 				Hash = user.Password,
 				Salt = user.Salt,
-				Iterations = user.Iterations
+				Iterations = user.Iterations,
 			};
 
 			if (_passwordHash.ValidatePassword(Encoding.UTF8.GetBytes(password), passwordInformation))
@@ -78,7 +78,7 @@ namespace Thinktecture.Relay.Server.Repository
 				{
 					UserName = user.UserName,
 					Id = user.Id,
-					CreationDate = user.CreationDate
+					CreationDate = user.CreationDate,
 				};
 			}
 
@@ -93,7 +93,7 @@ namespace Thinktecture.Relay.Server.Repository
 				{
 					Id = u.Id,
 					UserName = u.UserName,
-					CreationDate = u.CreationDate
+					CreationDate = u.CreationDate,
 				}).ToList();
 			}
 		}
@@ -104,7 +104,7 @@ namespace Thinktecture.Relay.Server.Repository
 			{
 				var dbUser = new DbUser
 				{
-					Id = id
+					Id = id,
 				};
 
 				context.Users.Attach(dbUser);
@@ -158,7 +158,7 @@ namespace Thinktecture.Relay.Server.Repository
 				{
 					CreationDate = dbUser.CreationDate,
 					Id = dbUser.Id,
-					UserName = dbUser.UserName
+					UserName = dbUser.UserName,
 				};
 			}
 		}

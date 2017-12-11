@@ -41,7 +41,7 @@ namespace Thinktecture.Relay.Server.Http
 
 			if (response == null)
 			{
-				_logger?.Verbose("Received no response. request-id={request-id}", requestId);
+				_logger?.Verbose("Received no response. request-id={RequestId}", requestId);
 
 				message.StatusCode = HttpStatusCode.GatewayTimeout;
 				message.Content = new ByteArrayContent(new byte[0]);
@@ -79,19 +79,19 @@ namespace Thinktecture.Relay.Server.Http
 
 			if (response.ContentLength == 0)
 			{
-				_logger?.Verbose("Received no body. request-id={request-id}", response.RequestId);
+				_logger?.Verbose("Received no body. request-id={RequestId}", response.RequestId);
 
 				content = new ByteArrayContent(new byte[0]);
 			}
 			else if (response.Body != null)
 			{
-				_logger?.Verbose("Received small body with data. request-id={request-id}, body-length={response-content-length}", response.RequestId, response.Body.Length);
+				_logger?.Verbose("Received small body with data. request-id={RequestId}, body-length={ResponseContentLength}", response.RequestId, response.Body.Length);
 
 				content = new ByteArrayContent(response.Body);
 			}
 			else
 			{
-				_logger?.Verbose("Received body. request-id={request-id}, content-length={response-content-length}", response.RequestId, response.ContentLength);
+				_logger?.Verbose("Received body. request-id={RequestId}, content-length={ResponseContentLength}", response.RequestId, response.ContentLength);
 
 				var stream = _postDataTemporaryStore.GetResponseStream(response.RequestId);
 				if (stream == null)

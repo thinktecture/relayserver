@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server.Repository
 					LocalUrl = requestLogEntry.LocalUrl ?? "/",
 					OriginId = requestLogEntry.OriginId,
 					Link = link,
-					LinkId = requestLogEntry.LinkId
+					LinkId = requestLogEntry.LinkId,
 				});
 
 				context.SaveChanges();
@@ -63,7 +63,7 @@ namespace Thinktecture.Relay.Server.Repository
 							OnPremiseTargetKey = d.OnPremiseTargetKey,
 							LocalUrl = d.LocalUrl,
 							OriginId = d.OriginId,
-							LinkId = d.LinkId
+							LinkId = d.LinkId,
 						});
 			}
 		}
@@ -87,7 +87,7 @@ namespace Thinktecture.Relay.Server.Repository
 						OnPremiseTargetKey = d.OnPremiseTargetKey,
 						LocalUrl = d.LocalUrl,
 						OriginId = d.OriginId,
-						LinkId = d.LinkId
+						LinkId = d.LinkId,
 					})
 					.ToList();
 			}
@@ -98,7 +98,6 @@ namespace Thinktecture.Relay.Server.Repository
 			using (var context = new RelayContext())
 			{
 				var query = CreateBasicChartDataQuery(context, id, timeFrame);
-
 				var result = AggregateContentBytesChartData(query, timeFrame);
 
 				return result;
@@ -115,7 +114,7 @@ namespace Thinktecture.Relay.Server.Repository
 				{
 					In = group.Sum(entry => entry.ContentBytesIn),
 					Out = group.Sum(entry => entry.ContentBytesOut),
-					Key = DbFunctions.CreateDateTime(group.Key.Year, group.Key.Month ?? 1, group.Key.Day ?? 1, 0, 0, 0).Value
+					Key = DbFunctions.CreateDateTime(group.Key.Year, group.Key.Month ?? 1, group.Key.Day ?? 1, 0, 0, 0).Value,
 				})
 				.OrderBy(entry => entry.Key)
 				.ToList();
@@ -131,7 +130,7 @@ namespace Thinktecture.Relay.Server.Repository
 				{
 					Year = entry.OnPremiseConnectorInDate.Year,
 					Month = entry.OnPremiseConnectorInDate.Month,
-					Day = entry.OnPremiseConnectorInDate.Day
+					Day = entry.OnPremiseConnectorInDate.Day,
 				});
 			}
 
@@ -141,7 +140,7 @@ namespace Thinktecture.Relay.Server.Repository
 				{
 					Year = entry.OnPremiseConnectorInDate.Year,
 					Month = entry.OnPremiseConnectorInDate.Month,
-					Day = null
+					Day = null,
 				});
 			}
 
@@ -149,7 +148,7 @@ namespace Thinktecture.Relay.Server.Repository
 			{
 				Year = entry.OnPremiseConnectorInDate.Year,
 				Month = null,
-				Day = null
+				Day = null,
 			});
 		}
 
@@ -159,7 +158,7 @@ namespace Thinktecture.Relay.Server.Repository
 			{
 				Start = DateTime.Now.AddDays(-7),
 				End = DateTime.Now,
-				Resolution = Resolution.Daily
+				Resolution = Resolution.Daily,
 			};
 
 			return GetContentBytesChartDataItemsForLink(Guid.Empty, timeFrame);
