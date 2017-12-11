@@ -31,12 +31,11 @@ namespace Thinktecture.Relay.Server.Config
 
 		public Configuration(ILogger logger)
 		{
-			if (!Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out var tmpInt))
+			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
+			if (Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out var tmpInt))
 			{
-				tmpInt = 30;
+				OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
 			}
-
-			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
 
 			var settings = ConfigurationManager.ConnectionStrings["RabbitMQ"];
 			if (settings != null)
@@ -114,12 +113,11 @@ namespace Thinktecture.Relay.Server.Config
 				TemporaryRequestStoragePath = null;
 			}
 
-			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["TemporaryRequestStoragePeriod"], out var tmpTimeSpan))
+			TemporaryRequestStoragePeriod = TimeSpan.FromSeconds(10);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["TemporaryRequestStoragePeriod"], out var tmpTimeSpan))
 			{
-				tmpTimeSpan = TimeSpan.FromSeconds(10);
+				TemporaryRequestStoragePeriod = tmpTimeSpan;
 			}
-
-			TemporaryRequestStoragePeriod = tmpTimeSpan;
 
 			ActiveConnectionTimeoutInSeconds = 120;
 			if (Int32.TryParse(ConfigurationManager.AppSettings["ActiveConnectionTimeoutInSeconds"], out tmpInt))
@@ -136,12 +134,11 @@ namespace Thinktecture.Relay.Server.Config
 			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
 			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
 
-			if (!TimeSpan.TryParse(ConfigurationManager.AppSettings["HstsHeaderMaxAge"], out tmpTimeSpan))
+			HstsHeaderMaxAge = TimeSpan.FromDays(365);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["HstsHeaderMaxAge"], out tmpTimeSpan))
 			{
-				tmpTimeSpan = TimeSpan.FromDays(365);
+				HstsHeaderMaxAge = tmpTimeSpan;
 			}
-
-			HstsHeaderMaxAge = tmpTimeSpan;
 
 			HstsIncludeSubdomains = false;
 			if (Boolean.TryParse(ConfigurationManager.AppSettings["HstsIncludeSubdomains"], out tmpBool))
