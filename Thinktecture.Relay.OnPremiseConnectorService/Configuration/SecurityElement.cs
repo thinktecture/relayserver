@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 	{
 		private static readonly ConfigurationProperty _authenticationType = new ConfigurationProperty("authenticationType", typeof(AuthenticationType), AuthenticationType.None, ConfigurationPropertyOptions.IsRequired);
 		private static readonly ConfigurationProperty _identity = new ConfigurationProperty("identity", typeof(IdentityElement));
-		private static readonly ConfigurationProperty _accessTokenRefreshWindow = new ConfigurationProperty("accessTokenRefreshWindow", typeof(TimeSpan), "00:00:05", new TimeSpanConverter(), new PositiveTimeSpanValidator(), ConfigurationPropertyOptions.None);
+		private static readonly ConfigurationProperty _accessTokenRefreshWindow = new ConfigurationProperty("accessTokenRefreshWindow", typeof(TimeSpan), "00:01:00", new TimeSpanConverter(), new PositiveTimeSpanValidator(), ConfigurationPropertyOptions.None);
 
 		private static readonly ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection()
 		{

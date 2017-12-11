@@ -150,6 +150,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="SecureClientController" value="false" />
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
+    <add key="AccessTokenLifetime" value="365.00:00:00" />
 </appSettings>
 ```
 
@@ -173,6 +174,7 @@ Die Standardeinstellungen umfassen dabei:
 | SecureClientController | Wenn dies gesetzt ist, muss ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines OnPremiseConnectors / Links mitsenden (default false) |
 | QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
 | RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
+| AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für OPremise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) |
 
 ## netsh settings
 
@@ -263,7 +265,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 
 ```
 <relayServer baseUrl="https://relay.company.example/" ignoreSslErrors="false" timeout="00:00:30" >
-  <security authenticationType="Identity">
+  <security authenticationType="Identity" accessTokenRefreshWindow="00:01:00" >
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
@@ -285,6 +287,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 |  Attribut | Beschreibung |
 | --- | --- |
 | authenticationType | In der aktuellen Version des RelayServers wird nur der Modus *Identity* unterstützt |
+| accessTokenRefreshWindow | Wenn das aktuelle AccessToken in diesem Zeitfenster ablaufen wird, wird versucht es zu erneuern. Default: 1 Minute |
 
 ### identity Element
 
