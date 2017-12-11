@@ -63,12 +63,6 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return result;
 			}
 
-			// validate password complexity by other rules
-			if (!_passwordComplexityValidator.ValidatePassword(user.UserName, user.Password, out var errorMessage))
-			{
-				return BadRequest(errorMessage);
-			}
-
 			var id = _userRepository.Create(user.UserName, user.Password);
 
 			if (id == Guid.Empty)
@@ -88,6 +82,13 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 			if (user.Password != user.PasswordVerification)
 			{
 				httpActionResult = BadRequest("New password and verification do not match");
+				return false;
+			}
+
+			// validate password complexity by other rules
+			if (!_passwordComplexityValidator.ValidatePassword(user.UserName, user.Password, out var errorMessage))
+			{
+				httpActionResult =  BadRequest(errorMessage);
 				return false;
 			}
 
@@ -133,21 +134,14 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				return BadRequest("Old password not okay");
 			}
 
-			// new password and repetition need to match
-			if (user.Password != user.PasswordVerification)
-			{
-				return BadRequest("New password and verification do not match");
-			}
-
 			if (user.PasswordOld == user.Password)
 			{
 				return BadRequest("New password must be different from old one.");
 			}
 
-			// validate password complexity by other rules
-			if (!_passwordComplexityValidator.ValidatePassword(authenticatedUser.UserName, user.Password, out var errorMessage))
+			if (!CheckPasswordAndVerification(user, out var error))
 			{
-				return BadRequest(errorMessage);
+				return error;
 			}
 
 			var result = _userRepository.Update(authenticatedUser.Id, user.Password);
