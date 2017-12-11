@@ -136,7 +136,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 			if (user.PasswordOld == user.Password)
 			{
-				return BadRequest("New password must be different from old one.");
+				return BadRequest("New password must be different from old one");
 			}
 
 			if (!CheckPasswordAndVerification(user, out var error))
