@@ -31,6 +31,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; set; }
 		public int MaxFailedLoginAttempts { get; set; }
 		public TimeSpan FailedLoginLockoutPeriod { get; set; }
+		public bool SecureClientController { get; set; }
 
 		public ConfigurationDummy()
 		{

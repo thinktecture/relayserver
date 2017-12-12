@@ -89,6 +89,7 @@ namespace Thinktecture.Relay.Server
 		{
 			return container.BeginLifetimeScope(builder =>
 			{
+				// This enables property injection into ASP.NET MVC filter attributes
 				builder.RegisterWebApiFilterProvider(httpConfig);
 				RegisterApiControllers(builder, config);
 			});

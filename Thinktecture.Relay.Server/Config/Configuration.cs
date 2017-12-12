@@ -32,6 +32,7 @@ namespace Thinktecture.Relay.Server.Config
 		public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; }
 		public int MaxFailedLoginAttempts { get; }
 		public TimeSpan FailedLoginLockoutPeriod { get; }
+		public bool SecureClientController { get; }
 
 		public Configuration(ILogger logger)
 		{
@@ -168,6 +169,12 @@ namespace Thinktecture.Relay.Server.Config
 				FailedLoginLockoutPeriod = tmpTimeSpan;
 			}
 
+			SecureClientController = false;
+			if (Boolean.TryParse(ConfigurationManager.AppSettings["SecureClientController"], out tmpBool))
+			{
+				SecureClientController = tmpBool;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -197,6 +204,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting IncludeErrorDetailPolicy: {IncludeErrorDetailPolicy}", IncludeErrorDetailPolicy);
 			logger?.Verbose("Setting MaxFailedLoginAttempts: {MaxFailedLoginAttempts}", MaxFailedLoginAttempts);
 			logger?.Verbose("Setting FailedLoginLockoutPeriod: {FailedLoginLockoutPeriod}", FailedLoginLockoutPeriod);
+			logger?.Verbose("Setting SecureClientController: {SecureClientController}", SecureClientController);
 		}
 	}
 }

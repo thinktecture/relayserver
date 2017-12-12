@@ -13,6 +13,7 @@ namespace Thinktecture.Relay.Server.Http.Filters
 	{
 		public override bool AllowMultiple => true;
 
+		// This will be set by Autofac property injection (hooked up in startup)
 		public IConfiguration Configuration { get; set; }
 		private readonly Func<IConfiguration, ModuleBinding> _getPropertyFunc;
 
