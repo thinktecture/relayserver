@@ -85,6 +85,9 @@
     <Compile Include="SignalR\RelayServerConnection.cs" />
     <Compile Include="RelayServerConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\Shared\AssemblyInfo.shared.cs">
+      <Link>Properties\AssemblyInfo.shared.cs</Link>
+    </Compile>
     <Compile Include="SignalR\RelayServerConnectionFactory.cs" />
   </ItemGroup>
   <ItemGroup>

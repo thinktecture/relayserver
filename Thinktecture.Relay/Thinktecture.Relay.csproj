@@ -43,6 +43,9 @@
     <Compile Include="Server\Interceptor\IOnPremiseRequestInterceptor.cs" />
     <Compile Include="Server\Interceptor\IOnPremiseResponseInterceptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\Shared\AssemblyInfo.shared.cs">
+      <Link>Properties\AssemblyInfo.shared.cs</Link>
+    </Compile>
     <Compile Include="Server\Interceptor\IReadOnlyInterceptedRequest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
