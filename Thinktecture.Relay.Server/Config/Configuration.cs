@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.IO;
 using System.Web.Http;
 using Serilog;
 
@@ -24,7 +25,7 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan TemporaryRequestStoragePeriod { get; }
 		public string TemporaryRequestStoragePath { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
-		public string InterceptorAssembly { get; }
+		public string CustomCodeAssemblyPath { get; set; }
 		public string OAuthSharedSecret { get; }
 		public string OAuthCertificate { get; }
 		public TimeSpan HstsHeaderMaxAge { get; }
@@ -38,7 +39,7 @@ namespace Thinktecture.Relay.Server.Config
 		public Configuration(ILogger logger)
 		{
 			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
-			if (Int32.TryParse(ConfigurationManager.AppSettings["OnPremiseConnectorCallbackTimeout"], out var tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out var tmpInt))
 			{
 				OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
 			}
@@ -49,135 +50,140 @@ namespace Thinktecture.Relay.Server.Config
 				RabbitMqConnectionString = settings.ConnectionString;
 			}
 
-			TraceFileDirectory = ConfigurationManager.AppSettings.Get("TraceFileDirectory") ?? "tracefiles";
+			TraceFileDirectory = ConfigurationManager.AppSettings[nameof(TraceFileDirectory)] ?? "tracefiles";
 
 			LinkPasswordLength = 100;
-			if (Int32.TryParse(ConfigurationManager.AppSettings["LinkPasswordLength"], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(LinkPasswordLength)], out tmpInt))
 			{
 				LinkPasswordLength = tmpInt;
 			}
 
 			ConnectionTimeout = 5;
-			if (Int32.TryParse(ConfigurationManager.AppSettings["ConnectionTimeout"], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(ConnectionTimeout)], out tmpInt))
 			{
 				ConnectionTimeout = tmpInt;
 			}
 
 			DisconnectTimeout = 6;
-			if (Int32.TryParse(ConfigurationManager.AppSettings["DisconnectTimeout"], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(DisconnectTimeout)], out tmpInt))
 			{
 				DisconnectTimeout = tmpInt;
 			}
 
 			KeepAliveInterval = DisconnectTimeout / 3;
-			if (Int32.TryParse(ConfigurationManager.AppSettings["KeepAliveInterval"], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(KeepAliveInterval)], out tmpInt))
 			{
 				KeepAliveInterval = tmpInt;
 			}
 
-			HostName = ConfigurationManager.AppSettings["HostName"] ?? "+";
+			HostName = ConfigurationManager.AppSettings[nameof(HostName)] ?? "+";
 
 			Port = 20000;
-			if (Int32.TryParse(ConfigurationManager.AppSettings["Port"], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(Port)], out tmpInt))
 			{
 				Port = tmpInt;
 			}
 
 			EnableManagementWeb = ModuleBinding.True;
-			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableManagementWeb"], true, out ModuleBinding tmpModuleBinding))
+			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(EnableManagementWeb)], true, out ModuleBinding tmpModuleBinding))
 			{
 				EnableManagementWeb = tmpModuleBinding;
 			}
 
 			EnableRelaying = ModuleBinding.True;
-			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableRelaying"], true, out tmpModuleBinding))
+			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(EnableRelaying)], true, out tmpModuleBinding))
 			{
 				EnableRelaying = tmpModuleBinding;
 			}
 
 			EnableOnPremiseConnections = ModuleBinding.True;
-			if (Enum.TryParse(ConfigurationManager.AppSettings["EnableOnPremiseConnections"], true, out tmpModuleBinding))
+			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(EnableOnPremiseConnections)], true, out tmpModuleBinding))
 			{
 				EnableOnPremiseConnections = tmpModuleBinding;
 			}
 
 			UseInsecureHttp = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["UseInsecureHttp"], out var tmpBool))
+			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(UseInsecureHttp)], out var tmpBool))
 			{
 				UseInsecureHttp = tmpBool;
 			}
 
-			ManagementWebLocation = ConfigurationManager.AppSettings["ManagementWebLocation"];
+			ManagementWebLocation = ConfigurationManager.AppSettings[nameof(ManagementWebLocation)];
 			if (String.IsNullOrWhiteSpace(ManagementWebLocation))
 			{
 				ManagementWebLocation = "ManagementWeb";
 			}
 
-			TemporaryRequestStoragePath = ConfigurationManager.AppSettings["TemporaryRequestStoragePath"];
+			TemporaryRequestStoragePath = ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePath)];
 			if (String.IsNullOrWhiteSpace(TemporaryRequestStoragePath))
 			{
 				TemporaryRequestStoragePath = null;
 			}
 
 			TemporaryRequestStoragePeriod = TimeSpan.FromSeconds(10);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["TemporaryRequestStoragePeriod"], out var tmpTimeSpan))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out var tmpTimeSpan))
 			{
 				TemporaryRequestStoragePeriod = tmpTimeSpan;
 			}
 
 			ActiveConnectionTimeoutInSeconds = 120;
-			if (Int32.TryParse(ConfigurationManager.AppSettings["ActiveConnectionTimeoutInSeconds"], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(ActiveConnectionTimeoutInSeconds)], out tmpInt))
 			{
 				ActiveConnectionTimeoutInSeconds = tmpInt;
 			}
 
-			InterceptorAssembly = ConfigurationManager.AppSettings["InterceptorAssembly"];
-			if (String.IsNullOrWhiteSpace(InterceptorAssembly))
+			CustomCodeAssemblyPath = ConfigurationManager.AppSettings[nameof(CustomCodeAssemblyPath)];
+			if (String.IsNullOrWhiteSpace(CustomCodeAssemblyPath))
 			{
-				InterceptorAssembly = null;
+				CustomCodeAssemblyPath = null;
+			}
+			else if (!File.Exists(CustomCodeAssemblyPath))
+			{
+				logger?.Warning("A custom code assembly has been configured, but it is not available at the configured path. assembly-path={CustomCodeAssemblyPath}", CustomCodeAssemblyPath);
+				CustomCodeAssemblyPath = null;
 			}
 
-			OAuthSharedSecret = ConfigurationManager.AppSettings["OAuthSharedSecret"];
-			OAuthCertificate = ConfigurationManager.AppSettings["OAuthCertificate"];
+			OAuthSharedSecret = ConfigurationManager.AppSettings[nameof(OAuthSharedSecret)];
+			OAuthCertificate = ConfigurationManager.AppSettings[nameof(OAuthCertificate)];
 
 			HstsHeaderMaxAge = TimeSpan.FromDays(365);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["HstsHeaderMaxAge"], out tmpTimeSpan))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(HstsHeaderMaxAge)], out tmpTimeSpan))
 			{
 				HstsHeaderMaxAge = tmpTimeSpan;
 			}
 
 			HstsIncludeSubdomains = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["HstsIncludeSubdomains"], out tmpBool))
+			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(HstsIncludeSubdomains)], out tmpBool))
 			{
 				HstsIncludeSubdomains = tmpBool;
 			}
 
 			IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Default;
-			if (Enum.TryParse(ConfigurationManager.AppSettings["IncludeErrorDetailPolicy"], true, out IncludeErrorDetailPolicy tmpIncludeErrorDetailPolicy))
+			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(IncludeErrorDetailPolicy)], true, out IncludeErrorDetailPolicy tmpIncludeErrorDetailPolicy))
 			{
 				IncludeErrorDetailPolicy = tmpIncludeErrorDetailPolicy;
 			}
 
 			MaxFailedLoginAttempts = 5;
-			if (Int32.TryParse(ConfigurationManager.AppSettings["MaxFailedLoginAttempts"], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(MaxFailedLoginAttempts)], out tmpInt))
 			{
 				MaxFailedLoginAttempts = tmpInt;
 			}
 
 			FailedLoginLockoutPeriod = TimeSpan.FromMinutes(15);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["FailedLoginLockoutPeriod"], out tmpTimeSpan))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(FailedLoginLockoutPeriod)], out tmpTimeSpan))
 			{
 				FailedLoginLockoutPeriod = tmpTimeSpan;
 			}
 
 			SecureClientController = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings["SecureClientController"], out tmpBool))
+			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(SecureClientController)], out tmpBool))
 			{
 				SecureClientController = tmpBool;
 			}
 
 			RequestQueueExpiration = TimeSpan.FromSeconds(10);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["RequestQueueExpiration"], out tmpTimeSpan))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(RequestQueueExpiration)], out tmpTimeSpan))
 			{
 				RequestQueueExpiration = tmpTimeSpan;
 			}
@@ -187,32 +193,32 @@ namespace Thinktecture.Relay.Server.Config
 
 		private void LogSettings(ILogger logger)
 		{
-			logger?.Verbose("Setting OnPremiseConnectorCallbackTimeout: {CallbackTimeout}", OnPremiseConnectorCallbackTimeout);
-			logger?.Verbose("Setting RabbitMqConnectionString: {RabbitConnectionString}", RabbitMqConnectionString);
-			logger?.Verbose("Setting TraceFileDirectory: {TraceFileDirectory}", TraceFileDirectory);
-			logger?.Verbose("Setting LinkPasswordLength: {LinkPasswordLength}", LinkPasswordLength);
-			logger?.Verbose("Setting DisconnectTimeout: {DisconnectTimeout}", DisconnectTimeout);
-			logger?.Verbose("Setting ConnectionTimeout: {ConnectionTimeout}", ConnectionTimeout);
-			logger?.Verbose("Setting UseInsecureHttp: {UseInsecureHttp}", UseInsecureHttp);
-			logger?.Verbose("Setting EnableManagementWeb: {EnableManagementweb}", EnableManagementWeb);
-			logger?.Verbose("Setting EnableRelaying: {EnableRelay}", EnableRelaying);
-			logger?.Verbose("Setting EnableOnPremiseConnections: {EnableOnpremiseConnections}", EnableOnPremiseConnections);
-			logger?.Verbose("Setting HostName: {Hostname}", HostName);
-			logger?.Verbose("Setting Port: {Port}", Port);
-			logger?.Verbose("Setting ManagementWebLocation: {ManagementwebLocation}", ManagementWebLocation);
-			logger?.Verbose("Setting TemporaryRequestStoragePath: {TempStoragePath}", TemporaryRequestStoragePath ?? "not defined - using in-memory store");
-			logger?.Verbose("Setting TemporaryRequestStoragePeriod: {TempStoragePeriod}", TemporaryRequestStoragePeriod);
-			logger?.Verbose("Setting ActiveConnectionTimeoutInSeconds: {ActiveConnectionTimeout}", ActiveConnectionTimeoutInSeconds);
-			logger?.Verbose("Setting InterceptorAssembly: {InterceptorAssembly}", InterceptorAssembly);
-			logger?.Verbose("Setting OAuthSharedSecret: {OauthSharedSecret}", OAuthSharedSecret);
-			logger?.Verbose("Setting OAuthCertificate: {OauthCertificate}", OAuthCertificate);
-			logger?.Verbose("Setting HstsHeaderMaxAge: {HstsHeaderMaxAge}", HstsHeaderMaxAge);
-			logger?.Verbose("Setting HstsIncludeSubdomains: {HstsIncludeSubdomains}", HstsIncludeSubdomains);
-			logger?.Verbose("Setting IncludeErrorDetailPolicy: {IncludeErrorDetailPolicy}", IncludeErrorDetailPolicy);
-			logger?.Verbose("Setting MaxFailedLoginAttempts: {MaxFailedLoginAttempts}", MaxFailedLoginAttempts);
-			logger?.Verbose("Setting FailedLoginLockoutPeriod: {FailedLoginLockoutPeriod}", FailedLoginLockoutPeriod);
-			logger?.Verbose("Setting SecureClientController: {SecureClientController}", SecureClientController);
-			logger?.Verbose("Setting RequestQueueExpiration: {RequestQueueExpiration}", RequestQueueExpiration);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OnPremiseConnectorCallbackTimeout), OnPremiseConnectorCallbackTimeout);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqConnectionString), RabbitMqConnectionString);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TraceFileDirectory), TraceFileDirectory);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkPasswordLength), LinkPasswordLength);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(DisconnectTimeout), DisconnectTimeout);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ConnectionTimeout), ConnectionTimeout);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(UseInsecureHttp), UseInsecureHttp);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(EnableManagementWeb), EnableManagementWeb);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(EnableRelaying), EnableRelaying);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(EnableOnPremiseConnections), EnableOnPremiseConnections);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(HostName), HostName);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(Port), Port);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ManagementWebLocation), ManagementWebLocation);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePath), TemporaryRequestStoragePath ?? "not defined - using in-memory store");
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePeriod), TemporaryRequestStoragePeriod);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ActiveConnectionTimeoutInSeconds), ActiveConnectionTimeoutInSeconds);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(CustomCodeAssemblyPath), CustomCodeAssemblyPath);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OAuthSharedSecret), OAuthSharedSecret);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OAuthCertificate), OAuthCertificate);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(HstsHeaderMaxAge), HstsHeaderMaxAge);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(HstsIncludeSubdomains), HstsIncludeSubdomains);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(IncludeErrorDetailPolicy), IncludeErrorDetailPolicy);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(MaxFailedLoginAttempts), MaxFailedLoginAttempts);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(FailedLoginLockoutPeriod), FailedLoginLockoutPeriod);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SecureClientController), SecureClientController);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RequestQueueExpiration), RequestQueueExpiration);
 		}
 	}
 }

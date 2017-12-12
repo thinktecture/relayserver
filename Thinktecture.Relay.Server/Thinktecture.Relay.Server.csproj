@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -219,6 +219,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Filters\ConfigurableClientAuthorizationAttribute.cs" />
+    <Compile Include="Controller\ControllerLoader.cs" />
+    <Compile Include="Controller\IControllerLoader.cs" />
+    <Compile Include="DependencyInjection\CustomCodeAssemblyLoader.cs" />
+    <Compile Include="DependencyInjection\ICustomCodeAssemblyLoader.cs" />
     <Compile Include="Http\Filters\NoCacheAttribute.cs" />
     <Compile Include="DependencyInjection\RelayServerModule.cs" />
     <Compile Include="Dto\LinkDetails.cs" />

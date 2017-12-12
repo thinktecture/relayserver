@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Text;
 using Thinktecture.Relay.Server.Interceptor;
 
-namespace Thinktecture.Relay.InterceptorDemos
+namespace Thinktecture.Relay.CustomCodeDemo
 {
 	public class DemoResponseInterceptor : IOnPremiseResponseInterceptor
 	{

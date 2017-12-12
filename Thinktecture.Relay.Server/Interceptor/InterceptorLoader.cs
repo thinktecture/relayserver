@@ -1,11 +1,8 @@
 using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using Autofac;
-using Autofac.Core;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
+using Thinktecture.Relay.Server.DependencyInjection;
 
 namespace Thinktecture.Relay.Server.Interceptor
 {
@@ -13,137 +10,57 @@ namespace Thinktecture.Relay.Server.Interceptor
 	{
 		private readonly ILogger _logger;
 		private readonly IConfiguration _configuration;
+		private readonly ICustomCodeAssemblyLoader _customCodeAssemblyLoader;
 
-		public InterceptorLoader(ILogger logger, IConfiguration configuration)
+		public InterceptorLoader(ILogger logger, IConfiguration configuration, ICustomCodeAssemblyLoader customCodeAssemblyLoader)
 		{
 			_logger = logger;
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_customCodeAssemblyLoader = customCodeAssemblyLoader ?? throw new ArgumentNullException(nameof(customCodeAssemblyLoader));
 		}
 
-		public void LoadInterceptors(ContainerBuilder builder)
+		public void RegisterInterceptors(ContainerBuilder builder)
 		{
-			var assemblyPath = GetAssemblyPath();
-
-			if (String.IsNullOrWhiteSpace(assemblyPath))
+			var assembly = _customCodeAssemblyLoader.Assembly;
+			if (assembly == null)
 				return;
 
 			try
 			{
-				_logger?.Debug("Trying to load interceptors from file. interceptor-assembly={InterceptorAssembly}", assemblyPath);
+				_logger?.Debug("Trying to register interceptors from custom code assembly. assembly-path={CustomCodeAssemblyPath}", _configuration.CustomCodeAssemblyPath);
 
-				var interceptorAssembly = Assembly.LoadFrom(assemblyPath);
-
-				if (!RegisterInterceptorModule(interceptorAssembly, builder))
+				if (!RegisterInterceptors(builder, typeof(IOnPremiseRequestInterceptor), typeof(IOnPremiseResponseInterceptor)))
 				{
-					_logger?.Information("Interceptor assembly does not provide a DI module. Trying to load individual interceptor types.");
-
-					if (!RegisterIndividualInterceptors(interceptorAssembly, builder))
-					{
-						_logger?.Warning("No interceptors could be registered from interceptor assembly.");
-						return;
-					}
+					_logger?.Warning("No interceptors could be registered. assembly-path={CustomCodeAssemblyPath}", _configuration.CustomCodeAssemblyPath);
+					return;
 				}
 
-				_logger?.Information("Successfully loaded interceptor assembly");
+				_logger?.Information("Successfully registered interceptors from {CustomCodeAssemblyPath}", _configuration.CustomCodeAssemblyPath);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "There was an error loading the interceptor assembly. assembly-path={InterceptorAssemblyPath}", assemblyPath);
+				_logger?.Error(ex, "There was an error loading the interceptors. assembly-path={CustomCodeAssemblyPath}", _configuration.CustomCodeAssemblyPath);
 			}
 		}
 
-		private string GetAssemblyPath()
+		private bool RegisterInterceptors(ContainerBuilder builder, params Type[] interfaceTypes)
 		{
-			var path = _configuration.InterceptorAssembly;
-
-			if (String.IsNullOrWhiteSpace(path))
-				return null;
-
-			if (!File.Exists(path))
-			{
-				_logger?.Warning("An interceptor assembly has been configured, but it is not available at the configured path. assembly-path={InterceptorAssemblyPath}", path);
-				return null;
-			}
-
-			return path;
-		}
-
-		private bool RegisterInterceptorModule(Assembly interceptorAssembly, ContainerBuilder builder)
-		{
-			var interceptorAutofacModule = LoadInterceptorModule(interceptorAssembly);
-			if (interceptorAutofacModule == null)
-				return false;
-
-			var module = (IModule)Activator.CreateInstance(interceptorAutofacModule);
-			builder.RegisterModule(module);
-
-			return true;
-		}
-
-		private Type LoadInterceptorModule(Assembly interceptorAssembly)
-		{
-			// check for Module in assembly
-			var autofacModules = interceptorAssembly.GetTypes().Where(t => t.IsAssignableTo<IModule>()).ToArray();
-
-			if (autofacModules.Length == 0)
-			{
-				return null;
-			}
-
-			if (autofacModules.Length > 1)
-			{
-				_logger?.Warning("The interceptor assembly needs to provide at maximum of one (1) Autofac Module, but more were found. interceptor-module-count={InterceptorModuleCount}", autofacModules.Length);
-				return null;
-			}
-
-			return autofacModules.Single();
-		}
-
-		private bool RegisterIndividualInterceptors(Assembly interceptorAssembly, ContainerBuilder builder)
-		{
-			var interceptorInterfaceTypes = new[] { typeof(IOnPremiseRequestInterceptor), typeof(IOnPremiseResponseInterceptor) };
 			var registered = false;
 
-			foreach (var interceptorInterfaceType in interceptorInterfaceTypes)
+			foreach (var interfaceType in interfaceTypes)
 			{
-				_logger?.Verbose("Trying to load interceptor. type={InterceptorInterface}", interceptorInterfaceType.Name);
+				_logger?.Verbose("Trying to load interceptor implementation. type={InterceptorInterface}", interfaceType.Name);
 
-				var interceptorType = FindInterceptorType(interceptorInterfaceType, interceptorAssembly);
+				var interceptorType = _customCodeAssemblyLoader.GetType(interfaceType);
 				if (interceptorType != null)
 				{
-					RegisterInterceptorType(interceptorType, interceptorInterfaceType, builder);
+					_logger?.Verbose("Registering interceptor. type={InterceptorType}', interface={InterceptorInterface}", interceptorType.Name, interfaceType.Name);
+					builder.RegisterType(interceptorType).As(interfaceType);
 					registered = true;
 				}
 			}
 
 			return registered;
-		}
-
-		private Type FindInterceptorType(Type interceptorInterfaceType, Assembly interceptorAssembly)
-		{
-			var foundInterceptors = interceptorAssembly.GetTypes()
-				.Where(interceptorInterfaceType.IsAssignableFrom)
-				.ToArray();
-
-			if (foundInterceptors.Length == 0)
-			{
-				_logger?.Debug("Did not find an interceptor in interceptor assembly. interceptor-type={InterceptorInterface}", interceptorInterfaceType.Name);
-				return null;
-			}
-
-			if (foundInterceptors.Length > 1)
-			{
-				_logger?.Warning("One kind of interceptor can only be registered once, but interceptor assembly provides multiple types that implement an interceptor. interceptor-amount={InterceptorAmount}, interceptor-interface={InterceptorInterface}", foundInterceptors.Length, interceptorInterfaceType.Name);
-				return null;
-			}
-
-			return foundInterceptors.Single();
-		}
-
-		private void RegisterInterceptorType(Type interceptorType, Type interceptorInterfaceType, ContainerBuilder builder)
-		{
-			_logger?.Verbose("Registering interceptor. type={InterceptorType}', interface={InterceptorInterface}", interceptorType.Name, interceptorInterfaceType.Name);
-			builder.RegisterType(interceptorType).As(interceptorInterfaceType);
 		}
 	}
 }
