@@ -143,7 +143,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			var props = new BasicProperties()
 			{
 				ContentEncoding = "application/json",
-				DeliveryMode = 2
+				DeliveryMode = 2,
 			};
 
 			if (request.Expiration != TimeSpan.Zero)
@@ -163,7 +163,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			var props = new BasicProperties()
 			{
 				ContentEncoding = "application/json",
-				DeliveryMode = 2
+				DeliveryMode = 2,
 			};
 			_model.BasicPublish(_EXCHANGE_NAME, originId.ToString(), false, props, content);
 
