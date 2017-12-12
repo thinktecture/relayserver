@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, linkId, originId, "Foo/Bar/Baz", 0));
 			HttpResponseMessage messageDummy;
 			_interceptorManagerMock.Setup(i => i.HandleRequest(clientRequestFake, sut.Request, out messageDummy)).Returns(clientRequestFake);
-			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
+			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, sut.Request, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
 
 			result = await sut.Relay("Foo/Bar/Baz");
 
@@ -231,7 +231,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Foo/Bar/Baz", 0));
 			HttpResponseMessage messageDummy;
 			_interceptorManagerMock.Setup(i => i.HandleRequest(clientRequestFake, sut.Request, out messageDummy)).Returns(clientRequestFake);
-			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
+			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, sut.Request, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
 
 			result = await sut.Relay("Foo/Bar/Baz");
 

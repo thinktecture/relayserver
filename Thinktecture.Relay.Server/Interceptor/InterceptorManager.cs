@@ -37,13 +37,18 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Warning(ex, "Could not fetch remote IP address for request {RequestId}", request.RequestId);
+				_logger?.Warning(ex, "Could not fetch remote IP address. request-id={RequestId}", request.RequestId);
 			}
 
 			try
 			{
 				var replacedRequest = new InterceptedRequest(request) { ClientIpAddress = ipAddress };
 				immediateResponse = _requestInceptor.OnRequestReceived(replacedRequest);
+
+				if (immediateResponse != null)
+				{
+					immediateResponse.RequestMessage = message;
+				}
 
 				return replacedRequest;
 			}
@@ -55,7 +60,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			return request;
 		}
 
-		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response)
+		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, HttpRequestMessage message, IOnPremiseConnectorResponse response)
 		{
 			if (_responseInterceptor == null)
 			{
@@ -66,12 +71,16 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			try
 			{
-				if (response == null)
+				var immediateResponse = response == null
+					? _responseInterceptor.OnResponseFailed(new InterceptedRequest(request))
+					: _responseInterceptor.OnResponseReceived(new InterceptedRequest(request), new InterceptedResponse(response));
+
+				if (immediateResponse != null)
 				{
-					return _responseInterceptor.OnResponseReceived(new InterceptedRequest(request));
+					immediateResponse.RequestMessage = message;
 				}
 
-				return _responseInterceptor.OnResponseReceived(new InterceptedRequest(request), new InterceptedResponse(response));
+				return immediateResponse;
 			}
 			catch (Exception ex)
 			{
