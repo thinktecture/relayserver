@@ -84,8 +84,9 @@ namespace Thinktecture.Relay.Server.Controller
 
 					statusCode = message.StatusCode;
 
-					if (request.SendToOnPremiseConnector)
+					if (request.AlwaysSendToOnPremiseConnector)
 					{
+						_logger?.Verbose("Interceptor caused always sending of request. request-id={RequestId}", request.RequestId);
 						await SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
 					}
 
