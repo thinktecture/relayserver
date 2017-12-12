@@ -36,7 +36,7 @@ Um einen eingehenden Request zu modifizieren oder, noch vor dem Relay-Vorgang, u
 Das Interface gibt die Methode `HttpResponseMessage OnRequestReceived(IInterceptedRequest request)` vor.
 
 - Um den Request nicht zu verändern reicht es aus `null` zurück zu geben.
-- Wird eine `HttpResonseMessage` zurück gegeben, so wird diese Response *unmittelbar* an den Client gesendet und das weiterleiten des Requests übersprungen.
+- Wird eine `HttpResonseMessage` zurück gegeben, so wird diese Response *unmittelbar* an den Client gesendet. Wenn nicht explizit das Property `SendToOnPremiseConnector` auf dem Request auf `true` gesetzt wurde, wird das Weiterleiten des Requests an den OnPremiseConnector übersprungen.
 - Um den Request zu modifizieren können die entsprechenden Werte direkt auf dem übergebenen `IInterceptedRequest` verändert werden.
 
 Folgende Werte sind veränderbar:

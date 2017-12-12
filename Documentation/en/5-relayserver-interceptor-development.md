@@ -36,7 +36,7 @@ In order to modify an incoming request, or to answer it directly before the rela
 The interface specifies the `HttpResponseMessage OnRequestReceived(IInterceptedRequest request)` method.
 
 - In order not to change the request, it is sufficient to return `null`.
-- If an `HttpResonseMessage` is returned, this reponse is *immediately* sent to the client and the forwarding of the request is skipped.
+- If an `HttpResonseMessage` is returned, this reponse is *immediately* sent to the client. If the property `SendToOnPremiseConnector` is not explicitely set to `true`, the forwarding of the request to the on premise connector is skipped.
 - To modify the request, the corresponding values ​​can be changed directly on the transferred `IInterceptedRequest`.
 
 The following values ​​can be changed:
