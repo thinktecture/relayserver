@@ -255,7 +255,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					await Send(request.AcknowledgeId).ConfigureAwait(false);
+					if (!String.IsNullOrEmpty(request.AcknowledgeId))
+					{
+						await Send(request.AcknowledgeId).ConfigureAwait(false);
+					}
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();

@@ -29,5 +29,11 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// even when an interceptor directly answers this request
 		/// </summary>
 		bool AlwaysSendToOnPremiseConnector { get; set; }
+
+		/// <summary>
+		/// Gets whether this request should be auto-acknowledged when taken from the RabbitMQ
+		/// <remarks>This can be set by an interceptor</remarks>
+		/// </summary>
+		bool AutoAcknowledge { get; set; }
 	}
 }

@@ -43,6 +43,7 @@ Folgende Werte sind veränderbar:
   - `HttpMethod`: Hiermit kann die HTTP-Method (sog. Verb) verändert werden.
   - `Url`: Hiermit kann die URL des Requests modifiziert werden.
   - `HttpHeaders`: Hier können HTTP Header entfernt, neue hinzugefügt oder existierende geändert werden.
+  - `AutoAcknowledge`: Hier kann festgelegt werden, ob der Request automatisch nach dem Lesen aus der RabbitMQ gelöscht wird (true), oder auf ein ACK vom OnPremiseConnector wartet (false).
 
 Wird keine `HttpResonseMessage` zurück gegeben, so wird der modifizierte Request über einen OnPremiseConnector an das eigentliche Ziel weitergeleitet.
 

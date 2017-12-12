@@ -55,8 +55,19 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					{
 						var json = _encoding.GetString(args.Body);
 						var request = JsonConvert.DeserializeObject<OnPremiseConnectorRequest>(json);
-						request.AcknowledgeId = args.DeliveryTag.ToString();
 
+						if (!noAck)
+						{
+							if (request.AutoAcknowledge)
+							{
+								_model.BasicAck(args.DeliveryTag, false);
+							}
+							else
+							{
+								request.AcknowledgeId = args.DeliveryTag.ToString();
+							}
+						}
+						
 						observer.OnNext(request);
 					}
 					catch (Exception ex)
