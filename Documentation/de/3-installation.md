@@ -147,6 +147,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="IncludeErrorDetailPolicy" value="default" />
     <add key="MaxFailedLoginAttempts" value="5" />
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
+    <add key="RequestQueueExpiration" value="00:00:10" />
 </appSettings>
 ```
 
@@ -167,6 +168,7 @@ Die Standardeinstellungen umfassen dabei:
 | IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default'). Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
 | MaxFailedLoginAttempts | Anzahl von erfolglosen Login-Versuchen für einen User, bevor dieser temporär gesperrt wird (default 5) |
 | FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
+| RequestQueueExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus RabbitMQ verworfen wird (default 10 Sekunden) |
 
 ## netsh settings
 

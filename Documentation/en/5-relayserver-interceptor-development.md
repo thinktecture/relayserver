@@ -43,6 +43,8 @@ The following values ​​can be changed:
 - `HttpMethod`: The HTTP method (so-called verb) can be changed here.
 - `Url`: The URL of the request can be modified.
 - `HttpHeaders`: HTTP headers can be removed, new added or existing changed.
+- `AlwaysSendToOnPremiseConnector`: Setting this to true will cause the request to be relayed to the OnPremiseConnector even if the interceptor immediately answers it by returning an `HttpResponseMessage`.
+- `Expiration`: The TTL of this request in the RabbitMQ can be changed here.
 
 If no `HttpResonseMessage` is returned, the modified request is forwarded to the actual destination via an OnPremiseConnector.
 

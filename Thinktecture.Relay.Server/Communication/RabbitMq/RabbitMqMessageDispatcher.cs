@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,8 +14,6 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 {
 	public class RabbitMqMessageDispatcher : IMessageDispatcher, IDisposable
 	{
-		private static readonly int _queueExpiration = (int)TimeSpan.FromSeconds(10).TotalMilliseconds;
-
 		private const string _EXCHANGE_NAME = "Relay Server";
 
 		private readonly ILogger _logger;
@@ -134,6 +132,12 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				ContentEncoding = "application/json",
 				DeliveryMode = 2
 			};
+
+			if (request.Expiration != TimeSpan.Zero)
+			{
+				props.Expiration = request.Expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+			}
+
 			_model.BasicPublish(_EXCHANGE_NAME, linkId.ToString(), false, props, content);
 
 			return Task.CompletedTask;
@@ -160,8 +164,8 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		private void DeclareQueue(string name)
 		{
-			_logger?.Verbose("Declaring queue. name={QueueName}, expiration={QueueExpiration} sec", name, _queueExpiration / 1000);
-			_model.QueueDeclare(name, true, false, false, new Dictionary<string, object>() { ["x-expires"] = _queueExpiration });
+			_logger?.Verbose("Declaring queue. name={QueueName}", name);
+			_model.QueueDeclare(name, true, false, false);
 		}
 
 		private void Dispose(bool disposing)

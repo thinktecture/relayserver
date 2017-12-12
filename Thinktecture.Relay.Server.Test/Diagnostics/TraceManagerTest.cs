@@ -60,6 +60,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; }
 			public int MaxFailedLoginAttempts { get; }
 			public TimeSpan FailedLoginLockoutPeriod { get; }
+			public TimeSpan RequestQueueExpiration { get; }
 
 			public Configuration()
 			{

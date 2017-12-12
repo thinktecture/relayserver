@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Thinktecture.Relay.Server.Interceptor
@@ -29,5 +30,11 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// even when an interceptor directly answers this request
 		/// </summary>
 		bool AlwaysSendToOnPremiseConnector { get; set; }
+
+		/// <summary>
+		/// Gets the request TTL within the RabbitMQ
+		/// <remarks>This can be set by an interceptor</remarks>
+		/// </summary>
+		TimeSpan Expiration { get; set; }
 	}
 }

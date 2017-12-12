@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Serilog;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.SignalR;
 
@@ -13,13 +14,15 @@ namespace Thinktecture.Relay.Server.Http
 	{
 		private static readonly string[] _ignoredHeaders = { "Host", "Connection" };
 
-		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly ILogger _logger;
+		private readonly IConfiguration _configuration;
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 
-		public OnPremiseRequestBuilder(ILogger logger, IPostDataTemporaryStore postDataTemporaryStore)
+		public OnPremiseRequestBuilder(ILogger logger, IConfiguration configuration, IPostDataTemporaryStore postDataTemporaryStore)
 		{
-			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 			_logger = logger;
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 		}
 
 		public async Task<IOnPremiseConnectorRequest> BuildFromHttpRequest(HttpRequestMessage message, Guid originId, string pathWithoutUserName)
@@ -31,7 +34,8 @@ namespace Thinktecture.Relay.Server.Http
 				Url = pathWithoutUserName + message.RequestUri.Query,
 				HttpHeaders = message.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
 				OriginId = originId,
-				RequestStarted = DateTime.UtcNow
+				RequestStarted = DateTime.UtcNow,
+				Expiration = _configuration.RequestQueueExpiration,
 			};
 
 			if (message.Content.Headers.ContentLength.GetValueOrDefault(0x10000) >= 0x10000)
