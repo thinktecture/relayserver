@@ -86,14 +86,14 @@ namespace Thinktecture.Relay.Server.Controller
 
 					if (request.SendToOnPremiseConnector)
 					{
-						await SendRequestToOnPremise(link.Id, request).ConfigureAwait(false);
+						await SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
 					}
 
 					return message;
 				}
 
 				var task = _backendCommunication.GetResponseAsync(request.RequestId);
-				await SendRequestToOnPremise(link.Id, request).ConfigureAwait(false);
+				await SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
 
 				_logger?.Verbose("Waiting for response. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				response = await task.ConfigureAwait(false);
@@ -116,7 +116,7 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 		}
 
-		private async Task SendRequestToOnPremise(Guid linkId, IOnPremiseConnectorRequest request)
+		private async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
 			await _backendCommunication.SendOnPremiseConnectorRequest(linkId, request).ConfigureAwait(false);
