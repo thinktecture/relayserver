@@ -64,5 +64,11 @@ namespace Thinktecture.Relay.Server.OnPremise
 		/// Gets the request body size (shouldn't 2GB be enough *cough*)
 		/// </summary>
 		long ContentLength { get; }
+
+		/// <summary>
+		/// Determines, whether this request will always be send to an on premise connector
+		/// even when an interceptor directly answers this request
+		/// </summary>
+		bool AlwaysSendToOnPremiseConnector { get; }
 	}
 }
