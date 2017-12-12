@@ -83,13 +83,17 @@ namespace Thinktecture.Relay.Server.Controller
 					_logger?.Verbose("Interceptor caused direct answering of request. request-id={RequestId}, status-code={ResponseStatusCode}", request.RequestId, message.StatusCode);
 
 					statusCode = message.StatusCode;
+
+					if (request.SendToOnPremiseConnector)
+					{
+						await SendRequestToOnPremise(link.Id, request).ConfigureAwait(false);
+					}
+
 					return message;
 				}
 
 				var task = _backendCommunication.GetResponseAsync(request.RequestId);
-
-				_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
-				await _backendCommunication.SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
+				await SendRequestToOnPremise(link.Id, request).ConfigureAwait(false);
 
 				_logger?.Verbose("Waiting for response. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				response = await task.ConfigureAwait(false);
@@ -110,6 +114,12 @@ namespace Thinktecture.Relay.Server.Controller
 			{
 				FinishRequest(request, response, link.Id, path, statusCode);
 			}
+		}
+
+		private async Task SendRequestToOnPremise(Guid linkId, IOnPremiseConnectorRequest request)
+		{
+			_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
+			await _backendCommunication.SendOnPremiseConnectorRequest(linkId, request).ConfigureAwait(false);
 		}
 
 		private bool CanRequestBeHandled(string path, PathInformation pathInformation, Link link)

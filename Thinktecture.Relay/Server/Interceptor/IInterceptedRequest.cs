@@ -23,5 +23,11 @@ namespace Thinktecture.Relay.Server.Interceptor
 		new IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
 
 		Dictionary<string, string> CloneHttpHeaders();
+
+		/// <summary>
+		/// Determines, whether this request will be send
+		/// to an on premise connector even when an interceptor directly answers this request
+		/// </summary>
+		bool SendToOnPremiseConnector { get; set; }
 	}
 }

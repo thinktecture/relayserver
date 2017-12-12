@@ -24,6 +24,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			Body = other.Body;
 			Stream = other.Stream;
 			ContentLength = other.ContentLength;
+			SendToOnPremiseConnector = other.SendToOnPremiseConnector;
 		}
 
 		public Dictionary<string, string> CloneHttpHeaders()
