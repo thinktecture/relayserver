@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// This method can modify the request and prevent further processing by returning an <see cref="HttpResponseMessage"/>.
 		/// </summary>
 		/// <param name="request">The request that can be modified.</param>
-		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immidiately be send out to the client without any further processing.</returns>
+		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immediately be send out to the client without any further processing.</returns>
 		HttpResponseMessage OnRequestReceived(IInterceptedRequest request);
 	}
 }

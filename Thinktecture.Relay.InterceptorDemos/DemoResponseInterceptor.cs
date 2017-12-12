@@ -7,7 +7,7 @@ namespace Thinktecture.Relay.InterceptorDemos
 {
 	public class DemoResponseInterceptor : IOnPremiseResponseInterceptor
 	{
-		public HttpResponseMessage OnResponseReceived(IInterceptedRequest request)
+		public HttpResponseMessage OnResponseFailed(IInterceptedRequest request)
 		{
 			return new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
 			{

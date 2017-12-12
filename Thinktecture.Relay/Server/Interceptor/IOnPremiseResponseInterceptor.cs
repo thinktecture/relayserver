@@ -11,15 +11,15 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// This method is called if no response could be fetched for given <paramref name="request"/>.
 		/// </summary>
 		/// <param name="request">The original request.</param>
-		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immidiately be send out to the client without any further processing.</returns>
-		HttpResponseMessage OnResponseReceived(IInterceptedRequest request);
+		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immediately be send out to the client without any further processing.</returns>
+		HttpResponseMessage OnResponseFailed(IInterceptedRequest request);
 
 		/// <summary>
 		/// This method can modify the response and prevent further processing by returning an <see cref="HttpResponseMessage"/>.
 		/// </summary>
 		/// <param name="request">The original request that the <paramref name="response"/> is meant for.</param>
 		/// <param name="response">The response from the remote location that is to be modified, or null if no response could be retrieved.</param>
-		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immidiately be send out to the client without any further processing.</returns>
+		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immediately be send out to the client without any further processing.</returns>
 		HttpResponseMessage OnResponseReceived(IInterceptedRequest request, IInterceptedResponse response);
 	}
 }

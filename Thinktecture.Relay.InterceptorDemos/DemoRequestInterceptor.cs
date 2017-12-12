@@ -30,12 +30,12 @@ namespace Thinktecture.Relay.InterceptorDemos
 		/// This method can modify the request and prevent further processing by returning an <see cref="HttpResponseMessage"/>.
 		/// </summary>
 		/// <param name="request">The request that can be modified.</param>
-		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immidiately be send out to the client without any further processing.</returns>
+		/// <returns>If the returned <see cref="HttpResponseMessage"/> is not null then it will immediately be send out to the client without any further processing.</returns>
 		public HttpResponseMessage OnRequestReceived(IInterceptedRequest request)
 		{
 			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
 
-			// If a PUT is received, we immidiately reject and tell the user to use PATCH instead
+			// If a PUT is received, we immediately reject and tell the user to use PATCH instead
 			if (String.Equals(request.HttpMethod, HttpMethod.Put.Method, StringComparison.InvariantCultureIgnoreCase))
 			{
 				return new HttpResponseMessage(HttpStatusCode.MethodNotAllowed)

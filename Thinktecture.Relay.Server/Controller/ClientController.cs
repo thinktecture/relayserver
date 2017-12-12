@@ -109,7 +109,7 @@ namespace Thinktecture.Relay.Server.Controller
 					_logger?.Verbose("On-Premise timeout. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				}
 
-				return _interceptorManager.HandleResponse(request, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);
+				return _interceptorManager.HandleResponse(request, Request, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);
 			}
 			finally
 			{

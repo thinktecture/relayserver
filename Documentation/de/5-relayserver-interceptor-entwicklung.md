@@ -52,7 +52,7 @@ Eine Response, die über einen OnPremise Connector vom On-Premise Dienst zurück
 
 Dieses Interface gibt zwei zu implementierende Methoden vor:
 
-  * `HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request)`: Wird aufgerufen, wenn vom On-Premise Dienst *keine* Antwort empfangen wurde. Für diesen Fall kann hier eine Antwort generiert werden.
+  * `HttpResponseMessage OnResponseFailed(IReadOnlyInterceptedRequest request)`: Wird aufgerufen, wenn vom On-Premise Dienst *keine* Antwort empfangen wurde. Für diesen Fall kann hier eine Antwort generiert werden.
   * `HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request, IInterceptedResponse response)`: Wird aufgerufen, wenn eine Antwort empfangen wurde. Diese kann hier verändert oder durch eine eigene Antwort ersetzt werden.
 
 Sollte keine Response vom OnPremise Connector vorliegen, so wird die erste Version aufgerufen.
