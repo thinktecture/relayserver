@@ -44,15 +44,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private string _accessToken;
 		private DateTime _tokenExpiry = DateTime.MaxValue;
 
-		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeoutinSeconds,
-		    int tokenRefreshWindowInSeconds, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeoutInSeconds,
+			int tokenRefreshWindowInSeconds, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={Assembly.GetEntryAssembly().GetName().Version}")
 		{
 			_relayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;
 			_password = password;
 			_relayServerUri = relayServerUri;
-			_requestTimeoutInSeconds = requestTimeoutInSecondsInSeconds;
+			_requestTimeoutInSeconds = requestTimeoutInSeconds;
 			_tokenRefreshWindowInSeconds = TimeSpan.FromSeconds(tokenRefreshWindowInSeconds);
 
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
@@ -60,7 +60,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_httpClient = new HttpClient()
 			{
-				Timeout = TimeSpan.FromSeconds(requestTimeoutInSecondsInSeconds),
+				Timeout = TimeSpan.FromSeconds(requestTimeoutInSeconds),
 			};
 			_cts = new CancellationTokenSource();
 
