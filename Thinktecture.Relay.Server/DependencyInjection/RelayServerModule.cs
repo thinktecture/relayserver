@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 		{
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_customCodeAssemblyLoader = customCodeAssemblyLoader ?? throw new ArgumentNullException(nameof(customCodeAssemblyLoader));
-			_controllerLoader = controllerLoader;
+			_controllerLoader = controllerLoader ?? throw new ArgumentNullException(nameof(controllerLoader));
 			_interceptorLoader = interceptorLoader ?? throw new ArgumentNullException(nameof(interceptorLoader));
 		}
 
