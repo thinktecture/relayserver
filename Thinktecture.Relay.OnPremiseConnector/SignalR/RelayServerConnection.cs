@@ -285,7 +285,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					_logger?.Verbose("Unhandled request. message={message}", message);
 
-					var response = new OnPremiseTargetResponse
+					var response = new OnPremiseTargetResponse()
 					{
 						RequestStarted = ctx.StartDate,
 						RequestFinished = DateTime.UtcNow,
