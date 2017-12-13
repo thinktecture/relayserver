@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR.Client;
@@ -19,6 +20,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal class RelayServerConnection : Connection, IRelayServerConnection
 	{
+		private const int CONNECTOR_VERSION = 2;
+		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
+		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
+
+		private static int _nextId;
+		private static readonly Random _random = new Random();
+
 		private readonly string _userName;
 		private readonly string _password;
 		private readonly Uri _relayServerUri;
@@ -28,19 +36,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
 		private readonly HttpClient _httpClient;
 		private readonly int _relayServerConnectionId;
+
 		private CancellationTokenSource _cts;
 		private DateTime _lastHeartbeat;
 		private string _accessToken;
 		private bool _stopRequested;
 
-		private static int _nextId;
-		private static readonly Random _random = new Random();
-
-		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
-		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
-
 		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, "version=2")
+			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"version={CONNECTOR_VERSION}&assemblyVersion={Assembly.GetEntryAssembly().GetName().Version}")
 		{
 			_relayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;
