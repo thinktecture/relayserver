@@ -258,11 +258,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					if (!String.IsNullOrEmpty(request.AcknowledgeId))
-					{
-						_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
-						await Send(request.AcknowledgeId).ConfigureAwait(false);
-					}
+					await AcknowlegdeRequest(request);
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
@@ -308,6 +304,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 				}
 			}
+		}
+
+		private Task AcknowlegdeRequest(IOnPremiseTargetRequest request)
+		{
+			_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+
+			return SendToRelayAsync($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", HttpMethod.Get, null, null, CancellationToken.None);
 		}
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
