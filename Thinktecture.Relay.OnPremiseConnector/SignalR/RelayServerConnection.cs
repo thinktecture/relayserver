@@ -260,8 +260,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					if (!String.IsNullOrEmpty(request.AcknowledgeId))
 					{
-						_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
-						await Send(request.AcknowledgeId).ConfigureAwait(false);
+						await AcknowlegdeRequest(request).ConfigureAwait(false);
 					}
 				}
 
@@ -289,7 +288,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					_logger?.Verbose("Unhandled request. message={message}", message);
 
-					var response = new OnPremiseTargetResponse
+					var response = new OnPremiseTargetResponse()
 					{
 						RequestStarted = ctx.StartDate,
 						RequestFinished = DateTime.UtcNow,
@@ -308,6 +307,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 				}
 			}
+		}
+
+		private Task AcknowlegdeRequest(IOnPremiseTargetRequest request)
+		{
+			_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+
+			return SendToRelayAsync($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", HttpMethod.Get, null, null, CancellationToken.None);
 		}
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)

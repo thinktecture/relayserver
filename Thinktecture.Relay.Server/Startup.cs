@@ -236,6 +236,7 @@ namespace Thinktecture.Relay.Server
 			{
 				logger?.Information("On-premise connections enabled");
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
+				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequestAcknowledgement", "request/acknowledge", new { controller = "Request", action = "Acknowledge" });
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
 			}
 

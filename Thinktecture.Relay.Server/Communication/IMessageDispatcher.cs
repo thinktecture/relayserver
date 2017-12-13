@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server.Communication
 		IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck);
 		IObservable<IOnPremiseConnectorResponse> OnResponseReceived(Guid originId);
 
-		void AcknowledgeRequest(Guid linkId, string acknowledgeId);
+		void AcknowledgeRequest(string acknowledgeId);
 
 		Task DispatchRequest(Guid linkId, IOnPremiseConnectorRequest request);
 		Task DispatchResponse(Guid originId, IOnPremiseConnectorResponse response);

@@ -1,7 +1,9 @@
+using System;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Serilog;
+using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.SignalR;
 
@@ -12,13 +14,15 @@ namespace Thinktecture.Relay.Server.Controller
 	[NoCache]
 	public class RequestController : ApiController
 	{
-		private readonly IPostDataTemporaryStore _temporaryStore;
 		private readonly ILogger _logger;
+		private readonly IPostDataTemporaryStore _temporaryStore;
+		private readonly IBackendCommunication _backendCommunication;
 
-		public RequestController(IPostDataTemporaryStore temporaryStore, ILogger logger)
+		public RequestController(ILogger logger, IPostDataTemporaryStore temporaryStore, IBackendCommunication backendCommunication)
 		{
-			_temporaryStore = temporaryStore;
 			_logger = logger;
+			_temporaryStore = temporaryStore ?? throw new ArgumentNullException(nameof(temporaryStore));
+			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
 		}
 
 		public IHttpActionResult Get(string requestId)
@@ -33,6 +37,15 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 
 			return new ResponseMessageResult(new HttpResponseMessage() { Content = new StreamContent(stream) });
+		}
+
+		[HttpGet]
+		public IHttpActionResult Acknowledge(string id, string tag)
+		{
+			_logger?.Verbose("Received acknowledge. connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", id, tag);
+
+			_backendCommunication.AcknowledgeOnPremiseConnectorRequest(id, tag);
+			return Ok();
 		}
 	}
 }

@@ -131,7 +131,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			});
 		}
 
-		public void AcknowledgeRequest(Guid linkId, string acknowledgeId)
+		public void AcknowledgeRequest(string acknowledgeId)
 		{
 			if (UInt64.TryParse(acknowledgeId, out var deliveryTag))
 				_model.BasicAck(deliveryTag, false);
