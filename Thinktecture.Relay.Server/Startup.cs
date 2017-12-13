@@ -38,18 +38,17 @@ namespace Thinktecture.Relay.Server
 {
 	internal class Startup : IStartup
 	{
-		private readonly ILifetimeScope _rootScope;
 		private readonly ILogger _logger;
-		private readonly IOAuthAuthorizationServerProvider _authorizationServerProvider;
 		private readonly IConfiguration _configuration;
+		private readonly ILifetimeScope _rootScope;
+		private readonly IOAuthAuthorizationServerProvider _authorizationServerProvider;
 
-		public Startup(ILogger logger, IConfiguration configuration, IOAuthAuthorizationServerProvider authorizationServerProvider, ILifetimeScope rootScope)
+		public Startup(ILogger logger, IConfiguration configuration, ILifetimeScope rootScope, IOAuthAuthorizationServerProvider authorizationServerProvider)
 		{
 			_logger = logger;
-
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-			_authorizationServerProvider = authorizationServerProvider ?? throw new ArgumentNullException(nameof(authorizationServerProvider));
 			_rootScope = rootScope ?? throw new ArgumentNullException(nameof(rootScope));
+			_authorizationServerProvider = authorizationServerProvider ?? throw new ArgumentNullException(nameof(authorizationServerProvider));
 		}
 
 		public void Configuration(IAppBuilder app)
@@ -73,7 +72,7 @@ namespace Thinktecture.Relay.Server
 		{
 			Database.SetInitializer(new MigrateDatabaseToLatestVersion<RelayContext, Migrations.Configuration>());
 
-			var migrator  = new DbMigrator(new Migrations.Configuration
+			var migrator = new DbMigrator(new Migrations.Configuration
 			{
 				AutomaticMigrationsEnabled = true,
 				AutomaticMigrationDataLossAllowed = false
@@ -85,7 +84,7 @@ namespace Thinktecture.Relay.Server
 			}
 		}
 
-		private static ILifetimeScope RegisterAdditionalServices(ILifetimeScope container, HttpConfiguration httpConfig, IConfiguration config)
+		private ILifetimeScope RegisterAdditionalServices(ILifetimeScope container, HttpConfiguration httpConfig, IConfiguration config)
 		{
 			return container.BeginLifetimeScope(builder =>
 			{
@@ -223,6 +222,9 @@ namespace Thinktecture.Relay.Server
 				httpConfig.Filters.Add(new LogActionFilter(logger?.ForContext<LogActionFilter>()));
 
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
+			// custom code api controllers should use the RouteAttribute only
+
+			httpConfig.MapHttpAttributeRoutes();
 
 			if (configuration.EnableRelaying != ModuleBinding.False)
 			{
@@ -269,7 +271,7 @@ namespace Thinktecture.Relay.Server
 					app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
 				}
 
-				options.StaticFileOptions.OnPrepareResponse = (ctx) =>
+				options.StaticFileOptions.OnPrepareResponse = ctx =>
 				{
 					ctx.OwinContext.Response.Headers.Append("X-Frame-Options", "DENY");
 					ctx.OwinContext.Response.Headers.Append("X-XSS-Protection", "1; mode=block");

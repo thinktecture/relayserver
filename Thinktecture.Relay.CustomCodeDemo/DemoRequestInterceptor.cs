@@ -4,7 +4,7 @@ using System.Net.Http;
 using Serilog;
 using Thinktecture.Relay.Server.Interceptor;
 
-namespace Thinktecture.Relay.InterceptorDemos
+namespace Thinktecture.Relay.CustomCodeDemo
 {
 	/// <inheritdoc />
 	/// <summary>

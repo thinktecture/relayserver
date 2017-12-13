@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Server.Config
 		string TemporaryRequestStoragePath { get; }
 		TimeSpan TemporaryRequestStoragePeriod { get; }
 		int ActiveConnectionTimeoutInSeconds { get; }
-		string InterceptorAssembly { get; }
+		string CustomCodeAssemblyPath { get; set; }
 		string OAuthSharedSecret { get; }
 		string OAuthCertificate { get; }
 		TimeSpan HstsHeaderMaxAge { get; }

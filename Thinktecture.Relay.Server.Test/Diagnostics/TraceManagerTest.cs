@@ -52,7 +52,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public string TemporaryRequestStoragePath { get; }
 			public TimeSpan TemporaryRequestStoragePeriod { get; }
 			public int ActiveConnectionTimeoutInSeconds { get; }
-			public string InterceptorAssembly { get; }
+			public string CustomCodeAssemblyPath { get; set; }
 			public string OAuthSharedSecret { get; }
 			public string OAuthCertificate { get; }
 			public TimeSpan HstsHeaderMaxAge { get; }

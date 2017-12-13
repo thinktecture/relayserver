@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Communication.RabbitMq;
 using Thinktecture.Relay.Server.Config;
+using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
@@ -15,14 +16,18 @@ using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.DependencyInjection
 {
-	class RelayServerModule : Module
+	internal class RelayServerModule : Module
 	{
 		private readonly IConfiguration _configuration;
+		private readonly ICustomCodeAssemblyLoader _customCodeAssemblyLoader;
+		private readonly IControllerLoader _controllerLoader;
 		private readonly IInterceptorLoader _interceptorLoader;
 
-		public RelayServerModule(IConfiguration configuration, IInterceptorLoader interceptorLoader)
+		public RelayServerModule(IConfiguration configuration, ICustomCodeAssemblyLoader customCodeAssemblyLoader, IControllerLoader controllerLoader, IInterceptorLoader interceptorLoader)
 		{
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_customCodeAssemblyLoader = customCodeAssemblyLoader ?? throw new ArgumentNullException(nameof(customCodeAssemblyLoader));
+			_controllerLoader = controllerLoader ?? throw new ArgumentNullException(nameof(controllerLoader));
 			_interceptorLoader = interceptorLoader ?? throw new ArgumentNullException(nameof(interceptorLoader));
 		}
 
@@ -78,7 +83,10 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 
 			builder.RegisterType<PasswordComplexityValidator>().AsImplementedInterfaces();
 
-			_interceptorLoader.LoadInterceptors(builder);
+			_customCodeAssemblyLoader.RegisterModule(builder);
+
+			_controllerLoader.RegisterControllers(builder);
+			_interceptorLoader.RegisterInterceptors(builder);
 		}
 	}
 }

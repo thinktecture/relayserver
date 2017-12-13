@@ -4,6 +4,7 @@ using Autofac;
 using AutofacSerilogIntegration;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
+using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Interceptor;
 using Topshelf;
@@ -15,9 +16,7 @@ namespace Thinktecture.Relay.Server
 	{
 		private static void Main(string[] args)
 		{
-			Log.Logger = new LoggerConfiguration()
-				.ReadFrom.AppSettings()
-				.CreateLogger();
+			Log.Logger = new LoggerConfiguration().ReadFrom.AppSettings().CreateLogger();
 
 			try
 			{
@@ -56,8 +55,6 @@ namespace Thinktecture.Relay.Server
 				Log.CloseAndFlush();
 			}
 
-			Log.CloseAndFlush();
-
 #if DEBUG
 			if (Debugger.IsAttached)
 			{
@@ -73,8 +70,13 @@ namespace Thinktecture.Relay.Server
 			var builder = new ContainerBuilder();
 
 			builder.RegisterLogger();
+
 			builder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
+
+			builder.RegisterType<CustomCodeAssemblyLoader>().As<ICustomCodeAssemblyLoader>().SingleInstance();
+			builder.RegisterType<ControllerLoader>().As<IControllerLoader>().SingleInstance();
 			builder.RegisterType<InterceptorLoader>().As<IInterceptorLoader>().SingleInstance();
+
 			builder.RegisterType<RelayServerModule>();
 
 			return builder.Build();
