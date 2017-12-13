@@ -70,15 +70,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			return Task.CompletedTask;
 		}
 
-		protected override Task OnReceived(IRequest request, string connectionId, string data)
-		{
-			_logger?.Debug("Acknowledge received. connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", connectionId, data);
-
-			_backendCommunication.AcknowledgeOnPremiseConnectorRequest(connectionId, data);
-
-			return base.OnReceived(request, connectionId, data);
-		}
-
 		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
 		{
 			var claimsPrincipal = (ClaimsPrincipal)request.User;
