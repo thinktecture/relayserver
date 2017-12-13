@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Server.Communication.InProcess
 			});
 		}
 
-		public void AcknowledgeRequest(Guid linkId, string acknowledgeId)
+		public void AcknowledgeRequest(string acknowledgeId)
 		{
 			// no ack here
 		}
