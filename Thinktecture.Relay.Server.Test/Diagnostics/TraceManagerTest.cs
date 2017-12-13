@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using System.Web.Http;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
+using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
 
@@ -31,42 +31,6 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			public byte[] Body { get; set; }
 			public Stream Stream { get; set; }
 			public long ContentLength { get; set; }
-		}
-
-		private class Configuration : IConfiguration
-		{
-			public TimeSpan OnPremiseConnectorCallbackTimeout { get; }
-			public string RabbitMqConnectionString { get; }
-			public string TraceFileDirectory { get; }
-			public int LinkPasswordLength { get; }
-			public int DisconnectTimeout { get; }
-			public int ConnectionTimeout { get; }
-			public int KeepAliveInterval { get; }
-			public bool UseInsecureHttp { get; }
-			public ModuleBinding EnableManagementWeb { get; }
-			public ModuleBinding EnableRelaying { get; }
-			public ModuleBinding EnableOnPremiseConnections { get; }
-			public string HostName { get; }
-			public int Port { get; }
-			public string ManagementWebLocation { get; }
-			public string TemporaryRequestStoragePath { get; }
-			public TimeSpan TemporaryRequestStoragePeriod { get; }
-			public int ActiveConnectionTimeoutInSeconds { get; }
-			public string CustomCodeAssemblyPath { get; set; }
-			public string OAuthSharedSecret { get; }
-			public string OAuthCertificate { get; }
-			public TimeSpan HstsHeaderMaxAge { get; }
-			public bool HstsIncludeSubdomains { get; }
-			public IncludeErrorDetailPolicy IncludeErrorDetailPolicy { get; }
-			public int MaxFailedLoginAttempts { get; }
-			public TimeSpan FailedLoginLockoutPeriod { get; }
-			public bool SecureClientController { get; }
-			public TimeSpan RequestQueueExpiration { get; }
-
-			public Configuration()
-			{
-				TraceFileDirectory = "tracefiles";
-			}
 		}
 
 		[TestMethod]
@@ -124,7 +88,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 66, 67, 68 }
 			};
-			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, new Configuration(), loggerMock.Object);
+			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, CreateDummyConfiguration(), loggerMock.Object);
 
 			Directory.CreateDirectory("tracefiles");
 			Directory.Delete("tracefiles");
@@ -171,7 +135,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			string onPremiseTargetResponseBodyFileName = null;
 			string onPremiseTargetResponseHeadersFileName = null;
 			DateTime startTime;
-			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, new Configuration(), loggerMock.Object);
+			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, CreateDummyConfiguration(), loggerMock.Object);
 
 			startTime = DateTime.Now;
 
@@ -217,7 +181,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				},
 				Body = new byte[] { 66, 67, 68 }
 			};
-			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, new Configuration(), loggerMock.Object);
+			ITraceManager sut = new TraceManager(null, traceFileWriterMock.Object, null, CreateDummyConfiguration(), loggerMock.Object);
 
 			var exception = new Exception();
 
@@ -233,7 +197,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		public async Task GetTraceFilesAsync_returns_file_info_objects_for_all_trace_files_of_a_given_prefix()
 		{
 			var traceFileReaderMock = new Mock<TraceFileReader>() { CallBase = true };
-			var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), null);
+			var sut = new TraceManager(null, null, traceFileReaderMock.Object, CreateDummyConfiguration(), null);
 			const string filePrefix1 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831637";
 			const string filePrefix2 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831700";
 			IEnumerable<Trace> result;
@@ -270,7 +234,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		{
 			var loggerMock = new Mock<ILogger>();
 			var traceFileReaderMock = new Mock<TraceFileReader>() { CallBase = true };
-			var sut = new TraceManager(null, null, traceFileReaderMock.Object, new Configuration(), loggerMock.Object);
+			var sut = new TraceManager(null, null, traceFileReaderMock.Object, CreateDummyConfiguration(), loggerMock.Object);
 			const string filePrefix1 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831637";
 			const string filePrefix2 = "7975999f-54d9-4b21-a093-4502ea372723-635497418466831700";
 			IEnumerable<Trace> result;
@@ -303,6 +267,14 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 			loggerMock.Verify(m => m.Warning(It.IsAny<FileNotFoundException>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
 			result.Count().Should().Be(1);
+		}
+
+		private IConfiguration CreateDummyConfiguration()
+		{
+			return new ConfigurationDummy()
+			{
+				TraceFileDirectory = "tracefiles",
+			};
 		}
 	}
 }
