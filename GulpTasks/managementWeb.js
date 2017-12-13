@@ -39,7 +39,7 @@ gulp.task('managementweb:start-livereload-server', function () {
 });
 
 gulp.task('managementweb:live-server', function () {
-    runSequence('managementweb:less', 'managementweb:inject', 'managementweb:start-livereload-server');
+    runSequence('managementweb:build', 'managementweb:start-livereload-server');
 });
 
 gulp.task('managementweb:deploy:package', function () {
@@ -48,10 +48,16 @@ gulp.task('managementweb:deploy:package', function () {
         .pipe(gulp.dest(buildConfig.managementWeb.outputPaths.deploy));
 });
 
-gulp.task('managementweb:deploy', function () {
+gulp.task('managementweb:build', function () {
     runSequence(
         'managementweb:less',
-        'managementweb:inject',
+        'managementweb:inject'
+    );
+});
+
+gulp.task('managementweb:deploy', function () {
+    runSequence(
+        'managementweb:build',
         'managementweb:deploy:package'
     );
 });
