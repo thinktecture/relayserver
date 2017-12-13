@@ -11,10 +11,12 @@ namespace Thinktecture.Relay.Server.Http.Filters
 	[AttributeUsage(AttributeTargets.Class)]
 	public class CheckModuleBindingConfigurationAttribute : ActionFilterAttribute
 	{
+		private readonly Func<IConfiguration, ModuleBinding> _getPropertyFunc;
+
 		public override bool AllowMultiple => true;
 
+		// This will be set by Autofac property injection (hooked up in startup)
 		public IConfiguration Configuration { get; set; }
-		private readonly Func<IConfiguration, ModuleBinding> _getPropertyFunc;
 
 		public CheckModuleBindingConfigurationAttribute(Func<IConfiguration, ModuleBinding> getPropertyFunc)
 		{
