@@ -103,21 +103,21 @@ namespace Thinktecture.Relay.Server.Repository
 			using (var context = new RelayContext())
 			{
 				return context.Users.Select(u => new
-				{
-					u.Id,
-					u.UserName,
-					u.CreationDate,
-					u.FailedLoginAttempts,
-					u.LastFailedLoginAttempt,
-				})
-				.ToList()
-				.Select(u => new User()
-				{
-					Id = u.Id,
-					UserName = u.UserName,
-					CreationDate = u.CreationDate,
-					LockedUntil = LockedOutUntil(u.FailedLoginAttempts, u.LastFailedLoginAttempt),
-				});
+					{
+						u.Id,
+						u.UserName,
+						u.CreationDate,
+						u.FailedLoginAttempts,
+						u.LastFailedLoginAttempt,
+					})
+					.ToList()
+					.Select(u => new User()
+					{
+						Id = u.Id,
+						UserName = u.UserName,
+						CreationDate = u.CreationDate,
+						LockedUntil = LockedOutUntil(u.FailedLoginAttempts, u.LastFailedLoginAttempt),
+					});
 			}
 		}
 

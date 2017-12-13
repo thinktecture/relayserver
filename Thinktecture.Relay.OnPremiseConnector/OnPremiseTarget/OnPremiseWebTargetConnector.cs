@@ -14,8 +14,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
 	internal class OnPremiseWebTargetConnector : IOnPremiseTargetConnector
 	{
-		private static readonly string[] _ignoredHeaders = { "Host", "Connection", "Expect", "Proxy-Connection", "Proxy-Authorization",
-			"Range", "If-Range", "TransferEncoding", "Transfer-Encoding-Chunked", "Upgrade", "Via", "Warning", "Trailer", "Pragma" };
+		private static readonly string[] _ignoredHeaders =
+		{
+			"Host", "Connection", "Expect", "Proxy-Connection", "Proxy-Authorization",
+			"Range", "If-Range", "TransferEncoding", "Transfer-Encoding-Chunked", "Upgrade", "Via", "Warning", "Trailer", "Pragma"
+		};
+
 		private static readonly Dictionary<string, Action<HttpRequestHeaders, string>> _requestHeadersTransformations;
 		private static readonly Dictionary<string, Action<HttpContentHeaders, string>> _contentHeadersTransformations;
 

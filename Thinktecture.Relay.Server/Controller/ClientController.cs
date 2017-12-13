@@ -11,8 +11,8 @@ using Thinktecture.Relay.Server.Filters;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Http.Filters;
-using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Interceptor;
+using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller

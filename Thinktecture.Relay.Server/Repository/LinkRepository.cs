@@ -315,7 +315,7 @@ namespace Thinktecture.Relay.Server.Repository
 				using (var context = new RelayContext())
 				{
 					var activeConnection = await context.ActiveConnections
-							.FirstOrDefaultAsync(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId).ConfigureAwait(false);
+						.FirstOrDefaultAsync(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId).ConfigureAwait(false);
 
 					if (activeConnection != null)
 					{

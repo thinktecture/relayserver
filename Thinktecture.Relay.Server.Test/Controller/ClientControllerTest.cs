@@ -12,8 +12,8 @@ using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
-using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Interceptor;
+using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller

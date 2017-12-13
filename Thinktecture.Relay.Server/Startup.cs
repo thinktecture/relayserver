@@ -21,8 +21,8 @@ using Microsoft.Owin.Security.Jwt;
 using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
-using Serilog;
 using Owin;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.Controller.ManagementWeb;
@@ -46,7 +46,7 @@ namespace Thinktecture.Relay.Server
 		public Startup(ILogger logger, IConfiguration configuration, IOAuthAuthorizationServerProvider authorizationServerProvider, ILifetimeScope rootScope)
 		{
 			_logger = logger;
-			
+
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_authorizationServerProvider = authorizationServerProvider ?? throw new ArgumentNullException(nameof(authorizationServerProvider));
 			_rootScope = rootScope ?? throw new ArgumentNullException(nameof(rootScope));

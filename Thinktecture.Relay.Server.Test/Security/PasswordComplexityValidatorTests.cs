@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Thinktecture.Relay.Server.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Thinktecture.Relay.Server.Security

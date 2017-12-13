@@ -4,10 +4,10 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Serilog;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
+using Serilog;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
@@ -67,7 +67,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 								_logger?.Verbose("Request acknowledge id was set. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
 							}
 						}
-						
+
 						observer.OnNext(request);
 					}
 					catch (Exception ex)
@@ -143,7 +143,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			var props = new BasicProperties()
 			{
 				ContentEncoding = "application/json",
-				DeliveryMode = 2
+				DeliveryMode = 2,
 			};
 
 			if (request.Expiration != TimeSpan.Zero)
@@ -163,7 +163,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			var props = new BasicProperties()
 			{
 				ContentEncoding = "application/json",
-				DeliveryMode = 2
+				DeliveryMode = 2,
 			};
 			_model.BasicPublish(_EXCHANGE_NAME, originId.ToString(), false, props, content);
 

@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			var fileName = Path.Combine(path, "Thinktecure", "RelayServer", $"settings_{_configuration.Port}.config.json");
-		
+
 			_logger?.Debug("Using settings file. settings-file-name={SettingsFileName}", fileName);
 
 			return fileName;

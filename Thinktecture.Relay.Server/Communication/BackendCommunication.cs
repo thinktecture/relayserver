@@ -62,7 +62,7 @@ namespace Thinktecture.Relay.Server.Communication
 			if (_cts.IsCancellationRequested)
 			{
 				throw new ObjectDisposedException(GetType().Name);
-		}
+			}
 		}
 
 		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
@@ -152,7 +152,7 @@ namespace Thinktecture.Relay.Server.Communication
 				if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
 				{
 					_requestSubscriptions[registrationInformation.ConnectionId] = _messageDispatcher.OnRequestReceived(registrationInformation.LinkId, registrationInformation.ConnectionId, !registrationInformation.SupportsAck())
-							.Subscribe(request => registrationInformation.RequestAction(request, _cancellationToken));
+						.Subscribe(request => registrationInformation.RequestAction(request, _cancellationToken));
 				}
 			}
 

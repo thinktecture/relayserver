@@ -11,7 +11,6 @@ using Thinktecture.Relay.Server.Controller.ManagementWeb;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository;
-using Trace = Thinktecture.Relay.Server.Diagnostics.Trace;
 
 namespace Thinktecture.Relay.Server.Controller.Admin
 {

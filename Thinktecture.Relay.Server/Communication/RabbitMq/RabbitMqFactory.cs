@@ -1,7 +1,7 @@
 using System;
 using System.Configuration;
-using Serilog;
 using RabbitMQ.Client;
+using Serilog;
 using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
