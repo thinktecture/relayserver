@@ -75,5 +75,10 @@ namespace Thinktecture.Relay.Server.OnPremise
 		/// even when an interceptor directly answers this request
 		/// </summary>
 		bool AlwaysSendToOnPremiseConnector { get; }
+
+		/// <summary>
+		/// Gets the request TTL within the RabbitMQ
+		/// </summary>
+		TimeSpan Expiration { get; }
 	}
 }

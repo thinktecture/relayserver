@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Server.Http
 
 		private OnPremiseRequestBuilder CreateBuilder()
 		{
-			return new OnPremiseRequestBuilder(_loggerMock.Object, new InMemoryPostDataTemporaryStore(_loggerMock.Object, new ConfigurationDummy()));
+			return new OnPremiseRequestBuilder(_loggerMock.Object, new ConfigurationDummy(), new InMemoryPostDataTemporaryStore(_loggerMock.Object, new ConfigurationDummy()));
 		}
 
 		[TestMethod]
