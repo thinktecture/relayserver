@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal class RelayServerConnection : Connection, IRelayServerConnection
 	{
-		private const int CONNECTOR_VERSION = 2;
+		private const int _CONNECTOR_VERSION = 2;
 		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
 		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
 
@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private bool _stopRequested;
 
 		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"version={CONNECTOR_VERSION}&assemblyVersion={Assembly.GetEntryAssembly().GetName().Version}")
+			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={Assembly.GetEntryAssembly().GetName().Version}")
 		{
 			_relayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;

@@ -113,13 +113,13 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private int GetConnectorVersionFromRequest(IRequest request)
 		{
-			Int32.TryParse(request.QueryString["version"], out var version);
+			Int32.TryParse(request.QueryString["cv"], out var version);
 			return version;
 		}
 
 		private string GetConnectorAssemblyVersionFromRequest(IRequest request)
 		{
-			return request.QueryString["assemblyVersion"] ?? "Unknown";
+			return request.QueryString["av"] ?? "Unknown";
 		}
 
 		private static T Get<T>(IDictionary<string, object> env, string key)
