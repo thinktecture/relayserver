@@ -258,7 +258,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					await AcknowlegdeRequest(request);
+					if (!String.IsNullOrEmpty(request.AcknowledgeId))
+					{
+						await AcknowlegdeRequest(request);
+					}
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
