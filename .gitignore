@@ -18,4 +18,3 @@ Thinktecture.Relay.ManagementWeb/assets/*.css
 npm-debug.log
 
 credentials.json
-*.DotSettings
