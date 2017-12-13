@@ -35,6 +35,16 @@ namespace Thinktecture.Relay.InterceptorDemos
 		{
 			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
 
+			// Example: Set AUTO-ACK to true
+			if (request.Url.IndexOf("autoAcknowledge=true", 0, StringComparison.InvariantCultureIgnoreCase) >= 0)
+			{
+				// This request will be auto-acknowledged when taken out of RabbitMQ.
+				// When there is a problem with SignalR or the OnPremiseConnector, this request may not reach the remote API.
+
+				request.AutoAcknowledge = true;
+				return null;
+			}
+
 			// If a PUT is received, we immediately reject and tell the user to use PATCH instead
 			if (String.Equals(request.HttpMethod, HttpMethod.Put.Method, StringComparison.InvariantCultureIgnoreCase))
 			{
@@ -49,14 +59,14 @@ namespace Thinktecture.Relay.InterceptorDemos
 				request.HttpMethod = HttpMethod.Put.Method;
 
 			// Append something to the url
-			request.Url += request.Url.Contains("?") ? "&" : "?" + "parameterAddedFromDemoInterceptor=valueAddedFromDemoInterceptor";
+			request.Url += (request.Url.Contains("?") ? "&" : "?") + "parameterAddedFromDemoInterceptor=valueAddedFromDemoInterceptor";
 
 			// Add an HTTP header
 			var headers = request.CloneHttpHeaders();
 			headers.Add("X-ThinkectureRelay-Example", $"Added by {nameof(DemoRequestInterceptor)}");
 			request.HttpHeaders = headers;
 
-			_logger?.Debug("Demo interceptor modified request: {@Request}", request);
+			_logger?.Information("Demo interceptor modified request: {@Request}", request);
 			return null;
 		}
 	}
