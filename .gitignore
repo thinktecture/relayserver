@@ -12,6 +12,7 @@ node_modules/
 *.cache
 
 deploy/
+dist/
 Documentations
 Thinktecture.Relay.ManagementWeb/assets/*.css
 .DS_Store

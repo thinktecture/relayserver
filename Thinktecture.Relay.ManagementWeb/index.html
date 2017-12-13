@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html ng-app="thinktectureRelayAdminWeb">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,12 @@
 
     <title translate="MAIN.TITLE"></title>
     <style>
-        [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+        [ng\:cloak],
+        [ng-cloak],
+        [data-ng-cloak],
+        [x-ng-cloak],
+        .ng-cloak,
+        .x-ng-cloak {
             display: none !important;
         }
     </style>
@@ -23,58 +29,60 @@
     <link rel="stylesheet" href="assets/app.css">
     <link rel="stylesheet" href="assets/app.responsive.css">
     <!-- endinject -->
-    <link rel="shortcut icon" type="image/ico" href="assets/favicon.ico"/>
+    <link rel="shortcut icon" type="image/ico" href="assets/favicon.ico" />
 </head>
+
 <body>
-<navigation></navigation>
+    <navigation></navigation>
 
-<div class="container" ui-view role="main">
-</div>
+    <div class="container" ui-view role="main">
+    </div>
 
-<!-- inject:js -->
-<script src="libs/jQuery/jquery-3.2.1.min.js"></script>
-<script src="libs/angular/angular.js"></script>
-<script src="libs/chartjs/chart.js"></script>
-<script src="libs/angularAddOns/angular-sanitize.js"></script>
-<script src="libs/angularAddOns/angular-ui-router.js"></script>
-<script src="libs/angularChart/angular-chart.js"></script>
-<script src="libs/angularTranslate/angular-translate.js"></script>
-<script src="libs/momentjs/moment.js"></script>
-<script src="libs/uiBootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
-<script src="libs/pnotify/pnotify.custom.js"></script>
-<script src="libs/pnotify/pnotify.js"></script>
-<script src="libs/angularAddOns/ui-grid/ui-grid.js"></script>
-<script src="app/appInit.js"></script>
-<script src="app/dashboard/dashboard.js"></script>
-<script src="app/linkDetails/linkDetails.js"></script>
-<script src="app/links/links.js"></script>
-<script src="app/login/login.js"></script>
-<script src="app/login/logout.js"></script>
-<script src="app/setup/setup.js"></script>
-<script src="app/users/users.js"></script>
-<script src="app/linkDetails/tabs/charts.js"></script>
-<script src="app/linkDetails/tabs/info.js"></script>
-<script src="app/linkDetails/tabs/logs.js"></script>
-<script src="app/linkDetails/tabs/trace.js"></script>
-<script src="app/linkDetails/tabs/traceResult.js"></script>
-<script src="appServices/config.js"></script>
-<script src="appServices/httpInterceptors.js"></script>
-<script src="appServices/routing.js"></script>
-<script src="appServices/run.js"></script>
-<script src="appServices/directives/inplaceEdit.js"></script>
-<script src="appServices/directives/navigation.js"></script>
-<script src="appServices/directives/toggleSwitch.js"></script>
-<script src="appServices/directives/traceHeaders.js"></script>
-<script src="appServices/filters/defaultTextWhenFalsy.js"></script>
-<script src="appServices/services/dashboard.js"></script>
-<script src="appServices/services/link.js"></script>
-<script src="appServices/services/log.js"></script>
-<script src="appServices/services/security.js"></script>
-<script src="appServices/services/setup.js"></script>
-<script src="appServices/services/spinnerOverlay.js"></script>
-<script src="appServices/services/trace.js"></script>
-<script src="appServices/services/user.js"></script>
-<script src="appTranslations/translations-en.js"></script>
-<!-- endinject -->
+    <!-- inject:js -->
+    <script src="libs/jQuery/jquery-3.2.1.min.js"></script>
+    <script src="libs/angular/angular.js"></script>
+    <script src="libs/chartjs/chart.js"></script>
+    <script src="libs/angularAddOns/angular-sanitize.js"></script>
+    <script src="libs/angularAddOns/angular-ui-router.js"></script>
+    <script src="libs/angularChart/angular-chart.js"></script>
+    <script src="libs/angularTranslate/angular-translate.js"></script>
+    <script src="libs/momentjs/moment.js"></script>
+    <script src="libs/uiBootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
+    <script src="libs/pnotify/pnotify.custom.js"></script>
+    <script src="libs/pnotify/pnotify.js"></script>
+    <script src="libs/angularAddOns/ui-grid/ui-grid.js"></script>
+    <script src="app/appInit.js"></script>
+    <script src="app/dashboard/dashboard.js"></script>
+    <script src="app/linkDetails/linkDetails.js"></script>
+    <script src="app/links/links.js"></script>
+    <script src="app/login/login.js"></script>
+    <script src="app/login/logout.js"></script>
+    <script src="app/setup/setup.js"></script>
+    <script src="app/users/users.js"></script>
+    <script src="app/linkDetails/tabs/charts.js"></script>
+    <script src="app/linkDetails/tabs/info.js"></script>
+    <script src="app/linkDetails/tabs/logs.js"></script>
+    <script src="app/linkDetails/tabs/trace.js"></script>
+    <script src="app/linkDetails/tabs/traceResult.js"></script>
+    <script src="appServices/config.js"></script>
+    <script src="appServices/httpInterceptors.js"></script>
+    <script src="appServices/routing.js"></script>
+    <script src="appServices/run.js"></script>
+    <script src="appServices/directives/inplaceEdit.js"></script>
+    <script src="appServices/directives/navigation.js"></script>
+    <script src="appServices/directives/toggleSwitch.js"></script>
+    <script src="appServices/directives/traceHeaders.js"></script>
+    <script src="appServices/filters/defaultTextWhenFalsy.js"></script>
+    <script src="appServices/services/dashboard.js"></script>
+    <script src="appServices/services/link.js"></script>
+    <script src="appServices/services/log.js"></script>
+    <script src="appServices/services/security.js"></script>
+    <script src="appServices/services/setup.js"></script>
+    <script src="appServices/services/spinnerOverlay.js"></script>
+    <script src="appServices/services/trace.js"></script>
+    <script src="appServices/services/user.js"></script>
+    <script src="appTranslations/translations-en.js"></script>
+    <!-- endinject -->
 </body>
+
 </html>
