@@ -19,29 +19,29 @@
             id: linkId
         };
 
-        $scope.tabs = {
-            info: {
+        $scope.tabs = [
+            {
                 name: 'info'
             },
-            chart: {
+            {
                 name: 'chart',
                 onActivate: function () {
                     $scope.$broadcast(appEvents.reloadChart);
                 }
             },
-            logs: {
+            {
                 name: 'logs',
                 onActivate: function () {
                     $scope.$broadcast(appEvents.reloadLogs);
                 }
             },
-            trace: {
+            {
                 name: 'trace',
                 onActivate: function () {
                     $scope.$broadcast(appEvents.reloadTraces);
                 }
             }
-        };
+        ];
 
         function initialize() {
             if ($stateParams.tab) {
@@ -58,34 +58,37 @@
         }
 
         function setActiveTab(tabName) {
-            if (tabName) {
-                return angular.forEach($scope.tabs, function (tab) {
-                    tab.active = tab.name === tabName
-                });
+            if (tabName && trySetTabActive(tabName)) {
+                return true;
             }
 
-            if ($stateParams.tab && $scope.tabs[$stateParams.tab]) {
-                return $scope.tabs[$stateParams.tab].active = true;
+            if ($stateParams.tab && trySetTabActive($stateParams.tab)) {
+                return true;
             }
 
-            $scope.tabs.info.active = true;
+             $scope.activeTabIndex = 0;
+        }
+
+        function trySetTabActive(tabName) {
+            return angular.forEach($scope.tabs, function (tab, index) {
+                if (tab.name === tabName) {
+                    $scope.activeTabIndex = $scope.tabs.indexOf(tab);
+                    return true;
+                }
+            });
+
+            return false;
         }
 
         function onTabActivated() {
             // Needs to be done in a timeout, so uibootstrap has time for invalidating tab selection
             $timeout(function () {
-                var activatedTab;
-                angular.forEach($scope.tabs, function (tab) {
-                    if (!activatedTab && tab.active) {
-                        activatedTab = tab;
-
-                        if (tab.onActivate) {
-                            tab.onActivate();
-                        }
-                    }
-                });
-
+                var activatedTab = $scope.tabs[$scope.activeTabIndex];
                 if (activatedTab) {
+                    if (activatedTab.onActivate) {
+                        activatedTab.onActivate();
+                    }
+
                     $state.go('.', {
                         id: linkId,
                         tab: activatedTab.name
@@ -99,12 +102,21 @@
         function closeResultTab(event, tabId) {
             event.preventDefault();
             event.stopPropagation();
-
-            $scope.setActiveTab($scope.tabs.info.name);
-            delete $scope.tabs[tabId];
-
+           
+            // remove result from tabs
             var arrayIndex = -1;
+            $scope.tabs.forEach(function (tab, index) {
+                if (tab.name === tabId) {
+                    arrayIndex = index;
+                }
+            });
 
+            if (arrayIndex > -1) {
+                $scope.tabs.splice(arrayIndex, 1);
+            }
+
+            // remove result from traceResults
+            arrayIndex = -1;
             $scope.traceResults.forEach(function (item, index) {
                 if (item.id === tabId) {
                     arrayIndex = index;
@@ -113,8 +125,15 @@
 
             if (arrayIndex > -1) {
                 $scope.traceResults.splice(arrayIndex, 1);
-                setActiveTab($scope.tabs.trace.name);
             }
+        }
+
+        function getIndex(tabName) {
+            $scope.tabs.forEach(function (tab, index) {
+                if (tab.name === tabName) {
+                    return index;
+                }
+            });
         }
 
         link.getLink(data)
@@ -138,7 +157,9 @@
         $scope.onTabActivated = onTabActivated;
         $scope.traceResults = [];
         $scope.closeResultTab = closeResultTab;
-
+        $scope.activeTabIndex = 0;
+        $scope.getIndex = getIndex;
+        
         initialize();
     }
 

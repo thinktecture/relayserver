@@ -13,7 +13,7 @@
                 restrict: 'E',
                 templateUrl: 'app/linkDetails/tabs/charts.html',
                 link: function (scope) {
-                    var dateFormat = 'YYYY-MM-DD';
+                    scope.dateFormat = 'yyyy-MM-dd';
                     var currentDate = new Date();
 
                     scope.isChartReloading = false;
@@ -27,8 +27,8 @@
                             []
                         ],
                         labels: [],
-                        fromDate: moment(currentDate).subtract(7, 'days').format(dateFormat),
-                        toDate: moment(currentDate).format(dateFormat),
+                        fromDate: moment(currentDate).subtract(7, 'days').toDate(),
+                        toDate: moment(currentDate).toDate(),
                         resolution: 'Daily',
                         resolutions: [
                             'Daily',
@@ -51,8 +51,8 @@
 
                         var data = {
                             id: scope.link.id,
-                            start: scope.chart.fromDate,
-                            end: scope.chart.toDate,
+                            start: moment(scope.chart.fromDate).format(scope.dateFormat),
+                            end: moment(scope.chart.toDate).format(scope.dateFormat),
                             resolution: scope.chart.resolution
                         };
 
@@ -65,7 +65,7 @@
                                 var chartLabels = [];
 
                                 result.forEach(function (item) {
-                                    chartLabels.push(moment(item.key).format(dateFormat));
+                                    chartLabels.push(moment(item.key).format(scope.dateFormat));
                                     chartData[0].push(item.in);
                                     chartData[1].push(item.out);
                                 });
@@ -95,7 +95,7 @@
 
                         scope.chart.isToDatePickerOpen = true;
                     }
-                    
+
                     scope.$on(appEvents.reloadChart, reloadChart);
 
                     scope.openFrom = openFrom;
@@ -106,7 +106,7 @@
                     // Happens, when the user reloads the app while viewing the chart
                     // "TabActivated" Broadcast will be executed before scope.$on in this directive is executed
                     var unwatch = scope.$watch('link', function (newVal) {
-                        if (newVal && scope.tabs.chart.active) {
+                        if (newVal && scope.activeTabIndex === 1) {
                             unwatch();
                             reloadChart();
                         }
