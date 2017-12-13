@@ -134,14 +134,15 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger?.Debug("Registering link. link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role} connector-version={ConnectorVersion}",
+			_logger?.Debug("Registering link. link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role} connector-version={ConnectorVersion}, connector-assembly-version={ConnectorAssemblyVersion}",
 				registrationInformation.LinkId,
 				registrationInformation.ConnectionId,
 				registrationInformation.UserName,
 				registrationInformation.Role,
-				registrationInformation.ConnectorVersion);
+				registrationInformation.ConnectorVersion,
+				registrationInformation.ConnectorAssemblyVersion);
 
-			_linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
+			_linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion, registrationInformation.ConnectorAssemblyVersion);
 
 			if (!_onPremises.ContainsKey(registrationInformation.ConnectionId))
 				_onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.LinkId, registrationInformation.UserName, registrationInformation.Role);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.SqlServer;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
@@ -13,11 +14,11 @@ namespace Thinktecture.Relay.Server.Repository
 {
 	public class LinkRepository : ILinkRepository
 	{
+		private static readonly Dictionary<string, PasswordInformation> _successfullyValidatedUsernamesAndPasswords = new Dictionary<string, PasswordInformation>();
+
 		private readonly ILogger _logger;
 		private readonly IPasswordHash _passwordHash;
 		private readonly IConfiguration _configuration;
-
-		private static readonly Dictionary<string, PasswordInformation> _successfullyValidatedUsernamesAndPasswords = new Dictionary<string, PasswordInformation>();
 
 		private DateTime ActiveLinkTimeout => DateTime.UtcNow.AddSeconds(-_configuration.ActiveConnectionTimeoutInSeconds);
 
@@ -121,8 +122,8 @@ namespace Thinktecture.Relay.Server.Repository
 					link = l,
 					ActiveConnections = l.ActiveConnections
 						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
-						.Select(ac => ac.ConnectionId)
 				})
+				.ToList()
 				.Select(i => new LinkDetails
 				{
 					Id = i.link.Id,
@@ -134,8 +135,14 @@ namespace Thinktecture.Relay.Server.Repository
 					SymbolicName = i.link.SymbolicName,
 					UserName = i.link.UserName,
 					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
-					Connections = i.ActiveConnections.ToList()
-				});
+					Connections = i.ActiveConnections
+						.Select(ac => ac.ConnectionId
+							+ "; Versions: Connector = " + ac.ConnectorVersion + ", Assembly = " + ac.AssemblyVersion
+							+ "; Last Activity: " + ac.LastActivity.ToString("yyyy-MM-dd hh:mm:ss")
+						).
+						ToList(),
+				})
+				.AsQueryable();
 		}
 
 		public CreateLinkResult CreateLink(string symbolicName, string userName)
@@ -299,9 +306,9 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
-		public async Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion)
+		public async Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion, string assemblyVersion)
 		{
-			_logger?.Verbose("Adding or updating connection. connection-id={ConnectionId}, link-id={LinkId}, connector-version={ConnectorVersion}", connectionId, linkId, connectorVersion);
+			_logger?.Verbose("Adding or updating connection. connection-id={ConnectionId}, link-id={LinkId}, connector-version={ConnectorVersion}, connector-assembly-version={ConnectorAssemblyVersion}", connectionId, linkId, connectorVersion, assemblyVersion);
 
 			try
 			{
@@ -314,6 +321,7 @@ namespace Thinktecture.Relay.Server.Repository
 					{
 						activeConnection.LastActivity = DateTime.UtcNow;
 						activeConnection.ConnectorVersion = connectorVersion;
+						activeConnection.AssemblyVersion = assemblyVersion;
 					}
 					else
 					{
@@ -323,7 +331,8 @@ namespace Thinktecture.Relay.Server.Repository
 							OriginId = originId,
 							ConnectionId = connectionId,
 							ConnectorVersion = connectorVersion,
-							LastActivity = DateTime.UtcNow
+							AssemblyVersion = assemblyVersion,
+							LastActivity = DateTime.UtcNow,
 						});
 					}
 
@@ -332,7 +341,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during adding or renewing an active connection. link-id={LinkId}, connection-id={ConnectionId}, connector-version={ConnectorVersion}", linkId, connectionId, connectorVersion);
+				_logger?.Error(ex, "Error during adding or renewing an active connection. link-id={LinkId}, connection-id={ConnectionId}, connector-version={ConnectorVersion}, connector-assembly-version={ConnectorAssemblyVersion}", linkId, connectionId, connectorVersion, assemblyVersion);
 			}
 		}
 
