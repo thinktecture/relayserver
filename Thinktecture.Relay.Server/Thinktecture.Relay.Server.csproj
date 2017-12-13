@@ -233,6 +233,10 @@
     <Compile Include="Migrations\201711291411337_AddAccountLockoutData.Designer.cs">
       <DependentUpon>201711291411337_AddAccountLockoutData.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.cs" />
+    <Compile Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.Designer.cs">
+      <DependentUpon>201712130959002_AddAssemblyInfoToActiveConnections.cs</DependentUpon>
+    </Compile>
     <Compile Include="OnPremise\IOnPremiseConnectorRequest.cs" />
     <Compile Include="OnPremise\IOnPremiseConnectorResponse.cs" />
     <Compile Include="OnPremise\OnPremiseConnectorResponse.cs" />
@@ -393,6 +397,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201711291411337_AddAccountLockoutData.resx">
       <DependentUpon>201711291411337_AddAccountLockoutData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.resx">
+      <DependentUpon>201712130959002_AddAssemblyInfoToActiveConnections.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

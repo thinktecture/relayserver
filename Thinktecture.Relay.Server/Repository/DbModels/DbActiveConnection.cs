@@ -17,6 +17,9 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		public int ConnectorVersion { get; set; }
 
 		[Required]
+		public string AssemblyVersion { get; set; }
+
+		[Required]
 		public Guid OriginId { get; set; }
 
 		[Required]

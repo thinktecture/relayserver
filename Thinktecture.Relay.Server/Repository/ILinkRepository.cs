@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Repository
 
 		bool Authenticate(string userName, [Optional] string password, out Guid linkId);
 		bool IsUserNameAvailable(string userName);
-		Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion);
+		Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion, string assemblyVersion);
 		Task RenewActiveConnectionAsync(string connectionId);
 		Task RemoveActiveConnectionAsync(string connectionId);
 		void DeleteAllConnectionsForOrigin(Guid originId);

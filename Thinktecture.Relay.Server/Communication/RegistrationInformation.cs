@@ -14,6 +14,7 @@ namespace Thinktecture.Relay.Server.Communication
 		public string UserName { get; set; }
 		public string Role { get; set; }
 		public int ConnectorVersion { get; set; }
+		public string ConnectorAssemblyVersion { get; set; }
 
 		public bool SupportsAck()
 		{
