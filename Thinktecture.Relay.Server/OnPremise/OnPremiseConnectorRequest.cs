@@ -25,5 +25,8 @@ namespace Thinktecture.Relay.Server.OnPremise
 
 		[JsonIgnore]
 		public bool AlwaysSendToOnPremiseConnector { get; set; }
+
+		[JsonIgnore]
+		public TimeSpan Expiration { get; set; }
 	}
 }

@@ -33,6 +33,7 @@ namespace Thinktecture.Relay.Server.Config
 		public int MaxFailedLoginAttempts { get; }
 		public TimeSpan FailedLoginLockoutPeriod { get; }
 		public bool SecureClientController { get; }
+		public TimeSpan RequestQueueExpiration { get; }
 
 		public Configuration(ILogger logger)
 		{
@@ -175,6 +176,12 @@ namespace Thinktecture.Relay.Server.Config
 				SecureClientController = tmpBool;
 			}
 
+			RequestQueueExpiration = TimeSpan.FromSeconds(10);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings["RequestQueueExpiration"], out tmpTimeSpan))
+			{
+				RequestQueueExpiration = tmpTimeSpan;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -205,6 +212,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting MaxFailedLoginAttempts: {MaxFailedLoginAttempts}", MaxFailedLoginAttempts);
 			logger?.Verbose("Setting FailedLoginLockoutPeriod: {FailedLoginLockoutPeriod}", FailedLoginLockoutPeriod);
 			logger?.Verbose("Setting SecureClientController: {SecureClientController}", SecureClientController);
+			logger?.Verbose("Setting RequestQueueExpiration: {RequestQueueExpiration}", RequestQueueExpiration);
 		}
 	}
 }

@@ -35,6 +35,13 @@ namespace Thinktecture.Relay.InterceptorDemos
 		{
 			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
 
+			if (request.HttpHeaders.TryGetValue("Request-Expiration", out var value) && TimeSpan.TryParse(value, out var expiration))
+			{
+				_logger?.Information("Interceptor is setting RabbitMQ TTL to {RequestExpiration} for Request {RequestId}", expiration, request.RequestId);
+				request.Expiration = expiration;
+				return null;
+			}
+
 			// If a PUT is received, we immediately reject and tell the user to use PATCH instead
 			if (String.Equals(request.HttpMethod, HttpMethod.Put.Method, StringComparison.InvariantCultureIgnoreCase))
 			{
