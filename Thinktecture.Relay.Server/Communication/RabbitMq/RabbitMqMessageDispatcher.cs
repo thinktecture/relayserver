@@ -61,10 +61,12 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 							if (request.AutoAcknowledge)
 							{
 								_model.BasicAck(args.DeliveryTag, false);
+								_logger?.Debug("Request was auto-acknowledged. request-id={RequestId}", request.RequestId);
 							}
 							else
 							{
 								request.AcknowledgeId = args.DeliveryTag.ToString();
+								_logger?.Verbose("Request acknowledge id was set. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
 							}
 						}
 						
