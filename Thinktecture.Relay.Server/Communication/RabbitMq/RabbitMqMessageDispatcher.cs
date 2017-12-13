@@ -67,7 +67,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 								_logger?.Verbose("Request acknowledge id was set. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
 							}
 						}
-						
+
 						observer.OnNext(request);
 					}
 					catch (Exception ex)

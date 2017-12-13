@@ -49,6 +49,7 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		public DateTime CreationDate { get; set; }
 
 		private ICollection<DbActiveConnection> _activeConnections;
+
 		public virtual ICollection<DbActiveConnection> ActiveConnections
 		{
 			get => _activeConnections ?? (_activeConnections = new List<DbActiveConnection>());

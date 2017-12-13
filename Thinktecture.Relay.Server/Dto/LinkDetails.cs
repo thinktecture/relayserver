@@ -13,6 +13,7 @@ namespace Thinktecture.Relay.Server.Dto
 		public bool IsConnected => Connections.Count > 0;
 
 		private List<string> _connections;
+
 		public List<string> Connections
 		{
 			get => _connections ?? (_connections = new List<string>());
