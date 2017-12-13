@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Autofac;
 using AutofacSerilogIntegration;
 using Serilog;
@@ -58,7 +59,7 @@ namespace Thinktecture.Relay.Server
 			Log.CloseAndFlush();
 
 #if DEBUG
-			if (System.Diagnostics.Debugger.IsAttached)
+			if (Debugger.IsAttached)
 			{
 				// ReSharper disable once LocalizableElement
 				Console.WriteLine("\nPress any key to close application window...");
