@@ -260,7 +260,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					if (!String.IsNullOrEmpty(request.AcknowledgeId))
 					{
-						await AcknowlegdeRequest(request);
+						await AcknowlegdeRequest(request).ConfigureAwait(false);
 					}
 				}
 
