@@ -7,6 +7,7 @@ using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.Filters;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.Http.Filters;
@@ -16,8 +17,8 @@ using Thinktecture.Relay.Server.Repository;
 
 namespace Thinktecture.Relay.Server.Controller
 {
-	[AllowAnonymous]
 	[RelayModuleBindingFilter]
+	[ConfigurableClientAuthorization(Roles = "OnPremise")]
 	public class ClientController : ApiController
 	{
 		private readonly IBackendCommunication _backendCommunication;
