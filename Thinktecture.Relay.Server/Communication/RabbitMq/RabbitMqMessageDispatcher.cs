@@ -135,6 +135,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 			if (request.Expiration != TimeSpan.Zero)
 			{
+				_logger?.Verbose("Setting RabbitMQ message TTL. request-id={RequestId}, request-expiration={RequestExpiration}", request.RequestId, request.Expiration);
 				props.Expiration = request.Expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
 			}
 
