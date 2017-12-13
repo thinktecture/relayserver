@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		protected override Task OnReceived(IRequest request, string connectionId, string data)
 		{
-			_logger?.Debug("Acknowledge received. connection-id={ConnectionId}, data={Data}", connectionId, data);
+			_logger?.Debug("Acknowledge received. connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", connectionId, data);
 
 			_backendCommunication.AcknowledgeOnPremiseConnectorRequest(connectionId, data);
 

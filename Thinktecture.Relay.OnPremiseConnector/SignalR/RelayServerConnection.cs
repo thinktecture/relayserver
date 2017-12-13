@@ -255,7 +255,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					await Send(request.AcknowledgeId).ConfigureAwait(false);
+					if (!String.IsNullOrEmpty(request.AcknowledgeId))
+					{
+						_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+						await Send(request.AcknowledgeId).ConfigureAwait(false);
+					}
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
@@ -263,7 +267,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					if (_connectors.TryGetValue(key, out var connector))
 					{
-						_logger?.Verbose("Found on-premise target. key={OnPremiseTargetKey}", key);
+						_logger?.Verbose("Found on-premise target and sending request. on-premise-key={OnPremiseTargetKey}, request-id={RequestId}", key, request.RequestId);
 
 						await RequestLocalTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false);
 						return;

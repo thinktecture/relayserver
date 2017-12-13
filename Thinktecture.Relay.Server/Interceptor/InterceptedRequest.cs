@@ -22,6 +22,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			Url = other.Url;
 			HttpHeaders = other.HttpHeaders;
 			Body = other.Body;
+			AutoAcknowledge = other.AutoAcknowledge;
 			Stream = other.Stream;
 			ContentLength = other.ContentLength;
 			AlwaysSendToOnPremiseConnector = other.AlwaysSendToOnPremiseConnector;

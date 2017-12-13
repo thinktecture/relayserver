@@ -45,6 +45,7 @@ Folgende Werte sind veränderbar:
   - `HttpHeaders`: Hier können HTTP Header entfernt, neue hinzugefügt oder existierende geändert werden.
   - `AlwaysSendToOnPremiseConnector`: Hiermit kann festgelegt werden, dass der Request immer zum OnPremiseConnector gesendet wird, auch wenn er durch das Zurückgeben einer `HttpResponseMessage` sofort beantwortet wird.
   - `Expiration`: Hier kann die Lebenszeit des Requests in der RabbitMQ geändert werden.
+  - `AutoAcknowledge`: Hier kann festgelegt werden, ob der Request automatisch nach dem Lesen aus der RabbitMQ gelöscht wird (true), oder auf ein ACK vom OnPremiseConnector wartet (false).
 
 Wird keine `HttpResonseMessage` zurück gegeben, so wird der modifizierte Request über einen OnPremiseConnector an das eigentliche Ziel weitergeleitet.
 
