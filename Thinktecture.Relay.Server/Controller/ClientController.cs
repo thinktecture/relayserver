@@ -171,7 +171,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 		private new HttpResponseMessage NotFound()
 		{
-			return new HttpResponseMessage(HttpStatusCode.NotFound);
+			return Request.CreateResponse(HttpStatusCode.NotFound);
 		}
 	}
 }
