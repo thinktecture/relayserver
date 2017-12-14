@@ -121,7 +121,7 @@ namespace Thinktecture.Relay.Server.Controller
 		private async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
-			await _backendCommunication.SendOnPremiseConnectorRequest(linkId, request).ConfigureAwait(false);
+			await _backendCommunication.SendOnPremiseConnectorRequestAsync(linkId, request).ConfigureAwait(false);
 		}
 
 		private bool CanRequestBeHandled(string path, PathInformation pathInformation, Link link)

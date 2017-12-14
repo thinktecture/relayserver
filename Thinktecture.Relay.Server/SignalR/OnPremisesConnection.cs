@@ -31,43 +31,42 @@ namespace Thinktecture.Relay.Server.SignalR
 			return false;
 		}
 
-		protected override Task OnConnected(IRequest request, string connectionId)
+		protected override async Task OnConnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
 			_logger?.Debug("On-premise connected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-			RegisterOnPremise(request, connectionId, onPremiseClaims);
+			await RegisterOnPremiseAsync(request, connectionId, onPremiseClaims).ConfigureAwait(false);
 
-			return base.OnConnected(request, connectionId);
+			await base.OnConnected(request, connectionId).ConfigureAwait(false);
 		}
 
-		protected override Task OnReconnected(IRequest request, string connectionId)
+		protected override async Task OnReconnected(IRequest request, string connectionId)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
 			_logger?.Debug("On-premise reconnected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-			RegisterOnPremise(request, connectionId, onPremiseClaims);
+			await RegisterOnPremiseAsync(request, connectionId, onPremiseClaims).ConfigureAwait(false);
 
-			return base.OnReconnected(request, connectionId);
+			await base.OnReconnected(request, connectionId).ConfigureAwait(false);
 		}
 
-		protected override Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
+		protected override async Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
 		{
 			var onPremiseClaims = GetOnPremiseClaims(request);
 			_logger?.Debug("On-premise disconnected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-			_backendCommunication.UnregisterOnPremise(connectionId);
+			await _backendCommunication.UnregisterOnPremiseAsync(connectionId).ConfigureAwait(false);
 
-			return base.OnDisconnected(request, connectionId, stopCalled);
+			await base.OnDisconnected(request, connectionId, stopCalled).ConfigureAwait(false);
 		}
 
-		private Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest request)
+		private async Task ForwardClientRequestAsync(string connectionId, IOnPremiseConnectorRequest request)
 		{
 			_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
 				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.ContentLength);
 
-			Connection.Send(connectionId, request);
-			return Task.CompletedTask;
+			await Connection.Send(connectionId, request).ConfigureAwait(false);
 		}
 
 		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
@@ -81,19 +80,19 @@ namespace Thinktecture.Relay.Server.SignalR
 			return new OnPremiseClaims(claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value, linkId, claimsPrincipal.FindFirst(ClaimTypes.Role)?.Value);
 		}
 
-		private void RegisterOnPremise(IRequest request, string connectionId, OnPremiseClaims claims)
+		private async Task RegisterOnPremiseAsync(IRequest request, string connectionId, OnPremiseClaims claims)
 		{
-			_backendCommunication.RegisterOnPremise(new RegistrationInformation()
+			await _backendCommunication.RegisterOnPremiseAsync(new RegistrationInformation()
 			{
 				ConnectionId = connectionId,
 				LinkId = claims.OnPremiseId,
 				UserName = claims.UserName,
 				Role = claims.Role,
-				RequestAction = (cr, cancellationToken) => ForwardClientRequest(connectionId, cr),
+				RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, cr),
 				IpAddress = GetIpAddressFromOwinEnvironment(request.Environment),
 				ConnectorVersion = GetConnectorVersionFromRequest(request),
 				ConnectorAssemblyVersion = GetConnectorAssemblyVersionFromRequest(request),
-			});
+			}).ConfigureAwait(false);
 		}
 
 		// Adopted from http://stackoverflow.com/questions/11044361/signalr-get-caller-ip-address

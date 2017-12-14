@@ -100,7 +100,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(linkFake);
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { PathWithoutUserName = "Bar/Baz" });
 			_clientRequestBuilderMock.Setup(c => c.BuildFromHttpRequest(sut.Request, originId, "Bar/Baz")).ReturnsAsync(clientRequestFake);
-			_backendCommunicationMock.Setup(b => b.SendOnPremiseConnectorRequest(linkId, clientRequestFake)).Returns(Task.FromResult(0));
+			_backendCommunicationMock.Setup(b => b.SendOnPremiseConnectorRequestAsync(linkId, clientRequestFake)).Returns(Task.FromResult(0));
 			_backendCommunicationMock.Setup(b => b.GetResponseAsync(requestId)).ReturnsAsync(onPremiseTargetReponseFake);
 			_httpResponseMessageBuilderMock.Setup(h => h.BuildFromConnectorResponse(onPremiseTargetReponseFake, linkFake, requestId)).Returns(httpResponseMessageFake);
 			_traceManagerMock.Setup(t => t.GetCurrentTraceConfigurationId(linkFake.Id)).Returns(localConfigurationGuid);
@@ -249,7 +249,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_relayRepositoryMock.Setup(l => l.GetLink(It.IsAny<string>())).Returns(linkFake);
 			_pathSplitterMock.Setup(p => p.Split(It.IsAny<string>())).Returns(new PathInformation { PathWithoutUserName = "Bar/Baz" });
 			_clientRequestBuilderMock.Setup(c => c.BuildFromHttpRequest(sut.Request, new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Bar/Baz")).ReturnsAsync(clientRequestFake);
-			_backendCommunicationMock.Setup(b => b.SendOnPremiseConnectorRequest(new Guid("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), clientRequestFake)).Returns(Task.FromResult(0));
+			_backendCommunicationMock.Setup(b => b.SendOnPremiseConnectorRequestAsync(new Guid("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), clientRequestFake)).Returns(Task.FromResult(0));
 			_backendCommunicationMock.Setup(b => b.GetResponseAsync("239b6e03-9795-450d-bdd1-ab72900f1a98")).ReturnsAsync(onPremiseTargetReponseFake);
 			_httpResponseMessageBuilderMock.Setup(h => h.BuildFromConnectorResponse(onPremiseTargetReponseFake, linkFake, "239b6e03-9795-450d-bdd1-ab72900f1a98")).Returns(httpResponseMessageFake);
 			_traceManagerMock.Setup(t => t.GetCurrentTraceConfigurationId(linkFake.Id)).Returns((Guid?)null);
