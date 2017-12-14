@@ -38,6 +38,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Server\AcknowledgmentMode.cs" />
     <Compile Include="Server\Interceptor\IInterceptedRequest.cs" />
     <Compile Include="Server\Interceptor\IInterceptedResponse.cs" />
     <Compile Include="Server\Interceptor\IOnPremiseRequestInterceptor.cs" />

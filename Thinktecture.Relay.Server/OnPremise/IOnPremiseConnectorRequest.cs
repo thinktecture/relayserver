@@ -58,7 +58,7 @@ namespace Thinktecture.Relay.Server.OnPremise
 		/// <summary>
 		/// Gets whether this request should be auto-acknowledged when taken from the RabbitMQ
 		/// </summary>
-		bool AutoAcknowledge { get; }
+		AcknowledgmentMode AcknowledgmentMode { get; }
 
 		/// <summary>
 		/// Gets the request stream if the body is too large (was requested by a second request)

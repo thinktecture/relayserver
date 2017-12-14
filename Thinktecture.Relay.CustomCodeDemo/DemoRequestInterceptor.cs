@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using Serilog;
+using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.CustomCodeDemo
@@ -34,19 +35,20 @@ namespace Thinktecture.Relay.CustomCodeDemo
 		{
 			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
 
-			if (request.HttpHeaders.TryGetValue("Request-Expiration", out var value) && TimeSpan.TryParse(value, out var expiration))
+			// Example: Set Request expiration
+			if (request.HttpHeaders.TryGetValue("Request-Expiration", out var expirationValue) && TimeSpan.TryParse(expirationValue, out var expiration))
 			{
 				_logger?.Information("Interceptor is setting RabbitMQ TTL to {RequestExpiration} for Request {RequestId}", expiration, request.RequestId);
 				request.Expiration = expiration;
 				return null;
 			}
 
-			// Example: Set AUTO-ACK to true
-			if (request.Url.IndexOf("autoAcknowledge=true", 0, StringComparison.InvariantCultureIgnoreCase) >= 0)
+			// Example: Set AcknowledgmentMode
+			if (request.HttpHeaders.TryGetValue("Acknowledgment-Mode", out var ackModeValue) && Enum.TryParse(ackModeValue, out AcknowledgmentMode ackMode))
 			{
 				// This request will be auto-acknowledged when taken out of RabbitMQ.
 				// When there is a problem with SignalR or the OnPremiseConnector, this request may not reach the remote API.
-				request.AutoAcknowledge = true;
+				request.AcknowledgmentMode = ackMode;
 				return null;
 			}
 
