@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.Server.Http
 				HttpHeaders = message.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
 				OriginId = originId,
 				RequestStarted = DateTime.UtcNow,
-				Expiration = _configuration.RequestQueueExpiration,
+				Expiration = _configuration.RequestExpiration,
 			};
 
 			if (message.Content.Headers.ContentLength.GetValueOrDefault(0x10000) >= 0x10000)

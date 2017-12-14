@@ -139,14 +139,15 @@ The default settings include:
     <add key="HostName" value="+"/>
     <add key="UseInsecureHttp" value="false" />
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
-    <add key=PluginAssembly" value="" />
+    <add key="CustomCodeAssemblyPath" value="" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
     <add key="IncludeErrorDetailPolicy" value="default" />
     <add key="MaxFailedLoginAttempts" value="5" />
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
-    <add key="RequestQueueExpiration" value="00:00:10" />
+    <add key="QueueExpiration" value="00:00:10" />
+    <add key="RequestExpiration" value="00:00:10" />
 </appSettings>
 ```
 
@@ -161,14 +162,15 @@ The default settings include:
 | UseInsecureHttp | Enables the use of HTTP instead of HTTPS (the use of HTTP in productive mode is not recommended). |
 | TemporaryRequestStoragePath | Path to a directory where the data of the requests are temporarily stored. In multi-server mode this directory must be readable and described by all nodes. If no value is specified (default), the requests are kept in memory, and no multi-server operation is possible. |
 | ActiveConnectionTimeoutInSeconds | Time after which a connection between an OnPremise Connector and the RelayServer is no longer active (default 120 seconds) |
-| PluginAssembly | Path to an assembly that implements plugins. Either absolutely or relative to the RelayServer. |
+| CustomCodeAssemblyPath | Path to an assembly that implements custom code. Either absolutely or relative to the RelayServer. |
 | HstsHeaderMaxAge | Value that will be set in the HTTP Strict Transport Security Header for `max-age` (default 365 days) |
 | HstsIncludeSubdomains | Determines, whether the optional parameter `includeSubDomains` will be set on the HTTP Strict Transport Security Header (default false) |
 | IncludeErrorDetailPolicy | Determines whether error details (Stacktrace, Exception Messages) will be returned (default 'default'). For an explanation of possible values see [MSDN](https://msdn.microsoft.com/en-us/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
 | MaxFailedLoginAttempts | Maximum allowed failed login attempts for a user, until the account will temporary be locked out (default 5) |
 | FailedLoginLockoutPeriod | Time span that a user will be locked out after he has more than `MaxFailedLoginAttempts` failed login attempts (default 15 minutes) |
 | SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid OnPremiseConnector / Link access token (default false) |
-| RequestQueueExpiration | Time span after which a not yet handled request will expire from the RabbitMQ queue (default 10 seconds) |
+| QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
+| RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
 
 ## netsh settings
 
