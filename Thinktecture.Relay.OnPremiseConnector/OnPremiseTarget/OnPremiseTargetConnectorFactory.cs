@@ -6,15 +6,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	internal class OnPremiseTargetConnectorFactory : IOnPremiseTargetConnectorFactory
 	{
 		private readonly ILogger _logger;
+		private readonly Func<IOnPremiseWebTargetRequestMessageBuilder> _requestMessageBuilderFactory;
 
-		public OnPremiseTargetConnectorFactory(ILogger logger)
+		public OnPremiseTargetConnectorFactory(ILogger logger, Func<IOnPremiseWebTargetRequestMessageBuilder> requestMessageBuilderFactory)
 		{
 			_logger = logger;
+			_requestMessageBuilderFactory = requestMessageBuilderFactory ?? throw new ArgumentNullException(nameof(requestMessageBuilderFactory));
 		}
 
 		public IOnPremiseTargetConnector Create(Uri baseUri, int requestTimeout)
 		{
-			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger);
+			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger, _requestMessageBuilderFactory());
 		}
 
 		public IOnPremiseTargetConnector Create(Type handlerType, int requestTimeout)

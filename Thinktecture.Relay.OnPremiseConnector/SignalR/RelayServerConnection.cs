@@ -258,10 +258,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					if (!String.IsNullOrEmpty(request.AcknowledgeId))
-					{
-						await AcknowlegdeRequest(request).ConfigureAwait(false);
-					}
+					await AcknowlegdeRequestIfRequired(request).ConfigureAwait(false);
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
@@ -309,11 +306,25 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private Task AcknowlegdeRequest(IOnPremiseTargetRequest request)
+		private async Task AcknowlegdeRequestIfRequired(IOnPremiseTargetRequest request)
 		{
-			_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+			_logger.Verbose("Checking if acknowledged is required. request-id={RequestId}, acknowledgment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgmentMode, request.AcknowledgeId);
 
-			return SendToRelayAsync($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", HttpMethod.Get, null, null, CancellationToken.None);
+			if (String.IsNullOrEmpty(request.AcknowledgeId))
+				return;
+
+			switch (request.AcknowledgmentMode)
+			{
+				case AcknowledgmentMode.Default:
+					_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+					await SendToRelayAsync($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", HttpMethod.Get, null, null, CancellationToken.None).ConfigureAwait(false);
+					break;
+
+				case AcknowledgmentMode.Auto:
+				case AcknowledgmentMode.Manual:
+					// Auto was already acknowledged on the server, and Manual needs to send ACK by custom code
+					break;
+			}
 		}
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)

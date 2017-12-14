@@ -70,16 +70,19 @@
   <ItemGroup>
     <Compile Include="IOnPremiseInProcHandler.cs" />
     <Compile Include="IRelayServerConnector.cs" />
+    <Compile Include="OnPremiseTarget\AcknowledgmentMode.cs" />
     <Compile Include="OnPremiseTarget\IOnPremiseTargetConnector.cs" />
     <Compile Include="OnPremiseTarget\IOnPremiseTargetConnectorFactory.cs" />
     <Compile Include="OnPremiseTarget\IOnPremiseTargetRequest.cs" />
     <Compile Include="OnPremiseTarget\IOnPremiseTargetResponse.cs" />
+    <Compile Include="OnPremiseTarget\IOnPremiseWebTargetRequestMessageBuilder.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseInProcTargetConnector.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseInProcTargetConnectorBase.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseWebTargetConnector.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseTargetConnectorFactory.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseTargetRequest.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseTargetResponse.cs" />
+    <Compile Include="OnPremiseTarget\OnPremiseWebTargetRequestMessageBuilder.cs" />
     <Compile Include="SignalR\IRelayServerConnection.cs" />
     <Compile Include="SignalR\IRelayServerConnectionFactory.cs" />
     <Compile Include="SignalR\RelayServerConnection.cs" />

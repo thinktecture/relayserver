@@ -20,6 +20,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			var builder = new ContainerBuilder();
 
 			builder.RegisterLogger();
+			builder.RegisterType<OnPremiseWebTargetRequestMessageBuilder>().As<IOnPremiseWebTargetRequestMessageBuilder>();
 			builder.RegisterType<RelayServerConnectionFactory>().As<IRelayServerConnectionFactory>();
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
 

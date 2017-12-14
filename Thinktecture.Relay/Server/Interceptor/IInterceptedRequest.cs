@@ -38,9 +38,9 @@ namespace Thinktecture.Relay.Server.Interceptor
 		TimeSpan Expiration { get; set; }
 
 		/// <summary>
-		/// Gets whether this request should be auto-acknowledged when taken from the RabbitMQ
+		/// Gets the acknowledgment mode that determines how and when the request should be acknowledged in the message queue
 		/// <remarks>This can be set by an interceptor</remarks>
 		/// </summary>
-		bool AutoAcknowledge { get; set; }
+		AcknowledgmentMode AcknowledgmentMode { get; set; }
 	}
 }
