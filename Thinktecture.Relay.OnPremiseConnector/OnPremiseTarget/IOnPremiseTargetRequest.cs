@@ -4,6 +4,19 @@ using System.IO;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
+	internal interface IOnPremiseTargetRequestInternal : IOnPremiseTargetRequest
+	{
+		/// <summary>
+		/// Gets the request body if small enough
+		/// </summary>
+		byte[] Body { get; }
+
+		/// <summary>
+		/// Gets the request stream if the body is too large (was requested by a second request)
+		/// </summary>
+		new Stream Stream { get; set; }
+	}
+
 	/// <summary>
 	/// This is the pendant for the server interface IOnPremiseConnectorRequest and should be kept separate
 	/// </summary>
@@ -38,11 +51,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// Gets the HTTP headers to send to the local target
 		/// </summary>
 		IReadOnlyDictionary<string, string> HttpHeaders { get; }
-
-		/// <summary>
-		/// Gets the request body if small enough
-		/// </summary>
-		byte[] Body { get; }
 
 		/// <summary>
 		/// Gets the request stream if the body is too large (was requested by a second request)
