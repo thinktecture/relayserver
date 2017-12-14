@@ -322,6 +322,8 @@ namespace Thinktecture.Relay.Server.Repository
 						activeConnection.LastActivity = DateTime.UtcNow;
 						activeConnection.ConnectorVersion = connectorVersion;
 						activeConnection.AssemblyVersion = assemblyVersion;
+
+						context.Entry(activeConnection).State = EntityState.Modified;
 					}
 					else
 					{
@@ -358,6 +360,9 @@ namespace Thinktecture.Relay.Server.Repository
 					if (activeConnection != null)
 					{
 						activeConnection.LastActivity = DateTime.UtcNow;
+
+						context.Entry(activeConnection).State = EntityState.Modified;
+
 						await context.SaveChangesAsync().ConfigureAwait(false);
 					}
 				}
@@ -381,6 +386,7 @@ namespace Thinktecture.Relay.Server.Repository
 					if (activeConnection != null)
 					{
 						context.ActiveConnections.Remove(activeConnection);
+
 						await context.SaveChangesAsync().ConfigureAwait(false);
 					}
 				}

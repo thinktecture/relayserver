@@ -125,7 +125,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				RequestId = requestId
 			};
 
-			await _backendCommunication.SendOnPremiseConnectorRequest(id, request).ConfigureAwait(false);
+			await _backendCommunication.SendOnPremiseConnectorRequestAsync(id, request).ConfigureAwait(false);
 
 			var response = await _backendCommunication.GetResponseAsync(requestId).ConfigureAwait(false);
 			request.RequestFinished = DateTime.UtcNow;

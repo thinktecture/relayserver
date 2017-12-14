@@ -8,10 +8,10 @@ namespace Thinktecture.Relay.Server.Communication
 	{
 		Guid OriginId { get; }
 		Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId);
-		Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request);
+		Task SendOnPremiseConnectorRequestAsync(Guid linkId, IOnPremiseConnectorRequest request);
 		void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId);
-		void RegisterOnPremise(RegistrationInformation registrationInformation);
-		void UnregisterOnPremise(string connectionId);
-		Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response);
+		Task RegisterOnPremiseAsync(RegistrationInformation registrationInformation);
+		Task UnregisterOnPremiseAsync(string connectionId);
+		Task SendOnPremiseTargetResponseAsync(Guid originId, IOnPremiseConnectorResponse response);
 	}
 }

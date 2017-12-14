@@ -109,7 +109,7 @@ namespace Thinktecture.Relay.Server.Communication
 			return null;
 		}
 
-		public async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
+		public async Task SendOnPremiseConnectorRequestAsync(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			CheckDisposed();
 
@@ -127,7 +127,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_linkRepository.RenewActiveConnectionAsync(connectionId);
 		}
 
-		public void RegisterOnPremise(RegistrationInformation registrationInformation)
+		public async Task RegisterOnPremiseAsync(RegistrationInformation registrationInformation)
 		{
 			CheckDisposed();
 
@@ -139,7 +139,7 @@ namespace Thinktecture.Relay.Server.Communication
 				registrationInformation.ConnectorVersion,
 				registrationInformation.ConnectorAssemblyVersion);
 
-			_linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion, registrationInformation.ConnectorAssemblyVersion);
+			await _linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion, registrationInformation.ConnectorAssemblyVersion).ConfigureAwait(false);
 
 			if (!_onPremises.ContainsKey(registrationInformation.ConnectionId))
 				_onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.LinkId, registrationInformation.UserName, registrationInformation.Role);
@@ -156,7 +156,7 @@ namespace Thinktecture.Relay.Server.Communication
 			RegisterForHeartbeat(registrationInformation);
 		}
 
-		public void UnregisterOnPremise(string connectionId)
+		public async Task UnregisterOnPremiseAsync(string connectionId)
 		{
 			CheckDisposed();
 
@@ -165,7 +165,7 @@ namespace Thinktecture.Relay.Server.Communication
 				_logger?.Debug("Unregistered on-premise link.link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role}", connectionInfo.LinkId, connectionId, connectionInfo.UserName, connectionInfo.Role);
 			}
 
-			_linkRepository.RemoveActiveConnectionAsync(connectionId);
+			await _linkRepository.RemoveActiveConnectionAsync(connectionId).ConfigureAwait(false);
 			UnregisterForHeartbeat(connectionId);
 
 			IDisposable requestSubscription;
@@ -182,7 +182,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		public async Task SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response)
+		public async Task SendOnPremiseTargetResponseAsync(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			CheckDisposed();
 
