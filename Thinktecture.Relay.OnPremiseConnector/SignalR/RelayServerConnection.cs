@@ -234,7 +234,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		protected override async void OnMessageReceived(JToken message)
 		{
 			var ctx = new RequestContext();
-			OnPremiseTargetRequest request = null;
+			IOnPremiseTargetRequestInternal request = null;
 
 			try
 			{
@@ -417,7 +417,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			return _connectors.Keys.ToList();
 		}
 
-		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, OnPremiseTargetRequest request, CancellationToken cancellationToken)
+		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, IOnPremiseTargetRequestInternal request, CancellationToken cancellationToken)
 		{
 			_logger?.Debug("Relaying request to local target. request-url={RequestUrl}, request-id={RequestId}", request.Url, request.RequestId);
 

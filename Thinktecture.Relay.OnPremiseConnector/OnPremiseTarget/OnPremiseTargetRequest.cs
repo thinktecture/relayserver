@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
-	internal class OnPremiseTargetRequest : IOnPremiseTargetRequest
+	internal class OnPremiseTargetRequest : IOnPremiseTargetRequestInternal
 	{
 		public string RequestId { get; set; }
 		public Guid OriginId { get; set; }
