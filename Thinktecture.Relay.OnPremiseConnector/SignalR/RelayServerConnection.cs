@@ -258,7 +258,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					await AcknowlegdeRequestIfRequired(request).ConfigureAwait(false);
+					await AcknowlegdeRequest(request).ConfigureAwait(false);
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
@@ -296,7 +296,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 					try
 					{
-						await PostToRelayAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+						await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{
@@ -306,23 +306,33 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private async Task AcknowlegdeRequestIfRequired(IOnPremiseTargetRequest request)
+		private async Task AcknowlegdeRequest(IOnPremiseTargetRequest request)
 		{
-			_logger.Verbose("Checking if acknowledged is required. request-id={RequestId}, acknowledgment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgmentMode, request.AcknowledgeId);
+			if (request.AcknowledgmentMode == AcknowledgmentMode.Auto)
+			{
+				_logger?.Debug("Automatically acknowlegded by relay server. request-id={RequestId}, connection-id={ConnectionId}", request.RequestId, ConnectionId);
+				return;
+			}
 
 			if (String.IsNullOrEmpty(request.AcknowledgeId))
+			{
+				_logger?.Debug("No acknowledgment possible. request-id={RequestId}, connection-id={ConnectionId}, acknowledment-mode={AcknowledgmentMode}", request.RequestId, ConnectionId, request.AcknowledgmentMode);
 				return;
+			}
 
 			switch (request.AcknowledgmentMode)
 			{
 				case AcknowledgmentMode.Default:
-					_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
-					await SendToRelayAsync($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", HttpMethod.Get, null, null, CancellationToken.None).ConfigureAwait(false);
+					_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", request.RequestId, ConnectionId, request.AcknowledgeId);
+					await GetToRelay($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", CancellationToken.None).ConfigureAwait(false);
 					break;
 
-				case AcknowledgmentMode.Auto:
 				case AcknowledgmentMode.Manual:
-					// Auto was already acknowledged on the server, and Manual needs to send ACK by custom code
+					_logger?.Debug("Manual acknowledgment needed. request-id={RequestId}, connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", request.RequestId, ConnectionId, request.AcknowledgeId);
+					break;
+
+				default:
+					_logger?.Warning("Unknown acknowledgment mode found. request-id={RequestId}, connection-id={ConnectionId}, acknowledment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, ConnectionId, request.AcknowledgmentMode, request.AcknowledgeId);
 					break;
 			}
 		}
@@ -340,7 +350,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				RequestId = request.RequestId,
 			};
 
-			await PostToRelayAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
 		}
 
 		private void HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
@@ -468,7 +478,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				try
 				{
 					// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
-					await PostToRelayAsync(ctx, response, cancellationToken).ConfigureAwait(false);
+					await PostResponseAsync(ctx, response, cancellationToken).ConfigureAwait(false);
 				}
 				catch (Exception ex)
 				{
@@ -477,7 +487,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private async Task PostToRelayAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
+		private async Task PostResponseAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
 		{
 			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;

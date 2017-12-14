@@ -40,7 +40,7 @@ namespace Thinktecture.Relay.Server.Controller
 		}
 
 		[HttpGet]
-		public IHttpActionResult Acknowledge(string id, string tag)
+		public IHttpActionResult Acknowledge(string tag, string id = null)
 		{
 			_logger?.Verbose("Received acknowledge. connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", id, tag);
 

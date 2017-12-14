@@ -122,9 +122,12 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger?.Debug("Acknowledging request. acknowledge-id={AcknowledgeId}, connection-id={ConnectionId}", acknowledgeId, connectionId);
 			_messageDispatcher.AcknowledgeRequest(acknowledgeId);
-			_linkRepository.RenewActiveConnectionAsync(connectionId);
+
+			if (connectionId != null)
+			{
+				_linkRepository.RenewActiveConnectionAsync(connectionId);
+			}
 		}
 
 		public void RegisterOnPremise(RegistrationInformation registrationInformation)

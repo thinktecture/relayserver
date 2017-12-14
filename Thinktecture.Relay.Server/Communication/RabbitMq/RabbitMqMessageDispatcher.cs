@@ -138,7 +138,10 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		public void AcknowledgeRequest(string acknowledgeId)
 		{
 			if (UInt64.TryParse(acknowledgeId, out var deliveryTag))
+			{
+				_logger?.Debug("Acknowledging request. acknowledge-id={AcknowledgeId}", acknowledgeId);
 				_model.BasicAck(deliveryTag, false);
+			}
 		}
 
 		public Task DispatchRequest(Guid linkId, IOnPremiseConnectorRequest request)
