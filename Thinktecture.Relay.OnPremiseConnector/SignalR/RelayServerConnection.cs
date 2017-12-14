@@ -258,7 +258,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					await AcknowlegdeRequestIfRequired(request).ConfigureAwait(false);
+					AcknowlegdeRequestIfRequired(request);
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
@@ -306,20 +306,25 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private Task AcknowlegdeRequestIfRequired(IOnPremiseTargetRequest request)
+		private async void AcknowlegdeRequestIfRequired(IOnPremiseTargetRequest request)
 		{
 			_logger.Verbose("Checking if acknowledged is required. request-id={RequestId}, acknowledgment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgmentMode, request.AcknowledgeId);
 
-			if (request.AcknowledgmentMode == AcknowledgmentMode.Default && !String.IsNullOrEmpty(request.AcknowledgeId))
+			if (String.IsNullOrEmpty(request.AcknowledgeId))
+				return;
+
+			switch (request.AcknowledgmentMode)
 			{
-				_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+				case AcknowledgmentMode.Default:
+					_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+					await SendToRelayAsync($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", HttpMethod.Get, null, null, CancellationToken.None).ConfigureAwait(false);
+					break;
 
-				return SendToRelayAsync($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", HttpMethod.Get, null, null, CancellationToken.None);
+				case AcknowledgmentMode.Auto:
+				case AcknowledgmentMode.Manual:
+					// Auto was already acknowledged on the server, and Manual needs to send ACK by custom code
+					break;
 			}
-
-			// Mode is Auto or Manual: Do nothing.
-			// Manual needs to send ACK by custom code, and Auto already was acknowledged on server side
-			return Task.CompletedTask;
 		}
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)

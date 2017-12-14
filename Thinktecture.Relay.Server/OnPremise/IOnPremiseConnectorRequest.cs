@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.OnPremise
 		byte[] Body { get; }
 
 		/// <summary>
-		/// Gets whether this request should be auto-acknowledged when taken from the RabbitMQ
+		/// Gets the acknowledgment mode that determines how and when the request should be acknowledged in the message queue
 		/// </summary>
 		AcknowledgmentMode AcknowledgmentMode { get; }
 

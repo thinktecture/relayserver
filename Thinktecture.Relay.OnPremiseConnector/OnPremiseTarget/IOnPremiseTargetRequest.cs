@@ -58,7 +58,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		Stream Stream { get; }
 
 		/// <summary>
-		/// Gets the mode of Acknowledgment of this request
+		/// Gets the mode of acknowledgment of this request
 		/// </summary>
 		AcknowledgmentMode AcknowledgmentMode { get; }
 	}

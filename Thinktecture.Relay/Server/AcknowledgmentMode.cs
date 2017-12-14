@@ -3,21 +3,19 @@ namespace Thinktecture.Relay.Server
 	public enum AcknowledgmentMode
 	{
 		/// <summary>
-		/// Requests in the message queue will be automatically acknowledged by
-		/// the OnPremiseConnector before executing the request against the on premise api
+		/// Requests in the message queue will be automatically acknowledged
+		/// by the on-premise before contacting the local target
 		/// </summary>
 		Default,
 
 		/// <summary>
-		/// Requests in the message queue will be automatically acknowledged by
-		/// the relay server before sending them to the OnPremiseConnector
+		/// Requests in the message queue will be automatically acknowledged
+		/// by the relay server before sending to the on-premise
 		/// </summary>
 		Auto,
 
 		/// <summary>
-		/// Requests in the message queue will not be acknowleged by the Relay system
-		/// at all and have to be manually acknowleged by requesting the /request/acknowlegde endpoint
-		/// with the connection and the acknowledge id
+		/// Requests in the message queue need to be acknowledged manually
 		/// </summary>
 		Manual,
 	}
