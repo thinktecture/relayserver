@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Security.Principal;
 using Serilog;
 using Thinktecture.Relay.Server.Http;
 using Thinktecture.Relay.Server.OnPremise;
@@ -20,37 +21,28 @@ namespace Thinktecture.Relay.Server.Interceptor
 			_responseInterceptor = responseInterceptor;
 		}
 
-		public IOnPremiseConnectorRequest HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, out HttpResponseMessage immediateResponse)
+		public IOnPremiseConnectorRequest HandleRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, IPrincipal clientUser, out HttpResponseMessage immediateResponse)
 		{
 			immediateResponse = null;
+
 			if (_requestInceptor == null)
-			{
 				return request;
-			}
 
 			_logger?.Verbose("Handling request. request-id={RequestId}", request.RequestId);
 
-			IPAddress ipAddress = null;
-			try
-			{
-				ipAddress = message.GetRemoteIpAddress();
-			}
-			catch (Exception ex)
-			{
-				_logger?.Warning(ex, "Could not fetch remote IP address. request-id={RequestId}", request.RequestId);
-			}
 
 			try
 			{
-				var replacedRequest = new InterceptedRequest(request) { ClientIpAddress = ipAddress };
-				immediateResponse = _requestInceptor.OnRequestReceived(replacedRequest);
+				var interceptedRequest = CreateInterceptedRequest(request, message, clientUser);
+
+				immediateResponse = _requestInceptor.OnRequestReceived(interceptedRequest);
 
 				if (immediateResponse != null)
 				{
 					immediateResponse.RequestMessage = message;
 				}
 
-				return replacedRequest;
+				return interceptedRequest;
 			}
 			catch (Exception ex)
 			{
@@ -60,20 +52,41 @@ namespace Thinktecture.Relay.Server.Interceptor
 			return request;
 		}
 
-		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, HttpRequestMessage message, IOnPremiseConnectorResponse response)
+		private InterceptedRequest CreateInterceptedRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, IPrincipal clientUser)
+		{
+			return new InterceptedRequest(request)
+			{
+				ClientIpAddress = GetRemoteIpAddress(request, message),
+				ClientUser = clientUser,
+			};
+		}
+
+		private IPAddress GetRemoteIpAddress(IOnPremiseConnectorRequest request, HttpRequestMessage message)
+		{
+			try
+			{
+				return message.GetRemoteIpAddress();
+			}
+			catch (Exception ex)
+			{
+				_logger?.Warning(ex, "Could not fetch remote IP address. request-id={RequestId}", request.RequestId);
+			}
+
+			return null;
+		}
+
+		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, HttpRequestMessage message, IPrincipal clientUser, IOnPremiseConnectorResponse response)
 		{
 			if (_responseInterceptor == null)
-			{
 				return null;
-			}
 
 			_logger?.Verbose("Handling response. request-id={RequestId}", request.RequestId);
 
 			try
 			{
-				var immediateResponse = response == null
-					? _responseInterceptor.OnResponseFailed(new InterceptedRequest(request))
-					: _responseInterceptor.OnResponseReceived(new InterceptedRequest(request), new InterceptedResponse(response));
+				var interceptedRequest = CreateInterceptedRequest(request, message, clientUser);
+
+				var immediateResponse = response == null ? _responseInterceptor.OnResponseFailed(interceptedRequest) : _responseInterceptor.OnResponseReceived(interceptedRequest, new InterceptedResponse(response));
 
 				if (immediateResponse != null)
 				{

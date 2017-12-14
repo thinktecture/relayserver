@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Principal;
 
 namespace Thinktecture.Relay.Server.Interceptor
 {
@@ -35,5 +36,10 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// Gets the IP address of the requesting client
 		/// </summary>
 		IPAddress ClientIpAddress { get; }
+
+		/// <summary>
+		/// Gets the client user
+		/// </summary>
+		IPrincipal ClientUser { get; }
 	}
 }
