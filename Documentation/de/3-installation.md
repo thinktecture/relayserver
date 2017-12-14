@@ -141,14 +141,15 @@ Die Standardeinstellungen umfassen dabei:
     <add key="HostName" value="+"/>
     <add key="UseInsecureHttp" value="false" />
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
-    <add key="InterceptorAssembly" value="" />
+    <add key="CustomCodeAssemblyPath" value="" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
     <add key="IncludeErrorDetailPolicy" value="default" />
     <add key="MaxFailedLoginAttempts" value="5" />
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
-    <add key="RequestQueueExpiration" value="00:00:10" />
+    <add key="QueueExpiration" value="00:00:10" />
+    <add key="RequestExpiration" value="00:00:10" />
 </appSettings>
 ```
 
@@ -163,14 +164,15 @@ Die Standardeinstellungen umfassen dabei:
 | UseInsecureHttp | Aktiviert die Verwendung von HTTP statt HTTPS (die Verwendung von HTTP im Produktivbetrieb wird nicht empfohlen). |
 | TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden. Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist (default) werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
 | ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem Relay Server als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
-| InterceptorAssembly | Pfad zu einem Assembly, in dem Interceptor implementiert sind. Entweder absolut oder relativ zum RelayServer. |
+| CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist. Entweder absolut oder relativ zum RelayServer. |
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
 | HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
 | IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default'). Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
 | MaxFailedLoginAttempts | Anzahl von erfolglosen Login-Versuchen für einen User, bevor dieser temporär gesperrt wird (default 5) |
 | FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
 | SecureClientController | Wenn dies gesetzt ist, muss ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines OnPremiseConnectors / Links mitsenden (default false) |
-| RequestQueueExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus RabbitMQ verworfen wird (default 10 Sekunden) |
+| QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
+| RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
 
 ## netsh settings
 

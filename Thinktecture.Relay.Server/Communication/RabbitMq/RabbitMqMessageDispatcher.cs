@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reactive.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using Serilog;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
@@ -17,12 +19,15 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		private const string _EXCHANGE_NAME = "Relay Server";
 
 		private readonly ILogger _logger;
+		private readonly IConfiguration _configuration;
 		private readonly IModel _model;
 		private readonly UTF8Encoding _encoding;
 
-		public RabbitMqMessageDispatcher(ILogger logger, IConnection connection)
+		public RabbitMqMessageDispatcher(ILogger logger, IConfiguration configuration, IConnection connection)
 		{
 			_logger = logger;
+			_configuration = configuration;
+
 			if (connection == null)
 				throw new ArgumentNullException(nameof(connection));
 
@@ -100,6 +105,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			return Observable.Create<IOnPremiseConnectorResponse>(observer =>
 			{
 				var queueName = "Response " + originId;
+
 				DeclareQueue(queueName);
 				_model.QueueBind(queueName, _EXCHANGE_NAME, originId.ToString());
 
@@ -185,8 +191,26 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		private void DeclareQueue(string name)
 		{
-			_logger?.Verbose("Declaring queue. name={QueueName}", name);
-			_model.QueueDeclare(name, true, false, false);
+			Dictionary<string, object> arguments = null;
+			if (_configuration.QueueExpiration == TimeSpan.Zero)
+			{
+				_logger?.Verbose("Declaring queue. name={QueueName}", name);
+			}
+			else
+			{
+				_logger?.Verbose("Declaring queue. name={QueueName}, expiration={QueueExpiration}", name, _configuration.QueueExpiration);
+				arguments = new Dictionary<string, object>() { ["x-expires"] = (int)_configuration.QueueExpiration.TotalMilliseconds };
+			}
+
+			try
+			{
+				_model.QueueDeclare(name, true, false, false, arguments);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Declaring queue failed - possible expiration change. name={QueueName}", name);
+				throw;
+			}
 		}
 
 		private void Dispose(bool disposing)

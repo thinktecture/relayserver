@@ -31,6 +31,7 @@ namespace Thinktecture.Relay.Server.Config
 		int MaxFailedLoginAttempts { get; }
 		TimeSpan FailedLoginLockoutPeriod { get; }
 		bool SecureClientController { get; }
-		TimeSpan RequestQueueExpiration { get; }
+		TimeSpan QueueExpiration { get; }
+		TimeSpan RequestExpiration { get; }
 	}
 }
