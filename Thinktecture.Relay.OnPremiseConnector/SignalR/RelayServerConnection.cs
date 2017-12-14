@@ -258,7 +258,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					AcknowlegdeRequestIfRequired(request);
+					await AcknowlegdeRequestIfRequired(request).ConfigureAwait(false);
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
@@ -306,7 +306,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private async void AcknowlegdeRequestIfRequired(IOnPremiseTargetRequest request)
+		private async Task AcknowlegdeRequestIfRequired(IOnPremiseTargetRequest request)
 		{
 			_logger.Verbose("Checking if acknowledged is required. request-id={RequestId}, acknowledgment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgmentMode, request.AcknowledgeId);
 
