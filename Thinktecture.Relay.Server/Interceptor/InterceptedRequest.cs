@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Principal;
 using Newtonsoft.Json;
 using Thinktecture.Relay.Server.OnPremise;
 
@@ -10,6 +11,9 @@ namespace Thinktecture.Relay.Server.Interceptor
 	{
 		[JsonIgnore]
 		public IPAddress ClientIpAddress { get; set; }
+
+		[JsonIgnore]
+		public IPrincipal ClientUser { get; set; }
 
 		public InterceptedRequest(IOnPremiseConnectorRequest other)
 		{

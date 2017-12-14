@@ -78,7 +78,7 @@ namespace Thinktecture.Relay.Server.Controller
 			IOnPremiseConnectorResponse response = null;
 			try
 			{
-				request = _interceptorManager.HandleRequest(request, Request, out var message);
+				request = _interceptorManager.HandleRequest(request, Request, User, out var message);
 				if (message != null)
 				{
 					_logger?.Verbose("Interceptor caused direct answering of request. request-id={RequestId}, status-code={ResponseStatusCode}", request.RequestId, message.StatusCode);
@@ -110,7 +110,7 @@ namespace Thinktecture.Relay.Server.Controller
 					_logger?.Verbose("On-Premise timeout. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				}
 
-				return _interceptorManager.HandleResponse(request, Request, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);
+				return _interceptorManager.HandleResponse(request, Request, User, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);
 			}
 			finally
 			{

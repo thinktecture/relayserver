@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using FluentAssertions;
@@ -33,6 +34,28 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly Mock<ITraceManager> _traceManagerMock;
 		private readonly Mock<IInterceptorManager> _interceptorManagerMock;
 
+		private class FakePrincipal : IPrincipal
+		{
+			public FakePrincipal()
+			{
+				Identity = new FakeIdentity();
+			}
+
+			public bool IsInRole(string role)
+			{
+				return false;
+			}
+
+			public IIdentity Identity { get; }
+		}
+
+		private class FakeIdentity : IIdentity
+		{
+			public string Name { get; }
+			public string AuthenticationType { get; }
+			public bool IsAuthenticated { get; }
+		}
+
 		public ClientControllerTest()
 		{
 			_loggerMock = new Mock<ILogger>();
@@ -59,6 +82,7 @@ namespace Thinktecture.Relay.Server.Controller
 			var sut = CreateClientController();
 			sut.ControllerContext = new HttpControllerContext { Request = new HttpRequestMessage { Method = HttpMethod.Post } };
 			sut.Request = new HttpRequestMessage();
+			sut.User = new FakePrincipal();
 
 			HttpResponseMessage result;
 
@@ -83,8 +107,8 @@ namespace Thinktecture.Relay.Server.Controller
 			_traceManagerMock.Setup(t => t.Trace(clientRequestFake, onPremiseTargetReponseFake, localConfigurationGuid));
 			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, linkId, originId, "Foo/Bar/Baz", 0));
 			HttpResponseMessage messageDummy;
-			_interceptorManagerMock.Setup(i => i.HandleRequest(clientRequestFake, sut.Request, out messageDummy)).Returns(clientRequestFake);
-			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, sut.Request, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
+			_interceptorManagerMock.Setup(i => i.HandleRequest(clientRequestFake, sut.Request, sut.User, out messageDummy)).Returns(clientRequestFake);
+			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, sut.Request, sut.User, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
 
 			result = await sut.Relay("Foo/Bar/Baz");
 
@@ -212,6 +236,7 @@ namespace Thinktecture.Relay.Server.Controller
 			var sut = CreateClientController();
 			sut.ControllerContext = new HttpControllerContext { Request = new HttpRequestMessage { Method = HttpMethod.Post } };
 			sut.Request = new HttpRequestMessage();
+			sut.User = new FakePrincipal();
 			HttpResponseMessage result;
 
 			var linkFake = new Link { Id = Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda") };
@@ -230,8 +255,8 @@ namespace Thinktecture.Relay.Server.Controller
 			_traceManagerMock.Setup(t => t.GetCurrentTraceConfigurationId(linkFake.Id)).Returns((Guid?)null);
 			_requestLoggerMock.Setup(r => r.LogRequest(clientRequestFake, onPremiseTargetReponseFake, Guid.Parse("fb35e2fb-5fb6-4475-baa0-e0b06f5fdeda"), new Guid("c9208bdb-c195-460d-b84e-6c146bb252e5"), "Foo/Bar/Baz", 0));
 			HttpResponseMessage messageDummy;
-			_interceptorManagerMock.Setup(i => i.HandleRequest(clientRequestFake, sut.Request, out messageDummy)).Returns(clientRequestFake);
-			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, sut.Request, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
+			_interceptorManagerMock.Setup(i => i.HandleRequest(clientRequestFake, sut.Request, sut.User, out messageDummy)).Returns(clientRequestFake);
+			_interceptorManagerMock.Setup(i => i.HandleResponse(clientRequestFake, sut.Request, sut.User, onPremiseTargetReponseFake)).Returns((HttpResponseMessage)null);
 
 			result = await sut.Relay("Foo/Bar/Baz");
 
