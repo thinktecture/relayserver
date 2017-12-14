@@ -112,6 +112,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="NoAsyncVoidTest.cs" />
     <Compile Include="Communication\BackendCommunicationTests\BackendCommunicationTestBase.cs" />
     <Compile Include="Communication\BackendCommunicationTests\Ctor.cs" />
     <Compile Include="Communication\BackendCommunicationTests\Prepare.cs" />
