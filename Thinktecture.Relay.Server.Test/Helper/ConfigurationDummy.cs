@@ -6,8 +6,11 @@ namespace Thinktecture.Relay.Server.Helper
 {
 	public class ConfigurationDummy : IConfiguration
 	{
-		public TimeSpan OnPremiseConnectorCallbackTimeout { get; set; }
+		// Connection strings
 		public string RabbitMqConnectionString { get; set; }
+
+		// App Settings
+		public TimeSpan OnPremiseConnectorCallbackTimeout { get; set; }
 		public string TraceFileDirectory { get; set; }
 		public int LinkPasswordLength { get; set; }
 		public int DisconnectTimeout { get; set; }
@@ -20,8 +23,8 @@ namespace Thinktecture.Relay.Server.Helper
 		public string HostName { get; set; }
 		public int Port { get; set; }
 		public string ManagementWebLocation { get; set; }
-		public string TemporaryRequestStoragePath { get; set; }
 		public TimeSpan TemporaryRequestStoragePeriod { get; set; }
+		public string TemporaryRequestStoragePath { get; set; }
 		public int ActiveConnectionTimeoutInSeconds { get; set; }
 		public string CustomCodeAssemblyPath { get; set; }
 		public string OAuthSharedSecret { get; set; }
