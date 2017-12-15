@@ -8,8 +8,11 @@ namespace Thinktecture.Relay.Server.Config
 {
 	internal class Configuration : IConfiguration
 	{
-		public TimeSpan OnPremiseConnectorCallbackTimeout { get; }
+		// Connection strings
 		public string RabbitMqConnectionString { get; }
+
+		// App Settings
+		public TimeSpan OnPremiseConnectorCallbackTimeout { get; }
 		public string TraceFileDirectory { get; }
 		public int LinkPasswordLength { get; }
 		public int DisconnectTimeout { get; }
@@ -39,16 +42,16 @@ namespace Thinktecture.Relay.Server.Config
 
 		public Configuration(ILogger logger)
 		{
-			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out var tmpInt))
-			{
-				OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
-			}
-
 			var settings = ConfigurationManager.ConnectionStrings["RabbitMQ"];
 			if (settings != null)
 			{
 				RabbitMqConnectionString = settings.ConnectionString;
+			}
+
+			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out var tmpInt))
+			{
+				OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
 			}
 
 			TraceFileDirectory = ConfigurationManager.AppSettings[nameof(TraceFileDirectory)] ?? "tracefiles";
@@ -59,16 +62,16 @@ namespace Thinktecture.Relay.Server.Config
 				LinkPasswordLength = tmpInt;
 			}
 
-			ConnectionTimeout = 5;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(ConnectionTimeout)], out tmpInt))
-			{
-				ConnectionTimeout = tmpInt;
-			}
-
 			DisconnectTimeout = 6;
 			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(DisconnectTimeout)], out tmpInt))
 			{
 				DisconnectTimeout = tmpInt;
+			}
+
+			ConnectionTimeout = 5;
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(ConnectionTimeout)], out tmpInt))
+			{
+				ConnectionTimeout = tmpInt;
 			}
 
 			KeepAliveInterval = DisconnectTimeout / 3;
@@ -77,12 +80,10 @@ namespace Thinktecture.Relay.Server.Config
 				KeepAliveInterval = tmpInt;
 			}
 
-			HostName = ConfigurationManager.AppSettings[nameof(HostName)] ?? "+";
-
-			Port = 20000;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(Port)], out tmpInt))
+			UseInsecureHttp = false;
+			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(UseInsecureHttp)], out var tmpBool))
 			{
-				Port = tmpInt;
+				UseInsecureHttp = tmpBool;
 			}
 
 			EnableManagementWeb = ModuleBinding.True;
@@ -103,10 +104,12 @@ namespace Thinktecture.Relay.Server.Config
 				EnableOnPremiseConnections = tmpModuleBinding;
 			}
 
-			UseInsecureHttp = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(UseInsecureHttp)], out var tmpBool))
+			HostName = ConfigurationManager.AppSettings[nameof(HostName)] ?? "+";
+
+			Port = UseInsecureHttp ? 20000 : 443;
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(Port)], out tmpInt))
 			{
-				UseInsecureHttp = tmpBool;
+				Port = tmpInt;
 			}
 
 			ManagementWebLocation = ConfigurationManager.AppSettings[nameof(ManagementWebLocation)];

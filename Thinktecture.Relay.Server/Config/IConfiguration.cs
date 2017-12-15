@@ -5,8 +5,8 @@ namespace Thinktecture.Relay.Server.Config
 {
 	public interface IConfiguration
 	{
-		TimeSpan OnPremiseConnectorCallbackTimeout { get; }
 		string RabbitMqConnectionString { get; }
+		TimeSpan OnPremiseConnectorCallbackTimeout { get; }
 		string TraceFileDirectory { get; }
 		int LinkPasswordLength { get; }
 		int DisconnectTimeout { get; }
@@ -19,8 +19,8 @@ namespace Thinktecture.Relay.Server.Config
 		string HostName { get; }
 		int Port { get; }
 		string ManagementWebLocation { get; }
-		string TemporaryRequestStoragePath { get; }
 		TimeSpan TemporaryRequestStoragePeriod { get; }
+		string TemporaryRequestStoragePath { get; }
 		int ActiveConnectionTimeoutInSeconds { get; }
 		string CustomCodeAssemblyPath { get; set; }
 		string OAuthSharedSecret { get; }
