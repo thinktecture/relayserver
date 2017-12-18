@@ -83,8 +83,13 @@
     <Compile Include="OnPremiseTarget\OnPremiseTargetRequest.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseTargetResponse.cs" />
     <Compile Include="OnPremiseTarget\OnPremiseWebTargetRequestMessageBuilder.cs" />
+    <Compile Include="SignalR\HeartbeatChecker.cs" />
+    <Compile Include="SignalR\IHeartbeatChecker.cs" />
+    <Compile Include="SignalR\IMaintenanceLoop.cs" />
     <Compile Include="SignalR\IRelayServerConnection.cs" />
     <Compile Include="SignalR\IRelayServerConnectionFactory.cs" />
+    <Compile Include="SignalR\ITokenExpiryChecker.cs" />
+    <Compile Include="SignalR\MaintenanceLoop.cs" />
     <Compile Include="SignalR\RelayServerConnection.cs" />
     <Compile Include="RelayServerConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -92,6 +97,7 @@
       <Link>Properties\AssemblyInfo.shared.cs</Link>
     </Compile>
     <Compile Include="SignalR\RelayServerConnectionFactory.cs" />
+    <Compile Include="SignalR\TokenExpiryChecker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
