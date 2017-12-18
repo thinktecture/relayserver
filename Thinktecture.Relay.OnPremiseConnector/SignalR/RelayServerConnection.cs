@@ -215,7 +215,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			Headers["Authorization"] = $"{tokenResponse.TokenType} {_accessToken}";
 
-			_logger?.Verbose("Setting access token. Token expires at {TokenExpiry}", _tokenExpiry);
+			_logger?.Verbose("Setting access token. token-expiry={TokenExpiry}", _tokenExpiry);
 		}
 
 		private void CheckResponseTokenForErrors(TokenResponse token)
@@ -420,7 +420,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					if (!await CheckTokenExpiry())
 					{
-						_logger.Warning("Could not renew access token. Trying a hard reconnect for for relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+						_logger.Warning("Could not renew access token and trying a hard reconnect. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 						ForceReconnect();
 
 						// break loop to stop this task, as ForceReconnect calls ConnectAsync which will start a new TokenRefreshLoop after connecting
@@ -436,7 +436,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			if (!_stopRequested && (_tokenExpiry - _tokenRefreshWindowInSeconds <= DateTime.UtcNow))
 			{
-				_logger.Information("Access token is going to expire soon. Trying to refresh token for relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+				_logger.Information("Access token is going to expire soon. Trying to refresh token for relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 				return await TryRequestAuthorizationTokenAsync().ConfigureAwait(false);
 			}
 
