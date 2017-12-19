@@ -403,6 +403,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}", Uri, RelayServerConnectionId);
 
+			LastHeartbeat = DateTime.MinValue;
+			HeartbeatInterval = TimeSpan.Zero;
+
 			_stopRequested = true;
 			Stop();
 		}
