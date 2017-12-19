@@ -16,8 +16,6 @@ const gulp = require('gulp'),
 
 const buildConfig = require('../gulp.config');
 
-// new
-
 gulp.task('managementweb:clean', () => {
   return del(
     [].concat(
@@ -120,7 +118,6 @@ gulp.task('managementweb:inject', () => {
     [].concat(
       path.join(buildConfig.managementWeb.outputPaths.styles, 'vendor.min.css'),
       path.join(buildConfig.managementWeb.outputPaths.styles, 'app.min.css'),
-      //buildConfig.managementWeb.inputPaths.vendor.js,
       path.join(buildConfig.managementWeb.outputPaths.dist, 'app.js')
     )
   );
@@ -146,73 +143,4 @@ gulp.task('managementweb:build', () => {
     'managementweb:inject',
     'managementweb:files'
   );
-});
-
-// OLD
-
-gulp.task('managementweb:less', function() {
-  return gulp
-    .src(buildConfig.managementWeb.inputPaths.app.less)
-    .pipe(less())
-    .pipe(gulp.dest(buildConfig.managementWeb.outputPaths.less));
-});
-
-/*
-gulp.task('managementweb:inject', function() {
-  var injectables = gulp.src(
-    [].concat(
-      buildConfig.managementWeb.inputPaths.vendor.css,
-      buildConfig.managementWeb.inputPaths.app.css,
-      buildConfig.managementWeb.inputPaths.vendor.js,
-      buildConfig.managementWeb.inputPaths.app.js
-    )
-  );
-
-  return gulp
-    .src(buildConfig.managementWeb.inputPaths.app.index)
-    .pipe(
-      inject(injectables, {
-        ignorePath: buildConfig.managementWeb.inputPaths.basePath,
-        addRootSlash: false,
-      })
-    )
-    .pipe(gulp.dest(buildConfig.managementWeb.outputPaths.index));
-});
-*/
-
-gulp.task('managementweb:start-livereload-server', function() {
-  gulp.src(buildConfig.managementWeb.inputPaths.basePath).pipe(
-    server({
-      livereload: true,
-    })
-  );
-});
-
-gulp.task('managementweb:live-server', function() {
-  runSequence(
-    'managementweb:less',
-    'managementweb:inject',
-    'managementweb:start-livereload-server'
-  );
-});
-
-gulp.task('managementweb:deploy:package', function() {
-  return gulp
-    .src(buildConfig.managementWeb.inputPaths.deploymentFiles)
-    .pipe(zip(buildConfig.managementWeb.outputPaths.packageFileName))
-    .pipe(gulp.dest(buildConfig.managementWeb.outputPaths.deploy));
-});
-
-gulp.task('managementweb:deploy', function() {
-  runSequence(
-    'managementweb:less',
-    'managementweb:inject',
-    'managementweb:deploy:package'
-  );
-});
-
-gulp.task('managementweb:watch', function() {
-  runSequence('managementweb:live-server', function() {
-    gulp.watch(buildConfig.managementWeb.inputPaths.app.less, ['managementweb:less']);
-  });
 });

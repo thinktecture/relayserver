@@ -10,7 +10,7 @@
   "scripts": {
     "gitbook": "gulp gitbook",
     "gitbook-pdf": "gulp gitbook:pdf",
-    "watch": "gulp watch",
+    "build": "gulp managementweb:build",
     "deploy": "gulp relay:deploy",
     "release": "gulp release"
   },
