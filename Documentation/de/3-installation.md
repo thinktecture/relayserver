@@ -192,7 +192,7 @@ Die Standardeinstellungen umfassen dabei:
 | SecureClientController | Legt fest, ob ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines OnPremiseConnectors / Links mitsenden muss (default false) |
 | QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
 | RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
-| AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für OPremise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) |
+| AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für OnPremise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) <br/> _Hinweis:_ Ein zu kleiner Wert schränkt die Benutzbarkeit des Management Webs ein |
 
 ## netsh settings
 

@@ -190,7 +190,7 @@ The default settings include:
 | SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid OnPremiseConnector / Link access token (default false) |
 | QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
 | RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
-| AccessTokenLifetime | Time span that an issued access token for OnPremise Connectors and Management Web Users will be valid (default 365 days) |
+| AccessTokenLifetime | Time span that an issued access token for OnPremise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
 
 ## netsh settings
 
