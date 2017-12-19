@@ -13,7 +13,7 @@
                 restrict: 'E',
                 templateUrl: 'app/linkDetails/tabs/charts.html',
                 link: function (scope) {
-                    scope.dateFormat = 'yyyy-MM-dd';
+                    scope.dateFormat = 'YYYY-MM-DD';
                     var currentDate = new Date();
 
                     scope.isChartReloading = false;
