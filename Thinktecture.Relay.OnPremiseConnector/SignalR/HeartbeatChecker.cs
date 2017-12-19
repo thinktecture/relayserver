@@ -26,8 +26,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (lastHeartbeat != DateTime.MinValue && lastHeartbeat != DateTime.MaxValue)
 			{
-				logger?.Verbose("Checking last heartbeat time. last-heartbeat={LastHeartbeat}, relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", lastHeartbeat);
-
 				if (lastHeartbeat <= DateTime.UtcNow.Add(-intervalWithTolerance))
 				{
 					logger?.Warning("Did not receive expected heartbeat; reconnecting. last-heartbeat={LastHeartbeat}, heartbeat-interval={HeartbeatInterval}, relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", lastHeartbeat, connection.HeartbeatInterval);
