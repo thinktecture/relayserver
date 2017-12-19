@@ -9,16 +9,27 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal interface IRelayServerConnection : IDisposable
 	{
+		string RelayedRequestHeader { get; set; }
+		Uri Uri { get; }
+		TimeSpan TokenRefreshWindow { get; }
+		DateTime TokenExpiry { get; }
+		int RelayServerConnectionId { get; }
+		DateTime LastHeartbeat { get; }
+		TimeSpan HeartbeatInterval { get; }
+
+		event EventHandler Disposing;
+
 		void RegisterOnPremiseTarget(string key, Uri baseUri);
 		void RegisterOnPremiseTarget(string key, Type handlerType);
 		void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory);
 		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();
 		void RemoveOnPremiseTarget(string key);
-		string RelayedRequestHeader { get; set; }
 		Task ConnectAsync();
 		void Disconnect();
-		List<string> GetOnPremiseTargetKeys();
+		void Reconnect();
+		Task<bool> TryRequestAuthorizationTokenAsync();
 
+		List<string> GetOnPremiseTargetKeys();
 		Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
 		Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
 	}

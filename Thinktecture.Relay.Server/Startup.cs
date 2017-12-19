@@ -113,11 +113,14 @@ namespace Thinktecture.Relay.Server
 			if (authProvider == null)
 				throw new ArgumentNullException(nameof(authProvider));
 
+			// Todo: Add this only when relaying is enabled (no need to auth OnPremises if not), and add
+			// a second endpoint with different token lifetime for management web user (i.e. `/managementToken`),
+			// when management web is enabled. Also, use different AuthProviders for each endpoint
 			var serverOptions = new OAuthAuthorizationServerOptions
 			{
 				AllowInsecureHttp = config.UseInsecureHttp,
 				TokenEndpointPath = new PathString("/token"),
-				AccessTokenExpireTimeSpan = TimeSpan.FromDays(365),
+				AccessTokenExpireTimeSpan = config.AccessTokenLifetime,
 				Provider = authProvider,
 			};
 
@@ -154,8 +157,8 @@ namespace Thinktecture.Relay.Server
 				}
 			};
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseOAuthBearerAuthentication(authOptions);
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void UseSharedSecret(IAppBuilder app, string sharedSecret, OAuthAuthorizationServerOptions serverOptions)
@@ -166,12 +169,12 @@ namespace Thinktecture.Relay.Server
 
 			serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
 
-			app.UseOAuthAuthorizationServer(serverOptions);
 			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
 			{
 				AllowedAudiences = new[] { audience },
-				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) }
+				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
 			});
+			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
 		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config)

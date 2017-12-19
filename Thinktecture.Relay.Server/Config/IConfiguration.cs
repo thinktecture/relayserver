@@ -33,5 +33,6 @@ namespace Thinktecture.Relay.Server.Config
 		bool SecureClientController { get; }
 		TimeSpan QueueExpiration { get; }
 		TimeSpan RequestExpiration { get; }
+		TimeSpan AccessTokenLifetime { get; }
 	}
 }

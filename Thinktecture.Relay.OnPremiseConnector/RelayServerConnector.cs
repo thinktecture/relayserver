@@ -24,6 +24,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterType<OnPremiseWebTargetRequestMessageBuilder>().As<IOnPremiseWebTargetRequestMessageBuilder>();
 			builder.RegisterType<RelayServerConnectionFactory>().As<IRelayServerConnectionFactory>();
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
+			builder.RegisterType<HeartbeatChecker>().As<IHeartbeatChecker>();
+			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();
+			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
 
 			_container = builder.Build();
 		}
@@ -43,11 +46,12 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="userName">A <see cref="String"/> containing the user name.</param>
 		/// <param name="password">A <see cref="String"/> containing the password.</param>
 		/// <param name="relayServer">An <see cref="Uri"/> containing the relay server's base url.</param>
-		/// <param name="requestTimeout">An <see cref="Int32"/> defining the timeout in seconds.</param>
-		public RelayServerConnector(Assembly entryAssembly, string userName, string password, Uri relayServer, int requestTimeout = 30)
+		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
+		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
+		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 60)
 		{
 			var factory = _container.Resolve<IRelayServerConnectionFactory>();
-			_connection = factory.Create(entryAssembly, userName, password, relayServer, requestTimeout);
+			_connection = factory.Create(userName, password, relayServer, requestTimeoutInSeconds, tokenRefreshWindowInSeconds);
 		}
 
 		/// <summary>
