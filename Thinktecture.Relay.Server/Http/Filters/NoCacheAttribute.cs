@@ -9,11 +9,14 @@ namespace Thinktecture.Relay.Server.Http.Filters
 	{
 		public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
 		{
-			actionExecutedContext.Response.Headers.CacheControl = new CacheControlHeaderValue()
+			if (actionExecutedContext.Response != null)
 			{
-				NoCache = true,
-				NoStore = true,
-			};
+				actionExecutedContext.Response.Headers.CacheControl = new CacheControlHeaderValue()
+				{
+					NoCache = true,
+					NoStore = true,
+				};
+			}
 
 			base.OnActionExecuted(actionExecutedContext);
 		}
