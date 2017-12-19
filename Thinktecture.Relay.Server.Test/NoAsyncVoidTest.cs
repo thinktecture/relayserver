@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Thinktecture.Relay.OnPremiseConnector;
 
 namespace Thinktecture.Relay.Server
 {
@@ -44,12 +43,6 @@ namespace Thinktecture.Relay.Server
 		public void Ensure_RelayServer_assembly_has_no_async_void_methods()
 		{
 			AssertNoAsyncVoidMethods(typeof(RelayService).Assembly);
-		}
-
-		[TestMethod]
-		public void Ensure_OnPremiseConnector_assembly_has_no_async_void_methods()
-		{
-			AssertNoAsyncVoidMethods(typeof(RelayServerConnector).Assembly, "RelayServerConnection.OnMessageReceived");
 		}
 
 		private static void AssertNoAsyncVoidMethods(Assembly assembly, params string[] ignoredMethods)

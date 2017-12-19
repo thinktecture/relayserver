@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Serilog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 
@@ -15,9 +16,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger;
 		}
 
-		public IRelayServerConnection Create(string userName, string password, Uri relayServer, int requestTimeout)
+		public IRelayServerConnection Create(Assembly entryAssembly, string userName, string password, Uri relayServer, int requestTimeout)
 		{
-			return new RelayServerConnection(userName, password, relayServer, requestTimeout, _onPremiseTargetConnectorFactory, _logger);
+			return new RelayServerConnection(entryAssembly, userName, password, relayServer, requestTimeout, _onPremiseTargetConnectorFactory, _logger);
 		}
 	}
 }
