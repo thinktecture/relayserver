@@ -37,7 +37,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				OnPremiseTargetOutDate = response?.RequestFinished,
 				OriginId = originId,
 				OnPremiseTargetKey = pathInformation.OnPremiseTargetKey,
-				LinkId = linkId
+				LinkId = linkId,
 			});
 		}
 	}
