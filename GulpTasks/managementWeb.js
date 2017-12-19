@@ -19,7 +19,12 @@ const buildConfig = require('../gulp.config');
 // new
 
 gulp.task('managementweb:clean', () => {
-  return del(buildConfig.managementWeb.outputPaths.dist);
+  return del(
+    [].concat(
+      buildConfig.managementWeb.outputPaths.dist,
+      buildConfig.managementWeb.outputPaths.temp
+    )
+  );
 });
 
 gulp.task('managementweb:styles:vendor', () => {
@@ -41,14 +46,14 @@ gulp.task('managementweb:styles:app', () => {
 
 gulp.task('managementweb:templates', () => {
   return gulp
-    .src('src/app/**/*.html')
+    .src(buildConfig.managementWeb.inputPaths.app.templates)
     .pipe(
       ngTemplateCache({
-        module: 'xnote',
         filename: 'templates.js',
+        module: 'thinktectureRelayAdminWeb',
       })
     )
-    .pipe(gulp.dest('.temp'));
+    .pipe(gulp.dest(buildConfig.managementWeb.outputPaths.temp));
 });
 
 gulp.task('managementweb:scripts', () => {
@@ -57,7 +62,7 @@ gulp.task('managementweb:scripts', () => {
       [].concat(
         buildConfig.managementWeb.inputPaths.vendor.js,
         buildConfig.managementWeb.inputPaths.app.js,
-        '.temp/templates.js'
+        buildConfig.managementWeb.outputPaths.temp + '/templates.js'
       )
     )
     .pipe(ngAnnotate())
@@ -76,8 +81,8 @@ gulp.task('managementweb:assets', () => {
     .pipe(gulp.dest(buildConfig.managementWeb.outputPaths.assets));
 });
 
-gulp.task('managementweb:live-server', function () {
-    runSequence('managementweb:build', 'managementweb:start-livereload-server');
+gulp.task('managementweb:live-server', function() {
+  runSequence('managementweb:build', 'managementweb:start-livereload-server');
 });
 
 gulp.task('managementweb:fonts', () => {
@@ -94,18 +99,8 @@ gulp.task('managementweb:fonts:bootstrap', () => {
     .pipe(gulp.dest(buildConfig.managementWeb.outputPaths.vendor.fonts));
 });
 
-gulp.task('managementweb:build', function () {
-    runSequence(
-        'managementweb:less',
-        'managementweb:inject'
-    );
-});
-
-gulp.task('managementweb:deploy', function () {
-    runSequence(
-        'managementweb:build',
-        'managementweb:deploy:package'
-    );
+gulp.task('managementweb:deploy', function() {
+  runSequence('managementweb:build', 'managementweb:deploy:package');
 });
 
 gulp.task('managementweb:fonts:fontawesome', () => {

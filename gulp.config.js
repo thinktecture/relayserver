@@ -17,7 +17,10 @@ module.exports = {
       basePath: 'Thinktecture.Relay.ManagementWeb',
       app: {
         index: path.join('Thinktecture.Relay.ManagementWeb', 'index.html'),
-        templates: path.join('Thinktecture.Relay.ManagementWeb', '**', '*.html'),
+        templates: [
+          path.join('Thinktecture.Relay.ManagementWeb', '**', '*.html'),
+          '!' + path.join('Thinktecture.Relay.ManagementWeb', 'index.html'),
+        ],
         less: path.join('Thinktecture.Relay.ManagementWeb', 'assets', 'less', '*.less'),
         js: [
           path.join('Thinktecture.Relay.ManagementWeb', 'app', 'appInit.js'),
@@ -106,6 +109,7 @@ module.exports = {
         fonts: path.join('Thinktecture.Relay.ManagementWeb', 'dist', 'fonts'),
         uiGrid: path.join('Thinktecture.Relay.ManagementWeb', 'dist', 'assets'),
       },
+      temp: path.join('Thinktecture.Relay.ManagementWeb', 'temp'),
     },
   },
   relay: {
