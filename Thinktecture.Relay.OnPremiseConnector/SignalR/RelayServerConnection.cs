@@ -49,9 +49,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public DateTime LastHeartbeat { get; private set; } = DateTime.MinValue;
 		public TimeSpan HeartbeatInterval { get; private set; }
 
-		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeoutInSeconds,
+		public RelayServerConnection(Assembly entryAssembly, string userName, string password, Uri relayServerUri, int requestTimeoutInSeconds,
 			int tokenRefreshWindowInSeconds, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={Assembly.GetEntryAssembly().GetName().Version}")
+			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={entryAssembly.GetName().Version}")
 		{
 			RelayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;

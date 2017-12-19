@@ -10,50 +10,22 @@
     <PackageReference Include="Microsoft.AspNet.SignalR.Client" Version="2.2.2" />
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="System.Net.Requests" Version="4.3.0" />
+    <PackageReference Include="System.Net.Security" Version="4.3.0" />
   </ItemGroup>
-
 
   <!-- Use AssemblyInfo.shared.cs for shared info, so include that file and disable auto-generation -->
   <PropertyGroup>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="IOnPremiseInProcHandler.cs" />
-    <Compile Include="IRelayServerConnector.cs" />
-    <Compile Include="OnPremiseTarget\AcknowledgmentMode.cs" />
-    <Compile Include="OnPremiseTarget\IOnPremiseTargetConnector.cs" />
-    <Compile Include="OnPremiseTarget\IOnPremiseTargetConnectorFactory.cs" />
-    <Compile Include="OnPremiseTarget\IOnPremiseTargetRequest.cs" />
-    <Compile Include="OnPremiseTarget\IOnPremiseTargetResponse.cs" />
-    <Compile Include="OnPremiseTarget\IOnPremiseWebTargetRequestMessageBuilder.cs" />
-    <Compile Include="OnPremiseTarget\OnPremiseInProcTargetConnector.cs" />
-    <Compile Include="OnPremiseTarget\OnPremiseInProcTargetConnectorBase.cs" />
-    <Compile Include="OnPremiseTarget\OnPremiseWebTargetConnector.cs" />
-    <Compile Include="OnPremiseTarget\OnPremiseTargetConnectorFactory.cs" />
-    <Compile Include="OnPremiseTarget\OnPremiseTargetRequest.cs" />
-    <Compile Include="OnPremiseTarget\OnPremiseTargetResponse.cs" />
-    <Compile Include="OnPremiseTarget\OnPremiseWebTargetRequestMessageBuilder.cs" />
-    <Compile Include="SignalR\HeartbeatChecker.cs" />
-    <Compile Include="SignalR\IHeartbeatChecker.cs" />
-    <Compile Include="SignalR\IMaintenanceLoop.cs" />
-    <Compile Include="SignalR\IRelayServerConnection.cs" />
-    <Compile Include="SignalR\IRelayServerConnectionFactory.cs" />
-    <Compile Include="SignalR\ITokenExpiryChecker.cs" />
-    <Compile Include="SignalR\MaintenanceLoop.cs" />
-    <Compile Include="SignalR\RelayServerConnection.cs" />
-    <Compile Include="RelayServerConnector.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Shared\AssemblyInfo.shared.cs">
       <Link>Properties\AssemblyInfo.shared.cs</Link>
     </Compile>
-    <Compile Include="SignalR\RelayServerConnectionFactory.cs" />
-    <Compile Include="SignalR\TokenExpiryChecker.cs" />
   </ItemGroup>
 
 </Project>
