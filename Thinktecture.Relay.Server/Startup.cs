@@ -113,6 +113,9 @@ namespace Thinktecture.Relay.Server
 			if (authProvider == null)
 				throw new ArgumentNullException(nameof(authProvider));
 
+			// Todo: Add this only when relaying is enabled (no need to auth OnPremises if not), and add
+			// a second endpoint with different token lifetime for management web user (i.e. `/managementToken`),
+			// when management web is enabled. Also, use different AuthProviders for each endpoint
 			var serverOptions = new OAuthAuthorizationServerOptions
 			{
 				AllowInsecureHttp = config.UseInsecureHttp,
