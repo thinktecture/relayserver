@@ -7,6 +7,7 @@ using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.PostDataTemporaryStore;
 using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Controller

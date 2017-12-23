@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.PostDataTemporaryStore;
 using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http

@@ -27,6 +27,8 @@ namespace Thinktecture.Relay.Server.Config
 		public string ManagementWebLocation { get; }
 		public TimeSpan TemporaryRequestStoragePeriod { get; }
 		public string TemporaryRequestStoragePath { get; }
+		public string TemporaryRequestStorageMemcachedNodeEndPoint { get; }
+		public string TemporaryRequestStorageMemcachedConfigEndPoint { get; }
 		public int ActiveConnectionTimeoutInSeconds { get; }
 		public string CustomCodeAssemblyPath { get; set; }
 		public string OAuthSharedSecret { get; }
@@ -125,6 +127,18 @@ namespace Thinktecture.Relay.Server.Config
 				TemporaryRequestStoragePath = null;
 			}
 
+			TemporaryRequestStorageMemcachedNodeEndPoint = ConfigurationManager.AppSettings[nameof(TemporaryRequestStorageMemcachedNodeEndPoint)];
+			if (String.IsNullOrWhiteSpace(TemporaryRequestStorageMemcachedNodeEndPoint))
+			{
+				TemporaryRequestStorageMemcachedNodeEndPoint = null;
+			}
+
+			TemporaryRequestStorageMemcachedConfigEndPoint = ConfigurationManager.AppSettings[nameof(TemporaryRequestStorageMemcachedConfigEndPoint)];
+			if (String.IsNullOrWhiteSpace(TemporaryRequestStorageMemcachedConfigEndPoint))
+			{
+				TemporaryRequestStorageMemcachedConfigEndPoint = null;
+			}
+			
 			TemporaryRequestStoragePeriod = OnPremiseConnectorCallbackTimeout + OnPremiseConnectorCallbackTimeout;
 			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out tmpTimeSpan) && tmpTimeSpan >= TemporaryRequestStoragePeriod)
 			{
@@ -224,7 +238,9 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(HostName), HostName);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(Port), Port);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ManagementWebLocation), ManagementWebLocation);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePath), TemporaryRequestStoragePath ?? "not defined - using in-memory store");
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStorageMemcachedNodeEndPoint), TemporaryRequestStorageMemcachedNodeEndPoint ?? "not defined");
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStorageMemcachedConfigEndPoint), TemporaryRequestStorageMemcachedConfigEndPoint ?? "not defined");
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePath), TemporaryRequestStoragePath ?? "not defined");
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePeriod), TemporaryRequestStoragePeriod);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ActiveConnectionTimeoutInSeconds), ActiveConnectionTimeoutInSeconds);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(CustomCodeAssemblyPath), CustomCodeAssemblyPath);

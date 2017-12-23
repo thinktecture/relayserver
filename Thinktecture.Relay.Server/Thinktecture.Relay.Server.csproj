@@ -40,6 +40,9 @@
     <StartupObject>Thinktecture.Relay.Server.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Amazon.ElastiCacheCluster, Version=1.0.1.0, Culture=neutral, PublicKeyToken=445456c82d5a0fce, processorArchitecture=MSIL">
+      <HintPath>..\packages\Amazon.ElastiCacheCluster.1.0.1.0\lib\net35\Amazon.ElastiCacheCluster.dll</HintPath>
+    </Reference>
     <Reference Include="Autofac, Version=4.6.2.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
       <HintPath>..\packages\Autofac.4.6.2\lib\net45\Autofac.dll</HintPath>
     </Reference>
@@ -61,6 +64,9 @@
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Enyim.Caching, Version=2.12.0.0, Culture=neutral, PublicKeyToken=cec98615db04012e, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnyimMemcached.2.12\lib\net35\Enyim.Caching.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.2.2\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
@@ -270,6 +276,8 @@
       <DependentUpon>201707240650482_AddActiveConnectionsTable.cs</DependentUpon>
     </Compile>
     <Compile Include="Owin\HstsAppBuilderExtensions.cs" />
+    <Compile Include="PostDataTemporaryStore\MemcachedPostDataTemporaryStore.cs" />
+    <Compile Include="PostDataTemporaryStore\NotifyingMemoryStream.cs" />
     <Compile Include="Repository\DbModels\DbActiveConnection.cs" />
     <Compile Include="Http\Filters\RelayModuleBindingFilter.cs" />
     <Compile Include="Interceptor\InterceptorLoader.cs" />
@@ -370,11 +378,11 @@
     <Compile Include="Security\PasswordHash.cs" />
     <Compile Include="Security\PasswordInformation.cs" />
     <Compile Include="Security\RsaDataProtector.cs" />
-    <Compile Include="SignalR\FilePostDataTemporaryStore.cs" />
-    <Compile Include="SignalR\IPostDataTemporaryStore.cs" />
+    <Compile Include="PostDataTemporaryStore\FilePostDataTemporaryStore.cs" />
+    <Compile Include="PostDataTemporaryStore\IPostDataTemporaryStore.cs" />
     <Compile Include="SignalR\OnPremisesConnection.cs" />
     <Compile Include="Security\AuthorizationServerProvider.cs" />
-    <Compile Include="SignalR\InMemoryPostDataTemporaryStore.cs" />
+    <Compile Include="PostDataTemporaryStore\InMemoryPostDataTemporaryStore.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Thinktecture.Relay.Server.SignalR
+namespace Thinktecture.Relay.Server.PostDataTemporaryStore
 {
 	public interface IPostDataTemporaryStore
 	{

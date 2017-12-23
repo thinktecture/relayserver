@@ -177,6 +177,8 @@ The default settings include:
 | Port | Default port of the RelayServer (default 443) |
 | ManagementWebLocation | Path to the files of the management web (default 'ManagementWeb') |
 | TemporaryRequestStoragePath | Path to a directory where the data of the requests are temporarily stored (default _null_) <br/> In multi-server mode this directory must be readable and described by all nodes. If no value is specified (default), the requests are kept in memory, and no multi-server operation is possible. |
+| TemporaryRequestStorageMemcachedNodeEndPoint | End-point to a Memcached node where the data of the requests will be temporarily stored. In multi-server mode this Memcached node must be reachable by all nodes. If no value is specified (default), the requests will be managed based on TemporaryRequestStoragePath setting. |
+| TemporaryRequestStorageMemcachedConfigEndPoint | End-point to an Amazon ElastiCache Cluster Configuration for a Memcached node cluster node where the data of the requests will be temporarily stored. In multi-server mode this Memcached node must be reachable by all nodes. If no value is specified (default), the requests will be managed based on TemporaryRequestStoragePath setting. |
 | TemporaryRequestStoragePeriod | Time span after which unused temporary files will be deleted (default and mimimum two times of OnPremiseConnectorCallbackTimeout) |
 | ActiveConnectionTimeoutInSeconds | Time after which a connection between an On-Premise Connector and the RelayServer is no longer active (default 120 seconds) |
 | CustomCodeAssemblyPath | Path to an assembly that implements custom code (default _null_) <br/> Either absolutely or relative to the RelayServer |

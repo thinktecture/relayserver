@@ -21,6 +21,8 @@ namespace Thinktecture.Relay.Server.Config
 		string ManagementWebLocation { get; }
 		TimeSpan TemporaryRequestStoragePeriod { get; }
 		string TemporaryRequestStoragePath { get; }
+		string TemporaryRequestStorageMemcachedNodeEndPoint { get; }
+		string TemporaryRequestStorageMemcachedConfigEndPoint { get; }
 		int ActiveConnectionTimeoutInSeconds { get; }
 		string CustomCodeAssemblyPath { get; set; }
 		string OAuthSharedSecret { get; }
