@@ -147,18 +147,35 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 					var response = await client.RequestResourceOwnerPasswordAsync(_userName, _password).ConfigureAwait(false);
 
-					_logger?.Verbose("Received token. relay-server={RelayServerUri}, relay-server-id={RelayServerId}", _relayServerUri, _relayServerConnectionId);
-					return response;
+					if (response.IsHttpError && TransientErrorStatusCode(response))
+					{
+						await DelayAuthorizationRetry($"transient HTTP error status code {response.HttpErrorStatusCode}");
+					}
+					else
+					{
+						_logger?.Verbose("Received token. relay-server={RelayServerUri}, relay-server-id={RelayServerId}", _relayServerUri, _relayServerConnectionId);
+						return response;
+					}
 				}
-				catch
+				catch (Exception exception)
 				{
-					var randomWaitTime = GetRandomWaitTime();
-					_logger?.Information("Could not authenticate with relay server - re-trying in {RetryWaitTime} seconds", randomWaitTime.TotalSeconds);
-					await Task.Delay(randomWaitTime, _cts.Token).ConfigureAwait(false);
+					await DelayAuthorizationRetry(exception.Message);
 				}
 			}
 
 			return null;
+		}
+
+		private static Boolean TransientErrorStatusCode(TokenResponse response)
+		{
+			return (response.HttpErrorStatusCode == HttpStatusCode.ServiceUnavailable || response.HttpErrorStatusCode == HttpStatusCode.GatewayTimeout);
+		}
+
+		private async Task DelayAuthorizationRetry(String error)
+		{
+			var randomWaitTime = GetRandomWaitTime();
+			_logger?.Information("Could not authenticate with relay server due to {Error} - re-trying in {RetryWaitTime} seconds", error, randomWaitTime.TotalSeconds);
+			await Task.Delay(randomWaitTime, _cts.Token).ConfigureAwait(false);
 		}
 
 		public async Task ConnectAsync()
