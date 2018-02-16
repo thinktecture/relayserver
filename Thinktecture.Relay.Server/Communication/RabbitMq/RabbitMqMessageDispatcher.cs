@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 {
 	public class RabbitMqMessageDispatcher : IMessageDispatcher, IDisposable
 	{
-		private const string _EXCHANGE_NAME = "Relay Server";
+		private const string _EXCHANGE_NAME = "RelayServer";
 
 		private readonly ILogger _logger;
 		private readonly IConfiguration _configuration;

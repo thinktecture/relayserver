@@ -40,8 +40,8 @@ namespace Thinktecture.Relay.Server
 					});
 
 					config.RunAsNetworkService();
-					config.SetDescription("Thinktecture Relay Server Process");
-					config.SetDisplayName("Thinktecture Relay Server");
+					config.SetDescription("Thinktecture RelayServer Process");
+					config.SetDisplayName("Thinktecture RelayServer");
 					config.SetServiceName("TTRelayServer");
 					config.ApplyCommandLine();
 				});

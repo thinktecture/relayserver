@@ -51,70 +51,70 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		List<string> GetOnPremiseTargetKeys();
 
 		/// <summary>
-		/// Connects to the relay server.
+		/// Connects to the RelayServer.
 		/// </summary>
 		Task ConnectAsync();
 
 		/// <summary>
-		/// Disconnectes from the relay server.
+		/// Disconnectes from the RelayServer.
 		/// </summary>
 		void Disconnect();
 
 		/// <summary>
-		/// Makes a GET request to relay server using the current authentication token.
+		/// Makes a GET request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		Task<HttpResponseMessage> GetViaRelay(string linkName, string relativeUrl, CancellationToken cancellationToken);
 
 		/// <summary>
-		/// Makes a GET request to relay server using the current authentication token.
+		/// Makes a GET request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="setHeaders">Callback for setting headers.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		Task<HttpResponseMessage> GetViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, CancellationToken cancellationToken);
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="setHeaders">Callback for setting headers.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
-		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the RelayServer.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, HttpContent content, CancellationToken cancellationToken);
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="setHeaders">Callback for setting headers.</param>
-		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the RelayServer.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);

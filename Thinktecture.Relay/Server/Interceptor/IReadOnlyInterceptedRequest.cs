@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 		string RequestId { get; }
 
 		/// <summary>
-		/// Gets the id of the relay server this request was sent to
+		/// Gets the id of the RelayServer this request was sent to
 		/// </summary>
 		Guid OriginId { get; }
 

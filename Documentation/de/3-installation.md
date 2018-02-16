@@ -4,9 +4,9 @@
 
 Zum Betrieb des RelayServers müssen auf dem dafür verwendeten Windows Server folgende Software-Bestandteile installiert sein:
 
-- Microsoft .Net-Framework v4.5.1 oder höher
-- Microsoft SQL Server (Express) 2014
-- RabbitMQ mit Erlang-Ausführungsumgebung
+* Microsoft .Net-Framework v4.6 oder höher
+* Microsoft SQL Server (Express) 2014 oder neuer
+* RabbitMQ mit Erlang-Ausführungsumgebung
 
 ### RabbitMQ mit Erlang-Ausführungsumgebung
 
@@ -101,8 +101,7 @@ SAMPLE_Thinktecture.Relay.Server.exe.config
 
 ![2-sample-config-file.png](./assets/2-sample-config-file.png)
 
-
-Diese Konfigurationsdatei sollte nach der initialen Bearbeitung als 
+Diese Konfigurationsdatei sollte nach der initialen Bearbeitung als
 
 ```
 Thinktecture.Relay.Server.exe.config
@@ -133,18 +132,28 @@ Die Standardeinstellungen umfassen dabei:
 
 ```
 <appSettings>
-    <add key="EnableManagementWeb" value="true"/>
-    <add key="ManagementWebLocation" value="ManagementWeb">
-    <add key="EnableRelaying" value="true"/>
-    <add key="EnableOnPremiseConnections" value="true" />
-    <add key="Port" value="443"/>
-    <add key="HostName" value="+"/>
+    <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
+    <add key="TraceFileDirectory" value="tracefiles" />
+    <add key="LinkPasswordLength" value="100" />
+    <add key="DisconnectTimeout" value="6" />
+    <add key="ConnectionTimeout" value="5" />
+    <add key="KeepAliveInterval" value="2" />
     <add key="UseInsecureHttp" value="false" />
+    <add key="EnableManagementWeb" value="true" />
+    <add key="EnableRelaying" value="true" />
+    <add key="EnableOnPremiseConnections" value="true" />
+    <add key="HostName" value="+" />
+    <add key="Port" value="443" />
+    <add key="ManagementWebLocation" value="ManagementWeb" />
+    <add key="TemporaryRequestStoragePath" value="" />
+    <add key="TemporaryRequestStoragePeriod" value="00:00:10" />
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
     <add key="CustomCodeAssemblyPath" value="" />
+    <add key="OAuthSharedSecret" value="" />
+    <add key="OAuthCertificate" value="" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
-    <add key="IncludeErrorDetailPolicy" value="default" />
+    <add key="IncludeErrorDetailPolicy" value="Default" />
     <add key="MaxFailedLoginAttempts" value="5" />
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
@@ -155,22 +164,31 @@ Die Standardeinstellungen umfassen dabei:
 
 |  Key name | Description |
 | --- | --- |
-| EnableManagementWeb | Aktiviert die Management Weboberfläche (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet)
-| ManagementWebLocation | Pfad zu den Dateien des Management-Webs (default 'ManagementWeb') |
-| EnableRelaying | Aktiviert die Relay-Funktion des Servers (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet)|
-| EnableOnPremiseConnections | Erlaubt den Verbindungsaufbau von On-Premises Connectoren (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet)|
-| Port | Standard-Port des RelayServers (default 443) |
+| OnPremiseConnectorCallbackTimeout| Zeitspanne, die der RelayServer auf eine Antwort des OnPremise Connectors wartet (default 30 Sekunden) |
+| TraceFileDirectory | Pfad zum Verzeichnis, in das Trace-dateien geschrieben werden, wenn traceing aktiviert ist (default 'tracefiles') |
+| LinkPasswordLength | Länge der Passwörter, die für neue links automatisch generiert werden (default 100) |
+| DisconnectTimeout | Zeitspanne, nach der für nicht mehr über SignalR verbundene OnPremise Connectoren das OnDisconnect event ausgelöst wird (default 6 Sekunden) |
+| ConnectionTimeout | Zeitspanne, nach der eine nicht mehr aktive SignalR Verbindung zu einem OnPremise Connector geschlossen wird (default 5 Sekunden) |
+| KeepAliveInterval | Zeitspanne, nach der Keepalive Pakete über die SignalR Verbindung an verbundene OnPremise Connectoren gesendet werden (default DisconnectTimeout / 3 Sekunden) |
+| UseInsecureHttp | Aktiviert die Verwendung von HTTP statt HTTPS (die Verwendung von HTTP im Produktivbetrieb wird nicht empfohlen) (default false) |
+| EnableManagementWeb | Aktiviert die Management Weboberfläche (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet) |
+| EnableRelaying | Aktiviert die Relay-Funktion des Servers (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet) |
+| EnableOnPremiseConnections | Erlaubt den Verbindungsaufbau von On-Premises Connectoren (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet) |
 | HostName | Gewünschte Ziel-URL des RelayServers (default +) |
-| UseInsecureHttp | Aktiviert die Verwendung von HTTP statt HTTPS (die Verwendung von HTTP im Produktivbetrieb wird nicht empfohlen). |
-| TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden. Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist (default) werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
-| ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem Relay Server als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
-| CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist. Entweder absolut oder relativ zum RelayServer. |
+| Port | Standard-Port des RelayServers (default 443) |
+| ManagementWebLocation | Pfad zu den Dateien des Management-Webs (default 'ManagementWeb') |
+| TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden (default _null_) <br/> Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
+| TemporaryRequestStoragePeriod | Zeitspanne, in der temporär abgelegete Dateien für die Weiterleitung vorgehalten werden (default 10 Sekunden) |
+| ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem RelayServer als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
+| CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist (default _null_) <br/> Entweder absolut oder relativ zum RelayServer |
+| OAuthSharedSecret | Base64 encodiertes shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von OnPremise Connectoren und ManagementWeb User hiermit signiert |
+| OAuthCertificate | Base64 encodiertes X509 Zertifikat (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von OnPremise Connectoren und ManagementWeb User hiermit signiert |
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
 | HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
-| IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default'). Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx). |
+| IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default') <br/> Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx) |
 | MaxFailedLoginAttempts | Anzahl von erfolglosen Login-Versuchen für einen User, bevor dieser temporär gesperrt wird (default 5) |
 | FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
-| SecureClientController | Wenn dies gesetzt ist, muss ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines OnPremiseConnectors / Links mitsenden (default false) |
+| SecureClientController | Legt fest, ob ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines OnPremiseConnectors / Links mitsenden muss (default false) |
 | QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
 | RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
 
@@ -247,9 +265,9 @@ Click on User Mapping in the left list. Check Map in the row of the database you
 
 Zum Betrieb des RelayServers müssen auf dem dafür verwendeten Windows Server folgende Software-Bestandteile installiert sein:
 
-- Microsoft .Net-Framework v4.5.1 oder höher
-- Zugriffsmöglichkeit auf die Service-Endpunkte der abzudeckenden On-Premises Applikation
-- Ausgehende Zugriffsmöglichkeit auf die URL des RelayServers
+* Microsoft .Net-Framework v4.6 oder höher
+* Zugriffsmöglichkeit auf die Service-Endpunkte der abzudeckenden On-Premises Applikation
+* Ausgehende Zugriffsmöglichkeit auf die URL des RelayServers
 
 ## Installation
 

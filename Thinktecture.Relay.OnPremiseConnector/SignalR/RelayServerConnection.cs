@@ -153,7 +153,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				catch
 				{
 					var randomWaitTime = GetRandomWaitTime();
-					_logger?.Information("Could not authenticate with relay server - re-trying in {RetryWaitTime} seconds", randomWaitTime.TotalSeconds);
+					_logger?.Information("Could not authenticate with RelayServer - re-trying in {RetryWaitTime} seconds", randomWaitTime.TotalSeconds);
 					await Task.Delay(randomWaitTime, _cts.Token).ConfigureAwait(false);
 				}
 			}
@@ -163,7 +163,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task ConnectAsync()
 		{
-			_logger?.Information("Connecting to relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Information("Connecting to RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
 			{
@@ -173,11 +173,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			try
 			{
 				await Start().ConfigureAwait(false);
-				_logger?.Information("Connected to relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 			}
 			catch
 			{
-				_logger?.Information("Error while connecting to relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+				_logger?.Information("Error while connecting to RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 			}
 		}
 
@@ -210,14 +210,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			if (token.IsHttpError)
 			{
-				_logger?.Warning("Could not authenticate with relay server. relay-server-id={RelayServerId}, status-code={ConnectionHttpStatusCode}, reason={ConnectionErrorReason}", _relayServerConnectionId, token.HttpErrorStatusCode, token.HttpErrorReason);
-				throw new Exception("Could not authenticate with relay server: " + token.HttpErrorReason);
+				_logger?.Warning("Could not authenticate with RelayServer. relay-server-id={RelayServerId}, status-code={ConnectionHttpStatusCode}, reason={ConnectionErrorReason}", _relayServerConnectionId, token.HttpErrorStatusCode, token.HttpErrorReason);
+				throw new Exception("Could not authenticate with RelayServer: " + token.HttpErrorReason);
 			}
 
 			if (token.IsError)
 			{
-				_logger?.Warning("Could not authenticate with relay server. relay-server-id={RelayServerId}, reason={ConnectionErrorReason}", _relayServerConnectionId, token.Error);
-				throw new Exception("Could not authenticate with relay server: " + token.Error);
+				_logger?.Warning("Could not authenticate with RelayServer. relay-server-id={RelayServerId}, reason={ConnectionErrorReason}", _relayServerConnectionId, token.Error);
+				throw new Exception("Could not authenticate with RelayServer: " + token.Error);
 			}
 		}
 
@@ -310,7 +310,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			if (request.AcknowledgmentMode == AcknowledgmentMode.Auto)
 			{
-				_logger?.Debug("Automatically acknowlegded by relay server. request-id={RequestId}, connection-id={ConnectionId}", request.RequestId, ConnectionId);
+				_logger?.Debug("Automatically acknowlegded by RelayServer. request-id={RequestId}, connection-id={ConnectionId}", request.RequestId, ConnectionId);
 				return;
 			}
 
@@ -323,7 +323,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			switch (request.AcknowledgmentMode)
 			{
 				case AcknowledgmentMode.Default:
-					_logger?.Debug("Sending acknowlegde to relay server. request-id={RequestId}, connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", request.RequestId, ConnectionId, request.AcknowledgeId);
+					_logger?.Debug("Sending acknowlegde to RelayServer. request-id={RequestId}, connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", request.RequestId, ConnectionId, request.AcknowledgeId);
 					await GetToRelay($"/request/acknowledge?id={ConnectionId}&tag={request.AcknowledgeId}", CancellationToken.None).ConfigureAwait(false);
 					break;
 
@@ -339,7 +339,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
-			_logger?.Debug("Received ping from relay server. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Debug("Received ping from RelayServer. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			var response = new OnPremiseTargetResponse()
 			{
@@ -355,7 +355,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
-			_logger?.Debug("Received heartbeat from relay server. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Debug("Received heartbeat from RelayServer. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			if (_lastHeartbeat == DateTime.MinValue)
 			{
@@ -415,7 +415,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public void Disconnect()
 		{
-			_logger?.Information("Disconnecting from relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			_stopRequested = true;
 			Stop();
@@ -450,7 +450,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					// a length of 0 indicates that there is a larger body available on the server
 					_logger?.Verbose("Requesting body. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}, request-id={RequestId}", _relayServerUri, _relayServerConnectionId, request.RequestId);
-					// request the body from the relay server (because SignalR cannot handle large messages)
+					// request the body from the RelayServer (because SignalR cannot handle large messages)
 					var webResponse = await GetToRelay("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
 					request.Stream = await webResponse.Content.ReadAsStreamAsync().ConfigureAwait(false); // this stream should not be disposed (owned by the Framework)
 				}
@@ -477,7 +477,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 				try
 				{
-					// transfer the result to the relay server (need POST here, because SignalR does not handle large messages)
+					// transfer the result to the RelayServer (need POST here, because SignalR does not handle large messages)
 					await PostResponseAsync(ctx, response, cancellationToken).ConfigureAwait(false);
 				}
 				catch (Exception ex)
@@ -495,14 +495,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		protected override void OnClosed()
 		{
-			_logger?.Information("Connection closed to relay server {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
+			_logger?.Information("Connection closed to RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}", _relayServerUri, _relayServerConnectionId);
 
 			base.OnClosed();
 
 			if (!_stopRequested)
 			{
 				var randomWaitTime = GetRandomWaitTime();
-				_logger?.Debug("Connection closed. reconnecte-wait-time={ReconnectWaitTime}", randomWaitTime.TotalSeconds);
+				_logger?.Debug("Connection closed. reconnect-wait-time={ReconnectWaitTime}", randomWaitTime.TotalSeconds);
 				Task.Delay(randomWaitTime).ContinueWith(_ => ConnectAsync());
 			}
 		}
