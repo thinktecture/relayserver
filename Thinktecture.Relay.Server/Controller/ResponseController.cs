@@ -30,7 +30,6 @@ namespace Thinktecture.Relay.Server.Controller
 		public async Task<IHttpActionResult> Forward()
 		{
 			var message = JToken.Parse(Request.Headers.TryGetValues("X-TTRELAY-METADATA", out var headerValues) ? headerValues.First() : await Request.Content.ReadAsStringAsync().ConfigureAwait(false));
-
 			var response = message.ToObject<OnPremiseConnectorResponse>();
 
 			if (headerValues == null)
@@ -55,12 +54,11 @@ namespace Thinktecture.Relay.Server.Controller
 				{
 					var requestStream = await Request.Content.ReadAsStreamAsync().ConfigureAwait(false);
 					await requestStream.CopyToAsync(stream).ConfigureAwait(false);
-
 					response.ContentLength = stream.Length;
 				}
 			}
 
-			_logger?.Verbose("Received legacy on-premise response. request-id={RequestId}, response-length={ResponseContentLength}", response.RequestId, response.ContentLength);
+			_logger?.Verbose("Received on-premise response. request-id={RequestId}, response-length={ResponseContentLength}", response.RequestId, response.ContentLength);
 
 			await _backendCommunication.SendOnPremiseTargetResponseAsync(response.OriginId, response).ConfigureAwait(false);
 

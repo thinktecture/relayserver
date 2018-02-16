@@ -72,20 +72,20 @@ namespace Thinktecture.Relay.Server.SignalR
 					}
 					catch (Exception ex)
 					{
-						_logger?.Error(ex, "Could not delete file. file-name={FileName}", fileName);
+						_logger?.Error(ex, "File store cleanup process could not delete file. file-name={FileName}", fileName);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during cleanup");
+				_logger?.Error(ex, "Error during file store cleanup process");
 			}
 		}
 
 		public Stream CreateRequestStream(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
-			_logger?.Verbose("Creating stream for storing request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating write stream for storing request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			return File.Open(fileName, FileMode.Create);
 		}
@@ -93,7 +93,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		public Stream GetRequestStream(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
-			_logger?.Verbose("Creating stream for stored request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating read stream for stored request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
@@ -106,7 +106,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		public Stream CreateResponseStream(string requestId)
 		{
 			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Creating stream for storing response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating write stream for storing response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			return File.Open(fileName, FileMode.Create);
 		}
@@ -114,7 +114,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		public Stream GetResponseStream(string requestId)
 		{
 			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Creating stream for stored response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating read stream for stored response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
