@@ -42,8 +42,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private string _accessToken;
 		private bool _stopRequested;
 
-		public RelayServerConnection(Assembly entryAssembly, string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={entryAssembly.GetName().Version}")
+		public RelayServerConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
 			_relayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;

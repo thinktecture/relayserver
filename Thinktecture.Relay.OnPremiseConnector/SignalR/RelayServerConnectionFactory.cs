@@ -16,9 +16,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger;
 		}
 
-		public IRelayServerConnection Create(Assembly entryAssembly, string userName, string password, Uri relayServer, int requestTimeout)
+		public IRelayServerConnection Create(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeout)
 		{
-			return new RelayServerConnection(entryAssembly, userName, password, relayServer, requestTimeout, _onPremiseTargetConnectorFactory, _logger);
+			return new RelayServerConnection(versionAssembly, userName, password, relayServer, requestTimeout, _onPremiseTargetConnectorFactory, _logger);
 		}
 	}
 }
