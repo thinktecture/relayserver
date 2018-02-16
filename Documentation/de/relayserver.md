@@ -11,15 +11,15 @@
 
 * Multi-Server Betrieb
 
-  * Es ist nun möglich, mehrere Relay-Server zur Lastverteilung parallel zu betreiben. Die Server müssen hierzu Zugriff auf einen gemeinsamen Netzwerk-Ordner haben, in dem zu übertragende Daten zwischen den Servern ausgetauscht werden.
+  * Es ist nun möglich, mehrere RelayServer zur Lastverteilung parallel zu betreiben. Die Server müssen hierzu Zugriff auf einen gemeinsamen Netzwerk-Ordner haben, in dem zu übertragende Daten zwischen den Servern ausgetauscht werden.
 
 * Verbesserte Verbindungsstabilität mit neueren OnPremise Connectoren
 
-  * Der Relay-Server wird einen OnPremiseConnector mit Version 2.x oder neuer nun regelmässig mit einem Heartbeat anfragen. Bleibt dieser Heartbeat aus, so wird der OnPremiseConnector versuchen die Verbindung zum Relay Server neu aufzubauen.
+  * Der RelayServer wird einen OnPremiseConnector mit Version 2.x oder neuer nun regelmässig mit einem Heartbeat anfragen. Bleibt dieser Heartbeat aus, so wird der OnPremiseConnector versuchen die Verbindung zum RelayServer neu aufzubauen.
 
 * Möglichkeit, eigenen Code ausführen zu lassen
 
-  * Es ist nun möglich, im Relay-Server sowohl eigene WebAPI Controller einzubinden als auch eingehende Requests sowie ausgehende Responses zu verändern. Für Details siehe [RelayServer Interceptor Entwicklung](5-relayserver-interceptor-entwicklung.md).
+  * Es ist nun möglich, im RelayServer sowohl eigene WebAPI Controller einzubinden als auch eingehende Requests sowie ausgehende Responses zu verändern. Für Details siehe [RelayServer Interceptor Entwicklung](5-relayserver-interceptor-entwicklung.md).
 
     Folgende Möglichkeiten stehen zur Verfügung:
 
@@ -44,11 +44,11 @@
 
 - Optimierungen
 
-  * Der Speicherverbrauch des Relay Servers und der OnPremise Connectoren wurde reduziert. Zudem wurden viele Performance-Optimierungen vorgenommen, um das System effizienter zu machen.
+  * Der Speicherverbrauch des RelayServers und der OnPremise Connectoren wurde reduziert. Zudem wurden viele Performance-Optimierungen vorgenommen, um das System effizienter zu machen.
 
 - Verbesserungen der Sicherheit
 
-  * Es ist nun möglich, alle Funktionen des Relay Servers (Relaying, OnPremise Verbindungen, ManagementWeb) einzeln zu deaktivieren oder für rein lokalen oder globalen Zugriff zu aktivieren.
+  * Es ist nun möglich, alle Funktionen des RelayServers (Relaying, OnPremise Verbindungen, ManagementWeb) einzeln zu deaktivieren oder für rein lokalen oder globalen Zugriff zu aktivieren.
   * Alle Dashboard & Info-Endpunkte erfordern nun Authorisierung
   * Fehlermeldungen enthalten keine Stacktraces mehr
   * Passwortänderungen für Management-Web Benutzer erfordert jetzt die Eingabe des alten Passworts

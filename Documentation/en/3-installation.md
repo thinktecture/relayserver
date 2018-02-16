@@ -10,7 +10,7 @@ The following software components must be installed on the Windows Server used f
 
 ### RabbitMQ with Erlang execution environment
 
-The installation of RabbitMQ, which requires an installed Erlang execution environment, is detailed at [http://www.rabbitmq.com/install-windows.html](http://www.rabbitmq.com/install-windows.html) described. No deviating ports should be selected to avoid inconsistencies during the installation of the relay server.
+The installation of RabbitMQ, which requires an installed Erlang execution environment, is detailed at [http://www.rabbitmq.com/install-windows.html](http://www.rabbitmq.com/install-windows.html) described. No deviating ports should be selected to avoid inconsistencies during the installation of the RelayServer.
 
 After the installation of Erlang and RabbitMQ, it is useful to activate the management web interface for RabbitMQ. Activation takes place in the RabbitMQ Command Prompt, which has been created by installing RabbitMQ in the program group of the same name in the Start menu. Please start with administrator rights. In the RabbitMQ Command Prompt, the following commands must be executed:
 
@@ -91,7 +91,7 @@ To remove the RelayServer service, navigate to the folder of the RelayServer in 
 Thinktecture.Relay.Server.exe uninstall
 ```
 
-# Configuration of the relay server
+# Configuration of the RelayServer
 
 The RelayServer is configured via the Thinktecture.Relay.Server.exe.config in the RelayServer folder. Any text editor (e.g. notepad) can be used to edit this file. The use of the sample configuration is recommended as a starting point
 
@@ -162,7 +162,7 @@ The default settings include:
 
 |  Key name | Description |
 | --- | --- |
-| OnPremiseConnectorCallbackTimeout | Time span the relay server will wait for a response from the On-Premise connector (default 30 seconds) |
+| OnPremiseConnectorCallbackTimeout | Time span the RelayServer will wait for a response from the On-Premise connector (default 30 seconds) |
 | TraceFileDirectory | Path to the directory, where trace files will be written to, if traceing is enabled (default 'tracefiles') |
 | LinkPasswordLength | Length of the auto generated password for new links (default 100) |
 | DisconnectTimeout | Time span, after which the OnDisconnect event will be raised for an inactive On-Premises connector SignalR connection (default 6 seconds) |

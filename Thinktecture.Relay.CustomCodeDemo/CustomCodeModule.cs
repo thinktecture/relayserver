@@ -6,7 +6,7 @@ namespace Thinktecture.Relay.CustomCodeDemo
 {
 	/// <inheritdoc />
 	/// <summary>
-	/// A relay server custom code assembly may provide a single Autofac module, that will register all
+	/// A RelayServer custom code assembly may provide a single Autofac module, that will register all
 	/// types that are implemented and should be used.
 	/// </summary>
 	public class CustomCodeModule : Module

@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="versionAssembly">An <see cref="Assembly"/> to be used as version.</param>
 		/// <param name="userName">A <see cref="String"/> containing the user name.</param>
 		/// <param name="password">A <see cref="String"/> containing the password.</param>
-		/// <param name="relayServer">An <see cref="Uri"/> containing the relay server's base url.</param>
+		/// <param name="relayServer">An <see cref="Uri"/> containing the RelayServer's base url.</param>
 		/// <param name="requestTimeout">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeout = 30)
 		{
@@ -116,7 +116,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Connects to the relay server.
+		/// Connects to the RelayServer.
 		/// </summary>
 		public async Task ConnectAsync()
 		{
@@ -125,7 +125,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Disconnectes from the relay server.
+		/// Disconnectes from the RelayServer.
 		/// </summary>
 		public void Disconnect()
 		{
@@ -134,10 +134,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Makes a GET request to relay server using the current authentication token.
+		/// Makes a GET request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		public Task<HttpResponseMessage> GetViaRelay(string linkName, string relativeUrl, CancellationToken cancellationToken)
@@ -146,10 +146,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Makes a GET request to relay server using the current authentication token.
+		/// Makes a GET request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="setHeaders">Callback for setting headers.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
@@ -169,10 +169,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, CancellationToken cancellationToken)
@@ -181,10 +181,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="setHeaders">Callback for setting headers.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
@@ -194,11 +194,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
-		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the RelayServer.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, HttpContent content, CancellationToken cancellationToken)
@@ -207,12 +207,12 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		}
 
 		/// <summary>
-		/// Makes a POST request to relay server using the current authentication token.
+		/// Makes a POST request to RelayServer using the current authentication token.
 		/// </summary>
 		/// <param name="linkName">The name of the relay link.</param>
-		/// <param name="relativeUrl">Url relative to the relay server url.</param>
+		/// <param name="relativeUrl">Url relative to the RelayServer url.</param>
 		/// <param name="setHeaders">A Callback for setting headers.</param>
-		/// <param name="content">The <see cref="HttpContent"/> to post through the relay server.</param>
+		/// <param name="content">The <see cref="HttpContent"/> to post through the RelayServer.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		public Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)

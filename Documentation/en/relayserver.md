@@ -9,15 +9,15 @@
 
 * Multi-Server operation
 
-  * It is now possible to operate multiple Relay servers in parallel for better load distribution. All servers need to have access to a shared network folder in order to exchange binary files with request or response payloads.
+  * It is now possible to operate multiple RelayServers in parallel for better load distribution. All servers need to have access to a shared network folder in order to exchange binary files with request or response payloads.
 
 * Improved connection stability with new On-Premises connectors
 
-  * The Relay server is now capable of heart beating On-Premises connectors of version 2.x or newer. A connector that does not receive this heartbeat will automatically try to reconnect to the server.
+  * The RelayServer is now capable of heart beating On-Premises connectors of version 2.x or newer. A connector that does not receive this heartbeat will automatically try to reconnect to the server.
 
 * Implementation of custom code
 
-  * It is now possible to extend the Relay server with custom WebAPI controllers as well as as plugins to react upon or even modify incoming requests or outgoing responses. For details see [RelayServer Plugin Development](5-relayserver-interceptor-development.md).  
+  * It is now possible to extend the RelayServer with custom WebAPI controllers as well as as plugins to react upon or even modify incoming requests or outgoing responses. For details see [RelayServer Plugin Development](5-relayserver-interceptor-development.md).  
 
     We offer the following extension points:
 
@@ -42,11 +42,11 @@
 
 - Optimizations
 
-  * Memory consumption of the Relay server and On-Premises connectors has been reduced. Additionally we optimized general performance to make the system more efficient.
+  * Memory consumption of the RelayServer and On-Premises connectors has been reduced. Additionally we optimized general performance to make the system more efficient.
 
 - Security improvements
 
-  * It is now possible to deactivate features of the Relay server (Relaying, On Premises connections, Management Web) specifically. Also, when enabled, it is possible to allow access globally or only from localhost.
+  * It is now possible to deactivate features of the RelayServer (Relaying, On Premises connections, Management Web) specifically. Also, when enabled, it is possible to allow access globally or only from localhost.
   * All dashboard and info endpoints now require authorization
   * Error messages do not contain stack traces anymore
   * Changing a users password now requires the current password

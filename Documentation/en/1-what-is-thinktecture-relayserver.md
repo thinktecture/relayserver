@@ -9,7 +9,7 @@ The positioning of the RelayServer in the public Internet also ensures that both
 # Advantages of the RelayServer
 
 - Open Source Software
-- Full data ownership lies with the operator of the relay server
+- Full data ownership lies with the operator of the RelayServer
 - Easy to implement as a pure software solution
 - No libraries are required for the client software
 - The solution supports multi-tenancy so that data can flow through a RelayServer for several different on-premise applications and their clients
@@ -20,7 +20,7 @@ The positioning of the RelayServer in the public Internet also ensures that both
 - No firewall changes required
 - No data retention in a DMZ is necessary
 
-# Objective of the relay server
+# Objective of the RelayServer
 
 The requirements for enterprise applications have changed dramatically in recent years. The existing application environments consisting of servers and desktop-based clients in a local, secure network no longer reflect the current reality.
 

@@ -60,7 +60,7 @@ Dieses Interface gibt zwei zu implementierende Methoden vor:
 
 Sollte keine Response vom OnPremise Connector vorliegen, so wird die erste Version aufgerufen.
 
-- Wird `null` zurück gegeben, so greift das Standardverhalten des Relay Servers.
+- Wird `null` zurück gegeben, so greift das Standardverhalten des RelayServers.
 - Wird eine `HttpResonseMessage` zurück gegeben, so wird diese Reponse *unmittelbar* an den Client gesendet.
 
 Sollte eine Response vom OnPremise Connector vorliegen, so wird die zweite Überladung aufgerufen.
@@ -82,7 +82,7 @@ using Autofac;
 using Thinktecture.Relay.Server.Interceptors;
 
 /// <summary>
-/// A relay server interceptor assembly can provide a single AutoFac
+/// A RelayServer interceptor assembly can provide a single AutoFac
 /// Module that will register all interceptor types that are implemented
 /// and should be used.
 /// </summary>

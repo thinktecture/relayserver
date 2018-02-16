@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during start of the relay server listener");
+				_logger?.Error(ex, "Error during start of the RelayServer listener");
 				throw;
 			}
 		}

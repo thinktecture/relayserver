@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		/// <summary>
 		/// Requests in the message queue will be automatically acknowledged
-		/// by the relay server before sending to the on-premise
+		/// by the RelayServer before sending to the on-premise
 		/// </summary>
 		Auto,
 

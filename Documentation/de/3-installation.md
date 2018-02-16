@@ -164,7 +164,7 @@ Die Standardeinstellungen umfassen dabei:
 
 |  Key name | Description |
 | --- | --- |
-| OnPremiseConnectorCallbackTimeout| Zeitspanne, die der Relay Server auf eine Antwort des OnPremise Connectors wartet (default 30 Sekunden) |
+| OnPremiseConnectorCallbackTimeout| Zeitspanne, die der RelayServer auf eine Antwort des OnPremise Connectors wartet (default 30 Sekunden) |
 | TraceFileDirectory | Pfad zum Verzeichnis, in das Trace-dateien geschrieben werden, wenn traceing aktiviert ist (default 'tracefiles') |
 | LinkPasswordLength | Länge der Passwörter, die für neue links automatisch generiert werden (default 100) |
 | DisconnectTimeout | Zeitspanne, nach der für nicht mehr über SignalR verbundene OnPremise Connectoren das OnDisconnect event ausgelöst wird (default 6 Sekunden) |
@@ -179,7 +179,7 @@ Die Standardeinstellungen umfassen dabei:
 | ManagementWebLocation | Pfad zu den Dateien des Management-Webs (default 'ManagementWeb') |
 | TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden (default _null_) <br/> Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
 | TemporaryRequestStoragePeriod | Zeitspanne, in der temporär abgelegete Dateien für die Weiterleitung vorgehalten werden (default 10 Sekunden) |
-| ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem Relay Server als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
+| ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem OnPremise Connector und dem RelayServer als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
 | CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist (default _null_) <br/> Entweder absolut oder relativ zum RelayServer |
 | OAuthSharedSecret | Base64 encodiertes shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von OnPremise Connectoren und ManagementWeb User hiermit signiert |
 | OAuthCertificate | Base64 encodiertes X509 Zertifikat (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von OnPremise Connectoren und ManagementWeb User hiermit signiert |
