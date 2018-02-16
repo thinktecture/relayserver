@@ -10,11 +10,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.IdentityModel
 {
 	public class OAuth2Client
 	{
-		protected HttpClient _client;
-		protected ClientAuthenticationStyle _authenticationStyle;
-		protected Uri _address;
-		protected string _clientId;
-		protected string _clientSecret;
+		private readonly HttpClient _client;
+		private readonly ClientAuthenticationStyle _authenticationStyle;
+		private readonly Uri _address;
+		private readonly string _clientId;
+		private readonly string _clientSecret;
 
 		public enum ClientAuthenticationStyle
 		{
@@ -70,61 +70,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.IdentityModel
 			set => _client.Timeout = value;
 		}
 
-		public string CreateCodeFlowUrl(
-			string clientId,
-			string scope = null,
-			string redirectUri = null,
-			string state = null,
-			string nonce = null,
-			string loginHint = null,
-			string acrValues = null,
-			Dictionary<string, string> additionalValues = null)
+		public string CreateCodeFlowUrl(string clientId, string scope = null, string redirectUri = null, string state = null, string nonce = null, string loginHint = null, string acrValues = null, Dictionary<string, string> additionalValues = null)
 		{
-			return CreateAuthorizeUrl(
-				clientId: clientId,
-				responseType: OAuth2Constants.ResponseTypes.Code,
-				scope: scope,
-				redirectUri: redirectUri,
-				state: state,
-				nonce: nonce,
-				loginHint: loginHint,
-				acrValues: acrValues,
-				additionalValues: additionalValues);
+			return CreateAuthorizeUrl(clientId, OAuth2Constants.ResponseTypes.Code, scope, redirectUri, state, nonce, loginHint, acrValues, additionalValues: additionalValues);
 		}
 
-		public string CreateImplicitFlowUrl(
-			string clientId,
-			string scope = null,
-			string redirectUri = null,
-			string state = null,
-			string nonce = null,
-			string loginHint = null,
-			string acrValues = null,
-			Dictionary<string, string> additionalValues = null)
+		public string CreateImplicitFlowUrl(string clientId, string scope = null, string redirectUri = null, string state = null, string nonce = null, string loginHint = null, string acrValues = null, Dictionary<string, string> additionalValues = null)
 		{
-			return CreateAuthorizeUrl(
-				clientId: clientId,
-				responseType: OAuth2Constants.ResponseTypes.Token,
-				scope: scope,
-				redirectUri: redirectUri,
-				state: state,
-				nonce: nonce,
-				loginHint: loginHint,
-				acrValues: acrValues,
-				additionalValues: additionalValues);
+			return CreateAuthorizeUrl(clientId, OAuth2Constants.ResponseTypes.Token, scope, redirectUri, state, nonce, loginHint, acrValues, additionalValues: additionalValues);
 		}
 
-		public string CreateAuthorizeUrl(
-			string clientId,
-			string responseType,
-			string scope = null,
-			string redirectUri = null,
-			string state = null,
-			string nonce = null,
-			string loginHint = null,
-			string acrValues = null,
-			string responseMode = null,
-			Dictionary<string, string> additionalValues = null)
+		public string CreateAuthorizeUrl(string clientId, string responseType, string scope = null, string redirectUri = null, string state = null, string nonce = null, string loginHint = null, string acrValues = null, string responseMode = null, Dictionary<string, string> additionalValues = null)
 		{
 			var values = new Dictionary<string, string>
 			{
@@ -250,7 +206,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.IdentityModel
 		{
 			return RequestAsync(Merge(values), cancellationToken);
 		}
-		
+
 		public Task<TokenResponse> RequestAssertionAsync(string assertionType, string assertion, string scope = null, Dictionary<string, string> additionalValues = null, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			var fields = new Dictionary<string, string>
@@ -276,10 +232,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.IdentityModel
 				var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 				return new TokenResponse(content);
 			}
-			else
-			{
-				return new TokenResponse(response.StatusCode, response.ReasonPhrase);
-			}
+
+			return new TokenResponse(response.StatusCode, response.ReasonPhrase);
 		}
 
 		private Dictionary<string, string> Merge(Dictionary<string, string> explicitValues, Dictionary<string, string> additionalValues = null)
