@@ -56,9 +56,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			RelayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;
 			_password = password;
-			_relayServerUri = relayServerUri;
 			_requestTimeoutInSeconds = requestTimeout;
-			_tokenRefreshWindowInSeconds = TimeSpan.FromSeconds(tokenRefreshWindow);
+
+			Uri = relayServerUri;
+			TokenRefreshWindow = TimeSpan.FromSeconds(tokenRefreshWindow);
 
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_logger = logger;
@@ -535,8 +536,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			public RequestContext()
 			{
 				StartDate = DateTime.UtcNow;
-		}
 			}
+		}
 
 		protected virtual void OnDisposing()
 		{

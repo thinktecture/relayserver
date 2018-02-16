@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if ((connection.TokenExpiry - connection.TokenRefreshWindow) <= DateTime.UtcNow)
 			{
-				logger?.Information("Access token is going to expire soon. Trying to refresh token for relay server {RelayServerUri} with connection id {RelayServerConnectionId}");
+				logger?.Information("Access token is going to expire soon. Trying to refresh token for RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}");
 
 				try
 				{

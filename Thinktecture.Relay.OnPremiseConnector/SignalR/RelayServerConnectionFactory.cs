@@ -20,8 +20,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public IRelayServerConnection Create(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeout, int tokenRefreshWindow)
 		{
-			_logger?.Information("Creating new connection for relay server {RelayServerUrl} and link user {UserName}", relayServer, userName);
-			return new RelayServerConnection(versionAssembly, userName, password, relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, _logger);
+			_logger?.Information("Creating new connection for RelayServer {RelayServerUrl} and link user {UserName}", relayServer, userName);
+			var connection = new RelayServerConnection(versionAssembly, userName, password, relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, _logger);
 
 			// registering connection with maintenance loop
 			_maintenanceLoop.RegisterConnection(connection);
