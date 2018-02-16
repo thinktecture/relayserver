@@ -125,10 +125,13 @@ namespace Thinktecture.Relay.Server.Config
 				TemporaryRequestStoragePath = null;
 			}
 
-			TemporaryRequestStoragePeriod = TimeSpan.FromSeconds(10);
+			TemporaryRequestStoragePeriod = OnPremiseConnectorCallbackTimeout + OnPremiseConnectorCallbackTimeout;
 			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out tmpTimeSpan))
 			{
-				TemporaryRequestStoragePeriod = tmpTimeSpan;
+				if (tmpTimeSpan >= OnPremiseConnectorCallbackTimeout + OnPremiseConnectorCallbackTimeout)
+				{
+					TemporaryRequestStoragePeriod = tmpTimeSpan;
+				}
 			}
 
 			ActiveConnectionTimeoutInSeconds = 120;

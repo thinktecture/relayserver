@@ -158,6 +158,7 @@ The default settings include:
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
+    <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
 </appSettings>
 ```
 
@@ -191,6 +192,7 @@ The default settings include:
 | QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
 | RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
 | AccessTokenLifetime | Time span that an issued access token for OnPremise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
+| TemporaryRequestStoragePeriod | Time span after which unused temporary files will be deleted (default 2* OnPremiseConnectionTimeout) <br/> This is always at least 2* the connection timeout, even if a smaller value was configured. |
 
 ## netsh settings
 
