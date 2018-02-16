@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
@@ -39,14 +40,15 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <summary>
 		/// Creates a new instance of <see cref="RelayServerConnector"/>.
 		/// </summary>
+		/// <param name="versionAssembly">An <see cref="Assembly"/> to be used as version.</param>
 		/// <param name="userName">A <see cref="String"/> containing the user name.</param>
 		/// <param name="password">A <see cref="String"/> containing the password.</param>
 		/// <param name="relayServer">An <see cref="Uri"/> containing the relay server's base url.</param>
 		/// <param name="requestTimeout">An <see cref="Int32"/> defining the timeout in seconds.</param>
-		public RelayServerConnector(string userName, string password, Uri relayServer, int requestTimeout = 30)
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeout = 30)
 		{
 			var factory = _container.Resolve<IRelayServerConnectionFactory>();
-			_connection = factory.Create(userName, password, relayServer, requestTimeout);
+			_connection = factory.Create(versionAssembly, userName, password, relayServer, requestTimeout);
 		}
 
 		/// <summary>

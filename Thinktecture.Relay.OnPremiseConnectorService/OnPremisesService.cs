@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 						if (String.IsNullOrEmpty(section.Security.Identity.UserName))
 							throw new ConfigurationErrorsException("The user name cannot be null or empty when using authentication type 'Identity'");
 
-						_connector = new RelayServerConnector(section.Security.Identity.UserName, section.Security.Identity.Password,
+						_connector = new RelayServerConnector(Assembly.GetEntryAssembly(), section.Security.Identity.UserName, section.Security.Identity.Password,
 							new Uri(section.BaseUrl), (int)section.RequestTimeout.TotalSeconds);
 						break;
 

@@ -16,8 +16,7 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp />
     <TargetFrameworkProfile />
     <CodeAnalysisRuleSet>..\Thinktecture.Relay.ruleset</CodeAnalysisRuleSet>
     <LangVersion>7.1</LangVersion>
@@ -136,10 +135,6 @@
     <Compile Include="Security\PasswordHashTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Thinktecture.Relay.OnPremiseConnector\Thinktecture.Relay.OnPremiseConnector.csproj">
-      <Project>{63d02790-c22d-479b-bc30-1a45f2b832e8}</Project>
-      <Name>Thinktecture.Relay.OnPremiseConnector</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj">
       <Project>{41eeced0-e7c6-4c7c-8b7d-9b6a33da0150}</Project>
       <Name>Thinktecture.Relay.Server</Name>

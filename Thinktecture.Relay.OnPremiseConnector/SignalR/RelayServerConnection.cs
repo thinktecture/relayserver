@@ -13,8 +13,8 @@ using Microsoft.AspNet.SignalR.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Thinktecture.IdentityModel.Client;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector.IdentityModel;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
@@ -42,8 +42,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private string _accessToken;
 		private bool _stopRequested;
 
-		public RelayServerConnection(string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={Assembly.GetEntryAssembly().GetName().Version}")
+		public RelayServerConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, int requestTimeout, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
 			_relayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;
