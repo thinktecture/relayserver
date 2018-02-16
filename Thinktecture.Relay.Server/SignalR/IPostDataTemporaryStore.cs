@@ -6,7 +6,6 @@ namespace Thinktecture.Relay.Server.SignalR
 	{
 		Stream CreateRequestStream(string requestId);
 		Stream GetRequestStream(string requestId);
-		void SaveResponse(string requestId, byte[] data);
 		Stream CreateResponseStream(string requestId);
 		Stream GetResponseStream(string requestId);
 	}

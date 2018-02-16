@@ -90,13 +90,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			return null;
 		}
 
-		public void SaveResponse(string requestId, byte[] data)
-		{
-			_logger?.Verbose("Storing response body. request id={RequestId}", requestId);
-
-			_responseData[requestId] = new Entry(data, _storagePeriod);
-		}
-
 		public Stream CreateResponseStream(string requestId)
 		{
 			_logger?.Verbose("Creating stream for storing response body. request-id={RequestId}", requestId);

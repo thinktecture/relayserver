@@ -103,14 +103,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			return null;
 		}
 
-		public void SaveResponse(string requestId, byte[] data)
-		{
-			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Storing response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
-
-			File.WriteAllBytes(fileName, data);
-		}
-
 		public Stream CreateResponseStream(string requestId)
 		{
 			var fileName = GetResponseFileName(requestId);

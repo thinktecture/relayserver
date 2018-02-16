@@ -40,8 +40,13 @@ namespace Thinktecture.Relay.Server.Controller
 				// this is a legacy on premise connector (v1)
 				if (response.Body?.Length >= 0x10000)
 				{
-					_postDataTemporaryStore.SaveResponse(response.RequestId, response.Body);
-					response.Body = null; // free the memory a.s.a.p.
+					// this is more than our 64k allowance through rabbit/signalR
+					_logger.Verbose("Received large response body content from legacy (v1) OnPremiseConnector.");
+					using (var stream = _postDataTemporaryStore.CreateResponseStream(response.RequestId))
+					{
+						await stream.WriteAsync(response.Body, 0, response.Body.Length);
+						response.Body = null; // free the memory a.s.a.p.
+					}
 				}
 			}
 			else
