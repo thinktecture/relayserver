@@ -5,20 +5,17 @@ using System.Text;
 namespace Thinktecture.Relay.OnPremiseConnector.IdentityModel
 {
 	public class BasicAuthenticationHeaderValue : AuthenticationHeaderValue
-
 	{
 		public BasicAuthenticationHeaderValue(string userName, string password)
-			: base("Basic", EncodeCredential(userName, password))
-
+			: base("Basic", EncodeCredentials(userName, password))
 		{
 		}
 
-		private static string EncodeCredential(string userName, string password)
+		private static string EncodeCredentials(string userName, string password)
 		{
-			var encoding = Encoding.UTF8;
 			var credential = String.Format("{0}:{1}", userName, password);
 
-			return Convert.ToBase64String(encoding.GetBytes(credential));
+			return Convert.ToBase64String(Encoding.UTF8.GetBytes(credential));
 		}
 	}
 }
