@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Web.Http;
 
 namespace Thinktecture.Relay.Server.Config
@@ -34,5 +35,6 @@ namespace Thinktecture.Relay.Server.Config
 		TimeSpan QueueExpiration { get; }
 		TimeSpan RequestExpiration { get; }
 		TimeSpan AccessTokenLifetime { get; }
+		IEnumerable<string> RabbitHosts { get; }
 	}
 }

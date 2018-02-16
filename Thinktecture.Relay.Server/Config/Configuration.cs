@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Web.Http;
@@ -40,6 +41,7 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan QueueExpiration { get; }
 		public TimeSpan RequestExpiration { get; }
 		public TimeSpan AccessTokenLifetime { get; }
+		public IEnumerable<string> RabbitHosts { get; }
 
 		public Configuration(ILogger logger)
 		{
@@ -205,6 +207,12 @@ namespace Thinktecture.Relay.Server.Config
 				AccessTokenLifetime = tmpTimeSpan;
 			}
 
+			RabbitHosts = new string[0];
+			if (!String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings[nameof(RabbitHosts)]))
+			{
+				RabbitHosts = ConfigurationManager.AppSettings[nameof(RabbitHosts)].Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+			}
+
 			LogSettings(logger);
 		}
 
@@ -239,6 +247,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(QueueExpiration), QueueExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RequestExpiration), RequestExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(AccessTokenLifetime), AccessTokenLifetime);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitHosts), String.Join("; ", RabbitHosts));
 		}
 	}
 }
