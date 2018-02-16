@@ -50,15 +50,15 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out var tmpInt))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out var tmpTimeSpan))
 			{
-				OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(tmpInt);
+				OnPremiseConnectorCallbackTimeout = tmpTimeSpan;
 			}
 
 			TraceFileDirectory = ConfigurationManager.AppSettings[nameof(TraceFileDirectory)] ?? "tracefiles";
 
 			LinkPasswordLength = 100;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(LinkPasswordLength)], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(LinkPasswordLength)], out var tmpInt))
 			{
 				LinkPasswordLength = tmpInt;
 			}
@@ -126,7 +126,7 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			TemporaryRequestStoragePeriod = TimeSpan.FromSeconds(10);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out var tmpTimeSpan))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out tmpTimeSpan))
 			{
 				TemporaryRequestStoragePeriod = tmpTimeSpan;
 			}
