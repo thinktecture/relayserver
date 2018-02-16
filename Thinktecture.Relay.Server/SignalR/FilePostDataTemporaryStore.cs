@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class FilePostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
-		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(30);
+		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
 
 		private readonly TimeSpan _storagePeriod;
 		private readonly ILogger _logger;
