@@ -11,12 +11,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
 	internal abstract class OnPremiseInProcTargetConnectorBase : IOnPremiseTargetConnector
 	{
-		private readonly int _requestTimeout;
+		private readonly TimeSpan _requestTimeout;
 		private readonly ILogger _logger;
 
-		protected OnPremiseInProcTargetConnectorBase(ILogger logger, int requestTimeout)
+		protected OnPremiseInProcTargetConnectorBase(ILogger logger, TimeSpan requestTimeout)
 		{
-			if (requestTimeout < 0)
+			if (requestTimeout < TimeSpan.Zero)
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
 
 			_requestTimeout = requestTimeout;
@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 				try
 				{
-					using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_requestTimeout)))
+					using (var cts = new CancellationTokenSource(_requestTimeout))
 					{
 						await handler.ProcessRequest(request, response, cts.Token).ConfigureAwait(false);
 
