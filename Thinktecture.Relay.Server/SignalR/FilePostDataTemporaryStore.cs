@@ -52,7 +52,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			_logger?.Verbose("Cleaning up old stored files");
 
-			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
+			var timeOut = DateTime.UtcNow.Add(-_storagePeriod);
 
 			try
 			{
