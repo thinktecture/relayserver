@@ -14,7 +14,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger;
 		}
 
-		public async Task CheckTokenExpiry(IRelayServerConnection connection)
+		public async Task Check(IRelayServerConnection connection)
 		{
 			if (connection == null)
 				throw new ArgumentNullException(nameof(connection));

@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger;
 		}
 
-		public void CheckHeartbeat(IRelayServerConnection connection)
+		public void Check(IRelayServerConnection connection)
 		{
 			if (connection == null)
 				throw new ArgumentNullException(nameof(connection));
@@ -26,9 +26,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (lastHeartbeat != DateTime.MinValue && lastHeartbeat != DateTime.MaxValue)
 			{
-				if (lastHeartbeat <= DateTime.UtcNow.Add(-intervalWithTolerance))
+				if (lastHeartbeat <= DateTime.UtcNow.Subtract(intervalWithTolerance))
 				{
-					logger?.Warning("Did not receive expected heartbeat; reconnecting. last-heartbeat={LastHeartbeat}, heartbeat-interval={HeartbeatInterval}, relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", lastHeartbeat, connection.HeartbeatInterval);
+					logger?.Warning("Did not receive expected heartbeat. last-heartbeat={LastHeartbeat}, heartbeat-interval={HeartbeatInterval}, relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", lastHeartbeat, connection.HeartbeatInterval);
 
 					connection.Reconnect();
 				}

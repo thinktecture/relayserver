@@ -4,6 +4,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal interface ITokenExpiryChecker
 	{
-		Task CheckTokenExpiry(IRelayServerConnection connection);
+		Task Check(IRelayServerConnection connection);
 	}
 }

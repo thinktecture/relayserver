@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private readonly List<IRelayServerConnection> _connections;
 
 		// Simplest and fastest possible more or less threadsafe implementation for changing elements while looping through them in another thread.
-		private IEnumerable<IRelayServerConnection> _connectionsForLoop;
+		private IRelayServerConnection[] _connectionsForLoop;
 
 		public MaintenanceLoop(ILogger logger, ITokenExpiryChecker tokenExpiryChecker, IHeartbeatChecker heartbeatChecker)
 		{
@@ -36,9 +36,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				throw new ArgumentNullException(nameof(connection));
 
 			_logger?.Information("Registering connection to {RelayServer} with maintenance loop", connection.Uri);
-			_connections.Add(connection);
 
-			_connectionsForLoop = _connections.ToArray();
+			lock (_connections)
+			{
+				_connections.Add(connection);
+				_connectionsForLoop = _connections.ToArray();
+			}
 		}
 
 		public void UnregisterConnection(IRelayServerConnection connection)
@@ -48,9 +51,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Information("Unregistering connection to {RelayServer} from maintenance loop", connection.Uri);
 
-			_connections.Remove(connection);
-
-			_connectionsForLoop = _connections.ToArray();
+			lock (_connections)
+			{
+				_connections.Remove(connection);
+				_connectionsForLoop = _connections.ToArray();
+			}
 		}
 
 		public void StartLoop()
@@ -63,23 +68,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					foreach(var connection in _connectionsForLoop)
 					{
-						CheckTokenExpiry(connection);
-						CheckHeartbeat(connection);
+						await _tokenExpiryChecker.Check(connection);
+						_heartbeatChecker.Check(connection);
 					}
 
 					await Task.Delay(_checkInterval, token).ConfigureAwait(false);
 				}
 			}, token).ConfigureAwait(false);
-		}
-
-		private void CheckHeartbeat(IRelayServerConnection connection)
-		{
-			_heartbeatChecker.CheckHeartbeat(connection);
-		}
-
-		private void CheckTokenExpiry(IRelayServerConnection connection)
-		{
-			_tokenExpiryChecker.CheckTokenExpiry(connection);
 		}
 
 		public void Dispose()

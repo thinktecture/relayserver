@@ -199,7 +199,7 @@ namespace Thinktecture.Relay.Server.Config
 				RequestExpiration = tmpTimeSpan;
 			}
 
-            AccessTokenLifetime = TimeSpan.FromDays(365);
+			AccessTokenLifetime = TimeSpan.FromDays(365);
 			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(AccessTokenLifetime)], out tmpTimeSpan))
 			{
 				AccessTokenLifetime = tmpTimeSpan;
