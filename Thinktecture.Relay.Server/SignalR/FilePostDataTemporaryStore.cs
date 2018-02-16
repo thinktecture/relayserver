@@ -82,30 +82,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			}
 		}
 
-		public byte[] LoadRequest(string requestId)
-		{
-			var fileName = GetRequestFileName(requestId);
-			_logger?.Verbose("Loading request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
-
-			if (File.Exists(fileName))
-			{
-				var data = File.ReadAllBytes(fileName);
-
-				try
-				{
-					File.Delete(fileName);
-				}
-				catch (Exception ex)
-				{
-					_logger?.Error(ex, "Could not delete file. file-name={FileName}", fileName);
-				}
-
-				return data;
-			}
-
-			return null;
-		}
-
 		public Stream CreateRequestStream(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);

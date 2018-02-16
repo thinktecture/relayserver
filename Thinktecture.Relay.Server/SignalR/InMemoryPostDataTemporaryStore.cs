@@ -69,13 +69,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			}
 		}
 
-		public byte[] LoadRequest(string requestId)
-		{
-			_logger?.Verbose("Loading request body. request-id={RequestId}", requestId);
-
-			return _requestData.TryRemove(requestId, out var entry) ? entry.Data : _emptyByteArray;
-		}
-
 		public Stream CreateRequestStream(string requestId)
 		{
 			_logger?.Verbose("Creating stream for storing request body. request-id={RequestId}", requestId);
