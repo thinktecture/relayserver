@@ -23,6 +23,19 @@ namespace Thinktecture.Relay.Server.Security
 			return base.ValidateClientAuthentication(context);
 		}
 
+		public override Task GrantCustomExtension(OAuthGrantCustomExtensionContext context)
+		{
+			if ((context.GrantType == "renew_token")
+			    && (context.OwinContext.Authentication.User?.Identity is ClaimsIdentity identity)
+			    && identity.IsAuthenticated)
+			{
+				// If we still have a valid token for this user, issue a new one
+				context.Validated(identity);
+			}
+			
+			return base.GrantCustomExtension(context);
+		}
+
 		public override Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
 		{
 			if (_linkRepository.Authenticate(context.UserName, context.Password, out var linkId))
