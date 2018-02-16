@@ -70,18 +70,19 @@ namespace Thinktecture.Relay.Server.Http
 					request.ContentLength = storeStream.Length;
 				}
 			}
-			else if (message.Content.Headers.ContentLength.GetValueOrDefault(0) > 0)
+			else
 			{
-				// we have a body, and it is small enough to be transmitted directly
+				var contentLength = message.Content.Headers.ContentLength.GetValueOrDefault(0);
+				if (contentLength > 0)
+				{
+					// we have a body, and it is small enough to be transmitted directly
+					var contentStream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-				// ReSharper disable once PossibleInvalidOperationException; Justification: We checked we have the header value above
-				var contentLength = (int)message.Content.Headers.ContentLength.Value;
-				var contentStream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
+					request.Body = new byte[contentLength];
+					await contentStream.ReadAsync(request.Body, 0, (int)contentLength).ConfigureAwait(false);
 
-				request.Body = new byte[contentLength];
-				await contentStream.ReadAsync(request.Body, 0, contentLength).ConfigureAwait(false);
-
-				request.ContentLength = contentLength;
+					request.ContentLength = contentLength;
+				}
 			}
 
 			request.HttpHeaders = message.Headers
