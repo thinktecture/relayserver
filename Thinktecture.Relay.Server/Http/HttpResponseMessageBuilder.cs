@@ -51,14 +51,10 @@ namespace Thinktecture.Relay.Server.Http
 			{
 				message.StatusCode = response.StatusCode;
 				message.Content = GetResponseContentForOnPremiseTargetResponse(response, link);
-
+				
 				if (response.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
-					var parts = wwwAuthenticate.Split(' ');
-					message.Headers.WwwAuthenticate.Add(parts.Length == 2
-						? new AuthenticationHeaderValue(parts[0], parts[1])
-						: new AuthenticationHeaderValue(wwwAuthenticate)
-					);
+					message.Headers.Add("WWW-Authenticate", wwwAuthenticate);
 				}
 			}
 
