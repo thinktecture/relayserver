@@ -46,7 +46,7 @@
 
 - Security improvements
 
-  * It is now possible to deactivate features of the RelayServer (Relaying, On Premises connections, Management Web) specifically. Also, when enabled, it is possible to allow access globally or only from localhost.
+  * It is now possible to deactivate features of the RelayServer (relaying, on-premises connections, management web) specifically. Also, when enabled, it is possible to allow access globally or only from localhost.
   * All dashboard and info endpoints now require authorization
   * Error messages do not contain stack traces anymore
   * Changing a users password now requires the current password

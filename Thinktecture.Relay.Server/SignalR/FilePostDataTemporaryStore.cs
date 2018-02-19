@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.SignalR
 {
 	internal class FilePostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
-		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(30);
+		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
 
 		private readonly TimeSpan _storagePeriod;
 		private readonly ILogger _logger;
@@ -52,7 +52,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			_logger?.Verbose("Cleaning up old stored files");
 
-			var timeOut = DateTime.UtcNow.Add(_storagePeriod);
+			var timeOut = DateTime.UtcNow.Add(-_storagePeriod);
 
 			try
 			{
@@ -72,44 +72,20 @@ namespace Thinktecture.Relay.Server.SignalR
 					}
 					catch (Exception ex)
 					{
-						_logger?.Error(ex, "Could not delete file. file-name={FileName}", fileName);
+						_logger?.Error(ex, "File store cleanup process could not delete file. file-name={FileName}", fileName);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during cleanup");
+				_logger?.Error(ex, "Error during file store cleanup process");
 			}
-		}
-
-		public byte[] LoadRequest(string requestId)
-		{
-			var fileName = GetRequestFileName(requestId);
-			_logger?.Verbose("Loading request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
-
-			if (File.Exists(fileName))
-			{
-				var data = File.ReadAllBytes(fileName);
-
-				try
-				{
-					File.Delete(fileName);
-				}
-				catch (Exception ex)
-				{
-					_logger?.Error(ex, "Could not delete file. file-name={FileName}", fileName);
-				}
-
-				return data;
-			}
-
-			return null;
 		}
 
 		public Stream CreateRequestStream(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
-			_logger?.Verbose("Creating stream for storing request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating write stream for storing request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			return File.Open(fileName, FileMode.Create);
 		}
@@ -117,7 +93,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		public Stream GetRequestStream(string requestId)
 		{
 			var fileName = GetRequestFileName(requestId);
-			_logger?.Verbose("Creating stream for stored request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating read stream for stored request body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{
@@ -127,18 +103,10 @@ namespace Thinktecture.Relay.Server.SignalR
 			return null;
 		}
 
-		public void SaveResponse(string requestId, byte[] data)
-		{
-			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Storing response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
-
-			File.WriteAllBytes(fileName, data);
-		}
-
 		public Stream CreateResponseStream(string requestId)
 		{
 			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Creating stream for storing response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating write stream for storing response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			return File.Open(fileName, FileMode.Create);
 		}
@@ -146,7 +114,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		public Stream GetResponseStream(string requestId)
 		{
 			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Creating stream for stored response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
+			_logger?.Verbose("Creating read stream for stored response body. request-id={RequestId}, file-name={FileName}", requestId, fileName);
 
 			if (File.Exists(fileName))
 			{

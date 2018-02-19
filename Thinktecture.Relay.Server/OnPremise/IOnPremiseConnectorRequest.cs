@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.OnPremise
 		Guid OriginId { get; }
 
 		/// <summary>
-		/// Gets the Id the On Premise Connector should acknowledge with when it receives this request
+		/// Gets the id the on-premise connector should acknowledge with when it receives this request
 		/// </summary>
 		string AcknowledgeId { get; }
 
@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Server.OnPremise
 		long ContentLength { get; }
 
 		/// <summary>
-		/// Determines, whether this request will always be send to an on premise connector
+		/// Determines whether this request will always be send to an on-premise connector
 		/// even when an interceptor directly answers this request
 		/// </summary>
 		bool AlwaysSendToOnPremiseConnector { get; }

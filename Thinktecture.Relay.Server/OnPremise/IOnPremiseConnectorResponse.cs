@@ -41,7 +41,7 @@ namespace Thinktecture.Relay.Server.OnPremise
 		IReadOnlyDictionary<string, string> HttpHeaders { get; }
 
 		/// <summary>
-		/// Gets the request body if small enough
+		/// Gets the request body from a legacy on-premise connectors
 		/// </summary>
 		byte[] Body { get; }
 

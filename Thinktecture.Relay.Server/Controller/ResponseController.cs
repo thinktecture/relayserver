@@ -30,18 +30,22 @@ namespace Thinktecture.Relay.Server.Controller
 		public async Task<IHttpActionResult> Forward()
 		{
 			var message = JToken.Parse(Request.Headers.TryGetValues("X-TTRELAY-METADATA", out var headerValues) ? headerValues.First() : await Request.Content.ReadAsStringAsync().ConfigureAwait(false));
-
 			var response = message.ToObject<OnPremiseConnectorResponse>();
 
 			if (headerValues == null)
 			{
+				// this is a legacy on-premise connector (v1)
 				response.ContentLength = response.Body?.Length ?? 0;
 
-				// this is a legacy on premise connector (v1)
-				if (response.Body?.Length >= 0x10000)
+				if (response.ContentLength >= 0x10000)
 				{
-					_postDataTemporaryStore.SaveResponse(response.RequestId, response.Body);
-					response.Body = null; // free the memory a.s.a.p.
+					// this is more than our 64k allowance through rabbit/signalR
+					_logger?.Verbose("Received large legacy on-premise response. request-id={RequestId}, body-length={ResponseContentLength}", response.RequestId, response.ContentLength);
+					using (var stream = _postDataTemporaryStore.CreateResponseStream(response.RequestId))
+					{
+						await stream.WriteAsync(response.Body, 0, (int)response.ContentLength);
+						response.Body = null; // free the memory a.s.a.p.
+					}
 				}
 			}
 			else
@@ -50,12 +54,11 @@ namespace Thinktecture.Relay.Server.Controller
 				{
 					var requestStream = await Request.Content.ReadAsStreamAsync().ConfigureAwait(false);
 					await requestStream.CopyToAsync(stream).ConfigureAwait(false);
-
 					response.ContentLength = stream.Length;
 				}
 			}
 
-			_logger?.Verbose("Received legacy on-premise response. request-id={RequestId}, response-length={ResponseContentLength}", response.RequestId, response.ContentLength);
+			_logger?.Verbose("Received on-premise response. request-id={RequestId}, content-length={ResponseContentLength}", response.RequestId, response.ContentLength);
 
 			await _backendCommunication.SendOnPremiseTargetResponseAsync(response.OriginId, response).ConfigureAwait(false);
 

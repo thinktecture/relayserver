@@ -44,11 +44,11 @@
 
 - Optimierungen
 
-  * Der Speicherverbrauch des RelayServers und der OnPremise Connectoren wurde reduziert. Zudem wurden viele Performance-Optimierungen vorgenommen, um das System effizienter zu machen.
+  * Der Speicherverbrauch des RelayServers und der On-Premise Connectoren wurde reduziert. Zudem wurden viele Performance-Optimierungen vorgenommen, um das System effizienter zu machen.
 
 - Verbesserungen der Sicherheit
 
-  * Es ist nun möglich, alle Funktionen des RelayServers (Relaying, OnPremise Verbindungen, ManagementWeb) einzeln zu deaktivieren oder für rein lokalen oder globalen Zugriff zu aktivieren.
+  * Es ist nun möglich, alle Funktionen des RelayServers (Relaying, On-Premise Verbindungen, ManagementWeb) einzeln zu deaktivieren oder für rein lokalen oder globalen Zugriff zu aktivieren.
   * Alle Dashboard & Info-Endpunkte erfordern nun Authorisierung
   * Fehlermeldungen enthalten keine Stacktraces mehr
   * Passwortänderungen für Management-Web Benutzer erfordert jetzt die Eingabe des alten Passworts

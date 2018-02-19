@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		Guid OriginId { get; }
 
 		/// <summary>
-		/// Gets the Id the On Premise Connector should acknowledge with when it receives this request
+		/// Gets the id the on-premise connector should acknowledge with when it receives this request
 		/// </summary>
 		string AcknowledgeId { get; }
 
