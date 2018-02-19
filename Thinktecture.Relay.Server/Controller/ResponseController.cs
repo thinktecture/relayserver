@@ -34,16 +34,16 @@ namespace Thinktecture.Relay.Server.Controller
 
 			if (headerValues == null)
 			{
+				// this is a legacy on-premise connector (v1)
 				response.ContentLength = response.Body?.Length ?? 0;
 
-				// this is a legacy on premise connector (v1)
-				if (response.Body?.Length >= 0x10000)
+				if (response.ContentLength >= 0x10000)
 				{
 					// this is more than our 64k allowance through rabbit/signalR
-					_logger.Verbose("Received large response body content from legacy (v1) OnPremiseConnector.");
+					_logger?.Verbose("Received large legacy on-premise response. request-id={RequestId}, body-length={ResponseContentLength}", response.RequestId, response.ContentLength);
 					using (var stream = _postDataTemporaryStore.CreateResponseStream(response.RequestId))
 					{
-						await stream.WriteAsync(response.Body, 0, response.Body.Length);
+						await stream.WriteAsync(response.Body, 0, (int)response.ContentLength);
 						response.Body = null; // free the memory a.s.a.p.
 					}
 				}
@@ -58,7 +58,7 @@ namespace Thinktecture.Relay.Server.Controller
 				}
 			}
 
-			_logger?.Verbose("Received on-premise response. request-id={RequestId}, response-length={ResponseContentLength}", response.RequestId, response.ContentLength);
+			_logger?.Verbose("Received on-premise response. request-id={RequestId}, content-length={ResponseContentLength}", response.RequestId, response.ContentLength);
 
 			await _backendCommunication.SendOnPremiseTargetResponseAsync(response.OriginId, response).ConfigureAwait(false);
 
