@@ -144,7 +144,7 @@ The default settings include:
     <add key="Port" value="443" />
     <add key="ManagementWebLocation" value="ManagementWeb" />
     <add key="TemporaryRequestStoragePath" value="" />
-    <add key="TemporaryRequestStoragePeriod" value="00:00:10" />
+    <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
     <add key="ActiveConnectionTimeoutInSeconds" value="120" />
     <add key="CustomCodeAssemblyPath" value="" />
     <add key="OAuthSharedSecret" value="" />
@@ -158,41 +158,39 @@ The default settings include:
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
-    <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
 </appSettings>
 ```
 
 |  Key name | Description |
 | --- | --- |
-| OnPremiseConnectorCallbackTimeout | Time span the RelayServer will wait for a response from the On-Premise connector (default 30 seconds) |
+| OnPremiseConnectorCallbackTimeout | Time span the RelayServer will wait for a response from the On-Premise Connector (default 30 seconds) |
 | TraceFileDirectory | Path to the directory, where trace files will be written to, if traceing is enabled (default 'tracefiles') |
 | LinkPasswordLength | Length of the auto generated password for new links (default 100) |
-| DisconnectTimeout | Time span, after which the OnDisconnect event will be raised for an inactive On-Premises connector SignalR connection (default 6 seconds) |
+| DisconnectTimeout | Time span, after which the OnDisconnect event will be raised for an inactive On-Premise Connector SignalR connection (default 6 seconds) |
 | ConnectionTimeout | Time span after which an inactive SignalR connection will time out (default 5 seconds) |
-| KeepAliveInterval | Interval to send keep alive packets through an active SignalR connection to an On-Premises connector (default DisconnectTimeout / 3 seconds) |
+| KeepAliveInterval | Interval to send keep alive packets through an active SignalR connection to an On-Premise Connector (default and minimum DisconnectTimeout / 3 seconds) |
 | UseInsecureHttp | Enables the use of HTTP instead of HTTPS (the use of HTTP in productive mode is not recommended) (default false) |
 | EnableManagementWeb | Enables the management web interface (default true) <br/> Possible values: true (on), false (off), local (only localhost requests are answered) |
 | EnableRelaying | Activates the relay function of the server (default true) <br/> Possible values: true (on), false (off), local (only localhost requests are answered) |
-| EnableOnPremiseConnections | Allows the connection set-up of On-Premises connectors (default true) <br/> Possible values: true (on), false (off), local (only localhost requests are answered) |
+| EnableOnPremiseConnections | Allows the connection set-up of On-Premise Connectors (default true) <br/> Possible values: true (on), false (off), local (only localhost requests are answered) |
 | HostName | Desired destination URL of RelayServer (default +) |
 | Port | Default port of the RelayServer (default 443) |
 | ManagementWebLocation | Path to the files of the management web (default 'ManagementWeb') |
 | TemporaryRequestStoragePath | Path to a directory where the data of the requests are temporarily stored (default _null_) <br/> In multi-server mode this directory must be readable and described by all nodes. If no value is specified (default), the requests are kept in memory, and no multi-server operation is possible. |
-| TemporaryRequestStoragePeriod | Time span for which files will be held in the temporary storage for relaying (default 10 seconds) |
-| ActiveConnectionTimeoutInSeconds | Time after which a connection between an OnPremise Connector and the RelayServer is no longer active (default 120 seconds) |
+| TemporaryRequestStoragePeriod | Time span after which unused temporary files will be deleted (default and mimimum two times of OnPremiseConnectorCallbackTimeout) |
+| ActiveConnectionTimeoutInSeconds | Time after which a connection between an On-Premise Connector and the RelayServer is no longer active (default 120 seconds) |
 | CustomCodeAssemblyPath | Path to an assembly that implements custom code (default _null_) <br/> Either absolutely or relative to the RelayServer |
-| OAuthSharedSecret | Base64 encoded shared secret (default _null_) <br/> If set, the JWT tokens for On-Premises connectors and Management Web users will be signed using this value |
-| OAuthCertificate | Base64 encoded X509 certificate (default _null_) <br/> If set, the JWT tokens for On-Premises connectors and Management Web users will be signed using this value |
+| OAuthSharedSecret | Base64 encoded shared secret (default _null_) <br/> If set, the JWT tokens for On-Premise Connectors and Management Web users will be signed using this value |
+| OAuthCertificate | Base64 encoded X509 certificate (default _null_) <br/> If set, the JWT tokens for On-Premise Connectors and Management Web users will be signed using this value |
 | HstsHeaderMaxAge | Value that will be set in the HTTP Strict Transport Security Header for `max-age` (default 365 days) |
 | HstsIncludeSubdomains | Determines, whether the optional parameter `includeSubDomains` will be set on the HTTP Strict Transport Security Header (default false) |
 | IncludeErrorDetailPolicy | Determines whether error details (Stacktrace, Exception Messages) will be returned (default 'default') <br/> For an explanation of possible values see [MSDN](https://msdn.microsoft.com/en-us/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx) |
 | MaxFailedLoginAttempts | Maximum allowed failed login attempts for a user, until the account will temporary be locked out (default 5) |
 | FailedLoginLockoutPeriod | Time span that a user will be locked out after he has more than `MaxFailedLoginAttempts` failed login attempts (default 15 minutes) |
-| SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid OnPremiseConnector / Link access token (default false) |
+| SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid On-Premise Connector / Link access token (default false) |
 | QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
 | RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
-| AccessTokenLifetime | Time span that an issued access token for OnPremise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
-| TemporaryRequestStoragePeriod | Time span after which unused temporary files will be deleted (default 2* OnPremiseConnectionTimeout) <br/> This is always at least 2* the connection timeout, even if a smaller value was configured. |
+| AccessTokenLifetime | Time span that an issued access token for On-Premise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
 
 ## netsh settings
 
@@ -263,19 +261,19 @@ Side note: You don't have to use a trusted connection. You can use a SQL Server 
 
 Click on User Mapping in the left list. Check Map in the row of the database you just created. Then select db\_owner and click Ok.
 
-# Installing the On-Premises Connector
+# Installing the On-Premise Connector
 
 ## Requirements
 
 The following software components must be installed on the Windows Server used for the operation of the RelayServer:
 
 * Microsoft .Net Framework v4.6 or later
-* Access to the service endpoints of the On-Premises application to be covered
+* Access to the service endpoints of the on-premise application to be covered
 * Outgoing https access to the URL of the RelayServer
 
 ## Installation
 
-In typical deployment scenarios of the RelayServer, the On-Premises Connector is closely linked to the On-Premises application. The On-Premises Connector is therefore usually installed by the installer of the On-Premises application. The On-Premises Connector can also be installed separately for test setups.
+In typical deployment scenarios of the RelayServer, the On-Premise Connector is closely linked to the on-premise application. The On-Premise Connector is therefore usually installed by the installer of the on-premise application. The On-Premise Connector can also be installed separately for test setups.
 
 ## Configure the On-Premises Connector
 
@@ -318,4 +316,4 @@ Only the <relayServer></relayServer> section has to be edited in the configurati
 
 ### onPremiseTargets Element
 
-List of On-Premises Applications that the On-Premises Connector should be able to send requests to.
+List of on-premise applications that the On-Premise Connector should be able to send requests to.

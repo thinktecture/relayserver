@@ -76,7 +76,7 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			KeepAliveInterval = DisconnectTimeout / 3;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(KeepAliveInterval)], out tmpInt))
+			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(KeepAliveInterval)], out tmpInt) && tmpInt >= KeepAliveInterval)
 			{
 				KeepAliveInterval = tmpInt;
 			}
@@ -126,12 +126,9 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			TemporaryRequestStoragePeriod = OnPremiseConnectorCallbackTimeout + OnPremiseConnectorCallbackTimeout;
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out tmpTimeSpan) && tmpTimeSpan >= TemporaryRequestStoragePeriod)
 			{
-				if (tmpTimeSpan >= OnPremiseConnectorCallbackTimeout + OnPremiseConnectorCallbackTimeout)
-				{
-					TemporaryRequestStoragePeriod = tmpTimeSpan;
-				}
+				TemporaryRequestStoragePeriod = tmpTimeSpan;
 			}
 
 			ActiveConnectionTimeoutInSeconds = 120;
@@ -213,12 +210,13 @@ namespace Thinktecture.Relay.Server.Config
 
 		private void LogSettings(ILogger logger)
 		{
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OnPremiseConnectorCallbackTimeout), OnPremiseConnectorCallbackTimeout);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqConnectionString), RabbitMqConnectionString);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OnPremiseConnectorCallbackTimeout), OnPremiseConnectorCallbackTimeout);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TraceFileDirectory), TraceFileDirectory);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkPasswordLength), LinkPasswordLength);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(DisconnectTimeout), DisconnectTimeout);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ConnectionTimeout), ConnectionTimeout);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(KeepAliveInterval), KeepAliveInterval);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(UseInsecureHttp), UseInsecureHttp);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(EnableManagementWeb), EnableManagementWeb);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(EnableRelaying), EnableRelaying);
