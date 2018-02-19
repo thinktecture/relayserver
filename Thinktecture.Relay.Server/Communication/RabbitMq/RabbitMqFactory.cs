@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using RabbitMQ.Client;
 using Serilog;
@@ -31,46 +30,22 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 			try
 			{
-				_logger?.Verbose("Creating RabbitMQ Bus. connection-string={RabbitConnectionString}", _configuration.RabbitMqConnectionString);
-
 				_factory.Uri = new Uri(connectionString);
 
-				var endpoints = BuildEndpointListFromConfig();
-				return endpoints.Count > 0
-					? _factory.CreateConnection(endpoints)
-					: _factory.CreateConnection();
+				if (_configuration.RabbitMqClusterHosts == null)
+				{
+					_logger?.Verbose("Creating RabbitMQ connection. connection-string={RabbitConnectionString}", _configuration.RabbitMqConnectionString);
+					return _factory.CreateConnection();
+				}
+
+				_logger?.Verbose("Creating RabbitMQ cluster connection. connection-string={RabbitConnectionString}, cluster-hosts={RabbitClusterHosts}", _configuration.RabbitMqConnectionString, _configuration.RabbitMqConnectionString, _configuration.RabbitMqClusterHosts);
+				return _factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(_configuration.RabbitMqClusterHosts));
 			}
 			catch (Exception ex)
 			{
 				_logger?.Fatal(ex, "Cannot connect to RabbitMQ using the provided configuration.");
 				throw;
 			}
-		}
-
-		private List<AmqpTcpEndpoint> BuildEndpointListFromConfig()
-		{
-			var result = new List<AmqpTcpEndpoint>();
-
-			foreach (var host in _configuration.RabbitHosts)
-			{
-				var parts = host.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-				if (parts.Length == 1)
-				{
-					result.Add(new AmqpTcpEndpoint(host));
-					_logger?.Information("Adding RabbitMQ host {RabbitMQHost} to available list.", host);
-				}
-				else if (parts.Length == 2 && Int32.TryParse(parts[1], out var port))
-				{
-					result.Add(new AmqpTcpEndpoint(parts[0], port));
-					_logger?.Information("Adding RabbitMQ host {RabbitMQHost} to available list.", host);
-				}
-				else
-				{
-					_logger?.Error("Provided RabbitMQ host {RabbitMQHost} cannot be build into an AmqpTcpEndpoint. Skipping this entry.", host);
-				}
-			}
-
-			return result;
 		}
 	}
 }

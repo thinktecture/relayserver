@@ -132,6 +132,9 @@ Die Standardeinstellungen umfassen dabei:
 
 ```
 <appSettings>
+    <add key="RabbitMqClusterHosts" value="" />
+    <add key="QueueExpiration" value="00:00:10" />
+    <add key="RequestExpiration" value="00:00:10" />
     <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
     <add key="TraceFileDirectory" value="tracefiles" />
     <add key="LinkPasswordLength" value="100" />
@@ -157,14 +160,15 @@ Die Standardeinstellungen umfassen dabei:
     <add key="MaxFailedLoginAttempts" value="5" />
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
-    <add key="QueueExpiration" value="00:00:10" />
-    <add key="RequestExpiration" value="00:00:10" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
 </appSettings>
 ```
 
 |  Key name | Description |
 | --- | --- |
+| RabbitMqClusterHosts | Komma-separierte Liste der RabbitMQ Cluster Teilnehmer (default _null_) |
+| QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
+| RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
 | OnPremiseConnectorCallbackTimeout| Zeitspanne, die der RelayServer auf eine Antwort des On-Premise Connectors wartet (default 30 Sekunden) |
 | TraceFileDirectory | Pfad zum Verzeichnis, in das Trace-dateien geschrieben werden, wenn traceing aktiviert ist (default 'tracefiles') |
 | LinkPasswordLength | Länge der Passwörter, die für neue links automatisch generiert werden (default 100) |
@@ -190,8 +194,6 @@ Die Standardeinstellungen umfassen dabei:
 | MaxFailedLoginAttempts | Anzahl von erfolglosen Login-Versuchen für einen User, bevor dieser temporär gesperrt wird (default 5) |
 | FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
 | SecureClientController | Legt fest, ob ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines On-Premise Connectors / Links mitsenden muss (default false) |
-| QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
-| RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
 | AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für On-Premise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) <br/> _Hinweis:_ Ein zu kleiner Wert schränkt die Benutzbarkeit des Management Webs ein |
 
 ## netsh settings

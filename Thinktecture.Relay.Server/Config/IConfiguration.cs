@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Web.Http;
 
 namespace Thinktecture.Relay.Server.Config
@@ -7,6 +6,9 @@ namespace Thinktecture.Relay.Server.Config
 	public interface IConfiguration
 	{
 		string RabbitMqConnectionString { get; }
+		string RabbitMqClusterHosts { get; }
+		TimeSpan QueueExpiration { get; }
+		TimeSpan RequestExpiration { get; }
 		TimeSpan OnPremiseConnectorCallbackTimeout { get; }
 		string TraceFileDirectory { get; }
 		int LinkPasswordLength { get; }
@@ -32,9 +34,6 @@ namespace Thinktecture.Relay.Server.Config
 		int MaxFailedLoginAttempts { get; }
 		TimeSpan FailedLoginLockoutPeriod { get; }
 		bool SecureClientController { get; }
-		TimeSpan QueueExpiration { get; }
-		TimeSpan RequestExpiration { get; }
 		TimeSpan AccessTokenLifetime { get; }
-		IEnumerable<string> RabbitHosts { get; }
 	}
 }
