@@ -14,22 +14,22 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_requestMessageBuilderFactory = requestMessageBuilderFactory ?? throw new ArgumentNullException(nameof(requestMessageBuilderFactory));
 		}
 
-		public IOnPremiseTargetConnector Create(Uri baseUri, int requestTimeout)
+		public IOnPremiseTargetConnector Create(Uri baseUri, TimeSpan requestTimeout)
 		{
 			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger, _requestMessageBuilderFactory());
 		}
 
-		public IOnPremiseTargetConnector Create(Type handlerType, int requestTimeout)
+		public IOnPremiseTargetConnector Create(Type handlerType, TimeSpan requestTimeout)
 		{
 			return new OnPremiseInProcTargetConnector(_logger, requestTimeout, handlerType);
 		}
 
-		public IOnPremiseTargetConnector Create(Func<IOnPremiseInProcHandler> handlerFactory, int requestTimeout)
+		public IOnPremiseTargetConnector Create(Func<IOnPremiseInProcHandler> handlerFactory, TimeSpan requestTimeout)
 		{
 			return new OnPremiseInProcTargetConnector(_logger, requestTimeout, handlerFactory);
 		}
 
-		public IOnPremiseTargetConnector Create<T>(int requestTimeout)
+		public IOnPremiseTargetConnector Create<T>(TimeSpan requestTimeout)
 			where T : IOnPremiseInProcHandler, new()
 		{
 			return new OnPremiseInProcTargetConnector<T>(requestTimeout, _logger);

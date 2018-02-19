@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private readonly string _userName;
 		private readonly string _password;
-		private readonly int _requestTimeoutInSeconds;
+		private readonly TimeSpan _requestTimeout;
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
@@ -49,24 +49,24 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public DateTime LastHeartbeat { get; private set; } = DateTime.MinValue;
 		public TimeSpan HeartbeatInterval { get; private set; }
 
-		public RelayServerConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, int requestTimeout,
-			int tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+		public RelayServerConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, TimeSpan requestTimeout,
+			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
 			RelayServerConnectionId = Interlocked.Increment(ref _nextId);
 			_userName = userName;
 			_password = password;
-			_requestTimeoutInSeconds = requestTimeout;
+			_requestTimeout = requestTimeout;
 
 			Uri = relayServerUri;
-			TokenRefreshWindow = TimeSpan.FromSeconds(tokenRefreshWindow);
+			TokenRefreshWindow = tokenRefreshWindow;
 
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_logger = logger;
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_httpClient = new HttpClient()
 			{
-				Timeout = TimeSpan.FromSeconds(requestTimeout),
+				Timeout = requestTimeout,
 			};
 			_cts = new CancellationTokenSource();
 
@@ -87,7 +87,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}", key, baseUri);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeoutInSeconds);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
@@ -101,7 +101,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, handlerType);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeoutInSeconds);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory)
@@ -115,7 +115,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target using a handler factory. handler-key={HandlerKey}", key);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeoutInSeconds);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
 		}
 
 		public void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new()
@@ -127,7 +127,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, typeof(T).Name);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeoutInSeconds);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
 		}
 
 		private static string RemoveTrailingSlashes(string key)

@@ -7,12 +7,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	{
 		private readonly Func<IOnPremiseInProcHandler> _handlerFactory;
 
-		public OnPremiseInProcTargetConnector(ILogger logger, int requestTimeout, Type handlerType)
+		public OnPremiseInProcTargetConnector(ILogger logger, TimeSpan requestTimeout, Type handlerType)
 			: this(logger, requestTimeout, CreateFactory(handlerType))
 		{
 		}
 
-		public OnPremiseInProcTargetConnector(ILogger logger, int requestTimeout, Func<IOnPremiseInProcHandler> handlerFactory)
+		public OnPremiseInProcTargetConnector(ILogger logger, TimeSpan requestTimeout, Func<IOnPremiseInProcHandler> handlerFactory)
 			: base(logger, requestTimeout)
 		{
 			_handlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	internal class OnPremiseInProcTargetConnector<T> : OnPremiseInProcTargetConnectorBase
 		where T : IOnPremiseInProcHandler, new()
 	{
-		public OnPremiseInProcTargetConnector(int requestTimeout, ILogger logger)
+		public OnPremiseInProcTargetConnector(TimeSpan requestTimeout, ILogger logger)
 			: base(logger, requestTimeout)
 		{
 		}

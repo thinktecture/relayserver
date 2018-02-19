@@ -15,16 +15,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		private readonly Uri _baseUri;
 		private readonly HttpClient _httpClient;
 
-		public OnPremiseWebTargetConnector(Uri baseUri, int requestTimeout, ILogger logger, IOnPremiseWebTargetRequestMessageBuilder requestMessageBuilder)
+		public OnPremiseWebTargetConnector(Uri baseUri, TimeSpan requestTimeout, ILogger logger, IOnPremiseWebTargetRequestMessageBuilder requestMessageBuilder)
 		{
-			if (requestTimeout < 0)
+			if (requestTimeout < TimeSpan.Zero)
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
 
 			_baseUri = baseUri ?? throw new ArgumentNullException(nameof(baseUri));
 			_logger = logger;
 			_requestMessageBuilder = requestMessageBuilder ?? throw new ArgumentNullException(nameof(requestMessageBuilder));
 
-			_httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(requestTimeout) };
+			_httpClient = new HttpClient() { Timeout = requestTimeout };
 		}
 
 		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
