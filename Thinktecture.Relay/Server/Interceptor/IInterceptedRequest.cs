@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 		Dictionary<string, string> CloneHttpHeaders();
 
 		/// <summary>
-		/// Determines, whether this request will always be send to an on premise connector
+		/// Determines whether this request will always be send to an on-premise connector
 		/// even when an interceptor directly answers this request
 		/// </summary>
 		bool AlwaysSendToOnPremiseConnector { get; set; }

@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 		public IOnPremiseConnectorCallback Create(string requestId)
 		{
-			_logger?.Verbose("Creating on premise connector callback. request-id={RequestId}", requestId);
+			_logger?.Verbose("Creating on-premise connector callback. request-id={RequestId}", requestId);
 
 			return new OnPremiseConnectorCallback(requestId);
 		}

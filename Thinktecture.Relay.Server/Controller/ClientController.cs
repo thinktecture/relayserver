@@ -107,7 +107,7 @@ namespace Thinktecture.Relay.Server.Controller
 				}
 				else
 				{
-					_logger?.Verbose("On-Premise timeout. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
+					_logger?.Verbose("No response received because of on-premise timeout. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				}
 
 				return _interceptorManager.HandleResponse(request, Request, User, response) ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(response, link, request.RequestId);

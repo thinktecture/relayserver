@@ -79,13 +79,14 @@ namespace Thinktecture.Relay.Server.Http
 
 			if (response.ContentLength == 0)
 			{
-				_logger?.Verbose("Received no body. request-id={RequestId}", response.RequestId);
+				_logger?.Verbose("Received empty body. request-id={RequestId}", response.RequestId);
 
 				content = new ByteArrayContent(new byte[0]);
 			}
 			else if (response.Body != null)
 			{
-				_logger?.Verbose("Received small body with data. request-id={RequestId}, body-length={ResponseContentLength}", response.RequestId, response.Body.Length);
+				// only legacy on-premise connectors (v1) use this property
+				_logger?.Verbose("Received small legacy body with data. request-id={RequestId}, body-length={ResponseContentLength}", response.RequestId, response.Body.Length);
 
 				content = new ByteArrayContent(response.Body);
 			}
