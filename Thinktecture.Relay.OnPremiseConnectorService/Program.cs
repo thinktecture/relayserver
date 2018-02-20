@@ -18,11 +18,13 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 				HostFactory.Run(config =>
 				{
 					config.UseSerilog();
+					config.EnableShutdown();
 					config.Service<OnPremisesService>(settings =>
 					{
 						settings.ConstructUsing(_ => new OnPremisesService());
 						settings.WhenStarted(async s => await s.StartAsync().ConfigureAwait(false));
 						settings.WhenStopped(s => s.Stop());
+						settings.WhenShutdown(s => s.Stop());
 					});
 					config.RunAsNetworkService();
 
