@@ -467,7 +467,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task PostResponseAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
 		{
-			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null), cancellationToken).ConfigureAwait(false);
+			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null, 0x10000), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;
 		}
 
@@ -520,7 +520,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			setHeaders?.Invoke(request.Headers);
 			request.Content = content;
 
-			return await _httpClient.SendAsync(request, cancellationToken);
+			return await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 		}
 
 		private TimeSpan GetRandomWaitTime()
