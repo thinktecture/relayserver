@@ -50,9 +50,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp(CancellationToken cancellationToken)
 		{
-			_logger?.Verbose("Cleaning up old stored files");
-
-			var timeOut = DateTime.UtcNow.Add(-_storagePeriod);
+			var timeout = DateTime.UtcNow.Add(-_storagePeriod);
+			_logger?.Verbose("Cleaning up old stored files. timeout={CreationTimeout}", timeout);
 
 			try
 			{
@@ -65,7 +64,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 					try
 					{
-						if (File.GetCreationTimeUtc(fileName) < timeOut)
+						if (File.GetCreationTimeUtc(fileName) < timeout)
 						{
 							File.Delete(fileName);
 						}
@@ -122,6 +121,34 @@ namespace Thinktecture.Relay.Server.SignalR
 			}
 
 			return null;
+		}
+
+		public void RenameResponseStream(string temporaryId, string requestId)
+		{
+			var fileName = GetResponseFileName(temporaryId);
+			_logger?.Verbose("Renaming stored response body. temporary-id={TemporaryId}, request-id={RequestId}", temporaryId, requestId);
+
+			if (File.Exists(fileName))
+			{
+				File.Move(fileName, GetResponseFileName(requestId));
+			}
+		}
+
+		public long GetResponseStreamLength(string requestId)
+		{
+			var fileName = GetResponseFileName(requestId);
+			_logger?.Verbose("Getting stored response body length. request-id={RequestId}, filename={FileName}", requestId, fileName);
+
+			if (File.Exists(fileName))
+			{
+				using (var stream = File.OpenRead(fileName))
+				{
+					return stream.Length;
+				}
+			}
+
+			return 0;
+
 		}
 
 		private string GetRequestFileName(string requestId)

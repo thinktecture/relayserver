@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public Stream CreateRequestStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for storing request body. request-id={RequestId}", requestId);
+			_logger?.Verbose("Creating write stream for storing request body. request-id={RequestId}", requestId);
 
 			var ms = new NotifyingMemoryStream();
 			ms.Disposing += (s, e) => _requestData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
@@ -80,19 +80,14 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public Stream GetRequestStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for stored request body. request-id={RequestId}", requestId);
+			_logger?.Verbose("Creating read stream for stored request body. request-id={RequestId}", requestId);
 
-			if (_requestData.TryRemove(requestId, out var entry))
-			{
-				return new MemoryStream(entry.Data);
-			}
-
-			return null;
+			return _requestData.TryRemove(requestId, out var entry) ? new MemoryStream(entry.Data) : null;
 		}
 
 		public Stream CreateResponseStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for storing response body. request-id={RequestId}", requestId);
+			_logger?.Verbose("Creating write stream for storing response body. request-id={RequestId}", requestId);
 
 			var ms = new NotifyingMemoryStream();
 			ms.Disposing += (s, e) => _responseData[requestId] = new Entry(ms.ToArray(), _storagePeriod);
@@ -101,14 +96,26 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		public Stream GetResponseStream(string requestId)
 		{
-			_logger?.Verbose("Creating stream for stored response body. request-id={RequestId}", requestId);
+			_logger?.Verbose("Creating read stream for stored response body. request-id={RequestId}", requestId);
 
-			if (_responseData.TryRemove(requestId, out var entry))
+			return _responseData.TryRemove(requestId, out var entry) ? new MemoryStream(entry.Data) : null;
+		}
+
+		public void RenameResponseStream(string temporaryId, string requestId)
+		{
+			_logger?.Verbose("Renaming stored response body. temporary-id={TemporaryId}, request-id={RequestId}", temporaryId, requestId);
+
+			if (_responseData.TryRemove(temporaryId, out var entry))
 			{
-				return new MemoryStream(entry.Data);
+				_responseData[requestId] = entry;
 			}
+		}
 
-			return null;
+		public long GetResponseStreamLength(string requestId)
+		{
+			_logger?.Verbose("Getting stored response body length. request-id={RequestId}", requestId);
+
+			return _responseData.TryRemove(requestId, out var entry) ? entry.Data.LongLength : 0;
 		}
 
 		public void Dispose()
