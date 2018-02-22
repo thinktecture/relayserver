@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.Server.Controller
 				return NotFound();
 			}
 
-			return new ResponseMessageResult(new HttpResponseMessage() { Content = new StreamContent(stream) });
+			return new ResponseMessageResult(new HttpResponseMessage() { Content = new StreamContent(stream, 0x10000) });
 		}
 
 		[HttpGet]

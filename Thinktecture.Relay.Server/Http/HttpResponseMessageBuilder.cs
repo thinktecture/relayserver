@@ -96,7 +96,7 @@ namespace Thinktecture.Relay.Server.Http
 					throw new InvalidOperationException(); // TODO what now?
 				}
 
-				content = new StreamContent(stream);
+				content = new StreamContent(stream, 0x10000);
 			}
 
 			AddContentHttpHeaders(content, response.HttpHeaders);
