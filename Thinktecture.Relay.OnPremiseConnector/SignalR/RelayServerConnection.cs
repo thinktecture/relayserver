@@ -160,14 +160,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					_logger?.Verbose("Requesting authorization token. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", Uri, RelayServerConnectionId);
 
 					var response = await client.RequestResourceOwnerPasswordAsync(_userName, _password).ConfigureAwait(false);
+					if (response.IsError)
+						throw new AuthenticationException(response.HttpErrorReason ?? response.Error);
 
 					_logger?.Verbose("Received token. relay-server={RelayServerUri}, relay-server-id={RelayServerId}", Uri, RelayServerConnectionId);
 					return response;
 				}
-				catch
+				catch (Exception ex)
 				{
 					var randomWaitTime = GetRandomWaitTime();
-					_logger?.Information("Could not authenticate with RelayServer - re-trying in {RetryWaitTime} seconds", randomWaitTime.TotalSeconds);
+					_logger?.Error(ex, "Could not authenticate with RelayServer - re-trying in {RetryWaitTime} seconds", randomWaitTime.TotalSeconds);
 					await Task.Delay(randomWaitTime, _cts.Token).ConfigureAwait(false);
 				}
 			}
