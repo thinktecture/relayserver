@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
 
-namespace Thinktecture.Relay.Server.SignalR
+namespace Thinktecture.Relay.Server.PostDataTemporaryStore
 {
 	internal class FilePostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{

@@ -9,7 +9,7 @@ using Moq;
 using Serilog;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
+using Thinktecture.Relay.Server.PostDataTemporaryStore;
 
 namespace Thinktecture.Relay.Server.Http
 {

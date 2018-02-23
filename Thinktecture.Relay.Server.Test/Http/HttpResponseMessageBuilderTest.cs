@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.PostDataTemporaryStore;
 using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http

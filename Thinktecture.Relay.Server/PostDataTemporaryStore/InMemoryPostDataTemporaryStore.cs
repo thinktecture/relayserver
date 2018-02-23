@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
 
-namespace Thinktecture.Relay.Server.SignalR
+namespace Thinktecture.Relay.Server.PostDataTemporaryStore
 {
 	internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
@@ -137,19 +137,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				_timeoutDate = DateTime.UtcNow.Add(storagePeriod);
 				Data = data;
-			}
-		}
-
-		private class NotifyingMemoryStream : MemoryStream
-		{
-			public event EventHandler Disposing;
-
-			protected override void Dispose(bool disposing)
-			{
-				var handler = Disposing;
-				handler?.Invoke(this, EventArgs.Empty);
-
-				base.Dispose(disposing);
 			}
 		}
 	}
