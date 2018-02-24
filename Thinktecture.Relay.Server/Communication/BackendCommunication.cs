@@ -134,6 +134,8 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
+			await UnregisterStaleOnPremiseAsync(registrationInformation);
+
 			_logger?.Debug("Registering link. link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role} connector-version={ConnectorVersion}, connector-assembly-version={ConnectorAssemblyVersion}",
 				registrationInformation.LinkId,
 				registrationInformation.ConnectionId,
@@ -159,13 +161,24 @@ namespace Thinktecture.Relay.Server.Communication
 			RegisterForHeartbeat(registrationInformation);
 		}
 
+		private async Task UnregisterStaleOnPremiseAsync(RegistrationInformation registrationInformation)
+		{
+			var linkDetails = _linkRepository.GetLinkDetails(registrationInformation.LinkId);
+			foreach (var oldConnection in linkDetails.ActiveConnections
+				.Where(connection => !connection.Equals(registrationInformation.ConnectionId, StringComparison.InvariantCultureIgnoreCase)))
+			{
+				_logger?.Debug("Unregistering stale on-premise connection. connection-id={ConnectionId}, link-id={LinkId}", oldConnection, registrationInformation.LinkId);
+				await UnregisterOnPremiseAsync(oldConnection);
+			}
+		}
+
 		public async Task UnregisterOnPremiseAsync(string connectionId)
 		{
 			CheckDisposed();
 
 			if (_onPremises.TryRemove(connectionId, out var connectionInfo))
 			{
-				_logger?.Debug("Unregistered on-premise link.link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role}", connectionInfo.LinkId, connectionId, connectionInfo.UserName, connectionInfo.Role);
+				_logger?.Debug("Unregistered on-premise link. link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role}", connectionInfo.LinkId, connectionId, connectionInfo.UserName, connectionInfo.Role);
 			}
 
 			await _linkRepository.RemoveActiveConnectionAsync(connectionId).ConfigureAwait(false);
