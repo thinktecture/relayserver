@@ -19,5 +19,7 @@ namespace Thinktecture.Relay.Server.Dto
 			get => _connections ?? (_connections = new List<string>());
 			set => _connections = value;
 		}
+
+		public List<string> ActiveConnections { get; set; }
 	}
 }

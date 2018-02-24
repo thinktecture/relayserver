@@ -120,8 +120,7 @@ namespace Thinktecture.Relay.Server.Repository
 				.Select(l => new
 				{
 					link = l,
-					ActiveConnections = l.ActiveConnections
-						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
+					l.ActiveConnections
 				})
 				.ToList()
 				.Select(i => new LinkDetails
@@ -141,6 +140,9 @@ namespace Thinktecture.Relay.Server.Repository
 							+ "; Last Activity: " + ac.LastActivity.ToString("yyyy-MM-dd hh:mm:ss")
 						).
 						ToList(),
+					ActiveConnections = i.ActiveConnections
+						.Select(ac => ac.ConnectionId).
+						ToList()
 				})
 				.AsQueryable();
 		}
