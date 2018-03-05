@@ -344,43 +344,34 @@ namespace Thinktecture.Relay.Server.Controller
 			{
 				_logger?.Verbose("Decoding base64 body from legacy on-premise response. temporary-id={TemporaryId}, request-id={RequestId}", temporaryId, requestId);
 
-				using (var transform = new FromBase64Transform(FromBase64TransformMode.DoNotIgnoreWhiteSpaces))
+				var decoder = new SimpleBase64InplaceDecoder();
+
+				using (var input = _postDataTemporaryStore.GetResponseStream(temporaryId))
+				using (var output = _postDataTemporaryStore.CreateResponseStream(requestId))
 				{
-					var outputBuffer = new byte[transform.OutputBlockSize];
+					var offset = 0;
 
-					using (var input = _postDataTemporaryStore.GetResponseStream(temporaryId))
+					while (true)
 					{
-						using (var output = _postDataTemporaryStore.CreateResponseStream(requestId))
+						var length = await input.ReadAsync(_buffer, offset, _buffer.Length - offset).ConfigureAwait(false);
+						if (length == 0)
 						{
-							var offset = 0;
-							while (true)
-							{
-								var length = await input.ReadAsync(_buffer, offset, _buffer.Length - offset).ConfigureAwait(false);
-								if (length == 0)
-								{
-									outputBuffer = transform.TransformFinalBlock(_buffer, 0, offset);
-									output.Write(outputBuffer, 0, outputBuffer.Length);
-									break;
-								}
-
-								var block = 0;
-								while (length - block > 4)
-								{
-									var transformed = transform.TransformBlock(_buffer, block, 4, outputBuffer, 0);
-									await output.WriteAsync(outputBuffer, 0, transformed).ConfigureAwait(false);
-									block += 4;
-								}
-
-								offset = Math.Max(0, length -= block);
-								if (length > 0)
-								{
-									Buffer.BlockCopy(_buffer, block, _buffer, 0, length);
-								}
-							}
-
-							return output.Length;
+							break;
 						}
+
+						var decoded = decoder.Decode(_buffer, length + offset, out offset);
+
+						await output.WriteAsync(_buffer, 0, decoded).ConfigureAwait(false);
+
+						if (offset != length)
+						{
+							Buffer.BlockCopy(_buffer, offset, _buffer, 0, length - offset);
+						}
+
+						offset = length - offset;
 					}
+
+					return output.Length;
 				}
 			}
 
@@ -406,7 +397,41 @@ namespace Thinktecture.Relay.Server.Controller
 
 				return 0;
 			}
+		}
 
+		internal class SimpleBase64InplaceDecoder
+		{
+			private static readonly byte[] _base64 = Encoding.UTF8.GetBytes("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+			private static readonly byte[] _decode = new byte[256];
+
+			static SimpleBase64InplaceDecoder()
+			{
+				for (var i = 0; i < _base64.Length; i++)
+				{
+					_decode[_base64[i]] = (byte)i;
+				}
+			}
+
+			public int Decode(byte[] buffer, int count, out int offset)
+			{
+				var index = 0;
+				offset = count / 4 * 4;
+
+				for (var i = 0; i < offset; i += 4)
+				{
+					var triple = _decode[buffer[i]] << 18 | _decode[buffer[i + 1]] << 12 | _decode[buffer[i + 2]] << 6 | _decode[buffer[i + 3]];
+					buffer[index++] = (byte)(triple >> 16);
+					buffer[index++] = (byte)(triple >> 8);
+					buffer[index++] = (byte)triple;
+				}
+
+				while (buffer[index - 1] == 0)
+				{
+					index--;
+				}
+
+				return index;
+			}
 		}
 
 		public async Task<IHttpActionResult> Forward()
