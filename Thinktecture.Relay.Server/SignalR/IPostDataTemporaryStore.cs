@@ -8,7 +8,6 @@ namespace Thinktecture.Relay.Server.SignalR
 		Stream GetRequestStream(string requestId);
 		Stream CreateResponseStream(string requestId);
 		Stream GetResponseStream(string requestId);
-		void RenameResponseStream(string temporaryId, string requestId);
-		long GetResponseStreamLength(string requestId);
+		long RenameResponseStream(string temporaryId, string requestId);
 	}
 }

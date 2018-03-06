@@ -101,21 +101,17 @@ namespace Thinktecture.Relay.Server.SignalR
 			return _responseData.TryRemove(requestId, out var entry) ? new MemoryStream(entry.Data) : null;
 		}
 
-		public void RenameResponseStream(string temporaryId, string requestId)
+		public long RenameResponseStream(string temporaryId, string requestId)
 		{
 			_logger?.Verbose("Renaming stored response body. temporary-id={TemporaryId}, request-id={RequestId}", temporaryId, requestId);
 
 			if (_responseData.TryRemove(temporaryId, out var entry))
 			{
 				_responseData[requestId] = entry;
+				return entry.Data.LongLength;
 			}
-		}
 
-		public long GetResponseStreamLength(string requestId)
-		{
-			_logger?.Verbose("Getting stored response body length. request-id={RequestId}", requestId);
-
-			return _responseData.TryRemove(requestId, out var entry) ? entry.Data.LongLength : 0;
+			return 0;
 		}
 
 		public void Dispose()

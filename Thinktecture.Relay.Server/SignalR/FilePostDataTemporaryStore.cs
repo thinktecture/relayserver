@@ -123,32 +123,22 @@ namespace Thinktecture.Relay.Server.SignalR
 			return null;
 		}
 
-		public void RenameResponseStream(string temporaryId, string requestId)
+		public long RenameResponseStream(string temporaryId, string requestId)
 		{
 			var fileName = GetResponseFileName(temporaryId);
 			_logger?.Verbose("Renaming stored response body. temporary-id={TemporaryId}, request-id={RequestId}", temporaryId, requestId);
 
-			if (File.Exists(fileName))
+			if (!File.Exists(fileName))
 			{
-				File.Move(fileName, GetResponseFileName(requestId));
-			}
-		}
-
-		public long GetResponseStreamLength(string requestId)
-		{
-			var fileName = GetResponseFileName(requestId);
-			_logger?.Verbose("Getting stored response body length. request-id={RequestId}, filename={FileName}", requestId, fileName);
-
-			if (File.Exists(fileName))
-			{
-				using (var stream = File.OpenRead(fileName))
-				{
-					return stream.Length;
-				}
+				return 0;
 			}
 
-			return 0;
-
+			var targetName = GetResponseFileName(requestId);
+			File.Move(fileName, targetName);
+			using (var stream = File.OpenRead(targetName))
+			{
+				return stream.Length;
+			}
 		}
 
 		private string GetRequestFileName(string requestId)
