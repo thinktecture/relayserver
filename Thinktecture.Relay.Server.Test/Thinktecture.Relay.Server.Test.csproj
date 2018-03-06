@@ -111,7 +111,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Controller\ResponseControllerTest.cs" />
+    <Compile Include="IO\LegacyResponseStreamTest.cs" />
+    <Compile Include="IO\SimpleBase64InplaceDecoderTest.cs" />
     <Compile Include="NoAsyncVoidTest.cs" />
     <Compile Include="Communication\BackendCommunicationTests\BackendCommunicationTestBase.cs" />
     <Compile Include="Communication\BackendCommunicationTests\Ctor.cs" />

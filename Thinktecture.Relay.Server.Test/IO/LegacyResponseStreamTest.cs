@@ -9,19 +9,17 @@ using Moq;
 using Newtonsoft.Json;
 using Thinktecture.Relay.Server.SignalR;
 
-namespace Thinktecture.Relay.Server.Controller
+namespace Thinktecture.Relay.Server.IO
 {
 	[TestClass]
-	public class ResponseControllerTest
+	public class LegacyResponseStreamTest
 	{
 		private readonly Mock<IPostDataTemporaryStore> _postDataTemporaryStoreMock;
 
-		public ResponseControllerTest()
+		public LegacyResponseStreamTest()
 		{
 			_postDataTemporaryStoreMock = new Mock<IPostDataTemporaryStore>();
 		}
-
-		private static Random random = new Random();
 
 		private static string CreateString(int length)
 		{
@@ -30,7 +28,7 @@ namespace Thinktecture.Relay.Server.Controller
 		}
 
 		[TestMethod]
-		public async Task LegacyResponseStream_ExtractBodyAsync_extracts_from_a_small_object_with_large_buffer()
+		public async Task ExtractBodyAsync_extracts_from_a_small_object_with_large_buffer()
 		{
 			var body = CreateString(64);
 			var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(body));
@@ -41,7 +39,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			_postDataTemporaryStoreMock.Setup(s => s.CreateResponseStream(It.IsAny<string>())).Returns(target);
 
-			var stream = new ResponseController.LegacyResponseStream(source, _postDataTemporaryStoreMock.Object, null);
+			var stream = new LegacyResponseStream(source, _postDataTemporaryStoreMock.Object, null);
 			await stream.ExtractBodyAsync();
 
 			using (var reader = new StreamReader(stream))
@@ -54,7 +52,7 @@ namespace Thinktecture.Relay.Server.Controller
 		}
 
 		[TestMethod]
-		public async Task LegacyResponseStream_ExtractBodyAsync_extracts_from_a_large_object_with_small_buffer()
+		public async Task ExtractBodyAsync_extracts_from_a_large_object_with_small_buffer()
 		{
 			var body = CreateString(32000);
 			var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(body));
@@ -65,7 +63,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			_postDataTemporaryStoreMock.Setup(s => s.CreateResponseStream(It.IsAny<string>())).Returns(target);
 
-			var stream = new ResponseController.LegacyResponseStream(source, _postDataTemporaryStoreMock.Object, null);
+			var stream = new LegacyResponseStream(source, _postDataTemporaryStoreMock.Object, null);
 			await stream.ExtractBodyAsync();
 
 			using (var reader = new StreamReader(stream))
@@ -75,51 +73,6 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 			Encoding.UTF8.GetString(target.ToArray()).Should().Be(body);
 			_postDataTemporaryStoreMock.VerifyAll();
-		}
-
-		[TestMethod]
-		public void SimpleBase64InplaceDecoder_Decode_decodes_base64()
-		{
-			var data = "This is a Test!";
-			var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(data));
-
-			var decoder = new ResponseController.SimpleBase64InplaceDecoder();
-			var buffer = Encoding.UTF8.GetBytes(base64);
-			var length = decoder.Decode(buffer, buffer.Length, out int offset);
-
-			Encoding.UTF8.GetString(buffer, 0, length).Should().Be(data);
-		}
-
-		[TestMethod]
-		public void SimpleBase64InplaceDecoder_Decode_decodes_base64_in_multiple_parts()
-		{
-			var data = "This is a Test!";
-			var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(data));
-
-			var decoder = new ResponseController.SimpleBase64InplaceDecoder();
-			var buffer = Encoding.UTF8.GetBytes(base64);
-
-			var first = new byte[10];
-			Buffer.BlockCopy(buffer, 0, first, 0, first.Length);
-
-			var length = decoder.Decode(first, first.Length, out int offset);
-			var result = Encoding.UTF8.GetString(first, 0, length);
-
-			var remaining = new byte[buffer.Length];
-			if (offset != first.Length)
-			{
-				Buffer.BlockCopy(first, offset, remaining, 0, first.Length - offset);
-			}
-
-			offset = first.Length - offset;
-
-			Buffer.BlockCopy(buffer, first.Length, remaining, offset, buffer.Length - 10);
-
-			length = decoder.Decode(remaining, offset + buffer.Length - 10, out offset);
-
-			result += Encoding.UTF8.GetString(remaining, 0, length);
-
-			result.Should().Be(data);
 		}
 	}
 }

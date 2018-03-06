@@ -217,6 +217,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
+    <Compile Include="IO\LegacyResponseStream.cs" />
     <Compile Include="Filters\ConfigurableClientAuthorizationAttribute.cs" />
     <Compile Include="Controller\ControllerLoader.cs" />
     <Compile Include="Controller\IControllerLoader.cs" />
