@@ -13,6 +13,7 @@ using Autofac;
 using Autofac.Integration.SignalR;
 using Autofac.Integration.WebApi;
 using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Transports;
 using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.FileSystems;
@@ -63,7 +64,7 @@ namespace Thinktecture.Relay.Server
 			app.UseHsts(_configuration.HstsHeaderMaxAge, _configuration.HstsIncludeSubdomains);
 			app.UseCors(CorsOptions.AllowAll);
 			UseOAuthSecurity(app, _configuration, _authorizationServerProvider);
-			MapSignalR(app, innerScope, _configuration);
+			MapSignalR(app, innerScope, _configuration, _logger);
 			UseWebApi(app, httpConfig, innerScope);
 			UseFileServer(app, _configuration, _logger);
 		}
@@ -177,7 +178,7 @@ namespace Thinktecture.Relay.Server
 			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
-		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config)
+		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config, ILogger logger)
 		{
 			if (config.EnableOnPremiseConnections == ModuleBinding.False)
 				return;
@@ -192,10 +193,15 @@ namespace Thinktecture.Relay.Server
 				app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
 			}
 
+			var resolver = new AutofacDependencyResolver(scope);
 			app.MapSignalR<OnPremisesConnection>(path, new ConnectionConfiguration
 			{
-				Resolver = new AutofacDependencyResolver(scope),
+				Resolver = resolver,
 			});
+			
+			var transportHeartbeat = resolver.Resolve<ITransportHeartbeat>();
+			var staleConnectionMonitor = new StaleConnectionMonitor(transportHeartbeat, config, logger);
+			staleConnectionMonitor.StartStaleConnectionMonitorLoop();
 		}
 
 		private static void UseWebApi(IAppBuilder app, HttpConfiguration httpConfig, ILifetimeScope scope)
