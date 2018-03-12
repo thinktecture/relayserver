@@ -23,13 +23,11 @@ namespace Thinktecture.Relay.Server.Communication
 		private readonly ILinkRepository _linkRepository;
 
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
-		private readonly ConcurrentDictionary<string, ConnectionInformation> _onPremises;
 		private readonly ConcurrentDictionary<string, HeartbeatInformation> _heartbeatClients;
 		private readonly TimeSpan _heartbeatInterval;
 
 		private readonly Dictionary<string, IDisposable> _requestSubscriptions;
 		private IDisposable _responseSubscription;
-		private IDisposable _acknowledgeSubscription;
 
 		public Guid OriginId { get; }
 
@@ -40,7 +38,6 @@ namespace Thinktecture.Relay.Server.Communication
 			_requestCallbackFactory = requestCallbackFactory ?? throw new ArgumentNullException(nameof(requestCallbackFactory));
 			_logger = logger;
 			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
-			_onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
 			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
 			_heartbeatClients = new ConcurrentDictionary<string, HeartbeatInformation>();
 			_heartbeatInterval = new TimeSpan(_configuration.ActiveConnectionTimeout.Ticks / 2);
@@ -56,8 +53,7 @@ namespace Thinktecture.Relay.Server.Communication
 		public void Prepare()
 		{
 			_linkRepository.DeleteAllConnectionsForOrigin(OriginId);
-			_responseSubscription = StartReceivingResponses();
-			_acknowledgeSubscription = StartReceivingAcknowledges();
+			_responseSubscription = StartReceivingResponses(OriginId);
 
 			StartSendHeartbeatsLoop(_cts.Token);
 		}
@@ -114,24 +110,20 @@ namespace Thinktecture.Relay.Server.Communication
 			return null;
 		}
 
-		public void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
+		public async Task SendOnPremiseConnectorRequestAsync(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			CheckDisposed();
 
 			_logger?.Debug("Dispatching request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
 
-			_messageDispatcher.DispatchRequest(linkId, request);
+			await _messageDispatcher.DispatchRequest(linkId, request).ConfigureAwait(false);
 		}
 
-		public void AcknowledgeOnPremiseConnectorRequest(Guid originId, string acknowledgeId, string connectionId)
+		public void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId)
 		{
 			CheckDisposed();
 
-			if (originId != Guid.Empty)
-			{
-				_logger?.Debug("Dispatching acknowledge. origin-id={OriginId}, acknowledge-id={AcknowledgeId}, connection-id={ConnectionId}", originId, acknowledgeId, connectionId);
-				_messageDispatcher.DispatchAcknowledge(originId, acknowledgeId);
-			}
+			_messageDispatcher.AcknowledgeRequest(acknowledgeId);
 
 			if (connectionId != null)
 			{
@@ -153,9 +145,6 @@ namespace Thinktecture.Relay.Server.Communication
 
 			await _linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion, registrationInformation.ConnectorAssemblyVersion).ConfigureAwait(false);
 
-			if (!_onPremises.ContainsKey(registrationInformation.ConnectionId))
-				_onPremises[registrationInformation.ConnectionId] = new ConnectionInformation(registrationInformation.LinkId, registrationInformation.UserName, registrationInformation.Role);
-
 			lock (_requestSubscriptions)
 			{
 				if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
@@ -165,17 +154,15 @@ namespace Thinktecture.Relay.Server.Communication
 				}
 			}
 
-			await RegisterForHeartbeat(registrationInformation).ConfigureAwait(false);
+			RegisterForHeartbeat(registrationInformation);
 		}
 
 		public async Task UnregisterOnPremiseAsync(string connectionId)
 		{
 			CheckDisposed();
 
-			if (_onPremises.TryRemove(connectionId, out var connectionInfo))
-			{
-				_logger?.Debug("Unregistered on-premise link. link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role}", connectionInfo.LinkId, connectionId, connectionInfo.UserName, connectionInfo.Role);
-			}
+			_heartbeatClients.TryGetValue(connectionId, out var connectionInfo);
+			_logger?.Debug("Unregistering on-premise link. link-id={LinkId}, connection-id={ConnectionId}", connectionInfo?.LinkId, connectionId);
 
 			await _linkRepository.RemoveActiveConnectionAsync(connectionId).ConfigureAwait(false);
 			UnregisterForHeartbeat(connectionId);
@@ -194,27 +181,20 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		public void SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response)
+		public async Task SendOnPremiseTargetResponseAsync(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			CheckDisposed();
 
 			_logger?.Debug("Dispatching response. origin-id={OriginId}", originId);
 
-			_messageDispatcher.DispatchResponse(originId, response);
+			await _messageDispatcher.DispatchResponse(originId, response).ConfigureAwait(false);
 		}
 
-		private IDisposable StartReceivingResponses()
+		private IDisposable StartReceivingResponses(Guid originId)
 		{
-			_logger?.Debug("Start receiving responses from dispatcher. origin-id={OriginId}", OriginId);
+			_logger?.Debug("Start receiving responses from dispatcher. origin-id={OriginId}", originId);
 
-			return _messageDispatcher.OnResponseReceived().Subscribe(ForwardOnPremiseTargetResponse);
-		}
-
-		private IDisposable StartReceivingAcknowledges()
-		{
-			_logger?.Debug("Start receiving acknowledges from dispatcher. origin-id={OriginId}", OriginId);
-
-			return _messageDispatcher.OnAcknowledgeReceived().Subscribe(acknowledgeId => _messageDispatcher.AcknowledgeRequest(acknowledgeId));
+			return _messageDispatcher.OnResponseReceived(originId).Subscribe(ForwardOnPremiseTargetResponse);
 		}
 
 		private void ForwardOnPremiseTargetResponse(IOnPremiseConnectorResponse response)
@@ -230,7 +210,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		private async Task RegisterForHeartbeat(RegistrationInformation registrationInformation)
+		private void RegisterForHeartbeat(RegistrationInformation registrationInformation)
 		{
 			if (registrationInformation.SupportsHeartbeat())
 			{
@@ -244,10 +224,7 @@ namespace Thinktecture.Relay.Server.Communication
 					RequestAction = registrationInformation.RequestAction,
 				};
 
-				if (_heartbeatClients.TryAdd(registrationInformation.ConnectionId, heartbeatInfo))
-				{
-					await SendHeartbeatAsync(heartbeatInfo, _cancellationToken).ConfigureAwait(false);
-				}
+				_heartbeatClients.TryAdd(registrationInformation.ConnectionId, heartbeatInfo);
 			}
 			else
 			{
@@ -261,6 +238,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 			_heartbeatClients.TryRemove(connectionId, out var info);
 		}
+
 
 		private void StartSendHeartbeatsLoop(CancellationToken token)
 		{
@@ -326,7 +304,6 @@ namespace Thinktecture.Relay.Server.Communication
 				}
 
 				_responseSubscription?.Dispose();
-				_acknowledgeSubscription?.Dispose();
 			}
 		}
 
