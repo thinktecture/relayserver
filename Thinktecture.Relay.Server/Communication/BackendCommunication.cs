@@ -131,30 +131,30 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		public async Task RegisterOnPremiseAsync(RegistrationInformation registrationInformation)
+		public async Task RegisterOnPremiseAsync(IOnPremiseConnectionContext onPremiseConnectionContext)
 		{
 			CheckDisposed();
 
 			_logger?.Debug("Registering link. link-id={LinkId}, connection-id={ConnectionId}, user-name={UserName}, role={Role} connector-version={ConnectorVersion}, connector-assembly-version={ConnectorAssemblyVersion}",
-				registrationInformation.LinkId,
-				registrationInformation.ConnectionId,
-				registrationInformation.UserName,
-				registrationInformation.Role,
-				registrationInformation.ConnectorVersion,
-				registrationInformation.ConnectorAssemblyVersion);
+				onPremiseConnectionContext.LinkId,
+				onPremiseConnectionContext.ConnectionId,
+				onPremiseConnectionContext.UserName,
+				onPremiseConnectionContext.Role,
+				onPremiseConnectionContext.ConnectorVersion,
+				onPremiseConnectionContext.ConnectorAssemblyVersion);
 
-			await _linkRepository.AddOrRenewActiveConnectionAsync(registrationInformation.LinkId, OriginId, registrationInformation.ConnectionId, registrationInformation.ConnectorVersion, registrationInformation.ConnectorAssemblyVersion).ConfigureAwait(false);
+			await _linkRepository.AddOrRenewActiveConnectionAsync(onPremiseConnectionContext.LinkId, OriginId, onPremiseConnectionContext.ConnectionId, onPremiseConnectionContext.ConnectorVersion, onPremiseConnectionContext.ConnectorAssemblyVersion).ConfigureAwait(false);
 
 			lock (_requestSubscriptions)
 			{
-				if (!_requestSubscriptions.ContainsKey(registrationInformation.ConnectionId))
+				if (!_requestSubscriptions.ContainsKey(onPremiseConnectionContext.ConnectionId))
 				{
-					_requestSubscriptions[registrationInformation.ConnectionId] = _messageDispatcher.OnRequestReceived(registrationInformation.LinkId, registrationInformation.ConnectionId, !registrationInformation.SupportsAck())
-						.Subscribe(request => registrationInformation.RequestAction(request, _cancellationToken));
+					_requestSubscriptions[onPremiseConnectionContext.ConnectionId] = _messageDispatcher.OnRequestReceived(onPremiseConnectionContext.LinkId, onPremiseConnectionContext.ConnectionId, !onPremiseConnectionContext.SupportsAck)
+						.Subscribe(request => onPremiseConnectionContext.RequestAction(request, _cancellationToken));
 				}
 			}
 
-			RegisterForHeartbeat(registrationInformation);
+			RegisterForHeartbeat(onPremiseConnectionContext);
 		}
 
 		public async Task UnregisterOnPremiseAsync(string connectionId)
@@ -210,25 +210,25 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-		private void RegisterForHeartbeat(RegistrationInformation registrationInformation)
+		private void RegisterForHeartbeat(IOnPremiseConnectionContext onPremiseConnectionContext)
 		{
-			if (registrationInformation.SupportsHeartbeat())
+			if (onPremiseConnectionContext.SupportsHeartbeat)
 			{
-				_logger?.Verbose("Registration supports heartbeat. connection-id={ConnectionId}, version={ConnectorVersion}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
+				_logger?.Verbose("Registration supports heartbeat. connection-id={ConnectionId}, version={ConnectorVersion}", onPremiseConnectionContext.ConnectionId, onPremiseConnectionContext.ConnectorVersion);
 
 				var heartbeatInfo = new HeartbeatInformation()
 				{
-					ConnectionId = registrationInformation.ConnectionId,
-					LinkId = registrationInformation.LinkId,
-					ConnectorVersion = registrationInformation.ConnectorVersion,
-					RequestAction = registrationInformation.RequestAction,
+					ConnectionId = onPremiseConnectionContext.ConnectionId,
+					LinkId = onPremiseConnectionContext.LinkId,
+					ConnectorVersion = onPremiseConnectionContext.ConnectorVersion,
+					RequestAction = onPremiseConnectionContext.RequestAction,
 				};
 
-				_heartbeatClients.TryAdd(registrationInformation.ConnectionId, heartbeatInfo);
+				_heartbeatClients.TryAdd(onPremiseConnectionContext.ConnectionId, heartbeatInfo);
 			}
 			else
 			{
-				_logger?.Verbose("Registration has no heartbeat support. connection-id={ConnectionId}, version={ConnectorVersion}", registrationInformation.ConnectionId, registrationInformation.ConnectorVersion);
+				_logger?.Verbose("Registration has no heartbeat support. connection-id={ConnectionId}, version={ConnectorVersion}", onPremiseConnectionContext.ConnectionId, onPremiseConnectionContext.ConnectorVersion);
 			}
 		}
 

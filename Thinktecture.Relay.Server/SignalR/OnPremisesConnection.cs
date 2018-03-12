@@ -82,7 +82,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private async Task RegisterOnPremiseAsync(IRequest request, string connectionId, OnPremiseClaims claims)
 		{
-			await _backendCommunication.RegisterOnPremiseAsync(new RegistrationInformation()
+			await _backendCommunication.RegisterOnPremiseAsync(new OnPremiseConnectionContext()
 			{
 				ConnectionId = connectionId,
 				LinkId = claims.OnPremiseId,

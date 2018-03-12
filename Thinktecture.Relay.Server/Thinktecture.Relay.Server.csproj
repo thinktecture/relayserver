@@ -217,6 +217,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Communication\IOnPremiseConnectionContext.cs" />
     <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
     <Compile Include="IO\LegacyResponseStream.cs" />
     <Compile Include="Filters\ConfigurableClientAuthorizationAttribute.cs" />
@@ -255,7 +256,7 @@
     <Compile Include="Communication\RabbitMq\RabbitMqMessageDispatcher.cs" />
     <Compile Include="Communication\RegistrationAction.cs" />
     <Compile Include="Communication\UnregistrationAction.cs" />
-    <Compile Include="Communication\RegistrationInformation.cs" />
+    <Compile Include="Communication\OnPremiseConnectionContext.cs" />
     <Compile Include="Config\IPersistedSettings.cs" />
     <Compile Include="Config\LocalAppDataPersistedSettings.cs" />
     <Compile Include="Config\ModuleBinding.cs" />
