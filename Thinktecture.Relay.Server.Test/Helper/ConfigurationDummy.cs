@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public string ManagementWebLocation { get; set; }
 		public TimeSpan TemporaryRequestStoragePeriod { get; set; }
 		public string TemporaryRequestStoragePath { get; set; }
-		public int ActiveConnectionTimeoutInSeconds { get; set; }
+		public TimeSpan ActiveConnectionTimeout { get; set; }
 		public string CustomCodeAssemblyPath { get; set; }
 		public string OAuthSharedSecret { get; set; }
 		public string OAuthCertificate { get; set; }

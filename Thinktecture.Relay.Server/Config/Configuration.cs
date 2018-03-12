@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Config
 		public string ManagementWebLocation { get; }
 		public TimeSpan TemporaryRequestStoragePeriod { get; }
 		public string TemporaryRequestStoragePath { get; }
-		public int ActiveConnectionTimeoutInSeconds { get; }
+		public TimeSpan ActiveConnectionTimeout { get; }
 		public string CustomCodeAssemblyPath { get; set; }
 		public string OAuthSharedSecret { get; }
 		public string OAuthCertificate { get; }
@@ -131,10 +131,10 @@ namespace Thinktecture.Relay.Server.Config
 				TemporaryRequestStoragePeriod = tmpTimeSpan;
 			}
 
-			ActiveConnectionTimeoutInSeconds = 120;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(ActiveConnectionTimeoutInSeconds)], out tmpInt))
+			ActiveConnectionTimeout = TimeSpan.FromMinutes(2);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(ActiveConnectionTimeout)], out tmpTimeSpan))
 			{
-				ActiveConnectionTimeoutInSeconds = tmpInt;
+				ActiveConnectionTimeout = tmpTimeSpan;
 			}
 
 			CustomCodeAssemblyPath = ConfigurationManager.AppSettings[nameof(CustomCodeAssemblyPath)];
@@ -226,7 +226,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ManagementWebLocation), ManagementWebLocation);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePath), TemporaryRequestStoragePath ?? "not defined - using in-memory store");
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePeriod), TemporaryRequestStoragePeriod);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ActiveConnectionTimeoutInSeconds), ActiveConnectionTimeoutInSeconds);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ActiveConnectionTimeout), ActiveConnectionTimeout);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(CustomCodeAssemblyPath), CustomCodeAssemblyPath);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OAuthSharedSecret), OAuthSharedSecret);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OAuthCertificate), OAuthCertificate);

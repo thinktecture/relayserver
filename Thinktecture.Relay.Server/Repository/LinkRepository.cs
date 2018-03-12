@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Repository
 		private readonly IPasswordHash _passwordHash;
 		private readonly IConfiguration _configuration;
 
-		private DateTime ActiveLinkTimeout => DateTime.UtcNow.AddSeconds(-_configuration.ActiveConnectionTimeoutInSeconds);
+		private DateTime ActiveLinkTimeout => DateTime.UtcNow - _configuration.ActiveConnectionTimeout;
 
 		public LinkRepository(ILogger logger, IPasswordHash passwordHash, IConfiguration configuration)
 		{

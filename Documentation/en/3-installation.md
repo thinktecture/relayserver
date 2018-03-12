@@ -145,7 +145,7 @@ The default settings include:
     <add key="ManagementWebLocation" value="ManagementWeb" />
     <add key="TemporaryRequestStoragePath" value="" />
     <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
-    <add key="ActiveConnectionTimeoutInSeconds" value="120" />
+    <add key="ActiveConnectionTimeout" value="00:02:00" />
     <add key="CustomCodeAssemblyPath" value="" />
     <add key="OAuthSharedSecret" value="" />
     <add key="OAuthCertificate" value="" />
