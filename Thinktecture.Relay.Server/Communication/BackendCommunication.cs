@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace Thinktecture.Relay.Server.Communication
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
 		private readonly ConcurrentDictionary<string, ConnectionInformation> _onPremises;
 		private readonly ConcurrentDictionary<string, HeartbeatInformation> _heartbeatClients;
+		private readonly TimeSpan _heartbeatInterval;
 
 		private readonly Dictionary<string, IDisposable> _requestSubscriptions;
 		private IDisposable _responseSubscription;
@@ -40,11 +42,12 @@ namespace Thinktecture.Relay.Server.Communication
 			_onPremises = new ConcurrentDictionary<string, ConnectionInformation>(StringComparer.OrdinalIgnoreCase);
 			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
 			_heartbeatClients = new ConcurrentDictionary<string, HeartbeatInformation>();
+			_heartbeatInterval = new TimeSpan(_configuration.ActiveConnectionTimeout.Ticks / 2);
 			_requestSubscriptions = new Dictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
 			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
-
+			
 			_logger?.Verbose("Creating backend communication. origin-id={OriginId}", OriginId);
 			_logger?.Information("Backend communication is using message dispatcher {MessageDispatcherType}", messageDispatcher.GetType().Name);
 		}
@@ -248,12 +251,10 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			Task.Run(async () =>
 			{
-				var delay = TimeSpan.FromSeconds(_configuration.ActiveConnectionTimeoutInSeconds / 2d);
-
 				while (!token.IsCancellationRequested)
 				{
 					await Task.WhenAll(_heartbeatClients.Values.Select(heartbeatClient => SendHeartbeatAsync(heartbeatClient, token))).ConfigureAwait(false);
-					await Task.Delay(delay, token).ConfigureAwait(false);
+					await Task.Delay(_heartbeatInterval, token).ConfigureAwait(false);
 				}
 			}, token).ConfigureAwait(false);
 		}
@@ -276,7 +277,7 @@ namespace Thinktecture.Relay.Server.Communication
 					OriginId = OriginId,
 					RequestId = requestId,
 					AcknowledgeId = requestId,
-					HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-HEARTBEATINTERVAL"] = (_configuration.ActiveConnectionTimeoutInSeconds / 2).ToString() },
+					HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-HEARTBEATINTERVAL"] = _heartbeatInterval.TotalSeconds.ToString(CultureInfo.InvariantCulture) },
 				};
 
 				// heartbeats do NOT go through the message dispatcher as we want to heartbeat the connections directly

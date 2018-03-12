@@ -147,7 +147,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="ManagementWebLocation" value="ManagementWeb" />
     <add key="TemporaryRequestStoragePath" value="" />
     <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
-    <add key="ActiveConnectionTimeoutInSeconds" value="120" />
+    <add key="ActiveConnectionTimeout" value="00:02:00" />
     <add key="CustomCodeAssemblyPath" value="" />
     <add key="OAuthSharedSecret" value="" />
     <add key="OAuthCertificate" value="" />
@@ -180,7 +180,7 @@ Die Standardeinstellungen umfassen dabei:
 | ManagementWebLocation | Pfad zu den Dateien des Management-Webs (default 'ManagementWeb') |
 | TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden (default _null_) <br/> Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
 | TemporaryRequestStoragePeriod | Gibt die Zeitspanne an, nach der nicht mehr verwendete temporäre Dateien gelöscht werden (default und Minimum doppelter OnPremiseConnectorCallbackTimeout) |
-| ActiveConnectionTimeoutInSeconds | Zeit, nach der eine Verbindung zwischen einem On-Premise Connector und dem RelayServer als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
+| ActiveConnectionTimeout | Zeit, nach der eine Verbindung zwischen einem On-Premise Connector und dem RelayServer als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
 | CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist (default _null_) <br/> Entweder absolut oder relativ zum RelayServer |
 | OAuthSharedSecret | Base64 encodiertes shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert |
 | OAuthCertificate | Base64 encodiertes X509 Zertifikat (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert |
