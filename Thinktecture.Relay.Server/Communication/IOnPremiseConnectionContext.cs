@@ -10,6 +10,7 @@ namespace Thinktecture.Relay.Server.Communication
 		string ConnectionId { get; set; }
 		Guid LinkId { get; set; }
 		bool IsActive { get; set; }
+		DateTime LastLocalActivity { get; set; }
 		Func<IOnPremiseConnectorRequest, CancellationToken, Task> RequestAction { get; set; }
 		string IpAddress { get; set; }
 		string UserName { get; set; }
