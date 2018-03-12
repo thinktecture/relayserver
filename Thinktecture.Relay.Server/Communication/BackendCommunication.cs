@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
 			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
-			
+
 			_logger?.Verbose("Creating backend communication. origin-id={OriginId}", OriginId);
 			_logger?.Information("Backend communication is using message dispatcher {MessageDispatcherType}", messageDispatcher.GetType().Name);
 		}
