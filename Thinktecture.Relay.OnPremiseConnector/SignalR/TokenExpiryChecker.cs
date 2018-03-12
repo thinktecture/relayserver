@@ -30,15 +30,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				try
 				{
 					if (!await connection.TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
-					{
-						logger?.Warning("Could not renew access token and trying a hard reconnect. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}");
-
-						connection.Reconnect();
-					}
+						throw new AuthenticationException();
 				}
 				catch (AuthenticationException)
 				{
-					logger?.Error("There was a problem renewing the token; Reconnecting.");
+					logger?.Warning("Could not renew access token and trying a hard reconnect. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}");
 
 					connection.Reconnect();
 				}

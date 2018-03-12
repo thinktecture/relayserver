@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Web.Http;
 using Serilog;
 
@@ -8,8 +9,11 @@ namespace Thinktecture.Relay.Server.Config
 {
 	internal class Configuration : IConfiguration
 	{
-		// Connection strings
+		//  RabbitMQ Settings
 		public string RabbitMqConnectionString { get; }
+		public string RabbitMqClusterHosts { get; }
+		public TimeSpan QueueExpiration { get; }
+		public TimeSpan RequestExpiration { get; }
 
 		// App Settings
 		public TimeSpan OnPremiseConnectorCallbackTimeout { get; }
@@ -37,8 +41,6 @@ namespace Thinktecture.Relay.Server.Config
 		public int MaxFailedLoginAttempts { get; }
 		public TimeSpan FailedLoginLockoutPeriod { get; }
 		public bool SecureClientController { get; }
-		public TimeSpan QueueExpiration { get; }
-		public TimeSpan RequestExpiration { get; }
 		public TimeSpan AccessTokenLifetime { get; }
 
 		public Configuration(ILogger logger)
@@ -49,8 +51,26 @@ namespace Thinktecture.Relay.Server.Config
 				RabbitMqConnectionString = settings.ConnectionString;
 			}
 
+			RabbitMqClusterHosts = ConfigurationManager.AppSettings[nameof(RabbitMqClusterHosts)];
+			if (String.IsNullOrWhiteSpace(RabbitMqClusterHosts))
+			{
+				RabbitMqClusterHosts = null;
+			}
+
+			QueueExpiration = TimeSpan.FromSeconds(10);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(QueueExpiration)], out var tmpTimeSpan))
+			{
+				QueueExpiration = tmpTimeSpan;
+			}
+
+			RequestExpiration = TimeSpan.FromSeconds(10);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(RequestExpiration)], out tmpTimeSpan))
+			{
+				RequestExpiration = tmpTimeSpan;
+			}
+
 			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out var tmpTimeSpan))
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out tmpTimeSpan))
 			{
 				OnPremiseConnectorCallbackTimeout = tmpTimeSpan;
 			}
@@ -187,18 +207,6 @@ namespace Thinktecture.Relay.Server.Config
 				SecureClientController = tmpBool;
 			}
 
-			QueueExpiration = TimeSpan.FromSeconds(10);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(QueueExpiration)], out tmpTimeSpan))
-			{
-				QueueExpiration = tmpTimeSpan;
-			}
-
-			RequestExpiration = TimeSpan.FromSeconds(10);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(RequestExpiration)], out tmpTimeSpan))
-			{
-				RequestExpiration = tmpTimeSpan;
-			}
-
 			AccessTokenLifetime = TimeSpan.FromDays(365);
 			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(AccessTokenLifetime)], out tmpTimeSpan))
 			{
@@ -211,6 +219,9 @@ namespace Thinktecture.Relay.Server.Config
 		private void LogSettings(ILogger logger)
 		{
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqConnectionString), RabbitMqConnectionString);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqClusterHosts), RabbitMqClusterHosts ?? "not defined - using single host");
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(QueueExpiration), QueueExpiration);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RequestExpiration), RequestExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OnPremiseConnectorCallbackTimeout), OnPremiseConnectorCallbackTimeout);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TraceFileDirectory), TraceFileDirectory);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkPasswordLength), LinkPasswordLength);
@@ -236,8 +247,6 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(MaxFailedLoginAttempts), MaxFailedLoginAttempts);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(FailedLoginLockoutPeriod), FailedLoginLockoutPeriod);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SecureClientController), SecureClientController);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(QueueExpiration), QueueExpiration);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RequestExpiration), RequestExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(AccessTokenLifetime), AccessTokenLifetime);
 		}
 	}

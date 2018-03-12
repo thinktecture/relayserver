@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Web.Http;
 using Thinktecture.Relay.Server.Config;
 
@@ -6,8 +7,11 @@ namespace Thinktecture.Relay.Server.Helper
 {
 	public class ConfigurationDummy : IConfiguration
 	{
-		// Connection strings
+		// RabbitMQ Settings
 		public string RabbitMqConnectionString { get; set; }
+		public string RabbitMqClusterHosts { get; set; }
+		public TimeSpan QueueExpiration { get; set; }
+		public TimeSpan RequestExpiration { get; set; }
 
 		// App Settings
 		public TimeSpan OnPremiseConnectorCallbackTimeout { get; set; }
@@ -35,8 +39,6 @@ namespace Thinktecture.Relay.Server.Helper
 		public int MaxFailedLoginAttempts { get; set; }
 		public TimeSpan FailedLoginLockoutPeriod { get; set; }
 		public bool SecureClientController { get; set; }
-		public TimeSpan QueueExpiration { get; set; }
-		public TimeSpan RequestExpiration { get; set; }
 		public TimeSpan AccessTokenLifetime { get; set; }
 
 		public ConfigurationDummy()

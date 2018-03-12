@@ -130,6 +130,9 @@ The default settings include:
 
 ```
 <appSettings>
+    <add key="RabbitMqClusterHosts" value="" />
+    <add key="QueueExpiration" value="00:00:10" />
+    <add key="RequestExpiration" value="00:00:10" />
     <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
     <add key="TraceFileDirectory" value="tracefiles" />
     <add key="LinkPasswordLength" value="100" />
@@ -155,14 +158,15 @@ The default settings include:
     <add key="MaxFailedLoginAttempts" value="5" />
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
-    <add key="QueueExpiration" value="00:00:10" />
-    <add key="RequestExpiration" value="00:00:10" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
 </appSettings>
 ```
 
 |  Key name | Description |
 | --- | --- |
+| RabbitMqClusterHosts | Comma-separated list of RabbitMQ cluster members (default _null_) |
+| QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
+| RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
 | OnPremiseConnectorCallbackTimeout | Time span the RelayServer will wait for a response from the On-Premise Connector (default 30 seconds) |
 | TraceFileDirectory | Path to the directory, where trace files will be written to, if traceing is enabled (default 'tracefiles') |
 | LinkPasswordLength | Length of the auto generated password for new links (default 100) |
@@ -188,8 +192,6 @@ The default settings include:
 | MaxFailedLoginAttempts | Maximum allowed failed login attempts for a user, until the account will temporary be locked out (default 5) |
 | FailedLoginLockoutPeriod | Time span that a user will be locked out after he has more than `MaxFailedLoginAttempts` failed login attempts (default 15 minutes) |
 | SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid On-Premise Connector / Link access token (default false) |
-| QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
-| RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
 | AccessTokenLifetime | Time span that an issued access token for On-Premise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
 
 ## netsh settings
