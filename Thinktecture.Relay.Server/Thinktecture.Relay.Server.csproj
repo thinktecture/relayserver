@@ -247,7 +247,6 @@
     <Compile Include="OnPremise\IOnPremiseConnectorResponse.cs" />
     <Compile Include="OnPremise\OnPremiseConnectorResponse.cs" />
     <Compile Include="Owin\BlockNonLocalRequestsMiddleware.cs" />
-    <Compile Include="Communication\HeartbeatInformation.cs" />
     <Compile Include="Communication\IMessageDispatcher.cs" />
     <Compile Include="Communication\InProcess\InProcessMessageDispatcher.cs" />
     <Compile Include="Communication\InProcess\RequestSubjectContext.cs" />
