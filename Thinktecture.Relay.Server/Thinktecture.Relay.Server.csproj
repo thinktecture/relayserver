@@ -218,6 +218,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\IOnPremiseConnectionContext.cs" />
+    <Compile Include="Communication\IOnPremiseConnectionHeartbeater.cs" />
+    <Compile Include="Communication\OnPremiseConnectionHeartbeater.cs" />
     <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
     <Compile Include="IO\LegacyResponseStream.cs" />
     <Compile Include="Filters\ConfigurableClientAuthorizationAttribute.cs" />

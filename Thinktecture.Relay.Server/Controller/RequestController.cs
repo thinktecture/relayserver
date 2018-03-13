@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Serilog;
@@ -40,10 +41,11 @@ namespace Thinktecture.Relay.Server.Controller
 		}
 
 		[HttpGet]
-		public IHttpActionResult Acknowledge([FromUri(Name = "oid")] Guid originId, [FromUri(Name = "aid")] string acknowledgeId, [FromUri(Name = "cid")] string connectionId = null)
+		public async Task<IHttpActionResult> Acknowledge(string tag, string id = null)
 		{
-			_logger?.Verbose("Received acknowledge. origin-id={OriginId}, acknowledge-id={AcknowledgeId}, connection-id={ConnectionId}", originId, acknowledgeId, connectionId);
-			_backendCommunication.AcknowledgeOnPremiseConnectorRequest(originId, acknowledgeId, connectionId);
+			_logger?.Verbose("Received acknowledge. connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", id, tag);
+
+			await _backendCommunication.AcknowledgeOnPremiseConnectorRequestAsync(id, tag);
 			return Ok();
 		}
 	}

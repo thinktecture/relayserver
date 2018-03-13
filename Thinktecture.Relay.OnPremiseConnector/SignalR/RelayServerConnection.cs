@@ -262,13 +262,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 				try
 				{
-					if (request.HttpMethod == "PING")
+					if (request.IsPingRequest)
 					{
 						await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
 						return;
 					}
 
-					if (request.HttpMethod == "HEARTBEAT")
+					if (request.IsHeartbeatRequest)
 					{
 						HandleHeartbeatRequest(ctx, request);
 						return;
@@ -299,7 +299,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 			finally
 			{
-				if (!ctx.IsRelayServerNotified && request != null)
+				if (!ctx.IsRelayServerNotified && request != null && !request.IsHeartbeatOrPingRequest)
 				{
 					_logger?.Verbose("Unhandled request. message={message}", message);
 
@@ -360,7 +360,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			_logger?.Debug("Received ping from RelayServer. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", Uri, RelayServerConnectionId);
 
-			var response = new OnPremiseTargetResponse()
+			var pong = new OnPremiseTargetResponse()
 			{
 				RequestStarted = DateTime.UtcNow,
 				RequestFinished = DateTime.UtcNow,
@@ -369,10 +369,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				RequestId = request.RequestId,
 			};
 
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			await PostResponseAsync(ctx, pong, CancellationToken.None).ConfigureAwait(false);
 		}
 
-		private void HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
+		private async Task HandleHeartbeatRequest(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
 			_logger?.Debug("Received heartbeat from RelayServer. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", Uri, RelayServerConnectionId);
 
@@ -387,8 +387,22 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 
 			LastHeartbeat = DateTime.UtcNow;
-			ctx.IsRelayServerNotified = true;
+
+			var baDumTsss = new OnPremiseTargetResponse()
+			{
+				RequestStarted = DateTime.UtcNow,
+				RequestFinished = DateTime.UtcNow,
+				StatusCode = HttpStatusCode.OK,
+				OriginId = request.OriginId,
+				RequestId = request.RequestId,
+			};
+
+			if (badumTass)
+			// ToDo: Send Badumtsss
+			await PostResponseAsync(ctx, baDumTsss, CancellationToken.None).ConfigureAwait(false);
 		}
+
+		private bool badumTass = false;
 
 		public void Reconnect()
 		{

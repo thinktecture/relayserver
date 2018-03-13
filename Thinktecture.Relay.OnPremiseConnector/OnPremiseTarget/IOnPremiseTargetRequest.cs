@@ -15,6 +15,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// Gets the request stream if the body is too large (was requested by a second request)
 		/// </summary>
 		new Stream Stream { get; set; }
+
+		bool IsPingRequest { get; }
+		bool IsHeartbeatRequest { get; }
+		bool IsHeartbeatOrPingRequest { get; }
 	}
 
 	/// <summary>

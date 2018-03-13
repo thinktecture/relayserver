@@ -1,7 +1,9 @@
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Results;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
@@ -117,7 +119,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 		public async Task<IHttpActionResult> PingAsync(Guid id)
 		{
 			var requestId = Guid.NewGuid().ToString();
-			var request = new OnPremiseConnectorRequest
+			var request = new OnPremiseConnectorRequest()
 			{
 				HttpMethod = "PING",
 				Url = String.Empty,
@@ -126,15 +128,14 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				RequestId = requestId
 			};
 
-			var task = _backendCommunication.GetResponseAsync(requestId);
-			_backendCommunication.SendOnPremiseConnectorRequest(id, request);
+			var responseTask = _backendCommunication.GetResponseAsync(requestId).ConfigureAwait(false);
+			await _backendCommunication.SendOnPremiseConnectorRequestAsync(id, request).ConfigureAwait(false);
 
-			var response = await task.ConfigureAwait(false);
+			var response = await responseTask;
 			request.RequestFinished = DateTime.UtcNow;
+			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response?.StatusCode);
 
-			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response?.StatusCode ?? HttpStatusCode.InternalServerError);
-
-			return Ok();
+			return (response != null) ? (IHttpActionResult)Ok() : new StatusCodeResult(HttpStatusCode.GatewayTimeout, new HttpRequestMessage());
 		}
 	}
 }

@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			_pathSplitter = pathSplitter;
 		}
 
-		public void LogRequest(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid linkId, Guid originId, string relayPath, HttpStatusCode statusCode)
+		public void LogRequest(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid linkId, Guid originId, string relayPath, HttpStatusCode? statusCode)
 		{
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			_logRepository.LogRequest(new RequestLogEntry
 			{
 				LocalUrl = pathInformation.LocalUrl,
-				HttpStatusCode = statusCode,
+				HttpStatusCode = statusCode ?? HttpStatusCode.InternalServerError,
 				ContentBytesIn = request.ContentLength,
 				ContentBytesOut = response?.ContentLength ?? 0,
 				OnPremiseConnectorInDate = request.RequestStarted,

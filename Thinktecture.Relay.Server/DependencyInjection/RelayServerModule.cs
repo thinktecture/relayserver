@@ -50,8 +50,10 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 			builder.RegisterType<RabbitMqMessageDispatcher>().AsImplementedInterfaces().SingleInstance();
 
 			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance()
-				.OnActivated(args => args.Instance.Prepare())
-				.AutoActivate(); // ensure that the BUS to rabbitMQ starts up before accepting connections
+				.OnActivated(args => args.Instance.Prepare());
+			
+			builder.RegisterType<OnPremiseConnectionHeartbeater>().AsImplementedInterfaces().SingleInstance()
+				.OnActivated(args => args.Instance.Prepare()); ;
 
 			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
 

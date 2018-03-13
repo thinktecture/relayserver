@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Autofac;
 using AutofacSerilogIntegration;
 using Serilog;
+using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.DependencyInjection;
@@ -30,7 +31,12 @@ namespace Thinktecture.Relay.Server
 					config.Service<RelayService>(settings =>
 					{
 						settings.ConstructUsingAutofacContainer();
-						settings.WhenStarted(s => s.Start());
+						settings.WhenStarted(s =>
+						{
+							s.Start();
+							// Make sure we create the heartbeater at service staartup5
+							relayServerScope.Resolve<IOnPremiseConnectionHeartbeater>();
+						});
 						settings.WhenStopped(s =>
 						{
 							s.Stop();

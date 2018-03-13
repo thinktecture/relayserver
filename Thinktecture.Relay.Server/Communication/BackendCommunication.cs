@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +23,6 @@ namespace Thinktecture.Relay.Server.Communication
 
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectionContext> _connectionContexts;
-		private readonly TimeSpan _heartbeatInterval;
 
 		private readonly Dictionary<string, IDisposable> _requestSubscriptions;
 		private IDisposable _responseSubscription;
@@ -39,8 +37,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_logger = logger;
 			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
 			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
-			_connectionContexts = new ConcurrentDictionary<string, IOnPremiseConnectionContext>();
-			_heartbeatInterval = new TimeSpan(_configuration.ActiveConnectionTimeout.Ticks / 2);
+			_connectionContexts = new ConcurrentDictionary<string, IOnPremiseConnectionContext>();		
 			_requestSubscriptions = new Dictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
@@ -54,8 +51,6 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			_linkRepository.DeleteAllConnectionsForOrigin(OriginId);
 			_responseSubscription = StartReceivingResponses(OriginId);
-
-			StartSendHeartbeatsLoop(_cts.Token);
 		}
 
 		public async Task RegisterOnPremiseAsync(IOnPremiseConnectionContext onPremiseConnectionContext)
@@ -78,6 +73,8 @@ namespace Thinktecture.Relay.Server.Communication
 				{
 					_requestSubscriptions[onPremiseConnectionContext.ConnectionId] = _messageDispatcher.OnRequestReceived(onPremiseConnectionContext.LinkId, onPremiseConnectionContext.ConnectionId, !onPremiseConnectionContext.SupportsAck)
 						.Subscribe(request => onPremiseConnectionContext.RequestAction(request, _cancellationToken));
+
+					onPremiseConnectionContext.IsActive = true;
 				}
 			}
 
@@ -88,13 +85,53 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			await UnsubscribeConnectionAsync(connectionId);
-			UnregisterForHeartbeat(connectionId);
+			await DeactivateOnPremiseAsync(connectionId);
+
+			_logger?.Verbose("Completely unregistering on premise connection. connection-id={ConnectionId}", connectionId);
+			_connectionContexts.TryRemove(connectionId, out var info);
 		}
+
+		public async Task DeactivateOnPremiseAsync(string connectionId)
+		{
+			if (_connectionContexts.TryGetValue(connectionId, out var connectionContext))
+			{
+				connectionContext.IsActive = false;
+			}
+
+			_logger?.Debug("Unregistering on-premise link. link-id={LinkId}, connection-id={ConnectionId}", connectionContext?.LinkId, connectionId);
+
+			await _linkRepository.RemoveActiveConnectionAsync(connectionId).ConfigureAwait(false);
+
+			IDisposable requestSubscription;
+			lock (_requestSubscriptions)
+			{
+				if (_requestSubscriptions.TryGetValue(connectionId, out requestSubscription))
+					_requestSubscriptions.Remove(connectionId);
+			}
+
+			if (requestSubscription != null)
+			{
+				_logger?.Debug("Disposing request subscription. link-id={LinkId}, connection-id={ConnectionId}", connectionContext?.LinkId, connectionId);
+				requestSubscription.Dispose();
+			}
+		}
+
 
 		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
 		{
+			CheckDisposed();
+
 			return GetResponseAsync(requestId, _configuration.OnPremiseConnectorCallbackTimeout);
+		}
+
+		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId, TimeSpan requestTimeout)
+		{
+			CheckDisposed();
+			_logger?.Debug("Waiting for response. request-id={RequestId}", requestId);
+
+			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
+
+			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout, _cancellationToken);
 		}
 
 		public async Task SendOnPremiseConnectorRequestAsync(Guid linkId, IOnPremiseConnectorRequest request)
@@ -106,14 +143,28 @@ namespace Thinktecture.Relay.Server.Communication
 			await _messageDispatcher.DispatchRequest(linkId, request).ConfigureAwait(false);
 		}
 
-		public void AcknowledgeOnPremiseConnectorRequest(string connectionId, string acknowledgeId)
+		public async Task AcknowledgeOnPremiseConnectorRequestAsync(string connectionId, string acknowledgeId)
 		{
 			CheckDisposed();
 
 			_messageDispatcher.AcknowledgeRequest(acknowledgeId);
 
 			if (connectionId != null)
-				RenewLastActivity(connectionId);
+				await RenewLastActivityAsync(connectionId).ConfigureAwait(false);
+		}
+
+		public async Task RenewLastActivityAsync(string connectionId)
+		{
+			if (_connectionContexts.TryGetValue(connectionId, out var connectionContext))
+			{
+				connectionContext.LastLocalActivity = DateTime.UtcNow;
+				if (!connectionContext.IsActive)
+				{
+					await RegisterOnPremiseAsync(connectionContext);
+				}
+			}
+
+			await _linkRepository.RenewActiveConnectionAsync(connectionId);
 		}
 
 		public async Task SendOnPremiseTargetResponseAsync(Guid originId, IOnPremiseConnectorResponse response)
@@ -123,6 +174,11 @@ namespace Thinktecture.Relay.Server.Communication
 			_logger?.Debug("Dispatching response. origin-id={OriginId}", originId);
 
 			await _messageDispatcher.DispatchResponse(originId, response).ConfigureAwait(false);
+		}
+
+		public IEnumerable<IOnPremiseConnectionContext> GetConnectionContexts()
+		{
+			return _connectionContexts.Values;
 		}
 
 		private IDisposable StartReceivingResponses(Guid originId)
@@ -143,16 +199,6 @@ namespace Thinktecture.Relay.Server.Communication
 			{
 				_logger?.Debug("Response received but no request callback found. request-id={RequestId}", response.RequestId);
 			}
-		}
-
-		private Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId, TimeSpan requestTimeout)
-		{
-			CheckDisposed();
-			_logger?.Debug("Waiting for response. request-id={RequestId}", requestId);
-
-			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
-
-			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout, _cancellationToken);
 		}
 
 		private async Task<IOnPremiseConnectorResponse> GetOnPremiseTargetResponseAsync(IOnPremiseConnectorCallback callback, TimeSpan requestTimeout, CancellationToken cancellationToken)
@@ -187,102 +233,6 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 
 			return null;
-		}
-
-
-
-		private async Task UnsubscribeConnectionAsync(string connectionId)
-		{
-			_connectionContexts.TryGetValue(connectionId, out var connectionInfo);
-			_logger?.Debug("Unregistering on-premise link. link-id={LinkId}, connection-id={ConnectionId}", connectionInfo?.LinkId, connectionId);
-
-			await _linkRepository.RemoveActiveConnectionAsync(connectionId).ConfigureAwait(false);
-
-			IDisposable requestSubscription;
-			lock (_requestSubscriptions)
-			{
-				if (_requestSubscriptions.TryGetValue(connectionId, out requestSubscription))
-					_requestSubscriptions.Remove(connectionId);
-			}
-
-			if (requestSubscription != null)
-			{
-				_logger?.Debug("Disposing request subscription. link-id={LinkId}, connection-id={ConnectionId}", connectionInfo?.LinkId, connectionId);
-				requestSubscription.Dispose();
-			}
-		}
-
-		private void RenewLastActivity(string connectionId)
-		{
-			if (_connectionContexts.TryGetValue(connectionId, out var connectionContext))
-				connectionContext.LastLocalActivity = DateTime.UtcNow;
-
-			_linkRepository.RenewActiveConnectionAsync(connectionId);
-		}
-
-		private void StartSendHeartbeatsLoop(CancellationToken token)
-		{
-			Task.Run(async () =>
-			{
-				while (!token.IsCancellationRequested)
-				{
-					await Task.WhenAll(_connectionContexts.Values.Select(heartbeatClient => SendHeartbeatAsync(heartbeatClient, token))).ConfigureAwait(false);
-					await Task.Delay(_heartbeatInterval, token).ConfigureAwait(false);
-				}
-			}, token).ConfigureAwait(false);
-		}
-
-		private async Task SendHeartbeatAsync(IOnPremiseConnectionContext connectionContext, CancellationToken token)
-		{
-			if (connectionContext == null)
-				throw new ArgumentNullException(nameof(connectionContext));
-
-			if (!connectionContext.SupportsHeartbeat)
-				return;
-
-			try
-			{
-				_logger?.Verbose("Sending heartbeat. connection-id={ConnectionId}", connectionContext.ConnectionId);
-
-				var requestId = Guid.NewGuid().ToString();
-				var request = new OnPremiseConnectorRequest()
-				{
-					HttpMethod = "HEARTBEAT",
-					Url = String.Empty,
-					RequestStarted = DateTime.UtcNow,
-					OriginId = OriginId,
-					RequestId = requestId,
-					AcknowledgeId = requestId,
-					HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-HEARTBEATINTERVAL"] = _heartbeatInterval.TotalSeconds.ToString(CultureInfo.InvariantCulture) },
-				};
-
-				var responseTask = GetResponseAsync(requestId, _configuration.ActiveConnectionTimeout);
-
-				// heartbeats do NOT go through the message dispatcher as we want to heartbeat the connections directly
-				await connectionContext.RequestAction(request, token).ConfigureAwait(false);
-				var response = await responseTask;
-
-				if (response != null)
-				{
-					RenewLastActivity(connectionContext.ConnectionId);
-				}
-				else
-				{
-					// wenn fehlschlägt, dann last Activity checken, wenn zu alt, temporär disablen
-				}
-
-			}
-			catch (Exception ex)
-			{
-				_logger?.Error(ex, "Error during sending heartbeat to a client. link-id={LinkId}, connection-id={ConnectionId}, connector-version={ConnectorVersion}", connectionContext.LinkId, connectionContext.ConnectionId, connectionContext.ConnectorVersion);
-			}
-		}
-
-		private void UnregisterForHeartbeat(string connectionId)
-		{
-			_logger?.Verbose("Unregistering from heartbeating. connection-id={ConnectionId}", connectionId);
-
-			_connectionContexts.TryRemove(connectionId, out var info);
 		}
 
 		#region IDisposable
