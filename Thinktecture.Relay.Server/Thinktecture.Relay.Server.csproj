@@ -272,6 +272,8 @@
       <DependentUpon>201707240650482_AddActiveConnectionsTable.cs</DependentUpon>
     </Compile>
     <Compile Include="Owin\HstsAppBuilderExtensions.cs" />
+    <Compile Include="SignalR\DataStoreLoader.cs" />
+    <Compile Include="SignalR\IDataStoreLoader.cs" />
     <Compile Include="Repository\DbModels\DbActiveConnection.cs" />
     <Compile Include="Http\Filters\RelayModuleBindingFilter.cs" />
     <Compile Include="Interceptor\InterceptorLoader.cs" />
@@ -373,7 +375,6 @@
     <Compile Include="Security\PasswordInformation.cs" />
     <Compile Include="Security\RsaDataProtector.cs" />
     <Compile Include="SignalR\FilePostDataTemporaryStore.cs" />
-    <Compile Include="SignalR\IPostDataTemporaryStore.cs" />
     <Compile Include="SignalR\OnPremisesConnection.cs" />
     <Compile Include="Security\AuthorizationServerProvider.cs" />
     <Compile Include="SignalR\InMemoryPostDataTemporaryStore.cs" />

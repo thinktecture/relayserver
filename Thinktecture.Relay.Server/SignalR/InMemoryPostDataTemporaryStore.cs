@@ -11,7 +11,6 @@ namespace Thinktecture.Relay.Server.SignalR
 	internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
 		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
-		private static readonly byte[] _emptyByteArray = new byte[0];
 
 		private readonly ILogger _logger;
 		private readonly TimeSpan _storagePeriod;
@@ -140,19 +139,6 @@ namespace Thinktecture.Relay.Server.SignalR
 			{
 				_timeoutDate = DateTime.UtcNow.Add(storagePeriod);
 				Data = data;
-			}
-		}
-
-		private class NotifyingMemoryStream : MemoryStream
-		{
-			public event EventHandler Disposing;
-
-			protected override void Dispose(bool disposing)
-			{
-				var handler = Disposing;
-				handler?.Invoke(this, EventArgs.Empty);
-
-				base.Dispose(disposing);
 			}
 		}
 	}

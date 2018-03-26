@@ -18,17 +18,17 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 {
 	internal class RelayServerModule : Module
 	{
-		private readonly IConfiguration _configuration;
 		private readonly ICustomCodeAssemblyLoader _customCodeAssemblyLoader;
 		private readonly IControllerLoader _controllerLoader;
 		private readonly IInterceptorLoader _interceptorLoader;
+		private readonly IDataStoreLoader _dataStoreLoader;
 
-		public RelayServerModule(IConfiguration configuration, ICustomCodeAssemblyLoader customCodeAssemblyLoader, IControllerLoader controllerLoader, IInterceptorLoader interceptorLoader)
+		public RelayServerModule(ICustomCodeAssemblyLoader customCodeAssemblyLoader, IControllerLoader controllerLoader, IInterceptorLoader interceptorLoader, IDataStoreLoader dataStoreLoader)
 		{
-			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_customCodeAssemblyLoader = customCodeAssemblyLoader ?? throw new ArgumentNullException(nameof(customCodeAssemblyLoader));
 			_controllerLoader = controllerLoader ?? throw new ArgumentNullException(nameof(controllerLoader));
 			_interceptorLoader = interceptorLoader ?? throw new ArgumentNullException(nameof(interceptorLoader));
+			_dataStoreLoader = dataStoreLoader ?? throw new ArgumentNullException(nameof(dataStoreLoader));
 		}
 
 		protected override void Load(ContainerBuilder builder)
@@ -72,21 +72,13 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 
 			builder.RegisterType<InterceptorManager>().As<IInterceptorManager>();
 
-			if (String.IsNullOrWhiteSpace(_configuration.TemporaryRequestStoragePath))
-			{
-				builder.RegisterType<InMemoryPostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
-			}
-			else
-			{
-				builder.RegisterType<FilePostDataTemporaryStore>().As<IPostDataTemporaryStore>().SingleInstance();
-			}
-
 			builder.RegisterType<PasswordComplexityValidator>().AsImplementedInterfaces();
 
 			_customCodeAssemblyLoader.RegisterModule(builder);
 
 			_controllerLoader.RegisterControllers(builder);
 			_interceptorLoader.RegisterInterceptors(builder);
+			_dataStoreLoader.RegisterDataStore(builder);
 		}
 	}
 }
