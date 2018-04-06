@@ -8,15 +8,14 @@ namespace Thinktecture.Relay.Server.Communication
 	public interface IBackendCommunication
 	{
 		Guid OriginId { get; }
-		Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId);
-		Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId, TimeSpan requestTimeout);
-		Task SendOnPremiseConnectorRequestAsync(Guid linkId, IOnPremiseConnectorRequest request);
-		Task AcknowledgeOnPremiseConnectorRequestAsync(string connectionId, string acknowledgeId);
+		Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId, TimeSpan? requestTimeout = null);
+		void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request);
+		Task AcknowledgeOnPremiseConnectorRequestAsync(Guid originId, string acknowledgeId, string connectionId);
 		Task RenewLastActivityAsync(string connectionId);
 		Task RegisterOnPremiseAsync(IOnPremiseConnectionContext onPremiseConnectionContext);
-		Task UnregisterOnPremiseAsync(string connectionId);
-		Task DeactivateOnPremiseAsync(string connectionId);
-		Task SendOnPremiseTargetResponseAsync(Guid originId, IOnPremiseConnectorResponse response);
+		Task UnregisterOnPremiseConnectionAsync(string connectionId);
+		Task DeactivateOnPremiseConnectionAsync(string connectionId);
+		void SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response);
 		IEnumerable<IOnPremiseConnectionContext> GetConnectionContexts();
 	}
 }

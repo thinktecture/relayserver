@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		Uri Uri { get; }
 		TimeSpan TokenRefreshWindow { get; }
 		DateTime TokenExpiry { get; }
-		int RelayServerConnectionId { get; }
+		int RelayServerConnectionInstanceId { get; }
 		DateTime LastHeartbeat { get; }
 		TimeSpan HeartbeatInterval { get; }
 

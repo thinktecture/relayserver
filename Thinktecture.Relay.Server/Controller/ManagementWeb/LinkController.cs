@@ -116,7 +116,7 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 		[HttpGet]
 		[ActionName("ping")]
-		public async Task<IHttpActionResult> PingAsync(Guid id)
+		public async Task<IHttpActionResult> SendPing(Guid id)
 		{
 			var requestId = Guid.NewGuid().ToString();
 			var request = new OnPremiseConnectorRequest()
@@ -128,14 +128,14 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				RequestId = requestId
 			};
 
-			var responseTask = _backendCommunication.GetResponseAsync(requestId).ConfigureAwait(false);
-			await _backendCommunication.SendOnPremiseConnectorRequestAsync(id, request).ConfigureAwait(false);
+			var task = _backendCommunication.GetResponseAsync(requestId);
+			_backendCommunication.SendOnPremiseConnectorRequest(id, request);
 
-			var response = await responseTask;
+			var response = await task.ConfigureAwait(false);
 			request.RequestFinished = DateTime.UtcNow;
 			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response?.StatusCode);
 
-			return (response != null) ? (IHttpActionResult)Ok() : new StatusCodeResult(HttpStatusCode.GatewayTimeout, new HttpRequestMessage());
+			return (response != null) ? (IHttpActionResult)Ok() : new StatusCodeResult(HttpStatusCode.GatewayTimeout, Request);
 		}
 	}
 }

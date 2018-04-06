@@ -19,5 +19,6 @@ namespace Thinktecture.Relay.Server.Communication
 		string ConnectorAssemblyVersion { get; set; }
 		bool SupportsAck { get; }
 		bool SupportsHeartbeat { get; }
+		DateTime NextHeartbeat { get; set; }
 	}
 }

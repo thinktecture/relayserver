@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.Server.Communication
 						return SendHeartbeatAsync(connectionContext, token);
 					})).ConfigureAwait(false);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-					await Task.Delay(_heartbeatInterval, token).ConfigureAwait(false);
+					await Task.Delay(TimeSpan.FromSeconds(1), token).ConfigureAwait(false);
 				}
 			}, token).ConfigureAwait(false);
 		}
@@ -57,9 +57,16 @@ namespace Thinktecture.Relay.Server.Communication
 			if (connectionContext == null)
 				throw new ArgumentNullException(nameof(connectionContext));
 
+			if (connectionContext.NextHeartbeat > DateTime.UtcNow)
+			{
+				return;
+			}
+
+			connectionContext.NextHeartbeat = DateTime.UtcNow.Add(_heartbeatInterval);
+
 			try
 			{
-				_logger?.Verbose("Sending {PingMethod}. connection-id={ConnectionId}", (connectionContext.SupportsHeartbeat) ? "Heartbeat" : "Ping (as heartbeat)", connectionContext.ConnectionId);
+				_logger?.Verbose("Sending {PingMethod}. connection-id={ConnectionId}", connectionContext.SupportsHeartbeat ? "Heartbeat" : "Ping (as heartbeat)", connectionContext.ConnectionId);
 
 				var requestId = Guid.NewGuid().ToString();
 				var request = new OnPremiseConnectorRequest()
@@ -69,17 +76,16 @@ namespace Thinktecture.Relay.Server.Communication
 					RequestStarted = DateTime.UtcNow,
 					OriginId = _backendCommunication.OriginId,
 					RequestId = requestId,
-					AcknowledgeId = requestId,
 					AcknowledgmentMode = AcknowledgmentMode.Auto,
 					HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-HEARTBEATINTERVAL"] = _heartbeatInterval.TotalSeconds.ToString(CultureInfo.InvariantCulture) },
 				};
 
 				// wait for the response of the Heartbeat / Ping
-				var responseTask = _backendCommunication.GetResponseAsync(requestId, _configuration.ActiveConnectionTimeout).ConfigureAwait(false);
+				var task = _backendCommunication.GetResponseAsync(requestId, _configuration.ActiveConnectionTimeout);
 
 				// heartbeats do NOT go through the message dispatcher as we want to heartbeat the connections directly
 				await connectionContext.RequestAction(request, token).ConfigureAwait(false);
-				var response = await responseTask;
+				var response = await task.ConfigureAwait(false);
 
 				if (response != null)
 				{
@@ -96,7 +102,7 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			if (connectionContext.LastLocalActivity + _configuration.ActiveConnectionTimeout < DateTime.UtcNow)
 			{
-				await _backendCommunication.DeactivateOnPremiseAsync(connectionContext.ConnectionId);
+				await _backendCommunication.DeactivateOnPremiseConnectionAsync(connectionContext.ConnectionId);
 			}
 		}
 
@@ -113,14 +119,6 @@ namespace Thinktecture.Relay.Server.Communication
 			{
 				_cts.Cancel();
 				_cts.Dispose();
-			}
-		}
-
-		private void CheckDisposed()
-		{
-			if (_cts.IsCancellationRequested)
-			{
-				throw new ObjectDisposedException(GetType().Name);
 			}
 		}
 

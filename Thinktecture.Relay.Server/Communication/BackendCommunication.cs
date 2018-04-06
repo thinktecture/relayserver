@@ -25,7 +25,9 @@ namespace Thinktecture.Relay.Server.Communication
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectionContext> _connectionContexts;
 
 		private readonly Dictionary<string, IDisposable> _requestSubscriptions;
+
 		private IDisposable _responseSubscription;
+		private IDisposable _acknowledgeSubscription;
 
 		public Guid OriginId { get; }
 
@@ -37,7 +39,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_logger = logger;
 			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
 			_requestCompletedCallbacks = new ConcurrentDictionary<string, IOnPremiseConnectorCallback>(StringComparer.OrdinalIgnoreCase);
-			_connectionContexts = new ConcurrentDictionary<string, IOnPremiseConnectionContext>();		
+			_connectionContexts = new ConcurrentDictionary<string, IOnPremiseConnectionContext>();
 			_requestSubscriptions = new Dictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
@@ -50,7 +52,8 @@ namespace Thinktecture.Relay.Server.Communication
 		public void Prepare()
 		{
 			_linkRepository.DeleteAllConnectionsForOrigin(OriginId);
-			_responseSubscription = StartReceivingResponses(OriginId);
+			_responseSubscription = StartReceivingResponses();
+			_acknowledgeSubscription = StartReceivingAcknowledges();
 		}
 
 		public async Task RegisterOnPremiseAsync(IOnPremiseConnectionContext onPremiseConnectionContext)
@@ -81,24 +84,24 @@ namespace Thinktecture.Relay.Server.Communication
 			_connectionContexts.TryAdd(onPremiseConnectionContext.ConnectionId, onPremiseConnectionContext);
 		}
 
-		public async Task UnregisterOnPremiseAsync(string connectionId)
+		public async Task UnregisterOnPremiseConnectionAsync(string connectionId)
 		{
 			CheckDisposed();
 
-			await DeactivateOnPremiseAsync(connectionId);
+			await DeactivateOnPremiseConnectionAsync(connectionId);
 
-			_logger?.Verbose("Completely unregistering on premise connection. connection-id={ConnectionId}", connectionId);
+			_logger?.Verbose("Unregistering connection. connection-id={ConnectionId}", connectionId);
 			_connectionContexts.TryRemove(connectionId, out var info);
 		}
 
-		public async Task DeactivateOnPremiseAsync(string connectionId)
+		public async Task DeactivateOnPremiseConnectionAsync(string connectionId)
 		{
 			if (_connectionContexts.TryGetValue(connectionId, out var connectionContext))
 			{
 				connectionContext.IsActive = false;
 			}
 
-			_logger?.Debug("Unregistering on-premise link. link-id={LinkId}, connection-id={ConnectionId}", connectionContext?.LinkId, connectionId);
+			_logger?.Debug("Deactivating connection. link-id={LinkId}, connection-id={ConnectionId}", connectionContext?.LinkId, connectionId);
 
 			await _linkRepository.RemoveActiveConnectionAsync(connectionId).ConfigureAwait(false);
 
@@ -116,41 +119,40 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 		}
 
-
-		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId)
+		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId, TimeSpan? requestTimeout = null)
 		{
 			CheckDisposed();
 
-			return GetResponseAsync(requestId, _configuration.OnPremiseConnectorCallbackTimeout);
-		}
-
-		public Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId, TimeSpan requestTimeout)
-		{
-			CheckDisposed();
-			_logger?.Debug("Waiting for response. request-id={RequestId}", requestId);
+			_logger?.Debug("Waiting for response. request-id={RequestId}, timeout={Timeout}", requestId, requestTimeout);
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
-			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout, _cancellationToken);
+			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout ?? _configuration.OnPremiseConnectorCallbackTimeout, _cancellationToken);
 		}
 
-		public async Task SendOnPremiseConnectorRequestAsync(Guid linkId, IOnPremiseConnectorRequest request)
+		public void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			CheckDisposed();
 
 			_logger?.Debug("Dispatching request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
 
-			await _messageDispatcher.DispatchRequest(linkId, request).ConfigureAwait(false);
+			_messageDispatcher.DispatchRequest(linkId, request);
 		}
 
-		public async Task AcknowledgeOnPremiseConnectorRequestAsync(string connectionId, string acknowledgeId)
+		public async Task AcknowledgeOnPremiseConnectorRequestAsync(Guid originId, string acknowledgeId, string connectionId)
 		{
 			CheckDisposed();
 
-			_messageDispatcher.AcknowledgeRequest(acknowledgeId);
+			if (originId != Guid.Empty)
+			{
+				_logger?.Debug("Dispatching acknowledge. origin-id={OriginId}, acknowledge-id={AcknowledgeId}, connection-id={ConnectionId}", originId, acknowledgeId, connectionId);
+				_messageDispatcher.DispatchAcknowledge(originId, acknowledgeId);
+			}
 
 			if (connectionId != null)
+			{
 				await RenewLastActivityAsync(connectionId).ConfigureAwait(false);
+			}
 		}
 
 		public async Task RenewLastActivityAsync(string connectionId)
@@ -158,6 +160,7 @@ namespace Thinktecture.Relay.Server.Communication
 			if (_connectionContexts.TryGetValue(connectionId, out var connectionContext))
 			{
 				connectionContext.LastLocalActivity = DateTime.UtcNow;
+
 				if (!connectionContext.IsActive)
 				{
 					await RegisterOnPremiseAsync(connectionContext);
@@ -167,13 +170,13 @@ namespace Thinktecture.Relay.Server.Communication
 			await _linkRepository.RenewActiveConnectionAsync(connectionId);
 		}
 
-		public async Task SendOnPremiseTargetResponseAsync(Guid originId, IOnPremiseConnectorResponse response)
+		public void SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			CheckDisposed();
 
 			_logger?.Debug("Dispatching response. origin-id={OriginId}", originId);
 
-			await _messageDispatcher.DispatchResponse(originId, response).ConfigureAwait(false);
+			_messageDispatcher.DispatchResponse(originId, response);
 		}
 
 		public IEnumerable<IOnPremiseConnectionContext> GetConnectionContexts()
@@ -181,11 +184,11 @@ namespace Thinktecture.Relay.Server.Communication
 			return _connectionContexts.Values;
 		}
 
-		private IDisposable StartReceivingResponses(Guid originId)
+		private IDisposable StartReceivingResponses()
 		{
-			_logger?.Debug("Start receiving responses from dispatcher. origin-id={OriginId}", originId);
+			_logger?.Debug("Start receiving responses from dispatcher. origin-id={OriginId}", OriginId);
 
-			return _messageDispatcher.OnResponseReceived(originId).Subscribe(ForwardOnPremiseTargetResponse);
+			return _messageDispatcher.OnResponseReceived().Subscribe(ForwardOnPremiseTargetResponse);
 		}
 
 		private void ForwardOnPremiseTargetResponse(IOnPremiseConnectorResponse response)
@@ -199,6 +202,13 @@ namespace Thinktecture.Relay.Server.Communication
 			{
 				_logger?.Debug("Response received but no request callback found. request-id={RequestId}", response.RequestId);
 			}
+		}
+
+		private IDisposable StartReceivingAcknowledges()
+		{
+			_logger?.Debug("Start receiving acknowledges from dispatcher. origin-id={OriginId}", OriginId);
+
+			return _messageDispatcher.OnAcknowledgeReceived().Subscribe(acknowledgeId => _messageDispatcher.AcknowledgeRequest(acknowledgeId));
 		}
 
 		private async Task<IOnPremiseConnectorResponse> GetOnPremiseTargetResponseAsync(IOnPremiseConnectorCallback callback, TimeSpan requestTimeout, CancellationToken cancellationToken)
@@ -262,6 +272,7 @@ namespace Thinktecture.Relay.Server.Communication
 				}
 
 				_responseSubscription?.Dispose();
+				_acknowledgeSubscription?.Dispose();
 			}
 		}
 

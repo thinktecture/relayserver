@@ -51,7 +51,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		private void CleanUp(CancellationToken cancellationToken)
 		{
 			var timeout = DateTime.UtcNow.Add(-_storagePeriod);
-			_logger?.Verbose("Cleaning up old stored files. timeout={CreationTimeout}", timeout);
+			_logger?.Verbose("Cleaning up old stored temporary data (files). timeout={CreationTimeout}", timeout);
 
 			try
 			{
