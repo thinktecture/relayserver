@@ -28,7 +28,7 @@
       * Read or modify the HTTP headers
       * Immidiate rejection of answering of the request
       * Modifying the TTL of the request in the message queue
-      * Modification of the acknowlegde-mode to automatic or manual acknowledgement of the request in the message queue
+      * Modification of the acknowledge mode to automatic or manual acknowledgement of the request in the message queue
 
     * Responses
 

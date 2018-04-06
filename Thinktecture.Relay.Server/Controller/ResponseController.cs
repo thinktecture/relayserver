@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server.Controller
 
 			_logger?.Verbose("Received on-premise response. request-id={RequestId}, content-length={ResponseContentLength}", response.RequestId, response.ContentLength);
 
-			await _backendCommunication.SendOnPremiseTargetResponseAsync(response.OriginId, response).ConfigureAwait(false);
+			_backendCommunication.SendOnPremiseTargetResponse(response.OriginId, response);
 
 			return Ok();
 		}

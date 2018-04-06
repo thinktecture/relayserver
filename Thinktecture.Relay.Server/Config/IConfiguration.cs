@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Server.Config
 		string TemporaryRequestStoragePath { get; }
 		TimeSpan ActiveConnectionTimeout { get; }
 		string CustomCodeAssemblyPath { get; set; }
-		string OAuthSharedSecret { get; }
+		string SharedSecret { get; }
 		string OAuthCertificate { get; }
 		TimeSpan HstsHeaderMaxAge { get; }
 		bool HstsIncludeSubdomains { get; }

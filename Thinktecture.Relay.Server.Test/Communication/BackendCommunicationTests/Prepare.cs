@@ -14,7 +14,9 @@ namespace Thinktecture.Relay.Server.Communication.BackendCommunicationTests
 			PersistedSettingsMock.SetupGet(s => s.OriginId).Returns(OriginId);
 
 			var responseSubject = new Subject<IOnPremiseConnectorResponse>();
-			MessageDispatcherMock.Setup(d => d.OnResponseReceived(OriginId)).Returns(responseSubject);
+			MessageDispatcherMock.Setup(d => d.OnResponseReceived()).Returns(responseSubject);
+			var acknowledgeSubject = new Subject<string>();
+			MessageDispatcherMock.Setup(d => d.OnAcknowledgeReceived()).Returns(acknowledgeSubject);
 		}
 
 		[TestMethod]
@@ -32,7 +34,7 @@ namespace Thinktecture.Relay.Server.Communication.BackendCommunicationTests
 			var sut = Create();
 			sut.Prepare();
 
-			MessageDispatcherMock.Verify(d => d.OnResponseReceived(OriginId), Times.Once);
+			MessageDispatcherMock.Verify(d => d.OnResponseReceived(), Times.Once);
 		}
 	}
 }

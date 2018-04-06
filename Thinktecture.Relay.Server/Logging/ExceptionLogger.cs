@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Logging
 				ctx.Request?.RequestUri
 			);
 
-			return Task.FromResult(0);
+			return Task.CompletedTask;
 		}
 	}
 }

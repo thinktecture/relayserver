@@ -61,5 +61,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// Gets the mode of acknowledgment of this request
 		/// </summary>
 		AcknowledgmentMode AcknowledgmentMode { get; }
+
+		/// <summary>
+		/// Gets the id of the RelayServer this request may acknowledged to
+		/// </summary>
+		Guid AcknowledgeOriginId { get; }
 	}
 }

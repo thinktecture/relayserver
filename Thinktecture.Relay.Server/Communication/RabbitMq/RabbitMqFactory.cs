@@ -38,7 +38,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					return _factory.CreateConnection();
 				}
 
-				_logger?.Verbose("Creating RabbitMQ cluster connection. connection-string={RabbitConnectionString}, cluster-hosts={RabbitClusterHosts}", _configuration.RabbitMqConnectionString, _configuration.RabbitMqConnectionString, _configuration.RabbitMqClusterHosts);
+				_logger?.Verbose("Creating RabbitMQ cluster connection. connection-string={RabbitConnectionString}, cluster-hosts={RabbitClusterHosts}", _configuration.RabbitMqConnectionString, _configuration.RabbitMqClusterHosts);
 				return _factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(_configuration.RabbitMqClusterHosts));
 			}
 			catch (Exception ex)

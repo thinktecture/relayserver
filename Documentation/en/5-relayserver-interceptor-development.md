@@ -45,7 +45,7 @@ The following values ​​can be changed:
 - `HttpHeaders`: HTTP headers can be removed, new added or existing changed.
 - `AlwaysSendToOnPremiseConnector`: Setting this to true will cause the request to be relayed to the OnPremiseConnector even if the interceptor immediately answers it by returning an `HttpResponseMessage`.
 - `Expiration`: The TTL of this request in the RabbitMQ can be changed here.
-- `AcknowledgmentMode`: This determines whether the OnPremiseConnector will acknowledge a request (Default), the RelayServer will auto-acknowledge the request (Auto), of if custom node on the target needs to manually Acknowledge the request (Manual). For manual acknowledgement, send an HTTP GET request to the `/request/acknowledge` endpoint on the RelayServer and pass the query string parameters `tag` with the AcknowledgeId and `id` with the ConnectionId. This request needs to provide a valid bearer token in the Authorization header.
+- `AcknowledgmentMode`: This determines whether the OnPremiseConnector will acknowledge a request (Default), the RelayServer will auto-acknowledge the request (Auto), of if custom code on the target needs to manually acknowledge the request (Manual). For manual acknowledgement, send a HTTP GET request to the `/request/acknowledge` endpoint on the RelayServer and pass the query string parameters `aid` with the AcknowledgeId, `oid` with the OriginId and `cid` with the ConnectionId. This request needs to provide a valid bearer token in the authorization header.
 
 If no `HttpResonseMessage` is returned, the modified request is forwarded to the actual destination via an OnPremiseConnector.
 

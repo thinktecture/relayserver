@@ -31,6 +31,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			ContentLength = other.ContentLength;
 			AlwaysSendToOnPremiseConnector = other.AlwaysSendToOnPremiseConnector;
 			Expiration = other.Expiration;
+			AcknowledgeOriginId = other.AcknowledgeOriginId;
 		}
 
 		public Dictionary<string, string> CloneHttpHeaders()
