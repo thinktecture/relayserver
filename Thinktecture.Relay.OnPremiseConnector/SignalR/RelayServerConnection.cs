@@ -64,7 +64,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_logger = logger;
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
-			_httpClient = new HttpClient()
+			CookieContainer = new CookieContainer();
+			_httpClient = new HttpClient(new HttpClientHandler() { CookieContainer = CookieContainer, UseCookies = true})
 			{
 				Timeout = requestTimeout,
 			};
