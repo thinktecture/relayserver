@@ -19,16 +19,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			var logger = _logger?
 				.ForContext("RelayServerUri", connection.Uri)
-				.ForContext("RelayServerConnectionId", connection.RelayServerConnectionId);
+				.ForContext("RelayServerConnectionInstanceId", connection.RelayServerConnectionInstanceId);
 
-			var intervalWithTolerance = connection.HeartbeatInterval.Add(TimeSpan.FromSeconds(2));
 			var lastHeartbeat = connection.LastHeartbeat;
-
 			if (lastHeartbeat != DateTime.MinValue && lastHeartbeat != DateTime.MaxValue)
 			{
-				if (lastHeartbeat <= DateTime.UtcNow.Subtract(intervalWithTolerance))
+				if (lastHeartbeat <= DateTime.UtcNow.Subtract(connection.HeartbeatInterval.Add(TimeSpan.FromSeconds(2))))
 				{
-					logger?.Warning("Did not receive expected heartbeat. last-heartbeat={LastHeartbeat}, heartbeat-interval={HeartbeatInterval}, relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}", lastHeartbeat, connection.HeartbeatInterval);
+					logger?.Warning("Did not receive expected heartbeat. last-heartbeat={LastHeartbeat}, heartbeat-interval={HeartbeatInterval}, relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", lastHeartbeat, connection.HeartbeatInterval);
 
 					connection.Reconnect();
 				}

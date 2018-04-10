@@ -1,7 +1,9 @@
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Results;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
@@ -114,10 +116,10 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 		[HttpGet]
 		[ActionName("ping")]
-		public async Task<IHttpActionResult> PingAsync(Guid id)
+		public async Task<IHttpActionResult> SendPing(Guid id)
 		{
 			var requestId = Guid.NewGuid().ToString();
-			var request = new OnPremiseConnectorRequest
+			var request = new OnPremiseConnectorRequest()
 			{
 				HttpMethod = "PING",
 				Url = String.Empty,
@@ -131,10 +133,9 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 			var response = await task.ConfigureAwait(false);
 			request.RequestFinished = DateTime.UtcNow;
+			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response?.StatusCode);
 
-			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response?.StatusCode ?? HttpStatusCode.InternalServerError);
-
-			return Ok();
+			return (response != null) ? (IHttpActionResult)Ok() : new StatusCodeResult(HttpStatusCode.GatewayTimeout, Request);
 		}
 	}
 }

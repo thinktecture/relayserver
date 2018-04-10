@@ -50,7 +50,8 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private void CleanUp()
 		{
-			_logger?.Verbose("Cleaning up old stored data");
+			var timeout = DateTime.UtcNow.Add(-_storagePeriod);
+			_logger?.Verbose("Cleaning up old stored temporary data (memory). timeout={CreationTimeout}", timeout);
 
 			foreach (var kvp in _requestData)
 			{

@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			var onPremiseClaims = GetOnPremiseClaims(request);
 			_logger?.Debug("On-premise disconnected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-			await _backendCommunication.UnregisterOnPremiseAsync(connectionId).ConfigureAwait(false);
+			await _backendCommunication.UnregisterOnPremiseConnectionAsync(connectionId).ConfigureAwait(false);
 
 			await base.OnDisconnected(request, connectionId, stopCalled).ConfigureAwait(false);
 		}
@@ -82,7 +82,7 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private async Task RegisterOnPremiseAsync(IRequest request, string connectionId, OnPremiseClaims claims)
 		{
-			await _backendCommunication.RegisterOnPremiseAsync(new RegistrationInformation()
+			await _backendCommunication.RegisterOnPremiseAsync(new OnPremiseConnectionContext()
 			{
 				ConnectionId = connectionId,
 				LinkId = claims.OnPremiseId,

@@ -21,11 +21,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			var logger = _logger?
 				.ForContext("RelayServerUri", connection.Uri)
-				.ForContext("RelayServerConnectionId", connection.RelayServerConnectionId);
+				.ForContext("RelayServerConnectionInstanceId", connection.RelayServerConnectionInstanceId);
 
 			if ((connection.TokenExpiry - connection.TokenRefreshWindow) <= DateTime.UtcNow)
 			{
-				logger?.Information("Access token is going to expire soon. Trying to refresh token for RelayServer {RelayServerUri} with connection id {RelayServerConnectionId}");
+				logger?.Information("Access token is going to expire soon. Trying to refresh token for RelayServer {RelayServerUri} with connection instance id {RelayServerConnectionInstanceId}");
 
 				try
 				{
@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				catch (AuthenticationException)
 				{
-					logger?.Warning("Could not renew access token and trying a hard reconnect. relay-server={RelayServerUri}, relay-server-id={RelayServerConnectionId}");
+					logger?.Warning("Could not renew access token and trying a hard reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}");
 
 					connection.Reconnect();
 				}

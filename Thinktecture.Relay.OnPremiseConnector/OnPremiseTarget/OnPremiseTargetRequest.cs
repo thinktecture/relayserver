@@ -19,5 +19,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 		[JsonIgnore]
 		public Stream Stream { get; set; }
+		[JsonIgnore]
+		public bool IsHeartbeatRequest => HttpMethod == "HEARTBEAT";
+		[JsonIgnore]
+		public bool IsPingRequest => HttpMethod == "PING";
+		[JsonIgnore]
+		public bool IsHeartbeatOrPingRequest => IsHeartbeatRequest || IsPingRequest;
 	}
 }

@@ -43,7 +43,8 @@ namespace Thinktecture.Relay.Server.Controller
 		public IHttpActionResult Acknowledge([FromUri(Name = "oid")] Guid originId, [FromUri(Name = "aid")] string acknowledgeId, [FromUri(Name = "cid")] string connectionId = null)
 		{
 			_logger?.Verbose("Received acknowledge. origin-id={OriginId}, acknowledge-id={AcknowledgeId}, connection-id={ConnectionId}", originId, acknowledgeId, connectionId);
-			_backendCommunication.AcknowledgeOnPremiseConnectorRequest(originId, acknowledgeId, connectionId);
+			_backendCommunication.AcknowledgeOnPremiseConnectorRequestAsync(originId, acknowledgeId, connectionId);
+
 			return Ok();
 		}
 	}

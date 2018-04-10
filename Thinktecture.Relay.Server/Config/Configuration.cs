@@ -1,7 +1,6 @@
 using System;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Web.Http;
 using Serilog;
 

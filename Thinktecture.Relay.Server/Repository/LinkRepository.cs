@@ -117,11 +117,10 @@ namespace Thinktecture.Relay.Server.Repository
 		private IQueryable<LinkDetails> GetLinkDetailsFromDbLink(IQueryable<DbLink> linksQuery)
 		{
 			return linksQuery
-				.Select(l => new
+				.Select(link => new
 				{
-					link = l,
-					ActiveConnections = l.ActiveConnections
-						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
+					link,
+					link.ActiveConnections
 				})
 				.ToList()
 				.Select(i => new LinkDetails
@@ -131,7 +130,6 @@ namespace Thinktecture.Relay.Server.Repository
 					ForwardOnPremiseTargetErrorResponse = i.link.ForwardOnPremiseTargetErrorResponse,
 					IsDisabled = i.link.IsDisabled,
 					MaximumLinks = i.link.MaximumLinks,
-					Password = i.link.Password,
 					SymbolicName = i.link.SymbolicName,
 					UserName = i.link.UserName,
 					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
@@ -139,8 +137,9 @@ namespace Thinktecture.Relay.Server.Repository
 						.Select(ac => ac.ConnectionId
 							+ "; Versions: Connector = " + ac.ConnectorVersion + ", Assembly = " + ac.AssemblyVersion
 							+ "; Last Activity: " + ac.LastActivity.ToString("yyyy-MM-dd hh:mm:ss")
-						).
-						ToList(),
+							+ ((ac.LastActivity + _configuration.ActiveConnectionTimeout <= DateTime.UtcNow) ? " (inactive)" : "")
+						)
+						.ToList(),
 				})
 				.AsQueryable();
 		}
