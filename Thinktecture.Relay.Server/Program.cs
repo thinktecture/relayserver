@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server
 						settings.WhenStarted(s =>
 						{
 							s.Start();
-							// Make sure we create the heartbeater at service staartup5
+							// Make sure we create the heartbeater at service startup
 							relayServerScope.Resolve<IOnPremiseConnectionHeartbeater>();
 						});
 						settings.WhenStopped(s =>
