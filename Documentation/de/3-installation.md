@@ -186,7 +186,7 @@ Die Standardeinstellungen umfassen dabei:
 | TemporaryRequestStoragePeriod | Gibt die Zeitspanne an, nach der nicht mehr verwendete temporäre Dateien gelöscht werden (default und Minimum doppelter OnPremiseConnectorCallbackTimeout) |
 | ActiveConnectionTimeout | Zeit, nach der eine Verbindung zwischen einem On-Premise Connector und dem RelayServer als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
 | CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist (default _null_) <br/> Entweder absolut oder relativ zum RelayServer |
-| SharedSecret | Base64 encodiertes Shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert und wird benötigt für einen unterbrechungsfreien Failover der SignalR Verbindung bei der Verwendung eines Load-Balancers. |
+| SharedSecret | Base64 encodiertes Shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert. Wird benötigt für einen unterbrechungsfreien Failover der SignalR Verbindung bei der Verwendung eines Load-Balancers. |
 | OAuthCertificate | Base64 encodiertes X509 Zertifikat (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert |
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
 | HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
