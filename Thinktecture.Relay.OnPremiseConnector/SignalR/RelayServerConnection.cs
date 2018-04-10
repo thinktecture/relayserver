@@ -319,7 +319,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 					try
 					{
-						await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false); // TODO no cancellation token here?
+						// No cancellation token here, to not cancel sending of an already fetched response
+						await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{
@@ -373,7 +374,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				RequestId = request.RequestId,
 			};
 
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false); // TODO no cancellation token here?
+			// No cancellation token here, to not cancel sending of an already fetched response
+			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
 		}
 
 		private async Task HandleHeartbeatRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
@@ -400,8 +402,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				OriginId = request.OriginId,
 				RequestId = request.RequestId,
 			};
-
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false); // TODO no cancellation token here?
+			// No cancellation token here, to not cancel sending of an already fetched response
+			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
 		}
 
 		public void Reconnect()
