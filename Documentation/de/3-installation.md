@@ -152,7 +152,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
     <add key="ActiveConnectionTimeout" value="00:02:00" />
     <add key="CustomCodeAssemblyPath" value="" />
-    <add key="OAuthSharedSecret" value="" />
+    <add key="SharedSecret" value="" />
     <add key="OAuthCertificate" value="" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
@@ -186,7 +186,7 @@ Die Standardeinstellungen umfassen dabei:
 | TemporaryRequestStoragePeriod | Gibt die Zeitspanne an, nach der nicht mehr verwendete temporäre Dateien gelöscht werden (default und Minimum doppelter OnPremiseConnectorCallbackTimeout) |
 | ActiveConnectionTimeout | Zeit, nach der eine Verbindung zwischen einem On-Premise Connector und dem RelayServer als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
 | CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist (default _null_) <br/> Entweder absolut oder relativ zum RelayServer |
-| OAuthSharedSecret | Base64 encodiertes shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert |
+| SharedSecret | Base64 encodiertes Shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert. Wird benötigt für einen unterbrechungsfreien Failover der SignalR Verbindung bei der Verwendung eines Load-Balancers. |
 | OAuthCertificate | Base64 encodiertes X509 Zertifikat (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert |
 | HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
 | HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |

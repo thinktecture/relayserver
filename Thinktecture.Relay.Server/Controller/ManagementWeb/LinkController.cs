@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Thinktecture.Relay.Server.Communication;
@@ -125,12 +126,13 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				RequestId = requestId
 			};
 
-			await _backendCommunication.SendOnPremiseConnectorRequestAsync(id, request).ConfigureAwait(false);
+			var task = _backendCommunication.GetResponseAsync(requestId);
+			_backendCommunication.SendOnPremiseConnectorRequest(id, request);
 
-			var response = await _backendCommunication.GetResponseAsync(requestId).ConfigureAwait(false);
+			var response = await task.ConfigureAwait(false);
 			request.RequestFinished = DateTime.UtcNow;
 
-			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response.StatusCode);
+			_requestLogger.LogRequest(request, response, id, _backendCommunication.OriginId, "DEBUG/PING/", response?.StatusCode ?? HttpStatusCode.InternalServerError);
 
 			return Ok();
 		}

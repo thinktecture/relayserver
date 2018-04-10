@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.Server.Config
 		public string TemporaryRequestStoragePath { get; }
 		public TimeSpan ActiveConnectionTimeout { get; }
 		public string CustomCodeAssemblyPath { get; set; }
-		public string OAuthSharedSecret { get; }
+		public string SharedSecret { get; }
 		public string OAuthCertificate { get; }
 		public TimeSpan HstsHeaderMaxAge { get; }
 		public bool HstsIncludeSubdomains { get; }
@@ -168,7 +168,7 @@ namespace Thinktecture.Relay.Server.Config
 				CustomCodeAssemblyPath = null;
 			}
 
-			OAuthSharedSecret = ConfigurationManager.AppSettings[nameof(OAuthSharedSecret)];
+			SharedSecret = ConfigurationManager.AppSettings[nameof(SharedSecret)];
 			OAuthCertificate = ConfigurationManager.AppSettings[nameof(OAuthCertificate)];
 
 			HstsHeaderMaxAge = TimeSpan.FromDays(365);
@@ -239,7 +239,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(TemporaryRequestStoragePeriod), TemporaryRequestStoragePeriod);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(ActiveConnectionTimeout), ActiveConnectionTimeout);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(CustomCodeAssemblyPath), CustomCodeAssemblyPath);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OAuthSharedSecret), OAuthSharedSecret);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SharedSecret), SharedSecret);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OAuthCertificate), OAuthCertificate);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(HstsHeaderMaxAge), HstsHeaderMaxAge);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(HstsIncludeSubdomains), HstsIncludeSubdomains);

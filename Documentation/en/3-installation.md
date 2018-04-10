@@ -150,7 +150,7 @@ The default settings include:
     <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
     <add key="ActiveConnectionTimeout" value="00:02:00" />
     <add key="CustomCodeAssemblyPath" value="" />
-    <add key="OAuthSharedSecret" value="" />
+    <add key="SharedSecret" value="" />
     <add key="OAuthCertificate" value="" />
     <add key="HstsHeaderMaxAge" value="365.00:00:00" />
     <add key="HstsIncludeSubdomains" value="false" />
@@ -184,7 +184,7 @@ The default settings include:
 | TemporaryRequestStoragePeriod | Time span after which unused temporary files will be deleted (default and mimimum two times of OnPremiseConnectorCallbackTimeout) |
 | ActiveConnectionTimeoutInSeconds | Time after which a connection between an On-Premise Connector and the RelayServer is no longer active (default 120 seconds) |
 | CustomCodeAssemblyPath | Path to an assembly that implements custom code (default _null_) <br/> Either absolutely or relative to the RelayServer |
-| OAuthSharedSecret | Base64 encoded shared secret (default _null_) <br/> If set, the JWT tokens for On-Premise Connectors and Management Web users will be signed using this value |
+| SharedSecret | Base64 encoded shared secret (default _null_) <br/> If set, the JWT tokens for On-Premise Connectors and Management Web users will be signed using this value. Is needed for a seamless failover of the SignalR connection behind a load balancer |
 | OAuthCertificate | Base64 encoded X509 certificate (default _null_) <br/> If set, the JWT tokens for On-Premise Connectors and Management Web users will be signed using this value |
 | HstsHeaderMaxAge | Value that will be set in the HTTP Strict Transport Security Header for `max-age` (default 365 days) |
 | HstsIncludeSubdomains | Determines, whether the optional parameter `includeSubDomains` will be set on the HTTP Strict Transport Security Header (default false) |

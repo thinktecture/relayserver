@@ -29,5 +29,7 @@ namespace Thinktecture.Relay.Server.OnPremise
 
 		[JsonIgnore]
 		public TimeSpan Expiration { get; set; }
+
+		public Guid AcknowledgeOriginId { get; set; }
 	}
 }

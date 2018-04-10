@@ -80,5 +80,10 @@ namespace Thinktecture.Relay.Server.OnPremise
 		/// Gets the request TTL within the RabbitMQ
 		/// </summary>
 		TimeSpan Expiration { get; }
+
+		/// <summary>
+		/// Gets the id of the RelayServer this request may acknowledged to
+		/// </summary>
+		Guid AcknowledgeOriginId { get; }
 	}
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reactive.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -17,16 +16,20 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 	public class RabbitMqMessageDispatcher : IMessageDispatcher, IDisposable
 	{
 		private const string _EXCHANGE_NAME = "RelayServer";
+		private const string _REQUEST_QUEUE_PREFIX = "Request ";
+		private const string _RESPONSE_QUEUE_PREFIX = "Response ";
+		private const string _ACKNOWLEDGE_QUEUE_PREFIX = "Acknowledge ";
 
 		private readonly ILogger _logger;
 		private readonly IConfiguration _configuration;
 		private readonly IModel _model;
 		private readonly UTF8Encoding _encoding;
+		private readonly Guid _originId;
 
-		public RabbitMqMessageDispatcher(ILogger logger, IConfiguration configuration, IConnection connection)
+		public RabbitMqMessageDispatcher(ILogger logger, IConfiguration configuration, IConnection connection, IPersistedSettings persistedSettings)
 		{
 			_logger = logger;
-			_configuration = configuration;
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
 			if (connection == null)
 				throw new ArgumentNullException(nameof(connection));
@@ -34,55 +37,75 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			_model = connection.CreateModel();
 			_encoding = new UTF8Encoding(false, true);
 
+			_originId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
+
 			DeclareExchange(_EXCHANGE_NAME);
 		}
 
-		public IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool noAck)
+		public IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool autoAck)
 		{
-			return Observable.Create<IOnPremiseConnectorRequest>(observer =>
+			return CreateConsumerObservable<OnPremiseConnectorRequest>($"{_REQUEST_QUEUE_PREFIX}{linkId}", autoAck, (request, deliveryTag) =>
 			{
-				var queueName = "Request " + linkId;
+				if (autoAck)
+				{
+					return;
+				}
 
+				switch (request.AcknowledgmentMode)
+				{
+					case AcknowledgmentMode.Auto:
+						_model.BasicAck(deliveryTag, false);
+						_logger?.Debug("Request was automatically acknowledged. request-id={RequestId}", request.RequestId);
+						break;
+
+					case AcknowledgmentMode.Default:
+					case AcknowledgmentMode.Manual:
+						request.AcknowledgeId = deliveryTag.ToString();
+						request.AcknowledgeOriginId = _originId;
+						_logger?.Verbose("Request acknowledge id was set. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
+						break;
+				}
+			});
+		}
+
+		public IObservable<IOnPremiseConnectorResponse> OnResponseReceived()
+		{
+			return CreateConsumerObservable<OnPremiseConnectorResponse>($"{_RESPONSE_QUEUE_PREFIX}{_originId}");
+		}
+
+		public IObservable<string> OnAcknowledgeReceived()
+		{
+			return CreateConsumerObservable<string>($"{_ACKNOWLEDGE_QUEUE_PREFIX}{_originId}");
+		}
+
+		private IObservable<T> CreateConsumerObservable<T>(string queueName, bool autoAck = true, Action<T, ulong> callback = null)
+		{
+			return Observable.Create<T>(observer =>
+			{
 				DeclareQueue(queueName);
-				_model.QueueBind(queueName, _EXCHANGE_NAME, linkId.ToString());
+				_model.QueueBind(queueName, _EXCHANGE_NAME, queueName);
 
-				_logger?.Verbose("Creating request consumer. link-id={LinkId}, connection-id={ConnectionId}, supports-ack={ConnectionSupportsAck}", linkId, connectionId, !noAck);
+				_logger?.Debug("Creating consumer. queue-name={QueueName}", queueName);
 
 				var consumer = new EventingBasicConsumer(_model);
-
-				var consumerTag = _model.BasicConsume(queueName, noAck, consumer);
+				var consumerTag = _model.BasicConsume(queueName, autoAck, consumer);
 
 				void OnReceived(object sender, BasicDeliverEventArgs args)
 				{
 					try
 					{
 						var json = _encoding.GetString(args.Body);
-						var request = JsonConvert.DeserializeObject<OnPremiseConnectorRequest>(json);
+						var message = JsonConvert.DeserializeObject<T>(json);
 
-						if (!noAck)
-						{
-							switch (request.AcknowledgmentMode)
-							{
-								case AcknowledgmentMode.Auto:
-									_model.BasicAck(args.DeliveryTag, false);
-									_logger?.Debug("Request was auto-acknowledged. request-id={RequestId}", request.RequestId);
-									break;
+						callback?.Invoke(message, args.DeliveryTag);
 
-								case AcknowledgmentMode.Default:
-								case AcknowledgmentMode.Manual:
-									request.AcknowledgeId = args.DeliveryTag.ToString();
-									_logger?.Verbose("Request acknowledge id was set. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
-
-									break;
-							}
-						}
-
-						observer.OnNext(request);
+						observer.OnNext(message);
 					}
 					catch (Exception ex)
 					{
-						_logger?.Error(ex, "Error during reception of an request via RabbitMQ");
-						if (!noAck)
+						_logger?.Error(ex, "Error during receiving a message via RabbitMQ");
+
+						if (!autoAck)
 						{
 							_model.BasicAck(args.DeliveryTag, false);
 						}
@@ -93,47 +116,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 				return new DelegatingDisposable(_logger, () =>
 				{
-					_logger?.Debug("Disposing request consumer. link-id={LinkId}, connection-id={ConnectionId}", linkId, connectionId);
-					consumer.Received -= OnReceived;
-					_model.BasicCancel(consumerTag);
-				});
-			});
-		}
-
-		public IObservable<IOnPremiseConnectorResponse> OnResponseReceived(Guid originId)
-		{
-			return Observable.Create<IOnPremiseConnectorResponse>(observer =>
-			{
-				var queueName = "Response " + originId;
-
-				DeclareQueue(queueName);
-				_model.QueueBind(queueName, _EXCHANGE_NAME, originId.ToString());
-
-				_logger?.Debug("Creating response consumer");
-
-				var consumer = new EventingBasicConsumer(_model);
-				var consumerTag = _model.BasicConsume(queueName, true, consumer);
-
-				void OnReceived(object sender, BasicDeliverEventArgs args)
-				{
-					try
-					{
-						var json = _encoding.GetString(args.Body);
-						var request = JsonConvert.DeserializeObject<OnPremiseConnectorResponse>(json);
-
-						observer.OnNext(request);
-					}
-					catch (Exception ex)
-					{
-						_logger?.Error(ex, "Error during reception of an request via RabbitMQ");
-					}
-				}
-
-				consumer.Received += OnReceived;
-
-				return new DelegatingDisposable(_logger, () =>
-				{
-					_logger?.Debug("Disposing response consumer");
+					_logger?.Debug("Disposing consumer. queue-name={QueueName}", queueName);
 
 					consumer.Received -= OnReceived;
 					_model.BasicCancel(consumerTag);
@@ -150,14 +133,9 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			}
 		}
 
-		public Task DispatchRequest(Guid linkId, IOnPremiseConnectorRequest request)
+		public void DispatchRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
-			var content = _encoding.GetBytes(JsonConvert.SerializeObject(request));
-			var props = new BasicProperties()
-			{
-				ContentEncoding = "application/json",
-				DeliveryMode = 2,
-			};
+			var content = Serialize(request, out var props);
 
 			if (request.Expiration != TimeSpan.Zero)
 			{
@@ -165,22 +143,30 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				props.Expiration = request.Expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
 			}
 
-			_model.BasicPublish(_EXCHANGE_NAME, linkId.ToString(), false, props, content);
-
-			return Task.CompletedTask;
+			_model.BasicPublish(_EXCHANGE_NAME, $"{_REQUEST_QUEUE_PREFIX}{linkId}", false, props, content);
 		}
 
-		public Task DispatchResponse(Guid originId, IOnPremiseConnectorResponse response)
+		public void DispatchResponse(Guid originId, IOnPremiseConnectorResponse response)
 		{
-			var content = _encoding.GetBytes(JsonConvert.SerializeObject(response));
-			var props = new BasicProperties()
+			var content = Serialize(response, out var props);
+			_model.BasicPublish(_EXCHANGE_NAME, $"{_RESPONSE_QUEUE_PREFIX}{originId}", false, props, content);
+		}
+
+		public void DispatchAcknowledge(Guid originId, string acknowledgeId)
+		{
+			var content = Serialize(acknowledgeId, out var props);
+			_model.BasicPublish(_EXCHANGE_NAME, $"{_ACKNOWLEDGE_QUEUE_PREFIX}{originId}", false, props, content);
+		}
+
+		private byte[] Serialize<T>(T message, out BasicProperties props)
+		{
+			props = new BasicProperties()
 			{
 				ContentEncoding = "application/json",
 				DeliveryMode = 2,
 			};
-			_model.BasicPublish(_EXCHANGE_NAME, originId.ToString(), false, props, content);
 
-			return Task.CompletedTask;
+			return _encoding.GetBytes(JsonConvert.SerializeObject(message));
 		}
 
 		private void DeclareExchange(string name)

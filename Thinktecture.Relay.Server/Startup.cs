@@ -22,6 +22,7 @@ using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.StaticFiles;
 using Newtonsoft.Json.Serialization;
 using Owin;
+using Owin.Security.AesDataProtectorProvider;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Controller;
@@ -55,17 +56,18 @@ namespace Thinktecture.Relay.Server
 		{
 			InitializeAndMigrateDatabase();
 
-			var httpConfig = CreateHttpConfiguration(_configuration, _logger);
+			var httpConfig = CreateHttpConfiguration();
 			var innerScope = RegisterAdditionalServices(_rootScope, httpConfig, _configuration);
 
 			app.UseAutofacMiddleware(innerScope);
 
 			app.UseHsts(_configuration.HstsHeaderMaxAge, _configuration.HstsIncludeSubdomains);
 			app.UseCors(CorsOptions.AllowAll);
-			UseOAuthSecurity(app, _configuration, _authorizationServerProvider);
-			MapSignalR(app, innerScope, _configuration);
+
+			UseOAuthSecurity(app);
+			MapSignalR(app, innerScope);
 			UseWebApi(app, httpConfig, innerScope);
-			UseFileServer(app, _configuration, _logger);
+			UseFileServer(app);
 		}
 
 		private static void InitializeAndMigrateDatabase()
@@ -90,104 +92,103 @@ namespace Thinktecture.Relay.Server
 			{
 				// This enables property injection into ASP.NET MVC filter attributes
 				builder.RegisterWebApiFilterProvider(httpConfig);
-				RegisterApiControllers(builder, config);
+				RegisterApiControllers(builder);
 			});
 		}
 
-		private static void RegisterApiControllers(ContainerBuilder builder, IConfiguration configuration)
+		private void RegisterApiControllers(ContainerBuilder builder)
 		{
-			if (configuration.EnableManagementWeb != ModuleBinding.False)
+			if (_configuration.EnableManagementWeb != ModuleBinding.False)
 				builder.RegisterModule<ManagementWebModule>();
 
-			if (configuration.EnableRelaying != ModuleBinding.False)
+			if (_configuration.EnableRelaying != ModuleBinding.False)
 				builder.RegisterModule<RelayingModule>();
 
-			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
+			if (_configuration.EnableOnPremiseConnections != ModuleBinding.False)
 				builder.RegisterModule<OnPremiseConnectionsModule>();
 		}
 
-		private static void UseOAuthSecurity(IAppBuilder app, IConfiguration config, IOAuthAuthorizationServerProvider authProvider)
+		private void UseOAuthSecurity(IAppBuilder app)
 		{
-			if (app == null)
-				throw new ArgumentNullException(nameof(app));
-			if (authProvider == null)
-				throw new ArgumentNullException(nameof(authProvider));
-
 			// Todo: Add this only when relaying is enabled (no need to auth OnPremises if not), and add
 			// a second endpoint with different token lifetime for management web user (i.e. `/managementToken`),
 			// when management web is enabled. Also, use different AuthProviders for each endpoint
 			var serverOptions = new OAuthAuthorizationServerOptions
 			{
-				AllowInsecureHttp = config.UseInsecureHttp,
+				AllowInsecureHttp = _configuration.UseInsecureHttp,
 				TokenEndpointPath = new PathString("/token"),
-				AccessTokenExpireTimeSpan = config.AccessTokenLifetime,
-				Provider = authProvider,
+				AccessTokenExpireTimeSpan = _configuration.AccessTokenLifetime,
+				Provider = _authorizationServerProvider,
 			};
 
-			var sharedSecret = config.OAuthSharedSecret;
-
-			if (!String.IsNullOrWhiteSpace(sharedSecret))
-			{
-				UseSharedSecret(app, sharedSecret, serverOptions);
-				return;
-			}
-
-			var certBase64 = config.OAuthCertificate;
-			var authOptions = new OAuthBearerAuthenticationOptions();
+			var certBase64 = _configuration.OAuthCertificate;
 
 			if (!String.IsNullOrWhiteSpace(certBase64))
 			{
-				var certRaw = Convert.FromBase64String(certBase64);
-				var oauthCert = new X509Certificate2(certRaw);
+				var cert = new X509Certificate2(Convert.FromBase64String(certBase64));
 
-				serverOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(oauthCert));
-				authOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(oauthCert));
+				serverOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(cert));
+
+				var authOptions = new OAuthBearerAuthenticationOptions
+				{
+					AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(cert)),
+					Provider = new OAuthBearerAuthenticationProvider()
+					{
+						OnApplyChallenge = context =>
+						{
+							// Workaround: Keep an already set WWW-Authenticate header (otherwise OWIN would add its challenge). 
+							if (!context.Response.Headers.ContainsKey("WWW-Authenticate"))
+							{
+								context.OwinContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
+							}
+
+							return Task.CompletedTask;
+						}
+					}
+				};
+
+				app.UseOAuthBearerAuthentication(authOptions);
+			}
+			else
+			{
+				var sharedSecret = _configuration.SharedSecret;
+				if (!String.IsNullOrWhiteSpace(sharedSecret))
+				{
+					const string issuer = "http://thinktecture.com/relayserver/sts";
+					const string audience = "http://thinktecture.com/relayserver/consumers";
+
+					var key = Convert.FromBase64String(sharedSecret);
+
+					serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
+
+					app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
+					{
+						AllowedAudiences = new[] { audience },
+						IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
+					});
+				}
 			}
 
-			authOptions.Provider = new OAuthBearerAuthenticationProvider()
-			{
-				OnApplyChallenge = context =>
-				{
-					// Workaround: Keep an already set WWW-Authenticate header (otherwise OWIN would add its challenge). 
-					if (!context.Response.Headers.ContainsKey("WWW-Authenticate"))
-					{
-						context.OwinContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
-					}
-					return Task.FromResult(0);
-				}
-			};
-
-			app.UseOAuthBearerAuthentication(authOptions);
 			app.UseOAuthAuthorizationServer(serverOptions);
 		}
 
-		private static void UseSharedSecret(IAppBuilder app, string sharedSecret, OAuthAuthorizationServerOptions serverOptions)
+		private void MapSignalR(IAppBuilder app, ILifetimeScope scope)
 		{
-			const string issuer = "http://thinktecture.com/relayserver/sts";
-			const string audience = "http://thinktecture.com/relayserver/consumers";
-			var key = Convert.FromBase64String(sharedSecret);
-
-			serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
-
-			app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
-			{
-				AllowedAudiences = new[] { audience },
-				IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
-			});
-			app.UseOAuthAuthorizationServer(serverOptions);
-		}
-
-		private static void MapSignalR(IAppBuilder app, ILifetimeScope scope, IConfiguration config)
-		{
-			if (config.EnableOnPremiseConnections == ModuleBinding.False)
+			if (_configuration.EnableOnPremiseConnections == ModuleBinding.False)
 				return;
 
 			const string path = "/signalr";
-			GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(config.ConnectionTimeout);
-			GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(config.DisconnectTimeout);
-			GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(config.KeepAliveInterval);
+			GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(_configuration.ConnectionTimeout);
+			GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(_configuration.DisconnectTimeout);
+			GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(_configuration.KeepAliveInterval);
 
-			if (config.EnableOnPremiseConnections == ModuleBinding.Local)
+			var sharedSecret = _configuration.SharedSecret;
+			if (!String.IsNullOrWhiteSpace(sharedSecret))
+			{
+				app.UseAesDataProtectorProvider(sharedSecret);
+			}
+
+			if (_configuration.EnableOnPremiseConnections == ModuleBinding.Local)
 			{
 				app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
 			}
@@ -205,11 +206,11 @@ namespace Thinktecture.Relay.Server
 			app.UseWebApi(httpConfig);
 		}
 
-		private static HttpConfiguration CreateHttpConfiguration(IConfiguration configuration, ILogger logger)
+		private HttpConfiguration CreateHttpConfiguration()
 		{
 			var httpConfig = new HttpConfiguration
 			{
-				IncludeErrorDetailPolicy = configuration.IncludeErrorDetailPolicy,
+				IncludeErrorDetailPolicy = _configuration.IncludeErrorDetailPolicy,
 			};
 
 			httpConfig.EnableCors(new EnableCorsAttribute("*", "*", "*"));
@@ -217,35 +218,35 @@ namespace Thinktecture.Relay.Server
 			httpConfig.SuppressDefaultHostAuthentication();
 
 			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableTraceWriter"], "true"))
-				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new TraceWriter(logger?.ForContext<TraceWriter>(), new TraceLevelConverter()));
+				httpConfig.Services.Replace(typeof(System.Web.Http.Tracing.ITraceWriter), new TraceWriter(_logger?.ForContext<TraceWriter>(), new TraceLevelConverter()));
 
-			httpConfig.Services.Add(typeof(IExceptionLogger), new ExceptionLogger(logger?.ForContext<ExceptionLogger>()));
+			httpConfig.Services.Add(typeof(IExceptionLogger), new ExceptionLogger(_logger?.ForContext<ExceptionLogger>()));
 
 			if (StringComparer.OrdinalIgnoreCase.Equals(ConfigurationManager.AppSettings["EnableActionFilter"], "true"))
-				httpConfig.Filters.Add(new LogActionFilter(logger?.ForContext<LogActionFilter>()));
+				httpConfig.Filters.Add(new LogActionFilter(_logger?.ForContext<LogActionFilter>()));
 
 			httpConfig.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 			// custom code api controllers should use the RouteAttribute only
 
 			httpConfig.MapHttpAttributeRoutes();
 
-			if (configuration.EnableRelaying != ModuleBinding.False)
+			if (_configuration.EnableRelaying != ModuleBinding.False)
 			{
-				logger?.Information("Relaying enabled");
+				_logger?.Information("Relaying enabled");
 				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
 			}
 
-			if (configuration.EnableOnPremiseConnections != ModuleBinding.False)
+			if (_configuration.EnableOnPremiseConnections != ModuleBinding.False)
 			{
-				logger?.Information("On-premise connections enabled");
+				_logger?.Information("On-premise connections enabled");
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetResponse", "forward", new { controller = "Response", action = "Forward" });
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequestAcknowledgement", "request/acknowledge", new { controller = "Request", action = "Acknowledge" });
 				httpConfig.Routes.MapHttpRoute("OnPremiseTargetRequest", "request/{requestId}", new { controller = "Request", action = "Get" });
 			}
 
-			if (configuration.EnableManagementWeb != ModuleBinding.False)
+			if (_configuration.EnableManagementWeb != ModuleBinding.False)
 			{
-				logger?.Information("Management web enabled");
+				_logger?.Information("Management web enabled");
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
 			}
 
@@ -254,9 +255,9 @@ namespace Thinktecture.Relay.Server
 			return httpConfig;
 		}
 
-		private static void UseFileServer(IAppBuilder app, IConfiguration configuration, ILogger logger)
+		private void UseFileServer(IAppBuilder app)
 		{
-			if (configuration.EnableManagementWeb == ModuleBinding.False)
+			if (_configuration.EnableManagementWeb == ModuleBinding.False)
 				return;
 
 			try
@@ -265,12 +266,12 @@ namespace Thinktecture.Relay.Server
 
 				var options = new FileServerOptions()
 				{
-					FileSystem = new PhysicalFileSystem(configuration.ManagementWebLocation),
+					FileSystem = new PhysicalFileSystem(_configuration.ManagementWebLocation),
 					RequestPath = new PathString(path),
 				};
 				options.DefaultFilesOptions.DefaultFileNames.Add("index.html");
 
-				if (configuration.EnableManagementWeb == ModuleBinding.Local)
+				if (_configuration.EnableManagementWeb == ModuleBinding.Local)
 				{
 					app.Use(typeof(BlockNonLocalRequestsMiddleware), path);
 				}
@@ -286,7 +287,7 @@ namespace Thinktecture.Relay.Server
 			catch (DirectoryNotFoundException)
 			{
 				// no admin web deployed - catch silently, but display info for the user
-				logger?.Information("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
+				_logger?.Information("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
 			}
 		}
 	}

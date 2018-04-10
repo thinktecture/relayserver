@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public string TemporaryRequestStoragePath { get; set; }
 		public TimeSpan ActiveConnectionTimeout { get; set; }
 		public string CustomCodeAssemblyPath { get; set; }
-		public string OAuthSharedSecret { get; set; }
+		public string SharedSecret { get; set; }
 		public string OAuthCertificate { get; set; }
 		public TimeSpan HstsHeaderMaxAge { get; set; }
 		public bool HstsIncludeSubdomains { get; set; }

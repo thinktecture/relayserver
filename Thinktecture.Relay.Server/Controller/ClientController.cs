@@ -88,14 +88,14 @@ namespace Thinktecture.Relay.Server.Controller
 					if (request.AlwaysSendToOnPremiseConnector)
 					{
 						_logger?.Verbose("Interceptor caused always sending of request. request-id={RequestId}", request.RequestId);
-						await SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
+						SendOnPremiseConnectorRequest(link.Id, request);
 					}
 
 					return message;
 				}
 
 				var task = _backendCommunication.GetResponseAsync(request.RequestId);
-				await SendOnPremiseConnectorRequest(link.Id, request).ConfigureAwait(false);
+				SendOnPremiseConnectorRequest(link.Id, request);
 
 				_logger?.Verbose("Waiting for response. request-id={RequestId}, link-id={LinkId}", request.RequestId, link.Id);
 				response = await task.ConfigureAwait(false);
@@ -118,10 +118,10 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 		}
 
-		private async Task SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
+		private void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
 			_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
-			await _backendCommunication.SendOnPremiseConnectorRequestAsync(linkId, request).ConfigureAwait(false);
+			_backendCommunication.SendOnPremiseConnectorRequest(linkId, request);
 		}
 
 		private bool CanRequestBeHandled(string path, PathInformation pathInformation, Link link)
