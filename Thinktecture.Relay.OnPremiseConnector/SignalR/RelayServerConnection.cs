@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,9 +21,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 	internal class RelayServerConnection : Connection, IRelayServerConnection
 	{
 		private const int _CONNECTOR_VERSION = 2;
-		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
-		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
-
+		
 		private static int _nextInstanceId;
 		private static readonly Random _random = new Random();
 
@@ -40,6 +37,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private bool _stopRequested;
 		private string _accessToken;
 
+
+		private readonly int _minConnectWaitTimeInSeconds;
+		private readonly int _maxConnectWaitTimeInSeconds;
+
 		public event EventHandler Disposing;
 
 		public Uri Uri { get; }
@@ -49,17 +50,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public DateTime LastHeartbeat { get; private set; } = DateTime.MinValue;
 		public TimeSpan HeartbeatInterval { get; private set; }
 
-		public RelayServerConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, TimeSpan requestTimeout,
-			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
-			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
+		public RelayServerConnection(RelayServerConnectionConfig config, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+			: base(new Uri(config.RelayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={config.VersionAssembly.GetName().Version}")
 		{
 			RelayServerConnectionInstanceId = Interlocked.Increment(ref _nextInstanceId);
-			_userName = userName;
-			_password = password;
-			_requestTimeout = requestTimeout;
+			_userName = config.UserName;
+			_password = config.Password;
+			_requestTimeout = config.RequestTimeout;
+			_minConnectWaitTimeInSeconds = config.MinConnectWaitTimeInSeconds;
+			_maxConnectWaitTimeInSeconds = config.MaxConnectWaitTimeInSeconds;
 
-			Uri = relayServerUri;
-			TokenRefreshWindow = tokenRefreshWindow;
+			Uri = config.RelayServerUri;
+			TokenRefreshWindow = config.TokenRefreshWindow;
 
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_logger = logger;
@@ -67,7 +69,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_httpClient = new HttpClient()
 			{
-				Timeout = requestTimeout,
+				Timeout = config.RequestTimeout,
 			};
 			_cts = new CancellationTokenSource();
 
@@ -412,7 +414,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			Disconnect();
 
-			Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => ConnectAsync()).ConfigureAwait(false);
+			Task.Delay(GetRandomWaitTime()).ContinueWith(_ => ConnectAsync()).ConfigureAwait(false);
 		}
 
 		public void Disconnect()
@@ -540,7 +542,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private TimeSpan GetRandomWaitTime()
 		{
-			return TimeSpan.FromSeconds(_random.Next(_MIN_WAIT_TIME_IN_SECONDS, _MAX_WAIT_TIME_IN_SECONDS));
+			var waitingSeconds = _random.Next(_minConnectWaitTimeInSeconds, _maxConnectWaitTimeInSeconds);
+			_logger.Debug($"waiting {waitingSeconds}s from now...");
+			return TimeSpan.FromSeconds(waitingSeconds);
 		}
 
 		private class RequestContext

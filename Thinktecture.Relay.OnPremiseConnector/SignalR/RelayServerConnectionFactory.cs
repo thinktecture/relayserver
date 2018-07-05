@@ -18,10 +18,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory ?? throw new ArgumentNullException(nameof(onPremiseTargetConnectorFactory));
 		}
 
-		public IRelayServerConnection Create(Assembly versionAssembly, string userName, string password, Uri relayServer, TimeSpan requestTimeout, TimeSpan tokenRefreshWindow)
+		public IRelayServerConnection Create(RelayServerConnectionConfig config)
 		{
-			_logger?.Information("Creating new connection for RelayServer {RelayServerUrl} and link user {UserName}", relayServer, userName);
-			var connection = new RelayServerConnection(versionAssembly, userName, password, relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, _logger);
+			_logger?.Information("Creating new connection for RelayServer {RelayServerUrl} and link user {UserName}", config.RelayServerUri, config.UserName);
+			var connection = new RelayServerConnection(config, _onPremiseTargetConnectorFactory, _logger);
+			
 
 			// registering connection with maintenance loop
 			_maintenanceLoop.RegisterConnection(connection);

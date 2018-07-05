@@ -49,10 +49,12 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="relayServer">An <see cref="Uri"/> containing the RelayServer's base url.</param>
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
-		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5)
+		/// <param name="minConnectWaitTime"> An <see cref="Int32"/> defining the min waitingtime before reconnect is forced </param>
+		/// <param name="maxConnectWaitTime"> An <see cref="Int32"/> defining the max waitingtime before reconnect is forced </param>
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5, int minConnectWaitTime = 5, int maxConnectWaitTime = 30)
 		{
 			var factory = _container.Resolve<IRelayServerConnectionFactory>();
-			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds));
+			_connection = factory.Create(new RelayServerConnectionConfig(versionAssembly,userName,password,relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), minConnectWaitTime, maxConnectWaitTime));
 		}
 
 		/// <summary>
