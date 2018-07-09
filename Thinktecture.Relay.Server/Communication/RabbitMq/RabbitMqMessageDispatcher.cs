@@ -54,7 +54,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				switch (request.AcknowledgmentMode)
 				{
 					case AcknowledgmentMode.Auto:
-						_model.BasicAck(deliveryTag, false);
+						lock (_model)
+						{
+							_model.BasicAck(deliveryTag, false);
+						}
+
 						_logger?.Debug("Request was automatically acknowledged. request-id={RequestId}", request.RequestId);
 						break;
 
@@ -82,13 +86,21 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			return Observable.Create<T>(observer =>
 			{
-				DeclareQueue(queueName);
-				_model.QueueBind(queueName, _EXCHANGE_NAME, queueName);
+				lock (_model)
+				{
+					DeclareQueue(queueName);
+					_model.QueueBind(queueName, _EXCHANGE_NAME, queueName);
+				}
 
 				_logger?.Debug("Creating consumer. queue-name={QueueName}", queueName);
 
 				var consumer = new EventingBasicConsumer(_model);
-				var consumerTag = _model.BasicConsume(queueName, autoAck, consumer);
+
+				string consumerTag;
+				lock (_model)
+				{
+					consumerTag = _model.BasicConsume(queueName, autoAck, consumer);
+				}
 
 				void OnReceived(object sender, BasicDeliverEventArgs args)
 				{
@@ -107,7 +119,10 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 						if (!autoAck)
 						{
-							_model.BasicAck(args.DeliveryTag, false);
+							lock (_model)
+							{
+								_model.BasicAck(args.DeliveryTag, false);
+							}
 						}
 					}
 				}
@@ -119,7 +134,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					_logger?.Debug("Disposing consumer. queue-name={QueueName}", queueName);
 
 					consumer.Received -= OnReceived;
-					_model.BasicCancel(consumerTag);
+
+					lock (_model)
+					{
+						_model.BasicCancel(consumerTag);
+					}
 				});
 			});
 		}
@@ -129,7 +148,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			if (UInt64.TryParse(acknowledgeId, out var deliveryTag))
 			{
 				_logger?.Debug("Acknowledging request. acknowledge-id={AcknowledgeId}", acknowledgeId);
-				_model.BasicAck(deliveryTag, false);
+
+				lock (_model)
+				{
+					_model.BasicAck(deliveryTag, false);
+				}
 			}
 		}
 
@@ -143,19 +166,30 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				props.Expiration = request.Expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
 			}
 
-			_model.BasicPublish(_EXCHANGE_NAME, $"{_REQUEST_QUEUE_PREFIX}{linkId}", false, props, content);
+			lock (_model)
+			{
+				_model.BasicPublish(_EXCHANGE_NAME, $"{_REQUEST_QUEUE_PREFIX}{linkId}", false, props, content);
+			}
 		}
 
 		public void DispatchResponse(Guid originId, IOnPremiseConnectorResponse response)
 		{
 			var content = Serialize(response, out var props);
-			_model.BasicPublish(_EXCHANGE_NAME, $"{_RESPONSE_QUEUE_PREFIX}{originId}", false, props, content);
+
+			lock (_model)
+			{
+				_model.BasicPublish(_EXCHANGE_NAME, $"{_RESPONSE_QUEUE_PREFIX}{originId}", false, props, content);
+			}
 		}
 
 		public void DispatchAcknowledge(Guid originId, string acknowledgeId)
 		{
 			var content = Serialize(acknowledgeId, out var props);
-			_model.BasicPublish(_EXCHANGE_NAME, $"{_ACKNOWLEDGE_QUEUE_PREFIX}{originId}", false, props, content);
+
+			lock (_model)
+			{
+				_model.BasicPublish(_EXCHANGE_NAME, $"{_ACKNOWLEDGE_QUEUE_PREFIX}{originId}", false, props, content);
+			}
 		}
 
 		private byte[] Serialize<T>(T message, out BasicProperties props)
@@ -172,7 +206,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		private void DeclareExchange(string name)
 		{
 			_logger?.Verbose("Declaring exchange. name={ExchangeName}, type={ExchangeType}", name, ExchangeType.Direct);
-			_model.ExchangeDeclare(name, ExchangeType.Direct);
+
+			lock (_model)
+			{
+				_model.ExchangeDeclare(name, ExchangeType.Direct);
+			}
 		}
 
 		private void DeclareQueue(string name)
@@ -190,7 +228,10 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 			try
 			{
-				_model.QueueDeclare(name, true, false, false, arguments);
+				lock (_model)
+				{
+					_model.QueueDeclare(name, true, false, false, arguments);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -203,7 +244,10 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			if (disposing)
 			{
-				_model?.Dispose();
+				lock (_model)
+				{
+					_model.Dispose();
+				}
 			}
 		}
 
