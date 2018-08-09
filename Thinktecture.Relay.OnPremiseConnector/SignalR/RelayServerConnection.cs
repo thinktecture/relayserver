@@ -324,7 +324,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 					catch (Exception ex)
 					{
-						_logger?.Error(ex, "Error during posting to relay. connection-id={ConnectionId}", ConnectionId);
+						_logger?.Error(ex, "Error during posting unhandled request response to relay. request-id={RequestId}", request.RequestId);
 					}
 				}
 			}
@@ -374,8 +374,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				RequestId = request.RequestId,
 			};
 
-			// No cancellation token here, to not cancel sending of an already fetched response
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			try
+			{
+				// No cancellation token here, to not cancel sending of an already fetched response
+				await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during posting ping response to relay. request-id={RequestId}", request.RequestId);
+			}
 		}
 
 		private async Task HandleHeartbeatRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
@@ -402,8 +409,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				OriginId = request.OriginId,
 				RequestId = request.RequestId,
 			};
-			// No cancellation token here, to not cancel sending of an already fetched response
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+
+			try
+			{
+				// No cancellation token here, to not cancel sending of an already fetched response
+				await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during posting heartbeat response to relay. request-id={RequestId}", request.RequestId);
+			}
 		}
 
 		public void Reconnect()
@@ -475,7 +490,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				catch (Exception ex)
 				{
-					_logger?.Error(ex, "Error during posting to relay. request-id={RequestId}", request.RequestId);
+					_logger?.Error(ex, "Error during posting local target response to relay. request-id={RequestId}", request.RequestId);
 				}
 			}
 		}
