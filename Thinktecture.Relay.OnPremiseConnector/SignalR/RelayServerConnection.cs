@@ -295,7 +295,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 				}
 
-				_logger?.Verbose("No connector found for local server. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, request.Url);
+				_logger?.Information("No connector found for local server. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, request.Url);
 			}
 			catch (Exception ex)
 			{
