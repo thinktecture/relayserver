@@ -180,7 +180,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task ConnectAsync()
 		{
-			_logger?.Information("Connecting to RelayServer {RelayServerUri} with connection id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			_logger?.Information("Connecting to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			_stopRequested = false;
 
@@ -192,11 +192,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			try
 			{
 				await Start().ConfigureAwait(false);
-				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection id {ConnectionId}", Uri, ConnectionId);
+				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while connecting to RelayServer {RelayServerUri} with connection id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+				_logger?.Error(ex, "Error while connecting to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 			}
 		}
 
@@ -295,7 +295,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 				}
 
-				_logger?.Information("No connector found for local server. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, request.Url);
+				_logger?.Information("No connector found for local server for request {RequestId} and url {RequestUrl}", request.RequestId, request.Url);
 			}
 			catch (Exception ex)
 			{
@@ -432,7 +432,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public void Disconnect()
 		{
-			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			LastHeartbeat = DateTime.MinValue;
 			HeartbeatInterval = TimeSpan.Zero;
@@ -503,7 +503,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		protected override void OnClosed()
 		{
-			_logger?.Information("Connection closed to RelayServer {RelayServerUri} with connection instance id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			_logger?.Information("Connection closed to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			base.OnClosed();
 

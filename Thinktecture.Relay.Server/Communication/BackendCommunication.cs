@@ -202,7 +202,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			else
 			{
-				_logger?.Information("Response received but no request callback found. request-id={RequestId}", response.RequestId);
+				_logger?.Information("Response received but no request callback found for request {RequestId}", response.RequestId);
 			}
 		}
 
