@@ -123,11 +123,13 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
+			requestTimeout = requestTimeout ?? _configuration.OnPremiseConnectorCallbackTimeout;
+
 			_logger?.Debug("Waiting for response. request-id={RequestId}, timeout={Timeout}", requestId, requestTimeout);
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
-			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout ?? _configuration.OnPremiseConnectorCallbackTimeout, _cancellationToken);
+			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout, _cancellationToken);
 		}
 
 		public void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
