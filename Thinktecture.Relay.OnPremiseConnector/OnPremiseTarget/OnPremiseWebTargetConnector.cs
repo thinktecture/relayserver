@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Serilog;
+using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
@@ -15,7 +16,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		private readonly Uri _baseUri;
 		private readonly HttpClient _httpClient;
 
-		public OnPremiseWebTargetConnector(Uri baseUri, TimeSpan requestTimeout, ILogger logger, IOnPremiseWebTargetRequestMessageBuilder requestMessageBuilder)
+		public OnPremiseWebTargetConnector(Uri baseUri, TimeSpan requestTimeout, ILogger logger, IOnPremiseWebTargetRequestMessageBuilder requestMessageBuilder, IHttpClientFactory httpClientFactory)
 		{
 			if (requestTimeout < TimeSpan.Zero)
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
@@ -24,7 +25,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger = logger;
 			_requestMessageBuilder = requestMessageBuilder ?? throw new ArgumentNullException(nameof(requestMessageBuilder));
 
-			_httpClient = new HttpClient() { Timeout = requestTimeout };
+			_httpClient = httpClientFactory.CreateClient("WebTarget");
+			_httpClient.Timeout = requestTimeout;
 		}
 
 		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)

@@ -23,6 +23,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterLogger();
 			builder.RegisterType<OnPremiseWebTargetRequestMessageBuilder>().As<IOnPremiseWebTargetRequestMessageBuilder>();
 			builder.RegisterType<RelayServerConnectionFactory>().As<IRelayServerConnectionFactory>();
+			builder.RegisterType<HttpClientFactory>().As<IHttpClientFactory>().SingleInstance();
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
 			builder.RegisterType<HeartbeatChecker>().As<IHeartbeatChecker>();
 			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();

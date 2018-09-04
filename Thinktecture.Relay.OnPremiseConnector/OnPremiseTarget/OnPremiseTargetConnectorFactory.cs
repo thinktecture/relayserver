@@ -1,5 +1,6 @@
 using System;
 using Serilog;
+using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
@@ -7,16 +8,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 	{
 		private readonly ILogger _logger;
 		private readonly Func<IOnPremiseWebTargetRequestMessageBuilder> _requestMessageBuilderFactory;
+		private readonly IHttpClientFactory _httpClientFactory;
 
-		public OnPremiseTargetConnectorFactory(ILogger logger, Func<IOnPremiseWebTargetRequestMessageBuilder> requestMessageBuilderFactory)
+		public OnPremiseTargetConnectorFactory(ILogger logger, Func<IOnPremiseWebTargetRequestMessageBuilder> requestMessageBuilderFactory, IHttpClientFactory httpClientFactory)
 		{
 			_logger = logger;
 			_requestMessageBuilderFactory = requestMessageBuilderFactory ?? throw new ArgumentNullException(nameof(requestMessageBuilderFactory));
+			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 		}
 
 		public IOnPremiseTargetConnector Create(Uri baseUri, TimeSpan requestTimeout)
 		{
-			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger, _requestMessageBuilderFactory());
+			return new OnPremiseWebTargetConnector(baseUri, requestTimeout, _logger, _requestMessageBuilderFactory(), _httpClientFactory);
 		}
 
 		public IOnPremiseTargetConnector Create(Type handlerType, TimeSpan requestTimeout)
