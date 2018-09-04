@@ -6,7 +6,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using AutofacSerilogIntegration;
+using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
@@ -14,7 +16,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 {
 	public class RelayServerConnector : IDisposable, IRelayServerConnector
 	{
-		private static readonly IContainer _container;
+		private static readonly IServiceProvider _serviceProvider;
 
 		static RelayServerConnector()
 		{
@@ -29,7 +31,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
 
-			_container = builder.Build();
+			var container = builder.Build();
+			_serviceProvider = new AutofacServiceProvider(container);
 		}
 
 		public string RelayedRequestHeader
@@ -50,9 +53,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="relayServer">An <see cref="Uri"/> containing the RelayServer's base url.</param>
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
-		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5)
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null)
 		{
-			var factory = _container.Resolve<IRelayServerConnectionFactory>();
+			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
 			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds));
 		}
 
