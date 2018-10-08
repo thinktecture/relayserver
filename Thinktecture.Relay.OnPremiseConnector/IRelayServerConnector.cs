@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace Thinktecture.Relay.OnPremiseConnector
 {
+	/// <summary>
+	/// Interface that represents the class connecting to the relay server.
+	/// </summary>
 	public interface IRelayServerConnector
 	{
+		/// <summary>
+		/// Gets or sets the header that is set on relayed requests.
+		/// </summary>
 		string RelayedRequestHeader { get; set; }
 
 		/// <summary>
@@ -56,7 +62,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		Task ConnectAsync();
 
 		/// <summary>
-		/// Disconnectes from the RelayServer.
+		/// Disconnects from the RelayServer.
 		/// </summary>
 		void Disconnect();
 

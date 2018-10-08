@@ -14,6 +14,7 @@ using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector
 {
+	/// <inheritdoc cref="IRelayServerConnector" />
 	public class RelayServerConnector : IDisposable, IRelayServerConnector
 	{
 		private static readonly IServiceProvider _serviceProvider;
@@ -35,6 +36,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			_serviceProvider = new AutofacServiceProvider(container);
 		}
 
+		/// <inheritdoc />
 		public string RelayedRequestHeader
 		{
 			get => _connection.RelayedRequestHeader;
@@ -249,11 +251,16 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 		#region IDisposable
 
+		/// <inheritdoc />
 		~RelayServerConnector()
 		{
 			Dispose(false);
 		}
 
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">Determines whether this is called from the public <see cref="Dispose()"/> method.</param>
 		protected virtual void Dispose(bool disposing)
 		{
 			if (disposing)
@@ -268,6 +275,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			}
 		}
 
+		/// <inheritdoc />
 		public void Dispose()
 		{
 			Dispose(true);

@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Thinktecture.Relay.OnPremiseConnector.IdentityModel
 {
+	/// <inheritdoc />
 	public class BasicAuthenticationHeaderValue : AuthenticationHeaderValue
 	{
+		/// <inheritdoc />
 		public BasicAuthenticationHeaderValue(string userName, string password)
 			: base("Basic", EncodeCredentials(userName, password))
 		{
