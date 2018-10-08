@@ -4,7 +4,7 @@ using System.Reflection;
 
 [assembly: AssemblyCompany("Thinktecture AG")]
 [assembly: AssemblyProduct("Thinktecture RelayServer")]
-[assembly: AssemblyCopyright("Copyright © Thinktecture AG 2015 - 2018")]
+[assembly: AssemblyCopyright("Copyright © Thinktecture AG 2015 - 2018. All rights reserved.")]
 [assembly: AssemblyTrademark("Thinktecure RelayServer")]
 
 [assembly: AssemblyVersion("2.0.0.0")]

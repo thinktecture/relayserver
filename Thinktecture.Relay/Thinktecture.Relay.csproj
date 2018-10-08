@@ -2,23 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <Description>Provides interface definitions to extend the Thinktecture RelayServer with custom plugins.</Description>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <!-- Use AssemblyInfo.shared.cs for shared info, so include that file and disable auto-generation -->
-  <PropertyGroup>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\Shared\AssemblyInfo.shared.cs">
-      <Link>Properties\AssemblyInfo.shared.cs</Link>
-    </Compile>
-  </ItemGroup>
+  <Import Project="..\Shared\ProjectProperties.shared.props" />
+
   <ItemGroup>
     <PackageReference Include="System.Security.Principal" Version="4.3.0" />
   </ItemGroup>

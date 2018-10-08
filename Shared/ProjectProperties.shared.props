@@ -1,0 +1,26 @@
+<Project>
+  <!-- WARNING: This file is shared between all RelayServer .NET Standard library projects -->
+  <PropertyGroup>
+    <VersionPrefix>2.0.0</VersionPrefix>
+
+    <PackageTags>thinktecture,relayserver</PackageTags>
+    <PackageIconUrl>http://thinktecture.com/images/Logo_T_Nontransparent.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/thinktecture/relayserver</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/thinktecture/relayserver/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>git@github.com:thinktecture/relayserver.git</RepositoryUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.shared.cs">
+      <Link>Properties\AssemblyInfo.shared.cs</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

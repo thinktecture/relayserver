@@ -1,8 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <Description>The OnPremiseConnector library should be used to connect to a Thinktecture RelayServer and provide local connectivity. It can be incorporated into services to provide in-process access to local services via the RelayServer. It could also be used in a separate service to provide http(s)-based access to one or multiple services.</Description>
   </PropertyGroup>
+
+  <!-- Use AssemblyInfo.shared.cs for shared info, so include that file and disable auto-generation -->
+  <Import Project="..\Shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.2" />
@@ -14,23 +18,6 @@
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="System.Net.Requests" Version="4.3.0" />
     <PackageReference Include="System.Net.Security" Version="4.3.0" />
-  </ItemGroup>
-
-
-  <!-- Use AssemblyInfo.shared.cs for shared info, so include that file and disable auto-generation -->
-  <PropertyGroup>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\Shared\AssemblyInfo.shared.cs">
-      <Link>Properties\AssemblyInfo.shared.cs</Link>
-    </Compile>
   </ItemGroup>
 
 </Project>
