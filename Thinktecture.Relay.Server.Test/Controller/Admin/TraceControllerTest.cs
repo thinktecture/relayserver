@@ -69,7 +69,7 @@ namespace Thinktecture.Relay.Server.Controller.Admin
 			traceRepositoryMock.VerifyAll();
 			result.Should().NotBeNull();
 			result.Content.StartDate.Should().BeOnOrAfter(startDate).And.BeOnOrBefore(DateTime.UtcNow);
-			result.Content.EndDate.Should().BeAfter(startDate.AddMinutes(5)).And.BeBefore(DateTime.UtcNow.AddMinutes(5));
+			result.Content.EndDate.Should().BeOnOrAfter(startDate.AddMinutes(5)).And.BeBefore(DateTime.UtcNow.AddMinutes(5));
 			result.Content.LinkId.Should().Be(linkId);
 		}
 
