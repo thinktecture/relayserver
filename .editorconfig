@@ -10,3 +10,10 @@ insert_final_newline = true
 
 csharp_space_after_keywords_in_control_flow_statements = true
 csharp_space_after_cast = false
+
+[*.config]
+charset = utf-8
+indent_style = space
+indent_size = 2
+end_of_line = crlf
+insert_final_newline = true
