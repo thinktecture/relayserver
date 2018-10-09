@@ -14,6 +14,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		private readonly ILogger _logger;
 		private readonly IOnPremiseWebTargetRequestMessageBuilder _requestMessageBuilder;
 		private readonly Uri _baseUri;
+		private readonly TimeSpan _requestTimeout;
 		private readonly HttpClient _httpClient;
 
 		public OnPremiseWebTargetConnector(Uri baseUri, TimeSpan requestTimeout, ILogger logger, IOnPremiseWebTargetRequestMessageBuilder requestMessageBuilder, IHttpClientFactory httpClientFactory)
@@ -22,11 +23,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
 
 			_baseUri = baseUri ?? throw new ArgumentNullException(nameof(baseUri));
+			_requestTimeout = requestTimeout;
 			_logger = logger;
 			_requestMessageBuilder = requestMessageBuilder ?? throw new ArgumentNullException(nameof(requestMessageBuilder));
 
 			_httpClient = httpClientFactory.CreateClient("WebTarget");
-			_httpClient.Timeout = requestTimeout;
 		}
 
 		public async Task<IOnPremiseTargetResponse> GetResponseFromLocalTargetAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
@@ -47,7 +48,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			try
 			{
-				var requestMessage = _requestMessageBuilder.CreateLocalTargetRequestMessage(_baseUri, url, request, relayedRequestHeader);
+				var requestMessage = _requestMessageBuilder.CreateLocalTargetRequestMessage(_baseUri, url, request, relayedRequestHeader, _requestTimeout);
 				var message = await _httpClient.SendAsync(requestMessage).ConfigureAwait(false);
 
 				response.StatusCode = message.StatusCode;
