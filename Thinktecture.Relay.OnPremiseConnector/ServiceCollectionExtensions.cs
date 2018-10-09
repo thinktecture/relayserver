@@ -10,19 +10,19 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public static IServiceCollection AddOnPremiseConnectorServices(this IServiceCollection collection)
 		{
 			return collection
-				.AddTransient<IOnPremiseWebTargetRequestMessageBuilder, OnPremiseWebTargetRequestMessageBuilder>()
-				.AddTransient<IRelayServerConnectionFactory, RelayServerConnectionFactory>()
-				.AddTransient<IHttpClientFactory, HttpClientFactory>()
-				.AddTransient<IOnPremiseTargetConnectorFactory, OnPremiseTargetConnectorFactory>()
-				.AddTransient<IHeartbeatChecker, HeartbeatChecker>()
-				.AddTransient<ITokenExpiryChecker, TokenExpiryChecker>()
+				.AddSingleton<IOnPremiseWebTargetRequestMessageBuilder, OnPremiseWebTargetRequestMessageBuilder>()
+				.AddSingleton<IHttpClientFactory, HttpClientFactory>()
 				.AddSingleton<MaintenanceLoop>()
 				.AddSingleton<IMaintenanceLoop>(ctx =>
 				{
 					var loop = ctx.GetService<MaintenanceLoop>();
 					loop.StartLoop();
 					return loop;
-				});
+				})
+				.AddTransient<IRelayServerConnectionFactory, RelayServerConnectionFactory>()
+				.AddTransient<IOnPremiseTargetConnectorFactory, OnPremiseTargetConnectorFactory>()
+				.AddTransient<IHeartbeatChecker, HeartbeatChecker>()
+				.AddTransient<ITokenExpiryChecker, TokenExpiryChecker>();
 		}
 
 	}
