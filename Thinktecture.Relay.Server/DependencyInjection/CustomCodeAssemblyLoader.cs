@@ -100,7 +100,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 		{
 			var assembly = Assembly;
 			if (assembly == null)
-				return new Type[0];
+				return Array.Empty<Type>();
 
 			var types = GetTypes(assembly, type);
 			if (types.Length == 0)

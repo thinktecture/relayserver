@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_checkInterval = TimeSpan.FromSeconds(1);
 			_cancellationTokenSource = new CancellationTokenSource();
 			_connections = new List<IRelayServerConnection>();
-			_connectionsForLoop = new IRelayServerConnection[0];
+			_connectionsForLoop = Array.Empty<IRelayServerConnection>();
 		}
 
 		public void RegisterConnection(IRelayServerConnection connection)

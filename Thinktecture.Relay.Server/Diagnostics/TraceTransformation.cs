@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		{
 			if (traceFile.Content == null)
 			{
-				return new byte[0];
+				return Array.Empty<byte>();
 			}
 
 			var contentEncoding = traceFile.Headers.ContainsKey("content-encoding") ? traceFile.Headers["content-encoding"] : String.Empty;

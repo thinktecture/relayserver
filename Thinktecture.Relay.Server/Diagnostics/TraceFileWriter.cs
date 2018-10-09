@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		public Task WriteContentFileAsync(string fileName, byte[] content)
 		{
 			if (content == null)
-				content = new byte[0];
+				content = Array.Empty<byte>();
 
 			return WriteAsync(fileName, content);
 		}
