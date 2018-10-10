@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		[TestMethod]
 		public void Can_read_empty_content_file()
 		{
-			File.WriteAllBytes("test.content.txt", new byte[0]);
+			File.WriteAllBytes("test.content.txt", Array.Empty<byte>());
 
 			var sut = new TraceFileReader();
 			var result = sut.ReadContentFileAsync("test.content.txt").Result;

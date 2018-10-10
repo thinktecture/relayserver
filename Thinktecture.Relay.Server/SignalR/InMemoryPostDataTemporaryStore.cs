@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.SignalR
 	internal class InMemoryPostDataTemporaryStore : IPostDataTemporaryStore, IDisposable
 	{
 		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
-		private static readonly byte[] _emptyByteArray = new byte[0];
+		private static readonly byte[] _emptyByteArray = Array.Empty<byte>();
 
 		private readonly ILogger _logger;
 		private readonly TimeSpan _storagePeriod;

@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Server.Http
 				_logger?.Verbose("Received no response. request-id={RequestId}", requestId);
 
 				message.StatusCode = HttpStatusCode.GatewayTimeout;
-				message.Content = new ByteArrayContent(new byte[0]);
+				message.Content = new ByteArrayContent(Array.Empty<byte>());
 				message.Content.Headers.Add("X-TTRELAY-TIMEOUT", "On-Premise");
 			}
 			else
@@ -77,7 +77,7 @@ namespace Thinktecture.Relay.Server.Http
 			{
 				_logger?.Verbose("Received empty body. request-id={RequestId}", response.RequestId);
 
-				content = new ByteArrayContent(new byte[0]);
+				content = new ByteArrayContent(Array.Empty<byte>());
 			}
 			else if (response.Body != null)
 			{

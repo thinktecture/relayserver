@@ -64,7 +64,7 @@ namespace Thinktecture.Relay.Server.Http
 					else
 					{
 						// a length of 0 indicates that there is a larger body available on the server
-						request.Body = new byte[0];
+						request.Body = Array.Empty<byte>();
 					}
 
 					request.ContentLength = storeStream.Length;

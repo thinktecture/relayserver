@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 		public Type GetType(Type type)
 		{
 			var types = GetTypes(type);
-			if (types == null)
+			if (types.Length == 0)
 				return null;
 
 			if (types.Length > 1)
@@ -100,7 +100,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 		{
 			var assembly = Assembly;
 			if (assembly == null)
-				return null;
+				return Array.Empty<Type>();
 
 			var types = GetTypes(assembly, type);
 			if (types.Length == 0)
