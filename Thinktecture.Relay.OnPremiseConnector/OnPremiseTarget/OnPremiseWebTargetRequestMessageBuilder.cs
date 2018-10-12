@@ -126,12 +126,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger = logger;
 		}
 
-		public HttpRequestMessage CreateLocalTargetRequestMessage(Uri baseUri, string url, IOnPremiseTargetRequest request, string relayedRequestHeader, TimeSpan requestTimeout)
+		public HttpRequestMessage CreateLocalTargetRequestMessage(Uri baseUri, string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
 			_logger?.Verbose("Creating web request for request-id={RequestId}", request.RequestId);
 
 			var message = new HttpRequestMessage(new HttpMethod(request.HttpMethod), String.IsNullOrWhiteSpace(url) ? baseUri : new Uri(baseUri, url));
-			message.Properties["RequestTimeout"] = requestTimeout;
 
 			if (request.Stream != Stream.Null)
 			{

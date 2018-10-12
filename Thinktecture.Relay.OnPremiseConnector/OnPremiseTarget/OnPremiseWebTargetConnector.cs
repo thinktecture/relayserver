@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
@@ -48,8 +49,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			try
 			{
-				var requestMessage = _requestMessageBuilder.CreateLocalTargetRequestMessage(_baseUri, url, request, relayedRequestHeader, _requestTimeout);
-				var message = await _httpClient.SendAsync(requestMessage).ConfigureAwait(false);
+				var message = await SendLocalRequestWithTimeoutAsync(url, request, relayedRequestHeader).ConfigureAwait(false);
 
 				response.StatusCode = message.StatusCode;
 				response.HttpHeaders = message.Headers.Union(message.Content.Headers).ToDictionary(kvp => kvp.Key, kvp => String.Join(" ", kvp.Value));
@@ -69,6 +69,26 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger?.Verbose("Got web response. request-id={RequestId}, status-code={ResponseStatusCode}", response.RequestId, response.StatusCode);
 
 			return response;
+		}
+
+		private async Task<HttpResponseMessage> SendLocalRequestWithTimeoutAsync(String url, IOnPremiseTargetRequest request, String relayedRequestHeader)
+		{
+			// Only create CTS when really required (i.e. Timeout not Zero or infinite)
+			if (_requestTimeout > TimeSpan.Zero && _requestTimeout != TimeSpan.MaxValue)
+			{
+				using (var cts = new CancellationTokenSource(_requestTimeout))
+				{
+					return await SendLocalRequestAsync(url, request, relayedRequestHeader, cts.Token).ConfigureAwait(false);
+				}
+			}
+
+			return await SendLocalRequestAsync(url, request, relayedRequestHeader, CancellationToken.None).ConfigureAwait(false);
+		}
+
+		private async Task<HttpResponseMessage> SendLocalRequestAsync(String url, IOnPremiseTargetRequest request, String relayedRequestHeader, CancellationToken token)
+		{
+			var requestMessage = _requestMessageBuilder.CreateLocalTargetRequestMessage(_baseUri, url, request, relayedRequestHeader);
+			return await _httpClient.SendAsync(requestMessage, token).ConfigureAwait(false);
 		}
 	}
 }
