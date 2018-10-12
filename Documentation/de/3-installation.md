@@ -237,7 +237,9 @@ run -> mmc
 
 Über ein Kommandozeilenfenster mit Administrationsrechten muss folgender Befehl ausgeführt werden:
 
+```
 netsh http add sslcert ipport=0.0.0.0:443 certhash=thumbprint appid={guid}
+```
 
 Es muss sichergestellt sein, dass der Port dabei dem Port aus der Konfigurationsdatei des RelayServers entspricht. Der Thumbprint muss mit dem Thumbprint aus der SSL-Konfiguration ersetzt werden. Der Parameter GUID muss mit einer zufälligen GUID ersetzt werden (z.B. von https://www.guidgenerator.com/).
 
