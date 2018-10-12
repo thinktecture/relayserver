@@ -7,7 +7,7 @@
 
 # Release Notes
 
-## Version 2.0.0-beta
+## Version 2.0.0
 
 * Multi-Server Betrieb
 

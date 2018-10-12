@@ -5,7 +5,7 @@
 # [RelayServer Plugin Development](5-relayserver-interceptor-development.md)
 # [Development Setup](6-development-setup.md)
 
-## Version 2.0.0-beta
+## Version 2.0.0
 
 * Multi-Server operation
 
