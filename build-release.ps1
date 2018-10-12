@@ -1,6 +1,6 @@
 $dist= "dist"
 $sln = ".\Thinktecture.Relay.sln"
-$mgmtWeb = "Thinktecture.Relay.ManagementWeb\*";
+$mgmtWeb = "Thinktecture.Relay.ManagementWeb\dist\*";
 
 # Check for VS Command Prompt
 If(![Environment]::GetEnvironmentVariable('DevEnvDir')){
