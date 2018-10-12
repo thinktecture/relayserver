@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 			var referenceObject = JsonConvert.DeserializeObject<IDictionary<string, string>>(File.ReadAllText("test.headers.txt", Encoding.UTF8));
 
-			referenceObject.ShouldBeEquivalentTo(headers);
+			referenceObject.Should().BeEquivalentTo(headers);
 
 			File.Delete("test.headers.txt");
 		}

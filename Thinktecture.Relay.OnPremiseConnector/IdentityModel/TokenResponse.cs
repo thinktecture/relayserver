@@ -2,6 +2,8 @@ using System;
 using System.Net;
 using Newtonsoft.Json.Linq;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Thinktecture.Relay.OnPremiseConnector.IdentityModel
 {
 	public class TokenResponse

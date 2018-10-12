@@ -5,8 +5,16 @@ using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector
 {
+	/// <summary>
+	/// Provides extensions for the <see cref="IServiceCollection"/>.
+	/// </summary>
 	public static class ServiceCollectionExtensions
 	{
+		/// <summary>
+		/// Adds all services that are required to use the OnPremiseConnector.
+		/// </summary>
+		/// <param name="collection">The <see cref="IServiceCollection"/> to add the service registrations to.</param>
+		/// <returns>The <see cref="IServiceCollection"/> with added registrations.</returns>
 		public static IServiceCollection AddOnPremiseConnectorServices(this IServiceCollection collection)
 		{
 			return collection

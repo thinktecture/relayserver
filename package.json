@@ -1,6 +1,6 @@
 {
   "name": "thinktecture-relayserver",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "RelayServer",
   "main": "gulpfile.js",
   "repository": {

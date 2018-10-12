@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			var sut = new TraceFileReader();
 			var result = sut.ReadHeaderFileAsync("test.header.txt").Result;
 
-			result.ShouldBeEquivalentTo(headers);
+			result.Should().BeEquivalentTo(headers);
 
 			File.Delete("test.header.txt");
 		}
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 
 			result.Should().NotBeNull();
 			result.Length.Should().Be(3);
-			result.ShouldBeEquivalentTo(bytes);
+			result.Should().BeEquivalentTo(bytes);
 
 			File.Delete("test.content.txt");
 		}
