@@ -53,10 +53,12 @@ If(!(Test-Path $nuget -PathType Leaf)) {
 
 msbuild $sln /p:Configuration=Release
 
+# Prepare ZIP for RelayServer
 $srvRelease = ".\Thinktecture.Relay.Server\bin\Release\"
 $mgmtWebTargetPath = Join-Path $srvRelease "ManagementWeb\"
 New-Item -ItemType Directory -Path $mgmtWebTargetPath
 Copy-Item -Recurse -Path $mgmtWeb -destination $mgmtWebTargetPath
+Remove-Item (Join-Path $srvRelease "Thinktecture.Relay.Server.exe.config")
 Compress-Archive -Path (Join-Path $srvRelease "*") -DestinationPath (Join-Path $dist "\RelayServer.zip")
 
 # Build Nuget Packages
