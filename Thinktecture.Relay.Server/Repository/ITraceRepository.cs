@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Thinktecture.Relay.Server.Dto;
 
@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Repository
 		bool Disable(Guid traceConfigurationId);
 		Guid? GetCurrentTraceConfigurationId(Guid linkId);
 		IEnumerable<TraceConfiguration> GetTraceConfigurations(Guid linkId);
-	    TraceConfiguration GetRunningTranceConfiguration(Guid linkId);
-	    TraceConfiguration GetTraceConfiguration(Guid traceConfigurationId);
+		TraceConfiguration GetRunningTranceConfiguration(Guid linkId);
+		TraceConfiguration GetTraceConfiguration(Guid traceConfigurationId);
 	}
 }

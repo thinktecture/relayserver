@@ -5,15 +5,20 @@
 packages/
 node_modules/
 .idea/
+.vs/
 
 *.ncrunchproject
 *.ncrunchsolution
 *.cache
 
+temp/
 deploy/
+dist/
 Documentations
 Thinktecture.Relay.ManagementWeb/assets/*.css
 .DS_Store
 npm-debug.log
 
 credentials.json
+
+nuget\.exe

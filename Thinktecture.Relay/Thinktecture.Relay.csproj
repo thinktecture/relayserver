@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+    <Title>Thinktecture RelayServer</Title>
+    <Description>Provides interface definitions to extend the Thinktecture RelayServer with custom plugins.</Description>
+    <Summary>Thinktecture.RelayServer provides interfaces for extenion points within the RelayServer.</Summary>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <!-- Use AssemblyInfo.shared.cs for shared info, so include that file and disable auto-generation -->
+  <Import Project="..\Shared\ProjectProperties.shared.props" />
+
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Security.Principal" Version="4.3.0" />
+  </ItemGroup>
+</Project>

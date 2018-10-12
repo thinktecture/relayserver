@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 
 namespace Thinktecture.Relay.Server.Dto
@@ -15,6 +15,6 @@ namespace Thinktecture.Relay.Server.Dto
 		public DateTime OnPremiseConnectorInDate { get; set; }
 		public DateTime OnPremiseConnectorOutDate { get; set; }
 		public DateTime? OnPremiseTargetInDate { get; set; }
-		public DateTime? OnPremiseTargetOutDate { get; set; } 
+		public DateTime? OnPremiseTargetOutDate { get; set; }
 	}
 }

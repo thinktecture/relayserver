@@ -1,78 +1,110 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Serilog;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	internal class HttpResponseMessageBuilder : IHttpResponseMessageBuilder
 	{
+		private readonly ILogger _logger;
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly Dictionary<string, Action<HttpContent, string>> _contentHeaderTransformation;
 
-		public HttpResponseMessageBuilder()
+		public HttpResponseMessageBuilder(ILogger logger, IPostDataTemporaryStore postDataTemporaryStore)
 		{
+			_logger = logger;
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
+
 			_contentHeaderTransformation = new Dictionary<string, Action<HttpContent, string>>()
 			{
-				{ "Content-Disposition", (r, v) => r.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(v) },
-				{ "Content-Length", (r, v) => r.Headers.ContentLength = Int64.Parse(v) },
-				{ "Content-Location", (r, v) => r.Headers.ContentLocation = new Uri(v) },
-				{ "Content-MD5", null },
-				{ "Content-Range", null },
-				{ "Content-Type", (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v) },
-				{ "Expires", (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?) null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))) },
-				{ "Last-Modified", (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)) }
+				["Content-Disposition"] = (r, v) => r.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(v),
+				["Content-Length"] = (r, v) => r.Headers.ContentLength = Int64.Parse(v),
+				["Content-Location"] = (r, v) => r.Headers.ContentLocation = new Uri(v),
+				["Content-MD5"] = null,
+				["Content-Range"] = null,
+				["Content-Type"] = (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v),
+				["Expires"] = (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?)null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))),
+				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)),
 			};
 		}
 
-		public HttpResponseMessage BuildFrom(IOnPremiseTargetReponse onPremiseTargetReponse, Link link)
+		public HttpResponseMessage BuildFromConnectorResponse(IOnPremiseConnectorResponse response, Link link, string requestId)
 		{
-			var response = new HttpResponseMessage();
+			var message = new HttpResponseMessage();
 
-			if (onPremiseTargetReponse == null)
+			if (response == null)
 			{
-				response.StatusCode = HttpStatusCode.GatewayTimeout;
-				response.Content = new ByteArrayContent(new byte[] { });
-				response.Content.Headers.Add("X-TTRELAY-TIMEOUT", "On-Premise");
+				_logger?.Verbose("Received no response. request-id={RequestId}", requestId);
+
+				message.StatusCode = HttpStatusCode.GatewayTimeout;
+				message.Content = new ByteArrayContent(Array.Empty<byte>());
+				message.Content.Headers.Add("X-TTRELAY-TIMEOUT", "On-Premise");
 			}
 			else
 			{
-				response.StatusCode = onPremiseTargetReponse.StatusCode;
-				response.Content = GetResponseContentForOnPremiseTargetResponse(onPremiseTargetReponse, link);
-
-				string wwwAuthenticate;
-				if (onPremiseTargetReponse.HttpHeaders.TryGetValue("WWW-Authenticate", out wwwAuthenticate))
+				message.StatusCode = response.StatusCode;
+				message.Content = GetResponseContentForOnPremiseTargetResponse(response, link);
+				
+				if (response.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
-					var parts = wwwAuthenticate.Split(' ');
-					response.Headers.WwwAuthenticate.Add(parts.Length == 2 ? new AuthenticationHeaderValue(parts[0], parts[1]) : new AuthenticationHeaderValue(wwwAuthenticate));
+					message.Headers.Add("WWW-Authenticate", wwwAuthenticate);
 				}
 			}
 
-			return response;
+			return message;
 		}
 
-		internal HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseTargetReponse onPremiseTargetReponse, Link link)
+		public HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseConnectorResponse response, Link link)
 		{
-			if (onPremiseTargetReponse == null)
-			{
-				throw new ArgumentNullException("onPremiseTargetReponse", "On-Premise Target response must not be null here.");
-			}
+			if (response == null)
+				throw new ArgumentNullException(nameof(response));
 
-			if (onPremiseTargetReponse.StatusCode == HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
+			if (response.StatusCode == HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
 			{
 				return null;
 			}
 
-			var content = new ByteArrayContent(onPremiseTargetReponse.Body ?? new byte[] { });
-			SetHttpHeaders(onPremiseTargetReponse.HttpHeaders, content);
+			HttpContent content;
+
+			if (response.ContentLength == 0)
+			{
+				_logger?.Verbose("Received empty body. request-id={RequestId}", response.RequestId);
+
+				content = new ByteArrayContent(Array.Empty<byte>());
+			}
+			else if (response.Body != null)
+			{
+				// only legacy on-premise connectors (v1) use this property
+				_logger?.Verbose("Received small legacy body with data. request-id={RequestId}, body-length={ResponseContentLength}", response.RequestId, response.Body.Length);
+
+				content = new ByteArrayContent(response.Body);
+			}
+			else
+			{
+				_logger?.Verbose("Received body. request-id={RequestId}, content-length={ResponseContentLength}", response.RequestId, response.ContentLength);
+
+				var stream = _postDataTemporaryStore.GetResponseStream(response.RequestId);
+				if (stream == null)
+				{
+					throw new InvalidOperationException(); // TODO what now?
+				}
+
+				content = new StreamContent(stream, 0x10000);
+			}
+
+			AddContentHttpHeaders(content, response.HttpHeaders);
 
 			return content;
 		}
 
-		internal void SetHttpHeaders(IDictionary<string, string> httpHeaders, HttpContent content)
+		public void AddContentHttpHeaders(HttpContent content, IReadOnlyDictionary<string, string> httpHeaders)
 		{
 			if (httpHeaders == null)
 			{
@@ -81,14 +113,9 @@ namespace Thinktecture.Relay.Server.Http
 
 			foreach (var httpHeader in httpHeaders)
 			{
-				Action<HttpContent, string> contentHeaderTranformation;
-
-				if (_contentHeaderTransformation.TryGetValue(httpHeader.Key, out contentHeaderTranformation))
+				if (_contentHeaderTransformation.TryGetValue(httpHeader.Key, out var contentHeaderTranformation))
 				{
-					if (contentHeaderTranformation != null)
-					{
-						contentHeaderTranformation(content, httpHeader.Value);
-					}
+					contentHeaderTranformation?.Invoke(content, httpHeader.Value);
 				}
 				else
 				{

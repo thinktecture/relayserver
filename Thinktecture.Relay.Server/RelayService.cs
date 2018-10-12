@@ -1,41 +1,45 @@
-﻿using System;
+using System;
 using Microsoft.Owin.Hosting;
+using Serilog;
+using Thinktecture.Relay.Server.Config;
 
 namespace Thinktecture.Relay.Server
 {
 	internal class RelayService
 	{
-	    private readonly string _hostName;
-	    private readonly int _port;
-	    private readonly bool _allowHttp;
+		private readonly ILogger _logger;
+		private readonly IStartup _startup;
+		private readonly IConfiguration _configuration;
 
-	    private IDisposable _host;
+		private IDisposable _host;
 
-		public RelayService(string hostName, int port, bool allowHttp)
+		public RelayService(ILogger logger, IConfiguration configuration, IStartup startup)
 		{
-		    _hostName = hostName;
-		    _port = port;
-		    _allowHttp = allowHttp;
+			_logger = logger;
+			_startup = startup ?? throw new ArgumentNullException(nameof(startup));
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 		}
 
-	    public void Start()
-	    {
-	        var address = String.Format("{0}://{1}:{2}", _allowHttp ? "http" : "https", _hostName, _port);
+		public void Start()
+		{
+			try
+			{
+				var address = $"{(_configuration.UseInsecureHttp ? "http" : "https")}://{_configuration.HostName}:{_configuration.Port}";
+				_logger?.Information("Listening on {ListeningAddress}", address);
 
-#if DEBUG
-            Console.WriteLine("Listing on: {0}", address);
-#endif
-
-            _host = WebApp.Start<Startup>(address);
+				_host = WebApp.Start(address, app => _startup.Configuration(app));
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during start of the RelayServer listener");
+				throw;
+			}
 		}
 
 		public void Stop()
 		{
-			if (_host != null)
-			{
-				_host.Dispose();
-				_host = null;
-			}
+			_host?.Dispose();
+			_host = null;
 		}
 	}
 }

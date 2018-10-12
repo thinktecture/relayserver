@@ -40,7 +40,7 @@
                     // Happens, when the user reloads the app while viewing the logs
                     // "TabActivated" Broadcast will be executed before scope.$on in this directive is executed
                     var unwatch = scope.$watch('link', function (newVal) {
-                        if (newVal && scope.tabs.logs.active) {
+                        if (newVal && scope.activeTabIndex === 2) {
                             unwatch();
                             reloadLogs();
                         }

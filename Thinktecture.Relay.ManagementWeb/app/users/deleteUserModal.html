@@ -2,9 +2,7 @@
     <button type="button" class="close" ng-click="cancel()" tabindex="-1"><span>&times;</span><span class="sr-only" translate>COMMON.CLOSE</span></button>
     <h3 class="modal-title" translate>USERS.MODAL_DELETE.TITLE</h3>
 </div>
-<div class="modal-body">
-    {{ 'USERS.MODAL_DELETE.DESCRIPTION' | translate:user }}
-</div>
+<div class="modal-body" translate="USERS.MODAL_DELETE.DESCRIPTION" translate-values="{ userName: user.userName }"></div>
 <div class="modal-footer">
     <button class="btn btn-danger" ng-click="submit()" translate>COMMON.DELETE</button>
     <button class="btn btn-default" ng-click="cancel()" translate>COMMON.CANCEL</button>

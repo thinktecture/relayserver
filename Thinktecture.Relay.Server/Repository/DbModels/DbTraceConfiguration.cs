@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,14 +7,14 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 	[Table("TraceConfigurations")]
 	internal class DbTraceConfiguration
 	{
-        [Index(IsClustered = true)]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Identity { get; set; }
+		[Index(IsClustered = true)]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public int Identity { get; set; }
 
-        [Key]
-        public Guid Id { get; set; }
+		[Key]
+		public Guid Id { get; set; }
 
-        [Required]
+		[Required]
 		public Guid LinkId { get; set; }
 
 		[Required]
@@ -27,6 +27,6 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		public DateTime EndDate { get; set; }
 
 		[Required]
-		public DateTime CreationDate { get; set; } 
+		public DateTime CreationDate { get; set; }
 	}
 }

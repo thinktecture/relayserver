@@ -7,13 +7,13 @@
         <div>
             <div class="row">
                 <div class="col-md-12">
-                    <canvas id="contentBytesChart" chart-line chart-type="line" data="chart.data" labels="chart.labels" series="chart.series" options="chart.options"></canvas>
+                    <canvas id="contentBytesChart" class="chart chart-line" chart-type="line" chart-data="chart.data" chart-labels="chart.labels" chart-series="chart.series" chart-options="chart.options"></canvas>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-3">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="fromDate" name="fromDate" uib-datepicker-popup is-open="chart.isFromDatePickerOpen" ng-model="chart.fromDate" max-date="chart.toDate" ng-change="reloadChart()" />
+                        <input type="text" class="form-control" id="fromDate" name="fromDate" uib-datepicker-popup="{{dateFormat}}" is-open="chart.isFromDatePickerOpen" ng-model="chart.fromDate" max-date="chart.toDate" ng-change="reloadChart()" />
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="openFrom($event)"><i class="fa fa-calendar"></i></button>
                         </span>
@@ -21,7 +21,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="toDate" name="toDate" uib-datepicker-popup is-open="chart.isToDatePickerOpen" ng-model="chart.toDate" min-date="chart.fromDate" ng-change="reloadChart()" />
+                        <input type="text" class="form-control" id="toDate" name="toDate" uib-datepicker-popup="{{dateFormat}}" is-open="chart.isToDatePickerOpen" ng-model="chart.toDate" min-date="chart.fromDate" ng-change="reloadChart()" />
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="openTo($event)"><i class="fa fa-calendar"></i></button>
                         </span>

@@ -56,7 +56,7 @@ Da der RelayServer wie ein transparenter Reverse-Proxy funktioniert, sind nur mi
 
 Wir benötigen für das neue Setup
 
-1. die URL des RelayServers (*https://relay.company.example*) und
+1. die URL des RelayServers (*https://relay.company.example*) inklusive des RelayServer-Endpunkts `relay` und
 1. den Namen des Links, unter dem sich der zugehörige On-Premises Connector mit dem RelayServer verbindet und so die On-Premises Applikation für externe Clients sichtbar macht sowie
 1. den im OnPremise-Connector konfigurierten Name für die  On-Premises Applikation
 

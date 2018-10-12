@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,25 +9,31 @@ namespace Thinktecture.Relay.Server.Diagnostics
 {
 	public class TraceFileWriter : ITraceFileWriter
 	{
-		public Task WriteHeaderFile(string fileName, IDictionary<string, string> headers)
+		public Task WriteHeaderFileAsync(string fileName, IReadOnlyDictionary<string, string> headers)
 		{
-		    var json = JsonConvert.SerializeObject(headers);
-			return WriteFile(fileName, Encoding.UTF8.GetBytes(json));
+			var json = JsonConvert.SerializeObject(headers);
+			return WriteAsync(fileName, Encoding.UTF8.GetBytes(json));
 		}
 
-		public Task WriteContentFile(string fileName, byte[] content)
+		public Task WriteContentFileAsync(string fileName, byte[] content)
 		{
 			if (content == null)
-			{
-				content = new byte[0];
-			}
+				content = Array.Empty<byte>();
 
-			return WriteFile(fileName, content);
+			return WriteAsync(fileName, content);
 		}
 
-		internal Task WriteFile(string fileName, byte[] content)
+		internal async Task WriteAsync(string fileName, byte[] content)
 		{
-			return Task.Factory.StartNew(() => File.WriteAllBytes(fileName, content));
+			if (fileName == null)
+				throw new ArgumentNullException(nameof(fileName));
+			if (content == null)
+				throw new ArgumentNullException(nameof(content));
+
+			using (var stream = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
+			{
+				await stream.WriteAsync(content, 0, content.Length).ConfigureAwait(false);
+			}
 		}
 	}
 }

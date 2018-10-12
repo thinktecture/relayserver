@@ -1,6 +1,7 @@
+/// <binding BeforeBuild='managementweb:build' />
 'use strict';
 
-var gulp = require('gulp');
+const gulp = require('gulp');
 
 require('./GulpTasks/gitbook');
 require('./GulpTasks/managementWeb');

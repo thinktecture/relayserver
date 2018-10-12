@@ -1,20 +1,21 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
 {
-	public interface IBackendCommunication : IDisposable
+	public interface IBackendCommunication
 	{
-		string OriginId { get; }
-		Task<IOnPremiseTargetReponse> GetResponseAsync(string requestId);
-		Task SendOnPremiseConnectorRequest(string onPremiseId, IOnPremiseConnectorRequest onPremiseConnectorRequest);
-	    void RegisterOnPremise(RegistrationInformation registrationInformation);
-		void UnregisterOnPremise(string connectionId);
-		Task SendOnPremiseTargetResponse(string originId, IOnPremiseTargetReponse reponse);
-	    bool IsRegistered(string connectionId);
-	    List<string> GetConnections(string linkId);
+		Guid OriginId { get; }
+		Task<IOnPremiseConnectorResponse> GetResponseAsync(string requestId, TimeSpan? requestTimeout = null);
+		void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request);
+		Task AcknowledgeOnPremiseConnectorRequestAsync(Guid originId, string acknowledgeId, string connectionId);
+		Task RenewLastActivityAsync(string connectionId);
+		Task RegisterOnPremiseAsync(IOnPremiseConnectionContext onPremiseConnectionContext);
+		Task UnregisterOnPremiseConnectionAsync(string connectionId);
+		Task DeactivateOnPremiseConnectionAsync(string connectionId);
+		void SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response);
+		IEnumerable<IOnPremiseConnectionContext> GetConnectionContexts();
 	}
 }

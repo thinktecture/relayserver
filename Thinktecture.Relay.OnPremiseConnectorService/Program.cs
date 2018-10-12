@@ -1,4 +1,7 @@
-﻿using Topshelf;
+using System;
+using System.Diagnostics;
+using Serilog;
+using Topshelf;
 
 namespace Thinktecture.Relay.OnPremiseConnectorService
 {
@@ -6,20 +9,49 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 	{
 		private static void Main(string[] args)
 		{
-			HostFactory.Run(config =>
-			{
-				config.Service<OnPremisesService>(settings =>
-				{
-					settings.ConstructUsing(_ => new OnPremisesService());
-					settings.WhenStarted(async s => await s.Start());
-					settings.WhenStopped(s => s.Stop());
-				});
-				config.RunAsNetworkService();
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.AppSettings()
+				.CreateLogger();
 
-				config.SetDescription("Thinktecture Relay OnPremises Service");
-				config.SetDisplayName("Thinktecture Relay OnPremises Service");
-				config.SetServiceName("TTRelayOnPremisesService");
-			});
+			try
+			{
+				HostFactory.Run(config =>
+				{
+					config.UseSerilog();
+					config.EnableShutdown();
+					config.Service<OnPremisesService>(settings =>
+					{
+						settings.ConstructUsing(_ => new OnPremisesService());
+						settings.WhenStarted(async s => await s.StartAsync().ConfigureAwait(false));
+						settings.WhenStopped(s => s.Stop());
+						settings.WhenShutdown(s => s.Stop());
+					});
+					config.RunAsNetworkService();
+
+					config.SetDescription("Thinktecture Relay OnPremises Service");
+					config.SetDisplayName("Thinktecture Relay OnPremises Service");
+					config.SetServiceName("TTRelayOnPremisesService");
+				});
+			}
+			catch (Exception ex)
+			{
+				Log.Logger.Fatal(ex, "Service crashed");
+			}
+			finally
+			{
+				Log.CloseAndFlush();
+			}
+
+			Log.CloseAndFlush();
+
+#if DEBUG
+			if (Debugger.IsAttached)
+			{
+				// ReSharper disable once LocalizableElement
+				Console.WriteLine("\nPress any key to close application window...");
+				Console.ReadKey(true);
+			}
+#endif
 		}
 	}
 }

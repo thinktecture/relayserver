@@ -1,35 +1,83 @@
-﻿using System.Threading.Tasks;
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Results;
-using Autofac;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NLog.Interface;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Serilog;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Http.Filters;
+using Thinktecture.Relay.Server.IO;
+using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Controller
 {
-    [Authorize(Roles = "OnPremise")]
-    public class ResponseController : ApiController
-    {
-        private readonly ILogger _logger;
-        private readonly IBackendCommunication _backendCommunication;
+	[Authorize(Roles = "OnPremise")]
+	[OnPremiseConnectionModuleBindingFilter]
+	[NoCache]
+	public class ResponseController : ApiController
+	{
+		private readonly ILogger _logger;
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
+		private readonly IBackendCommunication _backendCommunication;
 
-        public ResponseController(ILifetimeScope scope, ILogger logger)
-        {
-            _logger = logger;
-            _backendCommunication = scope.Resolve<IBackendCommunication>();
-        }
+		public ResponseController(IBackendCommunication backendCommunication, ILogger logger, IPostDataTemporaryStore postDataTemporaryStore)
+		{
+			_logger = logger;
+			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
+		}
 
-        public async Task<OkResult> Forward(JToken message)
-        {
-            _logger.Trace("Forwarding {0}", message.ToString());
+		public async Task<IHttpActionResult> Forward()
+		{
+			var requestStream = await Request.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-            var onPremiseTargetReponse = message.ToObject<OnPremiseTargetReponse>();
+			OnPremiseConnectorResponse response = null;
+			if (Request.Headers.TryGetValues("X-TTRELAY-METADATA", out var headerValues))
+			{
+				response = JToken.Parse(headerValues.First()).ToObject<OnPremiseConnectorResponse>();
 
-            await _backendCommunication.SendOnPremiseTargetResponse(onPremiseTargetReponse.OriginId, onPremiseTargetReponse);
+				using (var stream = _postDataTemporaryStore.CreateResponseStream(response.RequestId))
+				{
+					await requestStream.CopyToAsync(stream).ConfigureAwait(false);
+					response.ContentLength = stream.Length;
+				}
+			}
+			else
+			{
+				// this is a legacy on-premise connector (v1)
+				response = await ForwardLegacyResponse(Encoding.UTF8, requestStream).ConfigureAwait(false);
+			}
 
-            return Ok();
-        }
-    }
+			_logger?.Verbose("Received on-premise response. request-id={RequestId}, content-length={ResponseContentLength}", response.RequestId, response.ContentLength);
+
+			_backendCommunication.SendOnPremiseTargetResponse(response.OriginId, response);
+
+			return Ok();
+		}
+
+		private async Task<OnPremiseConnectorResponse> ForwardLegacyResponse(Encoding encoding, Stream requestStream)
+		{
+			using (var stream = new LegacyResponseStream(requestStream, _postDataTemporaryStore, _logger))
+			{
+				var temporaryId = await stream.ExtractBodyAsync().ConfigureAwait(false);
+
+				using (var reader = new JsonTextReader(new StreamReader(stream)))
+				{
+					var message = await JToken.ReadFromAsync(reader).ConfigureAwait(false);
+					var response = message.ToObject<OnPremiseConnectorResponse>();
+
+					response.Body = null;
+					response.ContentLength = _postDataTemporaryStore.RenameResponseStream(temporaryId, response.RequestId);
+
+					_logger?.Verbose("Extracted legacy on-premise response. request-id={RequestId}", response.RequestId);
+
+					return response;
+				}
+			}
+		}
+	}
 }

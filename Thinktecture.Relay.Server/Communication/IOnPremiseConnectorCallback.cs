@@ -1,12 +1,11 @@
-﻿using System.Threading;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using System.Threading.Tasks;
+using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
 {
-	internal interface IOnPremiseConnectorCallback
+	public interface IOnPremiseConnectorCallback
 	{
 		string RequestId { get; }
-		ManualResetEvent Handle { get; }
-		IOnPremiseTargetReponse Reponse { get; set; }
+		TaskCompletionSource<IOnPremiseConnectorResponse> Response { get; }
 	}
 }

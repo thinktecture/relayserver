@@ -1,22 +1,59 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{41EECED0-E7C6-4C7C-8B7D-9B6A33DA0150}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Test", "Thinktecture.Relay.Server.Test\Thinktecture.Relay.Server.Test.csproj", "{FC928931-8741-48E1-9061-343CF009C903}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.OnPremiseConnector", "Thinktecture.Relay.OnPremiseConnector\Thinktecture.Relay.OnPremiseConnector.csproj", "{63D02790-C22D-479B-BC30-1A45F2B832E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.OnPremiseConnector", "Thinktecture.Relay.OnPremiseConnector\Thinktecture.Relay.OnPremiseConnector.csproj", "{63D02790-C22D-479B-BC30-1A45F2B832E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.OnPremiseConnectorService", "Thinktecture.Relay.OnPremiseConnectorService\Thinktecture.Relay.OnPremiseConnectorService.csproj", "{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{7286C586-743A-443C-BF95-5394EE8E49F4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configs", "Configs", "{7286C586-743A-443C-BF95-5394EE8E49F4}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5E5C3493-0D98-4B1D-A50B-1E760782DE2D}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{0961D429-E302-46AC-BB14-198240900C5A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "de", "de", "{C930A0EE-45E1-4815-93BF-65B1F87DC9E0}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\de\1-was-ist-der-thinktecture-relayserver.md = Documentation\de\1-was-ist-der-thinktecture-relayserver.md
+		Documentation\de\2-architektur.md = Documentation\de\2-architektur.md
+		Documentation\de\3-installation.md = Documentation\de\3-installation.md
+		Documentation\de\4-relayserver-management-web.md = Documentation\de\4-relayserver-management-web.md
+		Documentation\de\5-relayserver-interceptor-entwicklung.md = Documentation\de\5-relayserver-interceptor-entwicklung.md
+		Documentation\de\6-entwicklungssetup.md = Documentation\de\6-entwicklungssetup.md
+		Documentation\de\relayserver.md = Documentation\de\relayserver.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay", "Thinktecture.Relay\Thinktecture.Relay.csproj", "{E34D846B-3B1E-4A97-A06F-F5502349F4F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "en", "en", "{EB57D91E-69B1-4779-BE64-0729A2600DB7}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\en\1-what-is-thinktecture-relayserver.md = Documentation\en\1-what-is-thinktecture-relayserver.md
+		Documentation\en\2-architecture.md = Documentation\en\2-architecture.md
+		Documentation\en\3-installation.md = Documentation\en\3-installation.md
+		Documentation\en\4-relayserver-web-management.md = Documentation\en\4-relayserver-web-management.md
+		Documentation\en\5-relayserver-interceptor-development.md = Documentation\en\5-relayserver-interceptor-development.md
+		Documentation\en\6-development-setup.md = Documentation\en\6-development-setup.md
+		Documentation\en\relayserver.md = Documentation\en\relayserver.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ManagementWeb", "ManagementWeb", "{2A39E343-7677-413A-B53A-3A553252371A}"
+	ProjectSection(SolutionItems) = preProject
+		gulpfile.js = gulpfile.js
+		package.json = package.json
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.CustomCodeDemo", "Thinktecture.Relay.CustomCodeDemo\Thinktecture.Relay.CustomCodeDemo.csproj", "{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,11 +77,24 @@ Global
 		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEDA9154-6CF6-4D24-B3BD-731EE0C646F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E34D846B-3B1E-4A97-A06F-F5502349F4F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA1580DB-83D5-49EF-BB7E-0B3C98154BC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FC928931-8741-48E1-9061-343CF009C903} = {C7730B28-D0F7-49ED-B8F2-32114D3ABD0F}
+		{0961D429-E302-46AC-BB14-198240900C5A} = {5E5C3493-0D98-4B1D-A50B-1E760782DE2D}
+		{C930A0EE-45E1-4815-93BF-65B1F87DC9E0} = {0961D429-E302-46AC-BB14-198240900C5A}
+		{EB57D91E-69B1-4779-BE64-0729A2600DB7} = {0961D429-E302-46AC-BB14-198240900C5A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2E1834A6-24E4-4305-B777-6C2E875789DA}
 	EndGlobalSection
 EndGlobal

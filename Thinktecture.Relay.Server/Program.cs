@@ -1,40 +1,96 @@
-﻿using System;
-using System.Configuration;
-using System.Linq;
+using System;
+using System.Diagnostics;
+using Autofac;
+using AutofacSerilogIntegration;
+using Serilog;
+using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Config;
+using Thinktecture.Relay.Server.Controller;
+using Thinktecture.Relay.Server.DependencyInjection;
+using Thinktecture.Relay.Server.Interceptor;
 using Topshelf;
+using Topshelf.Autofac;
 
 namespace Thinktecture.Relay.Server
 {
-    internal static class Program
-    {
-        private static void Main(string[] args)
-        {
-            // TODO: Use configuration (see RELAY-68)
-            int port;
-            if (!Int32.TryParse(ConfigurationManager.AppSettings["Port"], out port))
-            {
-                port = 20000;
-            }
+	internal static class Program
+	{
+		private static void Main(string[] args)
+		{
+			Log.Logger = new LoggerConfiguration().ReadFrom.AppSettings().CreateLogger();
 
-            var hostName = ConfigurationManager.AppSettings["HostName"] ?? "+";
-            var allowHttp = String.Equals(ConfigurationManager.AppSettings["UseInsecureHttp"], "true",
-                StringComparison.OrdinalIgnoreCase);
+			try
+			{
+				HostFactory.Run(config =>
+				{
+					config.UseSerilog();
+					var programScope = BuildProgramScope();
+					var relayServerScope = BuildRelayServerScope(programScope);
 
-            HostFactory.Run(config =>
-            {
-                config.Service<RelayService>(settings =>
-                {
-                    settings.ConstructUsing(_ => new RelayService(hostName, port, allowHttp));
-                    settings.WhenStarted(s => s.Start());
-                    settings.WhenStopped(s => s.Stop());
-                });
-                config.RunAsNetworkService();
+					config.UseAutofacContainer(relayServerScope);
+					config.Service<RelayService>(settings =>
+					{
+						settings.ConstructUsingAutofacContainer();
+						settings.WhenStarted(s =>
+						{
+							s.Start();
+							// Make sure we create the heartbeater at service startup
+							relayServerScope.Resolve<IOnPremiseConnectionHeartbeater>();
+						});
+						settings.WhenStopped(s =>
+						{
+							s.Stop();
+							relayServerScope.Dispose();
+							programScope.Dispose();
+						});
+					});
 
-                config.SetDescription("Thinktecture Relay Server Process");
-                config.SetDisplayName("Thinktecture Relay Server");
-                config.SetServiceName("TTRelayServer");
-                config.ApplyCommandLine();
-            });
-        }
-    }
+					config.RunAsNetworkService();
+					config.SetDescription("Thinktecture RelayServer Process");
+					config.SetDisplayName("Thinktecture RelayServer");
+					config.SetServiceName("TTRelayServer");
+					config.ApplyCommandLine();
+				});
+			}
+			catch (Exception ex)
+			{
+				Log.Logger.Fatal(ex, "Service crashed");
+			}
+			finally
+			{
+				Log.CloseAndFlush();
+			}
+
+#if DEBUG
+			if (Debugger.IsAttached)
+			{
+				// ReSharper disable once LocalizableElement
+				Console.WriteLine("\nPress any key to close application window...");
+				Console.ReadKey(true);
+			}
+#endif
+		}
+
+		private static ILifetimeScope BuildProgramScope()
+		{
+			var builder = new ContainerBuilder();
+
+			builder.RegisterLogger();
+
+			builder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
+
+			builder.RegisterType<CustomCodeAssemblyLoader>().As<ICustomCodeAssemblyLoader>().SingleInstance();
+			builder.RegisterType<ControllerLoader>().As<IControllerLoader>().SingleInstance();
+			builder.RegisterType<InterceptorLoader>().As<IInterceptorLoader>().SingleInstance();
+
+			builder.RegisterType<RelayServerModule>();
+
+			return builder.Build();
+		}
+
+		private static ILifetimeScope BuildRelayServerScope(ILifetimeScope programScope)
+		{
+			return programScope.BeginLifetimeScope(builder => builder.RegisterModule(programScope.Resolve<RelayServerModule>()));
+		}
+	}
 }

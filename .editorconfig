@@ -1,0 +1,19 @@
+# For more info see: https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference
+# Recommended VS plugin for editing the .editorconfig: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.EditorConfig
+
+[*.cs]
+charset = utf-8
+indent_style = tab
+trim_trailing_whitespace = true
+end_of_line = crlf
+insert_final_newline = true
+
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_cast = false
+
+[*.config]
+charset = utf-8
+indent_style = space
+indent_size = 2
+end_of_line = crlf
+insert_final_newline = true

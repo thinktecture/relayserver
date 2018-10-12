@@ -1,128 +1,134 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
-using NLog.Interface;
+using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
-    internal class OnPremisesConnection : PersistentConnection
-    {
-        private readonly IBackendCommunication _backendCommunication;
-        private readonly IPostDataTemporaryStore _temporaryStore;
-        private readonly ILogger _logger;
+	internal class OnPremisesConnection : PersistentConnection
+	{
+		private readonly ILogger _logger;
+		private readonly IBackendCommunication _backendCommunication;
 
-        public OnPremisesConnection(IBackendCommunication backendCommunication, IPostDataTemporaryStore temporaryStore, ILogger logger)
-        {
-            _backendCommunication = backendCommunication;
-            _temporaryStore = temporaryStore;
-            _logger = logger;
+		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication)
+		{
+			_logger = logger;
+			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
+		}
 
-        }
+		protected override bool AuthorizeRequest(IRequest request)
+		{
+			if ((request.User?.Identity.IsAuthenticated ?? false) && request.User is ClaimsPrincipal principal)
+			{
+				var linkId = principal.FindFirst("OnPremiseId")?.Value;
+				return !String.IsNullOrWhiteSpace(linkId) && Guid.TryParse(linkId, out var _);
+			}
 
-        protected override bool AuthorizeRequest(IRequest request)
-        {
-            if (request.User != null)
-            {
-                return request.User.Identity.IsAuthenticated;
-            }
-            return false;
-        }
+			return false;
+		}
 
-        protected override Task OnConnected(IRequest request, string connectionId)
-        {
-            string onPremiseId = GetOnPremiseIdFromRequest(request);
+		protected override async Task OnConnected(IRequest request, string connectionId)
+		{
+			var onPremiseClaims = GetOnPremiseClaims(request);
+			_logger?.Debug("On-premise connected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-            _logger.Debug("OnPremise {0} connected", onPremiseId);
+			await RegisterOnPremiseAsync(request, connectionId, onPremiseClaims).ConfigureAwait(false);
 
-            RegisterOnPremise(request, connectionId, onPremiseId);
+			await base.OnConnected(request, connectionId).ConfigureAwait(false);
+		}
 
-            return base.OnConnected(request, connectionId);
-        }
+		protected override async Task OnReconnected(IRequest request, string connectionId)
+		{
+			var onPremiseClaims = GetOnPremiseClaims(request);
+			_logger?.Debug("On-premise reconnected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-        private async Task ForwardClientRequest(string connectionId, IOnPremiseConnectorRequest onPremiseConnectorRequest)
-        {
-            _logger.Debug("Forwarding client request to connection '{0}'", connectionId);
-            _logger.Trace("Forwarding client request to connection '{0}'. request-id={1}, http-method={2}, url={3}, origin-id={4}, body-length={5}",
-                connectionId, onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.HttpMethod, onPremiseConnectorRequest.Url, onPremiseConnectorRequest.OriginId, onPremiseConnectorRequest.Body != null ? onPremiseConnectorRequest.Body.Length : 0);
+			await RegisterOnPremiseAsync(request, connectionId, onPremiseClaims).ConfigureAwait(false);
 
-            var onPremiseTargetRequest = new OnPremiseTargetRequest()
-            {
-                RequestId = onPremiseConnectorRequest.RequestId,
-                HttpMethod = onPremiseConnectorRequest.HttpMethod,
-                Url = onPremiseConnectorRequest.Url,
-                HttpHeaders = onPremiseConnectorRequest.HttpHeaders,
-                OriginId = onPremiseConnectorRequest.OriginId
-            };
+			await base.OnReconnected(request, connectionId).ConfigureAwait(false);
+		}
 
-            if (onPremiseConnectorRequest.Body != null)
-            {
-                if (onPremiseConnectorRequest.Body.Length > 0x20000) // 128k
-                {
-                    _temporaryStore.Save(onPremiseConnectorRequest.RequestId, onPremiseConnectorRequest.Body);
-                    onPremiseTargetRequest.Body = String.Empty;
-                }
-                else
-                {
-                    onPremiseTargetRequest.Body = Convert.ToBase64String(onPremiseConnectorRequest.Body);
-                }
-            }
+		protected override async Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
+		{
+			var onPremiseClaims = GetOnPremiseClaims(request);
+			_logger?.Debug("On-premise disconnected. connection-id={ConnectionId}, link-id={LinkId}, user-name={UserName}, role={Role}", connectionId, onPremiseClaims.OnPremiseId, onPremiseClaims.UserName, onPremiseClaims.Role);
 
-            await Connection.Send(connectionId, onPremiseTargetRequest);
-        }
+			await _backendCommunication.UnregisterOnPremiseConnectionAsync(connectionId).ConfigureAwait(false);
 
-        protected override Task OnReconnected(IRequest request, string connectionId)
-        {
-            var onPremiseId = GetOnPremiseIdFromRequest(request);
+			await base.OnDisconnected(request, connectionId, stopCalled).ConfigureAwait(false);
+		}
 
-            _logger.Debug("OnPremise {0} reconnected.", onPremiseId);
+		private async Task ForwardClientRequestAsync(string connectionId, IOnPremiseConnectorRequest request)
+		{
+			_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
+				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.ContentLength);
 
-            RegisterOnPremise(request, connectionId, onPremiseId);
+			await Connection.Send(connectionId, request).ConfigureAwait(false);
+		}
 
-            return base.OnReconnected(request, connectionId);
-        }
+		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
+		{
+			var claimsPrincipal = (ClaimsPrincipal)request.User;
+			var onPremiseId = claimsPrincipal.FindFirst("OnPremiseId")?.Value;
 
-        private static string GetOnPremiseIdFromRequest(IRequest request)
-        {
-            string onPremiseId = ((ClaimsPrincipal)request.User).Claims.Single(c => c.Type == "OnPremiseId").Value;
-            return onPremiseId;
-        }
+			if (!Guid.TryParse(onPremiseId, out var linkId))
+				throw new ArgumentException($"The claim \"OnPremiseId\" is not valid: {onPremiseId}.");
 
-        private void RegisterOnPremise(IRequest request, string connectionId, string onPremiseId)
-        {
-            _backendCommunication.RegisterOnPremise(new RegistrationInformation()
-            {
-                ConnectionId = connectionId,
-                OnPremiseId = onPremiseId,
-                RequestAction = async cr => await ForwardClientRequest(connectionId, cr),
-                IpAddress = GetIpAddressFromOwinEnvironment(request.Environment)
-            });
-        }
+			return new OnPremiseClaims(claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value, linkId, claimsPrincipal.FindFirst(ClaimTypes.Role)?.Value);
+		}
 
-        protected override Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)
-        {
-            _logger.Debug("OnPremise {0} disconnected - V2.", connectionId);
-            _backendCommunication.UnregisterOnPremise(connectionId);
+		private async Task RegisterOnPremiseAsync(IRequest request, string connectionId, OnPremiseClaims claims)
+		{
+			await _backendCommunication.RegisterOnPremiseAsync(new OnPremiseConnectionContext()
+			{
+				ConnectionId = connectionId,
+				LinkId = claims.OnPremiseId,
+				UserName = claims.UserName,
+				Role = claims.Role,
+				RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, cr),
+				IpAddress = GetIpAddressFromOwinEnvironment(request.Environment),
+				ConnectorVersion = GetConnectorVersionFromRequest(request),
+				ConnectorAssemblyVersion = GetConnectorAssemblyVersionFromRequest(request),
+			}).ConfigureAwait(false);
+		}
 
-            return base.OnDisconnected(request, connectionId, stopCalled);
-        }
+		// Adopted from http://stackoverflow.com/questions/11044361/signalr-get-caller-ip-address
+		private string GetIpAddressFromOwinEnvironment(IDictionary<string, object> environment)
+		{
+			return Get<string>(environment, "server.RemoteIpAddress");
+		}
 
-        // Adopted from http://stackoverflow.com/questions/11044361/signalr-get-caller-ip-address
-        private string GetIpAddressFromOwinEnvironment(IDictionary<string, object> environment)
-        {
-            var ipAddress = Get<string>(environment, "server.RemoteIpAddress");
-            return ipAddress;
-        }
+		private int GetConnectorVersionFromRequest(IRequest request)
+		{
+			Int32.TryParse(request.QueryString["cv"], out var version);
+			return version;
+		}
 
-        private static T Get<T>(IDictionary<string, object> env, string key)
-        {
-            object value;
-            return env.TryGetValue(key, out value) ? (T)value : default(T);
-        }
-    }
+		private string GetConnectorAssemblyVersionFromRequest(IRequest request)
+		{
+			return request.QueryString["av"] ?? "Unknown";
+		}
+
+		private static T Get<T>(IDictionary<string, object> env, string key)
+		{
+			return env.TryGetValue(key, out var value) ? (T)value : default;
+		}
+
+		private class OnPremiseClaims
+		{
+			public string UserName { get; }
+			public Guid OnPremiseId { get; }
+			public string Role { get; }
+
+			public OnPremiseClaims(string userName, Guid onPremiseId, string role)
+			{
+				UserName = userName;
+				OnPremiseId = onPremiseId;
+				Role = role;
+			}
+		}
+	}
 }

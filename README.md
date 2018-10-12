@@ -1,5 +1,7 @@
 # Thinktecture RelayServer
 
+[English documentation](./Documentation/en/relayserver.md).
+
 Der Thinktecture RelayServer (nachfolgend kurz RelayServer genannt) ermöglicht als Open-Source-Software eine bidirektionale, sichere Kommunikation von Clients, mobilen Endgeräten und Applikationen mit On-Premises-Applikationen hinter Routern und Firewalls über das HTTPS-Protokoll bei vollständiger zentraler Kontrolle und Auditierung der zulässigen Teilnehmer und der erlaubten Daten.
 
 Ein für Client-Anwendungen und On-Premises-Applikationen gleichermaßen erreichbarer Server bildet einen sicheren Austauschpunkt für Nachrichten und Daten. Da der Server unter der vollen Kontrolle des Betreibers steht und sowohl mit Clients als auch On-Premises-Applikationen durchgängig verschlüsselt kommuniziert, ist die Sicherheit der übertragenen Daten jederzeit gewährleistet.

@@ -1,99 +1,153 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.Repository;
+using Thinktecture.Relay.Server.Security;
 
 namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 {
-    [Authorize(Roles = "Admin")]
-    public class UserController : ApiController
-    {
-        private readonly IUserRepository _userRepository;
+	[Authorize(Roles = "Admin")]
+	[ManagementWebModuleBindingFilter]
+	[NoCache]
+	public class UserController : ApiController
+	{
+		private readonly IUserRepository _userRepository;
+		private readonly IPasswordComplexityValidator _passwordComplexityValidator;
 
-        public UserController(IUserRepository userRepository)
-        {
-            _userRepository = userRepository;
-        }
+		public UserController(IUserRepository userRepository, IPasswordComplexityValidator passwordComplexityValidator)
+		{
+			_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+			_passwordComplexityValidator = passwordComplexityValidator ?? throw new ArgumentNullException(nameof(passwordComplexityValidator));
+		}
 
-        [AllowAnonymous]
-        [HttpPost]
-        [ActionName("firsttime")]
-        public IHttpActionResult CreateFirstUser(CreateUser user)
-        {
-            if (_userRepository.Any())
-            {
-                return new StatusCodeResult(HttpStatusCode.Forbidden, Request);
-            }
+		[AllowAnonymous]
+		[HttpPost]
+		[ActionName("firsttime")]
+		public IHttpActionResult CreateFirstUser(CreateUser user)
+		{
+			if (_userRepository.Any())
+			{
+				return new StatusCodeResult(HttpStatusCode.Forbidden, Request);
+			}
 
-            return Create(user);
-        }
+			if (!CheckPasswordAndVerification(user, out var result))
+			{
+				return result;
+			}
 
-        [HttpGet]
-        [ActionName("users")]
-        public IEnumerable<User> List()
-        {
-            return _userRepository.List();
-        }
+			return Create(user);
+		}
 
-        [HttpPost]
-        [ActionName("user")]
-        public IHttpActionResult Create(CreateUser user)
-        {
-            if (user == null)
-            {
-                return BadRequest();
-            }
+		[HttpGet]
+		[ActionName("users")]
+		public IEnumerable<User> List()
+		{
+			return _userRepository.List();
+		}
 
-            var id = _userRepository.Create(user.UserName, user.Password);
+		[HttpPost]
+		[ActionName("user")]
+		public IHttpActionResult Create(CreateUser user)
+		{
+			if (user == null)
+			{
+				return BadRequest();
+			}
 
-            if (id == Guid.Empty)
-            {
-                return BadRequest();
-            }
+			if (!CheckPasswordAndVerification(user, out var result))
+			{
+				return result;
+			}
 
-            // TODO: Location
-            return Created("", id);
-        }
+			var id = _userRepository.Create(user.UserName, user.Password);
 
-        [HttpGet]
-        [ActionName("user")]
-        public IHttpActionResult Get(Guid id)
-        {
-            var user = _userRepository.Get(id);
+			if (id == Guid.Empty)
+			{
+				return BadRequest();
+			}
 
-            if (user == null)
-            {
-                return BadRequest();
-            }
+			// TODO: Location
+			return Created("", id);
+		}
 
-            return Ok(user);
-        }
+		private bool CheckPasswordAndVerification(CreateUser user, out IHttpActionResult httpActionResult)
+		{
+			httpActionResult = null;
 
-        [HttpDelete]
-        [ActionName("user")]
-        public IHttpActionResult Delete(Guid id)
-        {
-            var result = _userRepository.Delete(id);
+			// new password and repetition need to match
+			if (user.Password != user.PasswordVerification)
+			{
+				httpActionResult = BadRequest("New password and verification do not match");
+				return false;
+			}
 
-            return result ? (IHttpActionResult) Ok() : BadRequest();
-        }
+			// validate password complexity by other rules
+			if (!_passwordComplexityValidator.ValidatePassword(user.UserName, user.Password, out var errorMessage))
+			{
+				httpActionResult = BadRequest(errorMessage);
+				return false;
+			}
 
-        [HttpPut]
-        [ActionName("user")]
-        public IHttpActionResult Update(UpdateUser user)
-        {
-            if (user == null)
-            {
-                return BadRequest();
-            }
+			return true;
+		}
 
-            var result = _userRepository.Update(user.Id, user.Password);
+		[HttpGet]
+		[ActionName("user")]
+		public IHttpActionResult Get(Guid id)
+		{
+			var user = _userRepository.Get(id);
 
-            return result ? (IHttpActionResult) Ok() : BadRequest();
-        }
+			if (user == null)
+			{
+				return BadRequest();
+			}
+
+			return Ok(user);
+		}
+
+		[HttpDelete]
+		[ActionName("user")]
+		public IHttpActionResult Delete(Guid id)
+		{
+			var result = _userRepository.Delete(id);
+
+			return result ? (IHttpActionResult)Ok() : BadRequest();
+		}
+
+		[HttpPut]
+		[ActionName("user")]
+		public IHttpActionResult Update(UpdateUser user)
+		{
+			if (user == null)
+			{
+				return BadRequest();
+			}
+
+			// OldPassword needs to be correct
+			var authenticatedUser = _userRepository.Authenticate(user.UserName, user.PasswordOld);
+			if (authenticatedUser == null)
+			{
+				return BadRequest("Old password not okay");
+			}
+
+			if (user.PasswordOld == user.Password)
+			{
+				return BadRequest("New password must be different from old one");
+			}
+
+			if (!CheckPasswordAndVerification(user, out var error))
+			{
+				return error;
+			}
+
+			var result = _userRepository.Update(authenticatedUser.Id, user.Password);
+
+			return result ? (IHttpActionResult)Ok() : BadRequest();
+		}
 
 		[HttpGet]
 		[ActionName("userNameAvailability")]
@@ -106,5 +160,5 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 
 			return Conflict();
 		}
-    }
+	}
 }

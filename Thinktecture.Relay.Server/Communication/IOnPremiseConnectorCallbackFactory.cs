@@ -1,6 +1,6 @@
-﻿namespace Thinktecture.Relay.Server.Communication
+namespace Thinktecture.Relay.Server.Communication
 {
-	internal interface IOnPremiseConnectorCallbackFactory
+	public interface IOnPremiseConnectorCallbackFactory
 	{
 		IOnPremiseConnectorCallback Create(string requestId);
 	}

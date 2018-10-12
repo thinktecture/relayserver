@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html ng-app="thinktectureRelayAdminWeb">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,22 +11,27 @@
 
     <title translate="MAIN.TITLE"></title>
     <style>
-        [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+        [ng\:cloak],
+        [ng-cloak],
+        [data-ng-cloak],
+        [x-ng-cloak],
+        .ng-cloak,
+        .x-ng-cloak {
             display: none !important;
         }
     </style>
 
     <!-- inject:css -->
     <link rel="stylesheet" href="libs/bootstrap/bootstrap.css">
-    <link rel="stylesheet" href="libs/angularChart/angular-chart.css">
     <link rel="stylesheet" href="libs/pnotify/pnotify.custom.css">
-    <link rel="stylesheet" href="libs/angularAddOns/ui-grid/ui-grid-unstable.css">
+    <link rel="stylesheet" href="libs/angularAddOns/ui-grid/ui-grid.css">
     <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="assets/app.css">
     <link rel="stylesheet" href="assets/app.responsive.css">
     <!-- endinject -->
-    <link rel="shortcut icon" type="image/ico" href="assets/favicon.ico"/>
+    <link rel="shortcut icon" type="image/ico" href="assets/favicon.ico" />
 </head>
+
 <body>
 <navigation></navigation>
 
@@ -33,22 +39,22 @@
 </div>
 
 <!-- inject:js -->
-<script src="libs/jQuery/jquery-1.10.2.js"></script>
+<script src="libs/jQuery/jquery-3.2.1.min.js"></script>
 <script src="libs/angular/angular.js"></script>
 <script src="libs/chartjs/chart.js"></script>
-<script src="libs/angularChart/angular-chart.js"></script>
 <script src="libs/angularAddOns/angular-sanitize.js"></script>
 <script src="libs/angularAddOns/angular-ui-router.js"></script>
+<script src="libs/angularChart/angular-chart.js"></script>
 <script src="libs/angularTranslate/angular-translate.js"></script>
 <script src="libs/momentjs/moment.js"></script>
 <script src="libs/pnotify/pnotify.custom.js"></script>
 <script src="libs/pnotify/pnotify.js"></script>
-<script src="libs/uiBootstrap/ui-bootstrap-tpls-0.14.3.js"></script>
-<script src="libs/angularAddOns/ui-grid/ui-grid-unstable.js"></script>
+<script src="libs/uiBootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
+<script src="libs/angularAddOns/ui-grid/ui-grid.js"></script>
 <script src="app/appInit.js"></script>
 <script src="app/dashboard/dashboard.js"></script>
-<script src="app/links/links.js"></script>
 <script src="app/linkDetails/linkDetails.js"></script>
+<script src="app/links/links.js"></script>
 <script src="app/login/login.js"></script>
 <script src="app/login/logout.js"></script>
 <script src="app/setup/setup.js"></script>
@@ -78,4 +84,5 @@
 <script src="appTranslations/translations-en.js"></script>
 <!-- endinject -->
 </body>
+
 </html>

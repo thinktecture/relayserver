@@ -4,15 +4,15 @@
 
 Zum Betrieb des RelayServers müssen auf dem dafür verwendeten Windows Server folgende Software-Bestandteile installiert sein:
 
-- Microsoft .Net-Framework v4.5.1 oder höher
-- Microsoft SQL Server (Express) 2014
-- RabbitMQ mit Erlang-Ausführungsumgebung
+* Microsoft .Net-Framework v4.6 oder höher
+* Microsoft SQL Server (Express) 2014 oder neuer
+* RabbitMQ mit Erlang-Ausführungsumgebung
 
 ### RabbitMQ mit Erlang-Ausführungsumgebung
 
-Die Installation von RabbitMQ, welches eine installierte Erlang- Ausführungsumgebung voraussetzt, ist unter [http://www.rabbitmq.com/install-windows.html](http://www.rabbitmq.com/install-windows.html) ausführlich beschrieben. Es sollten dabei keine abweichenden Ports gewählt werden, um Unstimmigkeiten im weiteren Verlauf der Installation des RelayServers zu vermeiden.
+Die Installation von RabbitMQ, welches eine installierte Erlang-Ausführungsumgebung voraussetzt, ist unter [http://www.rabbitmq.com/install-windows.html](http://www.rabbitmq.com/install-windows.html) ausführlich beschrieben. Es sollten dabei keine abweichenden Ports gewählt werden, um Unstimmigkeiten im weiteren Verlauf der Installation des RelayServers zu vermeiden.
 
-Nach der Installation von Erlang und RabbitMQ ist es sinnvoll, die Management Weboberfläche für RabbitMQ zu aktivieren. Die Aktivierung erfolgt im RabbitMQ Command Prompt, der durch die Installation von RabbitMQ in der gleichnamigen Programmgruppe im Startmenü angelegt worden ist. Im RabbitMQ Command Prompt müssen die nachfolgenden Befehle ausgeführt werden:
+Nach der Installation von Erlang und RabbitMQ ist es sinnvoll, die Management Weboberfläche für RabbitMQ zu aktivieren. Die Aktivierung erfolgt im RabbitMQ Command Prompt, der durch die Installation von RabbitMQ in der gleichnamigen Programmgruppe im Startmenü angelegt worden ist. Diesen bitte mit Administrator-Rechten starten. Im RabbitMQ Command Prompt müssen die nachfolgenden Befehle ausgeführt werden:
 
 ```
 rabbitmq-plugins enable rabbitmq_management
@@ -25,7 +25,6 @@ rabbitmq-service start
 Jetzt lässt sich das Management Web von RabbitMQ unter [http://127.0.0.1:15672/](http://127.0.0.1:15672/) aufrufen und meldet sich mit dem Login.
 
 ![2-rabbitmq2.png](./assets/2-rabbitmq2.png)
-
 
 **Hinweis** : Sollte die Management Weboberfläche von RabbitMQ nicht aufrufbar sein, so ist sehr wahrscheinlich während der Installation von RabbitMQ der zugehörige Service nicht fehlerfrei installiert worden. Dazu muss in der Windows Service Konsole geprüft werden, ob der RabbitMQ Service eine Beschreibung enthält. Fehlt die Service-Beschreibung wie im nachfolgenden Screenshot, dann konnte der RabbitMQ Installer den Service nicht korrekt installieren.
 
@@ -102,8 +101,7 @@ SAMPLE_Thinktecture.Relay.Server.exe.config
 
 ![2-sample-config-file.png](./assets/2-sample-config-file.png)
 
-
-Diese Konfigurationsdatei sollte nach der initialen Bearbeitung als 
+Diese Konfigurationsdatei sollte nach der initialen Bearbeitung als
 
 ```
 Thinktecture.Relay.Server.exe.config
@@ -134,23 +132,69 @@ Die Standardeinstellungen umfassen dabei:
 
 ```
 <appSettings>
-     <add key="EnableManagementWeb" value="true"/>
-    <add key="EnableRelaying" value="true"/>
-    <add key="EnableOnPremiseConnections" value="true" />
-    <add key="Port" value="443"/>
-    <add key="HostName" value="+"/>
+    <add key="RabbitMqClusterHosts" value="" />
+    <add key="QueueExpiration" value="00:00:10" />
+    <add key="RequestExpiration" value="00:00:10" />
+    <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
+    <add key="TraceFileDirectory" value="tracefiles" />
+    <add key="LinkPasswordLength" value="100" />
+    <add key="DisconnectTimeout" value="6" />
+    <add key="ConnectionTimeout" value="5" />
+    <add key="KeepAliveInterval" value="2" />
     <add key="UseInsecureHttp" value="false" />
+    <add key="EnableManagementWeb" value="true" />
+    <add key="EnableRelaying" value="true" />
+    <add key="EnableOnPremiseConnections" value="true" />
+    <add key="HostName" value="+" />
+    <add key="Port" value="443" />
+    <add key="ManagementWebLocation" value="ManagementWeb" />
+    <add key="TemporaryRequestStoragePath" value="" />
+    <add key="TemporaryRequestStoragePeriod" value="00:01:00" />
+    <add key="ActiveConnectionTimeout" value="00:02:00" />
+    <add key="CustomCodeAssemblyPath" value="" />
+    <add key="SharedSecret" value="" />
+    <add key="OAuthCertificate" value="" />
+    <add key="HstsHeaderMaxAge" value="365.00:00:00" />
+    <add key="HstsIncludeSubdomains" value="false" />
+    <add key="IncludeErrorDetailPolicy" value="Default" />
+    <add key="MaxFailedLoginAttempts" value="5" />
+    <add key="FailedLoginLockoutPeriod" value="00:15:00" />
+    <add key="SecureClientController" value="false" />
+    <add key="AccessTokenLifetime" value="365.00:00:00" />
 </appSettings>
 ```
 
 |  Key name | Description |
 | --- | --- |
-| EnableManagementWeb | Aktiviert die Management Weboberfläche (default true) |
-| EnableRelaying | Aktiviert die Relay-Funktion des Servers (default true) |
-| EnableOnPremiseConnections | Erlaubt den Verbindungsaufbau von On-Premises Connectoren (default true) |
-| Port | Standard-Port des RelayServers (default 443) |
+| RabbitMqClusterHosts | Komma-separierte Liste der RabbitMQ Cluster Teilnehmer (default _null_) |
+| QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
+| RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
+| OnPremiseConnectorCallbackTimeout| Zeitspanne, die der RelayServer auf eine Antwort des On-Premise Connectors wartet (default 30 Sekunden) |
+| TraceFileDirectory | Pfad zum Verzeichnis, in das Trace-dateien geschrieben werden, wenn traceing aktiviert ist (default 'tracefiles') |
+| LinkPasswordLength | Länge der Passwörter, die für neue links automatisch generiert werden (default 100) |
+| DisconnectTimeout | Zeitspanne, nach der für nicht mehr über SignalR verbundene On-Premise Connectoren das OnDisconnect event ausgelöst wird (default 6 Sekunden) |
+| ConnectionTimeout | Zeitspanne, nach der eine nicht mehr aktive SignalR Verbindung zu einem On-Premise Connector geschlossen wird (default 5 Sekunden) |
+| KeepAliveInterval | Zeitspanne, nach der Keepalive Pakete über die SignalR Verbindung an verbundene On-Premise Connectoren gesendet werden (default und Minimum DisconnectTimeout / 3 Sekunden) |
+| UseInsecureHttp | Aktiviert die Verwendung von HTTP statt HTTPS (die Verwendung von HTTP im Produktivbetrieb wird nicht empfohlen) (default false) |
+| EnableManagementWeb | Aktiviert die Management Weboberfläche (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet) |
+| EnableRelaying | Aktiviert die Relay-Funktion des Servers (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet) |
+| EnableOnPremiseConnections | Erlaubt den Verbindungsaufbau von On-Premises Connectoren (default true) <br/> Mögliche Werte: true (an), false (aus), local (es werden nur Anfragen von localhost beantwortet) |
 | HostName | Gewünschte Ziel-URL des RelayServers (default +) |
-| UseInsecureHttp | Aktiviert die Verwendung von HTTP statt HTTPS (die Verwendung von HTTP im Produktivbetrieb wird nicht empfohlen). |
+| Port | Standard-Port des RelayServers (default 443) |
+| ManagementWebLocation | Pfad zu den Dateien des Management-Webs (default 'ManagementWeb') |
+| TemporaryRequestStoragePath | Pfad zu einem Verzeichnis in dem die Daten der Requests temporär abgelegt werden (default _null_) <br/> Im Multi-Server-Betrieb muss dieses Verzeichnis von allen Nodes gelesen und beschrieben werden können. Wenn kein Wert angegeben ist werden die Requests im Speicher gehalten, es ist dann kein Multi-Server-Betrieb möglich. |
+| TemporaryRequestStoragePeriod | Gibt die Zeitspanne an, nach der nicht mehr verwendete temporäre Dateien gelöscht werden (default und Minimum doppelter OnPremiseConnectorCallbackTimeout) |
+| ActiveConnectionTimeout | Zeit, nach der eine Verbindung zwischen einem On-Premise Connector und dem RelayServer als nicht mehr aktiv angesehen wird (default 120 Sekunden) |
+| CustomCodeAssemblyPath | Pfad zu einem Assembly, in dem zusätzlicher Code implementiert ist (default _null_) <br/> Entweder absolut oder relativ zum RelayServer |
+| SharedSecret | Base64 encodiertes Shared Secret (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert. Wird benötigt für einen unterbrechungsfreien Failover der SignalR Verbindung bei der Verwendung eines Load-Balancers. |
+| OAuthCertificate | Base64 encodiertes X509 Zertifikat (default _null_) <br/> Wenn gesetzt, werden die JWT Tokens für die Authorisierung von On-Premise Connectoren und ManagementWeb User hiermit signiert |
+| HstsHeaderMaxAge | Wert, der im HTTP Strict Transport Security Header für `max-age` gesetzt werden soll (default 365 Tage) |
+| HstsIncludeSubdomains | Gibt an, ob im HTTP Strict Transport Security Header der optionale Parameter `includeSubDomains` gesetzt werden soll (default false) |
+| IncludeErrorDetailPolicy | Legt fest, ob Fehlerdetails (Stacktrace, Exception Messages) ausgegeben werden (default 'default') <br/> Zur Erläuterung der möglichen Werte siehe [MSDN](https://msdn.microsoft.com/de-de/library/system.web.http.includeerrordetailpolicy(v=vs.118).aspx) |
+| MaxFailedLoginAttempts | Anzahl von erfolglosen Login-Versuchen für einen User, bevor dieser temporär gesperrt wird (default 5) |
+| FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
+| SecureClientController | Legt fest, ob ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines On-Premise Connectors / Links mitsenden muss (default false) |
+| AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für On-Premise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) <br/> _Hinweis:_ Ein zu kleiner Wert schränkt die Benutzbarkeit des Management Webs ein |
 
 ## netsh settings
 
@@ -193,7 +237,9 @@ run -> mmc
 
 Über ein Kommandozeilenfenster mit Administrationsrechten muss folgender Befehl ausgeführt werden:
 
+```
 netsh http add sslcert ipport=0.0.0.0:443 certhash=thumbprint appid={guid}
+```
 
 Es muss sichergestellt sein, dass der Port dabei dem Port aus der Konfigurationsdatei des RelayServers entspricht. Der Thumbprint muss mit dem Thumbprint aus der SSL-Konfiguration ersetzt werden. Der Parameter GUID muss mit einer zufälligen GUID ersetzt werden (z.B. von https://www.guidgenerator.com/).
 
@@ -203,21 +249,21 @@ Wenn der RelayServer für Clients und On-Premises Applikationen ohne Einschränk
 
 ## Konfiguration SQL Server
 
-You will need to add a login for SQL Server. Open SQL Server Management Studio (SSMS), connect to your SQL Server you want to use for RelayServer (and you have configured as connection string).
+Es wird ein SQL Server-Login benötigt. Öffnen Sie das SQL Server Management Studio (SMSS) und verbinden Sie sich mit dem Datenbank-Server den Sie für RelayServer verwenden wollen, und der dort im ConnectionString konfiguriert ist.
 
 ## Database
 
-Right click Database and select New Database.... Use database name RelayServer if you didn't change it in your connection string.
+Navigieren Sie zu den Datenbanken, klicken Sie rechts und erzeugen Sie eine neue Datenbank mit dem Namen, der im ConnectionString konfiguriert ist (Standard ist `RelayServer`).
 
 ## Login
 
-Go to Security, right click Logins and select New login.
+Navigisieren Sie zu den Sicherheitseinstellungen, klicken Sie rechts und erzeugen Sie einen neuen Login.
 
-Since RelayServer uses a trusted connection to connect to SQL Server and runs as Network Service per default, you will need to add Network Service as a login. Select Windows authentication and click on Search. Type in Network Service and click Ok.
+Standardmäßig wird eine Trusted Connection verwendet, und der RelayServer läuft als Network Service. Sie müssen daher den Network Service als Login hinzufügen. Wählen Sie "Windows Authentication" und klicken Sie auf Suchen. Suchen Sie nach Network Service und klicken Sie auf OK.
 
-Side note: You don't have to use a trusted connection. You can use a SQL Server authenticated login, if you want. Don't forget to change the connection string!
+Hinweis: Es muss keine Trusted Connection verwendet werden. Sie können auch SQL Server - Nutzer verwenden, wenn Sie möchten. Erzeugen Sie den passenden Login und passen Sie den Connection String entsprechend an.
 
-Click on User Mapping in the left list. Check Map in the row of the database you just created. Then select db\_owner and click Ok.
+Klicken Sie auf die Zuordnung von Nutzern und Logins. Weisen Sie den neu erstellten Login der Rolle `db_owner` der neu erstellten Datenbank zu, und klicken Sie auf Ok.
 
 # Installation des On-Premises Connectors
 
@@ -225,9 +271,9 @@ Click on User Mapping in the left list. Check Map in the row of the database you
 
 Zum Betrieb des RelayServers müssen auf dem dafür verwendeten Windows Server folgende Software-Bestandteile installiert sein:
 
-- Microsoft .Net-Framework v4.5.1 oder höher
-- Zugriffsmöglichkeit auf die Service-Endpunkte der abzudeckenden On-Premises Applikation
-- Ausgehende Zugriffsmöglichkeit auf die URL des RelayServers
+* Microsoft .Net-Framework v4.6 oder höher
+* Zugriffsmöglichkeit auf die Service-Endpunkte der abzudeckenden On-Premises Applikation
+* Ausgehende Zugriffsmöglichkeit auf die URL des RelayServers
 
 ## Installation
 
@@ -240,12 +286,12 @@ Zur Konfiguration des On-Premises Connectors wird die Konfigurationsdatei Thinkt
 In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> bearbeitet werden:
 
 ```
-<relayServer baseUrl="https://relay.company.example/">
-  <security authenticationType="Identity">
+<relayServer baseUrl="https://relay.company.example/" ignoreSslErrors="false" timeout="00:00:30" >
+  <security authenticationType="Identity" accessTokenRefreshWindow="00:01:00" >
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <add key="Test" baseUrl="http://localhost/" />
+    <web key="Test" baseUrl="http://localhost/"/>
   </onPremiseTargets>
 </relayServer>
 ```
@@ -255,12 +301,15 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 |  Attribut | Beschreibung |
 | --- | --- |
 | baseUrl | URL des RelayServer |
+| ignoreSslErrors | Akzeptiert Antworten der On-Premises Applikation Anwendung mit einem selbstsignierten SSL-Zertifikat |
+| timeout | Timeout, nach dem Anfragen an die On-Premises-Applikation abgebrochen werden |
 
 ### security Element
 
 |  Attribut | Beschreibung |
 | --- | --- |
 | authenticationType | In der aktuellen Version des RelayServers wird nur der Modus *Identity* unterstützt |
+| accessTokenRefreshWindow | Wenn das aktuelle AccessToken in diesem Zeitfenster ablaufen wird, wird versucht es zu erneuern. Default: 1 Minute |
 
 ### identity Element
 
@@ -272,3 +321,8 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 ### onPremiseTargets Element
 
 Liste von On-Premises Applikationen, die vom On-Premises Connector mit Anfragen versorgt werden sollen.
+
+|  Attribut | Beschreibung |
+| --- | --- |
+| key | On-Premises-Anwendungsname |
+| baseUrl | URL des On-Premises Applikation |

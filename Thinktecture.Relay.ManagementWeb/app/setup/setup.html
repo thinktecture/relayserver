@@ -9,24 +9,37 @@
         <form name="createUserForm" class="createUserForm" role="form">
             <fieldset>
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                    <input type="text" class="form-control" placeholder="{{'COMMON.USERNAME' | translate}}"
-                           name="username" ng-model="username"
-                           autofocus required/>
+                    <span class="input-group-addon">
+                        <i class="fa fa-user"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="{{'COMMON.USERNAME' | translate}}" name="username" ng-model="username"
+                        autofocus required/>
                 </div>
+                <span class="text-danger" ng-show="createUserForm.username.$error.required && createUserForm.username.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fa fa-lock"></i></span>
-                    <input type="password" class="form-control" placeholder="{{'COMMON.PASSWORD' | translate}}"
-                           ng-model="password"
-                           name="password" required/>
+                    <span class="input-group-addon">
+                        <i class="fa fa-lock"></i>
+                    </span>
+                    <input type="password" class="form-control" placeholder="{{'COMMON.PASSWORD' | translate}}" ng-model="password" name="password"
+                        required/>
                 </div>
+                <span class="text-danger" ng-show="createUserForm.password.$error.required && createUserForm.password.$dirty" translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fa fa-lock"></i></span>
-                    <input type="password" class="form-control" placeholder="{{'COMMON.VERIFY_PASSWORD' | translate }}"
-                            name="password2" ng-model="password2" required/>
+                    <span class="input-group-addon">
+                        <i class="fa fa-lock"></i>
+                    </span>
+                    <input type="password" class="form-control" placeholder="{{'COMMON.VERIFY_PASSWORD' | translate }}" name="passwordVerification"
+                        ng-model="passwordVerification" required/>
                 </div>
-                <button class="pull-right btn btn-primary btn-block" ng-click="createUser()"
-                        ng-disabled="createUserForm.$invalid || passwordsDoNotMatch" translate>SETUP.CREATE_USER
+                <span class="text-danger" ng-show="createUserForm.passwordVerification.$error.required && createUserForm.passwordVerification.$dirty"
+                    translate>COMMON.ERRORS.FIELD_REQUIRED</span>
+                <span class="text-danger" ng-show="passwordsDoNotMatch && createUserForm.passwordVerification.$dirty && !createUserForm.passwordVerification.$error.required"
+                    translate>COMMON.ERRORS.PASSWORDS_DO_NOT_MATCH</span>
+
+                <button class="pull-right btn btn-primary btn-block" ng-click="createUser()" ng-disabled="createUserForm.$invalid || passwordsDoNotMatch"
+                    translate>SETUP.CREATE_USER
                 </button>
             </fieldset>
         </form>

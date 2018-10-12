@@ -1,271 +1,419 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.SqlServer;
 using System.Linq;
 using System.Threading.Tasks;
-using Thinktecture.Relay.Server.Configuration;
+using Serilog;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Repository.DbModels;
 using Thinktecture.Relay.Server.Security;
 
 namespace Thinktecture.Relay.Server.Repository
 {
-    public class LinkRepository : ILinkRepository
-    {
-        private readonly IPasswordHash _passwordHash;
-        private readonly IConfiguration _configuration;
+	public class LinkRepository : ILinkRepository
+	{
+		private static readonly Dictionary<string, PasswordInformation> _successfullyValidatedUsernamesAndPasswords = new Dictionary<string, PasswordInformation>();
 
-        private static readonly Dictionary<string, PasswordInformation> _successfullyValidatedUsernamesAndPasswords = new Dictionary<string, PasswordInformation>();
+		private readonly ILogger _logger;
+		private readonly IPasswordHash _passwordHash;
+		private readonly IConfiguration _configuration;
 
-        public LinkRepository(IPasswordHash passwordHash, IConfiguration configuration)
-        {
-            _passwordHash = passwordHash;
-            _configuration = configuration;
-        }
+		private DateTime ActiveLinkTimeout => DateTime.UtcNow - _configuration.ActiveConnectionTimeout;
 
-        public PageResult<Link> GetLinks(PageRequest paging)
-        {
-            using (var context = new RelayContext())
-            {
-                var query = context.Links.AsQueryable();
+		public LinkRepository(ILogger logger, IPasswordHash passwordHash, IConfiguration configuration)
+		{
+			_logger = logger;
+			_passwordHash = passwordHash ?? throw new ArgumentNullException(nameof(passwordHash));
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+		}
 
-                if (!String.IsNullOrWhiteSpace(paging.SearchText))
-                {
-                    var searchText = paging.SearchText.ToLower();
-                    query = query.Where(w => w.UserName.ToLower().Contains(searchText) || w.SymbolicName.ToLower().Contains(searchText));
-                }
+		public PageResult<LinkDetails> GetLinkDetails(PageRequest paging)
+		{
+			using (var context = new RelayContext())
+			{
+				var linksQuery = context.Links.AsQueryable();
 
-                // Default sorting must be provided
-                if (String.IsNullOrWhiteSpace(paging.SortField))
-                {
-                    paging.SortField = "SymbolicName";
-                    paging.SortDirection = SortDirection.Asc;
-                }
+				if (!String.IsNullOrWhiteSpace(paging.SearchText))
+				{
+					var searchText = paging.SearchText.ToLower();
+					linksQuery = linksQuery.Where(w => w.UserName.Contains(searchText) || w.SymbolicName.Contains(searchText));
+				}
 
-                var count = query.Count();
+				// Default sorting must be provided
+				if (String.IsNullOrWhiteSpace(paging.SortField))
+				{
+					paging.SortField = "SymbolicName";
+					paging.SortDirection = SortDirection.Asc;
+				}
 
-                query = query.OrderByPropertyName(paging.SortField, paging.SortDirection);
-                query = query.ApplyPaging(paging);
+				var numberOfLinks = linksQuery.Count();
 
-                var queryResult = query.ToList().Select(GetLinkFromDbLink).ToList();
+				linksQuery = linksQuery.OrderByPropertyName(paging.SortField, paging.SortDirection);
+				linksQuery = linksQuery.ApplyPaging(paging);
 
-                var result = new PageResult<Link>()
-                {
-                    Items = queryResult,
-                    Count = count
-                };
+				return new PageResult<LinkDetails>()
+				{
+					Items = GetLinkDetailsFromDbLink(linksQuery).ToList(),
+					Count = numberOfLinks,
+				};
+			}
+		}
 
-                return result;
-            }
-        }
+		public Link GetLink(Guid linkId)
+		{
+			using (var context = new RelayContext())
+			{
+				var linkQuery = context.Links
+					.Where(l => l.Id == linkId);
 
-        public Link GetLink(Guid linkId)
-        {
-            using (var context = new RelayContext())
-            {
-                var link = context.Links.SingleOrDefault(p => p.Id == linkId);
+				return GetLinkFromDbLink(linkQuery).FirstOrDefault();
+			}
+		}
 
-                if (link == null)
-                {
-                    return null;
-                }
+		public LinkDetails GetLinkDetails(Guid linkId)
+		{
+			using (var context = new RelayContext())
+			{
+				var linkQuery = context.Links
+					.Where(l => l.Id == linkId);
 
-                return GetLinkFromDbLink(link);
-            }
-        }
+				return GetLinkDetailsFromDbLink(linkQuery).FirstOrDefault();
+			}
+		}
 
-        public Link GetLink(string linkName)
-        {
-            using (var context = new RelayContext())
-            {
-                var link = context.Links.SingleOrDefault(p => p.UserName == linkName);
+		public Link GetLink(string linkName)
+		{
+			using (var context = new RelayContext())
+			{
+				var linkQuery = context.Links
+					.Where(p => p.UserName == linkName);
 
-                if (link == null)
-                {
-                    return null;
-                }
+				return GetLinkFromDbLink(linkQuery).FirstOrDefault();
+			}
+		}
 
-                return GetLinkFromDbLink(link);
-            }
-        }
+		private IQueryable<Link> GetLinkFromDbLink(IQueryable<DbLink> linksQuery)
+		{
+			return linksQuery
+				.Select(l => new
+				{
+					link = l,
+					ActiveConnections = l.ActiveConnections
+						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
+						.Select(ac => ac.ConnectionId)
+				})
+				.Select(i => new Link
+				{
+					Id = i.link.Id,
+					ForwardOnPremiseTargetErrorResponse = i.link.ForwardOnPremiseTargetErrorResponse,
+					IsDisabled = i.link.IsDisabled,
+					SymbolicName = i.link.SymbolicName,
+					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
+				});
+		}
 
-        private Link GetLinkFromDbLink(DbLink link)
-        {
-            return new Link
-            {
-                Id = link.Id,
-                CreationDate = link.CreationDate,
-                ForwardOnPremiseTargetErrorResponse = link.ForwardOnPremiseTargetErrorResponse,
-                IsDisabled = link.IsDisabled,
-                MaximumLinks = link.MaximumLinks,
-                Password = link.Password,
-                SymbolicName = link.SymbolicName,
-                UserName = link.UserName,
-                AllowLocalClientRequestsOnly = link.AllowLocalClientRequestsOnly
-            };
-        }
+		private IQueryable<LinkDetails> GetLinkDetailsFromDbLink(IQueryable<DbLink> linksQuery)
+		{
+			return linksQuery
+				.Select(link => new
+				{
+					link,
+					link.ActiveConnections
+				})
+				.ToList()
+				.Select(i => new LinkDetails
+				{
+					Id = i.link.Id,
+					CreationDate = i.link.CreationDate,
+					ForwardOnPremiseTargetErrorResponse = i.link.ForwardOnPremiseTargetErrorResponse,
+					IsDisabled = i.link.IsDisabled,
+					MaximumLinks = i.link.MaximumLinks,
+					SymbolicName = i.link.SymbolicName,
+					UserName = i.link.UserName,
+					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
+					Connections = i.ActiveConnections
+						.Select(ac => ac.ConnectionId
+							+ "; Versions: Connector = " + ac.ConnectorVersion + ", Assembly = " + ac.AssemblyVersion
+							+ "; Last Activity: " + ac.LastActivity.ToString("yyyy-MM-dd hh:mm:ss")
+							+ ((ac.LastActivity + _configuration.ActiveConnectionTimeout <= DateTime.UtcNow) ? " (inactive)" : "")
+						)
+						.ToList(),
+				})
+				.AsQueryable();
+		}
 
-        public CreateLinkResult CreateLink(string symbolicName, string userName)
-        {
-            using (var context = new RelayContext())
-            {
-                var password = _passwordHash.GeneratePassword(_configuration.LinkPasswordLength);
-                var passwordInformation = _passwordHash.CreatePasswordInformation(password);
+		public CreateLinkResult CreateLink(string symbolicName, string userName)
+		{
+			using (var context = new RelayContext())
+			{
+				var password = _passwordHash.GeneratePassword(_configuration.LinkPasswordLength);
+				var passwordInformation = _passwordHash.CreatePasswordInformation(password);
 
-                var link = new DbLink
-                {
-                    Id = Guid.NewGuid(),
-                    Password = passwordInformation.Hash,
-                    Salt = passwordInformation.Salt,
-                    Iterations = passwordInformation.Iterations,
-                    SymbolicName = symbolicName,
-                    UserName = userName,
-                    CreationDate = DateTime.UtcNow
-                };
+				var link = new DbLink
+				{
+					Id = Guid.NewGuid(),
+					Password = passwordInformation.Hash,
+					Salt = passwordInformation.Salt,
+					Iterations = passwordInformation.Iterations,
+					SymbolicName = symbolicName,
+					UserName = userName,
+					CreationDate = DateTime.UtcNow,
+				};
 
-                context.Links.Add(link);
-                context.SaveChanges();
+				context.Links.Add(link);
+				context.SaveChanges();
 
-                var result = new CreateLinkResult()
-                {
-                    Id = link.Id,
-                    Password = Convert.ToBase64String(password)
-                };
+				var result = new CreateLinkResult()
+				{
+					Id = link.Id,
+					Password = Convert.ToBase64String(password),
+				};
 
-                return result;
-            }
-        }
+				return result;
+			}
+		}
 
-        public bool UpdateLink(Link linkId)
-        {
-            using (var context = new RelayContext())
-            {
-                var itemToUpdate = context.Links.SingleOrDefault(p => p.Id == linkId.Id);
+		public bool UpdateLink(LinkDetails link)
+		{
+			using (var context = new RelayContext())
+			{
+				var linkEntity = context.Links.SingleOrDefault(p => p.Id == link.Id);
 
-                if (itemToUpdate == null)
-                {
-                    return false;
-                }
+				if (linkEntity == null)
+					return false;
 
-                itemToUpdate.CreationDate = linkId.CreationDate;
-                itemToUpdate.AllowLocalClientRequestsOnly = linkId.AllowLocalClientRequestsOnly;
-                itemToUpdate.ForwardOnPremiseTargetErrorResponse = linkId.ForwardOnPremiseTargetErrorResponse;
-                itemToUpdate.IsDisabled = linkId.IsDisabled;
-                itemToUpdate.MaximumLinks = linkId.MaximumLinks;
-                itemToUpdate.SymbolicName = linkId.SymbolicName;
-                itemToUpdate.UserName = linkId.UserName;
+				linkEntity.CreationDate = link.CreationDate;
+				linkEntity.AllowLocalClientRequestsOnly = link.AllowLocalClientRequestsOnly;
+				linkEntity.ForwardOnPremiseTargetErrorResponse = link.ForwardOnPremiseTargetErrorResponse;
+				linkEntity.IsDisabled = link.IsDisabled;
+				linkEntity.MaximumLinks = link.MaximumLinks;
+				linkEntity.SymbolicName = link.SymbolicName;
+				linkEntity.UserName = link.UserName;
 
-                context.Entry(itemToUpdate).State = EntityState.Modified;
+				context.Entry(linkEntity).State = EntityState.Modified;
 
-                return context.SaveChanges() == 1;
-            }
-        }
+				return context.SaveChanges() == 1;
+			}
+		}
 
-        public void DeleteLink(Guid linkId)
-        {
-            using (var context = new RelayContext())
-            {
-                var itemToDelete = new DbLink
-                {
-                    Id = linkId
-                };
+		public void DeleteLink(Guid linkId)
+		{
+			using (var context = new RelayContext())
+			{
+				var itemToDelete = new DbLink
+				{
+					Id = linkId,
+				};
 
-                context.Links.Attach(itemToDelete);
-                context.Links.Remove(itemToDelete);
+				context.Links.Attach(itemToDelete);
+				context.Links.Remove(itemToDelete);
 
-                context.SaveChanges();
-            }
-        }
+				context.SaveChanges();
+			}
+		}
 
-        public IEnumerable<Link> GetLinks()
-        {
-            using (var context = new RelayContext())
-            {
-                return context.Links.ToList().Select(GetLinkFromDbLink).ToList();
-            }
-        }
+		public IEnumerable<LinkDetails> GetLinkDetails()
+		{
+			using (var context = new RelayContext())
+			{
+				return GetLinkDetailsFromDbLink(context.Links).ToList();
+			}
+		}
 
-        public bool Authenticate(string userName, string password, out Guid linkId)
-        {
-            linkId = Guid.Empty;
+		public bool Authenticate(string userName, string password, out Guid linkId)
+		{
+			linkId = Guid.Empty;
 
-            using (var context = new RelayContext())
-            {
-                byte[] passwordBytes;
+			using (var context = new RelayContext())
+			{
+				byte[] passwordBytes;
 
-                try
-                {
-                    passwordBytes = Convert.FromBase64String(password);
-                }
-                catch
-                {
-                    return false;
-                }
+				try
+				{
+					passwordBytes = Convert.FromBase64String(password);
+				}
+				catch
+				{
+					return false;
+				}
 
-                var link = context.Links.Where(p => p.UserName == userName).Select(p => new
-                {
-                    p.Id,
-                    p.Password,
-                    p.Iterations,
-                    p.Salt
-                }).FirstOrDefault();
+				var link = context.Links.Where(p => p.UserName == userName).Select(p => new
+				{
+					p.Id,
+					p.Password,
+					p.Iterations,
+					p.Salt,
+				}).FirstOrDefault();
 
-                if (link == null)
-                {
-                    return false;
-                }
+				if (link == null)
+				{
+					return false;
+				}
 
-                var passwordInformation = new PasswordInformation()
-                {
-                    Hash = link.Password,
-                    Iterations = link.Iterations,
-                    Salt = link.Salt
-                };
-                
-                var cacheKey = userName + "/" + password;
-                PasswordInformation previousInfo = null;
+				var passwordInformation = new PasswordInformation()
+				{
+					Hash = link.Password,
+					Iterations = link.Iterations,
+					Salt = link.Salt,
+				};
 
-                lock (_successfullyValidatedUsernamesAndPasswords)
-                {
-                    _successfullyValidatedUsernamesAndPasswords.TryGetValue(cacheKey, out previousInfo);
-                }
+				var cacheKey = userName + "/" + password;
+				PasswordInformation previousInfo;
 
-                // found in cache (NOTE: cache only contains successfully validated passwords to prevent DOS attacks!)
-                if (previousInfo != null)
-                {
-                    if (previousInfo.Hash == passwordInformation.Hash &&
-                        previousInfo.Iterations == passwordInformation.Iterations &&
-                        previousInfo.Salt == passwordInformation.Salt)
-                    {
-                        linkId = link.Id;
-                        return true;
-                    }
-                }
+				lock (_successfullyValidatedUsernamesAndPasswords)
+				{
+					_successfullyValidatedUsernamesAndPasswords.TryGetValue(cacheKey, out previousInfo);
+				}
 
-                // ELSE: calculate and cache
-                if (!_passwordHash.ValidatePassword(passwordBytes, passwordInformation))
-                {
-                    return false;
-                }
+				// found in cache (NOTE: cache only contains successfully validated passwords to prevent DOS attacks!)
+				if (previousInfo != null)
+				{
+					if (previousInfo.Hash == passwordInformation.Hash
+						&& previousInfo.Iterations == passwordInformation.Iterations
+						&& previousInfo.Salt == passwordInformation.Salt)
+					{
+						linkId = link.Id;
+						return true;
+					}
+				}
 
-                lock (_successfullyValidatedUsernamesAndPasswords)
-                {
-                    {
-                        _successfullyValidatedUsernamesAndPasswords[cacheKey] = passwordInformation;
-                    }
-                }
+				// ELSE: calculate and cache
+				if (!_passwordHash.ValidatePassword(passwordBytes, passwordInformation))
+				{
+					return false;
+				}
 
-                linkId = link.Id;
-                return true;
-            }
-        }
+				lock (_successfullyValidatedUsernamesAndPasswords)
+				{
+					{
+						_successfullyValidatedUsernamesAndPasswords[cacheKey] = passwordInformation;
+					}
+				}
 
-        public bool IsUserNameAvailable(string userName)
-        {
-            using (var context = new RelayContext())
-            {
-                return !context.Links.Any(p => p.UserName == userName);
-            }
-        }
-    }
+				linkId = link.Id;
+				return true;
+			}
+		}
+
+		public bool IsUserNameAvailable(string userName)
+		{
+			using (var context = new RelayContext())
+			{
+				return !context.Links.Any(p => p.UserName == userName);
+			}
+		}
+
+		public async Task AddOrRenewActiveConnectionAsync(Guid linkId, Guid originId, string connectionId, int connectorVersion, string assemblyVersion)
+		{
+			_logger?.Verbose("Adding or updating connection. connection-id={ConnectionId}, link-id={LinkId}, connector-version={ConnectorVersion}, connector-assembly-version={ConnectorAssemblyVersion}", connectionId, linkId, connectorVersion, assemblyVersion);
+
+			try
+			{
+				using (var context = new RelayContext())
+				{
+					var activeConnection = await context.ActiveConnections
+						.FirstOrDefaultAsync(ac => ac.LinkId == linkId && ac.OriginId == originId && ac.ConnectionId == connectionId).ConfigureAwait(false);
+
+					if (activeConnection != null)
+					{
+						activeConnection.LastActivity = DateTime.UtcNow;
+						activeConnection.ConnectorVersion = connectorVersion;
+						activeConnection.AssemblyVersion = assemblyVersion;
+
+						context.Entry(activeConnection).State = EntityState.Modified;
+					}
+					else
+					{
+						context.ActiveConnections.Add(new DbActiveConnection()
+						{
+							LinkId = linkId,
+							OriginId = originId,
+							ConnectionId = connectionId,
+							ConnectorVersion = connectorVersion,
+							AssemblyVersion = assemblyVersion,
+							LastActivity = DateTime.UtcNow,
+						});
+					}
+
+					await context.SaveChangesAsync().ConfigureAwait(false);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during adding or renewing an active connection. link-id={LinkId}, connection-id={ConnectionId}, connector-version={ConnectorVersion}, connector-assembly-version={ConnectorAssemblyVersion}", linkId, connectionId, connectorVersion, assemblyVersion);
+			}
+		}
+
+		public async Task RenewActiveConnectionAsync(string connectionId)
+		{
+			_logger?.Verbose("Renewing last activity. connection-id={ConnectionId}", connectionId);
+
+			try
+			{
+				using (var context = new RelayContext())
+				{
+					var activeConnection = await context.ActiveConnections.FirstOrDefaultAsync(ac => ac.ConnectionId == connectionId).ConfigureAwait(false);
+
+					if (activeConnection != null)
+					{
+						activeConnection.LastActivity = DateTime.UtcNow;
+
+						context.Entry(activeConnection).State = EntityState.Modified;
+
+						await context.SaveChangesAsync().ConfigureAwait(false);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during renewing an active connection. connection-id={ConnectionId}", connectionId);
+			}
+		}
+
+		public async Task RemoveActiveConnectionAsync(string connectionId)
+		{
+			_logger?.Verbose("Deleting active connection. connection-id={ConnectionId}", connectionId);
+
+			try
+			{
+				using (var context = new RelayContext())
+				{
+					var activeConnection = await context.ActiveConnections.FirstOrDefaultAsync(ac => ac.ConnectionId == connectionId).ConfigureAwait(false);
+
+					if (activeConnection != null)
+					{
+						context.ActiveConnections.Remove(activeConnection);
+
+						await context.SaveChangesAsync().ConfigureAwait(false);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during removing an active connection. connection-id={ConnectionId}", connectionId);
+			}
+		}
+
+		public void DeleteAllConnectionsForOrigin(Guid originId)
+		{
+			_logger?.Verbose("Deleting all active connections");
+
+			try
+			{
+				using (var context = new RelayContext())
+				{
+					var invalidConnections = context.ActiveConnections.Where(ac => ac.OriginId == originId).ToList();
+					context.ActiveConnections.RemoveRange(invalidConnections);
+
+					context.SaveChanges();
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during deleting of all active connections");
+			}
+		}
+	}
 }

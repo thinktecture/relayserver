@@ -143,13 +143,17 @@
 
                         return trace.getConfiguration(params)
                             .then(function (data) {
-                                scope.tabs[data.id] = {
-                                    name: data.id
-                                };
+                                scope.tabs.push({
+                                    name: data.id,
+                                });
 
                                 // TODO: Needs refactoring for communication with linkTraceTab-directive
                                 scope.traceResults.push(data);
-                                scope.setActiveTab(data.id);
+
+                                $timeout(function(){
+                                    // select tab
+                                    scope.setActiveTab(data.id);
+                                });
                             });
                     }
 
@@ -174,7 +178,7 @@
                     // Happens, when the user reloads the app while viewing the traces
                     // "TabActivated" Broadcast will be executed before scope.$on in this directive is executed
                     var unwatch = scope.$watch('link', function (newVal) {
-                        if (newVal && scope.tabs.trace.active) {
+                        if (newVal && scope.activeTabIndex === 3) {
                             unwatch();
                             reloadTracingData();
                             reloadRunningTracingData();

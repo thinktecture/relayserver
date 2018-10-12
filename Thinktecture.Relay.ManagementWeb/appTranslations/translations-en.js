@@ -4,10 +4,12 @@
     app.module.constant('translationsEn', {
         "COMMON": {
             "CREATE": "Create",
+            "UPDATE": "Update",
             "CLOSE": "Close",
             "CANCEL": "Cancel",
             "USERNAME": "Username",
             "PASSWORD": "Password",
+            "PASSWORD_OLD": "Current password",
             "DELETE": "Delete",
             "EDIT": "Edit",
             "DATE": "Date",
@@ -131,6 +133,7 @@
             "TITLE": "Users",
             "ADD_USER": "Add User",
             "OPTIONS": "Options",
+            "LOCKEDOUT_UNTIL": "Locked until",
             "NOTIFICATIONS": {
                 "CREATE_SUCCESS": "User created successfully.",
                 "CREATE_ERROR": "User could not be created.",

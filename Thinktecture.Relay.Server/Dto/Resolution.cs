@@ -1,9 +1,9 @@
-﻿namespace Thinktecture.Relay.Server.Dto
+namespace Thinktecture.Relay.Server.Dto
 {
-    public enum Resolution
-    {
-        Daily,
-        Monthly,
-        Yearly
-    }
+	public enum Resolution
+	{
+		Daily,
+		Monthly,
+		Yearly,
+	}
 }

@@ -1,78 +1,103 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Serilog;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	internal class OnPremiseRequestBuilder : IOnPremiseRequestBuilder
 	{
-		private readonly string[] _ignoredHeaders;
+		private static readonly string[] _ignoredHeaders = { "Host", "Connection" };
 
-		public OnPremiseRequestBuilder()
+		private readonly ILogger _logger;
+		private readonly IConfiguration _configuration;
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
+
+		public OnPremiseRequestBuilder(ILogger logger, IConfiguration configuration, IPostDataTemporaryStore postDataTemporaryStore)
 		{
-			_ignoredHeaders = new[] { "Host", "Connection" };
+			_logger = logger;
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 		}
 
-		public async Task<IOnPremiseConnectorRequest> BuildFrom(HttpRequestMessage request, string originId, string pathWithoutUserName)
+		public async Task<IOnPremiseConnectorRequest> BuildFromHttpRequest(HttpRequestMessage message, Guid originId, string pathWithoutUserName)
 		{
-			var onPremiseConnectorRequest = new OnPremiseConnectorRequest
+			var request = new OnPremiseConnectorRequest
 			{
 				RequestId = Guid.NewGuid().ToString(),
-
-				Body = await GetClientRequestBodyAsync(request.Content),
-
-				HttpMethod = request.Method.Method,
-				Url = pathWithoutUserName + request.RequestUri.Query,
-
-				HttpHeaders = request.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
-
+				HttpMethod = message.Method.Method,
+				Url = pathWithoutUserName + message.RequestUri.Query,
+				HttpHeaders = message.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
 				OriginId = originId,
-
-				RequestStarted = DateTime.UtcNow
+				RequestStarted = DateTime.UtcNow,
+				Expiration = _configuration.RequestExpiration,
 			};
 
-			AddContentHeaders(onPremiseConnectorRequest, request);
-			RemoveIgnoredHeaders(onPremiseConnectorRequest);
-
-			return onPremiseConnectorRequest;
-		}
-
-		internal async Task<byte[]> GetClientRequestBodyAsync(HttpContent content)
-		{
-			var body = await content.ReadAsByteArrayAsync();
-
-			if (body.LongLength == 0L)
+			if (message.Content.Headers.ContentLength.GetValueOrDefault(0x10000) >= 0x10000)
 			{
-				return null;
+				var contentStream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
+
+				using (var storeStream = _postDataTemporaryStore.CreateRequestStream(request.RequestId))
+				{
+					await contentStream.CopyToAsync(storeStream).ConfigureAwait(false);
+					if (storeStream.Length < 0x10000)
+					{
+						if (storeStream.Length == 0)
+						{
+							// no body available (e.g. GET request)
+						}
+						else
+						{
+							// the body is small enough to be used directly
+							request.Body = new byte[storeStream.Length];
+							storeStream.Position = 0;
+							await storeStream.ReadAsync(request.Body, 0, (int)storeStream.Length).ConfigureAwait(false);
+						}
+
+						// TODO delete obsolete file now
+					}
+					else
+					{
+						// a length of 0 indicates that there is a larger body available on the server
+						request.Body = Array.Empty<byte>();
+					}
+
+					request.ContentLength = storeStream.Length;
+				}
+			}
+			else
+			{
+				var contentLength = message.Content.Headers.ContentLength.GetValueOrDefault(0);
+				if (contentLength > 0)
+				{
+					// we have a body, and it is small enough to be transmitted directly
+					var contentStream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
+
+					request.Body = new byte[contentLength];
+					await contentStream.ReadAsync(request.Body, 0, (int)contentLength).ConfigureAwait(false);
+
+					request.ContentLength = contentLength;
+				}
 			}
 
-			return body;
+			request.HttpHeaders = message.Headers
+				.Union(message.Content.Headers)
+				.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key))
+				.Select(kvp => new { Name = kvp.Key, Value = CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value) })
+				.ToDictionary(header => header.Name, header => header.Value);
+
+			return request;
 		}
 
 		internal string CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(IEnumerable<string> headers)
 		{
 			// HTTP RFC2616 says, that multiple headers can be combined into a comma-separated single header
-
-			return headers.Aggregate(String.Empty, (s, v) => s + (s == String.Empty ? String.Empty : ", ") + v);
-		}
-
-		internal void AddContentHeaders(IOnPremiseConnectorRequest onPremiseConnectorRequest, HttpRequestMessage request)
-		{
-			foreach (var httpHeader in request.Content.Headers)
-			{
-				onPremiseConnectorRequest.HttpHeaders.Add(httpHeader.Key, CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(httpHeader.Value));
-			}
-		}
-
-		internal void RemoveIgnoredHeaders(OnPremiseConnectorRequest onPremiseConnectorRequest)
-		{
-			foreach (var key in _ignoredHeaders)
-			{
-				onPremiseConnectorRequest.HttpHeaders.Remove(key);
-			}
+			return headers.Aggregate(String.Empty, (s, v) => s + (String.IsNullOrWhiteSpace(s) ? String.Empty : ", ") + v);
 		}
 	}
 }
