@@ -1,0 +1,23 @@
+version: "3"
+services:
+   queue:
+      image: rabbitmq:3-management
+      ports:
+         - "4369:4369"
+         - "5671:5671"
+         - "5672:5672"
+         - "25672:25672"
+         - "15672:15672"
+   db:
+      image: mcr.microsoft.com/mssql/server:2017-latest
+      environment:
+         - ACCEPT_EULA=Y
+         - SA_PASSWORD=<Strong!Passw0rd>
+      ports:
+         - "1433:1433"
+   seq:
+      image: datalust/seq:latest
+      environment:
+         - ACCEPT_EULA=Y
+      ports:
+         - "5341:80"
