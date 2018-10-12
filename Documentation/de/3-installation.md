@@ -249,21 +249,21 @@ Wenn der RelayServer für Clients und On-Premises Applikationen ohne Einschränk
 
 ## Konfiguration SQL Server
 
-You will need to add a login for SQL Server. Open SQL Server Management Studio (SSMS), connect to your SQL Server you want to use for RelayServer (and you have configured as connection string).
+Es wird ein SQL Server-Login benötigt. Öffnen Sie das SQL Server Management Studio (SMSS) und verbinden Sie sich mit dem Datenbank-Server den Sie für RelayServer verwenden wollen, und der dort im ConnectionString konfiguriert ist.
 
 ## Database
 
-Right click Database and select New Database.... Use database name RelayServer if you didn't change it in your connection string.
+Navigieren Sie zu den Datenbanken, klicken Sie rechts und erzeugen Sie eine neue Datenbank mit dem Namen, der im ConnectionString konfiguriert ist (Standard ist `RelayServer`).
 
 ## Login
 
-Go to Security, right click Logins and select New login.
+Navigisieren Sie zu den Sicherheitseinstellungen, klicken Sie rechts und erzeugen Sie einen neuen Login.
 
-Since RelayServer uses a trusted connection to connect to SQL Server and runs as Network Service per default, you will need to add Network Service as a login. Select Windows authentication and click on Search. Type in Network Service and click Ok.
+Standardmäßig wird eine Trusted Connection verwendet, und der RelayServer läuft als Network Service. Sie müssen daher den Network Service als Login hinzufügen. Wählen Sie "Windows Authentication" und klicken Sie auf Suchen. Suchen Sie nach Network Service und klicken Sie auf OK.
 
-Side note: You don't have to use a trusted connection. You can use a SQL Server authenticated login, if you want. Don't forget to change the connection string!
+Hinweis: Es muss keine Trusted Connection verwendet werden. Sie können auch SQL Server - Nutzer verwenden, wenn Sie möchten. Erzeugen Sie den passenden Login und passen Sie den Connection String entsprechend an.
 
-Click on User Mapping in the left list. Check Map in the row of the database you just created. Then select db\_owner and click Ok.
+Klicken Sie auf die Zuordnung von Nutzern und Logins. Weisen Sie den neu erstellten Login der Rolle `db_owner` der neu erstellten Datenbank zu, und klicken Sie auf Ok.
 
 # Installation des On-Premises Connectors
 
