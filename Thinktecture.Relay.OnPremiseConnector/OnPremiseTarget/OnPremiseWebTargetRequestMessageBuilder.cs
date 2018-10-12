@@ -131,6 +131,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger?.Verbose("Creating web request for request-id={RequestId}", request.RequestId);
 
 			var message = new HttpRequestMessage(new HttpMethod(request.HttpMethod), String.IsNullOrWhiteSpace(url) ? baseUri : new Uri(baseUri, url));
+
 			if (request.Stream != Stream.Null)
 			{
 				_logger?.Verbose("Adding request stream to request. request-id={RequestId}", request.RequestId);
