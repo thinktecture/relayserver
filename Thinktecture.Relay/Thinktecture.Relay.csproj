@@ -2,7 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
+    <Title>Thinktecture RelayServer</Title>
     <Description>Provides interface definitions to extend the Thinktecture RelayServer with custom plugins.</Description>
+    <Summary>Thinktecture.RelayServer provides interfaces for extenion points within the RelayServer.</Summary>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 

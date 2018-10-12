@@ -1,16 +1,20 @@
 <Project>
-  <!-- WARNING: This file is shared between all RelayServer .NET Standard library projects -->
+  <!-- WARNING: This file is shared between all RelayServer .NET Core library projects -->
   <PropertyGroup>
     <VersionPrefix>2.0.0</VersionPrefix>
 
-    <PackageTags>thinktecture,relayserver</PackageTags>
+    <Copyright>Copyright © Thinktecture AG 2015 - 2018. All rights reserved.</Copyright>
+    <PackageTags>thinktecture;relayserver</PackageTags>
     <PackageIconUrl>http://thinktecture.com/images/Logo_T_Nontransparent.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/thinktecture/relayserver</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/thinktecture/relayserver/master/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <RepositoryUrl>https://github.com/thinktecture/relayserver.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git@github.com:thinktecture/relayserver.git</RepositoryUrl>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
