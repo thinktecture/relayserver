@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>net46</TargetFramework>
     <Description>Provides interface definitions to extend the Thinktecture RelayServer with custom plugins.</Description>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
@@ -10,6 +10,7 @@
   <Import Project="..\Shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Security.Principal" Version="4.3.0" />
   </ItemGroup>
 </Project>
