@@ -9,10 +9,10 @@
 The goal of this list is to highlight companies who pay back to this open source project which is helping them to save time and money in their own projects.
 
 ## Sponsors from Germany
-[<img width="120px" src="./Documentation/de/assets/logo_sponsor_kwp.svg" />](https://www.kwpsoftware.de)
+[<img width="120px" src="./assets/logo_sponsor_kwp.svg" />](https://www.kwpsoftware.de)
 
 ## Sponsors from Swiss
-[<img width="120px" src="./Documentation/de/assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
+[<img width="120px" src="./assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
 
 # Version history
 ## Version 2.0.0
