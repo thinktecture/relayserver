@@ -27,3 +27,13 @@ Die Positionierung des RelayServers im öffentlichen Internet sorgt weiterhin da
 # Architektur, Installation und Management
 
 Eine vollständige Dokumentation zum RelayServer inklusive aller Details zu seiner Architektur, einer ausführlichen Installationsanleitung und einer Einführung in das RelayServer Management Web befindet sich unter [thinktecture/relayserver/Documentation/de](./Documentation/de/relayserver.md).
+
+# Sponsoren
+Das Ziel dieser Sponsorenliste ist es, Unternehmen hervorzuheben, die sich technisch und/oder finanziell an diesem Open-Source-Projekt beteiligen, weil es ihnen hilft, bei ihren eigenen Projekten Zeit und Geld zu sparen.
+
+## Sponsoren aus Deutschland
+[<img width="120px" src="./Documentation/de/assets/logo_sponsor_kwp.svg" />](https://www.kwpsoftware.de)
+
+## Sponsoren aus der Schweiz
+[<img width="120px" src="./Documentation/de/assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
+
