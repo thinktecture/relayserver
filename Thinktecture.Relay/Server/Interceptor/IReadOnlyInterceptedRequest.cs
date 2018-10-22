@@ -44,5 +44,10 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// Gets the client user.
 		/// </summary>
 		IPrincipal ClientUser { get; }
+
+		/// <summary>
+		/// Gets the Uri of this request
+		/// </summary>
+		Uri Uri { get; }
 	}
 }

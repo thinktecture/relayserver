@@ -30,7 +30,6 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 			_logger?.Verbose("Handling request. request-id={RequestId}", request.RequestId);
 
-
 			try
 			{
 				var interceptedRequest = CreateInterceptedRequest(request, message, clientUser);
@@ -58,6 +57,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			{
 				ClientIpAddress = GetRemoteIpAddress(request, message),
 				ClientUser = clientUser,
+				Uri = message.RequestUri
 			};
 		}
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,6 +15,8 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 		[JsonIgnore]
 		public IPrincipal ClientUser { get; set; }
+
+		public Uri Uri { get; set; }
 
 		public InterceptedRequest(IOnPremiseConnectorRequest other)
 		{
