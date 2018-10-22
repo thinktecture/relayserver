@@ -8,6 +8,7 @@ using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Controller;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Interceptor;
+using Thinktecture.Relay.Server.SignalR;
 using Topshelf;
 using Topshelf.Autofac;
 
@@ -82,6 +83,7 @@ namespace Thinktecture.Relay.Server
 			builder.RegisterType<CustomCodeAssemblyLoader>().As<ICustomCodeAssemblyLoader>().SingleInstance();
 			builder.RegisterType<ControllerLoader>().As<IControllerLoader>().SingleInstance();
 			builder.RegisterType<InterceptorLoader>().As<IInterceptorLoader>().SingleInstance();
+			builder.RegisterType<DataStoreLoader>().As<IDataStoreLoader>().SingleInstance();
 
 			builder.RegisterType<RelayServerModule>();
 
