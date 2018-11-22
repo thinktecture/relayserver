@@ -53,20 +53,20 @@ namespace Thinktecture.Relay.Server.Controller
 		[HttpPatch]
 		[HttpDelete]
 		[HttpHead]
-		public async Task<HttpResponseMessage> Relay(string path)
+		public async Task<HttpResponseMessage> Relay(string fullPathToOnPremiseEndpoint)
 		{
-			_logger?.Debug("Relaying request. method={RequestMethod}, path={RequestPath}", ControllerContext.Request.Method, path);
+			_logger?.Debug("Relaying request. method={RequestMethod}, fullPathToOnPremiseEndpoint={RequestPath}", ControllerContext.Request.Method, fullPathToOnPremiseEndpoint);
 
-			if (path == null)
+			if (fullPathToOnPremiseEndpoint == null)
 			{
-				_logger?.Information("Path is not set");
+				_logger?.Information("Path to on premise endpoint is not set");
 				return NotFound();
 			}
 
-			var pathInformation = _pathSplitter.Split(path);
+			var pathInformation = _pathSplitter.Split(fullPathToOnPremiseEndpoint);
 			var link = _linkRepository.GetLink(pathInformation.UserName);
 
-			if (!CanRequestBeHandled(path, pathInformation, link))
+			if (!CanRequestBeHandled(fullPathToOnPremiseEndpoint, pathInformation, link))
 			{
 				_logger?.Information("Request cannot be handled");
 				return NotFound();
@@ -114,7 +114,7 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 			finally
 			{
-				FinishRequest(request, response, link.Id, path, statusCode);
+				FinishRequest(request, response, link.Id, fullPathToOnPremiseEndpoint, statusCode);
 			}
 		}
 
@@ -128,7 +128,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			if (link == null)
 			{
-				_logger?.Information("Link for path {RequestPath} not found", path);
+				_logger?.Information("Link for fullPathToOnPremiseEndpoint {RequestPath} not found", path);
 				return false;
 			}
 

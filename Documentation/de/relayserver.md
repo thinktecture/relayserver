@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.0.1
+
+- Fehlerbehebungen
+
+  * Wenn eine weiterzuleitende Anfrage einen Query-Parameter namens 'path' enthielt, führte das zu unerwartetem Verhalten
+
 ## Version 2.0.0
 
 * Multi-Server Betrieb

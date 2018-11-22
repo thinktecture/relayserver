@@ -15,6 +15,13 @@ The goal of this list is to highlight companies who pay back to this open source
 [<img width="120px" src="./assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
 
 # Version history
+
+## Version 2.0.1
+
+- Bug fixes
+
+  * When the query to be relayed contained an query argument named 'path', this lead to unexpected behaviour
+
 ## Version 2.0.0
 
 * Multi-Server operation
