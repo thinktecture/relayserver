@@ -66,7 +66,7 @@ namespace Thinktecture.Relay.Server.Http
 			if (response == null)
 				throw new ArgumentNullException(nameof(response));
 
-			if (response.StatusCode == HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
+			if (response.StatusCode >= HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
 			{
 				return null;
 			}
