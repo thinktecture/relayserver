@@ -21,6 +21,7 @@ The goal of this list is to highlight companies who pay back to this open source
 - Bug fixes
 
   * When the query to be relayed contained an query argument named 'path', this lead to unexpected behaviour
+  * Corrected the filtering of contents of error responses from on-premise side services when enabled
 
 ## Version 2.0.0
 
