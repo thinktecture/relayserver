@@ -12,6 +12,7 @@
 - Fehlerbehebungen
 
   * Wenn eine weiterzuleitende Anfrage einen Query-Parameter namens 'path' enthielt, führte das zu unerwartetem Verhalten
+  * Die konfigurierbare Filterung des Inhaltes von OnPremise-Seitigen Fehler-Antworten wurde korrigiert
 
 ## Version 2.0.0
 
@@ -65,7 +66,7 @@
   * X-XSS-Protection Header werden nun gesetzt
   * Es ist nun möglich, den Relaying-Endpunkt auf Authentifizierte Requests einzuschränken
 
-- Allgemeine Verbeserungen
+- Allgemeine Verbesserungen
 
   * Info- und Management Endpunkte setzten nun korrekte Cache-Header
   * Update verwendeter Bibliotheken auf die jeweils neueste Version
