@@ -15,6 +15,8 @@ services:
          - SA_PASSWORD=<Strong!Passw0rd>
       ports:
          - "1433:1433"
+      volumes:
+         - ./db_scripts:/var/scripts
    seq:
       image: datalust/seq:latest
       environment:
