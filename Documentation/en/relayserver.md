@@ -30,9 +30,6 @@ The goal of this list is to highlight companies who pay back to this open source
 
   * The On-Premises connectors settings for reconnect timeouts (maximum and minimum) are now configurable, to be able to prevent accidental DDoS detections i.e. when the server restarts and all connectors want to reconnect in the same 30 second window.
 
-
-## Version 2.0.1
-
 - Bugfixes
 
   * When the query to be relayed contained an query argument named 'path', this lead to unexpected behaviour
