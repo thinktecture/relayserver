@@ -21,9 +21,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal class RelayServerConnection : Connection, IRelayServerConnection
 	{
-		private const int _CONNECTOR_VERSION = 2;
-		private const int _MIN_WAIT_TIME_IN_SECONDS = 2;
-		private const int _MAX_WAIT_TIME_IN_SECONDS = 30;
+		private const int _CONNECTOR_VERSION = 3;
 
 		private static int _nextInstanceId;
 		private static readonly Random _random = new Random();
@@ -34,16 +32,36 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
-		private readonly HttpClient _httpClient;
 
 		private CancellationTokenSource _cts;
 		private bool _stopRequested;
 		private string _accessToken;
+		private TimeSpan _minReconnectWaitTime = TimeSpan.FromSeconds(2);
+		private TimeSpan _maxReconnectWaitTime = TimeSpan.FromSeconds(30);
+		private HttpClient _httpClient;
+		private TimeSpan? _absoluteConnectionLifetime;
+		private TimeSpan? _slidingConnectionLifetime;
+		private DateTime? _connectedSince;
+		private DateTime? _lastActivity;
 
+		protected TimeSpan HttpClientTimeout
+		{
+			get => _httpClient.Timeout;
+			set
+			{
+				if (value != _httpClient?.Timeout)
+				{
+					_httpClient = new HttpClient() { Timeout = value };
+				}
+			}
+		}
+
+		public event EventHandler Connected;
+		public event EventHandler Disconnected;
 		public event EventHandler Disposing;
 
 		public Uri Uri { get; }
-		public TimeSpan TokenRefreshWindow { get; }
+		public TimeSpan TokenRefreshWindow { get; private set; }
 		public DateTime TokenExpiry { get; private set; } = DateTime.MaxValue;
 		public int RelayServerConnectionInstanceId { get; }
 		public DateTime LastHeartbeat { get; private set; } = DateTime.MinValue;
@@ -65,11 +83,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger;
 
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
-			_httpClient = new HttpClient()
-			{
-				Timeout = requestTimeout,
-			};
 			_cts = new CancellationTokenSource();
+
+			// Set defaults
+			HttpClientTimeout = requestTimeout;
 
 			Reconnecting += OnReconnecting;
 			Reconnected += OnReconnected;
@@ -192,6 +209,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			try
 			{
 				await Start().ConfigureAwait(false);
+				_connectedSince = DateTime.UtcNow;
 				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
 			}
 			catch (Exception ex)
@@ -213,6 +231,25 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			SetBearerToken(tokenResponse);
 
 			return true;
+		}
+
+		public void Reconnect()
+		{
+			_logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+
+			Disconnect(true);
+
+			Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => ConnectAsync()).ConfigureAwait(false);
+		}
+
+		public void Disconnect()
+		{
+			Disconnect(false);
+		}
+
+		public List<string> GetOnPremiseTargetKeys()
+		{
+			return _connectors.Keys.ToList();
 		}
 
 		private void SetBearerToken(TokenResponse tokenResponse)
@@ -266,6 +303,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 				try
 				{
+					if (request.IsConfigurationRequest)
+					{
+						await HandleConfigurationRequestAsync(ctx, request).ConfigureAwait(false);
+						return;
+					}
+
 					if (request.IsPingRequest)
 					{
 						await HandlePingRequestAsync(ctx, request).ConfigureAwait(false);
@@ -290,6 +333,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					{
 						_logger?.Verbose("Found on-premise target and sending request. request-id={RequestId}, on-premise-key={OnPremiseTargetKey}", request.RequestId, key);
 
+						_lastActivity = DateTime.UtcNow; ;
+
 						await RequestLocalTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false); // TODO no cancellation token here?
 						return;
 					}
@@ -305,7 +350,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				if (!ctx.IsRelayServerNotified && request != null)
 				{
-					_logger?.Warning("Unhandled request. connection-id={ConnectionId}, message={message}", ConnectionId, message);
+					_logger?.Warning("Unhandled request. connection-id={ConnectionId}, request-id={RequestId}, message={message}", ConnectionId, request.RequestId, message);
 
 					var response = new OnPremiseTargetResponse()
 					{
@@ -361,6 +406,40 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
+		private async Task HandleConfigurationRequestAsync(RequestContext ctx, IOnPremiseTargetRequestInternal request)
+		{
+			_logger?.Debug("Received configuration from RelayServer. request-id={RequestId}", request.RequestId);
+
+			using (var sr = new JsonTextReader(new StreamReader(new MemoryStream(request.Body))))
+			{
+				var config = JsonSerializer.Deserialize<ServerSideLinkConfiguration>(sr);
+
+				TokenRefreshWindow = config.TokenRefreshWindow ?? TokenRefreshWindow;
+				HeartbeatInterval = config.HeartbeatInterval ?? HeartbeatInterval;
+				HttpClientTimeout = config.RelayRequestTimeout ?? HttpClientTimeout;
+
+				_minReconnectWaitTime = config.ReconnectMinWaitTime ?? _minReconnectWaitTime;
+				_maxReconnectWaitTime = config.ReconnectMaxWaitTime ?? _maxReconnectWaitTime;
+
+				_absoluteConnectionLifetime = config.AbsoluteConnectionLifetime ?? _absoluteConnectionLifetime;
+				_slidingConnectionLifetime = config.SlidingConnectionLifetime ?? _slidingConnectionLifetime;
+
+				_logger?.Debug("Applied configuration from RelayServer. configuration={@Configuration}", config);
+			}
+
+			var response = new OnPremiseTargetResponse()
+			{
+				RequestStarted = DateTime.UtcNow,
+				RequestFinished = DateTime.UtcNow,
+				StatusCode = HttpStatusCode.OK,
+				OriginId = request.OriginId,
+				RequestId = request.RequestId,
+			};
+
+			// No cancellation token here, to not cancel sending of an already fetched response
+			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+		}
+
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
 			_logger?.Debug("Received ping from RelayServer. request-id={RequestId}", request.RequestId);
@@ -391,11 +470,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (LastHeartbeat == DateTime.MinValue)
 			{
-				request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
-				if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
+				if (request.HttpHeaders != null)
 				{
-					_logger?.Information("Heartbeat interval set to {HeartbeatInterval} seconds", heartbeatInterval);
-					HeartbeatInterval = TimeSpan.FromSeconds(heartbeatInterval);
+					request.HttpHeaders.TryGetValue("X-TTRELAY-HEARTBEATINTERVAL", out var heartbeatHeaderValue);
+					if (Int32.TryParse(heartbeatHeaderValue, out var heartbeatInterval))
+					{
+						_logger?.Information("Heartbeat interval set to {HeartbeatInterval} seconds", heartbeatInterval);
+						HeartbeatInterval = TimeSpan.FromSeconds(heartbeatInterval);
+					}
 				}
 			}
 
@@ -421,29 +503,26 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		public void Reconnect()
+		private void Disconnect(bool reconnecting)
 		{
-			_logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+		    if (reconnecting)
+		    {
+		        _logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+		    }
 
-			Disconnect();
-
-			Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => ConnectAsync()).ConfigureAwait(false);
-		}
-
-		public void Disconnect()
-		{
-			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+            _logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			LastHeartbeat = DateTime.MinValue;
 			HeartbeatInterval = TimeSpan.Zero;
 
+			if (!reconnecting)
+			{
+				_connectedSince = null;
+				_lastActivity = null;
+			}
+
 			_stopRequested = true;
 			Stop();
-		}
-
-		public List<string> GetOnPremiseTargetKeys()
-		{
-			return _connectors.Keys.ToList();
 		}
 
 		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, IOnPremiseTargetRequestInternal request, CancellationToken cancellationToken)
@@ -555,7 +634,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private TimeSpan GetRandomWaitTime()
 		{
-			return TimeSpan.FromSeconds(_random.Next(_MIN_WAIT_TIME_IN_SECONDS, _MAX_WAIT_TIME_IN_SECONDS));
+			return TimeSpan.FromSeconds(_random.Next((int)_minReconnectWaitTime.TotalSeconds, (int)_maxReconnectWaitTime.TotalSeconds));
 		}
 
 		private class RequestContext
