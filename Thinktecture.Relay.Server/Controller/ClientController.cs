@@ -55,7 +55,7 @@ namespace Thinktecture.Relay.Server.Controller
 		[HttpHead]
 		public async Task<HttpResponseMessage> Relay(string fullPathToOnPremiseEndpoint)
 		{
-			_logger?.Debug("Relaying request. method={RequestMethod}, fullPathToOnPremiseEndpoint={RequestPath}", ControllerContext.Request.Method, fullPathToOnPremiseEndpoint);
+			_logger?.Debug("Relaying request. method={RequestMethod}, path={RequestPath}", ControllerContext.Request.Method, fullPathToOnPremiseEndpoint);
 
 			if (fullPathToOnPremiseEndpoint == null)
 			{
