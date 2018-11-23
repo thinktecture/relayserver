@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.SqlServer;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
@@ -94,6 +93,17 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
+		public LinkConfiguration GetLinkConfiguration(Guid linkId)
+		{
+			using (var context = new RelayContext())
+			{
+				var linkQuery = context.Links
+					.Where(l => l.Id == linkId);
+
+				return GetLinkConfigurationFromDbLink(linkQuery).FirstOrDefault();
+			}
+		}
+
 		private IQueryable<Link> GetLinkFromDbLink(IQueryable<DbLink> linksQuery)
 		{
 			return linksQuery
@@ -140,6 +150,27 @@ namespace Thinktecture.Relay.Server.Repository
 							+ ((ac.LastActivity + _configuration.ActiveConnectionTimeout <= DateTime.UtcNow) ? " (inactive)" : "")
 						)
 						.ToList(),
+				})
+				.AsQueryable();
+		}
+
+		private IQueryable<LinkConfiguration> GetLinkConfigurationFromDbLink(IQueryable<DbLink> linksQuery)
+		{
+			return linksQuery
+				.Select(link => new
+				{
+					link,
+				})
+				.ToList()
+				.Select(i => new LinkConfiguration()
+				{
+					TokenRefreshWindow = i.link.TokenRefreshWindow,
+					HeartbeatInterval = i.link.HeartbeatInterval,
+					RelayRequestTimeout = i.link.RelayRequestTimeout,
+					ReconnectMinWaitTime = i.link.ReconnectMinWaitTime,
+					ReconnectMaxWaitTime = i.link.ReconnectMaxWaitTime,
+					AbsoluteConnectionLifetime = i.link.AbsoluteConnectionLifetime,
+					SlidingConnectionLifetime = i.link.SlidingConnectionLifetime,
 				})
 				.AsQueryable();
 		}
