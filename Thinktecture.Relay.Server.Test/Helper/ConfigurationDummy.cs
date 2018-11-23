@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Web.Http;
 using Thinktecture.Relay.Server.Config;
 
@@ -40,6 +39,14 @@ namespace Thinktecture.Relay.Server.Helper
 		public TimeSpan FailedLoginLockoutPeriod { get; set; }
 		public bool SecureClientController { get; set; }
 		public TimeSpan AccessTokenLifetime { get; set; }
+
+		// Default settings for links
+		public TimeSpan LinkTokenRefreshWindowDefault { get; set; }
+		public TimeSpan LinkRelayRequestTimeoutDefault { get; set; }
+		public TimeSpan LinkReconnectMinWaitTimeDefault { get; set; }
+		public TimeSpan LinkReconnectMaxWaitTimeDefault { get; set; }
+		public TimeSpan? LinkAbsoluteConnectionLifetimeDefault { get; set; }
+		public TimeSpan? LinkSlidingConnectionLifetimeDefault { get; set; }
 
 		public ConfigurationDummy()
 		{

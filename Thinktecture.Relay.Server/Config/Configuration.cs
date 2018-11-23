@@ -42,6 +42,14 @@ namespace Thinktecture.Relay.Server.Config
 		public bool SecureClientController { get; }
 		public TimeSpan AccessTokenLifetime { get; }
 
+		// Default settings for links
+		public TimeSpan LinkTokenRefreshWindowDefault { get; }
+		public TimeSpan LinkRelayRequestTimeoutDefault { get; }
+		public TimeSpan LinkReconnectMinWaitTimeDefault { get; }
+		public TimeSpan LinkReconnectMaxWaitTimeDefault { get; }
+		public TimeSpan? LinkAbsoluteConnectionLifetimeDefault { get; }
+		public TimeSpan? LinkSlidingConnectionLifetimeDefault { get; }
+
 		public Configuration(ILogger logger)
 		{
 			var settings = ConfigurationManager.ConnectionStrings["RabbitMQ"];
@@ -212,6 +220,47 @@ namespace Thinktecture.Relay.Server.Config
 				AccessTokenLifetime = tmpTimeSpan;
 			}
 
+			LinkTokenRefreshWindowDefault = TimeSpan.FromMinutes(1);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkTokenRefreshWindowDefault)], out tmpTimeSpan) && tmpTimeSpan < AccessTokenLifetime)
+			{
+				LinkTokenRefreshWindowDefault = tmpTimeSpan;
+			}
+
+			LinkRelayRequestTimeoutDefault = TimeSpan.FromSeconds(30);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkRelayRequestTimeoutDefault)], out tmpTimeSpan))
+			{
+				LinkRelayRequestTimeoutDefault = tmpTimeSpan;
+			}
+
+			LinkReconnectMinWaitTimeDefault = TimeSpan.FromSeconds(2);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMinWaitTimeDefault)], out tmpTimeSpan))
+			{
+				LinkReconnectMinWaitTimeDefault = tmpTimeSpan;
+			}
+
+			LinkReconnectMaxWaitTimeDefault = TimeSpan.FromSeconds(30);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMaxWaitTimeDefault)], out tmpTimeSpan) && tmpTimeSpan > LinkReconnectMinWaitTimeDefault)
+			{
+				LinkReconnectMaxWaitTimeDefault = tmpTimeSpan;
+			}
+			else if (LinkReconnectMaxWaitTimeDefault < LinkReconnectMinWaitTimeDefault)
+			{
+				 // something is fishy in the config
+				 LinkReconnectMaxWaitTimeDefault = LinkReconnectMinWaitTimeDefault + TimeSpan.FromSeconds(30);
+			}
+
+			LinkAbsoluteConnectionLifetimeDefault = null;
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkAbsoluteConnectionLifetimeDefault)], out tmpTimeSpan))
+			{
+				LinkAbsoluteConnectionLifetimeDefault = tmpTimeSpan;
+			}
+
+			LinkSlidingConnectionLifetimeDefault = null;
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkSlidingConnectionLifetimeDefault)], out tmpTimeSpan))
+			{
+				LinkSlidingConnectionLifetimeDefault = tmpTimeSpan;
+			}
+
 			LogSettings(logger);
 		}
 
@@ -247,6 +296,12 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(FailedLoginLockoutPeriod), FailedLoginLockoutPeriod);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SecureClientController), SecureClientController);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(AccessTokenLifetime), AccessTokenLifetime);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkTokenRefreshWindowDefault), LinkTokenRefreshWindowDefault);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkRelayRequestTimeoutDefault), LinkRelayRequestTimeoutDefault);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMinWaitTimeDefault), LinkReconnectMinWaitTimeDefault);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMaxWaitTimeDefault), LinkReconnectMaxWaitTimeDefault);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkAbsoluteConnectionLifetimeDefault), LinkAbsoluteConnectionLifetimeDefault);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkSlidingConnectionLifetimeDefault), LinkSlidingConnectionLifetimeDefault);
 		}
 	}
 }
