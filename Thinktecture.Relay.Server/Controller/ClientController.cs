@@ -128,7 +128,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			if (link == null)
 			{
-				_logger?.Information("Link for fullPathToOnPremiseEndpoint {RequestPath} not found", path);
+				_logger?.Information("Link for path {RequestPath} not found", path);
 				return false;
 			}
 
