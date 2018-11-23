@@ -77,7 +77,7 @@ namespace Thinktecture.Relay.Server.Communication
 					OriginId = _backendCommunication.OriginId,
 					RequestId = requestId,
 					AcknowledgmentMode = AcknowledgmentMode.Auto,
-					HttpHeaders = new Dictionary<string, string> { ["X-TTRELAY-HEARTBEATINTERVAL"] = _heartbeatInterval.TotalSeconds.ToString(CultureInfo.InvariantCulture) },
+					HttpHeaders = connectionContext.SupportsConfiguration ? null : new Dictionary<string, string> { ["X-TTRELAY-HEARTBEATINTERVAL"] = _heartbeatInterval.TotalSeconds.ToString(CultureInfo.InvariantCulture) },
 				};
 
 				// wait for the response of the Heartbeat / Ping
