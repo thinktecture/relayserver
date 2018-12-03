@@ -17,6 +17,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		DateTime LastHeartbeat { get; }
 		TimeSpan HeartbeatInterval { get; }
 
+		DateTime? ConnectedSince { get; }
+		DateTime? LastActivity { get; }
+		TimeSpan? AbsoluteConnectionLifetime { get; }
+		TimeSpan? SlidingConnectionLifetime { get; }
+
 		event EventHandler Disposing;
 		event EventHandler Connected;
 		event EventHandler Disconnected;

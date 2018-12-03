@@ -39,11 +39,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private TimeSpan _minReconnectWaitTime = TimeSpan.FromSeconds(2);
 		private TimeSpan _maxReconnectWaitTime = TimeSpan.FromSeconds(30);
 		private HttpClient _httpClient;
-		private TimeSpan? _absoluteConnectionLifetime;
-		private TimeSpan? _slidingConnectionLifetime;
-		private DateTime? _connectedSince;
-		private DateTime? _lastActivity;
-
 		protected TimeSpan HttpClientTimeout
 		{
 			get => _httpClient.Timeout;
@@ -66,6 +61,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public int RelayServerConnectionInstanceId { get; }
 		public DateTime LastHeartbeat { get; private set; } = DateTime.MinValue;
 		public TimeSpan HeartbeatInterval { get; private set; }
+		public DateTime? ConnectedSince { get; private set; }
+		public DateTime? LastActivity { get; private set; }
+		public TimeSpan? AbsoluteConnectionLifetime { get; private set; }
+		public TimeSpan? SlidingConnectionLifetime { get; private set; }
 
 		public RelayServerConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, TimeSpan requestTimeout,
 			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
@@ -209,7 +208,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			try
 			{
 				await Start().ConfigureAwait(false);
-				_connectedSince = DateTime.UtcNow;
+				ConnectedSince = DateTime.UtcNow;
 				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
 
 				try
@@ -430,8 +429,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				_minReconnectWaitTime = config.ReconnectMinWaitTime ?? _minReconnectWaitTime;
 				_maxReconnectWaitTime = config.ReconnectMaxWaitTime ?? _maxReconnectWaitTime;
 
-				_absoluteConnectionLifetime = config.AbsoluteConnectionLifetime ?? _absoluteConnectionLifetime;
-				_slidingConnectionLifetime = config.SlidingConnectionLifetime ?? _slidingConnectionLifetime;
+				AbsoluteConnectionLifetime = config.AbsoluteConnectionLifetime ?? AbsoluteConnectionLifetime;
+				SlidingConnectionLifetime = config.SlidingConnectionLifetime ?? SlidingConnectionLifetime;
 
 				_logger?.Debug("Applied configuration from RelayServer. configuration={@Configuration}", config);
 			}
@@ -522,8 +521,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (!reconnecting)
 			{
-				_connectedSince = null;
-				_lastActivity = null;
+				ConnectedSince = null;
+				LastActivity = null;
 			}
 
 			_stopRequested = true;

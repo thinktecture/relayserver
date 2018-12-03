@@ -30,6 +30,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
 			builder.RegisterType<HeartbeatChecker>().As<IHeartbeatChecker>();
 			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();
+			builder.RegisterType<AutomaticDisconnectChecker>().As<IAutomaticDisconnectChecker>();
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
 
 			var container = builder.Build();
