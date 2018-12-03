@@ -18,6 +18,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		TimeSpan HeartbeatInterval { get; }
 
 		event EventHandler Disposing;
+		event EventHandler Connected;
+		event EventHandler Disconnected;
 
 		void RegisterOnPremiseTarget(string key, Uri baseUri);
 		void RegisterOnPremiseTarget(string key, Type handlerType);

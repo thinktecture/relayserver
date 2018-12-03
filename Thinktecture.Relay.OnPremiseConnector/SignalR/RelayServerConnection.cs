@@ -211,6 +211,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				await Start().ConfigureAwait(false);
 				_connectedSince = DateTime.UtcNow;
 				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
+
+				try
+				{
+					Connected?.Invoke(this, EventArgs.Empty);
+				}
+				catch (Exception ex)
+				{
+					_logger?.Error(ex, "Error handling connected event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -427,31 +436,23 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				_logger?.Debug("Applied configuration from RelayServer. configuration={@Configuration}", config);
 			}
 
-			var response = new OnPremiseTargetResponse()
-			{
-				RequestStarted = DateTime.UtcNow,
-				RequestFinished = DateTime.UtcNow,
-				StatusCode = HttpStatusCode.OK,
-				OriginId = request.OriginId,
-				RequestId = request.RequestId,
-			};
+			var response = BuildDefaultResponse(request.OriginId, request.RequestId);
 
-			// No cancellation token here, to not cancel sending of an already fetched response
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+            try
+            {
+			    // No cancellation token here, to not cancel sending of an already fetched response
+			    await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex, "Error during posting configuration response to relay. request-id={RequestId}", request.RequestId);
+            }
 		}
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
 		{
 			_logger?.Debug("Received ping from RelayServer. request-id={RequestId}", request.RequestId);
-
-			var response = new OnPremiseTargetResponse()
-			{
-				RequestStarted = DateTime.UtcNow,
-				RequestFinished = DateTime.UtcNow,
-				StatusCode = HttpStatusCode.OK,
-				OriginId = request.OriginId,
-				RequestId = request.RequestId,
-			};
+			var response = BuildDefaultResponse(request.OriginId, request.RequestId);
 
 			try
 			{
@@ -482,25 +483,29 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 
 			LastHeartbeat = DateTime.UtcNow;
+			var response = BuildDefaultResponse(request.OriginId, request.RequestId);
 
-			var response = new OnPremiseTargetResponse()
+            try
+            {
+			    // No cancellation token here, to not cancel sending of an already fetched response
+			    await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex, "Error during posting heartbeat response to relay. request-id={RequestId}", request.RequestId);
+            }
+		}
+
+		private IOnPremiseTargetResponse BuildDefaultResponse(Guid originId, string requestId)
+		{
+			return new OnPremiseTargetResponse()
 			{
 				RequestStarted = DateTime.UtcNow,
 				RequestFinished = DateTime.UtcNow,
 				StatusCode = HttpStatusCode.OK,
-				OriginId = request.OriginId,
-				RequestId = request.RequestId,
+				OriginId = originId,
+				RequestId = requestId,
 			};
-
-			try
-			{
-				// No cancellation token here, to not cancel sending of an already fetched response
-				await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
-			}
-			catch (Exception ex)
-			{
-				_logger?.Error(ex, "Error during posting heartbeat response to relay. request-id={RequestId}", request.RequestId);
-			}
 		}
 
 		private void Disconnect(bool reconnecting)
@@ -591,6 +596,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				var randomWaitTime = GetRandomWaitTime();
 				_logger?.Debug("Connection closed. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}, reconnect-wait-time={ReconnectWaitTime}", Uri, RelayServerConnectionInstanceId, randomWaitTime.TotalSeconds);
 				Task.Delay(randomWaitTime).ContinueWith(_ => ConnectAsync()).ConfigureAwait(false);
+			}
+
+			try
+			{
+				Disconnected?.Invoke(this, EventArgs.Empty);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error handling disconnected event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 			}
 		}
 
