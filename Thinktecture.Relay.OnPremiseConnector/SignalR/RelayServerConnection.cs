@@ -342,7 +342,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					{
 						_logger?.Verbose("Found on-premise target and sending request. request-id={RequestId}, on-premise-key={OnPremiseTargetKey}", request.RequestId, key);
 
-						_lastActivity = DateTime.UtcNow; ;
+						LastActivity = DateTime.UtcNow;
 
 						await RequestLocalTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false); // TODO no cancellation token here?
 						return;

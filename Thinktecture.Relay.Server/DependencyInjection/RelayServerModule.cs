@@ -51,9 +51,9 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 
 			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance()
 				.OnActivated(args => args.Instance.Prepare());
-			
+
 			builder.RegisterType<OnPremiseConnectionHeartbeater>().AsImplementedInterfaces().SingleInstance()
-				.OnActivated(args => args.Instance.Prepare()); ;
+				.OnActivated(args => args.Instance.Prepare());
 
 			builder.RegisterType<OnPremiseConnectorCallbackFactory>().As<IOnPremiseConnectorCallbackFactory>().SingleInstance();
 
