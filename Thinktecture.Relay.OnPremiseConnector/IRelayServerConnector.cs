@@ -18,6 +18,16 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		string RelayedRequestHeader { get; set; }
 
 		/// <summary>
+		/// Raised, when a connection within the connector connects to the RelayServer.
+		/// </summary>
+		event EventHandler Connected;
+
+		/// <summary>
+		/// Raised, when a connection within the connector disconnects from the RelayServer.
+		/// </summary>
+		event EventHandler Disconnected;
+
+		/// <summary>
 		/// Registers a on-premise web target.
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>

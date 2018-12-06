@@ -19,6 +19,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 	{
 		private static readonly IServiceProvider _serviceProvider;
 
+		/// <inheritdoc />
+		public event EventHandler Connected;
+		/// <inheritdoc />
+		public event EventHandler Disconnected;
+
 		static RelayServerConnector()
 		{
 			var builder = new ContainerBuilder();
@@ -61,6 +66,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
 			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds));
+			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
+			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
 		}
 
 		/// <summary>
