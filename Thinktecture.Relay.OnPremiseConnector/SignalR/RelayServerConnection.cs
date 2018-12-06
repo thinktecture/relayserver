@@ -209,6 +209,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				await Start().ConfigureAwait(false);
 				ConnectedSince = DateTime.UtcNow;
+				LastActivity = DateTime.UtcNow;
+
 				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
 
 				try
@@ -416,7 +418,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task HandleConfigurationRequestAsync(RequestContext ctx, IOnPremiseTargetRequestInternal request)
 		{
-			_logger?.Debug("Received configuration from RelayServer. request-id={RequestId}", request.RequestId);
+			_logger?.Debug("Received configuration request from RelayServer. request-id={RequestId}", request.RequestId);
 
 			using (var sr = new JsonTextReader(new StreamReader(new MemoryStream(request.Body))))
 			{

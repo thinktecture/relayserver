@@ -16,13 +16,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			if (connection.AbsoluteConnectionLifetime.HasValue && connection.ConnectedSince.HasValue)
 			{
-				_logger?.Debug("Checking if connection reached maximum absolute lifetime. relay-server-connection-instance-id={RelayServerConnectionInstanceId}", connection.RelayServerConnectionInstanceId);
-
 				var endOfMaximumConnectionTime = connection.ConnectedSince + connection.AbsoluteConnectionLifetime;
 
 				if (DateTime.UtcNow > endOfMaximumConnectionTime)
 				{
-					_logger?.Information("Connection reached maximum absolute lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}", connection.RelayServerConnectionInstanceId);
+					_logger?.Information("Connection reached maximum absolute lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}, connected-since={ConnectedSince}, absolute-connection-lifetime={AbsoluteConnectionLifetime}", connection.RelayServerConnectionInstanceId, connection.ConnectedSince, connection.AbsoluteConnectionLifetime);
 					connection.Disconnect();
 					return true;
 				}
@@ -30,13 +28,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (connection.SlidingConnectionLifetime.HasValue && connection.LastActivity.HasValue)
 			{
-				_logger?.Debug("Checking if connection reached maximum sliding lifetime. relay-server-connection-instance-id={RelayServerConnectionInstanceId}", connection.RelayServerConnectionInstanceId);
-
 				var endOfSlidingConnectionTime = connection.LastActivity + connection.SlidingConnectionLifetime;
 
 				if (DateTime.UtcNow > endOfSlidingConnectionTime)
 				{
-					_logger?.Information("Connection reached maximum sliding lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}", connection.RelayServerConnectionInstanceId);
+					_logger?.Information("Connection reached maximum sliding lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}, last-activity={LastActivity}, sliding-connection-lifetime={SlidingConnectionLifetime}", connection.RelayServerConnectionInstanceId, connection.LastActivity, connection.SlidingConnectionLifetime);
 
 					connection.Disconnect();
 					return true;
