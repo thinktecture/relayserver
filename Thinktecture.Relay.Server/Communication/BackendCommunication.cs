@@ -123,11 +123,13 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
+			requestTimeout = requestTimeout ?? _configuration.OnPremiseConnectorCallbackTimeout;
+
 			_logger?.Debug("Waiting for response. request-id={RequestId}, timeout={Timeout}", requestId, requestTimeout);
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
-			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout ?? _configuration.OnPremiseConnectorCallbackTimeout, _cancellationToken);
+			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout, _cancellationToken);
 		}
 
 		public void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
@@ -200,7 +202,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			else
 			{
-				_logger?.Debug("Response received but no request callback found. request-id={RequestId}", response.RequestId);
+				_logger?.Information("Response received but no request callback found for request {RequestId}", response.RequestId);
 			}
 		}
 

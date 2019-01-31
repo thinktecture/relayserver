@@ -180,7 +180,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task ConnectAsync()
 		{
-			_logger?.Information("Connecting to RelayServer {RelayServerUri} with connection id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			_logger?.Information("Connecting to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			_stopRequested = false;
 
@@ -192,11 +192,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			try
 			{
 				await Start().ConfigureAwait(false);
-				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection id {ConnectionId}", Uri, ConnectionId);
+				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while connecting to RelayServer {RelayServerUri} with connection id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+				_logger?.Error(ex, "Error while connecting to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 			}
 		}
 
@@ -295,7 +295,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 				}
 
-				_logger?.Verbose("No connector found for local server. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, request.Url);
+				_logger?.Information("No connector found for local server for request {RequestId} and url {RequestUrl}", request.RequestId, request.Url);
 			}
 			catch (Exception ex)
 			{
@@ -324,7 +324,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					}
 					catch (Exception ex)
 					{
-						_logger?.Error(ex, "Error during posting to relay. connection-id={ConnectionId}", ConnectionId);
+						_logger?.Error(ex, "Error during posting unhandled request response to relay. request-id={RequestId}", request.RequestId);
 					}
 				}
 			}
@@ -374,8 +374,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				RequestId = request.RequestId,
 			};
 
-			// No cancellation token here, to not cancel sending of an already fetched response
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			try
+			{
+				// No cancellation token here, to not cancel sending of an already fetched response
+				await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during posting ping response to relay. request-id={RequestId}", request.RequestId);
+			}
 		}
 
 		private async Task HandleHeartbeatRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
@@ -402,8 +409,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				OriginId = request.OriginId,
 				RequestId = request.RequestId,
 			};
-			// No cancellation token here, to not cancel sending of an already fetched response
-			await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+
+			try
+			{
+				// No cancellation token here, to not cancel sending of an already fetched response
+				await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during posting heartbeat response to relay. request-id={RequestId}", request.RequestId);
+			}
 		}
 
 		public void Reconnect()
@@ -417,7 +432,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public void Disconnect()
 		{
-			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			LastHeartbeat = DateTime.MinValue;
 			HeartbeatInterval = TimeSpan.Zero;
@@ -475,20 +490,20 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				catch (Exception ex)
 				{
-					_logger?.Error(ex, "Error during posting to relay. request-id={RequestId}", request.RequestId);
+					_logger?.Error(ex, "Error during posting local target response to relay. request-id={RequestId}", request.RequestId);
 				}
 			}
 		}
 
 		private async Task PostResponseAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
 		{
-			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null, 0x10000), cancellationToken).ConfigureAwait(false);
 			ctx.IsRelayServerNotified = true;
+			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null, 0x10000), cancellationToken).ConfigureAwait(false);
 		}
 
 		protected override void OnClosed()
 		{
-			_logger?.Information("Connection closed to RelayServer {RelayServerUri} with connection instance id {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			_logger?.Information("Connection closed to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			base.OnClosed();
 
