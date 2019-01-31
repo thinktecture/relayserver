@@ -7,7 +7,19 @@
 
 # Release Notes
 
-## Version 2.0.1
+## Version 2.1.0
+
+* Server-Seitige Link-Konfiguration
+
+  * Es ist nun möglich, Link-Spezifische Settings auf dem RelayServer zu konfigurieren.
+
+* Automatischer Disconnect von On-Premise Connectoren
+
+  * Wenn gewünscht, kann ein On-Premise Connector von sich aus die Verbindung wieder abbrechen, wenn er eine maximale Verbindungszeit erreicht und/oder eine gewisse Zeit nicht verwendet wird.
+
+* Allgemeine Verbesserungen
+
+  * Die Zeitspanne in der sich On-Premise Connectoren nach einem Verbindungsverlust neu verbinden können ist nun konfigurierbar. Damit kann vermieden werden, dass z.B. bei einem Neustart des Servers alle On-Premise Connectoren innerhalb des gleichen kurzen Zeitfensters erneut verbinden wollen und damit versehentlich eine DDoS-Erkennung auslösen.
 
 - Fehlerbehebungen
 

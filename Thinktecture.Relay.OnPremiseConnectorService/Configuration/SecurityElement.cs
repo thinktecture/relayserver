@@ -20,6 +20,8 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 		protected override ConfigurationPropertyCollection Properties => _properties;
 		public AuthenticationType AuthenticationType => (AuthenticationType)this[_authenticationType];
 		public IdentityElement Identity => (IdentityElement)this[_identity];
+
+		[Obsolete("This property is obsolete. Please use the RelayServer - side link configuration from 2.1 onwards.")]
 		public TimeSpan AccessTokenRefreshWindow => (TimeSpan)this[_accessTokenRefreshWindow];
 	}
 }

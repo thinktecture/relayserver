@@ -16,7 +16,19 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.0.1
+## Version 2.1.0
+
+* Server-side Link configuration
+
+  * It is now possible to configure link-specific settings on the RelayServer itself.
+
+* Automatic disconnect of On-Premises connectors
+
+  * If required, it is possible to have an On-Premises connector auto-disconnect itself after a maximum absolute connection time and/or after a maximum idle time.
+
+* General improvements
+
+  * The On-Premises connectors settings for reconnect timeouts (maximum and minimum) are now configurable, to be able to prevent accidental DDoS detections i.e. when the server restarts and all connectors want to reconnect in the same 30 second window.
 
 - Bugfixes
 

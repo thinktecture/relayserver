@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.OnPremiseConnector
 {
 	/// <summary>
-	/// Interface that represents the class connecting to the relay server.
+	/// Interface that represents the class connecting to the RelayServer.
 	/// </summary>
 	public interface IRelayServerConnector
 	{
@@ -16,6 +16,16 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// Gets or sets the header that is set on relayed requests.
 		/// </summary>
 		string RelayedRequestHeader { get; set; }
+
+		/// <summary>
+		/// Raised, when a connection within the connector connects to the RelayServer.
+		/// </summary>
+		event EventHandler Connected;
+
+		/// <summary>
+		/// Raised, when a connection within the connector disconnects from the RelayServer.
+		/// </summary>
+		event EventHandler Disconnected;
 
 		/// <summary>
 		/// Registers a on-premise web target.

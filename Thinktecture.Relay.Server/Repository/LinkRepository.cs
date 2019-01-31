@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.SqlServer;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
@@ -94,6 +93,17 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
+		public LinkConfiguration GetLinkConfiguration(Guid linkId)
+		{
+			using (var context = new RelayContext())
+			{
+				var linkQuery = context.Links
+					.Where(l => l.Id == linkId);
+
+				return GetLinkConfigurationFromDbLink(linkQuery).FirstOrDefault();
+			}
+		}
+
 		private IQueryable<Link> GetLinkFromDbLink(IQueryable<DbLink> linksQuery)
 		{
 			return linksQuery
@@ -104,7 +114,7 @@ namespace Thinktecture.Relay.Server.Repository
 						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
 						.Select(ac => ac.ConnectionId)
 				})
-				.Select(i => new Link
+				.Select(i => new Link()
 				{
 					Id = i.link.Id,
 					ForwardOnPremiseTargetErrorResponse = i.link.ForwardOnPremiseTargetErrorResponse,
@@ -123,7 +133,7 @@ namespace Thinktecture.Relay.Server.Repository
 					link.ActiveConnections
 				})
 				.ToList()
-				.Select(i => new LinkDetails
+				.Select(i => new LinkDetails()
 				{
 					Id = i.link.Id,
 					CreationDate = i.link.CreationDate,
@@ -133,6 +143,14 @@ namespace Thinktecture.Relay.Server.Repository
 					SymbolicName = i.link.SymbolicName,
 					UserName = i.link.UserName,
 					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
+
+					TokenRefreshWindow = i.link.TokenRefreshWindow,
+					HeartbeatInterval = i.link.HeartbeatInterval,
+					ReconnectMinWaitTime = i.link.ReconnectMinWaitTime,
+					ReconnectMaxWaitTime = i.link.ReconnectMaxWaitTime,
+					AbsoluteConnectionLifetime = i.link.AbsoluteConnectionLifetime,
+					SlidingConnectionLifetime = i.link.SlidingConnectionLifetime,
+
 					Connections = i.ActiveConnections
 						.Select(ac => ac.ConnectionId
 							+ "; Versions: Connector = " + ac.ConnectorVersion + ", Assembly = " + ac.AssemblyVersion
@@ -144,6 +162,26 @@ namespace Thinktecture.Relay.Server.Repository
 				.AsQueryable();
 		}
 
+		private IQueryable<LinkConfiguration> GetLinkConfigurationFromDbLink(IQueryable<DbLink> linksQuery)
+		{
+			return linksQuery
+				.Select(link => new
+				{
+					link,
+				})
+				.ToList()
+				.Select(i => new LinkConfiguration()
+				{
+					TokenRefreshWindow = i.link.TokenRefreshWindow,
+					HeartbeatInterval = i.link.HeartbeatInterval,
+					ReconnectMinWaitTime = i.link.ReconnectMinWaitTime,
+					ReconnectMaxWaitTime = i.link.ReconnectMaxWaitTime,
+					AbsoluteConnectionLifetime = i.link.AbsoluteConnectionLifetime,
+					SlidingConnectionLifetime = i.link.SlidingConnectionLifetime,
+				})
+				.AsQueryable();
+		}
+
 		public CreateLinkResult CreateLink(string symbolicName, string userName)
 		{
 			using (var context = new RelayContext())
@@ -151,7 +189,7 @@ namespace Thinktecture.Relay.Server.Repository
 				var password = _passwordHash.GeneratePassword(_configuration.LinkPasswordLength);
 				var passwordInformation = _passwordHash.CreatePasswordInformation(password);
 
-				var link = new DbLink
+				var link = new DbLink()
 				{
 					Id = Guid.NewGuid(),
 					Password = passwordInformation.Hash,
@@ -191,6 +229,13 @@ namespace Thinktecture.Relay.Server.Repository
 				linkEntity.MaximumLinks = link.MaximumLinks;
 				linkEntity.SymbolicName = link.SymbolicName;
 				linkEntity.UserName = link.UserName;
+
+				linkEntity.TokenRefreshWindow = link.TokenRefreshWindow;
+				linkEntity.HeartbeatInterval = link.HeartbeatInterval;
+				linkEntity.ReconnectMinWaitTime = link.ReconnectMinWaitTime;
+				linkEntity.ReconnectMaxWaitTime = link.ReconnectMaxWaitTime;
+				linkEntity.AbsoluteConnectionLifetime = link.AbsoluteConnectionLifetime;
+				linkEntity.SlidingConnectionLifetime = link.SlidingConnectionLifetime;
 
 				context.Entry(linkEntity).State = EntityState.Modified;
 
