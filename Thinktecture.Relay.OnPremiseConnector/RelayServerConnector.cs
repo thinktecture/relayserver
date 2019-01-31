@@ -62,12 +62,27 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
+		[Obsolete("Use the ctor without tokenRefreshWindowInSeconds instead.")]
 		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null)
 		{
 			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
 			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds));
 			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
 			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
+		}
+
+		/// <summary>
+		/// Creates a new instance of <see cref="RelayServerConnector"/>.
+		/// </summary>
+		/// <param name="versionAssembly">An <see cref="Assembly"/> to be used as version.</param>
+		/// <param name="userName">A <see cref="String"/> containing the user name.</param>
+		/// <param name="password">A <see cref="String"/> containing the password.</param>
+		/// <param name="relayServer">An <see cref="Uri"/> containing the RelayServer's base url.</param>
+		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, IServiceProvider serviceProvider = null)
+			: this (versionAssembly, userName, password, relayServer, requestTimeoutInSeconds, 5, serviceProvider)
+		{
 		}
 
 		/// <summary>

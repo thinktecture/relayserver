@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				if (DateTime.UtcNow > connection.ConnectedSince + connection.AbsoluteConnectionLifetime)
 				{
-					_logger?.Information("Connection reached maximum absolute lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}, connected-since={ConnectedSince}, absolute-connection-lifetime={AbsoluteConnectionLifetime}", connection.RelayServerConnectionInstanceId, connection.ConnectedSince, connection.AbsoluteConnectionLifetime);
+					_logger?.Information("Disconnecting, because connection {RelayServerConnectionInstanceId} reached its maximum absolute lifetime of {AbsoluteConnectionLifetime} since connection was established at {ConnectedSince}", connection.RelayServerConnectionInstanceId, connection.AbsoluteConnectionLifetime, connection.ConnectedSince);
 
 					connection.Disconnect();
 					return true;
@@ -29,7 +29,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				if (DateTime.UtcNow > (connection.LastActivity ?? connection.ConnectedSince + connection.SlidingConnectionLifetime))
 				{
-					_logger?.Information("Connection reached maximum sliding lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}, last-activity={LastActivity}, connected-since={ConnectedSince}, sliding-connection-lifetime={SlidingConnectionLifetime}", connection.RelayServerConnectionInstanceId, connection.LastActivity, connection.ConnectedSince, connection.SlidingConnectionLifetime);
+					_logger?.Information("Disconnecting because connection {RelayServerConnectionInstanceId} reached its maximum sliding lifetime of {SlidingConnectionLifetime} since the last activity at {LastActivity}", connection.RelayServerConnectionInstanceId, connection.SlidingConnectionLifetime, connection.LastActivity ?? connection.ConnectedSince);
 
 					connection.Disconnect();
 					return true;
