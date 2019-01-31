@@ -34,6 +34,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
   * When the query to be relayed contained an query argument named 'path', this lead to unexpected behaviour
   * Corrected the filtering of contents of error responses from on-premise side services when enabled
+  * A better error message will be displayed if the config file is missing for the RelayServer
 
 ## Version 2.0.0
 

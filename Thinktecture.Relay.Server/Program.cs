@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Diagnostics;
 using Autofac;
 using AutofacSerilogIntegration;
@@ -10,13 +11,25 @@ using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Interceptor;
 using Topshelf;
 using Topshelf.Autofac;
+using Configuration = Thinktecture.Relay.Server.Config.Configuration;
 
 namespace Thinktecture.Relay.Server
 {
 	internal static class Program
 	{
-		private static void Main(string[] args)
+		private static int Main(string[] args)
 		{
+			var configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			if (!configuration.HasFile)
+			{
+				// ReSharper disable LocalizableElement
+				Console.WriteLine("ERROR: Cannot find a configuration file.");
+				Console.WriteLine($"Please provide a config file at '{configuration.FilePath}'.");
+				// ReSharper enable LocalizableElement
+
+				return 1;
+			}
+
 			Log.Logger = new LoggerConfiguration().ReadFrom.AppSettings().CreateLogger();
 
 			try
@@ -55,6 +68,7 @@ namespace Thinktecture.Relay.Server
 			catch (Exception ex)
 			{
 				Log.Logger.Fatal(ex, "Service crashed");
+				return 1;
 			}
 			finally
 			{
@@ -69,6 +83,8 @@ namespace Thinktecture.Relay.Server
 				Console.ReadKey(true);
 			}
 #endif
+
+			return 0;
 		}
 
 		private static ILifetimeScope BuildProgramScope()

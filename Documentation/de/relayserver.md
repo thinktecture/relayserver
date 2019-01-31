@@ -25,6 +25,7 @@
 
   * Wenn eine weiterzuleitende Anfrage einen Query-Parameter namens 'path' enthielt, führte das zu unerwartetem Verhalten
   * Die konfigurierbare Filterung des Inhaltes von OnPremise-Seitigen Fehler-Antworten wurde korrigiert
+  * Genauere Fehlermeldung wird angezeigt, wenn die Konfigurationsdatei des RelayServers fehlt
 
 ## Version 2.0.0
 
