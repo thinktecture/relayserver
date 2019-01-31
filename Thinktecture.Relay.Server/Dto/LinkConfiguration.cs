@@ -8,8 +8,6 @@ namespace Thinktecture.Relay.Server.Dto
 		public TimeSpan? TokenRefreshWindow { get; set; }
 		public TimeSpan? HeartbeatInterval { get; set; }
 
-		public TimeSpan? RelayRequestTimeout { get; set; }
-
 		public TimeSpan? ReconnectMinWaitTime { get; set; }
 		public TimeSpan? ReconnectMaxWaitTime { get; set; }
 
@@ -18,13 +16,12 @@ namespace Thinktecture.Relay.Server.Dto
 
 		public void ApplyDefaults(IConfiguration configuration)
 		{
-			TokenRefreshWindow = TokenRefreshWindow ?? configuration.LinkTokenRefreshWindowDefault;
+			TokenRefreshWindow = TokenRefreshWindow ?? configuration.LinkTokenRefreshWindow;
 			HeartbeatInterval = HeartbeatInterval ?? new TimeSpan(configuration.ActiveConnectionTimeout.Ticks / 4);
-			RelayRequestTimeout = RelayRequestTimeout ?? configuration.LinkRelayRequestTimeoutDefault;
-			ReconnectMinWaitTime = ReconnectMinWaitTime ?? configuration.LinkReconnectMinWaitTimeDefault;
-			ReconnectMaxWaitTime = ReconnectMaxWaitTime ?? configuration.LinkReconnectMaxWaitTimeDefault;
-			AbsoluteConnectionLifetime = AbsoluteConnectionLifetime ?? configuration.LinkAbsoluteConnectionLifetimeDefault;
-			SlidingConnectionLifetime = SlidingConnectionLifetime ?? configuration.LinkSlidingConnectionLifetimeDefault;
+			ReconnectMinWaitTime = ReconnectMinWaitTime ?? configuration.LinkReconnectMinWaitTime;
+			ReconnectMaxWaitTime = ReconnectMaxWaitTime ?? configuration.LinkReconnectMaxWaitTime;
+			AbsoluteConnectionLifetime = AbsoluteConnectionLifetime ?? configuration.LinkAbsoluteConnectionLifetime;
+			SlidingConnectionLifetime = SlidingConnectionLifetime ?? configuration.LinkSlidingConnectionLifetime;
 		}
 	}
 }

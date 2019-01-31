@@ -50,8 +50,6 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 
 		public TimeSpan? TokenRefreshWindow { get; set; }
 		public TimeSpan? HeartbeatInterval { get; set; }
-		public TimeSpan? RelayRequestTimeout { get; set; }
-
 		public TimeSpan? ReconnectMinWaitTime { get; set; }
 		public TimeSpan? ReconnectMaxWaitTime { get; set; }
 

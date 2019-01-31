@@ -35,11 +35,10 @@ namespace Thinktecture.Relay.Server.Config
 		TimeSpan FailedLoginLockoutPeriod { get; }
 		bool SecureClientController { get; }
 		TimeSpan AccessTokenLifetime { get; }
-		TimeSpan LinkTokenRefreshWindowDefault { get; }
-		TimeSpan LinkRelayRequestTimeoutDefault { get; }
-		TimeSpan LinkReconnectMinWaitTimeDefault { get; }
-		TimeSpan LinkReconnectMaxWaitTimeDefault { get; }
-		TimeSpan? LinkAbsoluteConnectionLifetimeDefault { get; }
-		TimeSpan? LinkSlidingConnectionLifetimeDefault { get; }
+		TimeSpan LinkTokenRefreshWindow { get; }
+		TimeSpan LinkReconnectMinWaitTime { get; }
+		TimeSpan LinkReconnectMaxWaitTime { get; }
+		TimeSpan? LinkAbsoluteConnectionLifetime { get; }
+		TimeSpan? LinkSlidingConnectionLifetime { get; }
 	}
 }

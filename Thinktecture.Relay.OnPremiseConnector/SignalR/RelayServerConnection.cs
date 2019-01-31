@@ -28,29 +28,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private readonly string _userName;
 		private readonly string _password;
-		private readonly TimeSpan _requestTimeout;
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
+		private readonly HttpClient _httpClient;
 
 		private CancellationTokenSource _cts;
 		private bool _stopRequested;
 		private string _accessToken;
 		private TimeSpan _minReconnectWaitTime = TimeSpan.FromSeconds(2);
 		private TimeSpan _maxReconnectWaitTime = TimeSpan.FromSeconds(30);
-		private HttpClient _httpClient;
-		protected TimeSpan HttpClientTimeout
-		{
-			get => _httpClient.Timeout;
-			set
-			{
-				if (value != _httpClient?.Timeout)
-				{
-					_httpClient = new HttpClient() { Timeout = value };
-				}
-			}
-		}
-
+		
 		public event EventHandler Connected;
 		public event EventHandler Disconnected;
 		public event EventHandler Disposing;
@@ -71,9 +59,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
 			RelayServerConnectionInstanceId = Interlocked.Increment(ref _nextInstanceId);
+			_httpClient = new HttpClient() { Timeout = requestTimeout };
+
 			_userName = userName;
 			_password = password;
-			_requestTimeout = requestTimeout;
 
 			Uri = relayServerUri;
 			TokenRefreshWindow = tokenRefreshWindow;
@@ -83,9 +72,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
-
-			// Set defaults
-			HttpClientTimeout = requestTimeout;
 
 			Reconnecting += OnReconnecting;
 			Reconnected += OnReconnected;
@@ -104,7 +90,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}", key, baseUri);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _httpClient.Timeout);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
@@ -118,7 +104,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, handlerType);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _httpClient.Timeout);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory)
@@ -132,7 +118,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target using a handler factory. handler-key={HandlerKey}", key);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _httpClient.Timeout);
 		}
 
 		public void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new()
@@ -144,7 +130,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, typeof(T).Name);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_httpClient.Timeout);
 		}
 
 		private static string RemoveTrailingSlashes(string key)
@@ -394,7 +380,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (String.IsNullOrEmpty(request.AcknowledgeId))
 			{
-				_logger?.Debug("No acknowledgment possible. request-id={RequestId}, acknowledment-mode={AcknowledgmentMode}", request.RequestId, request.AcknowledgmentMode);
+				_logger?.Debug("No acknowledgment possible. request-id={RequestId}, acknowledgment-mode={AcknowledgmentMode}", request.RequestId, request.AcknowledgmentMode);
 				return;
 			}
 
@@ -410,7 +396,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					break;
 
 				default:
-					_logger?.Warning("Unknown acknowledgment mode found. request-id={RequestId}, acknowledment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgmentMode, request.AcknowledgeId);
+					_logger?.Warning("Unknown acknowledgment mode found. request-id={RequestId}, acknowledgment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgmentMode, request.AcknowledgeId);
 					break;
 			}
 		}
@@ -425,7 +411,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 				TokenRefreshWindow = config.TokenRefreshWindow ?? TokenRefreshWindow;
 				HeartbeatInterval = config.HeartbeatInterval ?? HeartbeatInterval;
-				HttpClientTimeout = config.RelayRequestTimeout ?? HttpClientTimeout;
 
 				_minReconnectWaitTime = config.ReconnectMinWaitTime ?? _minReconnectWaitTime;
 				_maxReconnectWaitTime = config.ReconnectMaxWaitTime ?? _maxReconnectWaitTime;

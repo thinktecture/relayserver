@@ -146,7 +146,6 @@ namespace Thinktecture.Relay.Server.Repository
 
 					TokenRefreshWindow = i.link.TokenRefreshWindow,
 					HeartbeatInterval = i.link.HeartbeatInterval,
-					RelayRequestTimeout = i.link.RelayRequestTimeout,
 					ReconnectMinWaitTime = i.link.ReconnectMinWaitTime,
 					ReconnectMaxWaitTime = i.link.ReconnectMaxWaitTime,
 					AbsoluteConnectionLifetime = i.link.AbsoluteConnectionLifetime,
@@ -175,7 +174,6 @@ namespace Thinktecture.Relay.Server.Repository
 				{
 					TokenRefreshWindow = i.link.TokenRefreshWindow,
 					HeartbeatInterval = i.link.HeartbeatInterval,
-					RelayRequestTimeout = i.link.RelayRequestTimeout,
 					ReconnectMinWaitTime = i.link.ReconnectMinWaitTime,
 					ReconnectMaxWaitTime = i.link.ReconnectMaxWaitTime,
 					AbsoluteConnectionLifetime = i.link.AbsoluteConnectionLifetime,
@@ -234,7 +232,6 @@ namespace Thinktecture.Relay.Server.Repository
 
 				linkEntity.TokenRefreshWindow = link.TokenRefreshWindow;
 				linkEntity.HeartbeatInterval = link.HeartbeatInterval;
-				linkEntity.RelayRequestTimeout = link.RelayRequestTimeout;
 				linkEntity.ReconnectMinWaitTime = link.ReconnectMinWaitTime;
 				linkEntity.ReconnectMaxWaitTime = link.ReconnectMaxWaitTime;
 				linkEntity.AbsoluteConnectionLifetime = link.AbsoluteConnectionLifetime;

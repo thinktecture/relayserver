@@ -41,12 +41,11 @@ namespace Thinktecture.Relay.Server.Helper
 		public TimeSpan AccessTokenLifetime { get; set; }
 
 		// Default settings for links
-		public TimeSpan LinkTokenRefreshWindowDefault { get; set; }
-		public TimeSpan LinkRelayRequestTimeoutDefault { get; set; }
-		public TimeSpan LinkReconnectMinWaitTimeDefault { get; set; }
-		public TimeSpan LinkReconnectMaxWaitTimeDefault { get; set; }
-		public TimeSpan? LinkAbsoluteConnectionLifetimeDefault { get; set; }
-		public TimeSpan? LinkSlidingConnectionLifetimeDefault { get; set; }
+		public TimeSpan LinkTokenRefreshWindow { get; set; }
+		public TimeSpan LinkReconnectMinWaitTime { get; set; }
+		public TimeSpan LinkReconnectMaxWaitTime { get; set; }
+		public TimeSpan? LinkAbsoluteConnectionLifetime { get; set; }
+		public TimeSpan? LinkSlidingConnectionLifetime { get; set; }
 
 		public ConfigurationDummy()
 		{

@@ -22,8 +22,6 @@ namespace Thinktecture.Relay.Server.Dto
 
 		public TimeSpan? TokenRefreshWindow { get; set; }
 		public TimeSpan? HeartbeatInterval { get; set; }
-		public TimeSpan? RelayRequestTimeout { get; set; }
-
 		public TimeSpan? ReconnectMinWaitTime { get; set; }
 		public TimeSpan? ReconnectMaxWaitTime { get; set; }
 

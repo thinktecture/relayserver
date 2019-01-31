@@ -43,12 +43,11 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan AccessTokenLifetime { get; }
 
 		// Default settings for links
-		public TimeSpan LinkTokenRefreshWindowDefault { get; }
-		public TimeSpan LinkRelayRequestTimeoutDefault { get; }
-		public TimeSpan LinkReconnectMinWaitTimeDefault { get; }
-		public TimeSpan LinkReconnectMaxWaitTimeDefault { get; }
-		public TimeSpan? LinkAbsoluteConnectionLifetimeDefault { get; }
-		public TimeSpan? LinkSlidingConnectionLifetimeDefault { get; }
+		public TimeSpan LinkTokenRefreshWindow { get; }
+		public TimeSpan LinkReconnectMinWaitTime { get; }
+		public TimeSpan LinkReconnectMaxWaitTime { get; }
+		public TimeSpan? LinkAbsoluteConnectionLifetime { get; }
+		public TimeSpan? LinkSlidingConnectionLifetime { get; }
 
 		public Configuration(ILogger logger)
 		{
@@ -220,45 +219,39 @@ namespace Thinktecture.Relay.Server.Config
 				AccessTokenLifetime = tmpTimeSpan;
 			}
 
-			LinkTokenRefreshWindowDefault = TimeSpan.FromMinutes(1);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkTokenRefreshWindowDefault)], out tmpTimeSpan) && tmpTimeSpan < AccessTokenLifetime)
+			LinkTokenRefreshWindow = TimeSpan.FromMinutes(1);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkTokenRefreshWindow)], out tmpTimeSpan) && tmpTimeSpan < AccessTokenLifetime)
 			{
-				LinkTokenRefreshWindowDefault = tmpTimeSpan;
+				LinkTokenRefreshWindow = tmpTimeSpan;
 			}
 
-			LinkRelayRequestTimeoutDefault = TimeSpan.FromSeconds(30);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkRelayRequestTimeoutDefault)], out tmpTimeSpan))
+			LinkReconnectMinWaitTime = TimeSpan.FromSeconds(2);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMinWaitTime)], out tmpTimeSpan))
 			{
-				LinkRelayRequestTimeoutDefault = tmpTimeSpan;
+				LinkReconnectMinWaitTime = tmpTimeSpan;
 			}
 
-			LinkReconnectMinWaitTimeDefault = TimeSpan.FromSeconds(2);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMinWaitTimeDefault)], out tmpTimeSpan))
+			LinkReconnectMaxWaitTime = TimeSpan.FromSeconds(30);
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMaxWaitTime)], out tmpTimeSpan) && tmpTimeSpan > LinkReconnectMinWaitTime)
 			{
-				LinkReconnectMinWaitTimeDefault = tmpTimeSpan;
+				LinkReconnectMaxWaitTime = tmpTimeSpan;
 			}
-
-			LinkReconnectMaxWaitTimeDefault = TimeSpan.FromSeconds(30);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMaxWaitTimeDefault)], out tmpTimeSpan) && tmpTimeSpan > LinkReconnectMinWaitTimeDefault)
-			{
-				LinkReconnectMaxWaitTimeDefault = tmpTimeSpan;
-			}
-			else if (LinkReconnectMaxWaitTimeDefault < LinkReconnectMinWaitTimeDefault)
+			else if (LinkReconnectMaxWaitTime < LinkReconnectMinWaitTime)
 			{
 				 // something is fishy in the config
-				 LinkReconnectMaxWaitTimeDefault = LinkReconnectMinWaitTimeDefault + TimeSpan.FromSeconds(30);
+				 LinkReconnectMaxWaitTime = LinkReconnectMinWaitTime + TimeSpan.FromSeconds(30);
 			}
 
-			LinkAbsoluteConnectionLifetimeDefault = null;
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkAbsoluteConnectionLifetimeDefault)], out tmpTimeSpan))
+			LinkAbsoluteConnectionLifetime = null;
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkAbsoluteConnectionLifetime)], out tmpTimeSpan))
 			{
-				LinkAbsoluteConnectionLifetimeDefault = tmpTimeSpan;
+				LinkAbsoluteConnectionLifetime = tmpTimeSpan;
 			}
 
-			LinkSlidingConnectionLifetimeDefault = null;
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkSlidingConnectionLifetimeDefault)], out tmpTimeSpan))
+			LinkSlidingConnectionLifetime = null;
+			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkSlidingConnectionLifetime)], out tmpTimeSpan))
 			{
-				LinkSlidingConnectionLifetimeDefault = tmpTimeSpan;
+				LinkSlidingConnectionLifetime = tmpTimeSpan;
 			}
 
 			LogSettings(logger);
@@ -296,12 +289,11 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(FailedLoginLockoutPeriod), FailedLoginLockoutPeriod);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SecureClientController), SecureClientController);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(AccessTokenLifetime), AccessTokenLifetime);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkTokenRefreshWindowDefault), LinkTokenRefreshWindowDefault);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkRelayRequestTimeoutDefault), LinkRelayRequestTimeoutDefault);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMinWaitTimeDefault), LinkReconnectMinWaitTimeDefault);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMaxWaitTimeDefault), LinkReconnectMaxWaitTimeDefault);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkAbsoluteConnectionLifetimeDefault), LinkAbsoluteConnectionLifetimeDefault);
-			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkSlidingConnectionLifetimeDefault), LinkSlidingConnectionLifetimeDefault);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkTokenRefreshWindow), LinkTokenRefreshWindow);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMinWaitTime), LinkReconnectMinWaitTime);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMaxWaitTime), LinkReconnectMaxWaitTime);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkAbsoluteConnectionLifetime), LinkAbsoluteConnectionLifetime);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkSlidingConnectionLifetime), LinkSlidingConnectionLifetime);
 		}
 	}
 }

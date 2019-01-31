@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201811231325227_AddLinkConfigurationOptions"; }
+            get { return "201901311556307_AddLinkConfigurationOptions"; }
         }
         
         string IMigrationMetadata.Source

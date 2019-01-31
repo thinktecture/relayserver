@@ -317,9 +317,9 @@
     <Compile Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.Designer.cs">
       <DependentUpon>201712130959002_AddAssemblyInfoToActiveConnections.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201811231325227_AddLinkConfigurationOptions.cs" />
-    <Compile Include="Migrations\201811231325227_AddLinkConfigurationOptions.Designer.cs">
-      <DependentUpon>201811231325227_AddLinkConfigurationOptions.cs</DependentUpon>
+    <Compile Include="Migrations\201901311556307_AddLinkConfigurationOptions.cs" />
+    <Compile Include="Migrations\201901311556307_AddLinkConfigurationOptions.Designer.cs">
+      <DependentUpon>201901311556307_AddLinkConfigurationOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="OnPremise\IOnPremiseConnectorRequest.cs" />
     <Compile Include="OnPremise\IOnPremiseConnectorResponse.cs" />
@@ -489,8 +489,8 @@
     <EmbeddedResource Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.resx">
       <DependentUpon>201712130959002_AddAssemblyInfoToActiveConnections.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201811231325227_AddLinkConfigurationOptions.resx">
-      <DependentUpon>201811231325227_AddLinkConfigurationOptions.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201901311556307_AddLinkConfigurationOptions.resx">
+      <DependentUpon>201901311556307_AddLinkConfigurationOptions.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
