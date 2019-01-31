@@ -81,7 +81,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
 		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, IServiceProvider serviceProvider = null)
+#pragma warning disable CS0618 // Type or member is obsolete; Justification: Backward-compatibility with older servers that do not yet provide server-side config
 			: this (versionAssembly, userName, password, relayServer, requestTimeoutInSeconds, 5, serviceProvider)
+#pragma warning restore CS0618 // Type or member is obsolete;
 		{
 		}
 

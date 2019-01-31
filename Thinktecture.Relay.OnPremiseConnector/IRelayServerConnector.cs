@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.OnPremiseConnector
 {
 	/// <summary>
-	/// Interface that represents the class connecting to the relay server.
+	/// Interface that represents the class connecting to the RelayServer.
 	/// </summary>
 	public interface IRelayServerConnector
 	{

@@ -3,7 +3,7 @@ using Serilog;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
-	internal class AutomaticDisconnectChecker: IAutomaticDisconnectChecker
+	internal class AutomaticDisconnectChecker : IAutomaticDisconnectChecker
 	{
 		private readonly ILogger _logger;
 
@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				if (DateTime.UtcNow > connection.ConnectedSince + connection.AbsoluteConnectionLifetime)
 				{
-					_logger?.Information("Disconnecting, because connection {RelayServerConnectionInstanceId} reached its maximum absolute lifetime of {AbsoluteConnectionLifetime} since connection was established at {ConnectedSince}", connection.RelayServerConnectionInstanceId, connection.AbsoluteConnectionLifetime, connection.ConnectedSince);
+					_logger?.Information("Disconnecting because connection instance {RelayServerConnectionInstanceId} reached its maximum absolute lifetime of {AbsoluteConnectionLifetime} since {ConnectedSince}", connection.RelayServerConnectionInstanceId, connection.AbsoluteConnectionLifetime, connection.ConnectedSince);
 
 					connection.Disconnect();
 					return true;
@@ -29,7 +29,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				if (DateTime.UtcNow > (connection.LastActivity ?? connection.ConnectedSince + connection.SlidingConnectionLifetime))
 				{
-					_logger?.Information("Disconnecting because connection {RelayServerConnectionInstanceId} reached its maximum sliding lifetime of {SlidingConnectionLifetime} since the last activity at {LastActivity}", connection.RelayServerConnectionInstanceId, connection.SlidingConnectionLifetime, connection.LastActivity ?? connection.ConnectedSince);
+					_logger?.Information("Disconnecting because connection instance {RelayServerConnectionInstanceId} reached its maximum sliding lifetime of {SlidingConnectionLifetime} since {LastActivity}", connection.RelayServerConnectionInstanceId, connection.SlidingConnectionLifetime, connection.LastActivity ?? connection.ConnectedSince);
 
 					connection.Disconnect();
 					return true;

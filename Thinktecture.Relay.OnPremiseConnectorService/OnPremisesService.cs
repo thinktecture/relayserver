@@ -36,20 +36,21 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 						if (String.IsNullOrEmpty(section.Security.Identity.UserName))
 							throw new ConfigurationErrorsException("The user name cannot be null or empty when using authentication type 'Identity'");
 
+#pragma warning disable CS0618 // Type or member is obsolete; Justification: Backward-compatibility with older servers that do not yet provide server-side config
+
 						_connector = new RelayServerConnector(Assembly.GetEntryAssembly(),
 							section.Security.Identity.UserName,
 							section.Security.Identity.Password,
 							new Uri(section.BaseUrl),
 							(int)section.RequestTimeout.TotalSeconds,
-#pragma warning disable CS0618 // Type or member is obsolete;
-							// Justification: Backward-compatibility with older servers that do not yet provide server-side config
 							(int)section.Security.AccessTokenRefreshWindow.TotalSeconds)
-#pragma warning restore CS0618 // Type or member is obsolete
 							;
+
+#pragma warning restore CS0618 // Type or member is obsolete
 
 						_connector.Disconnected += (s, e) =>
 						{
-							_logger.Warning("Connection to the relay server was actively closed. In a non-demo environment you could shutdown the service now.");
+							_logger.Warning("Connection to the RelayServer was actively closed. In a non-demo environment you could shutdown the service now.");
 						};
 
 						break;
