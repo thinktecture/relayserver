@@ -16,23 +16,20 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			if (connection.AbsoluteConnectionLifetime.HasValue && connection.ConnectedSince.HasValue)
 			{
-				var endOfMaximumConnectionTime = connection.ConnectedSince + connection.AbsoluteConnectionLifetime;
-
-				if (DateTime.UtcNow > endOfMaximumConnectionTime)
+				if (DateTime.UtcNow > connection.ConnectedSince + connection.AbsoluteConnectionLifetime)
 				{
 					_logger?.Information("Connection reached maximum absolute lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}, connected-since={ConnectedSince}, absolute-connection-lifetime={AbsoluteConnectionLifetime}", connection.RelayServerConnectionInstanceId, connection.ConnectedSince, connection.AbsoluteConnectionLifetime);
+
 					connection.Disconnect();
 					return true;
 				}
 			}
 
-			if (connection.SlidingConnectionLifetime.HasValue && connection.LastActivity.HasValue)
+			if (connection.SlidingConnectionLifetime.HasValue && (connection.LastActivity.HasValue || connection.ConnectedSince.HasValue))
 			{
-				var endOfSlidingConnectionTime = connection.LastActivity + connection.SlidingConnectionLifetime;
-
-				if (DateTime.UtcNow > endOfSlidingConnectionTime)
+				if (DateTime.UtcNow > (connection.LastActivity ?? connection.ConnectedSince + connection.SlidingConnectionLifetime))
 				{
-					_logger?.Information("Connection reached maximum sliding lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}, last-activity={LastActivity}, sliding-connection-lifetime={SlidingConnectionLifetime}", connection.RelayServerConnectionInstanceId, connection.LastActivity, connection.SlidingConnectionLifetime);
+					_logger?.Information("Connection reached maximum sliding lifetime: Disconnecting. relay-server-connection-instance-id={RelayServerConnectionInstanceId}, last-activity={LastActivity}, connected-since={ConnectedSince}, sliding-connection-lifetime={SlidingConnectionLifetime}", connection.RelayServerConnectionInstanceId, connection.LastActivity, connection.ConnectedSince, connection.SlidingConnectionLifetime);
 
 					connection.Disconnect();
 					return true;

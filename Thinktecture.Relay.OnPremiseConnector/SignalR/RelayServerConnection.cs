@@ -209,7 +209,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				await Start().ConfigureAwait(false);
 				ConnectedSince = DateTime.UtcNow;
-				LastActivity = DateTime.UtcNow;
 
 				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
 
