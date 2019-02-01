@@ -62,5 +62,5 @@ Remove-Item (Join-Path $srvRelease "Thinktecture.Relay.Server.exe.config")
 Compress-Archive -Path (Join-Path $srvRelease "*") -DestinationPath (Join-Path $dist "\RelayServer.zip")
 
 # Build Nuget Packages
-dotnet pack ".\Thinktecture.Relay\" --configuration Release --include-symbols --include-source --output (Join-Path ".." $dist)
-dotnet pack ".\Thinktecture.Relay.OnPremiseConnector\" --configuration Release --include-symbols --include-source --output (Join-Path ".." $dist)
+dotnet pack ".\Thinktecture.Relay\" --configuration Release --include-symbols --include-source --output $dist
+dotnet pack ".\Thinktecture.Relay.OnPremiseConnector\" --configuration Release --include-symbols --include-source --output $dist
