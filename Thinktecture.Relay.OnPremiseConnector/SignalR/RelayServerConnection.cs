@@ -79,7 +79,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public string RelayedRequestHeader { get; set; }
 
-		public void RegisterOnPremiseTarget(string key, Uri baseUri)
+		public void RegisterOnPremiseTarget(string key, Uri baseUri, bool followRedirects)
 		{
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
@@ -88,9 +88,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			key = RemoveTrailingSlashes(key);
 
-			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}", key, baseUri);
+			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}, follow-redirects={FollowRedirects}", key, baseUri, followRedirects);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _httpClient.Timeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _httpClient.Timeout, followRedirects);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
