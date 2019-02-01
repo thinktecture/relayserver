@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		event EventHandler Connected;
 		event EventHandler Disconnected;
 
-		void RegisterOnPremiseTarget(string key, Uri baseUri);
+		void RegisterOnPremiseTarget(string key, Uri baseUri, bool followRedirects);
 		void RegisterOnPremiseTarget(string key, Type handlerType);
 		void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory);
 		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();

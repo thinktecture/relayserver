@@ -56,6 +56,11 @@ namespace Thinktecture.Relay.Server.Http
 				{
 					message.Headers.Add("WWW-Authenticate", wwwAuthenticate);
 				}
+
+				if (IsRedirectStatusCode(response.StatusCode) && response.HttpHeaders.TryGetValue("Location", out var location))
+				{
+					message.Headers.Location = new Uri(location, UriKind.RelativeOrAbsolute);
+				}
 			}
 
 			return message;
@@ -122,6 +127,11 @@ namespace Thinktecture.Relay.Server.Http
 					content.Headers.TryAddWithoutValidation(httpHeader.Key, httpHeader.Value);
 				}
 			}
+		}
+
+		private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
+		{
+			return ((int) statusCode >= 300) && ((int) statusCode <= 399);
 		}
 	}
 }

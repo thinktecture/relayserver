@@ -32,7 +32,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
 		/// <param name="uri">An <see cref="Uri"/> containing the on-premise target's base url.</param>
-		void RegisterOnPremiseTarget(string key, Uri uri);
+		/// <param name="followRedirects">A <see cref="bool"/> defining whether redirects will automatically be followed.</param>
+		void RegisterOnPremiseTarget(string key, Uri uri, bool followRedirects = true);
 
 		/// <summary>
 		/// Registers a on-premise in-proc target.
