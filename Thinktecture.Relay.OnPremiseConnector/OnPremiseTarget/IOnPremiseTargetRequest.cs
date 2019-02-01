@@ -19,6 +19,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		bool IsPingRequest { get; }
 		bool IsHeartbeatRequest { get; }
 		bool IsHeartbeatOrPingRequest { get; }
+		bool IsConfigurationRequest { get; }
 	}
 
 	/// <summary>

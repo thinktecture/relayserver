@@ -159,6 +159,11 @@ The default settings include:
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
+    <add key="LinkTokenRefreshWindow" value="00:01:00" />
+    <add key="LinkReconnectMinWaitTime" value="00:00:02" />
+    <add key="LinkReconnectMaxWaitTime" value="00:00:30" />
+    <add key="LinkAbsoluteConnectionLifetime" value="null" />
+    <add key="LinkSlidingConnectionLifetime" value="null" />
 </appSettings>
 ```
 
@@ -193,6 +198,11 @@ The default settings include:
 | FailedLoginLockoutPeriod | Time span that a user will be locked out after he has more than `MaxFailedLoginAttempts` failed login attempts (default 15 minutes) |
 | SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid On-Premise Connector / Link access token (default false) |
 | AccessTokenLifetime | Time span that an issued access token for On-Premise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
+| LinkTokenRefreshWindow | Default time span, in which an On-Premise Connector will request a new access token, before the current one expires (default 1 minute). This value can be overriden per link. |
+| LinkReconnectMinWaitTime | Default time span, after which an disconnected On-Premise Connector may reconnect to the RelayServer (default 2 seconds). This value can be overriden per link. |
+| LinkReconnectMaxWaitTime | Default time span, after which an disconnected On-Premise Connector will reconnect at the latest (default 30 seconds). This value can be overriden per link. |
+| LinkAbsoluteConnectionLifetime | Default time span, after which an On-Premise Connector will disconnect itself from the RelayServer (default `null` / never). This value can be overriden per link. |
+| LinkSlidingConnectionLifetime | Default time span, after which an idle On-Premise Connector will disconnect itself from the RelayServer (default `null` / never). This value can be overriden per link. |
 
 ## netsh settings
 
@@ -289,7 +299,7 @@ Only the <relayServer></relayServer> section has to be edited in the configurati
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <web key="Test" baseUrl="http://localhost/" />
+    <web key="Test" baseUrl="http://localhost/" followRedirects="true" />
   </onPremiseTargets>
 </relayServer>
 ```
@@ -306,8 +316,8 @@ Only the <relayServer></relayServer> section has to be edited in the configurati
 
 |  Attribute | Description |
 | --- | --- |
-| authenticationType | In the current version of the RelayServer only the mode *Identity* is supported|
-| accessTokenRefreshWindow | When the current AccessToken will expire in this time span, an attempt will be made to renew the token. Defaults to 1 minute. |
+| authenticationType | In the current version of the RelayServer only the mode *Identity* is supported |
+| accessTokenRefreshWindow | [Obsolete from 2.1 ongoing] When the current AccessToken will expire in this time span, an attempt will be made to renew the token. Defaults to 1 minute. Will be overriden from with the link-specific server-side configuration LinkTokenRefreshWindow |
 
 ### identity Element
 
@@ -319,3 +329,9 @@ Only the <relayServer></relayServer> section has to be edited in the configurati
 ### onPremiseTargets Element
 
 List of on-premise applications that the On-Premise Connector should be able to send requests to.
+
+|  Attribut | Beschreibung |
+| --- | --- |
+| key | Name of On-Premises application |
+| baseUrl | URL of the On-Premises application |
+| followRedirects | Determines, whether the On-Premises connector will automatically follow http redirect responses (default true, setting optional) |

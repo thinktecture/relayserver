@@ -162,10 +162,38 @@ namespace Thinktecture.Relay.Server.Http
 		}
 
 		[TestMethod]
+		public void GetResponseContentForOnPremiseTargetResponse_does_not_disclose_content_when_other_error_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_off()
+		{
+			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.NotImplemented };
+			var link = new Link();
+
+			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
+			{
+				result.Should().BeNull();
+			}
+		}
+
+		[TestMethod]
 		public async Task GetResponseContentForOnPremiseTargetResponse_discloses_content_when_InternalServerError_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_on()
 		{
 			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
 			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.InternalServerError, Body = new byte[] { 0, 0, 0 }, ContentLength = 3, };
+			var link = new Link { ForwardOnPremiseTargetErrorResponse = true };
+
+			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
+			{
+				var body = await result.ReadAsByteArrayAsync();
+				result.Should().NotBeNull();
+				body.LongLength.Should().Be(3L);
+			}
+		}
+
+		[TestMethod]
+		public async Task GetResponseContentForOnPremiseTargetResponse_discloses_content_when_other_error_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_on()
+		{
+			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.NotImplemented, Body = new byte[] { 0, 0, 0 }, ContentLength = 3, };
 			var link = new Link { ForwardOnPremiseTargetErrorResponse = true };
 
 			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))

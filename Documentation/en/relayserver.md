@@ -15,6 +15,30 @@ The goal of this list is to highlight companies who pay back to this open source
 [<img width="120px" src="./assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
 
 # Version history
+
+## Version 2.1.0
+
+* Server-side Link configuration
+
+  * It is now possible to configure link-specific settings on the RelayServer itself.
+
+* Automatic disconnect of On-Premises connectors
+
+  * If required, it is possible to have an On-Premises connector auto-disconnect itself after a maximum absolute connection time and/or after a maximum idle time.
+
+* General improvements
+
+  * The On-Premises connectors settings for reconnect timeouts (maximum and minimum) are now configurable, to be able to prevent accidental DDoS detections i.e. when the server restarts and all connectors want to reconnect in the same 30 second window.
+  * Interceptors now can read the local uri that the client requested, i.e. to set forwarded headers.
+  * It is now possible to configure whether the On-Premises connector automatically follows an http redirect response from a On-Premises target, or if the redirect will be relayed too.
+  * It is now possible to use a custom implementation of an `IPasswordComplexityValidator` by registering that in an Autofac module within a custom code assembly.
+
+- Bugfixes
+
+  * When the query to be relayed contained an query argument named 'path', this lead to unexpected behaviour
+  * Corrected the filtering of contents of error responses from on-premise side services when enabled
+  * A better error message will be displayed if the config file is missing for the RelayServer
+
 ## Version 2.0.0
 
 * Multi-Server operation
@@ -72,7 +96,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * Info and management endpoints now set correct cache headers
   * Dependencies have been updated to their corresponding latest versions
 
-- Bug fixes
+- Bugfixes
 
   * Some operations did not work reliable in the Management Web and have been fixed
 

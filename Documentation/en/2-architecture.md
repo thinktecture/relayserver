@@ -95,3 +95,11 @@ For the real-time connection, SignalR is used as a connection technology. It als
 1. After the On-Premises application has answered the message, the On-Premises Connector sends the result to the request handler in the RelayServer.
 1. The request handler of the RelayServer places the response in its message queue.
 1. Since there is a suitable thread waiting for the response through step 2, this thread can receive the response and pass it as a ready-made response to the request handler. The request handler sends the response as a last step to the waiting client and thus successfully completes the waiting client request.
+
+### Sequence diagram with a single server
+
+![request_single_server.png](../diagrams/request_single_server.png)
+
+### Sequence diagram in multi-server mode
+
+![request_multi_server.png](../diagrams/request_multi_server.png)

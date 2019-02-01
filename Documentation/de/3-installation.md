@@ -161,6 +161,11 @@ Die Standardeinstellungen umfassen dabei:
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
+    <add key="LinkTokenRefreshWindow" value="00:01:00" />
+    <add key="LinkReconnectMinWaitTime" value="00:00:02" />
+    <add key="LinkReconnectMaxWaitTime" value="00:00:30" />
+    <add key="LinkAbsoluteConnectionLifetime" value="null" />
+    <add key="LinkSlidingConnectionLifetime" value="null" />
 </appSettings>
 ```
 
@@ -195,6 +200,11 @@ Die Standardeinstellungen umfassen dabei:
 | FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
 | SecureClientController | Legt fest, ob ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines On-Premise Connectors / Links mitsenden muss (default false) |
 | AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für On-Premise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) <br/> _Hinweis:_ Ein zu kleiner Wert schränkt die Benutzbarkeit des Management Webs ein |
+| LinkTokenRefreshWindow | Default-Zeitspanne, in der ein On-Premise Connector vor dem ungültig werden seines AccessTokens ein neues anfordert (default 1 Minute). Dieser Wert kann pro Link überschrieben werden. |
+| LinkReconnectMinWaitTime | Default-Zeitspanne, nachdem ein On-Premise Connector nach einem Verbindungsverlust die SignalR-Verbindung frühestens wieder aufzubauen versucht (default 2 Sekunden). Dieser Wert kann pro Link überschrieben werden. |
+| LinkReconnectMaxWaitTime | Default-Zeitspanne, nachdem ein On-Premise Connector nach einem Verbindungsverlust die SignalR-Verbindung spätestens wieder aufzubauen versucht (default 30 Sekunden). Dieser Wert kann pro Link überschrieben werden. |
+| LinkAbsoluteConnectionLifetime | Default-Zeitspanne, nach der ein On-Premise Connector die SignalR Verbindung zum RelayServer von sich aus wieder beendet (default `null` / niemals). Dieser Wert kann pro Link überschrieben werden. |
+| LinkSlidingConnectionLifetime | Default-Zeitspanne, nach der ein On-Premise Connector nach dem letzten Request die SignalR Verbindung zum RelayServer von sich aus wieder beendet (default `null` / niemals). Dieser Wert kann pro Link überschrieben werden. |
 
 ## netsh settings
 
@@ -291,7 +301,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <web key="Test" baseUrl="http://localhost/"/>
+    <web key="Test" baseUrl="http://localhost/" followRedirects="true" />
   </onPremiseTargets>
 </relayServer>
 ```
@@ -309,7 +319,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
 |  Attribut | Beschreibung |
 | --- | --- |
 | authenticationType | In der aktuellen Version des RelayServers wird nur der Modus *Identity* unterstützt |
-| accessTokenRefreshWindow | Wenn das aktuelle AccessToken in diesem Zeitfenster ablaufen wird, wird versucht es zu erneuern. Default: 1 Minute |
+| accessTokenRefreshWindow | [Obsolet seit 2.1] Wenn das aktuelle AccessToken in diesem Zeitfenster ablaufen wird, wird versucht es zu erneuern. Default: 1 Minute. Wird von der RelayServer-seitigen Konfiguration überschrieben.  |
 
 ### identity Element
 
@@ -326,3 +336,4 @@ Liste von On-Premises Applikationen, die vom On-Premises Connector mit Anfragen 
 | --- | --- |
 | key | On-Premises-Anwendungsname |
 | baseUrl | URL des On-Premises Applikation |
+| followRedirects | Legt fest, ob der On-Premises Connector redirects selber automatisch folgt (default true, Angabe optional) |

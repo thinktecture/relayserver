@@ -19,6 +19,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 	{
 		private static readonly IServiceProvider _serviceProvider;
 
+		/// <inheritdoc />
+		public event EventHandler Connected;
+		/// <inheritdoc />
+		public event EventHandler Disconnected;
+
 		static RelayServerConnector()
 		{
 			var builder = new ContainerBuilder();
@@ -30,6 +35,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
 			builder.RegisterType<HeartbeatChecker>().As<IHeartbeatChecker>();
 			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();
+			builder.RegisterType<AutomaticDisconnectChecker>().As<IAutomaticDisconnectChecker>();
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
 
 			var container = builder.Build();
@@ -56,10 +62,29 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
+		[Obsolete("Use the ctor without tokenRefreshWindowInSeconds instead.")]
 		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null)
 		{
 			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
 			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds));
+			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
+			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
+		}
+
+		/// <summary>
+		/// Creates a new instance of <see cref="RelayServerConnector"/>.
+		/// </summary>
+		/// <param name="versionAssembly">An <see cref="Assembly"/> to be used as version.</param>
+		/// <param name="userName">A <see cref="String"/> containing the user name.</param>
+		/// <param name="password">A <see cref="String"/> containing the password.</param>
+		/// <param name="relayServer">An <see cref="Uri"/> containing the RelayServer's base url.</param>
+		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, IServiceProvider serviceProvider = null)
+#pragma warning disable CS0618 // Type or member is obsolete; Justification: Backward-compatibility with older servers that do not yet provide server-side config
+			: this (versionAssembly, userName, password, relayServer, requestTimeoutInSeconds, 5, serviceProvider)
+#pragma warning restore CS0618 // Type or member is obsolete;
+		{
 		}
 
 		/// <summary>
@@ -67,10 +92,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// </summary>
 		/// <param name="key">A <see cref="String"/> defining the key for the target.</param>
 		/// <param name="uri">An <see cref="Uri"/> containing the on-premise target's base url.</param>
-		public void RegisterOnPremiseTarget(string key, Uri uri)
+		/// <param name="followRedirects">A <see cref="bool"/> defining whether redirects will automatically be followed.</param>
+		public void RegisterOnPremiseTarget(string key, Uri uri, bool followRedirects = true)
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget(key, uri);
+			_connection.RegisterOnPremiseTarget(key, uri, followRedirects);
 		}
 
 		/// <summary>

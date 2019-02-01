@@ -233,7 +233,7 @@ namespace Thinktecture.Relay.Server
 			if (_configuration.EnableRelaying != ModuleBinding.False)
 			{
 				_logger?.Information("Relaying enabled");
-				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*path}", new { controller = "Client", action = "Relay" });
+				httpConfig.Routes.MapHttpRoute("ClientRequest", "relay/{*fullPathToOnPremiseEndpoint}", new { controller = "Client", action = "Relay" });
 			}
 
 			if (_configuration.EnableOnPremiseConnections != ModuleBinding.False)

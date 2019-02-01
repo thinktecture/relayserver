@@ -17,9 +17,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		DateTime LastHeartbeat { get; }
 		TimeSpan HeartbeatInterval { get; }
 
-		event EventHandler Disposing;
+		DateTime? ConnectedSince { get; }
+		DateTime? LastActivity { get; }
+		TimeSpan? AbsoluteConnectionLifetime { get; }
+		TimeSpan? SlidingConnectionLifetime { get; }
 
-		void RegisterOnPremiseTarget(string key, Uri baseUri);
+		event EventHandler Disposing;
+		event EventHandler Connected;
+		event EventHandler Disconnected;
+
+		void RegisterOnPremiseTarget(string key, Uri baseUri, bool followRedirects);
 		void RegisterOnPremiseTarget(string key, Type handlerType);
 		void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory);
 		void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new();

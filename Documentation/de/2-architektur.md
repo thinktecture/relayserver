@@ -95,3 +95,11 @@ Für die Real-Time-Verbindung kommt SignalR als Verbindungstechnologie zum Einsa
 1. Nachdem die On-Premises Applikation die Nachricht beantwortet hat, sendet der On-Premises Connector das Ergebnis an den Request Handler im RelayServer.
 1. Der Request Handler des RelayServer legt die Antwort in seine Message Queue.
 1. Da es durch Schritt 2 einen passenden Thread gibt, der auf die Antwort wartet, kann dieser Thread die Antwort entgegennehmen und als fertige Antwort dem Request Handler übergeben. Der Request Handler sendet die Antwort als letzten Schritt an den wartenden Client und beendet dadurch den wartenden Client Request erfolgreich.
+
+### Ablaufdiagramm mit nur einem Server
+
+![request_single_server.png](../diagrams/request_single_server.png)
+
+### Ablaufdiagramm im Multi-Server-Betrieb
+
+![request_multi_server.png](../diagrams/request_multi_server.png)

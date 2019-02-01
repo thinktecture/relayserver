@@ -291,6 +291,7 @@
     <Compile Include="Communication\IOnPremiseConnectionContext.cs" />
     <Compile Include="Communication\IOnPremiseConnectionHeartbeater.cs" />
     <Compile Include="Communication\OnPremiseConnectionHeartbeater.cs" />
+    <Compile Include="Dto\LinkConfiguration.cs" />
     <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
     <Compile Include="IO\LegacyResponseStream.cs" />
     <Compile Include="Filters\ConfigurableClientAuthorizationAttribute.cs" />
@@ -315,6 +316,10 @@
     <Compile Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.cs" />
     <Compile Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.Designer.cs">
       <DependentUpon>201712130959002_AddAssemblyInfoToActiveConnections.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201901311556307_AddLinkConfigurationOptions.cs" />
+    <Compile Include="Migrations\201901311556307_AddLinkConfigurationOptions.Designer.cs">
+      <DependentUpon>201901311556307_AddLinkConfigurationOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="OnPremise\IOnPremiseConnectorRequest.cs" />
     <Compile Include="OnPremise\IOnPremiseConnectorResponse.cs" />
@@ -438,14 +443,12 @@
     <Compile Include="Repository\LinkRepository.cs" />
     <Compile Include="Repository\TraceRepository.cs" />
     <Compile Include="Repository\UserRepository.cs" />
-    <Compile Include="Security\IPasswordComplexityValidator.cs" />
     <Compile Include="Security\IPasswordHash.cs" />
     <Compile Include="Security\PasswordComplexityValidator.cs" />
     <Compile Include="Security\PasswordHash.cs" />
     <Compile Include="Security\PasswordInformation.cs" />
     <Compile Include="Security\RsaDataProtector.cs" />
     <Compile Include="SignalR\FilePostDataTemporaryStore.cs" />
-    <Compile Include="SignalR\IPostDataTemporaryStore.cs" />
     <Compile Include="SignalR\OnPremisesConnection.cs" />
     <Compile Include="Security\AuthorizationServerProvider.cs" />
     <Compile Include="SignalR\InMemoryPostDataTemporaryStore.cs" />
@@ -483,6 +486,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201712130959002_AddAssemblyInfoToActiveConnections.resx">
       <DependentUpon>201712130959002_AddAssemblyInfoToActiveConnections.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901311556307_AddLinkConfigurationOptions.resx">
+      <DependentUpon>201901311556307_AddLinkConfigurationOptions.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

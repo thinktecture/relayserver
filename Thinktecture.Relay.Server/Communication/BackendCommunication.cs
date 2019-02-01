@@ -2,8 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
@@ -82,6 +84,8 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 
 			_connectionContexts.TryAdd(onPremiseConnectionContext.ConnectionId, onPremiseConnectionContext);
+
+			await ProvideLinkConfigurationAsync(onPremiseConnectionContext).ConfigureAwait(false);
 		}
 
 		public async Task UnregisterOnPremiseConnectionAsync(string connectionId)
@@ -123,11 +127,13 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			CheckDisposed();
 
-			_logger?.Debug("Waiting for response. request-id={RequestId}, timeout={Timeout}", requestId, requestTimeout);
+			var timeout = requestTimeout ?? _configuration.OnPremiseConnectorCallbackTimeout;
+
+			_logger?.Debug("Waiting for response. request-id={RequestId}, timeout={Timeout}", requestId, timeout);
 
 			var onPremiseConnectorCallback = _requestCompletedCallbacks[requestId] = _requestCallbackFactory.Create(requestId);
 
-			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, requestTimeout ?? _configuration.OnPremiseConnectorCallbackTimeout, _cancellationToken);
+			return GetOnPremiseTargetResponseAsync(onPremiseConnectorCallback, timeout, _cancellationToken);
 		}
 
 		public void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
@@ -184,6 +190,37 @@ namespace Thinktecture.Relay.Server.Communication
 			return _connectionContexts.Values;
 		}
 
+		private async Task ProvideLinkConfigurationAsync(IOnPremiseConnectionContext onPremiseConnectionContext)
+		{
+			try
+			{
+				var config = _linkRepository.GetLinkConfiguration(onPremiseConnectionContext.LinkId);
+				config.ApplyDefaults(_configuration);
+
+				var requestId = Guid.NewGuid().ToString();
+
+				_logger?.Debug("Sending configuration to OPC. connection-id={ConnectionId}, link-id={LinkId}, connector-version={ConnectorVersion}, link-configuration={@LinkConfiguration}, request-id={RequestId}", onPremiseConnectionContext.ConnectionId, onPremiseConnectionContext.LinkId, onPremiseConnectionContext.ConnectorVersion, config, requestId);
+
+				var request = new OnPremiseConnectorRequest()
+				{
+					HttpMethod = "CONFIG",
+					Url = String.Empty,
+					RequestStarted = DateTime.UtcNow,
+					OriginId = OriginId,
+					RequestId = requestId,
+					AcknowledgmentMode = AcknowledgmentMode.Auto,
+					Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(config)),
+				};
+
+				// configs, like heartbeats, do not go through the message dispatcher but directly to the connection
+				await onPremiseConnectionContext.RequestAction(request, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "An error happened while sending the link config to the connected OPC.");
+			}
+		}
+
 		private IDisposable StartReceivingResponses()
 		{
 			_logger?.Debug("Start receiving responses from dispatcher. origin-id={OriginId}", OriginId);
@@ -200,7 +237,7 @@ namespace Thinktecture.Relay.Server.Communication
 			}
 			else
 			{
-				_logger?.Debug("Response received but no request callback found. request-id={RequestId}", response.RequestId);
+				_logger?.Information("Response received but no request callback found for request {RequestId}", response.RequestId);
 			}
 		}
 

@@ -7,6 +7,29 @@
 
 # Release Notes
 
+## Version 2.1.0
+
+* Server-Seitige Link-Konfiguration
+
+  * Es ist nun möglich, Link-Spezifische Settings auf dem RelayServer zu konfigurieren.
+
+* Automatischer Disconnect von On-Premise Connectoren
+
+  * Wenn gewünscht, kann ein On-Premise Connector von sich aus die Verbindung wieder abbrechen, wenn er eine maximale Verbindungszeit erreicht und/oder eine gewisse Zeit nicht verwendet wird.
+
+* Allgemeine Verbesserungen
+
+  * Die Zeitspanne in der sich On-Premise Connectoren nach einem Verbindungsverlust neu verbinden können ist nun konfigurierbar. Damit kann vermieden werden, dass z.B. bei einem Neustart des Servers alle On-Premise Connectoren innerhalb des gleichen kurzen Zeitfensters erneut verbinden wollen und damit versehentlich eine DDoS-Erkennung auslösen.
+  * Interceptoren haben nun Zugriff auf die lokale Uri, die vom Client angefragt wurde, z.B. um Forwarded-Header zu setzen.
+  * Es ist nun möglich, zu konfigurieren ob der On-Premise Connector redirects eines On-Premise Targets selber folgt oder diese relayed.
+  * Es kann nun ein eigener `IPasswordComplexityValidator` implementiert und über ein eigenes Autofac-Modul aus einem eigenen CustomCodeAssembly registriert werden.
+
+- Fehlerbehebungen
+
+  * Wenn eine weiterzuleitende Anfrage einen Query-Parameter namens 'path' enthielt, führte das zu unerwartetem Verhalten
+  * Die konfigurierbare Filterung des Inhaltes von OnPremise-Seitigen Fehler-Antworten wurde korrigiert
+  * Eine genauere Fehlermeldung wird angezeigt, wenn die Konfigurationsdatei des RelayServers fehlt
+
 ## Version 2.0.0
 
 * Multi-Server Betrieb
@@ -59,7 +82,7 @@
   * X-XSS-Protection Header werden nun gesetzt
   * Es ist nun möglich, den Relaying-Endpunkt auf Authentifizierte Requests einzuschränken
 
-- Allgemeine Verbeserungen
+- Allgemeine Verbesserungen
 
   * Info- und Management Endpunkte setzten nun korrekte Cache-Header
   * Update verwendeter Bibliotheken auf die jeweils neueste Version

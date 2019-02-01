@@ -11,6 +11,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private readonly ILogger _logger;
 		private readonly ITokenExpiryChecker _tokenExpiryChecker;
 		private readonly IHeartbeatChecker _heartbeatChecker;
+		private readonly IAutomaticDisconnectChecker _automaticDisconnectChecker;
 		private readonly TimeSpan _checkInterval;
 		private readonly CancellationTokenSource _cancellationTokenSource;
 		private readonly List<IRelayServerConnection> _connections;
@@ -18,11 +19,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		// Simplest and fastest possible more or less threadsafe implementation for changing elements while looping through them in another thread.
 		private IRelayServerConnection[] _connectionsForLoop;
 
-		public MaintenanceLoop(ILogger logger, ITokenExpiryChecker tokenExpiryChecker, IHeartbeatChecker heartbeatChecker)
+		public MaintenanceLoop(ILogger logger, ITokenExpiryChecker tokenExpiryChecker, IHeartbeatChecker heartbeatChecker, IAutomaticDisconnectChecker automaticDisconnectChecker)
 		{
 			_logger = logger;
 			_tokenExpiryChecker = tokenExpiryChecker ?? throw new ArgumentNullException(nameof(tokenExpiryChecker));
 			_heartbeatChecker = heartbeatChecker ?? throw new ArgumentNullException(nameof(heartbeatChecker));
+			_automaticDisconnectChecker = automaticDisconnectChecker ?? throw new ArgumentNullException(nameof(automaticDisconnectChecker));
 
 			_checkInterval = TimeSpan.FromSeconds(1);
 			_cancellationTokenSource = new CancellationTokenSource();
@@ -68,6 +70,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				{
 					foreach(var connection in _connectionsForLoop)
 					{
+						if (_automaticDisconnectChecker.DisconnectIfRequired(connection))
+							continue;
+
 						await _tokenExpiryChecker.Check(connection);
 						_heartbeatChecker.Check(connection);
 					}

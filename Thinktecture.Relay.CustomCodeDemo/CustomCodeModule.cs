@@ -24,6 +24,9 @@ namespace Thinktecture.Relay.CustomCodeDemo
 
 			builder.RegisterApiControllers(typeof(CustomCodeModule).Assembly);
 
+			// Example: Override the password complexity validator with a custom version
+			builder.RegisterType<NoopPasswordComplexityValidator>().AsImplementedInterfaces();
+
 			base.Load(builder);
 		}
 	}

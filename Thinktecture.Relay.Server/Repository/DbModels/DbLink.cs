@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -47,6 +47,14 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 
 		[Required]
 		public DateTime CreationDate { get; set; }
+
+		public TimeSpan? TokenRefreshWindow { get; set; }
+		public TimeSpan? HeartbeatInterval { get; set; }
+		public TimeSpan? ReconnectMinWaitTime { get; set; }
+		public TimeSpan? ReconnectMaxWaitTime { get; set; }
+
+		public TimeSpan? AbsoluteConnectionLifetime { get; set; }
+		public TimeSpan? SlidingConnectionLifetime { get; set; }
 
 		private ICollection<DbActiveConnection> _activeConnections;
 
