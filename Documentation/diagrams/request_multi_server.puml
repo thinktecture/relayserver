@@ -1,0 +1,87 @@
+@startuml
+title RelayServer request with multiple/balanced RelayServers
+
+box "Internet"
+   participant "Client"
+   participant "RelayServer"
+   participant "RelayServer 2"
+   participant "RelayServer 3"
+end box
+
+participant "Storage"
+participant "RabbitMQ"
+
+box "On Premise"
+   participant "On Premise Connector"
+   participant "Internal API"
+end box
+
+"On Premise Connector" -> "RelayServer 2" : uses 'link' credentials to open a SignalR connection
+
+group request
+
+  Client -> "RelayServer" : sends request
+  activate "RelayServer"
+
+group Preparation
+
+  "RelayServer" --> "Storage" : (when payload > 64kB) persists request body
+  activate "Storage" #LightGray
+  "RelayServer" -> "RabbitMQ" : queues request for Link
+  activate "RabbitMQ"
+  "RabbitMQ" -> "RelayServer 2" : dequeues from Link queue
+  deactivate "RabbitMQ"
+end
+
+group Forwarding
+
+  "RelayServer 2" -> "On Premise Connector" : forwards request (via SignalR)
+  activate "On Premise Connector"
+
+  "On Premise Connector" --> "RelayServer 3" : (when payload > 64kB) requests request body
+  activate "RelayServer 3"
+  "Storage" --> "RelayServer 3" : (when payload > 64Kb) retrieves request body
+  deactivate "Storage"
+  "RelayServer 3" --> "On Premise Connector": (when payload > 64kB) returns request body
+  deactivate "RelayServer 3"
+end
+
+
+group Execution
+
+  "On Premise Connector" -> "Internal API" : executes request
+  activate "Internal API"
+  "Internal API" -> "On Premise Connector" : returns result
+  deactivate "Internal API"
+
+end
+
+group Returning
+ 
+  "On Premise Connector" -> "RelayServer 3" : POSTS response (via HTTPs)
+  deactivate "On Premise Connector"
+  activate "RelayServer 3"
+  "RelayServer 3" --> "Storage" : (when payload > 64kB) persists response body
+  activate "Storage" #LightGray
+
+  "RelayServer 3" -> "RabbitMQ" : puts response into queue
+  deactivate "RelayServer 3"
+  activate "RabbitMQ"
+
+  "RabbitMQ" -> "RelayServer" : dequeues response
+  deactivate "RabbitMQ"
+  "Storage" --> "RelayServer": (when payload > 64kB) retrieves response body
+  deactivate "Storage"
+
+end
+
+  "RelayServer" -> "Client" : returns result
+  deactivate "RelayServer"
+
+end
+
+|||
+...eventually...
+"On Premise Connector" -X "RelayServer 2" : disconnects
+deactivate "RelayServer 2"
+@enduml
