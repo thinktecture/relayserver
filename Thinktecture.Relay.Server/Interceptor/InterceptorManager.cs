@@ -58,6 +58,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			{
 				ClientIpAddress = GetRemoteIpAddress(request, message),
 				ClientUser = clientUser,
+				ClientRequestUri = message.RequestUri,
 			};
 		}
 
