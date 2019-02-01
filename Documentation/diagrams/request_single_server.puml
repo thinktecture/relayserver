@@ -1,0 +1,80 @@
+@startuml
+title RelayServer request with a single RelayServer and in-memory store
+
+box "Internet"
+   participant "Client"
+   participant "RelayServer"
+end box
+
+participant "RabbitMQ"
+
+box "On Premise"
+   participant "On Premise Connector"
+   participant "Internal API"
+end box
+
+"On Premise Connector" -> "RelayServer" : uses 'link' credentials to open a SignalR connection
+
+group request
+
+  Client -> "RelayServer" : sends request
+  activate "RelayServer"
+
+group Preparation
+
+  "RelayServer" --> "RelayServer" : (when payload > 64kB) hold request body in-memory
+  activate "RelayServer" #LightGray
+  "RelayServer" -> "RabbitMQ" : queues request for Link
+  activate "RabbitMQ"
+  "RabbitMQ" -> "RelayServer" : dequeues from Link queue
+  deactivate "RabbitMQ"
+end
+
+group Forwarding
+
+  "RelayServer" -> "On Premise Connector" : forwards request (via SignalR)
+  activate "On Premise Connector"
+
+  "On Premise Connector" --> "RelayServer" : (when payload > 64kB) requests request body
+  "RelayServer" --> "On Premise Connector": (when payload > 64kB) returns request body
+  deactivate "RelayServer" #LightGray
+end
+
+
+group Execution
+
+  "On Premise Connector" -> "Internal API" : executes request
+  activate "Internal API"
+  "Internal API" -> "On Premise Connector" : returns result
+  deactivate "Internal API"
+
+end
+
+group Returning
+ 
+  "On Premise Connector" -> "RelayServer" : POSTS response (via HTTPs)
+  deactivate "On Premise Connector"
+  activate "RelayServer"
+  "RelayServer" --> "RelayServer" : (when payload > 64kB) hold response body in-memory
+  activate "RelayServer" #LightGray
+
+  "RelayServer" -> "RabbitMQ" : puts response into queue
+  activate "RabbitMQ"
+  "RabbitMQ" -> "RelayServer" : dequeues response
+  deactivate "RabbitMQ"
+
+  "RelayServer" --> "RelayServer": (when payload > 64kB) retrieves response body
+  deactivate "RelayServer" #LightGray
+end
+
+  "RelayServer" -> "Client" : returns result
+  deactivate "RelayServer"
+  deactivate "RelayServer"
+
+end
+
+|||
+...eventually...
+"On Premise Connector" -X "RelayServer" : disconnects
+deactivate "RelayServer"
+@enduml
