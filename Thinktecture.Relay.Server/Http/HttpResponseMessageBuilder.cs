@@ -131,7 +131,7 @@ namespace Thinktecture.Relay.Server.Http
 
 		private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
 		{
-			return ((int)statusCode >= 300) && ((int)statusCode <= 399);
+			return ((int) statusCode >= 300) && ((int) statusCode <= 399);
 		}
 	}
 }
