@@ -301,7 +301,7 @@ In der Konfigurationsdatei muss nur der Abschnitt <relayServer></relayServer> be
     <identity userName="userName" password="password" />
   </security>
   <onPremiseTargets>
-    <web key="Test" baseUrl="http://localhost/"/>
+    <web key="Test" baseUrl="http://localhost/" followRedirects="true" />
   </onPremiseTargets>
 </relayServer>
 ```
@@ -336,3 +336,4 @@ Liste von On-Premises Applikationen, die vom On-Premises Connector mit Anfragen 
 | --- | --- |
 | key | On-Premises-Anwendungsname |
 | baseUrl | URL des On-Premises Applikation |
+| followRedirects | Legt fest, ob der On-Premises Connector redirects selber automatisch folgt (default true, Angabe optional) |

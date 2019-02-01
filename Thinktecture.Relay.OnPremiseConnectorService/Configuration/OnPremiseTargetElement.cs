@@ -13,6 +13,6 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 
 		protected override ConfigurationPropertyCollection Properties { get; }
 
-		public string Key => (string)this[_key];
+		public string Key => (string) this[_key];
 	}
 }

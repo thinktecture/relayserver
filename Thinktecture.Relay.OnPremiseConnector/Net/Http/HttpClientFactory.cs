@@ -1,4 +1,3 @@
-using System;
 using System.Net.Http;
 
 namespace Thinktecture.Relay.OnPremiseConnector.Net.Http
@@ -7,10 +6,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.Net.Http
 	public class HttpClientFactory : IHttpClientFactory
 	{
 		///<inheritdoc/>
-		public HttpClient CreateClient(String name)
+		public HttpClient CreateClient(string name)
 		{
-			// We ignore the name here, as this should be as simple as it gets.
-			return new HttpClient();
+			return (name == "FollowRedirectsWebTarget")
+				? new HttpClient()
+				: new HttpClient(new HttpClientHandler() { AllowAutoRedirect = false, });
 		}
 	}
 }
