@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="DemoController.cs" />
     <Compile Include="CustomCodeModule.cs" />
+    <Compile Include="NoopPasswordComplexityValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Shared\AssemblyInfo.shared.cs">
       <Link>Properties\AssemblyInfo.shared.cs</Link>

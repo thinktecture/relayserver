@@ -31,6 +31,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * The On-Premises connectors settings for reconnect timeouts (maximum and minimum) are now configurable, to be able to prevent accidental DDoS detections i.e. when the server restarts and all connectors want to reconnect in the same 30 second window.
   * Interceptors now can read the local uri that the client requested, i.e. to set forwarded headers.
   * It is now possible to configure whether the On-Premises connector automatically follows an http redirect response from a On-Premises target, or if the redirect will be relayed too.
+  * It is now possible to use a custom implementation of an `IPasswordComplexityValidator` by registering that in an Autofac module within a custom code assembly.
 
 - Bugfixes
 

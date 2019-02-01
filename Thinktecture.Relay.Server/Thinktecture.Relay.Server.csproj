@@ -443,14 +443,12 @@
     <Compile Include="Repository\LinkRepository.cs" />
     <Compile Include="Repository\TraceRepository.cs" />
     <Compile Include="Repository\UserRepository.cs" />
-    <Compile Include="Security\IPasswordComplexityValidator.cs" />
     <Compile Include="Security\IPasswordHash.cs" />
     <Compile Include="Security\PasswordComplexityValidator.cs" />
     <Compile Include="Security\PasswordHash.cs" />
     <Compile Include="Security\PasswordInformation.cs" />
     <Compile Include="Security\RsaDataProtector.cs" />
     <Compile Include="SignalR\FilePostDataTemporaryStore.cs" />
-    <Compile Include="SignalR\IPostDataTemporaryStore.cs" />
     <Compile Include="SignalR\OnPremisesConnection.cs" />
     <Compile Include="Security\AuthorizationServerProvider.cs" />
     <Compile Include="SignalR\InMemoryPostDataTemporaryStore.cs" />
