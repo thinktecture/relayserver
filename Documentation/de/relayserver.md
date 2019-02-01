@@ -20,6 +20,7 @@
 * Allgemeine Verbesserungen
 
   * Die Zeitspanne in der sich On-Premise Connectoren nach einem Verbindungsverlust neu verbinden können ist nun konfigurierbar. Damit kann vermieden werden, dass z.B. bei einem Neustart des Servers alle On-Premise Connectoren innerhalb des gleichen kurzen Zeitfensters erneut verbinden wollen und damit versehentlich eine DDoS-Erkennung auslösen.
+  * Interceptoren haben nun Zugriff auf die lokale Uri, die vom Client angefragt wurde, z.B. um Forwarded-Header zu setzen.
   * Es ist nun möglich, zu konfigurieren ob der On-Premise Connector redirects eines On-Premise Targets selber folgt oder diese relayed.
 
 - Fehlerbehebungen
