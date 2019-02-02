@@ -340,6 +340,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			catch (Exception ex)
 			{
 				_logger?.Error(ex, "Error during handling received message. connection-id={ConnectionId}, message={Message}", ConnectionId, message);
+
+				if (ex is TaskCanceledException)
+					Reconnect();
 			}
 			finally
 			{
@@ -365,6 +368,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					catch (Exception ex)
 					{
 						_logger?.Error(ex, "Error during posting unhandled request response to relay. request-id={RequestId}", request.RequestId);
+
+						if (ex is TaskCanceledException)
+							Reconnect();
 					}
 				}
 			}
