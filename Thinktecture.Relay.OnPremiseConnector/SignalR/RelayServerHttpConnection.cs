@@ -35,13 +35,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			var url = new Uri(relativeUrl, UriKind.Relative);
 
-			var request = new HttpRequestMessage(httpMethod, url);
-			setHeaders?.Invoke(request.Headers);
-			request.Content = content;
-
 			try
 			{
-				return await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+				return await CreateAndSendMessage(httpMethod, url, setHeaders, content, cancellationToken).ConfigureAwait(false);
 			}
 			catch (OperationCanceledException ex)
 			{
@@ -53,8 +49,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				_logger.Error(ex, "Sending http request to RelayServer failed. Replacing HttpClient and re-trying. relay-server={RelayServerUri}", _relayServerUri);
 
 				RecreateHttpClient();
-				return await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+				return await CreateAndSendMessage(httpMethod, url, setHeaders, content, cancellationToken).ConfigureAwait(false);
 			}
+		}
+
+		private Task<HttpResponseMessage> CreateAndSendMessage(HttpMethod httpMethod, Uri url, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
+		{
+			// We need to create a new HttpRequestMessage even when retrying, as the same message can't be send twice
+			var request = new HttpRequestMessage(httpMethod, url);
+			setHeaders?.Invoke(request.Headers);
+			request.Content = content;
+
+			return _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 		}
 
 		public void SetBearerToken(string accessToken)
