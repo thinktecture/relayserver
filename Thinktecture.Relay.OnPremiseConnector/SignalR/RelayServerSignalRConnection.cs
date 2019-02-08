@@ -18,7 +18,7 @@ using Thinktecture.Relay.OnPremiseConnector.IdentityModel;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
-	internal class RelayServerConnection : Connection, IRelayServerConnection
+	internal class RelayServerSignalRConnection : Connection, IRelayServerConnection
 	{
 		private const int _CONNECTOR_VERSION = 3;
 
@@ -27,10 +27,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private readonly string _userName;
 		private readonly string _password;
+		private readonly TimeSpan _requestTimeout;
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
-		private readonly HttpClient _httpClient;
+		private readonly IRelayServerHttpConnection _httpConnection;
 
 		private CancellationTokenSource _cts;
 		private bool _stopRequested;
@@ -53,20 +54,21 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public TimeSpan? AbsoluteConnectionLifetime { get; private set; }
 		public TimeSpan? SlidingConnectionLifetime { get; private set; }
 
-		public RelayServerConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, TimeSpan requestTimeout,
-			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, ILogger logger)
+		public RelayServerSignalRConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, TimeSpan requestTimeout,
+			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, IRelayServerHttpConnection httpConnection, ILogger logger)
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
 			RelayServerConnectionInstanceId = Interlocked.Increment(ref _nextInstanceId);
-			_httpClient = new HttpClient() { Timeout = requestTimeout };
 
 			_userName = userName;
 			_password = password;
+			_requestTimeout = requestTimeout;
 
 			Uri = relayServerUri;
 			TokenRefreshWindow = tokenRefreshWindow;
 
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
+			_httpConnection = httpConnection ?? throw new ArgumentNullException(nameof(httpConnection));
 			_logger = logger;
 
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
@@ -89,7 +91,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}, follow-redirects={FollowRedirects}", key, baseUri, followRedirects);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _httpClient.Timeout, followRedirects);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout, followRedirects);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
@@ -103,7 +105,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, handlerType);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _httpClient.Timeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory)
@@ -117,7 +119,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target using a handler factory. handler-key={HandlerKey}", key);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _httpClient.Timeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
 		}
 
 		public void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new()
@@ -129,7 +131,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, typeof(T).Name);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_httpClient.Timeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
 		}
 
 		private static string RemoveTrailingSlashes(string key)
@@ -251,7 +253,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_accessToken = tokenResponse.AccessToken;
 			TokenExpiry = DateTime.UtcNow + TimeSpan.FromSeconds(tokenResponse.ExpiresIn);
 
-			_httpClient.SetBearerToken(_accessToken);
+			_httpConnection.SetBearerToken(_accessToken);
 
 			Headers["Authorization"] = $"{tokenResponse.TokenType} {_accessToken}";
 
@@ -599,7 +601,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken)
 		{
-			return SendToRelayAsync(relativeUrl, HttpMethod.Get, setHeaders, null, cancellationToken);
+			return _httpConnection.SendToRelayAsync(relativeUrl, HttpMethod.Get, setHeaders, null, cancellationToken);
 		}
 
 		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, HttpContent content, CancellationToken cancellationToken)
@@ -609,25 +611,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
-			return SendToRelayAsync(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
-		}
-
-		private async Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
-		{
-			if (String.IsNullOrWhiteSpace(relativeUrl))
-				throw new ArgumentException("Relative url cannot be null or empty.");
-
-			if (!relativeUrl.StartsWith("/"))
-				relativeUrl = "/" + relativeUrl;
-
-			var url = new Uri(Uri, relativeUrl);
-
-			var request = new HttpRequestMessage(httpMethod, url);
-
-			setHeaders?.Invoke(request.Headers);
-			request.Content = content;
-
-			return await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+			return _httpConnection.SendToRelayAsync(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
 		}
 
 		private TimeSpan GetRandomWaitTime()
@@ -657,6 +641,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					_cts.Dispose();
 					_cts = null;
 				}
+
+				_httpConnection.Dispose();
 			}
 
 			base.Dispose(disposing);
