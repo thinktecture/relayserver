@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.1.1
+
+* Fehlerbehebungen
+
+  * Der automatische disconnect stand in custom OPC-Implementationen nicht korrekt zur Verfügung.
+
 ## Version 2.1.0
 
 * Server-Seitige Link-Konfiguration
@@ -24,7 +30,7 @@
   * Es ist nun möglich, zu konfigurieren ob der On-Premise Connector redirects eines On-Premise Targets selber folgt oder diese relayed.
   * Es kann nun ein eigener `IPasswordComplexityValidator` implementiert und über ein eigenes Autofac-Modul aus einem eigenen CustomCodeAssembly registriert werden.
 
-- Fehlerbehebungen
+* Fehlerbehebungen
 
   * Wenn eine weiterzuleitende Anfrage einen Query-Parameter namens 'path' enthielt, führte das zu unerwartetem Verhalten
   * Die konfigurierbare Filterung des Inhaltes von OnPremise-Seitigen Fehler-Antworten wurde korrigiert
@@ -61,15 +67,15 @@
       * Auslesen und Verändern der HTTP-Header
       * Vollständiges Ersetzen der Response
 
-- Verbessertes Logging
+* Verbessertes Logging
 
   * Das Logging wurde von NLog auf Serilog umgestellt, und die Logausgaben mit strukturierten Informationen angereichert. Es können eigene Serilog-Sinks und Enricher eingefügt werden. Zur Konfiguration siehe [Serilog AppSettings Konfiguration](https://github.com/serilog/serilog/wiki/AppSettings).
 
-- Optimierungen
+* Optimierungen
 
   * Der Speicherverbrauch des RelayServers und der On-Premise Connectoren wurde reduziert. Zudem wurden viele Performance-Optimierungen vorgenommen, um das System effizienter zu machen.
 
-- Verbesserungen der Sicherheit
+* Verbesserungen der Sicherheit
 
   * Es ist nun möglich, alle Funktionen des RelayServers (Relaying, On-Premise Verbindungen, ManagementWeb) einzeln zu deaktivieren oder für rein lokalen oder globalen Zugriff zu aktivieren.
   * Alle Dashboard & Info-Endpunkte erfordern nun Authorisierung
@@ -82,12 +88,12 @@
   * X-XSS-Protection Header werden nun gesetzt
   * Es ist nun möglich, den Relaying-Endpunkt auf Authentifizierte Requests einzuschränken
 
-- Allgemeine Verbesserungen
+* Allgemeine Verbesserungen
 
   * Info- und Management Endpunkte setzten nun korrekte Cache-Header
   * Update verwendeter Bibliotheken auf die jeweils neueste Version
 
-- Fehlerbehebungen
+* Fehlerbehebungen
 
   * Einige Funktionen im ManagementWeb wie z.B. das Bearbeiten von Nutzern funktionieren jetzt zuverlässiger
 
