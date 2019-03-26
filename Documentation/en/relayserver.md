@@ -16,6 +16,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.1.1
+
+* Bugfixes
+
+  * The automatic disconnect feature was not correctly made available for custom implementations of the On-Premise connector service.
+
 ## Version 2.1.0
 
 * Server-side Link configuration
@@ -33,7 +39,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * It is now possible to configure whether the On-Premises connector automatically follows an http redirect response from a On-Premises target, or if the redirect will be relayed too.
   * It is now possible to use a custom implementation of an `IPasswordComplexityValidator` by registering that in an Autofac module within a custom code assembly.
 
-- Bugfixes
+* Bugfixes
 
   * When the query to be relayed contained an query argument named 'path', this lead to unexpected behaviour
   * Corrected the filtering of contents of error responses from on-premise side services when enabled
@@ -70,15 +76,15 @@ The goal of this list is to highlight companies who pay back to this open source
       * Read or modify the response HTTP headers
       * Complete replacement of the received response
 
-- Improved logging
+* Improved logging
 
   * We switched the logging from NLog to Serilog and enriched the log entries with structured information. You can configure custom sinks and enrichers as you see the need. For configuration details see [Serilog AppSettings Konfiguration](https://github.com/serilog/serilog/wiki/AppSettings).
 
-- Optimizations
+* Optimizations
 
   * Memory consumption of the RelayServer and On-Premises connectors has been reduced. Additionally we optimized general performance to make the system more efficient.
 
-- Security improvements
+* Security improvements
 
   * It is now possible to deactivate features of the RelayServer (relaying, on-premises connections, management web) specifically. Also, when enabled, it is possible to allow access globally or only from localhost.
   * All dashboard and info endpoints now require authorization
@@ -91,12 +97,12 @@ The goal of this list is to highlight companies who pay back to this open source
   * X-XSS-Protection headers will be set
   * It ist now possible to restrict the relay endpoint to authenticated requests only
 
-- General improvements
+* General improvements
 
   * Info and management endpoints now set correct cache headers
   * Dependencies have been updated to their corresponding latest versions
 
-- Bugfixes
+* Bugfixes
 
   * Some operations did not work reliable in the Management Web and have been fixed
 
