@@ -30,7 +30,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				.AddTransient<IRelayServerConnectionFactory, RelayServerConnectionFactory>()
 				.AddTransient<IOnPremiseTargetConnectorFactory, OnPremiseTargetConnectorFactory>()
 				.AddTransient<IHeartbeatChecker, HeartbeatChecker>()
-				.AddTransient<ITokenExpiryChecker, TokenExpiryChecker>();
+				.AddTransient<ITokenExpiryChecker, TokenExpiryChecker>()
+				.AddTransient<IAutomaticDisconnectChecker, AutomaticDisconnectChecker>();
 		}
 
 	}
