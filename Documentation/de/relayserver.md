@@ -11,7 +11,7 @@
 
 * Fehlerbehebungen
 
-  * Der automatische disconnect stand in custom OPC-Implementationen nicht korrekt zur Verfügung.
+  * Der automatische Disconnect stand in individuellen OPC-Implementationen nicht korrekt zur Verfügung.
 
 ## Version 2.1.0
 
