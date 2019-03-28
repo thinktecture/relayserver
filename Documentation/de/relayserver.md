@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.1.2
+
+* Fehlerbehebungen
+
+  * Der automatische Disconnect trennt aktive Verbindungen vor dem Ablaufen der `LinkSlidingConnectionLifetime`.
+
 ## Version 2.1.1
 
 * Fehlerbehebungen
