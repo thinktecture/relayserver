@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			if (connection.SlidingConnectionLifetime.HasValue && (connection.LastActivity.HasValue || connection.ConnectedSince.HasValue))
 			{
-				if (DateTime.UtcNow > (connection.LastActivity ?? connection.ConnectedSince + connection.SlidingConnectionLifetime))
+				if (DateTime.UtcNow > (connection.LastActivity ?? connection.ConnectedSince) + connection.SlidingConnectionLifetime)
 				{
 					_logger?.Information("Disconnecting because connection instance {RelayServerConnectionInstanceId} reached its maximum sliding lifetime of {SlidingConnectionLifetime} since {LastActivity}", connection.RelayServerConnectionInstanceId, connection.SlidingConnectionLifetime, connection.LastActivity ?? connection.ConnectedSince);
 
