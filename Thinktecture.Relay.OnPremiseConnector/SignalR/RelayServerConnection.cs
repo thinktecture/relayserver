@@ -38,7 +38,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private string _accessToken;
 		private TimeSpan _minReconnectWaitTime = TimeSpan.FromSeconds(2);
 		private TimeSpan _maxReconnectWaitTime = TimeSpan.FromSeconds(30);
-		
+
 		public event EventHandler Connected;
 		public event EventHandler Disconnected;
 		public event EventHandler Disposing;
@@ -423,15 +423,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			var response = BuildDefaultResponse(request.OriginId, request.RequestId);
 
-            try
-            {
-			    // No cancellation token here, to not cancel sending of an already fetched response
-			    await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger?.Error(ex, "Error during posting configuration response to relay. request-id={RequestId}", request.RequestId);
-            }
+			try
+			{
+				// No cancellation token here, to not cancel sending of an already fetched response
+				await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during posting configuration response to relay. request-id={RequestId}", request.RequestId);
+			}
 		}
 
 		private async Task HandlePingRequestAsync(RequestContext ctx, IOnPremiseTargetRequest request)
@@ -470,15 +470,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			LastHeartbeat = DateTime.UtcNow;
 			var response = BuildDefaultResponse(request.OriginId, request.RequestId);
 
-            try
-            {
-			    // No cancellation token here, to not cancel sending of an already fetched response
-			    await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger?.Error(ex, "Error during posting heartbeat response to relay. request-id={RequestId}", request.RequestId);
-            }
+			try
+			{
+				// No cancellation token here, to not cancel sending of an already fetched response
+				await PostResponseAsync(ctx, response, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during posting heartbeat response to relay. request-id={RequestId}", request.RequestId);
+			}
 		}
 
 		private IOnPremiseTargetResponse BuildDefaultResponse(Guid originId, string requestId)
@@ -495,12 +495,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void Disconnect(bool reconnecting)
 		{
-		    if (reconnecting)
-		    {
-		        _logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
-		    }
+			if (reconnecting)
+			{
+				_logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			}
 
-            _logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
 			LastHeartbeat = DateTime.MinValue;
 			HeartbeatInterval = TimeSpan.Zero;

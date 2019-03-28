@@ -16,6 +16,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.1.2
+
+* Bugfixes
+
+  * The automatic disconnect feature killed active connections before the `LinkSlidingConnectionLifetime` had elapsed.
+
 ## Version 2.1.1
 
 * Bugfixes
