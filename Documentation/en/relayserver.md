@@ -16,6 +16,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.2.0
+
+* Customizing
+
+  * It is now possible to replace the `IRequestLogger` with a custom implementation.
+
 ## Version 2.1.2
 
 * Bugfixes

@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.2.0
+
+* Customizing
+
+  * Es ist jetzt möglich den `IRequestLogger` mit einer eigenen Implementation zu ersetzen.
+
 ## Version 2.1.2
 
 * Fehlerbehebungen

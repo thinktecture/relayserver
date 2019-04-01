@@ -1,7 +1,7 @@
 <Project>
   <!-- WARNING: This file is shared between all RelayServer .NET Core library projects -->
   <PropertyGroup>
-    <VersionPrefix>2.1.2</VersionPrefix>
+    <VersionPrefix>2.2.0</VersionPrefix>
 
     <Copyright>Copyright © Thinktecture AG 2015 - 2019. All rights reserved.</Copyright>
     <PackageTags>thinktecture;relayserver</PackageTags>
