@@ -321,8 +321,6 @@
     <Compile Include="Migrations\201901311556307_AddLinkConfigurationOptions.Designer.cs">
       <DependentUpon>201901311556307_AddLinkConfigurationOptions.cs</DependentUpon>
     </Compile>
-    <Compile Include="OnPremise\IOnPremiseConnectorRequest.cs" />
-    <Compile Include="OnPremise\IOnPremiseConnectorResponse.cs" />
     <Compile Include="OnPremise\OnPremiseConnectorResponse.cs" />
     <Compile Include="Owin\BlockNonLocalRequestsMiddleware.cs" />
     <Compile Include="Communication\IMessageDispatcher.cs" />
@@ -391,7 +389,6 @@
     <Compile Include="Controller\RequestController.cs" />
     <Compile Include="Controller\ResponseController.cs" />
     <Compile Include="RelayService.cs" />
-    <Compile Include="Diagnostics\IRequestLogger.cs" />
     <Compile Include="Diagnostics\ITraceFileReader.cs" />
     <Compile Include="Diagnostics\ITraceFileWriter.cs" />
     <Compile Include="Diagnostics\ITraceManager.cs" />

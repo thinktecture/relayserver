@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Serilog;
@@ -114,7 +115,7 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 			finally
 			{
-				FinishRequest(request, response, link.Id, fullPathToOnPremiseEndpoint, statusCode);
+				FinishRequest(request as OnPremiseConnectorRequest, response, link.Id, fullPathToOnPremiseEndpoint, statusCode);
 			}
 		}
 
@@ -153,8 +154,13 @@ namespace Thinktecture.Relay.Server.Controller
 			return true;
 		}
 
-		private void FinishRequest(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid linkId, string path, HttpStatusCode statusCode)
+		private void FinishRequest(OnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid linkId, string path, HttpStatusCode statusCode)
 		{
+			if (request == null)
+			{
+				return;
+			}
+
 			request.RequestFinished = DateTime.UtcNow;
 
 			_logger?.Verbose("Finishing request. request-id={RequestId}, link-id={LinkId}, on-premise-duration={RemoteDuration}, global-duration={GlobalDuration}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
