@@ -259,7 +259,8 @@ namespace Thinktecture.Relay.Server.Config
 
 		private string GetValue(string settingName)
 		{
-			return Environment.GetEnvironmentVariable($"RelayServer__{settingName}") ?? ConfigurationManager.AppSettings[settingName];
+			return Environment.GetEnvironmentVariable($"RelayServer__{settingName}")
+				?? ConfigurationManager.AppSettings[settingName];
 		}
 
 		private void LogSettings(ILogger logger)
