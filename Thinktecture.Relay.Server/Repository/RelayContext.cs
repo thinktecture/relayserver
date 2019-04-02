@@ -1,3 +1,4 @@
+using System;
 using System.Data.Entity;
 using Thinktecture.Relay.Server.Repository.DbModels;
 
@@ -12,6 +13,7 @@ namespace Thinktecture.Relay.Server.Repository
 		public DbSet<DbActiveConnection> ActiveConnections { get; set; }
 
 		public RelayContext()
+			: base(GetConnectionStringOrName())
 		{
 			Configuration.AutoDetectChangesEnabled = false;
 			Configuration.LazyLoadingEnabled = false;
@@ -25,6 +27,16 @@ namespace Thinktecture.Relay.Server.Repository
 			// add composite key for active connections table
 			modelBuilder.Entity<DbActiveConnection>()
 				.HasKey(t => new { t.LinkId, t.ConnectionId, t.OriginId });
+		}
+
+		private static string GetConnectionStringOrName()
+		{
+			return
+				Environment.GetEnvironmentVariable($"SQLAZURECONNSTR_{nameof(RelayContext)}")
+				?? Environment.GetEnvironmentVariable($"SQLCONNSTR_{nameof(RelayContext)}")
+				?? Environment.GetEnvironmentVariable($"CUSTOMCONNSTR_{nameof(RelayContext)}")
+				?? Environment.GetEnvironmentVariable($"RelayServer__{nameof(RelayContext)}")
+				?? nameof(RelayContext);
 		}
 	}
 }

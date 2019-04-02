@@ -1,16 +1,17 @@
 <Project>
   <!-- WARNING: This file is shared between all RelayServer .NET Core library projects -->
   <PropertyGroup>
-    <VersionPrefix>2.1.2</VersionPrefix>
+    <VersionPrefix>2.2.0</VersionPrefix>
 
     <Copyright>Copyright © Thinktecture AG 2015 - 2019. All rights reserved.</Copyright>
     <PackageTags>thinktecture;relayserver</PackageTags>
     <PackageIconUrl>http://thinktecture.com/images/Logo_T_Nontransparent.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/thinktecture/relayserver</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/thinktecture/relayserver/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/thinktecture/relayserver.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <Authors>SebastianGingter</Authors>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
@@ -26,5 +27,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.shared.cs">
       <Link>Properties\AssemblyInfo.shared.cs</Link>
     </Compile>
+    <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
