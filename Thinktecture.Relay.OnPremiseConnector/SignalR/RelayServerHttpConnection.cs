@@ -1,4 +1,7 @@
 using System;
+#if NETSTANDARD2_0
+using System.Net;
+#endif
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -21,6 +24,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_relayServerUri = relayServerUri ?? throw new ArgumentNullException(nameof(relayServerUri));
 			_requestTimeout = requestTimeout;
+
+#if NETSTANDARD2_0
+			ServicePointManager.FindServicePoint(relayServerUri).ConnectionLeaseTimeout = requestTimeout.Milliseconds;
+			ServicePointManager.DnsRefreshTimeout = requestTimeout.Milliseconds;
+#endif
 
 			CreateHttpClient();
 		}
