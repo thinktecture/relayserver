@@ -25,6 +25,7 @@ The goal of this list is to highlight companies who pay back to this open source
 * Customizing
 
   * It is now possible to replace the `IRequestLogger` in the RelayServer with a custom implementation.
+  * It is now possible to replace the `ITraceFileWriter` and the `ITraceFileReader` in the RelayServer with a custom implementation.
 
 ## Version 2.1.2
 

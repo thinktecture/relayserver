@@ -16,6 +16,7 @@
 * Customizing
 
   * Es ist jetzt möglich den `IRequestLogger` im RelayServer mit einer eigenen Implementation zu ersetzen.
+  * Es ist nun möglich den `ITraceFileWriter` und `ITraceFileReader` im RelayServer mit einer eigenen Implementation zu ersetzen.
 
 ## Version 2.1.2
 
