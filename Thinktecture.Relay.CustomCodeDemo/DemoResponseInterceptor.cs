@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.CustomCodeDemo
@@ -11,7 +10,7 @@ namespace Thinktecture.Relay.CustomCodeDemo
 		{
 			return new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
 			{
-				Content = new ByteArrayContent(GetBody())
+				Content = new StringContent(GetBody())
 			};
 		}
 
@@ -23,9 +22,9 @@ namespace Thinktecture.Relay.CustomCodeDemo
 			return null;
 		}
 
-		private static byte[] GetBody()
+		private static string GetBody()
 		{
-			return Encoding.UTF8.GetBytes(@"
+			return @"
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM `MM'  VMMMMM
 MMMMMV  MV   MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM  VM  MMMMMM
@@ -68,7 +67,7 @@ WIZMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmmmmmmMMMMMMMMMMMMMMMMMMMMMMMMM* MJJ
 88888P   T888P  88  `88     88      88    88     8b 88  `88 88  T888P  88
 
 (c) by Mike Jittlov
-");
+";
 		}
 	}
 }

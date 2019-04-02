@@ -7,6 +7,17 @@
 
 # Release Notes
 
+## Version 2.2.0
+
+* RelayServer Windows Docker Container-Unterstützung
+
+  * Es ist nun möglich alle Konfigurationswerte inklusive dem `RelayContext` ConnectionString mittels Umgebunsvariablen zu übersteuern. Der Name der Umgebungsvariablen muss mit dem Präfix `RelayServer__` beginnen und dann mit dem Namen der Einstellung in der Anwendungskonfigurationsdatei enden.
+
+* Customizing
+
+  * Es ist jetzt möglich den `IRequestLogger` im RelayServer mit einer eigenen Implementation zu ersetzen.
+  * Es ist nun möglich den `ITraceFileWriter` und `ITraceFileReader` im RelayServer mit einer eigenen Implementation zu ersetzen.
+
 ## Version 2.1.2
 
 * Fehlerbehebungen

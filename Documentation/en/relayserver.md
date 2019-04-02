@@ -16,6 +16,17 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.2.0
+
+* RelayServer Windows Docker Container support
+
+  * It is now possible to override all RelayServer configuration values, including the `RelayContext` connection string, via environment variables. The name of the environment variable needs to be the name of the setting as in the application config file, prefixed with `RelayServer__`.
+
+* Customizing
+
+  * It is now possible to replace the `IRequestLogger` in the RelayServer with a custom implementation.
+  * It is now possible to replace the `ITraceFileWriter` and the `ITraceFileReader` in the RelayServer with a custom implementation.
+
 ## Version 2.1.2
 
 * Bugfixes

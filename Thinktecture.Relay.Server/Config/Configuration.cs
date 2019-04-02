@@ -57,113 +57,113 @@ namespace Thinktecture.Relay.Server.Config
 				RabbitMqConnectionString = settings.ConnectionString;
 			}
 
-			RabbitMqClusterHosts = ConfigurationManager.AppSettings[nameof(RabbitMqClusterHosts)];
+			RabbitMqClusterHosts = GetValue(nameof(RabbitMqClusterHosts));
 			if (String.IsNullOrWhiteSpace(RabbitMqClusterHosts))
 			{
 				RabbitMqClusterHosts = null;
 			}
 
 			QueueExpiration = TimeSpan.FromSeconds(10);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(QueueExpiration)], out var tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(QueueExpiration)), out var tmpTimeSpan))
 			{
 				QueueExpiration = tmpTimeSpan;
 			}
 
 			RequestExpiration = TimeSpan.FromSeconds(10);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(RequestExpiration)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(RequestExpiration)), out tmpTimeSpan))
 			{
 				RequestExpiration = tmpTimeSpan;
 			}
 
 			OnPremiseConnectorCallbackTimeout = TimeSpan.FromSeconds(30);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(OnPremiseConnectorCallbackTimeout)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(OnPremiseConnectorCallbackTimeout)), out tmpTimeSpan))
 			{
 				OnPremiseConnectorCallbackTimeout = tmpTimeSpan;
 			}
 
-			TraceFileDirectory = ConfigurationManager.AppSettings[nameof(TraceFileDirectory)] ?? "tracefiles";
+			TraceFileDirectory = GetValue(nameof(TraceFileDirectory)) ?? "tracefiles";
 
 			LinkPasswordLength = 100;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(LinkPasswordLength)], out var tmpInt))
+			if (Int32.TryParse(GetValue(nameof(LinkPasswordLength)), out var tmpInt))
 			{
 				LinkPasswordLength = tmpInt;
 			}
 
 			DisconnectTimeout = 6;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(DisconnectTimeout)], out tmpInt))
+			if (Int32.TryParse(GetValue(nameof(DisconnectTimeout)), out tmpInt))
 			{
 				DisconnectTimeout = tmpInt;
 			}
 
 			ConnectionTimeout = 5;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(ConnectionTimeout)], out tmpInt))
+			if (Int32.TryParse(GetValue(nameof(ConnectionTimeout)), out tmpInt))
 			{
 				ConnectionTimeout = tmpInt;
 			}
 
 			KeepAliveInterval = DisconnectTimeout / 3;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(KeepAliveInterval)], out tmpInt) && tmpInt >= KeepAliveInterval)
+			if (Int32.TryParse(GetValue(nameof(KeepAliveInterval)), out tmpInt) && tmpInt >= KeepAliveInterval)
 			{
 				KeepAliveInterval = tmpInt;
 			}
 
 			UseInsecureHttp = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(UseInsecureHttp)], out var tmpBool))
+			if (Boolean.TryParse(GetValue(nameof(UseInsecureHttp)), out var tmpBool))
 			{
 				UseInsecureHttp = tmpBool;
 			}
 
 			EnableManagementWeb = ModuleBinding.True;
-			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(EnableManagementWeb)], true, out ModuleBinding tmpModuleBinding))
+			if (Enum.TryParse(GetValue(nameof(EnableManagementWeb)), true, out ModuleBinding tmpModuleBinding))
 			{
 				EnableManagementWeb = tmpModuleBinding;
 			}
 
 			EnableRelaying = ModuleBinding.True;
-			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(EnableRelaying)], true, out tmpModuleBinding))
+			if (Enum.TryParse(GetValue(nameof(EnableRelaying)), true, out tmpModuleBinding))
 			{
 				EnableRelaying = tmpModuleBinding;
 			}
 
 			EnableOnPremiseConnections = ModuleBinding.True;
-			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(EnableOnPremiseConnections)], true, out tmpModuleBinding))
+			if (Enum.TryParse(GetValue(nameof(EnableOnPremiseConnections)), true, out tmpModuleBinding))
 			{
 				EnableOnPremiseConnections = tmpModuleBinding;
 			}
 
-			HostName = ConfigurationManager.AppSettings[nameof(HostName)] ?? "+";
+			HostName = GetValue(nameof(HostName)) ?? "+";
 
 			Port = UseInsecureHttp ? 20000 : 443;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(Port)], out tmpInt))
+			if (Int32.TryParse(GetValue(nameof(Port)), out tmpInt))
 			{
 				Port = tmpInt;
 			}
 
-			ManagementWebLocation = ConfigurationManager.AppSettings[nameof(ManagementWebLocation)];
+			ManagementWebLocation = GetValue(nameof(ManagementWebLocation));
 			if (String.IsNullOrWhiteSpace(ManagementWebLocation))
 			{
 				ManagementWebLocation = "ManagementWeb";
 			}
 
-			TemporaryRequestStoragePath = ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePath)];
+			TemporaryRequestStoragePath = GetValue(nameof(TemporaryRequestStoragePath));
 			if (String.IsNullOrWhiteSpace(TemporaryRequestStoragePath))
 			{
 				TemporaryRequestStoragePath = null;
 			}
 
 			TemporaryRequestStoragePeriod = OnPremiseConnectorCallbackTimeout + OnPremiseConnectorCallbackTimeout;
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(TemporaryRequestStoragePeriod)], out tmpTimeSpan) && tmpTimeSpan >= TemporaryRequestStoragePeriod)
+			if (TimeSpan.TryParse(GetValue(nameof(TemporaryRequestStoragePeriod)), out tmpTimeSpan) && tmpTimeSpan >= TemporaryRequestStoragePeriod)
 			{
 				TemporaryRequestStoragePeriod = tmpTimeSpan;
 			}
 
 			ActiveConnectionTimeout = TimeSpan.FromMinutes(2);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(ActiveConnectionTimeout)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(ActiveConnectionTimeout)), out tmpTimeSpan))
 			{
 				ActiveConnectionTimeout = tmpTimeSpan;
 			}
 
-			CustomCodeAssemblyPath = ConfigurationManager.AppSettings[nameof(CustomCodeAssemblyPath)];
+			CustomCodeAssemblyPath = GetValue(nameof(CustomCodeAssemblyPath));
 			if (String.IsNullOrWhiteSpace(CustomCodeAssemblyPath))
 			{
 				CustomCodeAssemblyPath = null;
@@ -174,65 +174,65 @@ namespace Thinktecture.Relay.Server.Config
 				CustomCodeAssemblyPath = null;
 			}
 
-			SharedSecret = ConfigurationManager.AppSettings[nameof(SharedSecret)];
-			OAuthCertificate = ConfigurationManager.AppSettings[nameof(OAuthCertificate)];
+			SharedSecret = GetValue(nameof(SharedSecret));
+			OAuthCertificate = GetValue(nameof(OAuthCertificate));
 
 			HstsHeaderMaxAge = TimeSpan.FromDays(365);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(HstsHeaderMaxAge)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(HstsHeaderMaxAge)), out tmpTimeSpan))
 			{
 				HstsHeaderMaxAge = tmpTimeSpan;
 			}
 
 			HstsIncludeSubdomains = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(HstsIncludeSubdomains)], out tmpBool))
+			if (Boolean.TryParse(GetValue(nameof(HstsIncludeSubdomains)), out tmpBool))
 			{
 				HstsIncludeSubdomains = tmpBool;
 			}
 
 			IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Default;
-			if (Enum.TryParse(ConfigurationManager.AppSettings[nameof(IncludeErrorDetailPolicy)], true, out IncludeErrorDetailPolicy tmpIncludeErrorDetailPolicy))
+			if (Enum.TryParse(GetValue(nameof(IncludeErrorDetailPolicy)), true, out IncludeErrorDetailPolicy tmpIncludeErrorDetailPolicy))
 			{
 				IncludeErrorDetailPolicy = tmpIncludeErrorDetailPolicy;
 			}
 
 			MaxFailedLoginAttempts = 5;
-			if (Int32.TryParse(ConfigurationManager.AppSettings[nameof(MaxFailedLoginAttempts)], out tmpInt))
+			if (Int32.TryParse(GetValue(nameof(MaxFailedLoginAttempts)), out tmpInt))
 			{
 				MaxFailedLoginAttempts = tmpInt;
 			}
 
 			FailedLoginLockoutPeriod = TimeSpan.FromMinutes(15);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(FailedLoginLockoutPeriod)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(FailedLoginLockoutPeriod)), out tmpTimeSpan))
 			{
 				FailedLoginLockoutPeriod = tmpTimeSpan;
 			}
 
 			SecureClientController = false;
-			if (Boolean.TryParse(ConfigurationManager.AppSettings[nameof(SecureClientController)], out tmpBool))
+			if (Boolean.TryParse(GetValue(nameof(SecureClientController)), out tmpBool))
 			{
 				SecureClientController = tmpBool;
 			}
 
 			AccessTokenLifetime = TimeSpan.FromDays(365);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(AccessTokenLifetime)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(AccessTokenLifetime)), out tmpTimeSpan))
 			{
 				AccessTokenLifetime = tmpTimeSpan;
 			}
 
 			LinkTokenRefreshWindow = TimeSpan.FromMinutes(1);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkTokenRefreshWindow)], out tmpTimeSpan) && tmpTimeSpan < AccessTokenLifetime)
+			if (TimeSpan.TryParse(GetValue(nameof(LinkTokenRefreshWindow)), out tmpTimeSpan) && tmpTimeSpan < AccessTokenLifetime)
 			{
 				LinkTokenRefreshWindow = tmpTimeSpan;
 			}
 
 			LinkReconnectMinWaitTime = TimeSpan.FromSeconds(2);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMinWaitTime)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(LinkReconnectMinWaitTime)), out tmpTimeSpan))
 			{
 				LinkReconnectMinWaitTime = tmpTimeSpan;
 			}
 
 			LinkReconnectMaxWaitTime = TimeSpan.FromSeconds(30);
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkReconnectMaxWaitTime)], out tmpTimeSpan) && tmpTimeSpan > LinkReconnectMinWaitTime)
+			if (TimeSpan.TryParse(GetValue(nameof(LinkReconnectMaxWaitTime)), out tmpTimeSpan) && tmpTimeSpan > LinkReconnectMinWaitTime)
 			{
 				LinkReconnectMaxWaitTime = tmpTimeSpan;
 			}
@@ -243,18 +243,24 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			LinkAbsoluteConnectionLifetime = null;
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkAbsoluteConnectionLifetime)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(LinkAbsoluteConnectionLifetime)), out tmpTimeSpan))
 			{
 				LinkAbsoluteConnectionLifetime = tmpTimeSpan;
 			}
 
 			LinkSlidingConnectionLifetime = null;
-			if (TimeSpan.TryParse(ConfigurationManager.AppSettings[nameof(LinkSlidingConnectionLifetime)], out tmpTimeSpan))
+			if (TimeSpan.TryParse(GetValue(nameof(LinkSlidingConnectionLifetime)), out tmpTimeSpan))
 			{
 				LinkSlidingConnectionLifetime = tmpTimeSpan;
 			}
 
 			LogSettings(logger);
+		}
+
+		private string GetValue(string settingName)
+		{
+			return Environment.GetEnvironmentVariable($"RelayServer__{settingName}")
+				?? ConfigurationManager.AppSettings[settingName];
 		}
 
 		private void LogSettings(ILogger logger)

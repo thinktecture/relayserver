@@ -27,6 +27,9 @@ namespace Thinktecture.Relay.CustomCodeDemo
 			// Example: Override the password complexity validator with a custom version
 			builder.RegisterType<NoopPasswordComplexityValidator>().AsImplementedInterfaces();
 
+			// Example: Override request logger with a custom version
+			builder.RegisterType<NoopRequestLogger>().AsImplementedInterfaces();
+
 			base.Load(builder);
 		}
 	}
