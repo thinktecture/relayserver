@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				return await CreateAndSendMessage(httpMethod, url, setHeaders, content, cancellationToken).ConfigureAwait(false);
 			}
-			catch (OperationCanceledException ex)
+			catch (Exception ex)
 			{
 				// If it was us that cancelled the request, simply rethrow
 				if (cancellationToken.IsCancellationRequested)
