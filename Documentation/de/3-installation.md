@@ -15,8 +15,8 @@ Die Installation von RabbitMQ, welches eine installierte Erlang-Ausführungsumge
 Nach der Installation von Erlang und RabbitMQ ist es sinnvoll, die Management Weboberfläche für RabbitMQ zu aktivieren. Die Aktivierung erfolgt im RabbitMQ Command Prompt, der durch die Installation von RabbitMQ in der gleichnamigen Programmgruppe im Startmenü angelegt worden ist. Diesen bitte mit Administrator-Rechten starten. Im RabbitMQ Command Prompt müssen die nachfolgenden Befehle ausgeführt werden:
 
 ```
-rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service stop
+rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service start
 ```
 
@@ -42,7 +42,7 @@ net start rabbitmq
 
 Nach dieser Korrektur sollte der Service mit Beschreibung in der Windows Service Konsole vorhanden sein und das Management Web verfügbar sein.
 
-Mit den Default-Anmeldedaten guest / guest erfolgt der Login und die Statusübersicht von RabbitMQ erscheint.
+Mit den Default-Anmeldedaten `guest / guest` erfolgt der Login und die Statusübersicht von RabbitMQ erscheint. Es wird empfohlen, den Gast-Benutzer zu deaktivieren und einen neuen Benutzer mit einem starken Passwort anzulegen.
 
 ![2-rabbitmq5.png](./assets/2-rabbitmq5.png)
 
@@ -114,7 +114,7 @@ abgespeichert werden.
 Die Verbindungen des RelayServer zu den beteiligten Tools RabbitMQ und Microsoft SQL Server werden im Abschnitt <connectionStrings></connectionStrings> der Konfigurationsdatei konfiguriert. Standardmäßig finden sich in diesem Abschnitt daher diese beiden Verbindungseinstellungen:
 
 ```
-<add name="RabbitMQ" connectionString="host=localhost" />
+<add name="RabbitMQ" connectionString="amqp://rabbitUser:rabbitPassword@localhost" />
 <add name="RelayContext" connectionString="Server=.\SQLEXPRESS;Trusted\_Connection=True;Database=RelayServer" providerName="System.Data.SqlClient" />
 ```
 
@@ -231,19 +231,19 @@ run -> mmc
 ```
 
 1. Klicken Sie im Menü Datei auf Snap-In hinzufügen/entfernen.
-1. Klicken Sie im Dialogfeld Snap-In hinzufügen/entfernen auf Hinzufügen.
-1. Klicken Sie im Dialogfeld Eigenständiges Snap-In hinzufügen auf Zertifikateund klicken Sie dann auf Hinzufügen.
-1. Klicken Sie im Dialogfeld Zertifikat-Snap-in klicken Sie auf Computerkonto, und klicken Sie auf Weiter.
-1. Klicken Sie im Dialogfeld Computer auswählen auf Lokaler Computer: (der Computer, auf diese Konsole ausgeführt wird), und klicken Sie dann auf Fertig stellen.
-1. Klicken Sie im Dialogfeld Eigenständiges Snap-In hinzufügen auf Schließen.
-1. Klicken Sie im Dialogfeld Snap-In hinzufügen/entfernen auf OK.
-1. Doppelklicken Sie im linken Bereich der Konsole auf Zertifikate (lokaler Computer).
-1. PersönlicheMaustaste, zeigen Sie auf Alle Tasksund klicken Sie auf Importieren.
-1. Klicken Sie auf der Seite Willkommen des Assistenten auf Weiter.
-1. Klicken Sie auf Durchsuchenauf der Seite Importdateiname suchen Sie Zertifikatdatei, und klicken Sie auf Weiter.
-1. Wenn das Zertifikat über ein Kennwort verfügt, geben Sie das Kennwort auf der Seite und klicken Sie auf Weiter.
-1. Auf der Seite Zertifikatspeicher auf Alle Zertifikate in folgendem Speicher speichernund klicken Sie dann auf Weiter.
-1. Klicken Sie auf Fertig stellen, und dann auf OK, um zu bestätigen, dass der Import erfolgreich war.
+2. Klicken Sie im Dialogfeld Snap-In hinzufügen/entfernen auf Hinzufügen.
+3. Klicken Sie im Dialogfeld Eigenständiges Snap-In hinzufügen auf Zertifikateund klicken Sie dann auf Hinzufügen.
+4. Klicken Sie im Dialogfeld Zertifikat-Snap-in klicken Sie auf Computerkonto, und klicken Sie auf Weiter.
+5. Klicken Sie im Dialogfeld Computer auswählen auf Lokaler Computer: (der Computer, auf diese Konsole ausgeführt wird), und klicken Sie dann auf Fertig stellen.
+6. Klicken Sie im Dialogfeld Eigenständiges Snap-In hinzufügen auf Schließen.
+7. Klicken Sie im Dialogfeld Snap-In hinzufügen/entfernen auf OK.
+8. Doppelklicken Sie im linken Bereich der Konsole auf Zertifikate (lokaler Computer).
+9. PersönlicheMaustaste, zeigen Sie auf Alle Tasksund klicken Sie auf Importieren.
+10. Klicken Sie auf der Seite Willkommen des Assistenten auf Weiter.
+11. Klicken Sie auf Durchsuchenauf der Seite Importdateiname suchen Sie Zertifikatdatei, und klicken Sie auf Weiter.
+12. Wenn das Zertifikat über ein Kennwort verfügt, geben Sie das Kennwort auf der Seite und klicken Sie auf Weiter.
+13. Auf der Seite Zertifikatspeicher auf Alle Zertifikate in folgendem Speicher speichernund klicken Sie dann auf Weiter.
+14. Klicken Sie auf Fertig stellen, und dann auf OK, um zu bestätigen, dass der Import erfolgreich war.
 
 Über ein Kommandozeilenfenster mit Administrationsrechten muss folgender Befehl ausgeführt werden:
 

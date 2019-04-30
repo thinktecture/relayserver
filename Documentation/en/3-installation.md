@@ -15,8 +15,8 @@ The installation of RabbitMQ, which requires an installed Erlang execution envir
 After the installation of Erlang and RabbitMQ, it is useful to activate the management web interface for RabbitMQ. Activation takes place in the RabbitMQ Command Prompt, which has been created by installing RabbitMQ in the program group of the same name in the Start menu. Please start with administrator rights. In the RabbitMQ Command Prompt, the following commands must be executed:
 
 ```
-rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service stop
+rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service start
 ```
 
@@ -42,7 +42,7 @@ net start rabbitmq
 
 After this correction, the service with description should be present in the Windows service console and the Web Management should be available.
 
-The default login data `guest / guest` is used to log in and RabbitMQ's status overview is displayed.
+The default login credentials `guest / guest` are used to log in and RabbitMQ's status overview is displayed. It is strongly advised to disable the guest user and to create a new user with a strong password.
 
 ![2-rabbitmq5.png](./assets/2-rabbitmq5.png)
 
@@ -83,7 +83,7 @@ Thinktecture.Relay.Server.exe start -servicename=ServiceName
 
 The parameter "-servicename" is necessary if there are several RelayServers installed on the system.
 
-## Uninstallation
+## Removal
 
 To remove the RelayServer service, navigate to the folder of the RelayServer in a command line window with administrator rights and call this command:
 
@@ -112,7 +112,7 @@ Thinktecture.Relay.Server.exe.config
 The connections of the RelayServer to the RabbitMQ and Microsoft SQL Server tools are configured in the <connectionStrings></ connectionStrings> section of the configuration file. By default, this section contains these two connection settings:
 
 ```
-<add name="RabbitMQ" connectionString="host=localhost" />
+<add name="RabbitMQ" connectionString="amqp://rabbitUser:rabbitPassword@localhost" />
 <add name="RelayContext" connectionString="Server=.\SQLEXPRESS;Trusted\_Connection=True;Database=RelayServer" providerName="System.Data.SqlClient" />
 ```
 
