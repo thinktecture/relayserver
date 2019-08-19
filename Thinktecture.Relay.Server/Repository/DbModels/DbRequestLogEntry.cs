@@ -28,9 +28,11 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		public Guid LinkId { get; set; }
 
 		[Required]
+		[MaxLength(250)]
 		public string OnPremiseTargetKey { get; set; }
 
 		[Required]
+		[MaxLength(250)]
 		public string LocalUrl { get; set; }
 
 		[Required]
