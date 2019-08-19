@@ -177,6 +177,22 @@ namespace Thinktecture.Relay.Server.Config
 			SharedSecret = GetValue(nameof(SharedSecret));
 			OAuthCertificate = GetValue(nameof(OAuthCertificate));
 
+			if (String.IsNullOrEmpty(SharedSecret) && String.IsNullOrEmpty(OAuthCertificate))
+			{
+				if (String.IsNullOrEmpty(TemporaryRequestStoragePath))
+				{
+					logger?.Warning("No SharedSecret or OAuthCertificate is configured. Please configure one of them. Continuing with a random value which will make all tokens invalid on restart.");
+					SharedSecret = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+				}
+				else
+				{
+					var message = "No SharedSecret or OAuthCertificate is configured, and RelayServer is set up for Multi-Server operation. You need to configure either SharedSecret or OAuthCertificate before starting RelayServer.";
+
+					logger?.Error(message);
+					throw new ConfigurationErrorsException(message);
+				}
+			}
+
 			HstsHeaderMaxAge = TimeSpan.FromDays(365);
 			if (TimeSpan.TryParse(GetValue(nameof(HstsHeaderMaxAge)), out tmpTimeSpan))
 			{
