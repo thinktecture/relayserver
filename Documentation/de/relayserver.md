@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.3.0
+
+* Allgemeine Verbesserungen
+
+  * Der RelayServer wart nun wenn die `SharedSecret` Einstellung fehlt und kann, wenn nicht im Multi-Server Betrieb eingesetzt, einen zufälligen Startwert verwenden.
+
 ## Version 2.2.1
 
 * Fehlerbehebungen
