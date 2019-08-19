@@ -22,6 +22,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
   * The RelayServer now warns when the `SharedSecret` setting is missing and uses a random value to be able to work at all, if it is not configured for Multi-Server operation.
   * The EF model was extended with more accurate information and new indices.
+  * If an On-Premises target sets an invalid value for the expires header, there won't be an error anymopre.
 
 ## Version 2.2.1
 

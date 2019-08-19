@@ -13,6 +13,7 @@
 
   * Der RelayServer warnt nun wenn die `SharedSecret` Einstellung fehlt und kann, wenn nicht im Multi-Server Betrieb eingesetzt, einen zufälligen Startwert verwenden.
   * Das EF-Model wurde um genauere Informationen und Indices erweitert.
+  * Wenn ein On-Premise Target ungültige Expires-Header setzt, kommt es nicht mehr zu einem Fehler.
 
 ## Version 2.2.1
 
