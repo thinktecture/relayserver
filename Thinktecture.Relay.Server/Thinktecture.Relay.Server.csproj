@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -321,6 +321,10 @@
     <Compile Include="Migrations\201901311556307_AddLinkConfigurationOptions.Designer.cs">
       <DependentUpon>201901311556307_AddLinkConfigurationOptions.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201908191252176_AddMaxLengthsAndIndices.cs" />
+    <Compile Include="Migrations\201908191252176_AddMaxLengthsAndIndices.Designer.cs">
+      <DependentUpon>201908191252176_AddMaxLengthsAndIndices.cs</DependentUpon>
+    </Compile>
     <Compile Include="OnPremise\OnPremiseConnectorResponse.cs" />
     <Compile Include="Owin\BlockNonLocalRequestsMiddleware.cs" />
     <Compile Include="Communication\IMessageDispatcher.cs" />
@@ -484,6 +488,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201901311556307_AddLinkConfigurationOptions.resx">
       <DependentUpon>201901311556307_AddLinkConfigurationOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201908191252176_AddMaxLengthsAndIndices.resx">
+      <DependentUpon>201908191252176_AddMaxLengthsAndIndices.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
