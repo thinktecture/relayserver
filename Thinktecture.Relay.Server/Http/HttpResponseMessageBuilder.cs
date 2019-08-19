@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using Serilog;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
@@ -30,7 +29,7 @@ namespace Thinktecture.Relay.Server.Http
 				["Content-MD5"] = null,
 				["Content-Range"] = null,
 				["Content-Type"] = (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v),
-				["Expires"] = (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?)null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))),
+				["Expires"] = ExpiresHeaderTransformation,
 				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)),
 			};
 		}
@@ -132,6 +131,17 @@ namespace Thinktecture.Relay.Server.Http
 		private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
 		{
 			return ((int) statusCode >= 300) && ((int) statusCode <= 399);
+		}
+
+		private void ExpiresHeaderTransformation(HttpContent content, string value)
+		{
+			// Set default to null
+			content.Headers.Expires = null;
+
+			if (DateTime.TryParseExact(value, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expiresValue))
+			{
+				content.Headers.Expires = new DateTimeOffset(expiresValue);
+			}
 		}
 	}
 }
