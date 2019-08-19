@@ -107,6 +107,12 @@ This configuration file should be saved as
 Thinktecture.Relay.Server.exe.config
 ```
 
+## Important configuration settings
+
+If you do not provide a configuration file, the RelayServer will refuse to start.
+
+You have to provide at least the connection strings to the database and to the RabbitMQ, as well as either the `SharedSecret` or `OAuthCertificate`. If you are running in a Multi-Server environment, you also have to provide the `TemporaryRequestStoragePath`.
+
 ## Connection Strings
 
 The connections of the RelayServer to the RabbitMQ and Microsoft SQL Server tools are configured in the <connectionStrings></ connectionStrings> section of the configuration file. By default, this section contains these two connection settings:

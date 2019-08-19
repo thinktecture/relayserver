@@ -109,6 +109,12 @@ Thinktecture.Relay.Server.exe.config
 
 abgespeichert werden.
 
+## Wichtige Konfigurationseinstellungen
+
+Wird vergessen, die Konfigurationsdatei bereitzustellen, so bricht der RelayServer den Start ab.
+
+Es müssen zumindest die ConnectionStrings zur Datenbank und zur RabbitMQ und das `SharedSecret` bzw. das `OAuthCertificate` konfiguriert werden. Im Multi-Server Betrieb ist auch der `TemporaryRequestStoragePath` anzugeben.
+
 ## Connection Strings
 
 Die Verbindungen des RelayServer zu den beteiligten Tools RabbitMQ und Microsoft SQL Server werden im Abschnitt <connectionStrings></connectionStrings> der Konfigurationsdatei konfiguriert. Standardmäßig finden sich in diesem Abschnitt daher diese beiden Verbindungseinstellungen:
