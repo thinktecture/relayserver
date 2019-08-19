@@ -12,6 +12,7 @@
 * Fehlerbehebungen
 
   * Der OnPremiseConnector Demo-Service konnte ein Framwork-Assembly unter bestimmten Voraussetzungen nicht korrekt laden.
+  * Der OnPremise-Connector wird seinen `HttpClient` mit dem er Antworten an den RelayServer sendet nun erneuern, falls dort Fehler auftreten.
 
 ## Version 2.2.0
 
