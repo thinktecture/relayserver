@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Server.Http
 				RequestId = Guid.NewGuid().ToString(),
 				HttpMethod = message.Method.Method,
 				Url = pathWithoutUserName + message.RequestUri.Query,
-				HttpHeaders = message.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
+				HttpHeaders = message.Headers.ToDictionary(kvp => kvp.Key, kvp => CombineMultipleHttpHeaderValuesIntoOneCommaSeparatedValue(kvp.Value), StringComparer.OrdinalIgnoreCase),
 				OriginId = originId,
 				RequestStarted = DateTime.UtcNow,
 				Expiration = _configuration.RequestExpiration,
@@ -88,13 +88,13 @@ namespace Thinktecture.Relay.Server.Http
 			request.HttpHeaders = message.Headers
 				.Union(message.Content.Headers)
 				.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key))
-				.Select(kvp => new { Name = kvp.Key, Value = CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(kvp.Value) })
+				.Select(kvp => new { Name = kvp.Key, Value = CombineMultipleHttpHeaderValuesIntoOneCommaSeparatedValue(kvp.Value) })
 				.ToDictionary(header => header.Name, header => header.Value);
 
 			return request;
 		}
 
-		internal string CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(IEnumerable<string> headers)
+		internal string CombineMultipleHttpHeaderValuesIntoOneCommaSeparatedValue(IEnumerable<string> headers)
 		{
 			// HTTP RFC2616 says, that multiple headers can be combined into a comma-separated single header
 			return headers.Aggregate(String.Empty, (s, v) => s + (String.IsNullOrWhiteSpace(s) ? String.Empty : ", ") + v);

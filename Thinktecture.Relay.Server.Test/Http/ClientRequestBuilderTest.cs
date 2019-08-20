@@ -64,7 +64,7 @@ namespace Thinktecture.Relay.Server.Http
 		{
 			var headerValues = new List<string> { "Foo", "Bar", "Baz" };
 			var sut = CreateBuilder();
-			var result = sut.CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(headerValues);
+			var result = sut.CombineMultipleHttpHeaderValuesIntoOneCommaSeparatedValue(headerValues);
 
 			result.Should().Be("Foo, Bar, Baz");
 		}

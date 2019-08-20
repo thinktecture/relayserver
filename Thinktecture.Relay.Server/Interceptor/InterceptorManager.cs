@@ -11,13 +11,13 @@ namespace Thinktecture.Relay.Server.Interceptor
 	internal class InterceptorManager : IInterceptorManager
 	{
 		private readonly ILogger _logger;
-		private readonly IOnPremiseRequestInterceptor _requestInceptor;
+		private readonly IOnPremiseRequestInterceptor _requestInterceptor;
 		private readonly IOnPremiseResponseInterceptor _responseInterceptor;
 
-		public InterceptorManager(ILogger logger, IOnPremiseRequestInterceptor requestInceptor = null, IOnPremiseResponseInterceptor responseInterceptor = null)
+		public InterceptorManager(ILogger logger, IOnPremiseRequestInterceptor requestInterceptor = null, IOnPremiseResponseInterceptor responseInterceptor = null)
 		{
 			_logger = logger;
-			_requestInceptor = requestInceptor;
+			_requestInterceptor = requestInterceptor;
 			_responseInterceptor = responseInterceptor;
 		}
 
@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 		{
 			immediateResponse = null;
 
-			if (_requestInceptor == null)
+			if (_requestInterceptor == null)
 				return request;
 
 			_logger?.Verbose("Handling request. request-id={RequestId}", request.RequestId);
@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			{
 				var interceptedRequest = CreateInterceptedRequest(request, message, clientUser);
 
-				immediateResponse = _requestInceptor.OnRequestReceived(interceptedRequest);
+				immediateResponse = _requestInterceptor.OnRequestReceived(interceptedRequest);
 
 				if (immediateResponse != null)
 				{
@@ -46,7 +46,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while executing the request interceptor. type-name={InterceptorType}, request-id={RequestId}", _requestInceptor?.GetType().Name, request.RequestId);
+				_logger.Error(ex, "Error while executing the request interceptor. type-name={InterceptorType}, request-id={RequestId}", _requestInterceptor?.GetType().Name, request.RequestId);
 			}
 
 			return request;
