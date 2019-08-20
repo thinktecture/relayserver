@@ -33,6 +33,7 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly Mock<IRequestLogger> _requestLoggerMock;
 		private readonly Mock<ITraceManager> _traceManagerMock;
 		private readonly Mock<IInterceptorManager> _interceptorManagerMock;
+		private readonly Mock<IPostDataTemporaryStore> _postDataTemporaryStoreMock;
 
 		private class FakePrincipal : IPrincipal
 		{
@@ -67,12 +68,14 @@ namespace Thinktecture.Relay.Server.Controller
 			_requestLoggerMock = new Mock<IRequestLogger>();
 			_traceManagerMock = new Mock<ITraceManager>();
 			_interceptorManagerMock = new Mock<IInterceptorManager>();
+			_postDataTemporaryStoreMock = new Mock<IPostDataTemporaryStore>();
 		}
 
 		private ClientController CreateClientController()
 		{
 			return new ClientController(_backendCommunicationMock.Object, _loggerMock.Object, _relayRepositoryMock.Object, _requestLoggerMock.Object,
-				_httpResponseMessageBuilderMock.Object, _clientRequestBuilderMock.Object, _pathSplitterMock.Object, _traceManagerMock.Object, _interceptorManagerMock.Object);
+				_httpResponseMessageBuilderMock.Object, _clientRequestBuilderMock.Object, _pathSplitterMock.Object, _traceManagerMock.Object, _interceptorManagerMock.Object,
+				_postDataTemporaryStoreMock.Object);
 		}
 
 		[TestMethod]

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
@@ -16,18 +15,16 @@ namespace Thinktecture.Relay.Server.Http
 
 		private readonly ILogger _logger;
 		private readonly IConfiguration _configuration;
-		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 
-		public OnPremiseRequestBuilder(ILogger logger, IConfiguration configuration, IPostDataTemporaryStore postDataTemporaryStore)
+		public OnPremiseRequestBuilder(ILogger logger, IConfiguration configuration)
 		{
 			_logger = logger;
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 		}
 
 		public async Task<IOnPremiseConnectorRequest> BuildFromHttpRequest(HttpRequestMessage message, Guid originId, string pathWithoutUserName)
 		{
-			var request = new OnPremiseConnectorRequest
+			var request = new OnPremiseConnectorRequest()
 			{
 				RequestId = Guid.NewGuid().ToString(),
 				HttpMethod = message.Method.Method,
@@ -36,54 +33,9 @@ namespace Thinktecture.Relay.Server.Http
 				OriginId = originId,
 				RequestStarted = DateTime.UtcNow,
 				Expiration = _configuration.RequestExpiration,
+				ContentLength = message.Content.Headers.ContentLength.GetValueOrDefault(0),
+				Stream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false),
 			};
-
-			if (message.Content.Headers.ContentLength.GetValueOrDefault(0x10000) >= 0x10000)
-			{
-				var contentStream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
-
-				using (var storeStream = _postDataTemporaryStore.CreateRequestStream(request.RequestId))
-				{
-					await contentStream.CopyToAsync(storeStream).ConfigureAwait(false);
-					if (storeStream.Length < 0x10000)
-					{
-						if (storeStream.Length == 0)
-						{
-							// no body available (e.g. GET request)
-						}
-						else
-						{
-							// the body is small enough to be used directly
-							request.Body = new byte[storeStream.Length];
-							storeStream.Position = 0;
-							await storeStream.ReadAsync(request.Body, 0, (int)storeStream.Length).ConfigureAwait(false);
-						}
-
-						// TODO delete obsolete file now
-					}
-					else
-					{
-						// a length of 0 indicates that there is a larger body available on the server
-						request.Body = Array.Empty<byte>();
-					}
-
-					request.ContentLength = storeStream.Length;
-				}
-			}
-			else
-			{
-				var contentLength = message.Content.Headers.ContentLength.GetValueOrDefault(0);
-				if (contentLength > 0)
-				{
-					// we have a body, and it is small enough to be transmitted directly
-					var contentStream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
-
-					request.Body = new byte[contentLength];
-					await contentStream.ReadAsync(request.Body, 0, (int)contentLength).ConfigureAwait(false);
-
-					request.ContentLength = contentLength;
-				}
-			}
 
 			request.HttpHeaders = message.Headers
 				.Union(message.Content.Headers)

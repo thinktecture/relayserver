@@ -30,10 +30,11 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly IPathSplitter _pathSplitter;
 		private readonly ITraceManager _traceManager;
 		private readonly IInterceptorManager _interceptorManager;
+		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 
 		public ClientController(IBackendCommunication backendCommunication, ILogger logger, ILinkRepository linkRepository, IRequestLogger requestLogger,
 			IHttpResponseMessageBuilder httpResponseMessageBuilder, IOnPremiseRequestBuilder onPremiseRequestBuilder, IPathSplitter pathSplitter,
-			ITraceManager traceManager, IInterceptorManager interceptorManager)
+			ITraceManager traceManager, IInterceptorManager interceptorManager, IPostDataTemporaryStore postDataTemporaryStore)
 		{
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
 			_logger = logger;
@@ -44,6 +45,7 @@ namespace Thinktecture.Relay.Server.Controller
 			_pathSplitter = pathSplitter ?? throw new ArgumentNullException(nameof(pathSplitter));
 			_traceManager = traceManager ?? throw new ArgumentNullException(nameof(traceManager));
 			_interceptorManager = interceptorManager ?? throw new ArgumentNullException(nameof(interceptorManager));
+			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 		}
 
 		[HttpOptions]
@@ -120,8 +122,57 @@ namespace Thinktecture.Relay.Server.Controller
 
 		private void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
+			PrepareRequestBodyForRelaying((OnPremiseConnectorRequest)request);
+
 			_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
 			_backendCommunication.SendOnPremiseConnectorRequest(linkId, request);
+		}
+
+		private void PrepareRequestBodyForRelaying(OnPremiseConnectorRequest request)
+		{
+			if (request.Stream == null)
+			{
+				request.Body = Array.Empty<byte>();
+				return;
+			}
+
+			if (request.ContentLength == 0 || request.ContentLength >= 0x10000)
+			{
+				// We might have no Content-Length header, but still content, so we'll assume a large body first
+				using (var storeStream = _postDataTemporaryStore.CreateRequestStream(request.RequestId))
+				{
+					request.Stream.CopyTo(storeStream);
+					if (storeStream.Length < 0x10000)
+					{
+						if (storeStream.Length == 0)
+						{
+							// no body available (e.g. GET request)
+						}
+						else
+						{
+							// the body is small enough to be used directly
+							request.Body = new byte[storeStream.Length];
+							storeStream.Position = 0;
+							storeStream.Read(request.Body, 0, (int)storeStream.Length);
+						}
+					}
+					else
+					{
+						// a length of 0 indicates that there is a larger body available on the server
+						request.Body = Array.Empty<byte>();
+					}
+
+					request.Stream = null;
+					request.ContentLength = storeStream.Length;
+				}
+			}
+			else
+			{
+				// we have a body, and it is small enough to be transmitted directly
+				request.Body = new byte[request.ContentLength];
+				request.Stream.Read(request.Body, 0, (int)request.ContentLength);
+				request.Stream = null;
+			}
 		}
 
 		private bool CanRequestBeHandled(string path, PathInformation pathInformation, Link link)

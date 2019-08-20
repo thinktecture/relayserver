@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 		public InterceptorManager(ILogger logger, IOnPremiseRequestInterceptor requestInterceptor = null, IOnPremiseResponseInterceptor responseInterceptor = null)
 		{
-			_logger = logger;
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestInterceptor = requestInterceptor;
 			_responseInterceptor = responseInterceptor;
 		}
@@ -28,8 +28,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			if (_requestInterceptor == null)
 				return request;
 
-			_logger?.Verbose("Handling request. request-id={RequestId}", request.RequestId);
-
+			_logger.Verbose("Handling request. request-id={RequestId}", request.RequestId);
 
 			try
 			{
@@ -54,7 +53,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 		private InterceptedRequest CreateInterceptedRequest(IOnPremiseConnectorRequest request, HttpRequestMessage message, IPrincipal clientUser)
 		{
-			return new InterceptedRequest(request)
+			return new InterceptedRequest(_logger.ForContext<InterceptedRequest>(), request)
 			{
 				ClientIpAddress = GetRemoteIpAddress(request, message),
 				ClientUser = clientUser,
@@ -70,7 +69,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Warning(ex, "Could not fetch remote IP address. request-id={RequestId}", request.RequestId);
+				_logger.Warning(ex, "Could not fetch remote IP address. request-id={RequestId}", request.RequestId);
 			}
 
 			return null;
@@ -81,7 +80,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			if (_responseInterceptor == null)
 				return null;
 
-			_logger?.Verbose("Handling response. request-id={RequestId}", request.RequestId);
+			_logger.Verbose("Handling response. request-id={RequestId}", request.RequestId);
 
 			try
 			{
@@ -98,7 +97,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error while executing the response interceptor. type-name={InterceptorType}, request-id={RequestId}", _requestInceptor?.GetType().Name, request.RequestId);
+				_logger.Error(ex, "Error while executing the response interceptor. type-name={InterceptorType}, request-id={RequestId}", _requestInterceptor?.GetType().Name, request.RequestId);
 				return null;
 			}
 		}

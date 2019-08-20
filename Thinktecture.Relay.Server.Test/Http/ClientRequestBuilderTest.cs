@@ -9,7 +9,6 @@ using Moq;
 using Serilog;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
@@ -26,7 +25,7 @@ namespace Thinktecture.Relay.Server.Http
 
 		private OnPremiseRequestBuilder CreateBuilder()
 		{
-			return new OnPremiseRequestBuilder(_loggerMock.Object, new ConfigurationDummy(), new InMemoryPostDataTemporaryStore(_loggerMock.Object, new ConfigurationDummy()));
+			return new OnPremiseRequestBuilder(_loggerMock.Object, new ConfigurationDummy());
 		}
 
 		[TestMethod]
@@ -60,7 +59,7 @@ namespace Thinktecture.Relay.Server.Http
 		}
 
 		[TestMethod]
-		public void CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue_combines_multiple_HTTP_header_values_into_one()
+		public void CombineMultipleHttpHeaderValuesIntoOneCommaSeparatedValue_combines_multiple_HTTP_header_values_into_one()
 		{
 			var headerValues = new List<string> { "Foo", "Bar", "Baz" };
 			var sut = CreateBuilder();
