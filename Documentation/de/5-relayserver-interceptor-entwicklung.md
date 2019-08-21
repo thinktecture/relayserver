@@ -41,8 +41,10 @@ Das Interface gibt die Methode `HttpResponseMessage OnRequestReceived(IIntercept
 
 Folgende Werte sind veränderbar:
   - `HttpMethod`: Hiermit kann die HTTP-Method (sog. Verb) verändert werden.
-  - `Url`: Hiermit kann die URL des Requests modifiziert werden.
+  - `Url`: Hiermit kann die URL der Anfrage modifiziert werden.
   - `HttpHeaders`: Hier können HTTP Header entfernt, neue hinzugefügt oder existierende geändert werden.
+  - `Content`: Hier kann der Inhalt der Anfrage gelesen oder modifiziert werden.  
+   *Achtung:* Wird auf dieses Property zugegriffen, so wird im Speicher eine Kopie des gesamten Inhaltes erstellt, da der Stream der Anfrage nicht mehrfach gelesen werden kann. Dies kann den Speicherverbrauch spürbar erhöhen.
   - `AlwaysSendToOnPremiseConnector`: Hiermit kann festgelegt werden, dass der Request immer zum OnPremiseConnector gesendet wird, auch wenn er durch das Zurückgeben einer `HttpResponseMessage` sofort beantwortet wird.
   - `Expiration`: Hier kann die Lebenszeit des Requests in der RabbitMQ geändert werden.
   - `AcknowledgmentMode`: Hier kann festgelegt werden, ob der Request vom OnPremiseConnector Acknowledged wird (Default), automatisch nach dem Lesen aus der RabbitMQ gelöscht wird (Auto), oder auf ein manuelles Acknowledge vom Ziel wartet (Manual). Um einen Request manuell zu bestätigen muss ein HTTP GET Request an den `/request/acknowledge` Endpunkt auf dem RelayServer gesendet werden, welcher im Query-String die Parameter `aid` mit der AcknowledgeId, `oid` mit der OriginId und `cid` mit der ConnectionId übermittelt. Dieser Request muss einen gültigen Bearer-Token im Authorization Header bereitstellen.
@@ -72,6 +74,8 @@ Sollte eine Response vom OnPremise Connector vorliegen, so wird die zweite Über
 Folgende Werte sind veränderbar:
   - `StatusCode`: Hiermit kann der Status-Code der Antwort verändert werden.
   - `HttpHeaders`: Hier können HTTP Header entfernt, neue hinzugefügt oder existierende geändert werden.
+  - `Content`: Hier kann der Inhalt der Antwort gelesen oder modifiziert werden.  
+   *Achtung:* Wird auf dieses Property zugegriffen, so wird im Speicher eine Kopie des gesamten Inhaltes erstellt, da der Stream der Antwort nicht mehrfach gelesen werden kann. Dies kann den Speicherverbrauch spürbar erhöhen.
 
 ### Optional: Registrierung über ein AutofacModule
 

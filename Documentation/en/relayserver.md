@@ -18,6 +18,10 @@ The goal of this list is to highlight companies who pay back to this open source
 
 ## Version 2.3.0
 
+* Modify content streams
+
+  * Interceptors now can read and modify the content streams of requests and responses.
+
 * General improvements
 
   * The RelayServer now warns when the `SharedSecret` setting is missing and uses a random value to be able to work at all, if it is not configured for Multi-Server operation.
