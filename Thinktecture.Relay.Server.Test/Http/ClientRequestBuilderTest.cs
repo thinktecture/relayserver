@@ -48,7 +48,9 @@ namespace Thinktecture.Relay.Server.Http
 			result = await sut.BuildFromHttpRequest(request, new Guid("276b39f9-f0be-42b7-bcc1-1c2a24289689"), "Google/services/");
 
 			result.OriginId.Should().Be("276b39f9-f0be-42b7-bcc1-1c2a24289689");
-			result.Body.LongLength.Should().Be(3L);
+			result.Body.Should().BeNull();
+			result.Stream.Should().NotBeNull();
+			result.Stream.Length.Should().Be(3L);
 			result.HttpMethod.Should().Be("GET");
 			result.RequestId.Should().NotBeNullOrEmpty();
 			result.Url.Should().Be("Google/services/?id=bla");

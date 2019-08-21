@@ -1,11 +1,22 @@
+using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Text;
+using Serilog;
 using Thinktecture.Relay.Server.Interceptor;
 
 namespace Thinktecture.Relay.CustomCodeDemo
 {
 	public class DemoResponseInterceptor : IOnPremiseResponseInterceptor
 	{
+		private readonly ILogger _logger;
+
+		public DemoResponseInterceptor(ILogger logger)
+		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		}
+
 		public HttpResponseMessage OnResponseFailed(IInterceptedRequest request)
 		{
 			return new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
@@ -16,8 +27,24 @@ namespace Thinktecture.Relay.CustomCodeDemo
 
 		public HttpResponseMessage OnResponseReceived(IInterceptedRequest request, IInterceptedResponse response)
 		{
+			// Test modify the status code
 			if (request.Url.EndsWith("WhatIsTheAnswerToLiveTheUniverseAndEverything"))
 				response.StatusCode = HttpStatusCode.ExpectationFailed;
+
+			// Test modify the response
+			if (request.HttpHeaders.TryGetValue("Content-Type", out var contentType) && contentType == "application/json")
+			{
+				using (var reader = new StreamReader(response.Content))
+				{
+					// get original content
+					var content = reader.ReadToEnd();
+					_logger.Information("Received content {Content}", content);
+
+					// modify content
+					content = $"{{ \"modified\": true, \"receivedContent\": {content} }}";
+					response.Content = new MemoryStream(Encoding.UTF8.GetBytes(content));
+				}
+			}
 
 			return null;
 		}

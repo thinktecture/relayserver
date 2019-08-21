@@ -11,12 +11,15 @@ namespace Thinktecture.Relay.Server.Interceptor
 	internal class InterceptorManager : IInterceptorManager
 	{
 		private readonly ILogger _logger;
+		private readonly IHttpResponseMessageBuilder _httpResponseMessageBuilder;
 		private readonly IOnPremiseRequestInterceptor _requestInterceptor;
 		private readonly IOnPremiseResponseInterceptor _responseInterceptor;
 
-		public InterceptorManager(ILogger logger, IOnPremiseRequestInterceptor requestInterceptor = null, IOnPremiseResponseInterceptor responseInterceptor = null)
+		public InterceptorManager(ILogger logger, IHttpResponseMessageBuilder httpResponseMessageBuilder,
+			IOnPremiseRequestInterceptor requestInterceptor = null, IOnPremiseResponseInterceptor responseInterceptor = null)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_httpResponseMessageBuilder = httpResponseMessageBuilder ?? throw new ArgumentNullException(nameof(httpResponseMessageBuilder));
 			_requestInterceptor = requestInterceptor;
 			_responseInterceptor = responseInterceptor;
 		}
@@ -75,7 +78,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			return null;
 		}
 
-		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, HttpRequestMessage message, IPrincipal clientUser, IOnPremiseConnectorResponse response)
+		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, HttpRequestMessage message, IPrincipal clientUser, IOnPremiseConnectorResponse response, bool forwardOnPremiseTargetErrorResponse)
 		{
 			if (_responseInterceptor == null)
 				return null;
@@ -86,14 +89,28 @@ namespace Thinktecture.Relay.Server.Interceptor
 			{
 				var interceptedRequest = CreateInterceptedRequest(request, message, clientUser);
 
-				var immediateResponse = response == null ? _responseInterceptor.OnResponseFailed(interceptedRequest) : _responseInterceptor.OnResponseReceived(interceptedRequest, new InterceptedResponse(response));
+				HttpResponseMessage immediateResponse = null;
+				if (response == null)
+				{
+					immediateResponse = _responseInterceptor.OnResponseFailed(interceptedRequest);
+				}
+				else
+				{
+					var interceptedResponse = new InterceptedResponse(_logger.ForContext<IInterceptedResponse>(), response);
+					immediateResponse = _responseInterceptor.OnResponseReceived(interceptedRequest, interceptedResponse);
+
+					if (immediateResponse == null)
+					{
+						return _httpResponseMessageBuilder.BuildFromConnectorResponse(interceptedResponse, forwardOnPremiseTargetErrorResponse, request.RequestId);
+					}
+				}
 
 				if (immediateResponse != null)
 				{
 					immediateResponse.RequestMessage = message;
 				}
 
-				return immediateResponse;
+				return immediateResponse ?? _httpResponseMessageBuilder.BuildFromConnectorResponse(null, forwardOnPremiseTargetErrorResponse, request.RequestId);
 			}
 			catch (Exception ex)
 			{

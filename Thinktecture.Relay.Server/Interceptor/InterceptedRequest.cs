@@ -85,6 +85,5 @@ namespace Thinktecture.Relay.Server.Interceptor
 				HttpHeaders = headers;
 			}
 		}
-
 	}
 }
