@@ -39,6 +39,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public TimeSpan FailedLoginLockoutPeriod { get; set; }
 		public bool SecureClientController { get; set; }
 		public TimeSpan AccessTokenLifetime { get; set; }
+		public bool LogSensitiveData { get; set; }
 
 		// Default settings for links
 		public TimeSpan LinkTokenRefreshWindow { get; set; }

@@ -12,5 +12,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public TimeSpan? AbsoluteConnectionLifetime { get; set; }
 		public TimeSpan? SlidingConnectionLifetime { get; set; }
+		public bool? LogSensitiveData { get; set; }
 	}
 }

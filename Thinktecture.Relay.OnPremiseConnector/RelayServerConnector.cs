@@ -20,6 +20,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		private static readonly IServiceProvider _serviceProvider;
 
 		/// <inheritdoc />
+		public bool LogSensitiveData { get; set; }
+
+		/// <inheritdoc />
 		public event EventHandler Connected;
 		/// <inheritdoc />
 		public event EventHandler Disconnected;
@@ -62,11 +65,15 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
+		/// <param name="logSensitiveData">Determines whether sensitive data will be logged.</param>
 		[Obsolete("Use the ctor without tokenRefreshWindowInSeconds instead.")]
-		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null)
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30,
+			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = false)
 		{
+			LogSensitiveData = logSensitiveData;
+
 			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
-			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds));
+			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
 			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
 			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
 		}

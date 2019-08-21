@@ -40,5 +40,6 @@ namespace Thinktecture.Relay.Server.Config
 		TimeSpan LinkReconnectMaxWaitTime { get; }
 		TimeSpan? LinkAbsoluteConnectionLifetime { get; }
 		TimeSpan? LinkSlidingConnectionLifetime { get; }
+		bool LogSensitiveData { get; }
 	}
 }

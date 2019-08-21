@@ -126,7 +126,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger = logger;
 		}
 
-		public HttpRequestMessage CreateLocalTargetRequestMessage(Uri baseUri, string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
+		public HttpRequestMessage CreateLocalTargetRequestMessage(Uri baseUri, string url, IOnPremiseTargetRequest request, string relayedRequestHeader, bool logSensitiveData)
 		{
 			_logger?.Verbose("Creating web request for request-id={RequestId}", request.RequestId);
 
@@ -146,7 +146,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			foreach (var httpHeader in request.HttpHeaders.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key)))
 			{
-				_logger?.Verbose("Adding header to request. request-id={RequestId} header-name={HeaderName}, header-value={HeaderValue}", request.RequestId, httpHeader.Key, httpHeader.Value);
+				_logger?.Verbose("Adding header to request. request-id={RequestId} header-name={HeaderName}, header-value={HeaderValue}", request.RequestId, httpHeader.Key, logSensitiveData ? httpHeader.Value : "***");
 
 				try
 				{

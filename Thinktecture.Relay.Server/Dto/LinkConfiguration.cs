@@ -13,6 +13,7 @@ namespace Thinktecture.Relay.Server.Dto
 
 		public TimeSpan? AbsoluteConnectionLifetime { get; set; }
 		public TimeSpan? SlidingConnectionLifetime { get; set; }
+		public bool? LogSensitiveData { get; set; }
 
 		public void ApplyDefaults(IConfiguration configuration)
 		{
@@ -22,6 +23,7 @@ namespace Thinktecture.Relay.Server.Dto
 			ReconnectMaxWaitTime = ReconnectMaxWaitTime ?? configuration.LinkReconnectMaxWaitTime;
 			AbsoluteConnectionLifetime = AbsoluteConnectionLifetime ?? configuration.LinkAbsoluteConnectionLifetime;
 			SlidingConnectionLifetime = SlidingConnectionLifetime ?? configuration.LinkSlidingConnectionLifetime;
+			LogSensitiveData = LogSensitiveData ?? configuration.LogSensitiveData;
 		}
 	}
 }

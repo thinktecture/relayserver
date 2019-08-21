@@ -43,8 +43,9 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 							section.Security.Identity.Password,
 							new Uri(section.BaseUrl),
 							(int)section.RequestTimeout.TotalSeconds,
-							(int)section.Security.AccessTokenRefreshWindow.TotalSeconds)
-							;
+							(int)section.Security.AccessTokenRefreshWindow.TotalSeconds,
+							null,
+							section.LogSensitiveData);
 
 #pragma warning restore CS0618 // Type or member is obsolete
 
