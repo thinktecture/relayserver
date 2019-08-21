@@ -40,7 +40,7 @@ net start rabbitmq
 
 ![2-rabbitmq4.png](./assets/2-rabbitmq4.png)
 
-After this correction, the service with description should be present in the Windows service console and the Web Management should be available.
+After this correction, the service with description should be present in the Windows service console and the Management Web should be available.
 
 The default login data `guest / guest` is used to log in and RabbitMQ's status overview is displayed.
 
