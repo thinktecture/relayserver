@@ -47,7 +47,7 @@ Folgende Werte sind veränderbar:
    *Achtung:* Wird auf dieses Property zugegriffen, so wird im Speicher eine Kopie des gesamten Inhaltes erstellt, da der Stream der Anfrage nicht mehrfach gelesen werden kann. Dies kann den Speicherverbrauch spürbar erhöhen.
   - `AlwaysSendToOnPremiseConnector`: Hiermit kann festgelegt werden, dass der Request immer zum OnPremiseConnector gesendet wird, auch wenn er durch das Zurückgeben einer `HttpResponseMessage` sofort beantwortet wird.
   - `Expiration`: Hier kann die Lebenszeit des Requests in der RabbitMQ geändert werden.
-  - `AcknowledgmentMode`: Hier kann festgelegt werden, ob der Request vom OnPremiseConnector Acknowledged wird (Default), automatisch nach dem Lesen aus der RabbitMQ gelöscht wird (Auto), oder auf ein manuelles Acknowledge vom Ziel wartet (Manual). Um einen Request manuell zu bestätigen muss ein HTTP GET Request an den `/request/acknowledge` Endpunkt auf dem RelayServer gesendet werden, welcher im Query-String die Parameter `aid` mit der AcknowledgeId, `oid` mit der OriginId und `cid` mit der ConnectionId übermittelt. Dieser Request muss einen gültigen Bearer-Token im Authorization Header bereitstellen.
+  - `AcknowledgmentMode`: Hier kann festgelegt werden, ob der Request vom OnPremiseConnector Acknowledged wird (Default), automatisch nach dem Lesen aus der RabbitMQ gelöscht wird (Auto), oder auf ein manuelles Acknowledge vom Ziel wartet (Manual). Details siehe unten im Abschnitt Acknowledgment.
 
 Wird keine `HttpResonseMessage` zurück gegeben, so wird der modifizierte Request über einen OnPremiseConnector an das eigentliche Ziel weitergeleitet.
 
@@ -114,3 +114,15 @@ public class InterceptorModule : Module
 ## Konfiguration der Interceptoren
 
 In der `App.config` des RelayServers reicht es aus, den Konfigurationswert `InterceptorAssembly` mit einem Pfad zu belegen, der auf das Assembly mit den Interceptoren zeigt. Der Pfad kann entweder Absolut oder relativ angegeben werden.
+
+## Acknowledgment
+
+RelayServer setzt darauf, das Requests vom On-Premise Connector bestätigt werden, bevor die Nachricht auch in der Message Queue als abgearbeitet markiert (Acknowledged) wird. In der Standardeinstellung wird der On-Premise Connector wird eine Nachricht acknowledgen, sobald er diese Empfangen hat. Danach wird der Request dann an das On-Premise Target weitergeleitet.
+
+Ein Request-Interceptor kann den `AcknowledgmentMode` eines Requests auf `Auto` oder `Manual` umstellen.  
+Bei `Auto` wird der Request beim Auslesen automatisch acknowledged. Es wird also nicht garantiert, dass dieser auch beim On-Premise Connector ankommt.  
+Bei `Manual` muss der Request manuell Acknowledged werden. Dies kann z.B. durch das On-Premise Target geschehen, um zu bestätigen dass der Request auch in der Tat beim Zielsystem angekommen ist.
+
+Um einen Request manuell zu bestätigen muss ein HTTP GET Request an den `/request/acknowledge` Endpunkt auf dem RelayServer gesendet werden, welcher im Query-String die Parameter `aid` mit der AcknowledgeId, `oid` mit der OriginId und optional noch `cid` mit der ConnectionId übermittelt. Diese Parameter werden bei einem Web-Target vom On-Premise Connector in den HTTP-Headern `X-TTRELAY-ACKNOWLEDGE-ORIGIN-ID`, `X-TTRELAY-ACKNOWLEDGE-ID` sowie `X-TTRELAY-CONNECTION-ID` an die Ziel-Api übergeben. Der Acknowledge-Request muss zudem einen für den RelayServer gültigen Bearer-Token im Authorization Header bereitstellen.  
+Für In-Process Targets kann alternativ die Methode `AcknowledgeRequestAsync` auf dem `RelayServerConnector` aufgerufen werden, die den authentifizierten Request senden wird.
+

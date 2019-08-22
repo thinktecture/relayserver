@@ -209,7 +209,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
 
-			return _connection.GetToRelay("relay/" + linkName + relativeUrl, setHeaders, cancellationToken);
+			return _connection.GetToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, cancellationToken);
 		}
 
 		/// <summary>
@@ -271,7 +271,19 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
 
-			return _connection.PostToRelay("relay/" + linkName + relativeUrl, setHeaders, content, cancellationToken);
+			return _connection.PostToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, content, cancellationToken);
+		}
+
+		/// <summary>
+		/// Sends an acknowledgment to the RelayServer using the current authentication token.
+		/// </summary>
+		/// <param name="acknowledgeOriginId">The OriginId of the RelayServer instance that needs to acknowledge the request message on its rabbit connection.</param>
+		/// <param name="acknowledgeId">The id of the message in the queue that should be acknowledged.</param>
+		/// <param name="connectionId">The Id of the connection which identifies the Rabbit queue to acknowledge the message on.</param>
+		/// <returns>A Task that completes when the acknowledge http request is answered.</returns>
+		public Task AcknowledgeRequestAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null)
+		{
+			return _connection.SendAcknowledgmentAsync(acknowledgeOriginId, acknowledgeId, connectionId);
 		}
 
 		private void CheckDisposed()

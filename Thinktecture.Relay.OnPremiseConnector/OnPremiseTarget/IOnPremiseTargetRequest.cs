@@ -71,5 +71,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// Gets the id of the RelayServer this request may acknowledged to
 		/// </summary>
 		Guid AcknowledgeOriginId { get; }
+
+		/// <summary>
+		/// Gets the id of the connection this request was received at
+		/// </summary>
+		string ConnectionId { get; }
 	}
 }

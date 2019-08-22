@@ -250,6 +250,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			return _connectors.Keys.ToList();
 		}
 
+		public Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null)
+		{
+			return GetToRelayAsync($"/request/acknowledge?oid={acknowledgeOriginId}&aid={acknowledgeId}&cid={connectionId ?? ConnectionId}", CancellationToken.None);
+		}
+
 		private void SetBearerToken(TokenResponse tokenResponse)
 		{
 			_accessToken = tokenResponse.AccessToken;
@@ -297,7 +302,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				_logger?.Verbose("Received message from server. connection-id={ConnectionId}, message={Message}", ConnectionId, message);
 
-				request = message.ToObject<OnPremiseTargetRequest>();
+				var internalRequest = message.ToObject<OnPremiseTargetRequest>();
+				internalRequest.ConnectionId = ConnectionId;
+
+				request = internalRequest;
 
 				try
 				{
@@ -321,7 +329,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				}
 				finally
 				{
-					await AcknowledgeRequest(request).ConfigureAwait(false);
+					await AcknowledgeRequestAsync(request).ConfigureAwait(false);
 				}
 
 				var key = request.Url.Split('/').FirstOrDefault();
@@ -373,7 +381,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private async Task AcknowledgeRequest(IOnPremiseTargetRequest request)
+		private async Task AcknowledgeRequestAsync(IOnPremiseTargetRequest request)
 		{
 			if (request.AcknowledgmentMode == AcknowledgmentMode.Auto)
 			{
@@ -391,7 +399,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				case AcknowledgmentMode.Default:
 					_logger?.Debug("Sending acknowledge to RelayServer. request-id={RequestId}, origin-id={OriginId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeOriginId, request.AcknowledgeId);
-					await GetToRelay($"/request/acknowledge?oid={request.AcknowledgeOriginId}&aid={request.AcknowledgeId}&cid={ConnectionId}", CancellationToken.None).ConfigureAwait(false); // TODO no cancellation token here?
+					await SendAcknowledgmentAsync(request.AcknowledgeOriginId, request.AcknowledgeId).ConfigureAwait(false);
 					break;
 
 				case AcknowledgmentMode.Manual:
@@ -533,7 +541,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					// a length of 0 indicates that there is a larger body available on the server
 					_logger?.Verbose("Requesting body. request-id={RequestId}", request.RequestId);
 					// request the body from the RelayServer (because SignalR cannot handle large messages)
-					var webResponse = await GetToRelay("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
+					var webResponse = await GetToRelayAsync("/request/" + request.RequestId, cancellationToken).ConfigureAwait(false);
 					request.Stream = await webResponse.Content.ReadAsStreamAsync().ConfigureAwait(false); // this stream should not be disposed (owned by the Framework)
 				}
 				else
@@ -572,7 +580,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private async Task PostResponseAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)
 		{
 			ctx.IsRelayServerNotified = true;
-			await PostToRelay("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null, 0x10000), cancellationToken).ConfigureAwait(false);
+			await PostToRelayAsync("/forward", headers => headers.Add("X-TTRELAY-METADATA", JsonConvert.SerializeObject(response)), new StreamContent(response.Stream ?? Stream.Null, 0x10000), cancellationToken).ConfigureAwait(false);
 		}
 
 		protected override void OnClosed()
@@ -598,22 +606,22 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		public Task<HttpResponseMessage> GetToRelay(string relativeUrl, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> GetToRelayAsync(string relativeUrl, CancellationToken cancellationToken)
 		{
-			return GetToRelay(relativeUrl, null, cancellationToken);
+			return GetToRelayAsync(relativeUrl, null, cancellationToken);
 		}
 
-		public Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> GetToRelayAsync(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken)
 		{
 			return _httpConnection.SendToRelayAsync(relativeUrl, HttpMethod.Get, setHeaders, null, cancellationToken);
 		}
 
-		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, HttpContent content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostToRelayAsync(string relativeUrl, HttpContent content, CancellationToken cancellationToken)
 		{
-			return PostToRelay(relativeUrl, null, content, cancellationToken);
+			return PostToRelayAsync(relativeUrl, null, content, cancellationToken);
 		}
 
-		public Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
+		public Task<HttpResponseMessage> PostToRelayAsync(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			return _httpConnection.SendToRelayAsync(relativeUrl, HttpMethod.Post, setHeaders, content, cancellationToken);
 		}
