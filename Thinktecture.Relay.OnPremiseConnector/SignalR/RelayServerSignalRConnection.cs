@@ -302,10 +302,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				_logger?.Verbose("Received message from server. connection-id={ConnectionId}, message={Message}", ConnectionId, message);
 
-				var internalRequest = message.ToObject<OnPremiseTargetRequest>();
-				internalRequest.ConnectionId = ConnectionId;
-
-				request = internalRequest;
+				request = message.ToObject<OnPremiseTargetRequest>();
+				request.ConnectionId = ConnectionId;
 
 				try
 				{

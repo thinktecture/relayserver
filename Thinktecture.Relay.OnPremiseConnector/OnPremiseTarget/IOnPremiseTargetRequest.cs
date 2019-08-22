@@ -16,6 +16,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// </summary>
 		new Stream Stream { get; set; }
 
+		new string ConnectionId { get; set; }
+
 		bool IsPingRequest { get; }
 		bool IsHeartbeatRequest { get; }
 		bool IsHeartbeatOrPingRequest { get; }
