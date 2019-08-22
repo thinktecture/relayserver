@@ -15,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.IdentityModel;
+using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
@@ -30,6 +31,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private readonly TimeSpan _requestTimeout;
 		private readonly IOnPremiseTargetConnectorFactory _onPremiseTargetConnectorFactory;
 		private readonly ILogger _logger;
+		private readonly IOnPremiseInterceptorFactory _onPremiseInterceptorFactory;
 		private readonly ConcurrentDictionary<string, IOnPremiseTargetConnector> _connectors;
 		private readonly IRelayServerHttpConnection _httpConnection;
 
@@ -56,7 +58,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public TimeSpan? SlidingConnectionLifetime { get; private set; }
 
 		public RelayServerSignalRConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, TimeSpan requestTimeout,
-			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, IRelayServerHttpConnection httpConnection, ILogger logger, bool logSensitiveData)
+			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, IRelayServerHttpConnection httpConnection,
+			ILogger logger, bool logSensitiveData, IOnPremiseInterceptorFactory onPremiseInterceptorFactory)
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
 			RelayServerConnectionInstanceId = Interlocked.Increment(ref _nextInstanceId);
@@ -72,6 +75,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_httpConnection = httpConnection ?? throw new ArgumentNullException(nameof(httpConnection));
 			_logger = logger;
 			_logSensitiveData = logSensitiveData;
+			_onPremiseInterceptorFactory = onPremiseInterceptorFactory ?? throw new ArgumentNullException(nameof(onPremiseInterceptorFactory));
+
 
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
@@ -554,13 +559,13 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				request.Stream = Stream.Null;
 			}
 
-			using (var response = await connector.GetResponseFromLocalTargetAsync(url, request, RelayedRequestHeader).ConfigureAwait(false))
+			if (request.Stream.Position != 0 && request.Stream.CanSeek)
 			{
-				if (response.Stream == null)
-				{
-					response.Stream = Stream.Null;
-				}
+				request.Stream.Position = 0;
+			}
 
+			using (var response = await GetResponseFromLocalTargetAsync(connector, url, request, RelayedRequestHeader).ConfigureAwait(false))
+			{
 				_logger?.Debug("Sending response. request-id={RequestId}", request.RequestId);
 
 				try
@@ -573,6 +578,36 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					_logger?.Error(ex, "Error during posting local target response to relay. request-id={RequestId}", request.RequestId);
 				}
 			}
+		}
+
+		private async Task<InterceptedResponse> GetResponseFromLocalTargetAsync(IOnPremiseTargetConnector connector, string url, IOnPremiseTargetRequest onPremiseTargetRequest, string relayedRequestHeader)
+		{
+			var request= new InterceptedRequest(onPremiseTargetRequest);
+
+			try
+			{
+				var requestInterceptor = _onPremiseInterceptorFactory.CreateOnPremiseRequestInterceptor();
+				requestInterceptor?.HandleRequest(request);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during intercepting the request. request-id={RequestId}", request.RequestId);
+			}
+
+			var onPremiseTargetResponse = await connector.GetResponseFromLocalTargetAsync(url, request, relayedRequestHeader).ConfigureAwait(false);
+			var response = new InterceptedResponse(onPremiseTargetResponse);
+
+			try
+			{
+				var responseInterceptor = _onPremiseInterceptorFactory.CreateOnPremiseResponseInterceptor();
+				responseInterceptor?.HandleResponse(request, response);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during intercepting the response. request-id={RequestId}", request.RequestId);
+			}
+
+			return response;
 		}
 
 		private async Task PostResponseAsync(RequestContext ctx, IOnPremiseTargetResponse response, CancellationToken cancellationToken)

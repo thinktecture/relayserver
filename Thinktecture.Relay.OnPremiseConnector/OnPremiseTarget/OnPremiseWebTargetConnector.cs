@@ -57,7 +57,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				response.StatusCode = message.StatusCode;
 				response.HttpHeaders = message.Headers.Union(message.Content.Headers).ToDictionary(kvp => kvp.Key, kvp => String.Join(" ", kvp.Value));
 				response.Stream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
-				response.HttpResponseMessage = message;
 			}
 			catch (Exception ex)
 			{

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
@@ -31,7 +32,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				.AddTransient<IOnPremiseTargetConnectorFactory, OnPremiseTargetConnectorFactory>()
 				.AddTransient<IHeartbeatChecker, HeartbeatChecker>()
 				.AddTransient<ITokenExpiryChecker, TokenExpiryChecker>()
-				.AddTransient<IAutomaticDisconnectChecker, AutomaticDisconnectChecker>();
+				.AddTransient<IAutomaticDisconnectChecker, AutomaticDisconnectChecker>()
+				.AddTransient<IOnPremiseInterceptorFactory, OnPremiseInterceptorFactory>();
 		}
 
 	}
