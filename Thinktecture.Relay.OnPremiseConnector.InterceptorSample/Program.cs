@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
+using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 
 namespace Thinktecture.Relay.OnPremiseConnector.InterceptorSample
 {
@@ -30,6 +31,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.InterceptorSample
 				var services = new ServiceCollection();
 				services.AddSingleton<ILogger>(Log.Logger);
 				services.AddOnPremiseConnectorServices();
+
+				// Add Interceptors
+				services.AddTransient<IOnPremiseRequestInterceptor, SampleRequestInterceptor>();
+				services.AddTransient<IOnPremiseResponseInterceptor, SampleResponseInterceptor>();
+
 				var serviceProvider = services.BuildServiceProvider();
 
 				// Connector
