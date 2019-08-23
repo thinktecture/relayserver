@@ -9,6 +9,10 @@
 
 ## Version 2.3.0
 
+* On-Premise Interceptoren
+
+  * Es ist nun möglich, auch im On-Premise Connector eigenen Code zum Abfangen und modifizieren von Anfragen und Antworten einzubinden.
+
 * Inhaltsstream verändern
 
   *  Interceptoren können nun auch den Stream mit den Inhaltsdaten der Requests und Responses lesen und modifizieren.
