@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
@@ -19,7 +20,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public static IServiceCollection AddOnPremiseConnectorServices(this IServiceCollection collection)
 		{
 			return collection
-				.AddSingleton<IOnPremiseWebTargetRequestMessageBuilder, OnPremiseWebTargetRequestMessageBuilder>()
+				.AddTransient<IOnPremiseWebTargetRequestMessageBuilder, OnPremiseWebTargetRequestMessageBuilder>()
+				.AddSingleton<Func<IOnPremiseWebTargetRequestMessageBuilder>>(sp => sp.GetRequiredService<IOnPremiseWebTargetRequestMessageBuilder>)
 				.AddSingleton<IHttpClientFactory, HttpClientFactory>()
 				.AddSingleton<MaintenanceLoop>()
 				.AddSingleton<IMaintenanceLoop>(ctx =>
@@ -35,6 +37,5 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				.AddTransient<IAutomaticDisconnectChecker, AutomaticDisconnectChecker>()
 				.AddTransient<IOnPremiseInterceptorFactory, OnPremiseInterceptorFactory>();
 		}
-
 	}
 }
