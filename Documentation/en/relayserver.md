@@ -20,8 +20,9 @@ The goal of this list is to highlight companies who pay back to this open source
 
 * RabbitMq Improvements
 
-  * Closed Rabbit connections will now be automatically unbound at the client
-  * The automatic recovery feature of the rabbit client will now be enabled by default
+  * Closed Rabbit connections will now be automatically unbound at the client.
+  * The automatic recovery feature of the rabbit client will now be enabled by default.
+  * When a channel gets closed, make sure all unacknowledged messages get re-queued.
 
 * On-Premise Interceptors
 
