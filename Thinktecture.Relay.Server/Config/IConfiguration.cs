@@ -7,6 +7,7 @@ namespace Thinktecture.Relay.Server.Config
 	{
 		string RabbitMqConnectionString { get; }
 		string RabbitMqClusterHosts { get; }
+		bool RabbitMqAutomaticRecoveryEnabled { get; }
 		TimeSpan QueueExpiration { get; }
 		TimeSpan RequestExpiration { get; }
 		TimeSpan OnPremiseConnectorCallbackTimeout { get; }

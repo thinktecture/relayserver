@@ -137,6 +137,7 @@ The default settings include:
 ```
 <appSettings>
     <add key="RabbitMqClusterHosts" value="" />
+	<add key="RabbitMqAutomaticRecoveryEnabled" value="true" />
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
     <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
@@ -176,7 +177,8 @@ The default settings include:
 
 |  Key name | Description |
 | --- | --- |
-| RabbitMqClusterHosts | Comma-separated list of RabbitMQ cluster members (default _null_) |
+| RabbitMqClusterHosts | Comma-separated list of RabbitMq cluster members (default _null_) |
+| RabbitMqAutomaticRecoveryEnabled | Enables the feature of the RabbitMq client, to automatically try to recover failed network connections to the RabbitMq server (default true) |
 | QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
 | RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
 | OnPremiseConnectorCallbackTimeout | Time span the RelayServer will wait for a response from the On-Premise Connector (default 30 seconds) |
