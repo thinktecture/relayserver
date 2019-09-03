@@ -138,6 +138,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					lock (_model)
 					{
 						_model.BasicCancel(consumerTag);
+						_model.QueueUnbind(queueName, _EXCHANGE_NAME, null);
 					}
 				});
 			});
