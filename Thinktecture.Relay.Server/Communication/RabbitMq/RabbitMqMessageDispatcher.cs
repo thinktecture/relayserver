@@ -13,12 +13,13 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
 {
-	public class RabbitMqMessageDispatcher : IMessageDispatcher, IDisposable
+	/*
+	public class RabbitMqMessageDispatcher : IMessageDispatcher
 	{
 		private const string _EXCHANGE_NAME = "RelayServer";
-		private const string _REQUEST_QUEUE_PREFIX = "Request ";
-		private const string _RESPONSE_QUEUE_PREFIX = "Response ";
-		private const string _ACKNOWLEDGE_QUEUE_PREFIX = "Acknowledge ";
+		private const string _REQUEST_QUEUE_PREFIX = "Request";
+		private const string _RESPONSE_QUEUE_PREFIX = "Response";
+		private const string _ACKNOWLEDGE_QUEUE_PREFIX = "Acknowledge";
 
 		private readonly ILogger _logger;
 		private readonly IConfiguration _configuration;
@@ -258,4 +259,5 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			Dispose(true);
 		}
 	}
+	*/
 }
