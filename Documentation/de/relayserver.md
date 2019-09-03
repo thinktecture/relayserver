@@ -9,6 +9,11 @@
 
 ## Version 2.3.0
 
+* RabbitMq Verbesserungen
+
+  * Beendete Verbindungen werden nun explizit auf dem Client entbunden
+  * Die Funktion, verlorene Verbindungen zum RabbitMq Server von dessen Client automatisch wiederherzustellen zu lassen wird nun standardmässig aktiviert
+
 * On-Premise Interceptoren
 
   * Es ist nun möglich, auch im On-Premise Connector eigenen Code zum Abfangen und modifizieren von Anfragen und Antworten einzubinden.
