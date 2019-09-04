@@ -18,8 +18,8 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		private readonly IConnection _connection;
 		private readonly IConfiguration _configuration;
 		private readonly Guid _originId;
-		private readonly ConcurrentDictionary<string, RabbitMqRequestChannelBase> _rabbitMqRequestChannels = new ConcurrentDictionary<string, RabbitMqRequestChannelBase>();
-		private readonly ConcurrentDictionary<string, RabbitMqResponseChannelBase> _rabbitMqResponseChannels = new ConcurrentDictionary<string, RabbitMqResponseChannelBase>();
+		private readonly ConcurrentDictionary<string, RabbitMqRequestChannel> _rabbitMqRequestChannels = new ConcurrentDictionary<string, RabbitMqRequestChannel>();
+		private readonly ConcurrentDictionary<string, RabbitMqResponseChannel> _rabbitMqResponseChannels = new ConcurrentDictionary<string, RabbitMqResponseChannel>();
 		private readonly ConcurrentDictionary<string, RabbitMqAcknowledgeChannel> _rabbitMqAcknowledgeChannels = new ConcurrentDictionary<string, RabbitMqAcknowledgeChannel>();
 
 		public RabbitMqMessageDispatcherHandler(ILogger logger, IConnection connection, IConfiguration configuration, IPersistedSettings persistedSettings)
@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			_originId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
 		}
 
-		public IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, String connectionId, Boolean autoAck)
+		public IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool autoAck)
 		{
 			return EnsureRequestChannel(linkId.ToString()).OnReceived(autoAck);
 		}
@@ -41,14 +41,14 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			return EnsureResponseChannel(_originId.ToString()).OnReceived();
 		}
 
-		public IObservable<String> OnAcknowledgeReceived()
+		public IObservable<string> OnAcknowledgeReceived()
 		{
 			return EnsureAcknowledgeChannel(_originId.ToString()).OnReceived();
 		}
 
-		public void AcknowledgeRequest(String acknowledgeId)
+		public void AcknowledgeRequest(string acknowledgeId)
 		{
-			if (_rabbitMqRequestChannels.TryGetValue(_originId.ToString(), out var rabbitMqChannel))
+			if (_rabbitMqAcknowledgeChannels.TryGetValue(_originId.ToString(), out var rabbitMqChannel))
 			{
 				rabbitMqChannel.Acknowledge(acknowledgeId);
 			}
@@ -64,28 +64,28 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			EnsureResponseChannel(originId.ToString()).Dispatch(response);
 		}
 
-		public void DispatchAcknowledge(Guid originId, String acknowledgeId)
+		public void DispatchAcknowledge(Guid originId, string acknowledgeId)
 		{
 			EnsureAcknowledgeChannel(originId.ToString()).Dispatch(acknowledgeId);
 		}
 
-		private RabbitMqRequestChannelBase EnsureRequestChannel(string channelId)
+		private RabbitMqRequestChannel EnsureRequestChannel(string channelId)
 		{
 			if (_rabbitMqRequestChannels.TryGetValue(channelId, out var rabbitMqChannel))
 				return rabbitMqChannel;
 
-			rabbitMqChannel = new RabbitMqRequestChannelBase(_logger, _connection, _configuration, _EXCHANGE_NAME, channelId, _REQUEST_QUEUE_PREFIX);
+			rabbitMqChannel = new RabbitMqRequestChannel(_logger.ForContext<RabbitMqRequestChannel>(), _connection, _configuration, _EXCHANGE_NAME, channelId, _REQUEST_QUEUE_PREFIX);
 			_rabbitMqRequestChannels[channelId] = rabbitMqChannel;
 
 			return rabbitMqChannel;
 		}
 
-		private RabbitMqResponseChannelBase EnsureResponseChannel(string channelId)
+		private RabbitMqResponseChannel EnsureResponseChannel(string channelId)
 		{
 			if (_rabbitMqResponseChannels.TryGetValue(channelId, out var rabbitMqChannel))
 				return rabbitMqChannel;
 
-			rabbitMqChannel = new RabbitMqResponseChannelBase(_logger, _connection, _configuration, _EXCHANGE_NAME, channelId, _RESPONSE_QUEUE_PREFIX);
+			rabbitMqChannel = new RabbitMqResponseChannel(_logger.ForContext<RabbitMqResponseChannel>(), _connection, _configuration, _EXCHANGE_NAME, channelId, _RESPONSE_QUEUE_PREFIX);
 			_rabbitMqResponseChannels[channelId] = rabbitMqChannel;
 
 			return rabbitMqChannel;
@@ -96,7 +96,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			if (_rabbitMqAcknowledgeChannels.TryGetValue(channelId, out var rabbitMqChannel))
 				return rabbitMqChannel;
 
-			rabbitMqChannel = new RabbitMqAcknowledgeChannel(_logger, _connection, _configuration, _EXCHANGE_NAME, channelId, _ACKNOWLEDGE_QUEUE_PREFIX);
+			rabbitMqChannel = new RabbitMqAcknowledgeChannel(_logger.ForContext<RabbitMqAcknowledgeChannel>(), _connection, _configuration, _EXCHANGE_NAME, channelId, _ACKNOWLEDGE_QUEUE_PREFIX);
 			_rabbitMqAcknowledgeChannels[channelId] = rabbitMqChannel;
 
 			return rabbitMqChannel;

@@ -8,9 +8,9 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
 {
-	internal class RabbitMqRequestChannelBase : RabbitMqChannelBase<IOnPremiseConnectorRequest>, IRabbitMqAcknowledgeableChannel<IOnPremiseConnectorRequest>
+	internal class RabbitMqRequestChannel : RabbitMqChannelBase<IOnPremiseConnectorRequest>, IRabbitMqAcknowledgeableChannel<IOnPremiseConnectorRequest>
 	{
-		public RabbitMqRequestChannelBase(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix)
+		public RabbitMqRequestChannel(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix)
 			: base(logger, connection, configuration, exchange, channelId, queuePrefix)
 		{
 		}
@@ -25,10 +25,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				properties.Expiration = message.Expiration.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
 			}
 
-			lock (Model)
-			{
-				Model.BasicPublish(Exchange, ChannelId, false, properties, data);
-			}
+			Send(data, properties);
 
 			return Task.CompletedTask;
 		}

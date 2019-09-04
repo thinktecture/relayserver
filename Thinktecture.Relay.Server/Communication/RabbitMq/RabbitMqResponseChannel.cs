@@ -7,9 +7,9 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
 {
-	internal class RabbitMqResponseChannelBase : RabbitMqChannelBase<IOnPremiseConnectorResponse>
+	internal class RabbitMqResponseChannel : RabbitMqChannelBase<IOnPremiseConnectorResponse>
 	{
-		public RabbitMqResponseChannelBase(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix)
+		public RabbitMqResponseChannel(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix)
 			: base(logger, connection, configuration, exchange, channelId, queuePrefix)
 		{
 		}
@@ -22,12 +22,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		public override Task Dispatch(IOnPremiseConnectorResponse message)
 		{
 			var data = Serialize(message, out var properties);
-
-			lock (Model)
-			{
-				DeclareAndBind();
-				Model.BasicPublish(Exchange, ChannelId, false, properties, data);
-			}
+			Send(data, properties);
 
 			return Task.CompletedTask;
 		}

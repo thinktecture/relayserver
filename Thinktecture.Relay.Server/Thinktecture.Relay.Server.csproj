@@ -296,8 +296,8 @@
     <Compile Include="Communication\RabbitMq\RabbitMqAcknowledgeChannel.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqChannelBase.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqMessageDispatcherHandler.cs" />
-    <Compile Include="Communication\RabbitMq\RabbitMqRequestChannelBase.cs" />
-    <Compile Include="Communication\RabbitMq\RabbitMqResponseChannelBase.cs" />
+    <Compile Include="Communication\RabbitMq\RabbitMqRequestChannel.cs" />
+    <Compile Include="Communication\RabbitMq\RabbitMqResponseChannel.cs" />
     <Compile Include="Dto\LinkConfiguration.cs" />
     <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
     <Compile Include="IO\LegacyResponseStream.cs" />
@@ -339,7 +339,6 @@
     <Compile Include="Communication\InProcess\RequestSubjectContext.cs" />
     <Compile Include="Communication\IRegistryAction.cs" />
     <Compile Include="Communication\DelegatingDisposable.cs" />
-    <Compile Include="Communication\RabbitMq\RabbitMqMessageDispatcher.cs" />
     <Compile Include="Communication\RegistrationAction.cs" />
     <Compile Include="Communication\UnregistrationAction.cs" />
     <Compile Include="Communication\OnPremiseConnectionContext.cs" />

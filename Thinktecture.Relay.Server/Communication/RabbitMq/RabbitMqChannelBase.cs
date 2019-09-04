@@ -27,6 +27,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		protected IConfiguration Configuration { get; private set; }
 
 		protected string QueueName => $"{_queuePrefix} {ChannelId}";
+		protected string RoutingKey => QueueName;
 
 		protected RabbitMqChannelBase(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix)
 		{
@@ -56,22 +57,22 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			Dictionary<string, object> arguments = null;
 			if (Configuration.QueueExpiration == TimeSpan.Zero)
 			{
-				Logger?.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}", Exchange, QueueName);
+				Logger?.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 			}
 			else
 			{
-				Logger?.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}, expiration={QueueExpiration}", Exchange, QueueName, Configuration.QueueExpiration);
+				Logger?.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, expiration={QueueExpiration}", Exchange, QueueName, ChannelId, Configuration.QueueExpiration);
 				arguments = new Dictionary<string, object>() { ["x-expires"] = (int)Configuration.QueueExpiration.TotalMilliseconds };
 			}
 
 			try
 			{
 				Model.QueueDeclare(QueueName, true, false, false, arguments);
-				Model.QueueBind(QueueName, Exchange, ChannelId);
+				Model.QueueBind(QueueName, Exchange, RoutingKey);
 			}
 			catch (Exception ex)
 			{
-				Logger?.Error(ex, "Declaring queue failed - possible expiration change. exchange-name={ExchangeName}, queue-name={QueueName}", Exchange, QueueName);
+				Logger?.Error(ex, "Declaring queue failed - possible expiration change. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 				throw;
 			}
 		}
@@ -87,16 +88,26 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			return Encoding.GetBytes(JsonConvert.SerializeObject(message));
 		}
 
+		protected void Send(byte[] data, IBasicProperties properties)
+		{
+			Logger.Verbose("Sending data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+
+		 	lock (Model)
+			{
+				DeclareAndBind();
+				Model.BasicPublish(Exchange, RoutingKey, false, properties, data);
+			}
+		}
 
 		protected void Unbind()
 		{
-			Logger.Verbose("Unbinding queue. exchange-name={ExchangeName}, queue-name={QueueName}", Exchange, QueueName);
+			Logger.Verbose("Unbinding queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 
-			Model.QueueUnbind(QueueName, Exchange, ChannelId);
+			Model.QueueUnbind(QueueName, Exchange, RoutingKey);
 		}
 
 		protected IObservable<TMessage> CreateObservable<TMessageType>(bool autoAck = true, Action<TMessageType, ulong> callback = null)
-			where TMessageType: TMessage
+			where TMessageType : TMessage
 		{
 			return Observable.Create<TMessage>(observer =>
 			{
@@ -116,7 +127,6 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 							var message = JsonConvert.DeserializeObject<TMessageType>(json);
 
 							callback?.Invoke(message, args.DeliveryTag);
-
 							observer.OnNext(message);
 						}
 						catch (Exception ex)
@@ -145,7 +155,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 						{
 							Model.BasicCancel(consumerTag);
 							Model.BasicRecover(true);
-							Model.QueueUnbind(QueueName, Exchange, null);
+							Unbind();
 						}
 					});
 				}
@@ -154,6 +164,8 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		public void Dispose()
 		{
+			Logger?.Debug("Disposing channel. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+
 			if (!_disposed)
 			{
 				if (Model != null)
