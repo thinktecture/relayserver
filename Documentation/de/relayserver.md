@@ -11,9 +11,10 @@
 
 * RabbitMq Verbesserungen
 
-  * Beendete Verbindungen werden nun explizit auf dem Client entbunden.
-  * Die Funktion, verlorene Verbindungen zum RabbitMq Server von dessen Client automatisch wiederherzustellen zu lassen wird nun standardmässig aktiviert.
-  * Wenn eine Verbindung geschlossen wird, wird sichergestellt dass alle Nachrichten die noch nicht acknowledged wurden wieder zugestellt werden.
+  * Beendete Verbindungen werden nun explizit auch auf dem Rabbit-Client beendet.
+  * Die Funktion, verlorene Verbindungen zum RabbitMq Server von dessen Client automatisch wiederherzustellen zu lassen, wird nun standardmässig aktiviert.
+  * Wenn eine Verbindung geschlossen wird, wird sichergestellt dass alle Nachrichten die noch nicht acknowledged wurden, wieder zugestellt werden.
+  * Um den Durchsatz zu erhöhen werden nun separate Channels (via RoutingKeys) für Requests, Responses und Acknowledgements verwendet.
 
 * On-Premise Interceptoren
 

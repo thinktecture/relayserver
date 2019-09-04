@@ -23,6 +23,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * Closed Rabbit connections will now be automatically unbound at the client.
   * The automatic recovery feature of the rabbit client will now be enabled by default.
   * When a channel gets closed, make sure all unacknowledged messages get re-queued.
+  * To improve throughput, multiple channels (via RoutingKeys) will be used for requests, responses and acknowledgements.
 
 * On-Premise Interceptors
 
