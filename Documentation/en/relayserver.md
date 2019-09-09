@@ -21,6 +21,7 @@ The goal of this list is to highlight companies who pay back to this open source
 * Bugfixes
 
   * Under certain circumstances the on-premise connector demo service wasn't able to load a framework assembly.
+  * The OnPremise-Connector is now able to recreate the `HttpClient` that is used to send responses to the RelayServer in case there are errors when posting.
 
 ## Version 2.2.0
 
