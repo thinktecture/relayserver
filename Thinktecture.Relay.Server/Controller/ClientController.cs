@@ -131,7 +131,7 @@ namespace Thinktecture.Relay.Server.Controller
 		{
 			if (request.Stream == null)
 			{
-				request.Body = Array.Empty<byte>();
+				request.Body = null;
 				return;
 			}
 
