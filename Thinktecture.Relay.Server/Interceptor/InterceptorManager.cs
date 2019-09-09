@@ -81,7 +81,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 		public HttpResponseMessage HandleResponse(IOnPremiseConnectorRequest request, HttpRequestMessage message, IPrincipal clientUser, IOnPremiseConnectorResponse response, bool forwardOnPremiseTargetErrorResponse)
 		{
 			if (_responseInterceptor == null)
-				return null;
+				return _httpResponseMessageBuilder.BuildFromConnectorResponse(response, forwardOnPremiseTargetErrorResponse, request.RequestId);
 
 			_logger.Verbose("Handling response. request-id={RequestId}", request.RequestId);
 
