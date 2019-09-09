@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		{
 			_logger?.Information("Creating new connection for RelayServer {RelayServerUrl} and link user {UserName}", relayServer, userName);
 			var httpConnection = new RelayServerHttpConnection(_logger, relayServer, requestTimeout);
-			var signalRConnection = new RelayServerSignalRConnection(versionAssembly, userName, password, relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, httpConnection, _logger, _logSensitiveData);
+			var signalRConnection = new RelayServerSignalRConnection(versionAssembly, userName, password, relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, httpConnection, _logger, logSensitiveData);
 
 			// registering connection with maintenance loop
 			_maintenanceLoop.RegisterConnection(signalRConnection);

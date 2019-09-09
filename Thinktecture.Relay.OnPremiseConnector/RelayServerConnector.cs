@@ -68,7 +68,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="logSensitiveData">Determines whether sensitive data will be logged.</param>
 		[Obsolete("Use the ctor without tokenRefreshWindowInSeconds instead.")]
 		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30,
-			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = false)
+			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = true)
 		{
 			LogSensitiveData = logSensitiveData;
 

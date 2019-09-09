@@ -19,7 +19,7 @@
   *  Interceptoren können nun auch den Stream mit den Inhaltsdaten der Requests und Responses lesen und modifizieren.
   * Das EF-Model wurde um genauere Informationen und Indices erweitert.
   * Wenn ein On-Premise Target ungültige Expires-Header setzt, kommt es nicht mehr zu einem Fehler.
-  * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig deaktiviert.
+  * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.
 
 ## Version 2.2.1
 

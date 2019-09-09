@@ -236,7 +236,7 @@ namespace Thinktecture.Relay.Server.Config
 				AccessTokenLifetime = tmpTimeSpan;
 			}
 
-			LogSensitiveData = false;
+			LogSensitiveData = true;
 			if (Boolean.TryParse(GetValue(nameof(LogSensitiveData)), out tmpBool))
 			{
 				LogSensitiveData = tmpBool;

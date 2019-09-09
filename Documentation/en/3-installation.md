@@ -165,7 +165,7 @@ The default settings include:
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
-    <add key="LogSensitiveData" value="false" />
+    <add key="LogSensitiveData" value="true" />
     <add key="LinkTokenRefreshWindow" value="00:01:00" />
     <add key="LinkReconnectMinWaitTime" value="00:00:02" />
     <add key="LinkReconnectMaxWaitTime" value="00:00:30" />
@@ -205,7 +205,7 @@ The default settings include:
 | FailedLoginLockoutPeriod | Time span that a user will be locked out after he has more than `MaxFailedLoginAttempts` failed login attempts (default 15 minutes) |
 | SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid On-Premise Connector / Link access token (default false) |
 | AccessTokenLifetime | Time span that an issued access token for On-Premise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
-| LogSensitiveData | Determines whether sensitive data like query parameter values or http header values should be written to the logs (default false) |
+| LogSensitiveData | Determines whether sensitive data like query parameter values or http header values should be written to the logs (default true) |
 | LinkTokenRefreshWindow | Default time span, in which an On-Premise Connector will request a new access token, before the current one expires (default 1 minute). This value can be overriden per link. |
 | LinkReconnectMinWaitTime | Default time span, after which an disconnected On-Premise Connector may reconnect to the RelayServer (default 2 seconds). This value can be overriden per link. |
 | LinkReconnectMaxWaitTime | Default time span, after which an disconnected On-Premise Connector will reconnect at the latest (default 30 seconds). This value can be overriden per link. |
