@@ -167,7 +167,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
-	<add key="LogSensitiveData" value="false" />
+    <add key="LogSensitiveData" value="false" />
     <add key="LinkTokenRefreshWindow" value="00:01:00" />
     <add key="LinkReconnectMinWaitTime" value="00:00:02" />
     <add key="LinkReconnectMaxWaitTime" value="00:00:30" />
