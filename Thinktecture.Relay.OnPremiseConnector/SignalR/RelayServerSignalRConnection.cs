@@ -521,7 +521,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, IOnPremiseTargetRequestInternal request, CancellationToken cancellationToken)
 		{
-			var uri = new Uri(new Uri("http://dummyhost"), request.Url);
+			var uri = new Uri(new Uri("http://local-target/"), request.Url);
 			_logger?.Debug("Relaying request to local target. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, _logSensitiveData ? uri.PathAndQuery : uri.AbsolutePath);
 
 			var url = (request.Url.Length > key.Length) ? request.Url.Substring(key.Length + 1) : String.Empty;

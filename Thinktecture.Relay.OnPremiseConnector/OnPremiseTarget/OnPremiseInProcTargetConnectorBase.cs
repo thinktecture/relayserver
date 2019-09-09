@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			var uri = new Uri(new Uri("http://dummyHost/"), url);
+			var uri = new Uri(new Uri("http://in-proc-target/"), url);
 			_logger?.Verbose("Requesting response from on-premise in-proc target. request-id={RequestId}, url={RequestUrl}, origin-id={OriginId}", request.RequestId, LogSensitiveData ? uri.PathAndQuery : uri.AbsolutePath, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
