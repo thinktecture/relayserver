@@ -16,6 +16,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.3.0
+
+* General improvements
+
+  * The RelayServer now warns when the `SharedSecret` setting is missing and uses a random value to be able to work at all, if it is not configured for Multi-Server operation.
+
 ## Version 2.2.1
 
 * Bugfixes
