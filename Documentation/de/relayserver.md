@@ -11,7 +11,7 @@
 
 * Allgemeine Verbesserungen
 
-  * Der RelayServer wart nun wenn die `SharedSecret` Einstellung fehlt und kann, wenn nicht im Multi-Server Betrieb eingesetzt, einen zufälligen Startwert verwenden.
+  * Der RelayServer warnt nun wenn die `SharedSecret` Einstellung fehlt und kann, wenn nicht im Multi-Server Betrieb eingesetzt, einen zufälligen Startwert verwenden.
 
 ## Version 2.2.1
 
