@@ -19,6 +19,7 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		public Guid OriginId { get; set; }
 
 		[Required]
+		[Index("IX_HttpStatusCode")]
 		public HttpStatusCode HttpStatusCode { get; set; }
 
 		[Required]
@@ -28,24 +29,34 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		public Guid LinkId { get; set; }
 
 		[Required]
+		[MaxLength(250)]
+		[Index("IX_OnPremiseTargetKey")]
 		public string OnPremiseTargetKey { get; set; }
 
 		[Required]
+		[MaxLength(250)]
+		[Index("IX_LocalUrl")]
 		public string LocalUrl { get; set; }
 
 		[Required]
+		[Index("IX_ContentBytesIn")]
 		public long ContentBytesIn { get; set; }
 
 		[Required]
+		[Index("IX_ContentBytesOut")]
 		public long ContentBytesOut { get; set; }
 
 		[Required]
+		[Index("IX_OnPremiseConnectorInDate")]
 		public DateTime OnPremiseConnectorInDate { get; set; }
 
 		[Required]
+		[Index("IX_OnPremiseConnectorOutDate")]
 		public DateTime OnPremiseConnectorOutDate { get; set; }
 
+		[Index("IX_OnPremiseTargetInDate")]
 		public DateTime? OnPremiseTargetInDate { get; set; }
+		[Index("IX_OnPremiseTargetOutDate")]
 		public DateTime? OnPremiseTargetOutDate { get; set; }
 	}
 }

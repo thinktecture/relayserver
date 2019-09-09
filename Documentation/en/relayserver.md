@@ -21,6 +21,7 @@ The goal of this list is to highlight companies who pay back to this open source
 * General improvements
 
   * The RelayServer now warns when the `SharedSecret` setting is missing and uses a random value to be able to work at all, if it is not configured for Multi-Server operation.
+  * The EF model was extended with more accurate information and new indices.
 
 ## Version 2.2.1
 
