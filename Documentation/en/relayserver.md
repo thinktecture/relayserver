@@ -19,6 +19,7 @@ The goal of this list is to highlight companies who pay back to this open source
 ## Version 2.2.1
 
 * Bugfixes
+
   * Under certain circumstances the on-premise connector demo service wasn't able to load a framework assembly.
 
 ## Version 2.2.0
