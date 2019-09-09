@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Text;
 using Serilog;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.Interceptor;
@@ -34,6 +37,21 @@ namespace Thinktecture.Relay.CustomCodeDemo
 		public HttpResponseMessage OnRequestReceived(IInterceptedRequest request)
 		{
 			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
+
+			// Example: Modify content
+			if (request.HttpHeaders.TryGetValue("Content-Type", out var contentType) && contentType == "application/json")
+			{
+				using (var reader = new StreamReader(request.Content))
+				{
+					// get original content
+					var content = reader.ReadToEnd();
+					_logger?.Information("Received content {Content}", content);
+
+					// modify content
+					content = $"{{ \"modified\": true, \"originalContent\": {content} }}";
+					request.Content = new MemoryStream(Encoding.UTF8.GetBytes(content));
+				}
+			}
 
 			// Example: Set Request expiration
 			if (request.HttpHeaders.TryGetValue("Request-Expiration", out var expirationValue) && TimeSpan.TryParse(expirationValue, out var expiration))
@@ -73,7 +91,7 @@ namespace Thinktecture.Relay.CustomCodeDemo
 			headers.Add("X-ThinkectureRelay-Example", $"Added by {nameof(DemoRequestInterceptor)}");
 			request.HttpHeaders = headers;
 
-			_logger?.Information("Demo interceptor modified request: {@Request}", request);
+			_logger?.Information("Demo interceptor modified request");
 			return null;
 		}
 	}

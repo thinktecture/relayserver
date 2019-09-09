@@ -43,6 +43,8 @@ The following values ​​can be changed:
 - `HttpMethod`: The HTTP method (so-called verb) can be changed here.
 - `Url`: The URL of the request can be modified.
 - `HttpHeaders`: HTTP headers can be removed, new added or existing changed.
+- `Content`: The content stream of the request can be read and changed here.  
+*Caution:* When this property is accessed, a copy of the content will be created in memory, as the original request stream can only be read once. This will increase overall memory usage of the RelayServer.
 - `AlwaysSendToOnPremiseConnector`: Setting this to true will cause the request to be relayed to the OnPremiseConnector even if the interceptor immediately answers it by returning an `HttpResponseMessage`.
 - `Expiration`: The TTL of this request in the RabbitMQ can be changed here.
 - `AcknowledgmentMode`: This determines whether the OnPremiseConnector will acknowledge a request (Default), the RelayServer will auto-acknowledge the request (Auto), of if custom code on the target needs to manually acknowledge the request (Manual). For manual acknowledgement, send a HTTP GET request to the `/request/acknowledge` endpoint on the RelayServer and pass the query string parameters `aid` with the AcknowledgeId, `oid` with the OriginId and `cid` with the ConnectionId. This request needs to provide a valid bearer token in the authorization header.
@@ -56,23 +58,24 @@ A response sent back from the On-Premise target through an OnPremise Connector c
 This interface specifies two methods to implement:
 
 * `HttpResponseMessage OnResponseFailed(IReadOnlyInterceptedRequest request)`: Invoked when the On-Premise service has received *no* response. In this case, an answer can be generated here.
-* `HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request, IInterceptedResponse response)`: Invoked when a response was received. This can be use to modify the response or replace it by a separate answer.
+* `HttpResponseMessage OnResponseReceived(IReadOnlyInterceptedRequest request, IInterceptedResponse response)`: Invoked when a response was received. This can be use to modify the response or replace it with a completely new response message.
 
-If there is no response from the OnPremise Connector, the first version is called.
+If there is no response from the OnPremise Connector, the first method is called.
 
 - If `null` is returned, the default behavior of the RelayServer is used.
 - If an `HttpResonseMessage` is returned, this reponse is *immediately* sent to the client.
 
-If a response was received via the OnPremise Connector, the second overload is called.
+If a response was received via the OnPremise Connector, the second method is called.
 
-- If `null` is returned, the` IInterceptedResponse` is forwarded to the client.
-- If an `HttpResonseMessage` is returned, this reponse is *immediately* sent to the client and the` IInterceptedResponse` is discarded.
-- To modify the response, the corresponding values ​​can be changed directly on the transferred `IInterceptedResponse`.
+- If `null` is returned, the (probably modified) `IInterceptedResponse` is forwarded to the client.
+- If an `HttpResonseMessage` is returned, this reponse is *immediately* sent to the client and the `IInterceptedResponse` is discarded.
+- To modify the response, the corresponding values ​​can be changed directly on the provided `IInterceptedResponse`.
 
 The following values ​​can be changed:
 - `StatusCode`: Here the status code of the response can be changed.
-- `HttpHeaders`: HTTP headers can be removed, new added or existing changed.
-
+- `HttpHeaders`: HTTP headers can be removed, new ones added or existing changed.
+- `Content`: The content stream of the response can be read and changed here.  
+*Caution:* When this property is accessed, a copy of the content will be created in memory, as the original response stream can only be read once. This will increase overall memory usage of the RelayServer.
 
 ### Optional: Registstration via an AutofacModule
 
@@ -109,6 +112,6 @@ public class PluginModule : Module
 }
 ```
 
-## Configure the intecreptor
+## Configuration of the Interceptor Assembly
 
 In the `App.config` of the RelayServer, it is sufficient to assign the configuration value `Interceptor Assembly` to a path that points to the interceptor assembly. The path can be either absolute or relative.

@@ -9,7 +9,6 @@ using Moq;
 using Serilog;
 using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
@@ -26,7 +25,7 @@ namespace Thinktecture.Relay.Server.Http
 
 		private OnPremiseRequestBuilder CreateBuilder()
 		{
-			return new OnPremiseRequestBuilder(_loggerMock.Object, new ConfigurationDummy(), new InMemoryPostDataTemporaryStore(_loggerMock.Object, new ConfigurationDummy()));
+			return new OnPremiseRequestBuilder(_loggerMock.Object, new ConfigurationDummy());
 		}
 
 		[TestMethod]
@@ -49,7 +48,9 @@ namespace Thinktecture.Relay.Server.Http
 			result = await sut.BuildFromHttpRequest(request, new Guid("276b39f9-f0be-42b7-bcc1-1c2a24289689"), "Google/services/");
 
 			result.OriginId.Should().Be("276b39f9-f0be-42b7-bcc1-1c2a24289689");
-			result.Body.LongLength.Should().Be(3L);
+			result.Body.Should().BeNull();
+			result.Stream.Should().NotBeNull();
+			result.Stream.Length.Should().Be(3L);
 			result.HttpMethod.Should().Be("GET");
 			result.RequestId.Should().NotBeNullOrEmpty();
 			result.Url.Should().Be("Google/services/?id=bla");
@@ -60,11 +61,11 @@ namespace Thinktecture.Relay.Server.Http
 		}
 
 		[TestMethod]
-		public void CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue_combines_multiple_HTTP_header_values_into_one()
+		public void CombineMultipleHttpHeaderValuesIntoOneCommaSeparatedValue_combines_multiple_HTTP_header_values_into_one()
 		{
 			var headerValues = new List<string> { "Foo", "Bar", "Baz" };
 			var sut = CreateBuilder();
-			var result = sut.CombineMultipleHttpHeaderValuesIntoOneCommaSeperatedValue(headerValues);
+			var result = sut.CombineMultipleHttpHeaderValuesIntoOneCommaSeparatedValue(headerValues);
 
 			result.Should().Be("Foo, Bar, Baz");
 		}
