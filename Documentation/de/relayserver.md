@@ -10,6 +10,7 @@
 ## Version 2.2.1
 
 * Fehlerbehebungen
+
   * Der OnPremiseConnector Demo-Service konnte ein Framwork-Assembly unter bestimmten Voraussetzungen nicht korrekt laden.
 
 ## Version 2.2.0
