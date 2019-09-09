@@ -29,8 +29,8 @@ namespace Thinktecture.Relay.Server.Http
 				["Content-MD5"] = null,
 				["Content-Range"] = null,
 				["Content-Type"] = (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v),
-				["Expires"] = ExpiresHeaderTransformation,
-				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)),
+				["Expires"] = (r, v) => r.Headers.Expires = SafeParseDateTime(r, v),
+				["Last-Modified"] = (r, v) => r.Headers.LastModified = SafeParseDateTime(r, v),
 			};
 		}
 
@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Server.Http
 			{
 				message.StatusCode = response.StatusCode;
 				message.Content = GetResponseContentForOnPremiseTargetResponse(response, link);
-				
+
 				if (response.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
 					message.Headers.Add("WWW-Authenticate", wwwAuthenticate);
@@ -130,18 +130,13 @@ namespace Thinktecture.Relay.Server.Http
 
 		private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
 		{
-			return ((int) statusCode >= 300) && ((int) statusCode <= 399);
+			return ((int)statusCode >= 300) && ((int)statusCode <= 399);
 		}
 
-		private void ExpiresHeaderTransformation(HttpContent content, string value)
+		private DateTimeOffset? SafeParseDateTime(HttpContent content, string value)
 		{
-			// Set default to null
-			content.Headers.Expires = null;
-
-			if (DateTime.TryParseExact(value, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expiresValue))
-			{
-				content.Headers.Expires = new DateTimeOffset(expiresValue);
-			}
+			return DateTime.TryParseExact(value, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expiresValue)
+				? new DateTimeOffset(expiresValue) : (DateTimeOffset?)null;
 		}
 	}
 }
