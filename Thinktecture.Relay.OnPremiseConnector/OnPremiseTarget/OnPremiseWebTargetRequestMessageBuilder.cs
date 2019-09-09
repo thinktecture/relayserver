@@ -146,7 +146,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 
 			foreach (var httpHeader in request.HttpHeaders.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key)))
 			{
-				_logger?.Verbose("Adding header to request. request-id={RequestId} header-name={HeaderName}, header-value={HeaderValue}", request.RequestId, httpHeader.Key, logSensitiveData ? httpHeader.Value : "***");
+				_logger?.Verbose("Adding header to request. request-id={RequestId} header-name={HeaderName}, header-value={HeaderValue}", request.RequestId, httpHeader.Key, logSensitiveData ? httpHeader.Value : "*** BLOCKED ***");
 
 				try
 				{
