@@ -37,7 +37,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		Task<bool> TryRequestAuthorizationTokenAsync();
 
 		List<string> GetOnPremiseTargetKeys();
-		Task<HttpResponseMessage> GetToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
-		Task<HttpResponseMessage> PostToRelay(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
+		Task<HttpResponseMessage> GetToRelayAsync(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
+		Task<HttpResponseMessage> PostToRelayAsync(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
+		Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null);
 	}
 }

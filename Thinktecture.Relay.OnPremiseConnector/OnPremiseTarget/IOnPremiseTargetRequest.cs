@@ -16,6 +16,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// </summary>
 		new Stream Stream { get; set; }
 
+		new string ConnectionId { get; set; }
+
 		bool IsPingRequest { get; }
 		bool IsHeartbeatRequest { get; }
 		bool IsHeartbeatOrPingRequest { get; }
@@ -71,5 +73,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		/// Gets the id of the RelayServer this request may acknowledged to
 		/// </summary>
 		Guid AcknowledgeOriginId { get; }
+
+		/// <summary>
+		/// Gets the id of the connection this request was received at
+		/// </summary>
+		string ConnectionId { get; }
 	}
 }
