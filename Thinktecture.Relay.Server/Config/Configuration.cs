@@ -41,6 +41,7 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan FailedLoginLockoutPeriod { get; }
 		public bool SecureClientController { get; }
 		public TimeSpan AccessTokenLifetime { get; }
+		public bool LogSensitiveData { get; }
 
 		// Default settings for links
 		public TimeSpan LinkTokenRefreshWindow { get; }
@@ -235,6 +236,12 @@ namespace Thinktecture.Relay.Server.Config
 				AccessTokenLifetime = tmpTimeSpan;
 			}
 
+			LogSensitiveData = true;
+			if (Boolean.TryParse(GetValue(nameof(LogSensitiveData)), out tmpBool))
+			{
+				LogSensitiveData = tmpBool;
+			}
+
 			LinkTokenRefreshWindow = TimeSpan.FromMinutes(1);
 			if (TimeSpan.TryParse(GetValue(nameof(LinkTokenRefreshWindow)), out tmpTimeSpan) && tmpTimeSpan < AccessTokenLifetime)
 			{
@@ -311,6 +318,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(FailedLoginLockoutPeriod), FailedLoginLockoutPeriod);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SecureClientController), SecureClientController);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(AccessTokenLifetime), AccessTokenLifetime);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LogSensitiveData), LogSensitiveData);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkTokenRefreshWindow), LinkTokenRefreshWindow);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMinWaitTime), LinkReconnectMinWaitTime);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMaxWaitTime), LinkReconnectMaxWaitTime);

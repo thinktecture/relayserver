@@ -14,13 +14,17 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		private readonly TimeSpan _requestTimeout;
 		private readonly ILogger _logger;
 
-		protected OnPremiseInProcTargetConnectorBase(ILogger logger, TimeSpan requestTimeout)
+		protected bool LogSensitiveData { get; }
+
+		protected OnPremiseInProcTargetConnectorBase(ILogger logger, TimeSpan requestTimeout, bool logSensitiveData)
 		{
 			if (requestTimeout < TimeSpan.Zero)
 				throw new ArgumentOutOfRangeException(nameof(requestTimeout), "Request timeout cannot be negative.");
 
 			_requestTimeout = requestTimeout;
 			_logger = logger;
+
+			LogSensitiveData = logSensitiveData;
 		}
 
 		protected abstract IOnPremiseInProcHandler CreateHandler();
@@ -32,7 +36,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			_logger?.Verbose("Requesting response from on-premise in-proc target. request-id={RequestId}, url={RequestUrl}, origin-id={OriginId}", request.RequestId, url, request.OriginId);
+			var uri = new Uri(new Uri("http://in-proc-target/"), url);
+			_logger?.Verbose("Requesting response from on-premise in-proc target. request-id={RequestId}, url={RequestUrl}, origin-id={OriginId}", request.RequestId, LogSensitiveData ? uri.PathAndQuery : uri.AbsolutePath, request.OriginId);
 
 			var response = new OnPremiseTargetResponse()
 			{

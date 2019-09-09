@@ -11,6 +11,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 		private static readonly ConfigurationProperty _requestTimeout = new ConfigurationProperty("timeout", typeof(TimeSpan), "00:00:30", new TimeSpanConverter(), new PositiveTimeSpanValidator(), ConfigurationPropertyOptions.None);
 		private static readonly ConfigurationProperty _security = new ConfigurationProperty("security", typeof(SecurityElement), null, ConfigurationPropertyOptions.IsRequired);
 		private static readonly ConfigurationProperty _onPremiseTargets = new ConfigurationProperty("onPremiseTargets", typeof(OnPremiseTargetCollection), null);
+		private static readonly ConfigurationProperty _logSensitiveData = new ConfigurationProperty("logSensitiveData", typeof(bool), false);
 
 		private static readonly ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection()
 		{
@@ -19,6 +20,7 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 			_requestTimeout,
 			_security,
 			_onPremiseTargets,
+			_logSensitiveData,
 		};
 
 		protected override ConfigurationPropertyCollection Properties => _properties;
@@ -28,5 +30,6 @@ namespace Thinktecture.Relay.OnPremiseConnectorService.Configuration
 		public TimeSpan RequestTimeout => (TimeSpan)this[_requestTimeout];
 		public SecurityElement Security => (SecurityElement)this[_security];
 		public OnPremiseTargetCollection OnPremiseTargets => (OnPremiseTargetCollection)this[_onPremiseTargets];
+		public bool LogSensitiveData => (bool)this[_logSensitiveData];
 	}
 }

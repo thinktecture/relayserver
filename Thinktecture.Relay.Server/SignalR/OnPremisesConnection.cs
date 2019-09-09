@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.SignalR
@@ -13,11 +14,13 @@ namespace Thinktecture.Relay.Server.SignalR
 	{
 		private readonly ILogger _logger;
 		private readonly IBackendCommunication _backendCommunication;
+		private readonly IConfiguration _configuration;
 
-		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication)
+		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IConfiguration configuration)
 		{
 			_logger = logger;
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 		}
 
 		protected override bool AuthorizeRequest(IRequest request)
@@ -63,8 +66,10 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private async Task ForwardClientRequestAsync(string connectionId, IOnPremiseConnectorRequest request)
 		{
+			var uri = new Uri(new Uri("http://localhost"), request.Url);
+
 			_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
-				connectionId, request.RequestId, request.HttpMethod, request.Url, request.OriginId, request.ContentLength);
+				connectionId, request.RequestId, request.HttpMethod, _configuration.LogSensitiveData ? uri.PathAndQuery : uri.AbsolutePath, request.OriginId, request.ContentLength);
 
 			await Connection.Send(connectionId, request).ConfigureAwait(false);
 		}

@@ -38,6 +38,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		private string _accessToken;
 		private TimeSpan _minReconnectWaitTime = TimeSpan.FromSeconds(2);
 		private TimeSpan _maxReconnectWaitTime = TimeSpan.FromSeconds(30);
+		private bool _logSensitiveData;
 
 		public event EventHandler Connected;
 		public event EventHandler Disconnected;
@@ -55,7 +56,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public TimeSpan? SlidingConnectionLifetime { get; private set; }
 
 		public RelayServerSignalRConnection(Assembly versionAssembly, string userName, string password, Uri relayServerUri, TimeSpan requestTimeout,
-			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, IRelayServerHttpConnection httpConnection, ILogger logger)
+			TimeSpan tokenRefreshWindow, IOnPremiseTargetConnectorFactory onPremiseTargetConnectorFactory, IRelayServerHttpConnection httpConnection, ILogger logger, bool logSensitiveData)
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
 			RelayServerConnectionInstanceId = Interlocked.Increment(ref _nextInstanceId);
@@ -70,6 +71,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_onPremiseTargetConnectorFactory = onPremiseTargetConnectorFactory;
 			_httpConnection = httpConnection ?? throw new ArgumentNullException(nameof(httpConnection));
 			_logger = logger;
+			_logSensitiveData = logSensitiveData;
 
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
@@ -91,7 +93,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise web target. handler-key={HandlerKey}, base-uri={BaseUri}, follow-redirects={FollowRedirects}", key, baseUri, followRedirects);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout, followRedirects);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(baseUri, _requestTimeout, followRedirects, _logSensitiveData);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
@@ -105,7 +107,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, handlerType);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerType, _requestTimeout, _logSensitiveData);
 		}
 
 		public void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory)
@@ -119,7 +121,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target using a handler factory. handler-key={HandlerKey}", key);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create(handlerFactory, _requestTimeout, _logSensitiveData);
 		}
 
 		public void RegisterOnPremiseTarget<T>(string key) where T : IOnPremiseInProcHandler, new()
@@ -131,7 +133,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			_logger?.Verbose("Registering on-premise in-proc target. handler-key={HandlerKey}, handler-type={HandlerType}", key, typeof(T).Name);
 
-			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout);
+			_connectors[key] = _onPremiseTargetConnectorFactory.Create<T>(_requestTimeout, _logSensitiveData);
 		}
 
 		private static string RemoveTrailingSlashes(string key)
@@ -415,6 +417,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 				_minReconnectWaitTime = config.ReconnectMinWaitTime ?? _minReconnectWaitTime;
 				_maxReconnectWaitTime = config.ReconnectMaxWaitTime ?? _maxReconnectWaitTime;
+				_logSensitiveData = config.LogSensitiveData ?? _logSensitiveData;
 
 				AbsoluteConnectionLifetime = config.AbsoluteConnectionLifetime ?? AbsoluteConnectionLifetime;
 				SlidingConnectionLifetime = config.SlidingConnectionLifetime ?? SlidingConnectionLifetime;
@@ -518,7 +521,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task RequestLocalTargetAsync(RequestContext ctx, string key, IOnPremiseTargetConnector connector, IOnPremiseTargetRequestInternal request, CancellationToken cancellationToken)
 		{
-			_logger?.Debug("Relaying request to local target. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, request.Url);
+			var uri = new Uri(new Uri("http://local-target/"), request.Url);
+			_logger?.Debug("Relaying request to local target. request-id={RequestId}, request-url={RequestUrl}", request.RequestId, _logSensitiveData ? uri.PathAndQuery : uri.AbsolutePath);
 
 			var url = (request.Url.Length > key.Length) ? request.Url.Substring(key.Length + 1) : String.Empty;
 
