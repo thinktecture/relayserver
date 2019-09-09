@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public async Task<HttpResponseMessage> SendToRelayAsync(string relativeUrl, HttpMethod httpMethod, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken)
 		{
 			if (String.IsNullOrWhiteSpace(relativeUrl))
-				throw new ArgumentException("Relative url cannot be null or empty.");
+				throw new ArgumentException("Relative url cannot be null or empty.", nameof(relativeUrl));
 
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
