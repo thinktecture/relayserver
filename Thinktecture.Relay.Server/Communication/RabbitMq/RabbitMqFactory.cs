@@ -32,6 +32,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			{
 				_factory.Uri = new Uri(connectionString);
 
+				if (!_configuration.LogSensitiveData && !String.IsNullOrWhiteSpace(_factory.Uri.UserInfo))
+				{
+					connectionString = connectionString.Replace($"{_factory.Uri.UserInfo}@", "*** BLOCKED ***@");
+				}
+
 				if (_configuration.RabbitMqAutomaticRecoveryEnabled && _factory is ConnectionFactory connectionFactory)
 				{
 					connectionFactory.AutomaticRecoveryEnabled = true;
@@ -39,11 +44,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 				if (_configuration.RabbitMqClusterHosts == null)
 				{
-					_logger?.Verbose("Creating RabbitMQ connection. connection-string={RabbitConnectionString}, automatic-recovery-enabled={RabbitAutomaticRecoveryEnabled}", _configuration.RabbitMqConnectionString, _configuration.RabbitMqAutomaticRecoveryEnabled);
+					_logger?.Verbose("Creating RabbitMQ connection. connection-string={RabbitConnectionString}, automatic-recovery-enabled={RabbitAutomaticRecoveryEnabled}", connectionString, _configuration.RabbitMqAutomaticRecoveryEnabled);
 					return _factory.CreateConnection();
 				}
 
-				_logger?.Verbose("Creating RabbitMQ cluster connection. connection-string={RabbitConnectionString}, cluster-hosts={RabbitClusterHosts}, automatic-recovery-enabled={RabbitAutomaticRecoveryEnabled}", _configuration.RabbitMqConnectionString, _configuration.RabbitMqClusterHosts, _configuration.RabbitMqAutomaticRecoveryEnabled);
+				_logger?.Verbose("Creating RabbitMQ cluster connection. connection-string={RabbitConnectionString}, cluster-hosts={RabbitClusterHosts}, automatic-recovery-enabled={RabbitAutomaticRecoveryEnabled}", connectionString, _configuration.RabbitMqClusterHosts, _configuration.RabbitMqAutomaticRecoveryEnabled);
 
 				return _factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(_configuration.RabbitMqClusterHosts));
 			}
