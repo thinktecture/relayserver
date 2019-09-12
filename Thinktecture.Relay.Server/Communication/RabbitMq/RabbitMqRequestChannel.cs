@@ -48,10 +48,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				switch (request.AcknowledgmentMode)
 				{
 					case AcknowledgmentMode.Auto:
-						lock (Model)
-						{
-							Model.BasicAck(deliveryTag, false);
-						}
+						Acknowledge(deliveryTag);
 						Logger?.Debug("Request was automatically acknowledged. request-id={RequestId}", request.RequestId);
 						break;
 
@@ -69,10 +66,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			if (UInt64.TryParse(acknowledgeId, out var deliveryTag))
 			{
-				lock (Model)
-				{
-					Model.BasicAck(deliveryTag, false);
-				}
+				Acknowledge(deliveryTag);
 			}
 		}
 	}

@@ -16,12 +16,14 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		where TMessage : class
 	{
 		private bool _disposed = false;
+		private IModel _model;
+
 		private readonly string _queuePrefix;
 
 		protected readonly Encoding Encoding = new UTF8Encoding(false, true);
 		protected readonly ILogger Logger;
 
-		protected IModel Model { get; private set; }
+
 		protected string Exchange { get; private set; }
 		protected string ChannelId { get; private set; }
 		protected IConfiguration Configuration { get; private set; }
@@ -39,7 +41,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 			if (connection == null) throw new ArgumentNullException(nameof(connection));
 
-			Model = connection.CreateModel();
+			_model = connection.CreateModel();
 			DeclareExchange();
 		}
 
@@ -49,7 +51,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		protected void DeclareExchange()
 		{
 			Logger.Verbose("Declaring exchange. exchange-name={ExchangeName}, exchange-type={ExchangeType}", Exchange, ExchangeType.Direct);
-			Model.ExchangeDeclare(Exchange, ExchangeType.Direct);
+			_model.ExchangeDeclare(Exchange, ExchangeType.Direct);
 		}
 
 		protected void DeclareAndBind()
@@ -67,8 +69,8 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 			try
 			{
-				Model.QueueDeclare(QueueName, true, false, false, arguments);
-				Model.QueueBind(QueueName, Exchange, RoutingKey);
+				_model.QueueDeclare(QueueName, true, false, false, arguments);
+				_model.QueueBind(QueueName, Exchange, RoutingKey);
 			}
 			catch (Exception ex)
 			{
@@ -92,10 +94,10 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			Logger.Verbose("Sending data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 
-		 	lock (Model)
+			lock (_model)
 			{
 				DeclareAndBind();
-				Model.BasicPublish(Exchange, RoutingKey, false, properties, data);
+				_model.BasicPublish(Exchange, RoutingKey, false, properties, data);
 			}
 		}
 
@@ -103,7 +105,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			Logger.Verbose("Unbinding queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 
-			Model.QueueUnbind(QueueName, Exchange, RoutingKey);
+			_model.QueueUnbind(QueueName, Exchange, RoutingKey);
 		}
 
 		protected IObservable<TMessage> CreateObservable<TMessageType>(bool autoAck = true, Action<TMessageType, ulong> callback = null)
@@ -113,11 +115,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			{
 				Logger?.Debug("Creating consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 
-				lock (Model)
+				lock (_model)
 				{
 					DeclareAndBind();
-					var consumer = new EventingBasicConsumer(Model);
-					var consumerTag = Model.BasicConsume(QueueName, autoAck, consumer);
+					var consumer = new EventingBasicConsumer(_model);
+					var consumerTag = _model.BasicConsume(QueueName, autoAck, consumer);
 
 					void OnReceived(object sender, BasicDeliverEventArgs args)
 					{
@@ -135,10 +137,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 							if (!autoAck)
 							{
-								lock (Model)
-								{
-									Model.BasicAck(args.DeliveryTag, false);
-								}
+								Acknowledge(args.DeliveryTag);
 							}
 						}
 					}
@@ -151,15 +150,23 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 						consumer.Received -= OnReceived;
 
-						lock (Model)
+						lock (_model)
 						{
-							Model.BasicCancel(consumerTag);
-							Model.BasicRecover(true);
+							_model.BasicCancel(consumerTag);
+							_model.BasicRecover(true);
 							Unbind();
 						}
 					});
 				}
 			});
+		}
+
+		protected void Acknowledge(ulong deliveryTag, bool multiple = false)
+		{
+			lock (_model)
+			{
+				_model.BasicAck(deliveryTag, multiple);
+			}
 		}
 
 		public void Dispose()
@@ -168,11 +175,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 			if (!_disposed)
 			{
-				if (Model != null)
+				if (_model != null)
 				{
 					Unbind();
-					Model.Dispose();
-					Model = null;
+					_model.Dispose();
+					_model = null;
 				}
 
 				_disposed = true;

@@ -35,10 +35,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			if (UInt64.TryParse(acknowledgeId, out var deliveryTag))
 			{
-				lock (Model)
-				{
-					Model.BasicAck(deliveryTag, false);
-				}
+				Acknowledge(deliveryTag);
 			}
 		}
 	}
