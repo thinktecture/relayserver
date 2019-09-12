@@ -27,7 +27,7 @@
 * Allgemeine Verbesserungen
 
   * Der RelayServer warnt nun wenn die `SharedSecret` Einstellung fehlt und kann, wenn nicht im Multi-Server Betrieb eingesetzt, einen zufälligen Startwert verwenden.
-  *  Interceptoren können nun auch den Stream mit den Inhaltsdaten der Requests und Responses lesen und modifizieren.
+  * Interceptoren können nun auch den Stream mit den Inhaltsdaten der Requests und Responses lesen und modifizieren.
   * Das EF-Model wurde um genauere Informationen und Indices erweitert.
   * Wenn ein On-Premise Target ungültige Expires-Header setzt, kommt es nicht mehr zu einem Fehler.
   * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.
