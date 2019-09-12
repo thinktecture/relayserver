@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutofacSerilogIntegration;
+using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
@@ -40,6 +41,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();
 			builder.RegisterType<AutomaticDisconnectChecker>().As<IAutomaticDisconnectChecker>();
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
+			builder.RegisterType<OnPremiseInterceptorFactory>().As<IOnPremiseInterceptorFactory>();
+			builder.Register(ctx => _serviceProvider);
 
 			var container = builder.Build();
 			_serviceProvider = new AutofacServiceProvider(container);

@@ -18,6 +18,10 @@ The goal of this list is to highlight companies who pay back to this open source
 
 ## Version 2.3.0
 
+* On-Premise Interceptors
+
+  * It is now possible to add custom code into the On-Premise connector that is able to intercept and modifiy requests and responses.
+
 * Modify content streams
 
   * Interceptors now can read and modify the content streams of requests and responses.

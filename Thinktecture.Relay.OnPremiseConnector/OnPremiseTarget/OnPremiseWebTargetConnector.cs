@@ -57,7 +57,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 				response.StatusCode = message.StatusCode;
 				response.HttpHeaders = message.Headers.Union(message.Content.Headers).ToDictionary(kvp => kvp.Key, kvp => String.Join(" ", kvp.Value));
 				response.Stream = await message.Content.ReadAsStreamAsync().ConfigureAwait(false);
-				response.HttpResponseMessage = message;
 			}
 			catch (Exception ex)
 			{
@@ -74,7 +73,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			return response;
 		}
 
-		private async Task<HttpResponseMessage> SendLocalRequestWithTimeoutAsync(String url, IOnPremiseTargetRequest request, String relayedRequestHeader)
+		private async Task<HttpResponseMessage> SendLocalRequestWithTimeoutAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
 		{
 			// Only create CTS when really required (i.e. Timeout not Zero or infinite)
 			if (_requestTimeout > TimeSpan.Zero && _requestTimeout != TimeSpan.MaxValue)
@@ -88,7 +87,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			return await SendLocalRequestAsync(url, request, relayedRequestHeader, CancellationToken.None).ConfigureAwait(false);
 		}
 
-		private async Task<HttpResponseMessage> SendLocalRequestAsync(String url, IOnPremiseTargetRequest request, String relayedRequestHeader, CancellationToken token)
+		private async Task<HttpResponseMessage> SendLocalRequestAsync(string url, IOnPremiseTargetRequest request, string relayedRequestHeader, CancellationToken token)
 		{
 			var requestMessage = _requestMessageBuilder.CreateLocalTargetRequestMessage(_baseUri, url, request, relayedRequestHeader, _logSensitiveData);
 			return await _httpClient.SendAsync(requestMessage, token).ConfigureAwait(false);
