@@ -7,7 +7,7 @@
 
 # Release Notes
 
-## Version 2.3.0
+## Version 2.3.0-rc1
 
 * RabbitMq Verbesserungen
 
