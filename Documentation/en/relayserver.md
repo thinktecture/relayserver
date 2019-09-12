@@ -16,7 +16,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.3.0
+## Version 2.3.0-rc1
 
 * RabbitMq Improvements
 
@@ -40,8 +40,6 @@ The goal of this list is to highlight companies who pay back to this open source
   * If an On-Premises target sets an invalid value for the expires header, there won't be an error anymopre.
   * Logging of sensitive data is now configurable and enabled by default.
   * Now all information required for manual acknowledgment is provided for easier handling.
-
-## Version 2.2.1
 
 * Bugfixes
 

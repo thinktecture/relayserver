@@ -7,7 +7,7 @@
 
 # Release Notes
 
-## Version 2.3.0
+## Version 2.3.0-rc1
 
 * RabbitMq Verbesserungen
 
@@ -32,8 +32,6 @@
   * Wenn ein On-Premise Target ungültige Expires-Header setzt, kommt es nicht mehr zu einem Fehler.
   * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.
   * Es stehen nun alle benötigen Informationen für manuelles Acknowlegment einfacher zur Verfügung.
-
-## Version 2.2.1
 
 * Fehlerbehebungen
 
