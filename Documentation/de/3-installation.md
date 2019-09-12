@@ -180,7 +180,7 @@ Die Standardeinstellungen umfassen dabei:
 |  Key name | Description |
 | --- | --- |
 | RabbitMqClusterHosts | Komma-separierte Liste der RabbitMQ Cluster Teilnehmer (default _null_) |
-| RabbitMqAutomaticRecoveryEnabled | Aktiviert die Funktion des RabbitMq Clients, defekte Netzwerkverbindungen zum RabbitMq Server automatisch wieder her zu stellen (default true) |
+| RabbitMqAutomaticRecoveryEnabled | Aktiviert die Funktion des RabbitMq Clients, defekte Netzwerkverbindungen zum RabbitMq Server automatisch wiederherzustellen (default true) |
 | QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
 | RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
 | OnPremiseConnectorCallbackTimeout| Zeitspanne, die der RelayServer auf eine Antwort des On-Premise Connectors wartet (default 30 Sekunden) |
