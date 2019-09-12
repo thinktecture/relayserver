@@ -15,8 +15,8 @@ Die Installation von RabbitMQ, welches eine installierte Erlang-Ausführungsumge
 Nach der Installation von Erlang und RabbitMQ ist es sinnvoll, die Management Weboberfläche für RabbitMQ zu aktivieren. Die Aktivierung erfolgt im RabbitMQ Command Prompt, der durch die Installation von RabbitMQ in der gleichnamigen Programmgruppe im Startmenü angelegt worden ist. Diesen bitte mit Administrator-Rechten starten. Im RabbitMQ Command Prompt müssen die nachfolgenden Befehle ausgeführt werden:
 
 ```
-rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service stop
+rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service start
 ```
 
@@ -42,7 +42,7 @@ net start rabbitmq
 
 Nach dieser Korrektur sollte der Service mit Beschreibung in der Windows Service Konsole vorhanden sein und das Management Web verfügbar sein.
 
-Mit den Default-Anmeldedaten guest / guest erfolgt der Login und die Statusübersicht von RabbitMQ erscheint.
+Mit den Default-Anmeldedaten `guest / guest` erfolgt der Login und die Statusübersicht von RabbitMQ erscheint. Es wird empfohlen, den Gast-Benutzer zu deaktivieren und einen neuen Benutzer mit einem starken Passwort anzulegen.
 
 ![2-rabbitmq5.png](./assets/2-rabbitmq5.png)
 
@@ -109,12 +109,18 @@ Thinktecture.Relay.Server.exe.config
 
 abgespeichert werden.
 
+## Wichtige Konfigurationseinstellungen
+
+Wird vergessen, die Konfigurationsdatei bereitzustellen, so bricht der RelayServer den Start ab.
+
+Es müssen zumindest die ConnectionStrings zur Datenbank und zur RabbitMQ und das `SharedSecret` bzw. das `OAuthCertificate` konfiguriert werden. Im Multi-Server Betrieb ist auch der `TemporaryRequestStoragePath` anzugeben.
+
 ## Connection Strings
 
 Die Verbindungen des RelayServer zu den beteiligten Tools RabbitMQ und Microsoft SQL Server werden im Abschnitt <connectionStrings></connectionStrings> der Konfigurationsdatei konfiguriert. Standardmäßig finden sich in diesem Abschnitt daher diese beiden Verbindungseinstellungen:
 
 ```
-<add name="RabbitMQ" connectionString="host=localhost" />
+<add name="RabbitMQ" connectionString="amqp://rabbitUser:rabbitPassword@localhost" />
 <add name="RelayContext" connectionString="Server=.\SQLEXPRESS;Trusted\_Connection=True;Database=RelayServer" providerName="System.Data.SqlClient" />
 ```
 
@@ -133,6 +139,7 @@ Die Standardeinstellungen umfassen dabei:
 ```
 <appSettings>
     <add key="RabbitMqClusterHosts" value="" />
+    <add key="RabbitMqAutomaticRecoveryEnabled" value="true" />
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
     <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
@@ -161,6 +168,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
+    <add key="LogSensitiveData" value="true" />
     <add key="LinkTokenRefreshWindow" value="00:01:00" />
     <add key="LinkReconnectMinWaitTime" value="00:00:02" />
     <add key="LinkReconnectMaxWaitTime" value="00:00:30" />
@@ -172,6 +180,7 @@ Die Standardeinstellungen umfassen dabei:
 |  Key name | Description |
 | --- | --- |
 | RabbitMqClusterHosts | Komma-separierte Liste der RabbitMQ Cluster Teilnehmer (default _null_) |
+| RabbitMqAutomaticRecoveryEnabled | Aktiviert die Funktion des RabbitMq Clients, defekte Netzwerkverbindungen zum RabbitMq Server automatisch wiederherzustellen (default true) |
 | QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
 | RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
 | OnPremiseConnectorCallbackTimeout| Zeitspanne, die der RelayServer auf eine Antwort des On-Premise Connectors wartet (default 30 Sekunden) |
@@ -200,6 +209,7 @@ Die Standardeinstellungen umfassen dabei:
 | FailedLoginLockoutPeriod | Zeit, die ein User nach dem letzten erfolglosen Login-Versuch über `MaxFailedLoginAttempts` gesperrt wird (default 15 Minuten) |
 | SecureClientController | Legt fest, ob ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines On-Premise Connectors / Links mitsenden muss (default false) |
 | AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für On-Premise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) <br/> _Hinweis:_ Ein zu kleiner Wert schränkt die Benutzbarkeit des Management Webs ein |
+| LogSensitiveData | Gibt an, ob sensitive Daten der Requests wie Werte von Http-Headern und Query-Parametern gelogged werden sollen (default true) |
 | LinkTokenRefreshWindow | Default-Zeitspanne, in der ein On-Premise Connector vor dem ungültig werden seines AccessTokens ein neues anfordert (default 1 Minute). Dieser Wert kann pro Link überschrieben werden. |
 | LinkReconnectMinWaitTime | Default-Zeitspanne, nachdem ein On-Premise Connector nach einem Verbindungsverlust die SignalR-Verbindung frühestens wieder aufzubauen versucht (default 2 Sekunden). Dieser Wert kann pro Link überschrieben werden. |
 | LinkReconnectMaxWaitTime | Default-Zeitspanne, nachdem ein On-Premise Connector nach einem Verbindungsverlust die SignalR-Verbindung spätestens wieder aufzubauen versucht (default 30 Sekunden). Dieser Wert kann pro Link überschrieben werden. |

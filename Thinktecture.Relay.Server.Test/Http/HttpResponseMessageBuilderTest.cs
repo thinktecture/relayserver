@@ -8,10 +8,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Thinktecture.Relay.Server.Dto;
-using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
@@ -34,17 +31,12 @@ namespace Thinktecture.Relay.Server.Http
 			public long ContentLength { get; set; }
 		}
 
-		private IPostDataTemporaryStore GetInMemoryStore()
-		{
-			return new InMemoryPostDataTemporaryStore(null, new ConfigurationDummy());
-		}
-
 		[TestMethod]
 		public void GetResponseMessage_returns_on_premise_timeout_message_when_given_OnPremiseTargetResponse_is_null()
 		{
-			IHttpResponseMessageBuilder sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			IHttpResponseMessageBuilder sut = new HttpResponseMessageBuilder(null);
 
-			using (var result = sut.BuildFromConnectorResponse(null, null, null))
+			using (var result = sut.BuildFromConnectorResponse(null, true, null))
 			{
 				result.StatusCode.Should().Be(HttpStatusCode.GatewayTimeout);
 				result.Content.Headers.Count().Should().Be(1);
@@ -56,7 +48,7 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public async Task GetResponseMessage_returns_an_HttpResponseMessage_when_given_OnPremiseTargetResponse_is_null()
 		{
-			IHttpResponseMessageBuilder sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			IHttpResponseMessageBuilder sut = new HttpResponseMessageBuilder(null);
 			var onPremiseTargetRequest = new OnPremise.OnPremiseConnectorResponse
 			{
 				StatusCode = HttpStatusCode.NotFound,
@@ -68,9 +60,8 @@ namespace Thinktecture.Relay.Server.Http
 				},
 				ContentLength = 4,
 			};
-			var link = new Link();
 
-			using (var result = sut.BuildFromConnectorResponse(onPremiseTargetRequest, link, null))
+			using (var result = sut.BuildFromConnectorResponse(onPremiseTargetRequest, true, null))
 			{
 				var content = await result.Content.ReadAsByteArrayAsync();
 				result.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -83,7 +74,7 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public void SetHttpHeaders_does_nothing_when_no_HttpHeaders_are_provided()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var httpContent = new ByteArrayContent(new byte[] { });
 
 			sut.AddContentHttpHeaders(httpContent, null);
@@ -94,7 +85,7 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public void SetHttpHeaders_transforms_HTTP_headers_correctly_from_a_given_OnPremiseTargetRequest_and_sets_them_on_a_given_HttpContent()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var httpHeaders = new Dictionary<string, string>
 			{
 				["Content-MD5"] = "Q2hlY2sgSW50ZWdyaXR5IQ==", // will be discarded
@@ -124,7 +115,7 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public void SetHttpHeaders_sets_unknown_HTTP_headers_without_validation_correctly_from_a_OnPremiseTargetRequest_on_a_given_HttpContent()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var httpHeaders = new Dictionary<string, string>
 			{
 				["X-Foo"] = "X-Bar",
@@ -143,19 +134,18 @@ namespace Thinktecture.Relay.Server.Http
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void GetResponseContentForOnPremiseTargetResponse_throws_an_exception_when_given_OnPremiseTargetResponse_is_null()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 
-			sut.GetResponseContentForOnPremiseTargetResponse(null, null);
+			sut.GetResponseContentForOnPremiseTargetResponse(null, false);
 		}
 
 		[TestMethod]
 		public void GetResponseContentForOnPremiseTargetResponse_does_not_disclose_content_when_InternalServerError_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_off()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.InternalServerError };
-			var link = new Link();
 
-			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
+			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, false))
 			{
 				result.Should().BeNull();
 			}
@@ -164,11 +154,10 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public void GetResponseContentForOnPremiseTargetResponse_does_not_disclose_content_when_other_error_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_off()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.NotImplemented };
-			var link = new Link();
 
-			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
+			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, false))
 			{
 				result.Should().BeNull();
 			}
@@ -177,11 +166,10 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public async Task GetResponseContentForOnPremiseTargetResponse_discloses_content_when_InternalServerError_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_on()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.InternalServerError, Body = new byte[] { 0, 0, 0 }, ContentLength = 3, };
-			var link = new Link { ForwardOnPremiseTargetErrorResponse = true };
 
-			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
+			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, true))
 			{
 				var body = await result.ReadAsByteArrayAsync();
 				result.Should().NotBeNull();
@@ -192,11 +180,10 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public async Task GetResponseContentForOnPremiseTargetResponse_discloses_content_when_other_error_occurred_and_ForwardOnPremiseTargetErrorResponse_is_turned_on()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.NotImplemented, Body = new byte[] { 0, 0, 0 }, ContentLength = 3, };
-			var link = new Link { ForwardOnPremiseTargetErrorResponse = true };
 
-			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
+			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, true))
 			{
 				var body = await result.ReadAsByteArrayAsync();
 				result.Should().NotBeNull();
@@ -207,11 +194,10 @@ namespace Thinktecture.Relay.Server.Http
 		[TestMethod]
 		public async Task GetResponseContentForOnPremiseTargetResponse_sets_StatusCode_accordingly_and_discloses_content()
 		{
-			var sut = new HttpResponseMessageBuilder(null, GetInMemoryStore());
+			var sut = new HttpResponseMessageBuilder(null);
 			var onPremiseTargetResponse = new OnPremiseConnectorResponse { StatusCode = HttpStatusCode.OK, Body = new byte[] { 0, 0, 0, 0 }, ContentLength = 4, };
-			var link = new Link();
 
-			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, link))
+			using (var result = sut.GetResponseContentForOnPremiseTargetResponse(onPremiseTargetResponse, false))
 			{
 				var body = await result.ReadAsByteArrayAsync();
 				result.Should().NotBeNull();

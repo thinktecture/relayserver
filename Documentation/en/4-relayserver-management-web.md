@@ -1,12 +1,12 @@
-# RelayServer Web Management
+# RelayServer Management Web
 
-The RelayServer Web Management is the graphical user interface for configuring and managing the RelayServer by administrators. It shows the current system status and the historical utilization of data traffic and the number of connected on-premise applications.
+The RelayServer Management Web is the graphical user interface for configuring and managing the RelayServer by administrators. It shows the current system status and the historical utilization of data traffic and the number of connected on-premise applications.
 
 Analysis of operating problems is also accompanied by extensive logging and tracing on the packet level, if this feature has been selected during installation.
 
-For security reasons, the RelayServer Web Management is also only locally accessible and can not be activated for public access. The first start is by calling the URL http://localhost:20000/managementweb/. The web management should preferably be used with Google Chrome. The function with other browsers is not necessarily guaranteed.
+For security reasons, the RelayServer Management Web is also only locally accessible and can not be activated for public access. The first start is by calling the URL http://localhost:20000/managementweb/. The web management should preferably be used with Google Chrome. The function with other browsers is not necessarily guaranteed.
 
-## Initial setup of the RelayServer Web Management
+## Initial setup of the RelayServer Management Web
 
 When the RelayServer Management Web is accessed for the first time, the initial configuration screen is automatically displayed. The initial administrator user and the corresponding password can be created here.
 
@@ -14,17 +14,17 @@ When the RelayServer Management Web is accessed for the first time, the initial 
 
 After the creation of this administration user, the user is automatically redirected to the log-on screen.
 
-## Login to RelayServer Web Management
+## Login to RelayServer Management Web
 
-If the user has not yet logged on to the RelayServer Web Management, the log-on screen will appear.
+If the user has not yet logged on to the RelayServer Management Web, the log-on screen will appear.
 
 ![4-relayserver-management-web2.png](./assets/4-relayserver-management-web2.png)
 
 When logging in, the user can request a permanently valid session. Without active checkbox, the current session is terminated as soon as the user closes the browser.
 
-## Menu structure of the RelayServer Web Management
+## Menu structure of the RelayServer Management Web
 
-The navigation bar of the RelayServer Web Management is divided into the areas
+The navigation bar of the RelayServer Management Web is divided into the areas
 
 - Dashboard
 - Links
@@ -35,7 +35,7 @@ The navigation bar of the RelayServer Web Management is divided into the areas
 
 ## Dashboard
 
-After successful login, the user sees the Dashboard of the RelayServer Web Management. Here you get an overview of the whole system.
+After successful login, the user sees the Dashboard of the RelayServer Management Web. Here you get an overview of the whole system.
 
 The "Chart" tab shows the incoming and outgoing data traffic of the last 7 days, each day being aggregated to one data point.
 
@@ -157,7 +157,7 @@ The buttons for displaying the client request or the response of the On-Premises
 
 ## Users
 
-The RelayServer Web Management allows the creation of several different administration users. Since there is no extensive role management in RelayServer in the current version, each created user has full administration rights in the web management.
+The RelayServer Management Web allows the creation of several different administration users. Since there is no extensive role management in RelayServer in the current version, each created user has full administration rights in the web management.
 
 ![4-relayserver-management-web13.png](./assets/4-relayserver-management-web13.png)
 

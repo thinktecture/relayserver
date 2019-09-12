@@ -1,7 +1,7 @@
 # [What is Thinktecture RelayServer?](1-what-is-thinktecture-relayserver.md)
 # [RelayServer Architecture](2-architecture.md)
 # [RelayServer Installation](3-installation.md)
-# [RelayServer Web Management](4-relayserver-web-management.md)
+# [RelayServer Management Web](4-relayserver-management-web.md)
 # [RelayServer Plugin Development](5-relayserver-interceptor-development.md)
 # [Development Setup](6-development-setup.md)
 
@@ -15,6 +15,36 @@ The goal of this list is to highlight companies who pay back to this open source
 [<img width="120px" src="./assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
 
 # Version history
+
+## Version 2.3.0-rc1
+
+* RabbitMq Improvements
+
+  * Closed Rabbit connections will now be automatically unbound at the client.
+  * The automatic recovery feature of the rabbit client will now be enabled by default.
+  * When a channel gets closed, make sure all unacknowledged messages get re-queued.
+  * To improve throughput, multiple channels (via RoutingKeys) will be used for requests, responses and acknowledgements.
+
+* On-Premise Interceptors
+
+  * It is now possible to add custom code into the On-Premise connector that is able to intercept and modifiy requests and responses.
+
+* Modify content streams
+
+  * Interceptors now can read and modify the content streams of requests and responses.
+
+* General improvements
+
+  * The RelayServer now warns when the `SharedSecret` setting is missing and uses a random value to be able to work at all, if it is not configured for Multi-Server operation.
+  * The EF model was extended with more accurate information and new indices.
+  * If an On-Premises target sets an invalid value for the expires header, there won't be an error anymopre.
+  * Logging of sensitive data is now configurable and enabled by default.
+  * Now all information required for manual acknowledgment is provided for easier handling.
+
+* Bugfixes
+
+  * Under certain circumstances the on-premise connector demo service wasn't able to load a framework assembly.
+  * The OnPremise-Connector is now able to recreate the `HttpClient` that is used to send responses to the RelayServer in case there are errors when posting.
 
 ## Version 2.2.0
 

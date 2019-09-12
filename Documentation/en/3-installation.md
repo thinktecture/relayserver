@@ -15,8 +15,8 @@ The installation of RabbitMQ, which requires an installed Erlang execution envir
 After the installation of Erlang and RabbitMQ, it is useful to activate the management web interface for RabbitMQ. Activation takes place in the RabbitMQ Command Prompt, which has been created by installing RabbitMQ in the program group of the same name in the Start menu. Please start with administrator rights. In the RabbitMQ Command Prompt, the following commands must be executed:
 
 ```
-rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service stop
+rabbitmq-plugins enable rabbitmq_management
 rabbitmq-service start
 ```
 
@@ -40,9 +40,9 @@ net start rabbitmq
 
 ![2-rabbitmq4.png](./assets/2-rabbitmq4.png)
 
-After this correction, the service with description should be present in the Windows service console and the Web Management should be available.
+After this correction, the service with description should be present in the Windows service console and the Management Web should be available.
 
-The default login data `guest / guest` is used to log in and RabbitMQ's status overview is displayed.
+The default login credentials `guest / guest` are used to log in and RabbitMQ's status overview is displayed. It is strongly advised to disable the guest user and to create a new user with a strong password.
 
 ![2-rabbitmq5.png](./assets/2-rabbitmq5.png)
 
@@ -83,7 +83,7 @@ Thinktecture.Relay.Server.exe start -servicename=ServiceName
 
 The parameter "-servicename" is necessary if there are several RelayServers installed on the system.
 
-## Uninstallation
+## Removal
 
 To remove the RelayServer service, navigate to the folder of the RelayServer in a command line window with administrator rights and call this command:
 
@@ -107,12 +107,18 @@ This configuration file should be saved as
 Thinktecture.Relay.Server.exe.config
 ```
 
+## Important configuration settings
+
+If you do not provide a configuration file, the RelayServer will refuse to start.
+
+You have to provide at least the connection strings to the database and to the RabbitMQ, as well as either the `SharedSecret` or `OAuthCertificate`. If you are running in a Multi-Server environment, you also have to provide the `TemporaryRequestStoragePath`.
+
 ## Connection Strings
 
 The connections of the RelayServer to the RabbitMQ and Microsoft SQL Server tools are configured in the <connectionStrings></ connectionStrings> section of the configuration file. By default, this section contains these two connection settings:
 
 ```
-<add name="RabbitMQ" connectionString="host=localhost" />
+<add name="RabbitMQ" connectionString="amqp://rabbitUser:rabbitPassword@localhost" />
 <add name="RelayContext" connectionString="Server=.\SQLEXPRESS;Trusted\_Connection=True;Database=RelayServer" providerName="System.Data.SqlClient" />
 ```
 
@@ -131,6 +137,7 @@ The default settings include:
 ```
 <appSettings>
     <add key="RabbitMqClusterHosts" value="" />
+    <add key="RabbitMqAutomaticRecoveryEnabled" value="true" />
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
     <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
@@ -159,6 +166,7 @@ The default settings include:
     <add key="FailedLoginLockoutPeriod" value="00:15:00" />
     <add key="SecureClientController" value="false" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
+    <add key="LogSensitiveData" value="true" />
     <add key="LinkTokenRefreshWindow" value="00:01:00" />
     <add key="LinkReconnectMinWaitTime" value="00:00:02" />
     <add key="LinkReconnectMaxWaitTime" value="00:00:30" />
@@ -169,7 +177,8 @@ The default settings include:
 
 |  Key name | Description |
 | --- | --- |
-| RabbitMqClusterHosts | Comma-separated list of RabbitMQ cluster members (default _null_) |
+| RabbitMqClusterHosts | Comma-separated list of RabbitMq cluster members (default _null_) |
+| RabbitMqAutomaticRecoveryEnabled | Enables the feature of the RabbitMq client, to automatically try to recover failed network connections to the RabbitMq server (default true) |
 | QueueExpiration | Time span after which an abandon queue will be deleted (default 10 seconds) |
 | RequestExpiration | Time span after which a not yet handled request will expire from the queue (default 10 seconds) |
 | OnPremiseConnectorCallbackTimeout | Time span the RelayServer will wait for a response from the On-Premise Connector (default 30 seconds) |
@@ -198,6 +207,7 @@ The default settings include:
 | FailedLoginLockoutPeriod | Time span that a user will be locked out after he has more than `MaxFailedLoginAttempts` failed login attempts (default 15 minutes) |
 | SecureClientController | When set, every request to the `/relay` endpoint must be authorized by a valid On-Premise Connector / Link access token (default false) |
 | AccessTokenLifetime | Time span that an issued access token for On-Premise Connectors and Management Web users will be valid (default 365 days)<br /> _Note:_ If you set this value too short, usability of the Management Web will be affected |
+| LogSensitiveData | Determines whether sensitive data like query parameter values or http header values should be written to the logs (default true) |
 | LinkTokenRefreshWindow | Default time span, in which an On-Premise Connector will request a new access token, before the current one expires (default 1 minute). This value can be overriden per link. |
 | LinkReconnectMinWaitTime | Default time span, after which an disconnected On-Premise Connector may reconnect to the RelayServer (default 2 seconds). This value can be overriden per link. |
 | LinkReconnectMaxWaitTime | Default time span, after which an disconnected On-Premise Connector will reconnect at the latest (default 30 seconds). This value can be overriden per link. |

@@ -1,7 +1,7 @@
 using System;
-using System.Security.Authentication;
 using System.Threading.Tasks;
 using Serilog;
+using Thinktecture.Relay.OnPremiseConnector.IdentityModel;
 
 namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {

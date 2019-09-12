@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 
 namespace Thinktecture.Relay.Server.Interceptor
@@ -28,6 +29,12 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// Gets the HTTP headers received from the local target.
 		/// </summary>
 		IReadOnlyDictionary<string, string> HttpHeaders { get; set; }
+
+		/// <summary>
+		/// Gets or sets the content of the response.
+		/// <remarks>Accessing this property will COPY the original content and use more memory.</remarks>
+		/// </summary>
+		Stream Content { get; set; }
 
 		/// <summary>
 		/// Creates a copy of the <see cref="HttpHeaders"/> read-only dictionary.

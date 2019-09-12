@@ -20,9 +20,11 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 		public string UserName { get; set; }
 
 		[Required]
+		[MaxLength(32)]
 		public string Password { get; set; }
 
 		[Required]
+		[MaxLength(32)]
 		public string Salt { get; set; }
 
 		[Required]

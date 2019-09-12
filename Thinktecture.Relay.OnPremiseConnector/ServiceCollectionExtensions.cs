@@ -1,4 +1,6 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
+using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
@@ -18,7 +20,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public static IServiceCollection AddOnPremiseConnectorServices(this IServiceCollection collection)
 		{
 			return collection
-				.AddSingleton<IOnPremiseWebTargetRequestMessageBuilder, OnPremiseWebTargetRequestMessageBuilder>()
+				.AddTransient<IOnPremiseWebTargetRequestMessageBuilder, OnPremiseWebTargetRequestMessageBuilder>()
+				.AddSingleton<Func<IOnPremiseWebTargetRequestMessageBuilder>>(sp => sp.GetRequiredService<IOnPremiseWebTargetRequestMessageBuilder>)
 				.AddSingleton<IHttpClientFactory, HttpClientFactory>()
 				.AddSingleton<MaintenanceLoop>()
 				.AddSingleton<IMaintenanceLoop>(ctx =>
@@ -31,8 +34,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				.AddTransient<IOnPremiseTargetConnectorFactory, OnPremiseTargetConnectorFactory>()
 				.AddTransient<IHeartbeatChecker, HeartbeatChecker>()
 				.AddTransient<ITokenExpiryChecker, TokenExpiryChecker>()
-				.AddTransient<IAutomaticDisconnectChecker, AutomaticDisconnectChecker>();
+				.AddTransient<IAutomaticDisconnectChecker, AutomaticDisconnectChecker>()
+				.AddTransient<IOnPremiseInterceptorFactory, OnPremiseInterceptorFactory>();
 		}
-
 	}
 }

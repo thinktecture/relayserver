@@ -4,9 +4,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {
 	internal interface IOnPremiseTargetConnectorFactory
 	{
-		IOnPremiseTargetConnector Create(Uri baseUri, TimeSpan requestTimeout, bool followRedirects = true);
-		IOnPremiseTargetConnector Create(Type handlerType, TimeSpan requestTimeout);
-		IOnPremiseTargetConnector Create(Func<IOnPremiseInProcHandler> handlerFactory, TimeSpan requestTimeout);
-		IOnPremiseTargetConnector Create<T>(TimeSpan requestTimeout) where T : IOnPremiseInProcHandler, new();
+		IOnPremiseTargetConnector Create(Uri baseUri, TimeSpan requestTimeout, bool followRedirects = true, bool logSensitiveData = true);
+		IOnPremiseTargetConnector Create(Type handlerType, TimeSpan requestTimeout, bool logSensitiveData = true);
+		IOnPremiseTargetConnector Create(Func<IOnPremiseInProcHandler> handlerFactory, TimeSpan requestTimeout, bool logSensitiveData = true);
+		IOnPremiseTargetConnector Create<T>(TimeSpan requestTimeout, bool logSensitiveData = true) where T : IOnPremiseInProcHandler, new();
 	}
 }

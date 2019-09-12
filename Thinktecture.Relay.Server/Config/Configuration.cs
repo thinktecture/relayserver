@@ -11,6 +11,8 @@ namespace Thinktecture.Relay.Server.Config
 		//  RabbitMQ Settings
 		public string RabbitMqConnectionString { get; }
 		public string RabbitMqClusterHosts { get; }
+		public bool RabbitMqAutomaticRecoveryEnabled { get; }
+
 		public TimeSpan QueueExpiration { get; }
 		public TimeSpan RequestExpiration { get; }
 
@@ -41,6 +43,7 @@ namespace Thinktecture.Relay.Server.Config
 		public TimeSpan FailedLoginLockoutPeriod { get; }
 		public bool SecureClientController { get; }
 		public TimeSpan AccessTokenLifetime { get; }
+		public bool LogSensitiveData { get; }
 
 		// Default settings for links
 		public TimeSpan LinkTokenRefreshWindow { get; }
@@ -61,6 +64,12 @@ namespace Thinktecture.Relay.Server.Config
 			if (String.IsNullOrWhiteSpace(RabbitMqClusterHosts))
 			{
 				RabbitMqClusterHosts = null;
+			}
+
+			RabbitMqAutomaticRecoveryEnabled = true;
+			if (Boolean.TryParse(GetValue(nameof(RabbitMqAutomaticRecoveryEnabled)), out var tmpBool))
+			{
+				RabbitMqAutomaticRecoveryEnabled = tmpBool;
 			}
 
 			QueueExpiration = TimeSpan.FromSeconds(10);
@@ -108,7 +117,7 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			UseInsecureHttp = false;
-			if (Boolean.TryParse(GetValue(nameof(UseInsecureHttp)), out var tmpBool))
+			if (Boolean.TryParse(GetValue(nameof(UseInsecureHttp)), out tmpBool))
 			{
 				UseInsecureHttp = tmpBool;
 			}
@@ -177,6 +186,22 @@ namespace Thinktecture.Relay.Server.Config
 			SharedSecret = GetValue(nameof(SharedSecret));
 			OAuthCertificate = GetValue(nameof(OAuthCertificate));
 
+			if (String.IsNullOrEmpty(SharedSecret) && String.IsNullOrEmpty(OAuthCertificate))
+			{
+				if (String.IsNullOrEmpty(TemporaryRequestStoragePath))
+				{
+					logger?.Warning("No SharedSecret or OAuthCertificate is configured. Please configure one of them. Continuing with a random value which will make all tokens invalid on restart.");
+					SharedSecret = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+				}
+				else
+				{
+					var message = "No SharedSecret or OAuthCertificate is configured, and RelayServer is set up for Multi-Server operation. You need to configure either SharedSecret or OAuthCertificate before starting RelayServer.";
+
+					logger?.Error(message);
+					throw new ConfigurationErrorsException(message);
+				}
+			}
+
 			HstsHeaderMaxAge = TimeSpan.FromDays(365);
 			if (TimeSpan.TryParse(GetValue(nameof(HstsHeaderMaxAge)), out tmpTimeSpan))
 			{
@@ -217,6 +242,12 @@ namespace Thinktecture.Relay.Server.Config
 			if (TimeSpan.TryParse(GetValue(nameof(AccessTokenLifetime)), out tmpTimeSpan))
 			{
 				AccessTokenLifetime = tmpTimeSpan;
+			}
+
+			LogSensitiveData = true;
+			if (Boolean.TryParse(GetValue(nameof(LogSensitiveData)), out tmpBool))
+			{
+				LogSensitiveData = tmpBool;
 			}
 
 			LinkTokenRefreshWindow = TimeSpan.FromMinutes(1);
@@ -267,6 +298,7 @@ namespace Thinktecture.Relay.Server.Config
 		{
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqConnectionString), RabbitMqConnectionString);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqClusterHosts), RabbitMqClusterHosts ?? "not defined - using single host");
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqAutomaticRecoveryEnabled), RabbitMqAutomaticRecoveryEnabled);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(QueueExpiration), QueueExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RequestExpiration), RequestExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OnPremiseConnectorCallbackTimeout), OnPremiseConnectorCallbackTimeout);
@@ -295,6 +327,7 @@ namespace Thinktecture.Relay.Server.Config
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(FailedLoginLockoutPeriod), FailedLoginLockoutPeriod);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(SecureClientController), SecureClientController);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(AccessTokenLifetime), AccessTokenLifetime);
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LogSensitiveData), LogSensitiveData);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkTokenRefreshWindow), LinkTokenRefreshWindow);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMinWaitTime), LinkReconnectMinWaitTime);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(LinkReconnectMaxWaitTime), LinkReconnectMaxWaitTime);

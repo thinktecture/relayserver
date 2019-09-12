@@ -5,22 +5,18 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Serilog;
-using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
 
 namespace Thinktecture.Relay.Server.Http
 {
 	internal class HttpResponseMessageBuilder : IHttpResponseMessageBuilder
 	{
 		private readonly ILogger _logger;
-		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
 		private readonly Dictionary<string, Action<HttpContent, string>> _contentHeaderTransformation;
 
-		public HttpResponseMessageBuilder(ILogger logger, IPostDataTemporaryStore postDataTemporaryStore)
+		public HttpResponseMessageBuilder(ILogger logger)
 		{
 			_logger = logger;
-			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
 
 			_contentHeaderTransformation = new Dictionary<string, Action<HttpContent, string>>()
 			{
@@ -30,12 +26,12 @@ namespace Thinktecture.Relay.Server.Http
 				["Content-MD5"] = null,
 				["Content-Range"] = null,
 				["Content-Type"] = (r, v) => r.Headers.ContentType = MediaTypeHeaderValue.Parse(v),
-				["Expires"] = (r, v) => r.Headers.Expires = (v == "-1" ? (DateTimeOffset?)null : new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture))),
-				["Last-Modified"] = (r, v) => r.Headers.LastModified = new DateTimeOffset(DateTime.ParseExact(v, "R", CultureInfo.InvariantCulture)),
+				["Expires"] = (r, v) => r.Headers.Expires = SafeParseDateTime(r, v),
+				["Last-Modified"] = (r, v) => r.Headers.LastModified = SafeParseDateTime(r, v),
 			};
 		}
 
-		public HttpResponseMessage BuildFromConnectorResponse(IOnPremiseConnectorResponse response, Link link, string requestId)
+		public HttpResponseMessage BuildFromConnectorResponse(IOnPremiseConnectorResponse response, bool forwardOnPremiseTargetErrorResponse, string requestId)
 		{
 			var message = new HttpResponseMessage();
 
@@ -50,8 +46,8 @@ namespace Thinktecture.Relay.Server.Http
 			else
 			{
 				message.StatusCode = response.StatusCode;
-				message.Content = GetResponseContentForOnPremiseTargetResponse(response, link);
-				
+				message.Content = GetResponseContentForOnPremiseTargetResponse(response, forwardOnPremiseTargetErrorResponse);
+
 				if (response.HttpHeaders.TryGetValue("WWW-Authenticate", out var wwwAuthenticate))
 				{
 					message.Headers.Add("WWW-Authenticate", wwwAuthenticate);
@@ -66,12 +62,12 @@ namespace Thinktecture.Relay.Server.Http
 			return message;
 		}
 
-		public HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseConnectorResponse response, Link link)
+		public HttpContent GetResponseContentForOnPremiseTargetResponse(IOnPremiseConnectorResponse response, bool forwardOnPremiseTargetErrorResponse)
 		{
 			if (response == null)
 				throw new ArgumentNullException(nameof(response));
 
-			if (response.StatusCode >= HttpStatusCode.InternalServerError && !link.ForwardOnPremiseTargetErrorResponse)
+			if (response.StatusCode >= HttpStatusCode.InternalServerError && !forwardOnPremiseTargetErrorResponse)
 			{
 				return null;
 			}
@@ -80,25 +76,25 @@ namespace Thinktecture.Relay.Server.Http
 
 			if (response.ContentLength == 0)
 			{
-				_logger?.Verbose("Received empty body. request-id={RequestId}", response.RequestId);
-
+				// No content
 				content = new ByteArrayContent(Array.Empty<byte>());
 			}
 			else if (response.Body != null)
 			{
-				// only legacy on-premise connectors (v1) use this property
-				_logger?.Verbose("Received small legacy body with data. request-id={RequestId}, body-length={ResponseContentLength}", response.RequestId, response.Body.Length);
-
+				// Unmodified legacy response
 				content = new ByteArrayContent(response.Body);
 			}
 			else
 			{
-				_logger?.Verbose("Received body. request-id={RequestId}, content-length={ResponseContentLength}", response.RequestId, response.ContentLength);
-
-				var stream = _postDataTemporaryStore.GetResponseStream(response.RequestId);
+				// Normal content stream
+				var stream = response.Stream;
 				if (stream == null)
 				{
 					throw new InvalidOperationException(); // TODO what now?
+				}
+				else if (stream.Position != 0 && stream.CanSeek)
+				{
+					stream.Position = 0;
 				}
 
 				content = new StreamContent(stream, 0x10000);
@@ -118,9 +114,9 @@ namespace Thinktecture.Relay.Server.Http
 
 			foreach (var httpHeader in httpHeaders)
 			{
-				if (_contentHeaderTransformation.TryGetValue(httpHeader.Key, out var contentHeaderTranformation))
+				if (_contentHeaderTransformation.TryGetValue(httpHeader.Key, out var contentHeaderTransformation))
 				{
-					contentHeaderTranformation?.Invoke(content, httpHeader.Value);
+					contentHeaderTransformation?.Invoke(content, httpHeader.Value);
 				}
 				else
 				{
@@ -131,7 +127,13 @@ namespace Thinktecture.Relay.Server.Http
 
 		private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
 		{
-			return ((int) statusCode >= 300) && ((int) statusCode <= 399);
+			return ((int)statusCode >= 300) && ((int)statusCode <= 399);
+		}
+
+		private DateTimeOffset? SafeParseDateTime(HttpContent content, string value)
+		{
+			return DateTime.TryParseExact(value, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expiresValue)
+				? new DateTimeOffset(expiresValue) : (DateTimeOffset?)null;
 		}
 	}
 }

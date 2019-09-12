@@ -1,11 +1,12 @@
 <Project>
   <!-- WARNING: This file is shared between all RelayServer .NET Core library projects -->
   <PropertyGroup>
-    <VersionPrefix>2.2.0</VersionPrefix>
+    <VersionPrefix>2.3.0</VersionPrefix>
+    <PackageVersion>2.3.0-rc1</PackageVersion>
 
     <Copyright>Copyright © Thinktecture AG 2015 - 2019. All rights reserved.</Copyright>
     <PackageTags>thinktecture;relayserver</PackageTags>
-    <PackageIconUrl>http://thinktecture.com/images/Logo_T_Nontransparent.png</PackageIconUrl>
+    <PackageIcon>Logo_T_Nontransparent.png</PackageIcon>
     <PackageProjectUrl>https://github.com/thinktecture/relayserver</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -28,5 +29,6 @@
       <Link>Properties\AssemblyInfo.shared.cs</Link>
     </Compile>
     <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)Logo_T_Nontransparent.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

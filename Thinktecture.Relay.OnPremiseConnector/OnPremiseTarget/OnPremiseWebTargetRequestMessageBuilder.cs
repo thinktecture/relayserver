@@ -126,7 +126,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_logger = logger;
 		}
 
-		public HttpRequestMessage CreateLocalTargetRequestMessage(Uri baseUri, string url, IOnPremiseTargetRequest request, string relayedRequestHeader)
+		public HttpRequestMessage CreateLocalTargetRequestMessage(Uri baseUri, string url, IOnPremiseTargetRequest request, string relayedRequestHeader, bool logSensitiveData)
 		{
 			_logger?.Verbose("Creating web request for request-id={RequestId}", request.RequestId);
 
@@ -141,12 +141,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			if (request.AcknowledgmentMode == AcknowledgmentMode.Manual)
 			{
 				_logger?.Verbose("Request needs to be manually acknowledged, adding header. request-id={RequestId}, acknowledgment-mode={AcknowledgmentMode}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgmentMode, request.AcknowledgeId);
+				message.Headers.Add("X-TTRELAY-ACKNOWLEDGE-ORIGIN-ID", request.AcknowledgeOriginId.ToString());
 				message.Headers.Add("X-TTRELAY-ACKNOWLEDGE-ID", request.AcknowledgeId);
+				message.Headers.Add("X-TTRELAY-CONNECTION-ID", request.ConnectionId);
 			}
 
 			foreach (var httpHeader in request.HttpHeaders.Where(kvp => _ignoredHeaders.All(name => name != kvp.Key)))
 			{
-				_logger?.Verbose("Adding header to request. request-id={RequestId} header-name={HeaderName}, header-value={HeaderValue}", request.RequestId, httpHeader.Key, httpHeader.Value);
+				_logger?.Verbose("Adding header to request. request-id={RequestId} header-name={HeaderName}, header-value={HeaderValue}", request.RequestId, httpHeader.Key, logSensitiveData ? httpHeader.Value : "*** BLOCKED ***");
 
 				try
 				{

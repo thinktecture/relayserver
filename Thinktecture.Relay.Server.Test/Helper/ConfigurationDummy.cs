@@ -9,6 +9,7 @@ namespace Thinktecture.Relay.Server.Helper
 		// RabbitMQ Settings
 		public string RabbitMqConnectionString { get; set; }
 		public string RabbitMqClusterHosts { get; set; }
+		public bool RabbitMqAutomaticRecoveryEnabled { get; set; }
 		public TimeSpan QueueExpiration { get; set; }
 		public TimeSpan RequestExpiration { get; set; }
 
@@ -39,6 +40,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public TimeSpan FailedLoginLockoutPeriod { get; set; }
 		public bool SecureClientController { get; set; }
 		public TimeSpan AccessTokenLifetime { get; set; }
+		public bool LogSensitiveData { get; set; }
 
 		// Default settings for links
 		public TimeSpan LinkTokenRefreshWindow { get; set; }

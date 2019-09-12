@@ -18,6 +18,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		string RelayedRequestHeader { get; set; }
 
 		/// <summary>
+		/// Determines whether logging should include url query parameters and http header values
+		/// </summary>
+		bool LogSensitiveData { get; set; }
+
+		/// <summary>
 		/// Raised, when a connection within the connector connects to the RelayServer.
 		/// </summary>
 		event EventHandler Connected;

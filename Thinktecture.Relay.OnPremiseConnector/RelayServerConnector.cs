@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutofacSerilogIntegration;
+using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
@@ -18,6 +19,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 	public class RelayServerConnector : IDisposable, IRelayServerConnector
 	{
 		private static readonly IServiceProvider _serviceProvider;
+
+		/// <inheritdoc />
+		public bool LogSensitiveData { get; set; }
 
 		/// <inheritdoc />
 		public event EventHandler Connected;
@@ -37,6 +41,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();
 			builder.RegisterType<AutomaticDisconnectChecker>().As<IAutomaticDisconnectChecker>();
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
+			builder.RegisterType<OnPremiseInterceptorFactory>().As<IOnPremiseInterceptorFactory>();
+			builder.Register(ctx => _serviceProvider);
 
 			var container = builder.Build();
 			_serviceProvider = new AutofacServiceProvider(container);
@@ -62,11 +68,15 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
+		/// <param name="logSensitiveData">Determines whether sensitive data will be logged.</param>
 		[Obsolete("Use the ctor without tokenRefreshWindowInSeconds instead.")]
-		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null)
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30,
+			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = true)
 		{
+			LogSensitiveData = logSensitiveData;
+
 			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
-			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds));
+			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
 			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
 			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
 		}
@@ -202,7 +212,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
 
-			return _connection.GetToRelay("relay/" + linkName + relativeUrl, setHeaders, cancellationToken);
+			return _connection.GetToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, cancellationToken);
 		}
 
 		/// <summary>
@@ -264,7 +274,19 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
 
-			return _connection.PostToRelay("relay/" + linkName + relativeUrl, setHeaders, content, cancellationToken);
+			return _connection.PostToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, content, cancellationToken);
+		}
+
+		/// <summary>
+		/// Sends an acknowledgment to the RelayServer using the current authentication token.
+		/// </summary>
+		/// <param name="acknowledgeOriginId">The OriginId of the RelayServer instance that needs to acknowledge the request message on its rabbit connection.</param>
+		/// <param name="acknowledgeId">The id of the message in the queue that should be acknowledged.</param>
+		/// <param name="connectionId">The Id of the connection which identifies the Rabbit queue to acknowledge the message on.</param>
+		/// <returns>A Task that completes when the acknowledge http request is answered.</returns>
+		public Task AcknowledgeRequestAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null)
+		{
+			return _connection.SendAcknowledgmentAsync(acknowledgeOriginId, acknowledgeId, connectionId);
 		}
 
 		private void CheckDisposed()

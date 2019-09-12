@@ -16,6 +16,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 		public byte[] Body { get; set; }
 		public AcknowledgmentMode AcknowledgmentMode { get; set; }
 		public Guid AcknowledgeOriginId { get; set; }
+		public string ConnectionId { get; set; }
 
 		[JsonIgnore]
 		public Stream Stream { get; set; }
