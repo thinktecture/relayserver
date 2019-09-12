@@ -137,7 +137,7 @@ The default settings include:
 ```
 <appSettings>
     <add key="RabbitMqClusterHosts" value="" />
-	<add key="RabbitMqAutomaticRecoveryEnabled" value="true" />
+    <add key="RabbitMqAutomaticRecoveryEnabled" value="true" />
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
     <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
