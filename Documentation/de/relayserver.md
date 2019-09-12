@@ -9,6 +9,13 @@
 
 ## Version 2.3.0
 
+* RabbitMq Verbesserungen
+
+  * Beendete Verbindungen werden nun explizit auch auf dem Rabbit-Client beendet.
+  * Die Funktion, verlorene Verbindungen zum RabbitMq Server von dessen Client automatisch wiederherstellen zu lassen, wird nun standardmäßig aktiviert.
+  * Wenn eine Verbindung geschlossen wird, wird sichergestellt dass alle Nachrichten die noch nicht acknowledged wurden, wieder zugestellt werden.
+  * Um den Durchsatz zu erhöhen werden nun separate Channels (via RoutingKeys) für Requests, Responses und Acknowledgements verwendet.
+
 * On-Premise Interceptoren
 
   * Es ist nun möglich, auch im On-Premise Connector eigenen Code zum Abfangen und modifizieren von Anfragen und Antworten einzubinden.
@@ -20,7 +27,7 @@
 * Allgemeine Verbesserungen
 
   * Der RelayServer warnt nun wenn die `SharedSecret` Einstellung fehlt und kann, wenn nicht im Multi-Server Betrieb eingesetzt, einen zufälligen Startwert verwenden.
-  *  Interceptoren können nun auch den Stream mit den Inhaltsdaten der Requests und Responses lesen und modifizieren.
+  * Interceptoren können nun auch den Stream mit den Inhaltsdaten der Requests und Responses lesen und modifizieren.
   * Das EF-Model wurde um genauere Informationen und Indices erweitert.
   * Wenn ein On-Premise Target ungültige Expires-Header setzt, kommt es nicht mehr zu einem Fehler.
   * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.

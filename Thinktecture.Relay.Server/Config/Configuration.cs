@@ -11,6 +11,8 @@ namespace Thinktecture.Relay.Server.Config
 		//  RabbitMQ Settings
 		public string RabbitMqConnectionString { get; }
 		public string RabbitMqClusterHosts { get; }
+		public bool RabbitMqAutomaticRecoveryEnabled { get; }
+
 		public TimeSpan QueueExpiration { get; }
 		public TimeSpan RequestExpiration { get; }
 
@@ -64,6 +66,12 @@ namespace Thinktecture.Relay.Server.Config
 				RabbitMqClusterHosts = null;
 			}
 
+			RabbitMqAutomaticRecoveryEnabled = true;
+			if (Boolean.TryParse(GetValue(nameof(RabbitMqAutomaticRecoveryEnabled)), out var tmpBool))
+			{
+				RabbitMqAutomaticRecoveryEnabled = tmpBool;
+			}
+
 			QueueExpiration = TimeSpan.FromSeconds(10);
 			if (TimeSpan.TryParse(GetValue(nameof(QueueExpiration)), out var tmpTimeSpan))
 			{
@@ -109,7 +117,7 @@ namespace Thinktecture.Relay.Server.Config
 			}
 
 			UseInsecureHttp = false;
-			if (Boolean.TryParse(GetValue(nameof(UseInsecureHttp)), out var tmpBool))
+			if (Boolean.TryParse(GetValue(nameof(UseInsecureHttp)), out tmpBool))
 			{
 				UseInsecureHttp = tmpBool;
 			}
@@ -290,6 +298,7 @@ namespace Thinktecture.Relay.Server.Config
 		{
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqConnectionString), RabbitMqConnectionString);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqClusterHosts), RabbitMqClusterHosts ?? "not defined - using single host");
+			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RabbitMqAutomaticRecoveryEnabled), RabbitMqAutomaticRecoveryEnabled);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(QueueExpiration), QueueExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(RequestExpiration), RequestExpiration);
 			logger?.Verbose("Setting {ConfigurationProperty}: {ConfigurationValue}", nameof(OnPremiseConnectorCallbackTimeout), OnPremiseConnectorCallbackTimeout);

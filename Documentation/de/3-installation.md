@@ -139,6 +139,7 @@ Die Standardeinstellungen umfassen dabei:
 ```
 <appSettings>
     <add key="RabbitMqClusterHosts" value="" />
+    <add key="RabbitMqAutomaticRecoveryEnabled" value="true" />
     <add key="QueueExpiration" value="00:00:10" />
     <add key="RequestExpiration" value="00:00:10" />
     <add key="OnPremiseConnectorCallbackTimeout" value="00:00:30" />
@@ -179,6 +180,7 @@ Die Standardeinstellungen umfassen dabei:
 |  Key name | Description |
 | --- | --- |
 | RabbitMqClusterHosts | Komma-separierte Liste der RabbitMQ Cluster Teilnehmer (default _null_) |
+| RabbitMqAutomaticRecoveryEnabled | Aktiviert die Funktion des RabbitMq Clients, defekte Netzwerkverbindungen zum RabbitMq Server automatisch wiederherzustellen (default true) |
 | QueueExpiration | Zeit, nach der eine ungenutzte Queue komplett verworfen wird (default 10 Sekunden) |
 | RequestExpiration | Zeit, nach der ein noch nicht abgearbeiteter Request aus der Queue verworfen wird (default 10 Sekunden) |
 | OnPremiseConnectorCallbackTimeout| Zeitspanne, die der RelayServer auf eine Antwort des On-Premise Connectors wartet (default 30 Sekunden) |

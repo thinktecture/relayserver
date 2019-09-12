@@ -3,7 +3,7 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
 {
-	public interface IMessageDispatcher
+	public interface IMessageDispatcher : IDisposable
 	{
 		IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool autoAck);
 		IObservable<IOnPremiseConnectorResponse> OnResponseReceived();
