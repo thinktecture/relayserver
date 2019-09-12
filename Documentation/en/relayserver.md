@@ -41,8 +41,6 @@ The goal of this list is to highlight companies who pay back to this open source
   * Logging of sensitive data is now configurable and enabled by default.
   * Now all information required for manual acknowledgment is provided for easier handling.
 
-## Version 2.2.1
-
 * Bugfixes
 
   * Under certain circumstances the on-premise connector demo service wasn't able to load a framework assembly.

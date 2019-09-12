@@ -33,8 +33,6 @@
   * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.
   * Es stehen nun alle benötigen Informationen für manuelles Acknowlegment einfacher zur Verfügung.
 
-## Version 2.2.1
-
 * Fehlerbehebungen
 
   * Der OnPremiseConnector Demo-Service konnte ein Framwork-Assembly unter bestimmten Voraussetzungen nicht korrekt laden.
