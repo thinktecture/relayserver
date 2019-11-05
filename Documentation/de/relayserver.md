@@ -32,6 +32,7 @@
   * Wenn ein On-Premise Target ungültige Expires-Header setzt, kommt es nicht mehr zu einem Fehler.
   * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.
   * Es stehen nun alle benötigen Informationen für manuelles Acknowlegment einfacher zur Verfügung.
+  * Das Request-logging führt nun auch die RequestId mit.
 
 * Fehlerbehebungen
 

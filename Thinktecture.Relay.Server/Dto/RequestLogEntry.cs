@@ -16,5 +16,6 @@ namespace Thinktecture.Relay.Server.Dto
 		public DateTime OnPremiseConnectorOutDate { get; set; }
 		public DateTime? OnPremiseTargetInDate { get; set; }
 		public DateTime? OnPremiseTargetOutDate { get; set; }
+		public string RequestId { get; set; }
 	}
 }

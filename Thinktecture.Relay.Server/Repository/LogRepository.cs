@@ -35,6 +35,7 @@ namespace Thinktecture.Relay.Server.Repository
 					OriginId = requestLogEntry.OriginId,
 					Link = link,
 					LinkId = requestLogEntry.LinkId,
+					RequestId = requestLogEntry.RequestId,
 				});
 
 				context.SaveChanges();
@@ -64,6 +65,7 @@ namespace Thinktecture.Relay.Server.Repository
 							LocalUrl = d.LocalUrl,
 							OriginId = d.OriginId,
 							LinkId = d.LinkId,
+							RequestId = d.RequestId,
 						});
 			}
 		}
@@ -88,6 +90,7 @@ namespace Thinktecture.Relay.Server.Repository
 						LocalUrl = d.LocalUrl,
 						OriginId = d.OriginId,
 						LinkId = d.LinkId,
+						RequestId = d.RequestId,
 					})
 					.ToList();
 			}
