@@ -7,10 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AutofacSerilogIntegration;
-using Thinktecture.Relay.OnPremiseConnector.Interceptor;
-using Thinktecture.Relay.OnPremiseConnector.Net.Http;
-using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector
@@ -32,19 +28,10 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			var builder = new ContainerBuilder();
 
-			builder.RegisterLogger();
-			builder.RegisterType<OnPremiseWebTargetRequestMessageBuilder>().As<IOnPremiseWebTargetRequestMessageBuilder>();
-			builder.RegisterType<RelayServerConnectionFactory>().As<IRelayServerConnectionFactory>();
-			builder.RegisterType<HttpClientFactory>().As<IHttpClientFactory>().SingleInstance();
-			builder.RegisterType<OnPremiseTargetConnectorFactory>().As<IOnPremiseTargetConnectorFactory>();
-			builder.RegisterType<HeartbeatChecker>().As<IHeartbeatChecker>();
-			builder.RegisterType<TokenExpiryChecker>().As<ITokenExpiryChecker>();
-			builder.RegisterType<AutomaticDisconnectChecker>().As<IAutomaticDisconnectChecker>();
-			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
-			builder.RegisterType<OnPremiseInterceptorFactory>().As<IOnPremiseInterceptorFactory>();
+			builder.RegisterOnPremiseConnectorTypes();
 			builder.Register(ctx => _serviceProvider);
-
 			var container = builder.Build();
+
 			_serviceProvider = new AutofacServiceProvider(container);
 		}
 
