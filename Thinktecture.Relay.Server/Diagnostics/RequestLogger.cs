@@ -38,6 +38,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 				OriginId = originId,
 				OnPremiseTargetKey = pathInformation.OnPremiseTargetKey,
 				LinkId = linkId,
+				RequestId = request.RequestId,
 			});
 		}
 	}
