@@ -33,6 +33,7 @@
   * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.
   * Es stehen nun alle benötigen Informationen für manuelles Acknowlegment einfacher zur Verfügung.
   * Das Request-logging führt nun auch die RequestId mit.
+  * Registrierungen der On-Premise Connector-Typen für Autofac ist nun möglich.
 
 * Fehlerbehebungen
 

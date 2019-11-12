@@ -5,6 +5,7 @@ using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
+// ReSharper disable once CheckNamespace
 namespace Thinktecture.Relay.OnPremiseConnector
 {
 	/// <summary>
