@@ -56,7 +56,12 @@ namespace Thinktecture.Relay.Server.Repository.DbModels
 
 		[Index("IX_OnPremiseTargetInDate")]
 		public DateTime? OnPremiseTargetInDate { get; set; }
+
 		[Index("IX_OnPremiseTargetOutDate")]
 		public DateTime? OnPremiseTargetOutDate { get; set; }
+
+		[MaxLength(36)]
+		[Index("IX_RequestId")]
+		public string RequestId { get; set; }
 	}
 }

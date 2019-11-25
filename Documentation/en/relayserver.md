@@ -16,7 +16,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.3.0-rc1
+## Version 2.3.0-rc2
 
 * RabbitMq Improvements
 
@@ -40,11 +40,14 @@ The goal of this list is to highlight companies who pay back to this open source
   * If an On-Premises target sets an invalid value for the expires header, there won't be an error anymopre.
   * Logging of sensitive data is now configurable and enabled by default.
   * Now all information required for manual acknowledgment is provided for easier handling.
+  * Request logging now also tracks the request id.
+  * It is now possible to register the OnPremise Connector types with Autofac.
 
 * Bugfixes
 
   * Under certain circumstances the on-premise connector demo service wasn't able to load a framework assembly.
   * The OnPremise-Connector is now able to recreate the `HttpClient` that is used to send responses to the RelayServer in case there are errors when posting.
+  * HttpConfig needs to be explicitely initialized under certain circumstances.
 
 ## Version 2.2.0
 

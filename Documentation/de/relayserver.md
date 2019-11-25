@@ -7,7 +7,7 @@
 
 # Release Notes
 
-## Version 2.3.0-rc1
+## Version 2.3.0-rc2
 
 * RabbitMq Verbesserungen
 
@@ -32,11 +32,14 @@
   * Wenn ein On-Premise Target ungültige Expires-Header setzt, kommt es nicht mehr zu einem Fehler.
   * Das Logging von sensitiven Daten ist nun konfigurierbar und standardmäßig aktiviert.
   * Es stehen nun alle benötigen Informationen für manuelles Acknowlegment einfacher zur Verfügung.
+  * Das Request-logging führt nun auch die RequestId mit.
+  * Registrierungen der On-Premise Connector-Typen für Autofac ist nun möglich.
 
 * Fehlerbehebungen
 
   * Der OnPremiseConnector Demo-Service konnte ein Framwork-Assembly unter bestimmten Voraussetzungen nicht korrekt laden.
   * Der OnPremise-Connector wird seinen `HttpClient` mit dem er Antworten an den RelayServer sendet nun erneuern, falls dort Fehler auftreten.
+  * HttpConfig muss unter bestimmten Umständen explizit initialisiert werden.
 
 ## Version 2.2.0
 

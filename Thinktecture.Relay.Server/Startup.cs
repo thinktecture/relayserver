@@ -68,6 +68,8 @@ namespace Thinktecture.Relay.Server
 			MapSignalR(app, innerScope);
 			UseWebApi(app, httpConfig, innerScope);
 			UseFileServer(app);
+
+			httpConfig.EnsureInitialized();
 		}
 
 		private static void InitializeAndMigrateDatabase()
