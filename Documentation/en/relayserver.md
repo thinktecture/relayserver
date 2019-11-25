@@ -16,7 +16,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.3.0-rc1
+## Version 2.3.0-rc2
 
 * RabbitMq Improvements
 
