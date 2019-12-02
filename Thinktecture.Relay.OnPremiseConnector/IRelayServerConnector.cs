@@ -140,5 +140,14 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Http response</returns>
 		Task<HttpResponseMessage> PostViaRelay(string linkName, string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
+
+		/// <summary>
+		/// Sends an acknowledgment to the RelayServer using the current authentication token.
+		/// </summary>
+		/// <param name="acknowledgeOriginId">The OriginId of the RelayServer instance that needs to acknowledge the request message on its rabbit connection.</param>
+		/// <param name="acknowledgeId">The id of the message in the queue that should be acknowledged.</param>
+		/// <param name="connectionId">The Id of the connection which identifies the Rabbit queue to acknowledge the message on.</param>
+		/// <returns>A Task that completes when the acknowledge http request is answered.</returns>
+		Task AcknowledgeRequestAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null);
 	}
 }
