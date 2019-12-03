@@ -11,8 +11,9 @@ The goal of this list is to highlight companies who pay back to this open source
 ## Sponsors from Germany
 [<img width="120px" src="./assets/logo_sponsor_kwp.svg" />](https://www.kwpsoftware.de)
 
-## Sponsors from Swiss
+## Sponsors from Switzerland
 [<img width="120px" src="./assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
+[<img width="120px" src="./assets/logo_sponsor_abraxas.png" />](https://www.abraxas.ch/)
 
 # Version history
 
