@@ -36,4 +36,5 @@ Das Ziel dieser Sponsorenliste ist es, Unternehmen hervorzuheben, die sich techn
 
 ## Sponsoren aus der Schweiz
 [<img width="120px" src="./Documentation/de/assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
+[<img width="120px" src="./Documentation/de/assets/logo_sponsor_abraxas.png" />](https://www.abraxas.ch/)
 
