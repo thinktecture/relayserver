@@ -43,6 +43,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * Now all information required for manual acknowledgment is provided for easier handling.
   * Request logging now also tracks the request id.
   * It is now possible to register the OnPremise Connector types with Autofac.
+  * Relative paths in configuration are now consistently evaluated against the exe directory of the RelayServer and not against the execution dir anymore.
 
 * Bugfixes
 
