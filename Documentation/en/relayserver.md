@@ -17,7 +17,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.3.0-rc3
+## Version 2.3.0-rc4
 
 * RabbitMq Improvements
 
@@ -49,6 +49,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * Under certain circumstances the on-premise connector demo service wasn't able to load a framework assembly.
   * The OnPremise-Connector is now able to recreate the `HttpClient` that is used to send responses to the RelayServer in case there are errors when posting.
   * HttpConfig needs to be explicitely initialized under certain circumstances.
+  * A newly created HttpClient now also receives the authentication header values of its predecessor.
 
 ## Version 2.2.0
 
