@@ -17,7 +17,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.3.0-rc3
+## Version 2.3.0-rc4
 
 * RabbitMq Improvements
 
@@ -43,6 +43,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * Now all information required for manual acknowledgment is provided for easier handling.
   * Request logging now also tracks the request id.
   * It is now possible to register the OnPremise Connector types with Autofac.
+  * The On-Premise connector service now initializes http connection properties.
 
 * Bugfixes
 
