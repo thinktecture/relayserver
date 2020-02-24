@@ -94,6 +94,13 @@ namespace Thinktecture.Relay.OnPremiseConnectorService
 					_connector.RegisterOnPremiseTarget(onPremiseTarget.Key, handlerType);
 				}
 
+				var timeout = (int)section.RequestTimeout.TotalMilliseconds;
+				ServicePointManager.FindServicePoint(new Uri(section.BaseUrl)).ConnectionLeaseTimeout = timeout;
+				if (timeout < ServicePointManager.DnsRefreshTimeout)
+				{
+					ServicePointManager.DnsRefreshTimeout = timeout;
+				}
+
 				await _connector.ConnectAsync().ConfigureAwait(false);
 			}
 			catch (Exception ex)
