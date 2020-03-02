@@ -34,6 +34,7 @@
   * Es stehen nun alle benötigen Informationen für manuelles Acknowlegment einfacher zur Verfügung.
   * Das Request-logging führt nun auch die RequestId mit.
   * Registrierungen der On-Premise Connector-Typen für Autofac ist nun möglich.
+  * Relative Pfade in der Konfiguration werden nun einheitlich relativ zur RelayServer .exe-Datei ausgewertet und nicht mehr zum Ausführungsverzeichnis.
 
 * Fehlerbehebungen
 

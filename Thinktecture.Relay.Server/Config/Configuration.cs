@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.IO;
+using System.Reflection;
 using System.Web.Http;
 using Serilog;
 
@@ -90,7 +91,7 @@ namespace Thinktecture.Relay.Server.Config
 				OnPremiseConnectorCallbackTimeout = tmpTimeSpan;
 			}
 
-			TraceFileDirectory = GetValue(nameof(TraceFileDirectory)) ?? "tracefiles";
+			TraceFileDirectory = GetPathValue(nameof(TraceFileDirectory), logger) ?? "tracefiles";
 
 			LinkPasswordLength = 100;
 			if (Int32.TryParse(GetValue(nameof(LinkPasswordLength)), out var tmpInt))
@@ -148,13 +149,13 @@ namespace Thinktecture.Relay.Server.Config
 				Port = tmpInt;
 			}
 
-			ManagementWebLocation = GetValue(nameof(ManagementWebLocation));
+			ManagementWebLocation = GetPathValue(nameof(ManagementWebLocation), logger);
 			if (String.IsNullOrWhiteSpace(ManagementWebLocation))
 			{
 				ManagementWebLocation = "ManagementWeb";
 			}
 
-			TemporaryRequestStoragePath = GetValue(nameof(TemporaryRequestStoragePath));
+			TemporaryRequestStoragePath = GetPathValue(nameof(TemporaryRequestStoragePath), logger);
 			if (String.IsNullOrWhiteSpace(TemporaryRequestStoragePath))
 			{
 				TemporaryRequestStoragePath = null;
@@ -172,7 +173,7 @@ namespace Thinktecture.Relay.Server.Config
 				ActiveConnectionTimeout = tmpTimeSpan;
 			}
 
-			CustomCodeAssemblyPath = GetValue(nameof(CustomCodeAssemblyPath));
+			CustomCodeAssemblyPath = GetPathValue(nameof(CustomCodeAssemblyPath), logger);
 			if (String.IsNullOrWhiteSpace(CustomCodeAssemblyPath))
 			{
 				CustomCodeAssemblyPath = null;
@@ -188,7 +189,7 @@ namespace Thinktecture.Relay.Server.Config
 
 			if (String.IsNullOrEmpty(SharedSecret) && String.IsNullOrEmpty(OAuthCertificate))
 			{
-				if (String.IsNullOrEmpty(TemporaryRequestStoragePath))
+				if (String.IsNullOrEmpty(TemporaryRequestStoragePath)) // assume Multi-Server operation mode when this folder is configured
 				{
 					logger?.Warning("No SharedSecret or OAuthCertificate is configured. Please configure one of them. Continuing with a random value which will make all tokens invalid on restart.");
 					SharedSecret = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
@@ -292,6 +293,33 @@ namespace Thinktecture.Relay.Server.Config
 		{
 			return Environment.GetEnvironmentVariable($"RelayServer__{settingName}")
 				?? ConfigurationManager.AppSettings[settingName];
+		}
+
+		private string GetPathValue(string settingName, ILogger logger)
+		{
+			var value = GetValue(settingName);
+
+			if (String.IsNullOrEmpty(value))
+			{
+				return null;
+			}
+
+			if (!Path.IsPathRooted(value))
+			{
+				var basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
+				// we have a relative path, so we need to combine it with current execution directory
+				logger?.Verbose($"Configured path for {{SettingName}} is relative ({{{settingName}}}) to base path {{BasePath}} " , settingName, value, basePath);
+
+				value = Path.GetFullPath(Path.Combine(basePath, value));
+				logger?.Verbose($"Converted path for {{SettingName}} is absolute: {{{settingName}}}" , settingName, value);
+			}
+			else
+			{
+				logger?.Verbose($"Configured path for {{SettingName}} is absolute: {{{settingName}}}" , settingName, value);
+			}
+
+			return value;
 		}
 
 		private void LogSettings(ILogger logger)
