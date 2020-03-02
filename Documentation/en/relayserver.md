@@ -44,12 +44,14 @@ The goal of this list is to highlight companies who pay back to this open source
   * Request logging now also tracks the request id.
   * It is now possible to register the OnPremise Connector types with Autofac.
   * The On-Premise connector service now initializes http connection properties.
+  * Relative paths in configuration are now consistently evaluated against the exe directory of the RelayServer and not against the execution dir anymore.
 
 * Bugfixes
 
   * Under certain circumstances the on-premise connector demo service wasn't able to load a framework assembly.
   * The OnPremise-Connector is now able to recreate the `HttpClient` that is used to send responses to the RelayServer in case there are errors when posting.
   * HttpConfig needs to be explicitely initialized under certain circumstances.
+  * A newly created HttpClient now also receives the authentication header values of its predecessor.
 
 ## Version 2.2.0
 

@@ -82,9 +82,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void RecreateHttpClient()
 		{
+			var token = _httpClient.GetToken();
 			var oldClient = _httpClient;
 
 			CreateHttpClient();
+			_httpClient.SetBearerToken(token);
 
 			oldClient?.Dispose();
 		}
