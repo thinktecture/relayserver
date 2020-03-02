@@ -7,7 +7,7 @@
 
 # Release Notes
 
-## Version 2.3.0-rc3
+## Version 2.3.0-rc4
 
 * RabbitMq Verbesserungen
 
@@ -41,6 +41,7 @@
   * Der OnPremiseConnector Demo-Service konnte ein Framwork-Assembly unter bestimmten Voraussetzungen nicht korrekt laden.
   * Der OnPremise-Connector wird seinen `HttpClient` mit dem er Antworten an den RelayServer sendet nun erneuern, falls dort Fehler auftreten.
   * HttpConfig muss unter bestimmten Umständen explizit initialisiert werden.
+  * Ein neu erzeugter `HttpClient` erhält nun auch die Authentication-Header seines Vorgängers.
 
 ## Version 2.2.0
 
