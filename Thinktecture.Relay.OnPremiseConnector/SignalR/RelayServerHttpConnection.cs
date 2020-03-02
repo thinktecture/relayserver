@@ -26,8 +26,12 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_requestTimeout = requestTimeout;
 
 #if NETSTANDARD2_0
-			ServicePointManager.FindServicePoint(relayServerUri).ConnectionLeaseTimeout = requestTimeout.Milliseconds;
-			ServicePointManager.DnsRefreshTimeout = requestTimeout.Milliseconds;
+			ServicePointManager.FindServicePoint(relayServerUri).ConnectionLeaseTimeout = requestTimeout.TotalMilliseconds;
+
+			if (requestTimeout.Milliseconds < ServicePointManager.DnsRefreshTimeout)
+			{
+				ServicePointManager.DnsRefreshTimeout = requestTimeout.TotalMilliseconds;
+			}
 #endif
 
 			CreateHttpClient();
