@@ -43,6 +43,7 @@
   * Der OnPremise-Connector wird seinen `HttpClient` mit dem er Antworten an den RelayServer sendet nun erneuern, falls dort Fehler auftreten.
   * HttpConfig muss unter bestimmten Umständen explizit initialisiert werden.
   * Ein neu erzeugter `HttpClient` erhält nun auch die Authentication-Header seines Vorgängers.
+  * Auch der Request Interceptor hat nun Zugriff auf den Stream der Daten.
 
 ## Version 2.2.0
 
