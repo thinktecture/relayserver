@@ -54,6 +54,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * HttpConfig needs to be explicitely initialized under certain circumstances.
   * A newly created HttpClient now also receives the authentication header values of its predecessor.
   * The request interceptor now also has access to the request body.
+  * Accessing empty bodies on intercepted requests and responses does not throw a NullReferenceException anymore.
 
 ## Version 2.2.0
 

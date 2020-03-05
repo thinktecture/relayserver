@@ -45,6 +45,7 @@
   * HttpConfig muss unter bestimmten Umständen explizit initialisiert werden.
   * Ein neu erzeugter `HttpClient` erhält nun auch die Authentication-Header seines Vorgängers.
   * Auch der Request Interceptor hat nun Zugriff auf den Stream der Daten.
+  * Der Zugriff auf leere Inhalte in intercepted Requests und Responses wirft nun keine NullReferenceException mehr.
 
 ## Version 2.2.0
 
