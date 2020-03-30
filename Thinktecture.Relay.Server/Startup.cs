@@ -261,6 +261,7 @@ namespace Thinktecture.Relay.Server
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
 			}
 
+			httpConfig.Formatters.Remove(httpConfig.Formatters.XmlFormatter);
 			httpConfig.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
 			return httpConfig;
