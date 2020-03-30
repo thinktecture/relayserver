@@ -73,6 +73,7 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 
 			var request = await _onPremiseRequestBuilder.BuildFromHttpRequest(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName).ConfigureAwait(false);
+			PrepareRequestBodyForRelaying((OnPremiseConnectorRequest)request);
 
 			var statusCode = HttpStatusCode.GatewayTimeout;
 			IOnPremiseConnectorResponse response = null;
@@ -121,8 +122,6 @@ namespace Thinktecture.Relay.Server.Controller
 
 		private void SendOnPremiseConnectorRequest(Guid linkId, IOnPremiseConnectorRequest request)
 		{
-			PrepareRequestBodyForRelaying((OnPremiseConnectorRequest)request);
-
 			_logger?.Verbose("Sending on premise connector request. request-id={RequestId}, link-id={LinkId}", request.RequestId, linkId);
 			_backendCommunication.SendOnPremiseConnectorRequest(linkId, request);
 		}
