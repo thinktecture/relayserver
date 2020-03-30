@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Text;
+using System.Web.Http.Controllers;
 using Serilog;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.Interceptor;
@@ -17,16 +17,19 @@ namespace Thinktecture.Relay.CustomCodeDemo
 	public class DemoRequestInterceptor : IOnPremiseRequestInterceptor
 	{
 		private readonly ILogger _logger;
+		private readonly HttpRequestContext _context;
 
 		/// <summary>
 		/// Creates a new instance of the <see cref="DemoRequestInterceptor"/>
 		/// </summary>
 		/// <param name="logger">An instance of an <see cref="ILogger"/>, that will be injected by Autofac when this interceptor is created</param>
-		public DemoRequestInterceptor(ILogger logger)
+		/// <param name="context">An instance of an <see cref="HttpRequestContext"/> for access to request specifics.</param>
+		public DemoRequestInterceptor(ILogger logger, HttpRequestContext context)
 		{
 			// You can also have the DI inject different custom dependencies, as long as
 			// they are all registered in your interceptors Autofac module
 			_logger = logger;
+			_context = context;
 		}
 
 		/// <summary>
@@ -37,6 +40,11 @@ namespace Thinktecture.Relay.CustomCodeDemo
 		public HttpResponseMessage OnRequestReceived(IInterceptedRequest request)
 		{
 			_logger?.Debug($"{nameof(DemoRequestInterceptor)}.{nameof(OnRequestReceived)} is called.");
+
+			if (_context.IsLocal)
+			{
+				_logger?.Debug("This request comes from localhost.");
+			}
 
 			// Example: Modify content
 			if (request.HttpHeaders.TryGetValue("Content-Type", out var contentType) && contentType == "application/json")
