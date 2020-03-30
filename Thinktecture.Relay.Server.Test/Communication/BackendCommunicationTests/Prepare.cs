@@ -1,6 +1,7 @@
 using System.Reactive.Subjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Thinktecture.Relay.Server.Communication.RabbitMq;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.BackendCommunicationTests
@@ -15,7 +16,7 @@ namespace Thinktecture.Relay.Server.Communication.BackendCommunicationTests
 
 			var responseSubject = new Subject<IOnPremiseConnectorResponse>();
 			MessageDispatcherMock.Setup(d => d.OnResponseReceived()).Returns(responseSubject);
-			var acknowledgeSubject = new Subject<string>();
+			var acknowledgeSubject = new Subject<IAcknowledgeRequest>();
 			MessageDispatcherMock.Setup(d => d.OnAcknowledgeReceived()).Returns(acknowledgeSubject);
 		}
 

@@ -22,8 +22,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		protected readonly Encoding Encoding = new UTF8Encoding(false, true);
 		protected readonly ILogger Logger;
-
-
+		
 		protected string Exchange { get; private set; }
 		protected string ChannelId { get; private set; }
 		protected IConfiguration Configuration { get; private set; }
@@ -46,7 +45,14 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		}
 
 		public abstract IObservable<TMessage> OnReceived();
-		public abstract Task Dispatch(TMessage message);
+
+		public virtual Task Dispatch(TMessage request)
+		{
+			var data = Serialize(request, out var properties);
+			Send(data, properties);
+
+			return Task.CompletedTask;
+		}
 
 		protected void DeclareExchange()
 		{
@@ -109,7 +115,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		}
 
 		protected IObservable<TMessage> CreateObservable<TMessageType>(bool autoAck = true, Action<TMessageType, ulong> callback = null)
-			where TMessageType : TMessage
+			where TMessageType : class, TMessage
 		{
 			return Observable.Create<TMessage>(observer =>
 			{
@@ -184,6 +190,21 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 				_disposed = true;
 			}
+		}
+	}
+
+	internal class RabbitMqChannelBase<TMessage, TInstance> : RabbitMqChannelBase<TMessage>
+		where TMessage : class
+		where TInstance : class, TMessage
+	{
+		protected RabbitMqChannelBase(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix)
+			: base(logger, connection, configuration, exchange, channelId, queuePrefix)
+		{
+		}
+
+		public override IObservable<TMessage> OnReceived()
+		{
+			return CreateObservable<TInstance>();
 		}
 	}
 }

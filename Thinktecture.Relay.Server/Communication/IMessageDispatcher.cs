@@ -1,4 +1,5 @@
 using System;
+using Thinktecture.Relay.Server.Communication.RabbitMq;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication
@@ -7,12 +8,12 @@ namespace Thinktecture.Relay.Server.Communication
 	{
 		IObservable<IOnPremiseConnectorRequest> OnRequestReceived(Guid linkId, string connectionId, bool autoAck);
 		IObservable<IOnPremiseConnectorResponse> OnResponseReceived();
-		IObservable<string> OnAcknowledgeReceived();
+		IObservable<IAcknowledgeRequest> OnAcknowledgeReceived();
 
-		void AcknowledgeRequest(string acknowledgeId);
+		void AcknowledgeRequest(Guid linkId, string acknowledgeId);
 
 		void DispatchRequest(Guid linkId, IOnPremiseConnectorRequest request);
 		void DispatchResponse(Guid originId, IOnPremiseConnectorResponse response);
-		void DispatchAcknowledge(Guid originId, string acknowledgeId);
+		void DispatchAcknowledge(Guid originId, string connectionId, string acknowledgeId);
 	}
 }
