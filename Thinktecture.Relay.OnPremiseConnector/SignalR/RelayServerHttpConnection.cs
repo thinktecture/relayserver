@@ -93,7 +93,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private void CreateHttpClient()
 		{
-			_httpClient = new HttpClient()
+			_httpClient = new HttpClient(new HttpClientHandler())
 			{
 				BaseAddress = _relayServerUri,
 				Timeout = _requestTimeout,

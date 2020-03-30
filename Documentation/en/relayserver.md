@@ -45,6 +45,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * It is now possible to register the OnPremise Connector types with Autofac.
   * The On-Premise connector service now initializes http connection properties.
   * Relative paths in configuration are now consistently evaluated against the exe directory of the RelayServer and not against the execution dir anymore.
+  * The new default for our own responses now is JSON and not XML.
 
 * Bugfixes
 
