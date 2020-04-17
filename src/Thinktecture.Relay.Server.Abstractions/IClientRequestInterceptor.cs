@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Abstractions;
 
@@ -16,7 +17,8 @@ namespace Thinktecture.Relay.Server.Abstractions
 		/// Called when a request was received.
 		/// </summary>
 		/// <param name="context">The context of the relay task.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous interception.</returns>
-		Task OnRequestReceivedAsync(IRelayContext<TRequest, TResponse> context);
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task OnRequestReceivedAsync(IRelayContext<TRequest, TResponse> context, CancellationToken cancellationToken = default);
 	}
 }
