@@ -1,6 +1,6 @@
 # Glossary
 
-When you are new to **RelayServer** or are coming from an older version, there can be a lot of words to learn. This glossary aims to give you a 25.000-feet overview of common terms and what they mean in the context of RelayServer.
+When you are new to **RelayServer** or coming from an older version, there can be a lot of words to learn. This glossary aims to give you a 25.000-feet overview of common terms and what they mean in the context of RelayServer.
 
 [C](#c) | [I](#i) | [R](#r) | [T](#t)
 
@@ -8,7 +8,7 @@ When you are new to **RelayServer** or are coming from an older version, there c
 
 ### Client
 
-A *Client* is an external application or a service, which is sending [Request](#request) to a [Target](#target) which is made accessible through the [RelayServer](#relayserver).
+A *Client* is an external application or a service, which is sending a [Request](#request) to a [Target](#target) which is made accessible through the [RelayServer](#relayserver).
 
 ### Connector
 
@@ -16,7 +16,7 @@ The RelayServer *Connector* is a piece of software that runs on a physical locat
 
 For reasons of availability and load balacing the *Connector* can be run multiple times at the same location / network. All *Connectors* on a specific physical location are logically referred to as a [Tenant](#tenant).
 
-The *Connector* was formerly called *OnPremisesConnector* (short *OPC*) in RelayServer v2.
+The *Connector* was formerly called *OnPremisesConnector* (short *OPC*) in RelayServer 2.
 
 ## R
 
@@ -53,4 +53,4 @@ A *Target* describes a service that is usually not directly exposed to the inter
 
 The *Tenant* describes a physical location (on-premises) where one or more [Connectors](#connector) are installed and ready to relay requests to local [Targets](#target) that are provided by the *Tenant*.
 
-The *Tenant* was formerly called *Link* in RelayServer v2.
+The *Tenant* was formerly called *Link* in RelayServer 2.
