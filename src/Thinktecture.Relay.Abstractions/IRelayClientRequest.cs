@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Thinktecture.Relay.Abstractions
 {
+	/// <summary>
+	/// The metadata of a client request to be relayed.
+	/// </summary>
 	public interface IRelayClientRequest
 	{
 		/// <summary>
