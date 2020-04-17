@@ -68,6 +68,7 @@ The scope should be the name of the npm package or namespace affected (as percei
 The following is the list of supported scopes:
 
 * **abstractions**
+* **server-abstractions**
 * _TBD_
 
 There are currently a few exceptions to the "use package name" rule:
