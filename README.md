@@ -4,7 +4,7 @@ Thinktecture RelayServer enables secure communication from clients - including m
 
 The client can be any kind of application which uses REST-style HTTPS requests to exchange data with on-premises applications. You can use RelayServer to provide backend communication for your HTML5 apps and for native apps on Windows, iOS, Android, Blackberry, Smart TVs, and many more. There is no special library or code change needed as RelayServer acts as a transparent HTTPS reverse proxy.
 
-The on-premises applications can be located behind routers and firewalls and only need a single outgoing port to be able to handle clients' requests. They will use this port to establish a persistent connection with your Internet-accessible RelayServer instance. This connection will be managed by an embeddable component (or small windows service) call RelayServer On-Premises Connector. If your on-premises application uses some kind of Web API to communicate with the client you are ready to go.
+The on-premises applications can be located behind routers and firewalls and only need a single outgoing port to be able to handle clients' requests. They will use this port to establish a persistent connection with your internet-accessible RelayServer instance. This connection will be managed by an embeddable component (or windows service) called RelayServer Connector. If your on-premises application uses some kind of Web-based API to communicate with the client you are ready to go.
 
 All data communication will be secured via https with complete control and auditing of allowed participants and permitted data.
 
@@ -16,7 +16,7 @@ See the [glossary](./docs/glossary.md) for a further description of terms used i
 
 - Open Source under BSD-3-Clause license
 - Full data sovereignty without the need to tunnel data over public relays operated by third parties
-- No special client-side library needed - it's technically only an HTTP reverse proxy
+- No special client-side library needed - it's technically only an distributed HTTP reverse proxy
 - Supports multiple tenants with provisioning - you would usually connect thousands of on-premises installation via one RelayServer instance
 - Management web included (status monitoring, provisioning, debugging)
 - Firewall, NAT & Proxy-friendly
@@ -26,6 +26,8 @@ See the [glossary](./docs/glossary.md) for a further description of terms used i
 - No VPN setup
 
 ## Sponsors
+
+We would like to thank our sponsors that helped to make RelayServer possible.
 
 ### Germany
 
