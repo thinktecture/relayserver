@@ -10,6 +10,8 @@ All data communication will be secured via https with complete control and audit
 
 ![en-architecture-overview.png](./docs/assets/en-architecture-overview.png)
 
+See the [glossary](./docs/glossary.md) for a further description of terms used in the context of RelayServer.
+
 ## Features
 
 - Open Source under BSD-3-Clause license
