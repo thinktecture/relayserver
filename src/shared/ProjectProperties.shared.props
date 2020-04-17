@@ -1,15 +1,23 @@
 <Project>
   <!-- WARNING: This file is shared between all RelayServer .NET Core library projects -->
   <PropertyGroup>
+    <!-- Build control -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Ignore Warnings: -->
+    <NoWarn>NU5105</NoWarn>
+    <!--
+      NU5105: PackageVersion is semver2 and older NuGet clients don't support that yet; This is on purpose
+    -->
+
+    <!-- Version -->
     <Version Condition="'$(Version)' == ''">3.0.0</Version>
     <VersionSuffix Condition="'$(VersionSuffix)' == ''">-alpha.1</VersionSuffix>
-
     <VersionPrefix>$(Version)</VersionPrefix>
     <PackageVersion>$(VersionPrefix)$(VersionSuffix)</PackageVersion>
     <InformationalVersion>$(PackageVersion)</InformationalVersion>
 
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
+    <!-- NuGet Package information -->
     <Company>Thinktecture AG</Company>
     <Product>Thinktecture RelayServer</Product>
     <Copyright>Copyright © $(Company) 2015 - 2020. All rights reserved.</Copyright>
@@ -17,12 +25,17 @@
     <PackageTags>thinktecture;relayserver</PackageTags>
     <PackageIcon>Logo_T_Nontransparent.png</PackageIcon>
     <PackageProjectUrl>https://github.com/thinktecture/relayserver</PackageProjectUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>https://github.com/thinktecture/relayserver/releases</PackageReleaseNotes>
+
+    <!-- Repository -->
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/thinktecture/relayserver.git</RepositoryUrl>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <!-- License -->
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="\" Visible="false" />
     <None Include="$(MSBuildThisFileDirectory)Logo_T_Nontransparent.png" Pack="true" PackagePath="\" Visible="false" />
