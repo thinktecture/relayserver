@@ -6,19 +6,23 @@ namespace Thinktecture.Relay.Server.Abstractions
 	/// <summary>
 	/// A context containing processing information and data for one relay task.
 	/// </summary>
-	public interface IRelayContext
+	/// <typeparam name="TRequest">The type of request.</typeparam>
+	/// <typeparam name="TResponse">The type of response.</typeparam>
+	public interface IRelayContext<TRequest, TResponse>
+		where TRequest : IRelayClientRequest
+		where TResponse : IRelayTargetResponse
 	{
 		/// <summary>
 		/// The client request.
 		/// </summary>
-		IRelayClientRequest ClientRequest { get; set; }
+		TRequest ClientRequest { get; set; }
 
 		/// <summary>
 		/// The target response.
 		/// <remarks>Setting this in an interceptor prevents requesting any target by default.</remarks>
 		/// <seealso cref="ForceConnectorDelivery"/>
 		/// </summary>
-		IRelayTargetResponse TargetResponse { get; set; }
+		TResponse TargetResponse { get; set; }
 
 		/// <summary>
 		/// Indicates if at least one connector is available for processing the <see cref="ClientRequest"/>
