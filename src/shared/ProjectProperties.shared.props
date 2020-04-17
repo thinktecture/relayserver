@@ -12,9 +12,12 @@
 
     <!-- Version -->
     <Version Condition="'$(Version)' == ''">3.0.0</Version>
-    <VersionSuffix Condition="'$(VersionSuffix)' == ''">-alpha.1</VersionSuffix>
+    <PreReleasePrefix Condition="'$(PreReleasePrefix)' == ''">-alpha.1</PreReleasePrefix>
+    <PreReleaseSuffix Condition="'$(PreReleaseSuffix)' == ''"></PreReleaseSuffix>
+    <PreRelease Condition="'$(PreReleasePrefix)' != ''">$(PreReleasePrefix)$(PreReleaseSuffix)</PreRelease>
     <VersionPrefix>$(Version)</VersionPrefix>
-    <PackageVersion>$(VersionPrefix)$(VersionSuffix)</PackageVersion>
+    <VersionSuffix Condition="'$(VersionSuffix)' == ''"></VersionSuffix>
+    <PackageVersion>$(VersionPrefix)$(PreRelease)$(VersionSuffix)</PackageVersion>
     <InformationalVersion>$(PackageVersion)</InformationalVersion>
 
     <!-- NuGet Package information -->
@@ -29,7 +32,7 @@
 
     <!-- Repository -->
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/thinktecture/relayserver.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/thinktecture/relayserver</RepositoryUrl>
 
     <!-- License -->
     <PackageLicenseFile>LICENSE</PackageLicenseFile>

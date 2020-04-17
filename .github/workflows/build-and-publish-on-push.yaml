@@ -1,0 +1,50 @@
+name: Build and publish NuGet packages
+
+on:
+  push:
+    branches:
+      - feature/dotnet-core
+
+    pull_request:
+      branches: [ feature/dotnet-core ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.201' # SDK Version to use.
+
+      - name: Restore required NuGet packages
+        run: dotnet restore
+        working-directory: src
+
+      - name: Build
+        run: dotnet build -c:Release -p:ContinuousIntegrationBuild=true -p:PreReleaseSuffix=.$GITHUB_RUN_NUMBER
+        working-directory: src
+
+      - name: Create NuGet packages
+        run: dotnet pack -c:Release -p:ContinuousIntegrationBuild=true -p:PreReleaseSuffix=.$GITHUB_RUN_NUMBER -o ../packages
+        working-directory: src
+
+      - name: Upload NuGet packages as artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: NuGet_Packages
+          path: packages
+
+      - name: Publish NuGet packages to GitHub package registry
+        uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
+        with:
+          nupkg-path: 'packages/*.*'
+          repo-owner: 'thinkecture'
+          gh-user: 'thinktecture'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+
