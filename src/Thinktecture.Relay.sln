@@ -21,6 +21,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Abstractions", "Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj", "{F76D6870-8364-4EE7-B6B1-953B7D07C63B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{EEE512D2-CB20-484F-8314-16300733942F}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\glossary.md = ..\docs\glossary.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{AD756171-B728-4FD3-9BC6-20C2E32141C6}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\assets\en-architecture-overview.png = ..\docs\assets\en-architecture-overview.png
+		..\docs\assets\logo_sponsor_abraxas.png = ..\docs\assets\logo_sponsor_abraxas.png
+		..\docs\assets\logo_sponsor_cmi.svg = ..\docs\assets\logo_sponsor_cmi.svg
+		..\docs\assets\logo_sponsor_kwp.svg = ..\docs\assets\logo_sponsor_kwp.svg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +51,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AD756171-B728-4FD3-9BC6-20C2E32141C6} = {EEE512D2-CB20-484F-8314-16300733942F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CE554FF-A10B-4F63-B480-ED9455F16873}
