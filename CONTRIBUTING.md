@@ -67,12 +67,14 @@ The scope should be the name of the npm package or namespace affected (as percei
 
 The following is the list of supported scopes:
 
+* **abstractions**
 * _TBD_
 
 There are currently a few exceptions to the "use package name" rule:
 
 * **packaging**: used for changes that change the npm or NuGet package layout, e.g. public path changes, package.json changes, d.ts file/format changes, changes to bundles, etc.
 * **changelog**: used for updating the release notes in CHANGELOG.md
+* **contributing**: used for updating the notes in CONTRIBUTING.md
 
 ### Subject
 The subject contains a succinct description of the change:
