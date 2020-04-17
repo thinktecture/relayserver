@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+
+    <Title>Thinktecture RelayServer Abstractions</Title>
+    <Description>Contains abstractions for the RelayServer server and connector.
+
+      This usually should not be referenced directly but provides shared types for
+      the more specific connector and server abstractions.</Description>
+    <Summary></Summary>
   </PropertyGroup>
+
+  <!-- Use shared information for NuGet packaging -->
+  <Import Project="..\shared\ProjectProperties.shared.props" />
 
 </Project>
