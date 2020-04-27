@@ -44,6 +44,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.PostgreSql", "tools\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.PostgreSql\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.PostgreSql.csproj", "{329E6E2B-FEB6-4FA9-A893-0435300A122D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj", "{734C4AFA-41C3-49AE-A39F-51DD5FAAF462}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.csproj", "{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +78,14 @@ Global
 		{329E6E2B-FEB6-4FA9-A893-0435300A122D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{329E6E2B-FEB6-4FA9-A893-0435300A122D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{329E6E2B-FEB6-4FA9-A893-0435300A122D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{734C4AFA-41C3-49AE-A39F-51DD5FAAF462}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{734C4AFA-41C3-49AE-A39F-51DD5FAAF462}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{734C4AFA-41C3-49AE-A39F-51DD5FAAF462}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{734C4AFA-41C3-49AE-A39F-51DD5FAAF462}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
