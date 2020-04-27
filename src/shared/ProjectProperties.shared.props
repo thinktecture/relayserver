@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- Ignore Warnings: -->
-    <NoWarn>NU5105</NoWarn>
+    <NoWarn>NU5105;$(NoWarn)</NoWarn>
     <!--
       NU5105: PackageVersion is semver2 and older NuGet clients don't support that yet; This is on purpose
     -->
