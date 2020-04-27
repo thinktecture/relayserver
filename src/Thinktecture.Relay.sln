@@ -1,4 +1,3 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30001.183
@@ -21,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Abstractions", "Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj", "{F76D6870-8364-4EE7-B6B1-953B7D07C63B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Connector.Abstractions", "Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj", "{29415635-781F-416B-BEE7-C1444E7D28AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Connector.Abstractions", "Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj", "{29415635-781F-416B-BEE7-C1444E7D28AC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{EEE512D2-CB20-484F-8314-16300733942F}"
 	ProjectSection(SolutionItems) = preProject
@@ -47,6 +46,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj", "{734C4AFA-41C3-49AE-A39F-51DD5FAAF462}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.csproj", "{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hosts", "hosts", "{696BE582-5142-4E0E-970D-CC8508735F9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Docker", "hosts\Thinktecture.Relay.Server.Docker\Thinktecture.Relay.Server.Docker.csproj", "{9B0F24AC-A664-40D0-AD7E-10856304DF19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +89,10 @@ Global
 		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B0F24AC-A664-40D0-AD7E-10856304DF19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B0F24AC-A664-40D0-AD7E-10856304DF19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B0F24AC-A664-40D0-AD7E-10856304DF19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B0F24AC-A664-40D0-AD7E-10856304DF19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +101,7 @@ Global
 		{AD756171-B728-4FD3-9BC6-20C2E32141C6} = {EEE512D2-CB20-484F-8314-16300733942F}
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C} = {AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}
 		{329E6E2B-FEB6-4FA9-A893-0435300A122D} = {AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}
+		{9B0F24AC-A664-40D0-AD7E-10856304DF19} = {696BE582-5142-4E0E-970D-CC8508735F9B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CE554FF-A10B-4F63-B480-ED9455F16873}
