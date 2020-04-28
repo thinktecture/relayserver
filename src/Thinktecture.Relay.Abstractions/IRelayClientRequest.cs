@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.Abstractions
 		AcknowledgeMode AcknowledgeMode { get; set; }
 
 		/// <summary>
-		/// The unique id of the server where the acknowledgment should send to.
+		/// The unique id of the server where the acknowledgment should be send to.
 		/// </summary>
 		Guid AcknowledgeOriginId { get; set; }
 	}
