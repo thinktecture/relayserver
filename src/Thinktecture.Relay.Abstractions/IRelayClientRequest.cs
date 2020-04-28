@@ -21,12 +21,17 @@ namespace Thinktecture.Relay.Abstractions
 		Guid RequestOriginId { get; set; }
 
 		/// <summary>
+		/// The unique identifier of the target used to request the response from.
+		/// </summary>
+		string TargetId { get; set; }
+
+		/// <summary>
 		/// The HTTP method used by the requesting client.
 		/// </summary>
 		string HttpMethod { get; set; }
 
 		/// <summary>
-		/// The URL used by the requesting client relative to the target.
+		/// The URL used by the requesting client relative to the <see cref="TargetId"/>.
 		/// </summary>
 		string Url { get; set; }
 

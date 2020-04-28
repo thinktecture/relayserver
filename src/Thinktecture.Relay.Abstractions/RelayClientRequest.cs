@@ -12,7 +12,11 @@ namespace Thinktecture.Relay.Abstractions
 		public Guid RequestOriginId { get; set; }
 
 		/// <inheritdoc />
+		public string TargetId { get; set; }
+
+		/// <inheritdoc />
 		public string HttpMethod { get; set; }
+
 		/// <inheritdoc />
 		public string Url { get; set; }
 		/// <inheritdoc />
