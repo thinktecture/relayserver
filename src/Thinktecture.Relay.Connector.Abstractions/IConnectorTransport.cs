@@ -18,5 +18,11 @@ namespace Thinktecture.Relay.Connector.Abstractions
 		/// <param name="request">The metadata.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task AcknowledgeAsync(IAcknowledgeRequest request);
+
+		/// <summary>
+		/// Send a pong signal to the server.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task PongAsync();
 	}
 }
