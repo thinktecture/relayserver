@@ -10,6 +10,10 @@
     <Summary></Summary>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="4.7.1" />
+  </ItemGroup>
+
   <!-- Use shared information for NuGet packaging -->
   <Import Project="..\shared\ProjectProperties.shared.props" />
 

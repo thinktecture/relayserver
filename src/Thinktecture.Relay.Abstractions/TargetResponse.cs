@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json.Serialization;
 
 namespace Thinktecture.Relay.Abstractions
 {
 	/// <inheritdoc />
-	public class RelayTargetResponse : IRelayTargetResponse
+	public class TargetResponse : ITransportTargetResponse
 	{
 		/// <inheritdoc />
 		public Guid RequestId { get; set; }
@@ -14,11 +16,16 @@ namespace Thinktecture.Relay.Abstractions
 		/// <inheritdoc />
 		public IDictionary<string, string[]> HttpHeaders { get; set; }
 		/// <inheritdoc />
-		public byte[] Body { get; set; }
+		byte[] ITransportTargetResponse.Body { get; set; }
 		/// <inheritdoc />
 		public long? BodySize { get; set; }
 		/// <inheritdoc />
 		public bool IsBodyAvailable { get; set; }
+
+		/// <inheritdoc />
+		[JsonIgnore]
+		public Stream BodyStream { get; set; }
+
 		/// <inheritdoc />
 		public DateTime? RequestStart { get; set; }
 		/// <inheritdoc />

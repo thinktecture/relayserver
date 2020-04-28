@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Thinktecture.Relay.Abstractions
 {
@@ -10,14 +11,14 @@ namespace Thinktecture.Relay.Abstractions
 	{
 		/// <summary>
 		/// The unique id of the request.
-		/// <remarks>This should not be changed.</remarks>
 		/// </summary>
+		/// <remarks>This should not be changed.</remarks>
 		Guid RequestId { get; set; }
 
 		/// <summary>
 		/// The unique id of the server which created the request.
-		/// <remarks>This should not be changed.</remarks>
 		/// </summary>
+		/// <remarks>This should not be changed.</remarks>
 		Guid RequestOriginId { get; set; }
 
 		/// <summary>
@@ -26,35 +27,33 @@ namespace Thinktecture.Relay.Abstractions
 		IDictionary<string, string[]> HttpHeaders { get; set; }
 
 		/// <summary>
-		/// An array of <see cref="byte"/>s containing the body returned by the requested target.
-		/// <remarks>This will be <value>null</value> when the body is too big for inlining.</remarks>
-		/// <seealso cref="IsBodyAvailable"/>
-		/// </summary>
-		byte[] Body { get; set; }
-
-		/// <summary>
 		/// The size of an optional body returned by the requested target.
-		/// <remarks>A value of <value>null</value> means that the size is unknown.</remarks>
-		/// <seealso cref="IsBodyAvailable"/>
 		/// </summary>
+		/// <seealso cref="IsBodyAvailable"/>
+		/// <remarks>A value of <value>null</value> means that the size is unknown.</remarks>
 		long? BodySize { get; set; }
 
 		/// <summary>
-		/// Indicates if a body was returned by the requested target. If false the value of <see cref="Body"/> and
+		/// Indicates if a body was returned by the requested target. If false the value of <see cref="BodyStream"/> and
 		/// <see cref="BodySize"/> should be ignored.
 		/// </summary>
 		bool IsBodyAvailable { get; set; }
 
 		/// <summary>
-		/// The time when the target was requested in behalf.
-		/// <remarks>This will only be set when tracing is enabled.</remarks>
+		/// The body as a stream.
 		/// </summary>
+		Stream BodyStream { get; set; }
+
+		/// <summary>
+		/// The time when the target was requested in behalf.
+		/// </summary>
+		/// <remarks>This will only be set when tracing is enabled.</remarks>
 		DateTime? RequestStart { get; set; }
 
 		/// <summary>
 		/// The duration until the target returned its results.
-		/// <remarks>This will only be set when tracing is enabled.</remarks>
 		/// </summary>
+		/// <remarks>This will only be set when tracing is enabled.</remarks>
 		TimeSpan? RequestDuration { get; set; }
 	}
 }

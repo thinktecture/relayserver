@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Thinktecture.Relay.Abstractions
 {
@@ -41,13 +42,6 @@ namespace Thinktecture.Relay.Abstractions
 		IDictionary<string, string[]> HttpHeaders { get; set; }
 
 		/// <summary>
-		/// An array of <see cref="byte"/>s containing the body provided by the requesting client.
-		/// <remarks>This will be <value>null</value> when the body is too big for inlining.</remarks>
-		/// <seealso cref="IsBodyAvailable"/>
-		/// </summary>
-		byte[] Body { get; set; }
-
-		/// <summary>
 		/// The size of an optional body provided by the requesting client.
 		/// <remarks>A value of <value>null</value> means that the size is unknown.</remarks>
 		/// <seealso cref="IsBodyAvailable"/>
@@ -55,10 +49,15 @@ namespace Thinktecture.Relay.Abstractions
 		long? BodySize { get; set; }
 
 		/// <summary>
-		/// Indicates if a body was provided by the requesting client. If false the value of <see cref="Body"/> and
+		/// Indicates if a body was provided by the requesting client. If false the value of <see cref="BodyStream"/> and
 		/// <see cref="BodySize"/> should be ignored.
 		/// </summary>
 		bool IsBodyAvailable { get; set; }
+
+		/// <summary>
+		/// The body as a stream.
+		/// </summary>
+		Stream BodyStream { get; set; }
 
 		/// <summary>
 		/// Indicating the mode if and when the connector should acknowledge the processing of the request.
