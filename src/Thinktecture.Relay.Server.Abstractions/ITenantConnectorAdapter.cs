@@ -3,11 +3,14 @@ using Thinktecture.Relay.Abstractions;
 namespace Thinktecture.Relay.Server.Abstractions
 {
 	/// <summary>
-	/// An implementation of an adapter between a tenant and a connector.
+	/// An implementation of an adapter between a tenant and a connector. This consumes the messages from the underlying transport.
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
-	public interface ITenantConnectorAdapter<TRequest>
-		where TRequest : IRelayClientRequest
+	/// <typeparam name="TResponse">The type of response.</typeparam>
+	public interface ITenantConnectorAdapter<TRequest, TResponse>
+		where TRequest : ITransportClientRequest
+		where TResponse : ITransportTargetResponse
 	{
+		// TODO methods/events/tbd for consuming messages
 	}
 }

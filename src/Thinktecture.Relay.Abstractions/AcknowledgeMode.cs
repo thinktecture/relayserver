@@ -1,18 +1,18 @@
 namespace Thinktecture.Relay.Abstractions
 {
 	/// <summary>
-	/// Used to set the acknowledge mode on a <see cref="RelayClientRequest"/>.
+	/// Used to set the acknowledge mode on a <see cref="ClientRequest"/>.
 	/// </summary>
 	public enum AcknowledgeMode
 	{
 		/// <summary>
-		/// Acknowledges when the connector has received the <see cref="RelayClientRequest"/> and also downloaded an optional body.
+		/// Acknowledges when the connector has received the <see cref="ClientRequest"/> and also downloaded an optional body.
 		/// </summary>
 		ConnectorReceived,
 
 		/// <summary>
-		/// Acknowledges when the connector has finished the <see cref="RelayClientRequest"/> and is about to return the
-		/// <see cref="RelayTargetResponse"/> to the server (after uploading an optional body).
+		/// Acknowledges when the connector has finished the <see cref="ClientRequest"/> and is about to return the
+		/// <see cref="TargetResponse"/> to the server (after uploading an optional body).
 		/// </summary>
 		ConnectorFinished,
 
@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Abstractions
 		Manual,
 
 		/// <summary>
-		/// Disables acknowledging of <see cref="RelayClientRequest"/>.
+		/// Disables acknowledging of <see cref="ClientRequest"/>.
 		/// </summary>
 		Disabled
 	}

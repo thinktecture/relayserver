@@ -19,9 +19,9 @@ namespace Thinktecture.Relay.Server.Abstractions
 
 		/// <summary>
 		/// The target response.
-		/// <remarks>Setting this in an interceptor prevents requesting any target by default.</remarks>
-		/// <seealso cref="ForceConnectorDelivery"/>
 		/// </summary>
+		/// <remarks>Setting this to an instance in an interceptor prevents requesting any target by default.</remarks>
+		/// <seealso cref="ForceConnectorDelivery"/>
 		TResponse TargetResponse { get; set; }
 
 		/// <summary>

@@ -7,7 +7,7 @@ namespace Thinktecture.Relay.Server.Abstractions
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IServerHandler<TResponse>
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITransportTargetResponse
 	{
 	}
 }
