@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Thinktecture.Relay.Abstractions;
 
 namespace Thinktecture.Relay.Connector.Abstractions
@@ -11,5 +12,11 @@ namespace Thinktecture.Relay.Connector.Abstractions
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse
 	{
+		/// <summary>
+		/// Send an acknowledge request to the server.
+		/// </summary>
+		/// <param name="request">The metadata.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task AcknowledgeAsync(IAcknowledgeRequest request);
 	}
 }
