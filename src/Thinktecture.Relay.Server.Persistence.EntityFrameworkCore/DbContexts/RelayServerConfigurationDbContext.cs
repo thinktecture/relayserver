@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities;
+using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts
 {
