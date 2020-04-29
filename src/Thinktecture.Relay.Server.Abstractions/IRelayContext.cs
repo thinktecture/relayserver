@@ -34,10 +34,5 @@ namespace Thinktecture.Relay.Server.Abstractions
 		/// to a connector for further processing by a target (ignoring the results).
 		/// </summary>
 		bool ForceConnectorDelivery { get; set; }
-
-		/// <summary>
-		/// A token signaling the cancellation of the task.
-		/// </summary>
-		CancellationToken CancellationToken { get; }
 	}
 }
