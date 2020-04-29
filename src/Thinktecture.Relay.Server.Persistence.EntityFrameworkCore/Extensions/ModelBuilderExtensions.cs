@@ -1,5 +1,5 @@
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities;
+using Thinktecture.Relay.Server.Persistence.Models;
 
 // ReSharper disable once CheckNamespace; Justification: Extension Methods on ModelBuilder
 namespace Microsoft.EntityFrameworkCore
