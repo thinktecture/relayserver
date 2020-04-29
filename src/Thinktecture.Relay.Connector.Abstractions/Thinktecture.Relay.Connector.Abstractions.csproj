@@ -7,11 +7,11 @@
     <Summary></Summary>
   </PropertyGroup>
 
+  <!-- Use shared information for NuGet packaging -->
+  <Import Project="..\shared\ProjectProperties.shared.props" />
+
   <ItemGroup>
     <ProjectReference Include="..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
   </ItemGroup>
-
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\shared\ProjectProperties.shared.props" />
 
 </Project>
