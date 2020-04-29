@@ -5,7 +5,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Creates EF Core migrations for MS SQL Server</Title>
     <Summary></Summary>
-    <Summary></Summary>
   </PropertyGroup>
 
   <ItemGroup>
