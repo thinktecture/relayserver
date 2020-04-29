@@ -35,11 +35,20 @@ namespace Microsoft.EntityFrameworkCore
 
 				tenant
 					.Property(t => t.Name)
+					.HasMaxLength(100)
 					.IsRequired();
 
 				tenant
 					.HasIndex(t => t.Name)
 					.IsUnique();
+
+				tenant
+					.Property(t => t.DisplayName)
+					.HasMaxLength(200);
+
+				tenant
+					.Property(t => t.Description)
+					.HasMaxLength(1000);
 
 				tenant.HasMany(t => t.ClientSecrets)
 					.WithOne(cs => cs.Tenant)
