@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities
+namespace Thinktecture.Relay.Server.Persistence.Models
 {
 	/// <summary>
 	/// Represents a client secret which a connector for a <see cref="Tenant"/> needs to use for authentication.

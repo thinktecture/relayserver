@@ -5,6 +5,7 @@
     <Title>Thinktecture RelayServer Server Abstractions</Title>
     <Description>Contains abstractions for the RelayServer server.</Description>
     <Summary></Summary>
+    <RootNamespace>Thinktecture.Relay.Server</RootNamespace>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->
