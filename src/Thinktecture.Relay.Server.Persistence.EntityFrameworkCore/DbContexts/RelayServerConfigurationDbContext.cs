@@ -19,10 +19,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts
 		/// </summary>
 		public DbSet<ClientSecret> ClientSecrets { get; set; }
 
-		/// <summary>
-		/// Initializes a new instance of the context.
-		/// </summary>
-		/// <param name="options"></param>
+		/// <inheritdoc />
 		public RelayServerConfigurationDbContext(DbContextOptions<RelayServerConfigurationDbContext> options)
 			: base(options)
 		{
