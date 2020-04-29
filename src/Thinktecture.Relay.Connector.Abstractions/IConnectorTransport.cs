@@ -24,5 +24,12 @@ namespace Thinktecture.Relay.Connector.Abstractions
 		/// </summary>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task PongAsync();
+
+		/// <summary>
+		/// Send the target response to the server.
+		/// </summary>
+		/// <param name="response">The target response.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task DeliverAsync(ITransportTargetResponse response);
 	}
 }
