@@ -20,6 +20,5 @@ namespace Thinktecture.Relay.Server.Abstractions
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task OnResponseReceivedAsync(IRelayContext<TRequest, TResponse> context, CancellationToken cancellationToken = default);
-		// TODO use cancellationToken on context?
 	}
 }

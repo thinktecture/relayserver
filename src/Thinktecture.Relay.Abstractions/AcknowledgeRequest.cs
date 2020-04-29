@@ -7,8 +7,10 @@ namespace Thinktecture.Relay.Abstractions
 	{
 		/// <inheritdoc />
 		public string AcknowledgeId { get; set; }
+
 		/// <inheritdoc />
 		public string ConnectionId { get; set; }
+
 		/// <inheritdoc />
 		public Guid OriginId { get; set; }
 	}
