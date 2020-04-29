@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{AD7561
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj", "{0E17E737-E4B5-4198-A784-D543187F15D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{DB91F41F-B977-4F2E-987B-38B4969EEF4F}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer", "tools\MigrationCreation.SqlServer\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer.csproj", "{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}"
@@ -80,6 +82,9 @@ Global
 		{0E17E737-E4B5-4198-A784-D543187F15D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E17E737-E4B5-4198-A784-D543187F15D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E17E737-E4B5-4198-A784-D543187F15D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E17E737-E4B5-4198-A784-D543187F15D0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -108,6 +113,7 @@ Global
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF97B995-7AFF-40B4-B521-D873A37CD244}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF97B995-7AFF-40B4-B521-D873A37CD244}.Debug|Any CPU.Build.0 = Debug|Any CPU
