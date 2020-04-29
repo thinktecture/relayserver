@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities
+namespace Thinktecture.Relay.Server.Persistence.Models
 {
 	/// <summary>
 	/// Represents a tenant. A tenant can have multiple connectors on one physical on-premises
