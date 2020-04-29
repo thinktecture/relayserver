@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
+using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 namespace Thinktecture.Relay.Server.Docker
 {
@@ -22,13 +21,7 @@ namespace Thinktecture.Relay.Server.Docker
 		{
 			services.AddControllers();
 
-			services.AddDbContext<RelayServerConfigurationDbContext>(options =>
-			{
-				options.UseNpgsql(Configuration.GetConnectionString("PostgreSql"), builder =>
-				{
-					builder.MigrationsAssembly("Thinktecture.Relay.Server.EntityFramework.PostgreSql");
-				});
-			});
+			services.AddPostgreSqlRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
