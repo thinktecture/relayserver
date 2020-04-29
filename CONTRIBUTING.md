@@ -72,6 +72,7 @@ The following is the list of supported scopes:
 * **persistence**  
 * **server-abstractions**
 * **idsrv**
+* **server**
 * _TBD_
 
 There are currently a few exceptions to the "use package name" rule:
