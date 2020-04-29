@@ -9,5 +9,6 @@ namespace Thinktecture.Relay.Server.Abstractions
 	public interface IServerHandler<TResponse>
 		where TResponse : ITransportTargetResponse
 	{
+		// TODO methods/events/tbd for consuming messages
 	}
 }

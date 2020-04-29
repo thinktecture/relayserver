@@ -3,6 +3,7 @@ using Thinktecture.Relay.Abstractions;
 
 namespace Thinktecture.Relay.Server.Abstractions
 {
+	// TODO change name of this?
 	/// <summary>
 	/// An implementation of a locator for an <see cref="ITenantConnectorAdapter{TRequest,TResponse}"/>. This mangles the communication
 	/// between the underlying tenant transport and connector transport.
