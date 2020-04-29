@@ -69,6 +69,7 @@ The following is the list of supported scopes:
 
 * **abstractions**
 * **connector-abstractions**
+* **persistence**  
 * **server-abstractions**
 * _TBD_
 
