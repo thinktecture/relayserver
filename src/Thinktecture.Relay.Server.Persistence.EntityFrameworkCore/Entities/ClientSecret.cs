@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities
 		public Guid TenantId { get; set; }
 
 		/// <summary>
-		/// A Sha256 or Sha512 of the actual secret string.
+		/// A SHA256 or SHA512 of the actual secret string.
 		/// </summary>
 		public string Value { get; set; }
 

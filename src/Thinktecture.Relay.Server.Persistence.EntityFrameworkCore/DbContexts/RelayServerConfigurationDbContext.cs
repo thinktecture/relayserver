@@ -6,7 +6,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts
 	/// <summary>
 	/// Provides EntityFrameworkCore data access logic for the RelayServer.
 	/// </summary>
-	public class RelayServerConfigurationDbContext: DbContext
+	public class RelayServerConfigurationDbContext : DbContext
 	{
 		/// <summary>
 		/// The tenants that can connect to the RelayServer with their connectors.
@@ -17,10 +17,10 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts
 		/// <summary>
 		/// The client secrets a connector needs for authentication when connecting to the RelayServer.
 		/// </summary>
-		public DbSet<ClientSecret> ClientSecrets{ get; set; }
+		public DbSet<ClientSecret> ClientSecrets { get; set; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RelayServerConfigurationDbContext"/>.
+		/// Initializes a new instance of the context.
 		/// </summary>
 		/// <param name="options"></param>
 		public RelayServerConfigurationDbContext(DbContextOptions<RelayServerConfigurationDbContext> options)
