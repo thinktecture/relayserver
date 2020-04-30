@@ -1,7 +1,6 @@
-using System.Threading;
 using Thinktecture.Relay.Abstractions;
 
-namespace Thinktecture.Relay.Server.Abstractions
+namespace Thinktecture.Relay.Server
 {
 	/// <summary>
 	/// A context containing processing information and data for one relay task.

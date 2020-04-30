@@ -22,9 +22,9 @@ namespace Thinktecture.Relay.Abstractions
 		Guid RequestOriginId { get; set; }
 
 		/// <summary>
-		/// The unique identifier of the target used to request the response from.
+		/// The name of the target used to request the response from.
 		/// </summary>
-		string TargetId { get; set; }
+		string Target { get; set; }
 
 		/// <summary>
 		/// The HTTP method used by the requesting client.
@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Abstractions
 		string HttpMethod { get; set; }
 
 		/// <summary>
-		/// The URL used by the requesting client relative to the <see cref="TargetId"/>.
+		/// The URL used by the requesting client relative to the <see cref="Target"/>.
 		/// </summary>
 		string Url { get; set; }
 
@@ -67,6 +67,6 @@ namespace Thinktecture.Relay.Abstractions
 		/// <summary>
 		/// The unique id of the server where the acknowledgment should be send to.
 		/// </summary>
-		Guid AcknowledgeOriginId { get; set; }
+		Guid? AcknowledgeOriginId { get; set; }
 	}
 }

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Thinktecture.Relay.Abstractions;
 
-namespace Thinktecture.Relay.Server.Abstractions
+namespace Thinktecture.Relay.Server
 {
 	/// <summary>
 	/// An implementation of a transport from and to the connector.

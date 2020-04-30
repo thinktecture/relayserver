@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Abstractions;
 
-namespace Thinktecture.Relay.Server.Abstractions
+namespace Thinktecture.Relay.Server.Interceptor
 {
 	/// <summary>
 	/// An implementation of an interceptor dealing with the request of the client.

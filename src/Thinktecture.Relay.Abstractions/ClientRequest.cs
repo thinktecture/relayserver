@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Abstractions
 		public Guid RequestOriginId { get; set; }
 
 		/// <inheritdoc />
-		public string TargetId { get; set; }
+		public string Target { get; set; }
 
 		/// <inheritdoc />
 		public string HttpMethod { get; set; }
@@ -68,6 +68,6 @@ namespace Thinktecture.Relay.Abstractions
 		public AcknowledgeMode AcknowledgeMode { get; set; }
 
 		/// <inheritdoc />
-		public Guid AcknowledgeOriginId { get; set; }
+		public Guid? AcknowledgeOriginId { get; set; }
 	}
 }

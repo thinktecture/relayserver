@@ -1,6 +1,6 @@
 using Thinktecture.Relay.Abstractions;
 
-namespace Thinktecture.Relay.Server.Abstractions
+namespace Thinktecture.Relay.Server
 {
 	/// <summary>
 	/// An implementation of a handler processing server to server messages.

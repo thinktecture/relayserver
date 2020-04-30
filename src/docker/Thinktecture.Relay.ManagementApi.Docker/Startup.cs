@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
-namespace Thinktecture.Relay.StatisticsApi.Docker
+namespace Thinktecture.Relay.ManagementApi.Docker
 {
 	public class Startup
 	{
@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.StatisticsApi.Docker
 		{
 			services.AddControllers();
 
-			services.AddPostgreSqlRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
+			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
