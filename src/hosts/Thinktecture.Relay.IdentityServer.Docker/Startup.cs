@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.IdentityServer.Stores;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 namespace Thinktecture.Relay.IdentityServer.Docker
