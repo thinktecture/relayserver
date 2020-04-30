@@ -45,14 +45,14 @@
   </ItemGroup>
 
   <!-- Enable sourcelink support for debugging our sources -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(DISABLE_SOURCELINK)' != 'true'">
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(DISABLE_SOURCELINK)' != 'true'">
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 </Project>
