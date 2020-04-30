@@ -1,6 +1,6 @@
 using Thinktecture.Relay.Abstractions;
 
-namespace Thinktecture.Relay.Server.Abstractions
+namespace Thinktecture.Relay.Server
 {
 	/// <summary>
 	/// An implementation of an adapter between a tenant and a connector. This consumes the messages from the underlying transport.

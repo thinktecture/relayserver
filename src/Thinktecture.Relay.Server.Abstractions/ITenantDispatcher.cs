@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Abstractions;
 
-namespace Thinktecture.Relay.Server.Abstractions
+namespace Thinktecture.Relay.Server
 {
 	/// <summary>
 	/// An implementation of a dispatcher for client requests to a connector and target responses from connectors.

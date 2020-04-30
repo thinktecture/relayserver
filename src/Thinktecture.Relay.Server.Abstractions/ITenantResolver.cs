@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace Thinktecture.Relay.Server.Abstractions
+namespace Thinktecture.Relay.Server
 {
 	/// <summary>
 	/// An implementation of a resolver for tenants.

@@ -12,10 +12,12 @@ docker run `
   -d `
   postgres
 
-docker rm -f relayserver_rabbitmq
+docker rm -f relay_rabbitmq
 docker run `
-  --name relayserver_rabbitmq `
-  --hostname relayserver-rabbitmq `
+  --name relay_rabbitmq `
+  --hostname relay-rabbitmq `
+  -e RABBITMQ_DEFAULT_USER=relayserver `
+  -e RABBITMQ_DEFAULT_PASS=<Strong!Passw0rd> `
   -p 5672:5672 `
   -p 15672:15672 `
   -d `

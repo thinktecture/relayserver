@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Server.Docker
 			{
 				var host = CreateHostBuilder(args).Build();
 
-				await ApplyMigrationsAsync(host);
+				// await ApplyMigrationsAsync(host);
 
 				await host.RunAsync();
 			}
