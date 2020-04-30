@@ -73,6 +73,8 @@ The following is the list of supported scopes:
 * **server-abstractions**
 * **idsrv**
 * **server**
+* **management**
+* **statistics**
 * _TBD_
 
 There are currently a few exceptions to the "use package name" rule:
