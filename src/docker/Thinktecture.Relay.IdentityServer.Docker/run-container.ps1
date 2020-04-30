@@ -5,4 +5,4 @@ docker run `
   --link relay_persistence_postgresql:database `
   -p 5002:80 `
   -d `
-  relay_identityserver
+  relayserver_identityserver

@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Thinktecture.Relay.Docker;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
 
 namespace Thinktecture.Relay.Server.Docker
@@ -34,23 +34,7 @@ namespace Thinktecture.Relay.Server.Docker
 			return 0;
 		}
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host
-				.CreateDefaultBuilder(args)
-				.UseSerilog((context, loggerConfiguration) =>
-				{
-					loggerConfiguration
-						.MinimumLevel.Information()
-						.Enrich.FromLogContext()
-						.Enrich.WithProperty("Application", "RelayServer")
-						.ReadFrom.Configuration(context.Configuration)
-						.WriteTo.Console();
-				})
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				});
-
+		public static IHostBuilder CreateHostBuilder(string[] args) => DockerUtils.CreateHostBuilder<Startup>("RelayServer", args);
 
 		private static async Task ApplyMigrationsAsync(IHost host)
 		{

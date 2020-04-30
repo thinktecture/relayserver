@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.IdentityServer.Docker
 		{
 			services.AddControllersWithViews();
 
-			services.AddPostgreSqlRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
+			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 
 			services.AddIdentityServer(c => { })
 				.AddClientStore<RelayServerTenantStore>()
