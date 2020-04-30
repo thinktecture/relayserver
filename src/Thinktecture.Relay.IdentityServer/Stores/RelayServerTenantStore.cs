@@ -28,6 +28,10 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 		async Task<Client> IClientStore.FindClientByIdAsync(string clientId)
 		{
 			var tenant = await _tenantRepository.LoadTenantByNameAsync(clientId);
+			if (tenant == null)
+			{
+				return null;
+			}
 
 			return ConvertToClient(tenant);
 		}
