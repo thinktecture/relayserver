@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Docker
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers();
-			services.AddPostgreSqlRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
+			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -11,3 +11,12 @@ docker run `
   -p 5432:5432 `
   -d `
   postgres
+
+docker rm -f relayserver_rabbitmq
+docker run `
+  --name relayserver_rabbitmq `
+  --hostname relayserver-rabbitmq `
+  -p 5672:5672 `
+  -p 15672:15672 `
+  -d `
+  rabbitmq:management
