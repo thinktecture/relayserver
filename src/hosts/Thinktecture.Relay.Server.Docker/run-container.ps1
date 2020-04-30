@@ -1,9 +1,8 @@
-docker rm -f relayserver
+docker rm -f relay_server
 
 docker run `
-  --name relayserver `
-  --link relayserver_postgresql:database `
-  -p 5001:443 `
+  --name relay_server `
+  --link relay_persistence_postgresql:database `
   -p 5000:80 `
   -d `
-  relayserver
+  relay_server
