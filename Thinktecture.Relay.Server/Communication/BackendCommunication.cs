@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Serilog;
+using Thinktecture.Relay.Server.Communication.RabbitMq;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
 using Thinktecture.Relay.Server.Repository;
@@ -145,14 +146,14 @@ namespace Thinktecture.Relay.Server.Communication
 			_messageDispatcher.DispatchRequest(linkId, request);
 		}
 
-		public async Task AcknowledgeOnPremiseConnectorRequestAsync(Guid originId, string acknowledgeId, string connectionId)
+		public async Task AcknowledgeOnPremiseConnectorRequestAsync(Guid originId, string connectionId, string acknowledgeId)
 		{
 			CheckDisposed();
 
 			if (originId != Guid.Empty)
 			{
-				_logger?.Debug("Dispatching acknowledge. origin-id={OriginId}, acknowledge-id={AcknowledgeId}, connection-id={ConnectionId}", originId, acknowledgeId, connectionId);
-				_messageDispatcher.DispatchAcknowledge(originId, acknowledgeId);
+				_logger?.Debug("Dispatching acknowledge. origin-id={OriginId}, connection-id={ConnectionId}, acknowledge-id={AcknowledgeId}", originId, connectionId, acknowledgeId);
+				_messageDispatcher.DispatchAcknowledge(originId, connectionId, acknowledgeId);
 			}
 
 			if (connectionId != null)
@@ -245,7 +246,15 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			_logger?.Debug("Start receiving acknowledges from dispatcher. origin-id={OriginId}", OriginId);
 
-			return _messageDispatcher.OnAcknowledgeReceived().Subscribe(acknowledgeId => _messageDispatcher.AcknowledgeRequest(acknowledgeId));
+			return _messageDispatcher.OnAcknowledgeReceived().Subscribe(AcknowledgeRequest);
+		}
+
+		private void AcknowledgeRequest(IAcknowledgeRequest acknowledgeRequest)
+		{
+			if (_connectionContexts.TryGetValue(acknowledgeRequest.ConnectionId, out var connectionContext))
+			{
+				_messageDispatcher.AcknowledgeRequest(connectionContext.LinkId, acknowledgeRequest.AcknowledgeId);
+			}
 		}
 
 		private async Task<IOnPremiseConnectorResponse> GetOnPremiseTargetResponseAsync(IOnPremiseConnectorCallback callback, TimeSpan requestTimeout, CancellationToken cancellationToken)
