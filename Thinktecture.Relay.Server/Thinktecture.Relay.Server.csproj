@@ -301,6 +301,8 @@
     <Compile Include="Communication\RabbitMq\RabbitMqRequestChannel.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqResponseChannel.cs" />
     <Compile Include="Dto\LinkConfiguration.cs" />
+    <Compile Include="Interceptor\IInterceptedStream.cs" />
+    <Compile Include="Interceptor\InterceptedStreamExtensions.cs" />
     <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
     <Compile Include="IO\LegacyResponseStream.cs" />
     <Compile Include="Filters\ConfigurableClientAuthorizationAttribute.cs" />
