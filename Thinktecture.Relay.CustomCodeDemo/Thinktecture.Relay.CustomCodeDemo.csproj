@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="DemoController.cs" />
     <Compile Include="CustomCodeModule.cs" />
+    <Compile Include="DemoOnPremiseConnectorContext.cs" />
     <Compile Include="NoopPasswordComplexityValidator.cs" />
     <Compile Include="NoopRequestLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

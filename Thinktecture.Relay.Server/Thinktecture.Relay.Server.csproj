@@ -288,7 +288,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Communication\IOnPremiseConnectionContext.cs" />
     <Compile Include="Communication\IOnPremiseConnectionHeartbeater.cs" />
     <Compile Include="Communication\OnPremiseConnectionHeartbeater.cs" />
     <Compile Include="Communication\RabbitMq\AcknowledgeRequest.cs" />
@@ -347,7 +346,6 @@
     <Compile Include="Communication\DelegatingDisposable.cs" />
     <Compile Include="Communication\RegistrationAction.cs" />
     <Compile Include="Communication\UnregistrationAction.cs" />
-    <Compile Include="Communication\OnPremiseConnectionContext.cs" />
     <Compile Include="Config\IPersistedSettings.cs" />
     <Compile Include="Config\LocalAppDataPersistedSettings.cs" />
     <Compile Include="Config\ModuleBinding.cs" />
