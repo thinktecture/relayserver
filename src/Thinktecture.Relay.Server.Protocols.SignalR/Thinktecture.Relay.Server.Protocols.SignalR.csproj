@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Contains the SignalR server transport implementation for the RelayServer.</Description>
+    <Summary></Summary>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj" />
+    <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
+  </ItemGroup>
+
+  <!-- Use shared information for NuGet packaging -->
+  <Import Project="..\shared\ProjectProperties.shared.props" />
+
+</Project>

@@ -21,8 +21,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer
 		/// <param name="contextLifetime">The lifetime with which to register the DbContext service in the container.</param>
 		/// <param name="optionsLifetime">The lifetime with which to register the DbContextOptions service in the container.</param>
 		/// <returns>The same service collection so that multiple calls can be chained.</returns>
-		public static IServiceCollection AddRelayServerConfigurationDbContext(
-			this IServiceCollection serviceCollection,
+		public static IServiceCollection AddRelayServerConfigurationDbContext(this IServiceCollection serviceCollection,
 			string connectionString,
 			Action<SqlServerDbContextOptionsBuilder> optionsAction = null,
 			bool addDefaultMigrations = true,

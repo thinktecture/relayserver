@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Title>Thinktecture RelayServer Connector</Title>
+    <Description>Contains the connector implementations for the RelayServer.</Description>
+    <Summary></Summary>
+  </PropertyGroup>
+
+  <!-- Use shared information for NuGet packaging -->
+  <Import Project="..\shared\ProjectProperties.shared.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.3" />
+  </ItemGroup>
+
+</Project>

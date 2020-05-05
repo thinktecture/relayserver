@@ -1,4 +1,6 @@
-namespace Thinktecture.Relay.Abstractions
+using Thinktecture.Relay.Transport;
+
+namespace Thinktecture.Relay.Acknowledgement
 {
 	/// <summary>
 	/// Used to set the acknowledge mode on a <see cref="ClientRequest"/>.

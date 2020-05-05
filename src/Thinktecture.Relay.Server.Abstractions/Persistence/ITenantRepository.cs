@@ -14,7 +14,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// Loads a <see cref="Tenant"/> by its name.
 		/// </summary>
 		/// <param name="name">The name of the <see cref="Tenant"/> to load.</param>
-		/// <returns>A tenant.</returns>
+		/// <returns>A <see cref="Tenant"/> or null if not found.</returns>
 		Task<Tenant> LoadTenantByNameAsync(string name);
 
 		// TODO: Fix these methods, these are preliminary
@@ -42,7 +42,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		Task<Guid> CreateTenantAsync(Tenant tenantToCreate);
 
 		/// <summary>
-		/// Create a client secret for an existing <see cref="Tenant"/>.
+		/// Creates a client secret for an existing <see cref="Tenant"/>.
 		/// </summary>
 		/// <param name="clientSecret">The secret to create.</param>
 		/// <returns></returns>

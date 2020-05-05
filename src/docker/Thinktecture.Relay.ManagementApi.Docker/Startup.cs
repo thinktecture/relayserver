@@ -20,7 +20,6 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers();
-
 			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 		}
 

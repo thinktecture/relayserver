@@ -10,14 +10,14 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.IdentityServer.Stores
 {
 	/// <summary>
-	/// Loads IdentityServer4 <see cref="Client"/> objects from the RelayServer Tenant store.
+	/// Loads IdentityServer4 <see cref="Client"/> objects from the tenant store.
 	/// </summary>
 	public class RelayServerTenantStore : IClientStore
 	{
 		private readonly ITenantRepository _tenantRepository;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RelayServerTenantStore"/>.
+		/// Initializes a new instance of <see cref="RelayServerTenantStore"/>.
 		/// </summary>
 		public RelayServerTenantStore(ITenantRepository tenantRepository)
 		{
@@ -38,7 +38,7 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 
 		private Client ConvertToClient(Tenant tenant)
 		{
-			var client = new Client()
+			return new Client()
 			{
 				ClientId = tenant.Id.ToString(),
 				ClientName = tenant.Name,
@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 				{
 					GrantType.ClientCredentials,
 				},
-				AllowedScopes = new []
+				AllowedScopes = new[]
 				{
 					// TODO: Define correct scopes
 					"relaying",
@@ -60,8 +60,6 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 				},
 				// TODO: Fill access token lifetime etc. from config
 			};
-
-			return client;
 		}
 
 		private ICollection<Secret> GetClientSecrets(Tenant tenant)

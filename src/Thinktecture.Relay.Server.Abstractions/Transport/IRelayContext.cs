@@ -1,6 +1,6 @@
-using Thinktecture.Relay.Abstractions;
+using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Server
+namespace Thinktecture.Relay.Server.Transport
 {
 	/// <summary>
 	/// A context containing processing information and data for one relay task.

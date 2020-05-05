@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Contains the RabbitMQ server transport implementation for the RelayServer.</Description>
+    <Summary></Summary>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="6.1.0" />
+  </ItemGroup>
+
+  <!-- Use shared information for NuGet packaging -->
+  <Import Project="..\shared\ProjectProperties.shared.props" />
+
+</Project>

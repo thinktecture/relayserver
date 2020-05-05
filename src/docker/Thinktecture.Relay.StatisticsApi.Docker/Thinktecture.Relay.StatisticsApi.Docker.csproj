@@ -16,5 +16,6 @@
     <ProjectReference Include="..\..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
     <ProjectReference Include="..\..\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj" />
+    <ProjectReference Include="..\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj" />
   </ItemGroup>
 </Project>

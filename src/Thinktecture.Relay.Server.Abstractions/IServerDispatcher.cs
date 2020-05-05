@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
-using Thinktecture.Relay.Abstractions;
+using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server
 {
@@ -8,7 +10,7 @@ namespace Thinktecture.Relay.Server
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IServerDispatcher<in TResponse>
-		where TResponse : ITransportTargetResponse
+		where TResponse : IRelayTargetResponse
 	{
 		/// <summary>
 		/// Dispatches the response to the origin server.
