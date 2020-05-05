@@ -100,7 +100,7 @@ namespace Thinktecture.Relay.Server.Communication
 
 		private async Task MarkConnectionInactiveIfTimedOut(IOnPremiseConnectionContext connectionContext)
 		{
-			if (connectionContext.LastLocalActivity + _configuration.ActiveConnectionTimeout < DateTime.UtcNow)
+			if (connectionContext.IsActive && connectionContext.LastLocalActivity + _configuration.ActiveConnectionTimeout < DateTime.UtcNow)
 			{
 				await _backendCommunication.DeactivateOnPremiseConnectionAsync(connectionContext.ConnectionId);
 			}
