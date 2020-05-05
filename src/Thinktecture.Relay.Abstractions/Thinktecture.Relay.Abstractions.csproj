@@ -8,6 +8,8 @@
       This usually should not be referenced directly but provides shared types for
       the more specific connector and server abstractions.</Description>
     <Summary></Summary>
+    <RootNamespace>Thinktecture.Relay</RootNamespace>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->

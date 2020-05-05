@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Abstractions
+namespace Thinktecture.Relay.Acknowledgement
 {
 	/// <summary>
 	/// The metadata of an acknowledgement.
@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Abstractions
 	public interface IAcknowledgeRequest
 	{
 		/// <summary>
-		/// The unique id of the mesaage.
+		/// The unique id of the message.
 		/// </summary>
 		string AcknowledgeId { get; set; }
 

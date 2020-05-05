@@ -1,4 +1,6 @@
+using System;
 using System.Threading.Tasks;
+using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.Server
 {
@@ -13,7 +15,6 @@ namespace Thinktecture.Relay.Server
 		/// <param name="identity">The identity of the tenant.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the tenant or null
 		/// if the identity is unknown.</returns>
-		Task<object> ResolveAsync(object identity);
-		// TODO replace with model and identity
+		Task<Tenant> ResolveAsync(Guid identity);
 	}
 }

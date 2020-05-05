@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-E
 		..\global.json = ..\global.json
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
+		..\.editorconfig = ..\.editorconfig
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Abstractions", "Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj", "{F76D6870-8364-4EE7-B6B1-953B7D07C63B}"
@@ -70,6 +71,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Docker", "docker\Thinktecture.Relay.Server.Docker\Thinktecture.Relay.Server.Docker.csproj", "{29B6CBFA-43A8-447E-90AB-6B22CD0EA413}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.StatisticsApi.Docker", "docker\Thinktecture.Relay.StatisticsApi.Docker\Thinktecture.Relay.StatisticsApi.Docker.csproj", "{055B9A9E-9A45-4100-BA64-378443F6AB73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Connector", "Thinktecture.Relay.Connector\Thinktecture.Relay.Connector.csproj", "{FF37E5FF-65D3-4EFD-B87F-8D456075402E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Protocols.SignalR", "Thinktecture.Relay.Server.Protocols.SignalR\Thinktecture.Relay.Server.Protocols.SignalR.csproj", "{1878FC63-129B-405E-B63B-386AB7CF0590}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Protocols.RabbitMq", "Thinktecture.Relay.Server.Protocols.RabbitMq\Thinktecture.Relay.Server.Protocols.RabbitMq.csproj", "{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,6 +144,18 @@ Global
 		{055B9A9E-9A45-4100-BA64-378443F6AB73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{055B9A9E-9A45-4100-BA64-378443F6AB73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{055B9A9E-9A45-4100-BA64-378443F6AB73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF37E5FF-65D3-4EFD-B87F-8D456075402E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF37E5FF-65D3-4EFD-B87F-8D456075402E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF37E5FF-65D3-4EFD-B87F-8D456075402E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF37E5FF-65D3-4EFD-B87F-8D456075402E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1878FC63-129B-405E-B63B-386AB7CF0590}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1878FC63-129B-405E-B63B-386AB7CF0590}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1878FC63-129B-405E-B63B-386AB7CF0590}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1878FC63-129B-405E-B63B-386AB7CF0590}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

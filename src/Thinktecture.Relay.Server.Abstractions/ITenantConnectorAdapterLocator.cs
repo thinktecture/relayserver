@@ -1,5 +1,6 @@
+using System;
 using System.Threading.Tasks;
-using Thinktecture.Relay.Abstractions;
+using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server
 {
@@ -11,15 +12,16 @@ namespace Thinktecture.Relay.Server
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface ITenantConnectorAdapterLocator<TRequest, TResponse>
-		where TRequest : ITransportClientRequest
-		where TResponse : ITransportTargetResponse
+		where TRequest : IRelayClientRequest
+		where TResponse : IRelayTargetResponse
 	{
 		/// <summary>
-		/// Registers the connection by creating a <see cref="ITenantConnectorAdapter{TRequest,TResponse}"/>.
+		/// Registers the connection by creating an <see cref="ITenantConnectorAdapter{TRequest,TResponse}"/>.
 		/// </summary>
+		/// <param name="tenantId">The unique id of the tenant.</param>
 		/// <param name="connectionId">The unique id for the connection.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task RegisterAdapterAsync(string connectionId);
+		Task RegisterAdapterAsync(Guid tenantId, string connectionId);
 
 		/// <summary>
 		/// Unregisters the connection by destroying the corresponding <see cref="ITenantConnectorAdapter{TRequest,TResponse}"/>.
@@ -27,5 +29,13 @@ namespace Thinktecture.Relay.Server
 		/// <param name="connectionId">The unique id for the connection.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task UnregisterAdapterAsync(string connectionId);
+
+		/// <summary>
+		/// Gets the <see cref="ITenantConnectorAdapter{TRequest,TResponse}"/> for the provided connection id.
+		/// </summary>
+		/// <param name="connectionId">The unique id for the connection.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the adapter or null if the connection id is
+		/// unknown.</returns>
+		Task<ITenantConnectorAdapter<TRequest, TResponse>> GetTenantConnectorAdapterAsync(string connectionId);
 	}
 }

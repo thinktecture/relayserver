@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Abstractions
+namespace Thinktecture.Relay.Acknowledgement
 {
 	/// <inheritdoc />
 	public class AcknowledgeRequest : IAcknowledgeRequest

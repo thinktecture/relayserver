@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Thinktecture.Relay.Docker;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
 
 namespace Thinktecture.Relay.ManagementApi.Docker
@@ -32,21 +33,6 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 			return 0;
 		}
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host
-				.CreateDefaultBuilder(args)
-				.UseSerilog((context, loggerConfiguration) =>
-				{
-					loggerConfiguration
-						.MinimumLevel.Information()
-						.Enrich.FromLogContext()
-						.Enrich.WithProperty("Application", "ManagementApi")
-						.ReadFrom.Configuration(context.Configuration)
-						.WriteTo.Console();
-				})
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				});
+		public static IHostBuilder CreateHostBuilder(string[] args) => DockerUtils.CreateHostBuilder<Startup>("ManagementApi", args);
 	}
 }

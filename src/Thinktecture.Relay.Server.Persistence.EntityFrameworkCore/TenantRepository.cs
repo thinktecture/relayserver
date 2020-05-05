@@ -14,9 +14,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		private readonly RelayServerConfigurationDbContext _dbContext;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TenantRepository"/>.
+		/// Initializes a new instance of <see cref="TenantRepository"/>.
 		/// </summary>
-		/// <param name="dbContext">The entity framework core database context.</param>
+		/// <param name="dbContext">The Entity Framework Core database context.</param>
 		public TenantRepository(RelayServerConfigurationDbContext dbContext)
 		{
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));

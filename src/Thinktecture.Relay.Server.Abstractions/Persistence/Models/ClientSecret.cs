@@ -8,12 +8,12 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 	public class ClientSecret
 	{
 		/// <summary>
-		/// The unique identifier of this client secret.
+		/// The unique id of this client secret.
 		/// </summary>
 		public Guid Id { get; set; }
 
 		/// <summary>
-		/// The identifier of the <see cref="Tenant"/> this secret is for.
+		/// The unique id of the <see cref="Tenant"/> this secret is for.
 		/// </summary>
 		public Guid TenantId { get; set; }
 

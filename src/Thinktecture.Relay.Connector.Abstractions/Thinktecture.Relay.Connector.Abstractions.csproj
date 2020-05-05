@@ -5,6 +5,7 @@
     <Title>Thinktecture RelayServer Connector Abstractions</Title>
     <Description>Contains abstractions for the RelayServer connector.</Description>
     <Summary></Summary>
+    <RootNamespace>Thinktecture.Relay.Connector</RootNamespace>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->
@@ -12,6 +13,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.3" />
   </ItemGroup>
 
 </Project>
