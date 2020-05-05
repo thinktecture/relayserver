@@ -86,7 +86,10 @@ namespace Thinktecture.Relay.Server.Communication
 
 			_connectionContexts.TryAdd(onPremiseConnectionContext.ConnectionId, onPremiseConnectionContext);
 
-			await ProvideLinkConfigurationAsync(onPremiseConnectionContext).ConfigureAwait(false);
+			if (onPremiseConnectionContext.SupportsConfiguration)
+			{
+				await ProvideLinkConfigurationAsync(onPremiseConnectionContext).ConfigureAwait(false);
+			}
 		}
 
 		public async Task UnregisterOnPremiseConnectionAsync(string connectionId)
