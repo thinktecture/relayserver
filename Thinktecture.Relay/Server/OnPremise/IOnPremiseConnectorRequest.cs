@@ -85,5 +85,10 @@ namespace Thinktecture.Relay.Server.OnPremise
 		/// Gets the id of the RelayServer this request may acknowledged to
 		/// </summary>
 		Guid AcknowledgeOriginId { get; }
+
+		/// <summary>
+		/// Gets the additional properties which will be serialized onto the root object
+		/// </summary>
+		IReadOnlyDictionary<string, object> Properties { get; }
 	}
 }

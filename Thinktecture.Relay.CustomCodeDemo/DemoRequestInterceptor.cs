@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -44,6 +45,16 @@ namespace Thinktecture.Relay.CustomCodeDemo
 			if (_context.IsLocal)
 			{
 				_logger?.Debug("This request comes from localhost.");
+			}
+
+			// Example: Move query parameters into own JSON property
+			if (request.Url.Contains("?"))
+			{
+				var parts = request.Url.Split('?');
+				request.Url = parts[0];
+				request.Properties = new Dictionary<string, object>() {
+					{ "Parameter", parts[1] }
+				};
 			}
 
 			// Example: Modify content

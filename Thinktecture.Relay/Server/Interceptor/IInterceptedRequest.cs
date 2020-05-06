@@ -57,5 +57,10 @@ namespace Thinktecture.Relay.Server.Interceptor
 		/// </summary>
 		/// <returns>A changeable dictionary containing all HttpHeaders of the intercepted request.</returns>
 		Dictionary<string, string> CloneHttpHeaders();
+
+		/// <summary>
+		/// Gets the additional properties which will be serialized onto the root object
+		/// </summary>
+		IReadOnlyDictionary<string, object> Properties { get; set; }
 	}
 }

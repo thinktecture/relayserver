@@ -4,6 +4,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.AspNet.SignalR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Config;
@@ -74,7 +76,18 @@ namespace Thinktecture.Relay.Server.SignalR
 			_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
 				connectionId, request.RequestId, request.HttpMethod, _configuration.LogSensitiveData ? uri.PathAndQuery : uri.AbsolutePath, request.OriginId, request.ContentLength);
 
-			await Connection.Send(connectionId, request).ConfigureAwait(false);
+			var json = JObject.FromObject(request);
+			if (request.Properties != null)
+			{
+				json.Remove(nameof(IOnPremiseConnectorRequest.Properties));
+
+				foreach (var kvp in request.Properties)
+				{
+					json[kvp.Key] = JToken.FromObject(kvp.Value);
+				}
+			}
+
+			await Connection.Send(connectionId, json).ConfigureAwait(false);
 		}
 
 		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
