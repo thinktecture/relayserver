@@ -50,7 +50,6 @@ namespace Thinktecture.Relay.Server.Communication
 		/// </summary>
 		string Role { get; set; }
 
-
 		/// <summary>
 		/// The version of the on-premise connector.
 		/// </summary>
