@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 
 		public InterceptedRequest(ILogger logger, IOnPremiseConnectorRequest other)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));;
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 			RequestId = other.RequestId;
 			OriginId = other.OriginId;
@@ -49,6 +49,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 			AlwaysSendToOnPremiseConnector = other.AlwaysSendToOnPremiseConnector;
 			Expiration = other.Expiration;
 			AcknowledgeOriginId = other.AcknowledgeOriginId;
+			Properties = other.Properties;
 		}
 
 		public Dictionary<string, string> CloneHttpHeaders()
