@@ -84,6 +84,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 			}
 
 			builder.RegisterType<PasswordComplexityValidator>().AsImplementedInterfaces();
+			builder.RegisterType<OnPremiseConnectionContext>().AsImplementedInterfaces().InstancePerDependency();
 
 			_customCodeAssemblyLoader.RegisterModule(builder);
 
