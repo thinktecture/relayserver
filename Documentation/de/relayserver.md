@@ -7,12 +7,12 @@
 
 # Release Notes
 
-## Version 2.3.0-rc4
+## Version 2.3.0-rc5
 
-* RabbitMq Verbesserungen
+* RabbitMQ Verbesserungen
 
   * Beendete Verbindungen werden nun explizit auch auf dem Rabbit-Client beendet.
-  * Die Funktion, verlorene Verbindungen zum RabbitMq Server von dessen Client automatisch wiederherstellen zu lassen, wird nun standardmäßig aktiviert.
+  * Die Funktion, verlorene Verbindungen zum RabbitMQ Server von dessen Client automatisch wiederherstellen zu lassen, wird nun standardmäßig aktiviert.
   * Wenn eine Verbindung geschlossen wird, wird sichergestellt dass alle Nachrichten die noch nicht acknowledged wurden, wieder zugestellt werden.
   * Um den Durchsatz zu erhöhen werden nun separate Channels (via RoutingKeys) für Requests, Responses und Acknowledgements verwendet.
 
@@ -37,15 +37,20 @@
   * Der On-Premise Connector service initialisiert nun die HttpConnection properties.
   * Relative Pfade in der Konfiguration werden nun einheitlich relativ zur RelayServer .exe-Datei ausgewertet und nicht mehr zum Ausführungsverzeichnis.
   * Es wird jetzt per default JSON statt XML über die eigenen Endpunkte zurück gegeben.
+  * Eine eigene Implementation (oder von der Standardklasse abgeleiteten) eines IOnPremiseConnectionContext kann in der DI registriert werden.
+  * Um eine einfachere Migration von geänderten IOnPremiseTargetRequest Implementierungen durchführen zu können, wurde eine Property mit dem Namen "Properties" eingeführt, welche in den Root des JSON serialisiert wird, um im On-Premise Connector in die jeweiligen Properties deserialisiert zu werden.
 
 * Fehlerbehebungen
 
-  * Der OnPremiseConnector Demo-Service konnte ein Framwork-Assembly unter bestimmten Voraussetzungen nicht korrekt laden.
-  * Der OnPremise-Connector wird seinen `HttpClient` mit dem er Antworten an den RelayServer sendet nun erneuern, falls dort Fehler auftreten.
+  * Der On-Premise Connector Demo-Service konnte ein Framwork-Assembly unter bestimmten Voraussetzungen nicht korrekt laden.
+  * Der On-Premise Connector wird seinen `HttpClient` mit dem er Antworten an den RelayServer sendet nun erneuern, falls dort Fehler auftreten.
   * HttpConfig muss unter bestimmten Umständen explizit initialisiert werden.
   * Ein neu erzeugter `HttpClient` erhält nun auch die Authentication-Header seines Vorgängers.
   * Auch der Request Interceptor hat nun Zugriff auf den Stream der Daten.
   * Der Zugriff auf leere Inhalte in intercepted Requests und Responses wirft nun keine NullReferenceException mehr.
+  * Das Acknowledgement wurde nicht auf dem korrekten RabbitMQ-Model durchgeführt.
+  * Eine bereits deaktivierter On-Premise Connector wurde wiederholt deaktiviert.
+  * Eine Konfigurationsnachricht wurde auch an On-Premise Connectoren geschickt, welche diese gar nicht unterstützt haben.
 
 ## Version 2.2.0
 
@@ -68,7 +73,7 @@
 
 * Fehlerbehebungen
 
-  * Der automatische Disconnect stand in individuellen OnPremiseConnector-Implementationen nicht korrekt zur Verfügung.
+  * Der automatische Disconnect stand in individuellen On-Premise Connector-Implementationen nicht korrekt zur Verfügung.
 
 ## Version 2.1.0
 
@@ -90,7 +95,7 @@
 * Fehlerbehebungen
 
   * Wenn eine weiterzuleitende Anfrage einen Query-Parameter namens 'path' enthielt, führte das zu unerwartetem Verhalten.
-  * Die konfigurierbare Filterung des Inhaltes von OnPremise-seitigen Fehler-Antworten wurde korrigiert.
+  * Die konfigurierbare Filterung des Inhaltes von on-premise-seitigen Fehler-Antworten wurde korrigiert.
   * Eine genauere Fehlermeldung wird angezeigt wenn die Konfigurationsdatei des RelayServers fehlt.
 
 ## Version 2.0.0
@@ -99,9 +104,9 @@
 
   * Mehrere RelayServer können zur Lastverteilung parallel betrieben werden. Die Server müssen hierzu Zugriff auf einen gemeinsamen Netzwerk-Ordner haben, in dem zu übertragende Daten zwischen den Servern ausgetauscht werden.
 
-* Verbesserte Verbindungsstabilität mit neueren OnPremiseConnectoren
+* Verbesserte Verbindungsstabilität mit neueren On-Premise Connectoren
 
-  * Der RelayServer wird einen OnPremiseConnector mit Version 2.x oder neuer nun regelmässig mit einem Heartbeat anfragen. Bleibt dieser Heartbeat aus, so wird der OnPremiseConnector versuchen die Verbindung zum RelayServer neu aufzubauen.
+  * Der RelayServer wird einen On-Premise Connector mit Version 2.x oder neuer nun regelmässig mit einem Heartbeat anfragen. Bleibt dieser Heartbeat aus, so wird der On-Premise Connector versuchen die Verbindung zum RelayServer neu aufzubauen.
 
 * Eigenen Code ausführen
 
