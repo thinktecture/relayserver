@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Autofac;
 using Microsoft.AspNet.SignalR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Config;
@@ -15,12 +18,14 @@ namespace Thinktecture.Relay.Server.SignalR
 		private readonly ILogger _logger;
 		private readonly IBackendCommunication _backendCommunication;
 		private readonly IConfiguration _configuration;
+		private readonly ILifetimeScope _lifetimeScope;
 
-		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IConfiguration configuration)
+		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IConfiguration configuration, ILifetimeScope lifetimeScope)
 		{
 			_logger = logger;
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_lifetimeScope = lifetimeScope ?? throw new ArgumentNullException(nameof(lifetimeScope));
 		}
 
 		protected override bool AuthorizeRequest(IRequest request)
@@ -71,7 +76,18 @@ namespace Thinktecture.Relay.Server.SignalR
 			_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
 				connectionId, request.RequestId, request.HttpMethod, _configuration.LogSensitiveData ? uri.PathAndQuery : uri.AbsolutePath, request.OriginId, request.ContentLength);
 
-			await Connection.Send(connectionId, request).ConfigureAwait(false);
+			var json = JObject.FromObject(request);
+			if (request.Properties != null)
+			{
+				json.Remove(nameof(IOnPremiseConnectorRequest.Properties));
+
+				foreach (var kvp in request.Properties)
+				{
+					json[kvp.Key] = JToken.FromObject(kvp.Value);
+				}
+			}
+
+			await Connection.Send(connectionId, json).ConfigureAwait(false);
 		}
 
 		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
@@ -87,17 +103,18 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private async Task RegisterOnPremiseAsync(IRequest request, string connectionId, OnPremiseClaims claims)
 		{
-			await _backendCommunication.RegisterOnPremiseAsync(new OnPremiseConnectionContext()
-			{
-				ConnectionId = connectionId,
-				LinkId = claims.OnPremiseId,
-				UserName = claims.UserName,
-				Role = claims.Role,
-				RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, cr),
-				IpAddress = GetIpAddressFromOwinEnvironment(request.Environment),
-				ConnectorVersion = GetConnectorVersionFromRequest(request),
-				ConnectorAssemblyVersion = GetConnectorAssemblyVersionFromRequest(request),
-			}).ConfigureAwait(false);
+			var context = _lifetimeScope.Resolve<IOnPremiseConnectionContext>();
+
+			context.ConnectionId = connectionId;
+			context.LinkId = claims.OnPremiseId;
+			context.UserName = claims.UserName;
+			context.Role = claims.Role;
+			context.RequestAction = (cr, cancellationToken) => ForwardClientRequestAsync(connectionId, cr);
+			context.IpAddress = GetIpAddressFromOwinEnvironment(request.Environment);
+			context.ConnectorVersion = GetConnectorVersionFromRequest(request);
+			context.ConnectorAssemblyVersion = GetConnectorAssemblyVersionFromRequest(request);
+
+			await _backendCommunication.RegisterOnPremiseAsync(context).ConfigureAwait(false);
 		}
 
 		// Adopted from http://stackoverflow.com/questions/11044361/signalr-get-caller-ip-address

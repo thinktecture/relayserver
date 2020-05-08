@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 			builder.RegisterType<ConnectionFactory>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<RabbitMqFactory>().AsImplementedInterfaces().SingleInstance();
 			builder.Register(ctx => ctx.Resolve<IRabbitMqFactory>().CreateConnection()).AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<RabbitMqMessageDispatcherHandler>().AsImplementedInterfaces().SingleInstance();
+			builder.RegisterType<RabbitMqMessageDispatcher>().AsImplementedInterfaces().SingleInstance();
 
 			builder.RegisterType<BackendCommunication>().AsImplementedInterfaces().SingleInstance()
 				.OnActivated(args => args.Instance.Prepare());
@@ -84,6 +84,7 @@ namespace Thinktecture.Relay.Server.DependencyInjection
 			}
 
 			builder.RegisterType<PasswordComplexityValidator>().AsImplementedInterfaces();
+			builder.RegisterType<OnPremiseConnectionContext>().AsImplementedInterfaces().InstancePerDependency();
 
 			_customCodeAssemblyLoader.RegisterModule(builder);
 

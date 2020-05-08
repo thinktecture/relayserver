@@ -4,9 +4,11 @@ using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Cors;
 using System.Web.Http.ExceptionHandling;
 using Autofac;
@@ -95,6 +97,13 @@ namespace Thinktecture.Relay.Server
 				// This enables property injection into ASP.NET MVC filter attributes
 				builder.RegisterWebApiFilterProvider(httpConfig);
 				RegisterApiControllers(builder);
+
+				// Make the current <see cref="HttpRequestMessage"/> resolvable through the dependency scope.
+				// This is required to extract the current HttpContext from its properties.
+				builder.RegisterHttpRequestMessage(httpConfig);
+				builder.Register(c => c.Resolve<HttpRequestMessage>().Properties["MS_RequestContext"])
+					.As<HttpRequestContext>()
+					.InstancePerRequest();
 			});
 		}
 
@@ -252,6 +261,7 @@ namespace Thinktecture.Relay.Server
 				httpConfig.Routes.MapHttpRoute("ManagementWeb", "api/managementweb/{controller}/{action}");
 			}
 
+			httpConfig.Formatters.Remove(httpConfig.Formatters.XmlFormatter);
 			httpConfig.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
 			return httpConfig;

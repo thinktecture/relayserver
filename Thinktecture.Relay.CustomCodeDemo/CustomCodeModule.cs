@@ -30,6 +30,9 @@ namespace Thinktecture.Relay.CustomCodeDemo
 			// Example: Override request logger with a custom version
 			builder.RegisterType<NoopRequestLogger>().AsImplementedInterfaces();
 
+			// Example: Override the on-premise connector context with an own implementation
+			builder.RegisterType<DemoOnPremiseConnectorContext>().AsImplementedInterfaces().InstancePerDependency();
+
 			base.Load(builder);
 		}
 	}

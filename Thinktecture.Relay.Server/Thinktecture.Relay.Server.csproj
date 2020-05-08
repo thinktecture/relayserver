@@ -288,17 +288,20 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Communication\IOnPremiseConnectionContext.cs" />
     <Compile Include="Communication\IOnPremiseConnectionHeartbeater.cs" />
     <Compile Include="Communication\OnPremiseConnectionHeartbeater.cs" />
-    <Compile Include="Communication\RabbitMq\IRabbitMqAcknowledgeableChannel.cs" />
+    <Compile Include="Communication\RabbitMq\AcknowledgeRequest.cs" />
+    <Compile Include="Communication\RabbitMq\IAcknowledgeRequest.cs" />
     <Compile Include="Communication\RabbitMq\IRabbitMqChannel.cs" />
+    <Compile Include="Communication\RabbitMq\IRabbitMqRequestChannel.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqAcknowledgeChannel.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqChannelBase.cs" />
-    <Compile Include="Communication\RabbitMq\RabbitMqMessageDispatcherHandler.cs" />
+    <Compile Include="Communication\RabbitMq\RabbitMqMessageDispatcher.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqRequestChannel.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqResponseChannel.cs" />
     <Compile Include="Dto\LinkConfiguration.cs" />
+    <Compile Include="Interceptor\IInterceptedStream.cs" />
+    <Compile Include="Interceptor\InterceptedStreamExtensions.cs" />
     <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
     <Compile Include="IO\LegacyResponseStream.cs" />
     <Compile Include="Filters\ConfigurableClientAuthorizationAttribute.cs" />
@@ -339,13 +342,10 @@
     <Compile Include="OnPremise\OnPremiseConnectorResponse.cs" />
     <Compile Include="Owin\BlockNonLocalRequestsMiddleware.cs" />
     <Compile Include="Communication\IMessageDispatcher.cs" />
-    <Compile Include="Communication\InProcess\InProcessMessageDispatcher.cs" />
-    <Compile Include="Communication\InProcess\RequestSubjectContext.cs" />
     <Compile Include="Communication\IRegistryAction.cs" />
     <Compile Include="Communication\DelegatingDisposable.cs" />
     <Compile Include="Communication\RegistrationAction.cs" />
     <Compile Include="Communication\UnregistrationAction.cs" />
-    <Compile Include="Communication\OnPremiseConnectionContext.cs" />
     <Compile Include="Config\IPersistedSettings.cs" />
     <Compile Include="Config\LocalAppDataPersistedSettings.cs" />
     <Compile Include="Config\ModuleBinding.cs" />

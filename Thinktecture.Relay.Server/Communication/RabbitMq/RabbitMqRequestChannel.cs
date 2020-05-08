@@ -8,11 +8,19 @@ using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.Communication.RabbitMq
 {
-	internal class RabbitMqRequestChannel : RabbitMqChannelBase<IOnPremiseConnectorRequest>, IRabbitMqAcknowledgeableChannel<IOnPremiseConnectorRequest>
+	internal class RabbitMqRequestChannel : RabbitMqChannelBase<IOnPremiseConnectorRequest>, IRabbitMqRequestChannel
 	{
-		public RabbitMqRequestChannel(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix)
+		private readonly Guid _originId;
+
+		public RabbitMqRequestChannel(ILogger logger, IConnection connection, IConfiguration configuration, string exchange, string channelId, string queuePrefix, Guid originId)
 			: base(logger, connection, configuration, exchange, channelId, queuePrefix)
 		{
+			_originId = originId;
+		}
+
+		public override IObservable<IOnPremiseConnectorRequest> OnReceived()
+		{
+			throw new NotSupportedException();
 		}
 
 		public override Task Dispatch(IOnPremiseConnectorRequest message)
@@ -28,12 +36,6 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			Send(data, properties);
 
 			return Task.CompletedTask;
-		}
-
-
-		public override IObservable<IOnPremiseConnectorRequest> OnReceived()
-		{
-			return OnReceived(true);
 		}
 
 		public IObservable<IOnPremiseConnectorRequest> OnReceived(bool autoAck)
@@ -55,7 +57,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					case AcknowledgmentMode.Default:
 					case AcknowledgmentMode.Manual:
 						request.AcknowledgeId = deliveryTag.ToString();
-						request.AcknowledgeOriginId = new Guid(ChannelId);
+						request.AcknowledgeOriginId = _originId;
 						Logger?.Verbose("Request acknowledge id was set. request-id={RequestId}, acknowledge-id={AcknowledgeId}", request.RequestId, request.AcknowledgeId);
 						break;
 				}
