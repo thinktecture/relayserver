@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Thinktecture.Relay.Server.Repository.DbModels
 {
 	[Table("ActiveConnections")]
-	internal class DbActiveConnection
+	public class DbActiveConnection
 	{
 		[Required]
 		public Guid LinkId { get; set; }

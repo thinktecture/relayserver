@@ -22,6 +22,7 @@ The goal of this list is to highlight companies who pay back to this open source
 * General improvements
 
   * A PING will be removed from the RabbitMQ queue directly by the server because of using AcknowledgeMode.Auto.
+  * The Entity Framework Context (RelayContext) is now public.
 
 ## Version 2.3.0-rc4
 

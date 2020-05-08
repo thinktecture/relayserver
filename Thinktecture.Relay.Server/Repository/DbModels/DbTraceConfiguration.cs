@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Thinktecture.Relay.Server.Repository.DbModels
 {
 	[Table("TraceConfigurations")]
-	internal class DbTraceConfiguration
+	public class DbTraceConfiguration
 	{
 		[Index(IsClustered = true)]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]

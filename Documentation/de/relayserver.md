@@ -12,6 +12,7 @@
 * Allgemeine Verbesserungen
 
   * Ein PING wird nun bereits auf dem Server durch AcknowledgeMode.Auto aus der RabbitMQ-Queue entfernt.
+  * Der Entity Framework Context (RelayContext) ist nun öffentlich nutzbar.
 
 ## Version 2.3.0-rc4
 
