@@ -125,7 +125,8 @@ namespace Thinktecture.Relay.Server.Controller.ManagementWeb
 				Url = String.Empty,
 				RequestStarted = DateTime.UtcNow,
 				OriginId = _backendCommunication.OriginId,
-				RequestId = requestId
+				RequestId = requestId,
+				AcknowledgmentMode = AcknowledgmentMode.Auto
 			};
 
 			var task = _backendCommunication.GetResponseAsync(requestId);
