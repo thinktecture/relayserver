@@ -19,6 +19,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 ## Version 2.3.0-rc5
 
+* General improvements
+
+  * A PING will be removed from the RabbitMQ queue directly by the server because of using AcknowledgeMode.Auto.
+
+## Version 2.3.0-rc4
+
 * RabbitMQ Improvements
 
   * Closed Rabbit connections will now be automatically unbound at the client.

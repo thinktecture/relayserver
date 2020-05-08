@@ -9,6 +9,12 @@
 
 ## Version 2.3.0-rc5
 
+* Allgemeine Verbesserungen
+
+  * Ein PING wird nun bereits auf dem Server durch AcknowledgeMode.Auto aus der RabbitMQ-Queue entfernt.
+
+## Version 2.3.0-rc4
+
 * RabbitMQ Verbesserungen
 
   * Beendete Verbindungen werden nun explizit auch auf dem Rabbit-Client beendet.
