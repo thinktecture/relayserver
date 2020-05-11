@@ -49,6 +49,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * An own implementation (or inherited from the default one) of an IOnPremiseConnectionContext can be registered in the DI.
   * For an easier migration scenario of changed IOnPremiseTargetRequest implementations a property called "Properties" was introduced, which will be serialized onto the root JSON object to be deserialized as properties on the on-premise side.
   * A PING will be removed from the RabbitMQ queue directly by the server because of using AcknowledgeMode.Auto.
+  * The Entity Framework Context (RelayContext) is now public.
 
 * Bugfixes
 
