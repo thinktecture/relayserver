@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Thinktecture.Relay.Server.Repository.DbModels
 {
 	[Table("Links")]
-	internal class DbLink
+	public class DbLink
 	{
 		[Index(IsClustered = true)]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]

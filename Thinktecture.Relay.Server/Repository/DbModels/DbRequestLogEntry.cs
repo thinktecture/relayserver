@@ -6,7 +6,7 @@ using System.Net;
 namespace Thinktecture.Relay.Server.Repository.DbModels
 {
 	[Table("RequestLogEntries")]
-	internal class DbRequestLogEntry
+	public class DbRequestLogEntry
 	{
 		[Index(IsClustered = true)]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]

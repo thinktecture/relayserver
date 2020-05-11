@@ -4,7 +4,7 @@ using Thinktecture.Relay.Server.Repository.DbModels;
 
 namespace Thinktecture.Relay.Server.Repository
 {
-	internal class RelayContext : DbContext
+	public class RelayContext : DbContext
 	{
 		public DbSet<DbLink> Links { get; set; }
 		public DbSet<DbRequestLogEntry> RequestLogEntries { get; set; }
