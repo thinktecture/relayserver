@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
@@ -9,9 +10,10 @@ using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.Migrations.ConfigurationDb
 {
     [DbContext(typeof(RelayServerConfigurationDbContext))]
-    partial class RelayServerConfigurationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200810122742_Add_NormalizedName_To_Tenant")]
+    partial class Add_NormalizedName_To_Tenant
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

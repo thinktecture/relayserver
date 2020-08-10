@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities.ClientSecret", b =>
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.ClientSecret", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,7 +46,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                     b.ToTable("ClientSecrets");
                 });
 
-            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities.Tenant", b =>
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -65,17 +65,25 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)")
+                        .HasMaxLength(100);
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
+                    b.HasIndex("NormalizedName")
+                        .IsUnique();
+
                     b.ToTable("Tenants");
                 });
 
-            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities.ClientSecret", b =>
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.ClientSecret", b =>
                 {
-                    b.HasOne("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.Entities.Tenant", "Tenant")
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", "Tenant")
                         .WithMany("ClientSecrets")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
