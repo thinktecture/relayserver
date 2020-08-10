@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
@@ -56,8 +55,8 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 				},
 				Claims = new[]
 				{
-					new Claim("name", tenant.Name, "string"),
-					new Claim("display_name", tenant.DisplayName ?? tenant.Name, "string"),
+					new ClientClaim("name", tenant.Name),
+					new ClientClaim("display_name", tenant.DisplayName ?? tenant.Name),
 				},
 				// TODO: Fill access token lifetime etc. from config
 			};
