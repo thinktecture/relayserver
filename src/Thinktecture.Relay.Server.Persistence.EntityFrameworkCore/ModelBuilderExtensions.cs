@@ -55,6 +55,15 @@ namespace Microsoft.EntityFrameworkCore
 					.HasForeignKey(cs => cs.TenantId)
 					.IsRequired()
 					.OnDelete(DeleteBehavior.Cascade);
+
+				tenant
+					.Property(t => t.NormalizedName)
+					.HasMaxLength(100)
+					.IsRequired();
+
+				tenant
+					.HasIndex(t => t.NormalizedName)
+					.IsUnique();
 			});
 		}
 

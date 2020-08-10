@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Thinktecture.Relay.Server.Persistence.Models
 {
@@ -31,6 +32,13 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The client secrets, used for authentication connectors for this tenant.
 		/// </summary>
+		[JsonIgnore]
 		public List<ClientSecret> ClientSecrets { get; set; }
+
+		/// <summary>
+		/// The normalized (e.g. ToUpperInvariant()) name of the tenant. Use this for case-insensitive comparison in the database.
+		/// </summary>
+		[JsonIgnore]
+		public string NormalizedName { get; set; }
 	}
 }
