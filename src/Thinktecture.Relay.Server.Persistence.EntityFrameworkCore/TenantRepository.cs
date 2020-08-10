@@ -25,10 +25,12 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		/// <inheritdoc />
 		public Task<Tenant> LoadTenantByNameAsync(string name)
 		{
+			var normalizedName = name.ToUpperInvariant();
+
 			return _dbContext.Tenants
-				.Include(t => t.ClientSecrets)
+				.Include(tenant => tenant.ClientSecrets)
 				.AsNoTracking()
-				.SingleOrDefaultAsync(t => t.Name == name);
+				.SingleOrDefaultAsync(tenant => tenant.NormalizedName == normalizedName);
 		}
 
 		// TODO: Fix these methods, these are preliminary
@@ -59,6 +61,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			{
 				tenantToCreate.Id = Guid.NewGuid();
 			}
+
+			tenantToCreate.NormalizedName = tenantToCreate.Name.ToUpperInvariant();
 
 			await _dbContext.Tenants.AddAsync(tenantToCreate);
 			await _dbContext.SaveChangesAsync();
