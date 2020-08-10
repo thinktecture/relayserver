@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
@@ -40,18 +41,23 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 		{
 			var client = new Client()
 			{
-				ClientId = tenant.Name,
+				ClientId = tenant.Id.ToString(),
+				ClientName = tenant.Name,
 				Description = tenant.Description,
-				ClientName = tenant.DisplayName,
-				ClientSecrets = ConvertToClientSecrets(tenant.ClientSecrets).ToArray(),
-				AllowedGrantTypes = new []
+				ClientSecrets = GetClientSecrets(tenant),
+				AllowedGrantTypes = new[]
 				{
-					GrantType.ClientCredentials
+					GrantType.ClientCredentials,
 				},
 				AllowedScopes = new []
 				{
 					// TODO: Define correct scopes
 					"relaying",
+				},
+				Claims = new[]
+				{
+					new Claim("name", tenant.Name, "string"),
+					new Claim("display_name", tenant.DisplayName ?? tenant.Name, "string"),
 				},
 				// TODO: Fill access token lifetime etc. from config
 			};
@@ -59,16 +65,12 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 			return client;
 		}
 
-		private IEnumerable<Secret> ConvertToClientSecrets(IEnumerable<ClientSecret> tenantClientSecrets)
+		private ICollection<Secret> GetClientSecrets(Tenant tenant)
 		{
-			foreach (var tenantClientSecret in tenantClientSecrets)
-			{
-				yield return new Secret()
-				{
-					Value = tenantClientSecret.Value,
-					Expiration = tenantClientSecret.Expiration,
-				};
-			}
+			return tenant
+				.ClientSecrets
+				.Select(secret => new Secret(secret.Value, secret.Expiration))
+				.ToArray();
 		}
 	}
 }
