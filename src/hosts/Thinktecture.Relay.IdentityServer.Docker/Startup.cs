@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,13 +29,17 @@ namespace Thinktecture.Relay.IdentityServer.Docker
 			services.AddIdentityServer(c => { })
 				.AddClientStore<RelayServerTenantStore>()
 				.AddDeveloperSigningCredential()
+				.AddInMemoryApiScopes(new []
+				{
+					new ApiScope("relaying"),
+				})
 				.AddInMemoryApiResources(new[]
 				{
 					new ApiResource("RelayServer")
 					{
 						Scopes = new[]
 						{
-							new Scope("relaying"),
+							"relaying",
 						},
 					},
 				});
