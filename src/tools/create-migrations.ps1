@@ -5,7 +5,7 @@ Param(
 
 Push-Location
 
-Get-ChildItem *.EntityFrameworkCore.MigrationCreation.* `
+Get-ChildItem MigrationCreation.* `
   | ForEach-Object `
   {
       Set-Location $_
