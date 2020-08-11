@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.DependencyInjection;
+using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Middleware;
 using Thinktecture.Relay.Transport;
 
@@ -11,14 +14,14 @@ namespace Microsoft.AspNetCore.Builder
 	public static class ApplicationBuilderExtensions
 	{
 		/// <summary>
-		/// Adds the <see cref="RelayMiddleware{ClientRequest}"/> to the application's request pipeline.
+		/// Adds RelayServer to the application's request pipeline.
 		/// </summary>
 		/// <param name="builder">The <see cref="IApplicationBuilder"/> instance.</param>
 		/// <returns>The <see cref="IApplicationBuilder"/> instance.</returns>
 		public static IApplicationBuilder UseRelayServer(this IApplicationBuilder builder) => builder.UseRelayServer<ClientRequest>();
 
 		/// <summary>
-		/// Adds the <see cref="RelayMiddleware{TRequest}"/> to the application's request pipeline.
+		/// Adds RelayServer to the application's request pipeline.
 		/// </summary>
 		/// <param name="builder">The <see cref="IApplicationBuilder"/> instance.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
@@ -32,6 +35,11 @@ namespace Microsoft.AspNetCore.Builder
 				app.UseHealthChecks("/ready", new HealthCheckOptions() { Predicate = check => check.Tags.Contains("ready") });
 				app.UseHealthChecks("/live", new HealthCheckOptions() { Predicate = _ => false });
 			});
+
+			foreach (var part in builder.ApplicationServices.GetServices<IApplicationBuilderPart>())
+			{
+				part.Use(builder);
+			}
 
 			return builder;
 		}
