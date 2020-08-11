@@ -20,6 +20,15 @@ namespace Thinktecture.Relay.Server.Docker
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers();
+
+			services
+				.AddAuthentication(Constants.DefaultAuthenticationScheme)
+				.AddJwtBearer(Constants.DefaultAuthenticationScheme, options =>
+				{
+					options.Authority = Configuration.GetValue<string>("Authentication:Authority");
+					options.Audience = Constants.AuthenticationAudience;
+				});
+
 			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 			services.AddRelayServer()
 				.AddInMemoryServerRouting()
