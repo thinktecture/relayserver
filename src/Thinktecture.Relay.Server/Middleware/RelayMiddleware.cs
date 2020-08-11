@@ -26,9 +26,9 @@ namespace Thinktecture.Relay.Server.Middleware
 		public RelayMiddleware(IRelayClientRequestFactory<TRequest> requestFactory, ILogger<RelayMiddleware<TRequest>> logger,
 			ITenantRepository tenantRepository)
 		{
-			_requestFactory = requestFactory;
-			_logger = logger;
-			_tenantRepository = tenantRepository;
+			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 		}
 
 		/// <inheritdoc />
@@ -49,7 +49,7 @@ namespace Thinktecture.Relay.Server.Middleware
 				context.Request.EnableBuffering();
 				await context.Request.Body.DrainAsync(context.RequestAborted);
 
-				var request = await _requestFactory.CreateAsync(context, tenant.Id);
+				var request = await _requestFactory.CreateAsync(tenant.Id);
 				_logger?.LogTrace("Parsed request into {@ClientRequest}", request);
 
 				context.Response.ContentType = "application/json";

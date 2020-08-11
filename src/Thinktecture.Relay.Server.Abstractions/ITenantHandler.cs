@@ -6,10 +6,8 @@ namespace Thinktecture.Relay.Server
 	/// An implementation of a handler processing request messages from the transport.
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
-	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public interface ITenantHandler<out TRequest, TResponse>
+	public interface ITenantHandler<out TRequest>
 		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
 	{
 		/// <summary>
 		/// Event fired when an <see cref="IRelayClientRequest"/> was received.

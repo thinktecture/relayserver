@@ -8,8 +8,8 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
-	/// <inheritdoc cref="ITenantHandler{TRequest,TResponse}" />
-	public class TenantHandler<TRequest, TResponse> : ITenantHandler<TRequest, TResponse>, IDisposable
+	/// <inheritdoc cref="ITenantHandler{TRequest}" />
+	public class TenantHandler<TRequest, TResponse> : ITenantHandler<TRequest>, IDisposable
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse
 	{
@@ -25,23 +25,27 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// Initializes a new instance of <see cref="TenantHandler{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="tenantId">The unique id of the tenant.</param>
-		/// <param name="modelFactory">The <see cref="ModelFactory"/> to use.</param>
 		/// <param name="serverHandler">An <see cref="IServerHandler{TResponse}"/>.</param>
+		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		public TenantHandler(Guid tenantId,
-			ModelFactory modelFactory,
-			IServerHandler<TResponse> serverHandler,
+		public TenantHandler(Guid tenantId, IServerHandler<TResponse> serverHandler, ModelFactory modelFactory,
 			RelayServerContext relayServerContext)
 		{
+			if (modelFactory == null)
+			{
+				throw new ArgumentNullException(nameof(modelFactory));
+			}
+
+			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
+
 			_model = modelFactory.Create();
 
-			_serverHandler = serverHandler;
 			serverHandler.AcknowledgeReceived += OnAcknowledgeReceived;
 
 			_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoAck: false, durable: true);
 			_consumer.Received += OnRequestReceived;
 
-			_relayServerContext = relayServerContext;
+			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
 		}
 
 		/// <inheritdoc />

@@ -2,50 +2,67 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.SignalR
 {
-	internal interface IConnector<in TRequest>
+	/// <summary>
+	/// A strongly-typed interface for a <see cref="Hub{T}"/>.
+	/// </summary>
+	/// <typeparam name="TRequest">The type of request.</typeparam>
+	public interface IConnector<in TRequest>
 		where TRequest : IRelayClientRequest
 	{
+		/// <summary>
+		/// A strongly-typed method for a <see cref="Hub{T}"/>.
+		/// </summary>
+		/// <param name="request">An <see cref="IRelayClientRequest"/>.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task RequestTarget(TRequest request);
 	}
 
-	internal class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, Connector.IConnectorTransport
+	/// <inheritdoc cref="IConnectorTransport" />
+	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse
 	{
-		private readonly ITenantConnectorAdapterLocator<TRequest, TResponse> _tenantConnectorAdapterLocator;
+		private readonly ITenantConnectorAdapterRegistry<TRequest> _tenantConnectorAdapterRegistry;
 		private readonly IServerDispatcher<TResponse> _serverDispatcher;
 
-		public ConnectorHub(ITenantConnectorAdapterLocator<TRequest, TResponse> tenantConnectorAdapterLocator,
+		/// <summary>
+		/// Initializes a new instance of <see cref="ConnectorHub{TRequest,TResponse}"/>.
+		/// </summary>
+		/// <param name="tenantConnectorAdapterRegistry">An <see cref="ITenantConnectorAdapterRegistry{TRequest}"/>.</param>
+		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
+		public ConnectorHub(ITenantConnectorAdapterRegistry<TRequest> tenantConnectorAdapterRegistry,
 			IServerDispatcher<TResponse> serverDispatcher)
 		{
-			_tenantConnectorAdapterLocator = tenantConnectorAdapterLocator;
-			_serverDispatcher = serverDispatcher;
+			_tenantConnectorAdapterRegistry = tenantConnectorAdapterRegistry
+				?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
+			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
 		}
 
+		/// <inheritdoc />
 		public override async Task OnConnectedAsync()
 		{
-			// TODO retrieve tenant id from somewhere (e.g. Claims?)
-			await _tenantConnectorAdapterLocator.RegisterAdapterAsync(Guid.Empty, Context.ConnectionId);
+			await _tenantConnectorAdapterRegistry.RegisterAsync(Guid.Empty, Context.ConnectionId); // TODO get tenant id
 			await base.OnConnectedAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task OnDisconnectedAsync(Exception exception)
 		{
-			await _tenantConnectorAdapterLocator.UnregisterAdapterAsync(Context.ConnectionId);
+			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
 			await base.OnDisconnectedAsync(exception);
 		}
 
+		/// <inheritdoc />
 		[HubMethodName("Acknowledge")]
 		public async Task AcknowledgeAsync(IAcknowledgeRequest request) => await _serverDispatcher.DispatchAcknowledgeAsync(request);
 
+		/// <inheritdoc />
 		[HubMethodName("Pong")]
-		public Task PongAsync()
-		{
-			throw new NotImplementedException();
-		}
+		public Task PongAsync() => throw new NotImplementedException();
 	}
 }

@@ -1,18 +1,17 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Server
+namespace Thinktecture.Relay.Server.Connector
 {
 	/// <summary>
 	/// An implementation of an adapter between a tenant and a connector. This consumes the messages from the underlying transport. The
 	/// transport is responsible for distributing the requests between multiple connectors for one tenant.
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
-	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public interface ITenantConnectorAdapter<TRequest, TResponse>
+	public interface ITenantConnectorAdapter<in TRequest>
 		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
 	{
 		/// <summary>
 		/// The unique id of the tenant.
@@ -25,10 +24,11 @@ namespace Thinktecture.Relay.Server
 		string ConnectionId { get; }
 
 		/// <summary>
-		/// Acknowledges a request.
+		/// Request the response from a target.
 		/// </summary>
-		/// <param name="acknowledgeId">The unique id of the message.</param>
+		/// <param name="request">The client request.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task AcknowledgeRequestAsync(string acknowledgeId);
+		Task RequestTargetAsync(TRequest request, CancellationToken cancellationToken = default);
 	}
 }

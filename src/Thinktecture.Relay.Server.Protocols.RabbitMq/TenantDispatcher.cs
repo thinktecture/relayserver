@@ -14,8 +14,16 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <summary>
 		/// Initializes a new instance of <see cref="TenantDispatcher{TRequest}"/>.
 		/// </summary>
-		/// <param name="modelFactory">The <see cref="ModelFactory"/> to use.</param>
-		public TenantDispatcher(ModelFactory modelFactory) => _model = modelFactory.Create();
+		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
+		public TenantDispatcher(ModelFactory modelFactory)
+		{
+			if (modelFactory == null)
+			{
+				throw new ArgumentNullException(nameof(modelFactory));
+			}
+
+			_model = modelFactory.Create();
+		}
 
 		/// <inheritdoc />
 		public Task DispatchRequestAsync(TRequest request)
