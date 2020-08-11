@@ -25,10 +25,15 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <summary>
 		/// Initializes a new instance of <see cref="ServerHandler{TResponse}"/>.
 		/// </summary>
-		/// <param name="modelFactory">The <see cref="ModelFactory"/> to use.</param>
-		/// <param name="relayServerContext">The <see cref="RelayServerContext"/> to use.</param>
+		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
+		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		public ServerHandler(ModelFactory modelFactory, RelayServerContext relayServerContext)
 		{
+			if (modelFactory == null)
+			{
+				throw new ArgumentNullException(nameof(modelFactory));
+			}
+
 			_model = modelFactory.Create();
 
 			_responseConsumer = _model.ConsumeQueue($"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");

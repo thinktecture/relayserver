@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Thinktecture.Relay.Acknowledgement;
 
-namespace Thinktecture.Relay.Connector
+namespace Thinktecture.Relay.Transport
 {
 	/// <summary>
 	/// An implementation of a connector transport between connector and relay server.

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Thinktecture.Relay;
+using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Factories;
 using Thinktecture.Relay.Server.HealthChecks;
@@ -42,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.TryAddScoped<DiscoveryDocumentBuilder>();
 			services.TryAddSingleton<RelayServerContext>();
 			services.TryAddSingleton<ResponseCoordinator<TResponse>>();
-			services.TryAddSingleton<TenantConnectorAdapterFactory<TRequest, TResponse>>();
+			services.TryAddSingleton<ITenantConnectorAdapterRegistry<TRequest>, TenantConnectorAdapterRegistry<TRequest, TResponse>>();
 
 			services.AddHealthChecks()
 				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });

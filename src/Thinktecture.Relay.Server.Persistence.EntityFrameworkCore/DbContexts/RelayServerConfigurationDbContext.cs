@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts
 		/// <summary>
 		/// The tenants that can connect to the server with their connectors.
 		/// </summary>
-		/// <remarks>Tenants were formerly known als Links in previous RelayServer versions.</remarks>
+		/// <remarks>Tenants were formerly known als Links in previous versions.</remarks>
 		public DbSet<Tenant> Tenants { get; set; }
 
 		/// <summary>

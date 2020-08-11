@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj" />
     <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
   </ItemGroup>
 

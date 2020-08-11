@@ -23,12 +23,10 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IRelayClientRequest
 			where TResponse : IRelayTargetResponse
 		{
-			builder.Services.AddSingleton<InMemoryServerHandler<TResponse>>();
-			builder.Services.AddSingleton<InMemoryServerDispatcher<TResponse>>();
-			builder.Services.AddSingleton<IServerHandler<TResponse>>(provider =>
-				provider.GetRequiredService<InMemoryServerHandler<TResponse>>());
-			builder.Services.AddSingleton<IServerDispatcher<TResponse>>(provider =>
-				provider.GetRequiredService<InMemoryServerDispatcher<TResponse>>());
+			builder.Services.AddSingleton<IServerDispatcher<TResponse>, InMemoryServerDispatcher<TResponse>>();
+			builder.Services.AddSingleton<IServerHandler<TResponse>, InMemoryServerHandler<TResponse>>();
+			builder.Services.AddSingleton<ITenantDispatcher<TRequest>, InMemoryTenantDispatcher<TRequest>>();
+			builder.Services.AddSingleton<ITenantHandlerFactory<TRequest, TResponse>, InMemoryTenantHandlerFactory<TRequest, TResponse>>();
 
 			return builder;
 		}

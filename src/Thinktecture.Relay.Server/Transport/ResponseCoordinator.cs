@@ -28,15 +28,12 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <param name="serverHandler">The <see cref="IServerHandler{TResponse}"/>.</param>
 		public ResponseCoordinator(IServerHandler<TResponse> serverHandler)
 		{
-			_serverHandler = serverHandler;
+			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			serverHandler.ResponseReceived += OnResponseReceived;
 		}
 
 		/// <inheritdoc />
-		public void Dispose()
-		{
-			_serverHandler.ResponseReceived -= OnResponseReceived;
-		}
+		public void Dispose() => _serverHandler.ResponseReceived -= OnResponseReceived;
 
 		private Task OnResponseReceived(object sender, TResponse response)
 		{

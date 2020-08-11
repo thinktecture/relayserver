@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+using System;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Transport;
 
@@ -10,8 +10,24 @@ namespace Thinktecture.Relay.Server.Transport
 		public event AsyncEventHandler<TResponse> ResponseReceived;
 		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
 
-		public async Task DispatchResponseAsync(TResponse response) => await ResponseReceived.InvokeAsync(this, response);
+		public InMemoryServerHandler(IServerDispatcher<TResponse> serverDispatcher)
+		{
+			switch (serverDispatcher)
+			{
+				case null:
+					throw new ArgumentNullException(nameof(serverDispatcher));
 
-		public async Task DispatchAcknowledgeAsync(IAcknowledgeRequest request) => await AcknowledgeReceived.InvokeAsync(this, request);
+				case InMemoryServerDispatcher<TResponse> inMemoryServerDispatcher:
+					inMemoryServerDispatcher.ResponseReceived += async (sender, @event) => await ResponseReceived.InvokeAsync(sender, @event);
+					inMemoryServerDispatcher.AcknowledgeReceived
+						+= async (sender, @event) => await AcknowledgeReceived.InvokeAsync(sender, @event);
+					break;
+
+				default:
+					throw new ArgumentException(
+						$"The registered server dispatcher must be of type {nameof(InMemoryServerDispatcher<TResponse>)}",
+						nameof(serverDispatcher));
+			}
+		}
 	}
 }
