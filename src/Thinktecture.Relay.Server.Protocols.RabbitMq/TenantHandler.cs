@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <param name="tenantId">The unique id of the tenant.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/> to use.</param>
 		/// <param name="serverHandler">An <see cref="IServerHandler{TResponse}"/>.</param>
-		/// <param name="relayServerContext">A <see cref="RelayServerContext"/>.</param>
+		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		public TenantHandler(Guid tenantId,
 			ModelFactory modelFactory,
 			IServerHandler<TResponse> serverHandler,
