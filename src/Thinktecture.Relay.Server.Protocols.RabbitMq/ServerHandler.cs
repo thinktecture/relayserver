@@ -26,14 +26,15 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// Initializes a new instance of <see cref="ServerHandler{TResponse}"/>.
 		/// </summary>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/> to use.</param>
-		public ServerHandler(ModelFactory modelFactory)
+		/// <param name="relayServerContext">The <see cref="RelayServerContext"/> to use.</param>
+		public ServerHandler(ModelFactory modelFactory, RelayServerContext relayServerContext)
 		{
 			_model = modelFactory.Create();
 
-			_responseConsumer = _model.ConsumeQueue($"{Constants.ResponseQueuePrefix}MISSING-ORIGIN-ID"); // TODO get origin id
+			_responseConsumer = _model.ConsumeQueue($"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
 			_responseConsumer.Received += OnResponseReceived;
 
-			_acknowledgeConsumer = _model.ConsumeQueue($"{Constants.AcknowledgeQueuePrefix}MISSING-ORIGIN-ID"); // TODO get origin id
+			_acknowledgeConsumer = _model.ConsumeQueue($"{Constants.AcknowledgeQueuePrefix}{relayServerContext.OriginId}");
 			_acknowledgeConsumer.Received += OnAcknowledgeReceived;
 		}
 
