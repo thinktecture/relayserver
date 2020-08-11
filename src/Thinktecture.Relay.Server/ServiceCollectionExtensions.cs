@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Thinktecture.Relay;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Factories;
 using Thinktecture.Relay.Server.HealthChecks;
@@ -39,6 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
 			services.TryAddScoped<RelayMiddleware<TRequest>>();
 			services.TryAddScoped<DiscoveryDocumentBuilder>();
+			services.TryAddSingleton<RelayServerContext>();
 			services.TryAddSingleton<ResponseCoordinator<TResponse>>();
 			services.TryAddSingleton<TenantConnectorAdapterFactory<TRequest, TResponse>>();
 
