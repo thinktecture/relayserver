@@ -10,7 +10,7 @@ namespace Thinktecture.Relay
 		/// </summary>
 		public string ServerVersion { get; set; }
 		/// <summary>
-		/// The url of the authorization server the relay server trusts.
+		/// The url of the authorization server.
 		/// </summary>
 		public string AuthorizationServer { get; set; }
 		/// <summary>
