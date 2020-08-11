@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using RabbitMQ.Client;
-using Thinktecture.Relay;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.RabbitMq;

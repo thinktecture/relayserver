@@ -29,7 +29,7 @@ namespace Thinktecture.Relay.IdentityServer.Docker
 			services.AddIdentityServer(c => { })
 				.AddClientStore<RelayServerTenantStore>()
 				.AddDeveloperSigningCredential()
-				.AddInMemoryApiScopes(new []
+				.AddInMemoryApiScopes(new[]
 				{
 					new ApiScope("relaying"),
 				})
@@ -72,8 +72,8 @@ namespace Thinktecture.Relay.IdentityServer.Docker
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute(
-						name: "default",
-						pattern: "{controller=Home}/{action=Index}/{id?}");
+					name: "default",
+					pattern: "{controller=Home}/{action=Index}/{id?}");
 			});
 		}
 	}

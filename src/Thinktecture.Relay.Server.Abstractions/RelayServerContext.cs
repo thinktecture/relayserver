@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay
+namespace Thinktecture.Relay.Server
 {
 	/// <summary>
 	/// Provides contextual information.

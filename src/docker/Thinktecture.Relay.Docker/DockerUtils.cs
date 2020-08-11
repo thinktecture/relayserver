@@ -6,7 +6,8 @@ namespace Thinktecture.Relay.Docker
 {
 	public static class DockerUtils
 	{
-		public static IHostBuilder CreateHostBuilder<TStartup>(string applicationName, string[] args) where TStartup : class =>
+		public static IHostBuilder CreateHostBuilder<TStartup>(string applicationName, string[] args)
+			where TStartup : class =>
 			Host
 				.CreateDefaultBuilder(args)
 				.UseSerilog((context, loggerConfiguration) =>
