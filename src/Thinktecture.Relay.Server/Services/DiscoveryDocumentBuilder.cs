@@ -81,12 +81,6 @@ namespace Thinktecture.Relay.Server.Services
 			var host = httpContext.Request.Host.ToUriComponent();
 			var basePath = httpContext.Request.PathBase.Value?.TrimEnd('/');
 
-			// remove trailing slash
-			if (basePath != null && basePath.EndsWith("/"))
-			{
-				basePath = basePath.Substring(0, basePath.Length - 1);
-			}
-
 			var baseUrl = $"{scheme}://{host}{basePath}";
 			// ensure trailing slash
 			if (!baseUrl.EndsWith("/"))
