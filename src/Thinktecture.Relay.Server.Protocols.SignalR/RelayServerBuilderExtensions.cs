@@ -25,6 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TResponse : IRelayTargetResponse
 		{
 			builder.Services.TryAddSingleton<IConnectorTransport<TRequest>, ConnectorTransport<TRequest, TResponse>>();
+			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse>>();
 			builder.Services.AddSignalR();
 
 			return builder;
