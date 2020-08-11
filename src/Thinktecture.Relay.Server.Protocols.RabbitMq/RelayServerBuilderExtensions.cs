@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
 	public static class RelayServerBuilderExtensions
 	{
 		/// <summary>
-		/// Adds the <see cref="ITenantDispatcher{TRequest}"/> and ? based on Rabbit MQ.
+		/// Adds the server-to-tenant routing based on Rabbit MQ.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		}
 
 		/// <summary>
-		/// Adds the <see cref="IServerDispatcher{TResponse}"/> and <see cref="IServerHandler{TResponse}"/> based on Rabbit MQ.
+		/// Adds the server-to-server routing based on Rabbit MQ.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
