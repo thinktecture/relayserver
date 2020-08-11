@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using RabbitMQ.Client;
+using Thinktecture.Relay;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.RabbitMq;
@@ -55,9 +56,10 @@ namespace Microsoft.Extensions.DependencyInjection
 		{
 			services.TryAddSingleton(provider =>
 			{
+				var relayServerContext = provider.GetRequiredService<RelayServerContext>();
 				var factory = new ConnectionFactory(); // TODO configure anything here
 
-				return factory.CreateConnection("Relay Server"); // TODO add origin id
+				return factory.CreateConnection($"Relay Server {relayServerContext.OriginId}");
 			});
 			services.AddSingleton<ModelFactory>();
 		}
