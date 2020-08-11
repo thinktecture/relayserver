@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Controllers
 	public class DiscoveryDocumentController : Controller
 	{
 		/// <summary>
-		/// Returns the RelayServer discovery document that provides initial configuration to the connectors.
+		/// Returns the discovery document that provides initial configuration to the connectors.
 		/// </summary>
 		/// <param name="documentBuilder">The <see cref="DiscoveryDocumentBuilder"/> that builds the document.</param>
 		/// <returns>An object that holds the configuration information.</returns>
