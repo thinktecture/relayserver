@@ -31,7 +31,8 @@ namespace Thinktecture.Relay.Server.Docker
 
 			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 			services.AddRelayServer()
-				.AddInMemoryServerRouting()
+				.AddRabbitMqServerRouting()
+				.AddRabbitMqTenantRouting()
 				.AddSignalRConnectorTransport();
 		}
 
