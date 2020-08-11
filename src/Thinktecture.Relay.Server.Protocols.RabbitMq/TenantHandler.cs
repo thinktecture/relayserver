@@ -13,6 +13,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse
 	{
+		private readonly RelayServerContext _relayServerContext;
 		private readonly IServerHandler<TResponse> _serverHandler;
 		private readonly IModel _model;
 		private readonly AsyncEventingBasicConsumer _consumer;
@@ -26,7 +27,11 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <param name="tenantId">The unique id of the tenant.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/> to use.</param>
 		/// <param name="serverHandler">An <see cref="IServerHandler{TResponse}"/>.</param>
-		public TenantHandler(Guid tenantId, ModelFactory modelFactory, IServerHandler<TResponse> serverHandler)
+		/// <param name="relayServerContext">A <see cref="RelayServerContext"/>.</param>
+		public TenantHandler(Guid tenantId,
+			ModelFactory modelFactory,
+			IServerHandler<TResponse> serverHandler,
+			RelayServerContext relayServerContext)
 		{
 			_model = modelFactory.Create();
 
@@ -35,6 +40,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 			_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoAck: false, durable: true);
 			_consumer.Received += OnRequestReceived;
+
+			_relayServerContext = relayServerContext;
 		}
 
 		/// <inheritdoc />
@@ -64,7 +71,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 			if (request.AcknowledgeMode != AcknowledgeMode.Disabled)
 			{
-				request.AcknowledgeOriginId = Guid.Empty; // TODO get origin id
+				request.AcknowledgeOriginId = _relayServerContext.OriginId;
 				request.AcknowledgeId = @event.DeliveryTag.ToString();
 			}
 			else
