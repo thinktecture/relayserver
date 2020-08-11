@@ -6,16 +6,21 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 
+# Copy only project files for restore
+# Dependencies
 COPY ["Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj", "Thinktecture.Relay.Abstractions/"]
 COPY ["Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstractions.csproj", "Thinktecture.Relay.Server.Abstractions/"]
 COPY ["Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/"]
 COPY ["Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/"]
 COPY ["Thinktecture.Relay.IdentityServer/Thinktecture.Relay.IdentityServer.csproj", "Thinktecture.Relay.IdentityServer/"]
-COPY ["hosts/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj", "hosts/Thinktecture.Relay.IdentityServer.Docker/"]
-RUN dotnet restore "hosts/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj"
+COPY ["/docker/Thinktecture.Relay.Docker/Thinktecture.Relay.Docker.csproj", "docker/Thinktecture.Relay.Docker/"]
+
+# Project
+COPY ["docker/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj", "docker/Thinktecture.Relay.IdentityServer.Docker/"]
+RUN dotnet restore "docker/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj"
 
 COPY . .
-WORKDIR "/src/hosts/Thinktecture.Relay.IdentityServer.Docker"
+WORKDIR "/src/docker/Thinktecture.Relay.IdentityServer.Docker"
 RUN dotnet build "Thinktecture.Relay.IdentityServer.Docker.csproj" -c Release -o /app/build -p:DISABLE_SOURCELINK=true
 
 FROM build AS publish
