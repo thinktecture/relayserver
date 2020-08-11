@@ -35,6 +35,6 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The <see cref="Tenant"/> for which this secret is valid.
 		/// </summary>
-		public Tenant Tenant { get;  set; }
+		public Tenant Tenant { get; set; }
 	}
 }
