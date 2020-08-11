@@ -1,6 +1,10 @@
 using System;
+using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Thinktecture.Relay.Server.Services
 {
@@ -11,16 +15,21 @@ namespace Thinktecture.Relay.Server.Services
 	{
 		private readonly ILogger<DiscoveryDocumentBuilder> _logger;
 		private readonly IHttpContextAccessor _contextAccessor;
+		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DiscoveryDocumentBuilder"/>.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger"/> to log to.</param>
 		/// <param name="contextAccessor">An <see cref="IHttpContextAccessor"/> to retrieve the http context from.</param>
-		public DiscoveryDocumentBuilder(ILogger<DiscoveryDocumentBuilder> logger, IHttpContextAccessor contextAccessor)
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> to retrieve services from.</param>
+		public DiscoveryDocumentBuilder(ILogger<DiscoveryDocumentBuilder> logger,
+			IHttpContextAccessor contextAccessor,
+			IServiceProvider serviceProvider)
 		{
 			_logger = logger;
 			_contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
 		/// <summary>
@@ -33,7 +42,8 @@ namespace Thinktecture.Relay.Server.Services
 
 			return new DiscoveryDocument()
 			{
-				ServerVersion = "3.0.0-alpha.1",
+				ServerVersion = GetServerVersion(),
+				AuthorizationServer = GetAuthorizationServer(),
 				ConnectorEndpoint = baseUrl + "connector",
 				RequestEndpoint = baseUrl + "request",
 				ResponseEndpoint = baseUrl + "response",
@@ -41,6 +51,26 @@ namespace Thinktecture.Relay.Server.Services
 				ReconnectMinDelay = (int)TimeSpan.FromSeconds(30).TotalSeconds,
 				ReconnectMaxDelay = (int)TimeSpan.FromMinutes(5).TotalSeconds,
 			};
+		}
+
+		private string GetServerVersion()
+		{
+			return Assembly.GetAssembly(typeof(DiscoveryDocumentBuilder))
+				?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+				?.InformationalVersion
+				??
+				Assembly.GetAssembly(typeof(DiscoveryDocumentBuilder))
+					?.GetCustomAttribute<AssemblyVersionAttribute>()
+					?.Version
+				;
+		}
+
+		private string GetAuthorizationServer()
+		{
+			var optionsMonitor = _serviceProvider.GetService<IOptionsMonitor<JwtBearerOptions>>();
+			var options = optionsMonitor?.Get(Constants.DefaultAuthenticationScheme);
+
+			return options?.Authority;
 		}
 
 		private string BuildBaseUrl()
