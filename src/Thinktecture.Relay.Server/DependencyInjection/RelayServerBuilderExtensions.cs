@@ -30,5 +30,23 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			return builder;
 		}
+
+		/// <summary>
+		/// Adds the in-memory body store. Use this only for single server or testing scenarios.
+		/// </summary>
+		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
+		/// <typeparam name="TRequest">The type of request.</typeparam>
+		/// <typeparam name="TResponse">The type of response.</typeparam>
+		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
+		/// <remarks>This could harm the memory usage of the server.</remarks>
+		public static IRelayServerBuilder<TRequest, TResponse> AddInMemoryBodyStore<TRequest, TResponse>(
+			this IRelayServerBuilder<TRequest, TResponse> builder)
+			where TRequest : IRelayClientRequest
+			where TResponse : IRelayTargetResponse
+		{
+			builder.Services.AddSingleton<IBodyStore, InMemoryBodyStore>();
+
+			return builder;
+		}
 	}
 }
