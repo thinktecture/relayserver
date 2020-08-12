@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Server.Persistence;
@@ -13,22 +14,33 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Middleware
 {
 	/// <inheritdoc />
-	public class RelayMiddleware<TRequest> : IMiddleware
+	public class RelayMiddleware<TRequest, TResponse> : IMiddleware
 		where TRequest : IRelayClientRequest
+		where TResponse : IRelayTargetResponse
 	{
 		private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
-		private readonly ILogger<RelayMiddleware<TRequest>> _logger;
+		private readonly ILogger<RelayMiddleware<TRequest, TResponse>> _logger;
 		private readonly ITenantRepository _tenantRepository;
+		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
+		private readonly ResponseCoordinator<TResponse> _responseCoordinator;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayMiddleware{TRequest}"/>.
+		/// Initializes a new instance of <see cref="RelayMiddleware{TRequest,TResponse}"/>.
 		/// </summary>
-		public RelayMiddleware(IRelayClientRequestFactory<TRequest> requestFactory, ILogger<RelayMiddleware<TRequest>> logger,
-			ITenantRepository tenantRepository)
+		/// <param name="requestFactory">An <see cref="IRelayClientRequestFactory{TRequest}"/>.</param>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
+		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
+		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
+		/// <param name="responseCoordinator">The <see cref="ResponseCoordinator{TResponse}"/>.</param>
+		public RelayMiddleware(IRelayClientRequestFactory<TRequest> requestFactory, ILogger<RelayMiddleware<TRequest, TResponse>> logger,
+			ITenantRepository tenantRepository, ITenantDispatcher<TRequest> tenantDispatcher,
+			ResponseCoordinator<TResponse> responseCoordinator)
 		{
 			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+			_tenantDispatcher = tenantDispatcher ?? throw new ArgumentNullException(nameof(tenantDispatcher));
+			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
 		}
 
 		/// <inheritdoc />
@@ -52,8 +64,13 @@ namespace Thinktecture.Relay.Server.Middleware
 				var request = await _requestFactory.CreateAsync(tenant.Id);
 				_logger?.LogTrace("Parsed request into {@ClientRequest}", request);
 
+				await _tenantDispatcher.DispatchRequestAsync(request);
+				var response = await _responseCoordinator.GetResponseAsync(request.RequestId, context.RequestAborted);
+
+				// TODO return the real response
 				context.Response.ContentType = "application/json";
-				await context.Response.WriteAsync(JsonSerializer.Serialize(request), context.RequestAborted);
+				await context.Response.WriteAsync(JsonSerializer.Serialize(new { request, response }), context.RequestAborted);
+
 				return;
 			}
 

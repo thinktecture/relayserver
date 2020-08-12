@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
@@ -50,12 +51,14 @@ namespace Thinktecture.Relay.Server.Transport
 		/// Gets the response for the request.
 		/// </summary>
 		/// <param name="requestId">The unique id of the request.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the response.</returns>
-		public async Task<TResponse> GetResponseAsync(Guid requestId)
+		public async Task<TResponse> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
 		{
 			var waitingState = _waitingStates.GetOrAdd(requestId, _ => new WaitingState());
 			try
 			{
+				cancellationToken.Register(() => waitingState.TaskCompletionSource.TrySetCanceled());
 				return await waitingState.TaskCompletionSource.Task;
 			}
 			finally

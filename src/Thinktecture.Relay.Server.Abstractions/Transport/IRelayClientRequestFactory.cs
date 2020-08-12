@@ -14,9 +14,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// Creates an instance of a class implementing <see cref="IRelayClientRequest"/>.
 		/// </summary>
 		/// <param name="tenantId">The unique id of the tenant.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the creation of an instance
-		/// implementing <see cref="IRelayClientRequest"/>.</returns>
-		/// <remarks>Some properties will always be set on the request after calling this method (e.g. Target).</remarks>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the creation of an instance implementing <see cref="IRelayClientRequest"/>.</returns>
 		Task<TRequest> CreateAsync(Guid tenantId);
 	}
 }
