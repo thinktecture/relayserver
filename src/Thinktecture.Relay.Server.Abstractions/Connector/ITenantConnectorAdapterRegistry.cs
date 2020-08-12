@@ -5,8 +5,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Connector
 {
 	/// <summary>
-	/// An implementation of a registry for an <see cref="ITenantConnectorAdapter{TRequest}"/>. This mangles the communication
-	/// between the underlying tenant transport and connector transport.
+	/// An implementation of a registry for an <see cref="ITenantConnectorAdapter{TRequest}"/>.
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	public interface ITenantConnectorAdapterRegistry<TRequest>
