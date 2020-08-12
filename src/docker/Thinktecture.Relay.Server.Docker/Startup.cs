@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +34,7 @@ namespace Thinktecture.Relay.Server.Docker
 			services.AddRelayServer()
 				.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 				.AddSignalRConnectorTransport()
-				.AddInMemoryBodyStore();
+				.AddFileBodyStore(options => options.StoragePath = Path.GetTempPath());
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
