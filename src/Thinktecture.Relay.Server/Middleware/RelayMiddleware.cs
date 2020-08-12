@@ -23,6 +23,7 @@ namespace Thinktecture.Relay.Server.Middleware
 		private readonly ITenantRepository _tenantRepository;
 		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
 		private readonly ResponseCoordinator<TResponse> _responseCoordinator;
+		private readonly IBodyStore _bodyStore;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="RelayMiddleware{TRequest,TResponse}"/>.
@@ -32,15 +33,17 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
 		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
 		/// <param name="responseCoordinator">The <see cref="ResponseCoordinator{TResponse}"/>.</param>
+		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		public RelayMiddleware(IRelayClientRequestFactory<TRequest> requestFactory, ILogger<RelayMiddleware<TRequest, TResponse>> logger,
 			ITenantRepository tenantRepository, ITenantDispatcher<TRequest> tenantDispatcher,
-			ResponseCoordinator<TResponse> responseCoordinator)
+			ResponseCoordinator<TResponse> responseCoordinator, IBodyStore bodyStore)
 		{
 			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 			_tenantDispatcher = tenantDispatcher ?? throw new ArgumentNullException(nameof(tenantDispatcher));
 			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
+			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
 		}
 
 		/// <inheritdoc />
@@ -64,8 +67,14 @@ namespace Thinktecture.Relay.Server.Middleware
 				var request = await _requestFactory.CreateAsync(tenant.Id);
 				_logger?.LogTrace("Parsed request into {@ClientRequest}", request);
 
+				// TODO call IClientRequestInterceptor
+
+				await StoreBodyIfNeeded(context, request);
+
 				await _tenantDispatcher.DispatchRequestAsync(request);
 				var response = await _responseCoordinator.GetResponseAsync(request.RequestId, context.RequestAborted);
+
+				// TODO call ITargetResponseInterceptor
 
 				// TODO return the real response
 				context.Response.ContentType = "application/json";
@@ -77,6 +86,24 @@ namespace Thinktecture.Relay.Server.Middleware
 			_logger?.LogWarning("Invalid request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
 
 			await next.Invoke(context);
+		}
+
+		private async Task StoreBodyIfNeeded(HttpContext context, TRequest request)
+		{
+			if (request.BodyContent != null)
+			{
+				if (request.BodySize > _tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(int.MaxValue))
+				{
+					_logger?.LogTrace("Storing too large body {BodySize}", request.BodySize);
+					request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, context.RequestAborted);
+				}
+				else
+				{
+					_logger?.LogTrace("Inlining small body {BodySize}", request.BodySize);
+					request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(context.RequestAborted);
+					context.Response.RegisterForDisposeAsync(request.BodyContent);
+				}
+			}
 		}
 	}
 }

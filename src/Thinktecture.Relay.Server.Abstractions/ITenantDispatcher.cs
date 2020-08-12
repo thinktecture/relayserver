@@ -12,6 +12,11 @@ namespace Thinktecture.Relay.Server
 		where TRequest : IRelayClientRequest
 	{
 		/// <summary>
+		/// The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.
+		/// </summary>
+		int? BinarySizeThreshold { get; }
+
+		/// <summary>
 		/// Dispatches the request to a tenant.
 		/// </summary>
 		/// <param name="request">The client request.</param>

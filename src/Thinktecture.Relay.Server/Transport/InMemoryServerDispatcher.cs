@@ -11,6 +11,8 @@ namespace Thinktecture.Relay.Server.Transport
 		public event AsyncEventHandler<TResponse> ResponseReceived;
 		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
 
+		public int? BinarySizeThreshold { get; } = null;
+
 		public async Task DispatchResponseAsync(TResponse response) => await ResponseReceived.InvokeAsync(this, response);
 
 		public async Task DispatchAcknowledgeAsync(IAcknowledgeRequest request) => await AcknowledgeReceived.InvokeAsync(this, request);

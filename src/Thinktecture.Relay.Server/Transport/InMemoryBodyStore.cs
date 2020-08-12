@@ -46,17 +46,9 @@ namespace Thinktecture.Relay.Server.Transport
 		private async Task<long> StoreDataAsync(Guid id, Stream stream, ConcurrentDictionary<Guid, byte[]> store,
 			CancellationToken cancellationToken)
 		{
-			await using var ms = new MemoryStream();
-
-			if (stream.CanSeek)
-			{
-				stream.Position = 0;
-			}
-
-			await stream.CopyToAsync(ms, cancellationToken);
-
-			store.TryAdd(id, ms.ToArray());
-			return ms.Length;
+			await using var memoryStream = await stream.CopyToMemoryStreamAsync(cancellationToken);
+			store.TryAdd(id, memoryStream.ToArray());
+			return memoryStream.Length;
 		}
 
 		private Task<MemoryStream> GetStreamAsync(Guid id, ConcurrentDictionary<Guid, byte[]> store)

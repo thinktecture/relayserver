@@ -8,6 +8,8 @@ namespace Thinktecture.Relay.Server.Transport
 	{
 		public event AsyncEventHandler<TRequest> RequestReceived;
 
+		public int? BinarySizeThreshold { get; } = null;
+
 		public async Task DispatchRequestAsync(TRequest request) => await RequestReceived.InvokeAsync(this, request);
 	}
 }
