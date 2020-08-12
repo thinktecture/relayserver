@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 		/// <inheritdoc />
 		public Task DispatchRequestAsync(TRequest request)
-			=> _model.PublishJsonAsync($"{Constants.RequestQueuePrefix}{request.TenantId}", request);
+			=> _model.PublishJsonAsync($"{Constants.RequestQueuePrefix}{request.TenantId}", request, autoDelete: false);
 
 		/// <inheritdoc />
 		public void Dispose() => _model.Dispose();

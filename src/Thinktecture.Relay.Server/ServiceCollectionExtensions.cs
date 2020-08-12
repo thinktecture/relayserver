@@ -40,7 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddHttpContextAccessor();
 
 			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
-			services.TryAddScoped<RelayMiddleware<TRequest>>();
+			services.TryAddScoped<RelayMiddleware<TRequest, TResponse>>();
 			services.TryAddScoped<DiscoveryDocumentBuilder>();
 			services.TryAddSingleton<RelayServerContext>();
 			services.TryAddSingleton<ResponseCoordinator<TResponse>>();

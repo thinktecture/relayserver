@@ -42,7 +42,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 			serverHandler.AcknowledgeReceived += OnAcknowledgeReceived;
 
-			_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoAck: false, durable: true);
+			_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
 			_consumer.Received += OnRequestReceived;
 
 			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));

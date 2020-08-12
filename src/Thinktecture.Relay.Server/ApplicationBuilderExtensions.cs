@@ -18,18 +18,21 @@ namespace Microsoft.AspNetCore.Builder
 		/// </summary>
 		/// <param name="builder">The <see cref="IApplicationBuilder"/> instance.</param>
 		/// <returns>The <see cref="IApplicationBuilder"/> instance.</returns>
-		public static IApplicationBuilder UseRelayServer(this IApplicationBuilder builder) => builder.UseRelayServer<ClientRequest>();
+		public static IApplicationBuilder UseRelayServer(this IApplicationBuilder builder)
+			=> builder.UseRelayServer<ClientRequest, TargetResponse>();
 
 		/// <summary>
 		/// Adds RelayServer to the application's request pipeline.
 		/// </summary>
 		/// <param name="builder">The <see cref="IApplicationBuilder"/> instance.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
+		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IApplicationBuilder"/> instance.</returns>
-		public static IApplicationBuilder UseRelayServer<TRequest>(this IApplicationBuilder builder)
+		public static IApplicationBuilder UseRelayServer<TRequest, TResponse>(this IApplicationBuilder builder)
 			where TRequest : IRelayClientRequest
+			where TResponse : IRelayTargetResponse
 		{
-			builder.Map("/relay", app => app.UseMiddleware<RelayMiddleware<TRequest>>());
+			builder.Map("/relay", app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse>>());
 			builder.Map("/health", app =>
 			{
 				app.UseHealthChecks("/ready", new HealthCheckOptions() { Predicate = check => check.Tags.Contains("ready") });
