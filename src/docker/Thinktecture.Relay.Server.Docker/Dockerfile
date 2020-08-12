@@ -13,6 +13,7 @@ COPY ["Thinktecture.Relay.Server/Thinktecture.Relay.Server.csproj", "Thinktectur
 COPY ["Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstractions.csproj", "Thinktecture.Relay.Server.Abstractions/"]
 COPY ["Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/"]
 COPY ["Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/"]
+COPY ["Thinktecture.Relay.Server.Protocols.RabbitMq/Thinktecture.Relay.Server.Protocols.RabbitMq.csproj", "Thinktecture.Relay.Server.Protocols.RabbitMq/"]
 COPY ["Thinktecture.Relay.Server.Protocols.SignalR/Thinktecture.Relay.Server.Protocols.SignalR.csproj", "Thinktecture.Relay.Server.Protocols.SignalR/"]
 COPY ["/docker/Thinktecture.Relay.Docker/Thinktecture.Relay.Docker.csproj", "docker/Thinktecture.Relay.Docker/"]
 
