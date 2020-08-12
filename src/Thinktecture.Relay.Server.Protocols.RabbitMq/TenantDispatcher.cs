@@ -11,6 +11,9 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 	{
 		private readonly IModel _model;
 
+		/// <inheritdoc />
+		public int? BinarySizeThreshold { get; } = 64 * 1024; // 64kb
+
 		/// <summary>
 		/// Initializes a new instance of <see cref="TenantDispatcher{TRequest}"/>.
 		/// </summary>

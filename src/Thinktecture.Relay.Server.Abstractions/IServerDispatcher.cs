@@ -13,6 +13,11 @@ namespace Thinktecture.Relay.Server
 		where TResponse : IRelayTargetResponse
 	{
 		/// <summary>
+		/// The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.
+		/// </summary>
+		int? BinarySizeThreshold { get; }
+
+		/// <summary>
 		/// Dispatches the response to the origin server.
 		/// </summary>
 		/// <param name="response">The target response.</param>
