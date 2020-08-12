@@ -12,8 +12,8 @@ namespace Thinktecture.Relay
 		/// <summary>
 		/// Sets the position of the stream to zero, if the stream supports seeking.
 		/// </summary>
-		/// <param name="stream">The <see cref="Stream"/> that will be rewind.</param>
-		/// <returns>True, if rewinding was successful; otherwise, false</returns>
+		/// <param name="stream">The <see cref="Stream"/> that will be rewinded.</param>
+		/// <returns>true, if rewinding was possible; otherwise, false</returns>
 		public static bool TryRewind(this Stream stream)
 		{
 			if (!stream.CanSeek)
