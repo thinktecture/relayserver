@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.Server.Transport
 {
 	/// <inheritdoc />
-	public class InMemoryBodyStore : IBodyStore
+	internal class InMemoryBodyStore : IBodyStore
 	{
 		private readonly ConcurrentDictionary<Guid, byte[]> _requestStore = new ConcurrentDictionary<Guid, byte[]>();
 		private readonly ConcurrentDictionary<Guid, byte[]> _responseStore = new ConcurrentDictionary<Guid, byte[]>();
