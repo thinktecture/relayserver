@@ -1,7 +1,12 @@
 using System;
+using IdentityModel.AspNetCore.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols;
+using Thinktecture.Relay;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.DependencyInjection;
+using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Transport;
 
 // ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
@@ -16,31 +21,49 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// Adds the connector to the <see cref="IServiceCollection"/>.
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
-		/// <param name="discoveryDocument">The <see cref="Uri"/> to the discovery document of the server.</param>
+		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions{ClientRequest,TargetResponse}"/>.</param>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
-		public static IRelayConnectorBuilder AddRelayConnector(this IServiceCollection services, Uri discoveryDocument)
+		public static IRelayConnectorBuilder AddRelayConnector(this IServiceCollection services,
+			Action<RelayConnectorOptions<ClientRequest, TargetResponse>> configure)
 		{
-			return services.AddRelayConnector<ClientRequest, TargetResponse>(discoveryDocument);
+			return services
+				.AddRelayConnector<ClientRequest, TargetResponse>(configure);
 		}
 
 		/// <summary>
 		/// Adds the connector to the <see cref="IServiceCollection"/>.
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
-		/// <param name="discoveryDocument">The <see cref="Uri"/> to the discovery document of the server.</param>
+		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions{TRequest,TResponse}"/>.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
-		public static IRelayConnectorBuilder AddRelayConnector<TRequest, TResponse>(this IServiceCollection services, Uri discoveryDocument)
+		public static IRelayConnectorBuilder AddRelayConnector<TRequest, TResponse>(this IServiceCollection services,
+			Action<RelayConnectorOptions<TRequest, TResponse>> configure)
 			where TRequest : IRelayClientRequest, new()
 			where TResponse : IRelayTargetResponse, new()
 		{
-			var builder = new RelayConnectorBuilder();
+			var builder = new RelayConnectorBuilder(services);
 
-			builder.Services.Configure<RelayConnectorOptions<TRequest, TResponse>>(options =>
-			{
-				options.DiscoveryDocument = discoveryDocument;
-			});
+			// Options and configurations
+			builder.Services.Configure(configure);
+
+			builder.Services.AddTransient<IPostConfigureOptions<RelayConnectorOptions<TRequest, TResponse>>,
+				RelayConnectorPostConfigureOptions<TRequest, TResponse>>();
+			builder.Services.AddTransient<IConfigurationRetriever<DiscoveryDocument>, RelayServerConfigurationRetriever>();
+			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>,
+				ConfigureAccessTokenManagementOptions<TRequest, TResponse>>();
+
+			// Http access management
+			builder.Services.AddAccessTokenManagement();
+			builder.Services
+				.AddHttpClient(Constants.RelayServerHttpClientName, (provider, client) =>
+				{
+					var options = provider.GetRequiredService<IOptions<RelayConnectorOptions<TRequest, TResponse>>>();
+					client.BaseAddress = options.Value.RelayServerBaseUri;
+					// Todo: set timeouts
+				})
+				.AddClientAccessTokenHandler();
 
 			builder.Services.TryAddSingleton<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
 

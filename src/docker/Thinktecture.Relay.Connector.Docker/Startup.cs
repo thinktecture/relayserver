@@ -1,6 +1,5 @@
 using System;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,9 +17,9 @@ namespace Thinktecture.Relay.Connector.Docker
 		{
 			var configuration = hostBuilderContext.Configuration;
 
-			services.AddHttpClient("relayServer", configure =>
+			services.AddRelayConnector(options =>
 			{
-				configure.BaseAddress = new Uri(configuration.GetValue<string>("Relay:Server"));
+				configuration.GetSection("RelayConnector").Bind(options);
 			});
 
 			services.AddHostedService<DummyLogger>();
@@ -82,7 +81,7 @@ namespace Thinktecture.Relay.Connector.Docker
 			{
 				_logger.LogInformation("Internal loop running at {Time} and counting {i}", DateTime.UtcNow, i++);
 
-				var client = _httpClientFactory.CreateClient("relayServer");
+				var client = _httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
 				var response = await client.GetAsync("/.well-known/relayserver-configuration", cancellationToken);
 				if (response.IsSuccessStatusCode)
 				{
