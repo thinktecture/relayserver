@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
 		public static IRelayConnectorBuilder AddRelayConnector<TRequest, TResponse>(this IServiceCollection services, Uri discoveryDocument)
-			where TRequest : IRelayClientRequest
+			where TRequest : IRelayClientRequest, new()
 			where TResponse : IRelayTargetResponse, new()
 		{
 			var builder = new RelayConnectorBuilder();
@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				options.DiscoveryDocument = discoveryDocument;
 			});
 
-			builder.Services.TryAddScoped<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
+			builder.Services.TryAddSingleton<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
 
 			return builder;
 		}

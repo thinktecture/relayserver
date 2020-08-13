@@ -14,6 +14,7 @@ namespace Thinktecture.Relay.Server.Transport
 		where TResponse : IRelayTargetResponse
 	{
 		private readonly IServerHandler<TResponse> _serverHandler;
+		private readonly IBodyStore _bodyStore;
 
 		private class WaitingState
 		{
@@ -27,9 +28,12 @@ namespace Thinktecture.Relay.Server.Transport
 		/// Initializes a new instance of <see cref="ResponseCoordinator{TResponse}"/>.
 		/// </summary>
 		/// <param name="serverHandler">The <see cref="IServerHandler{TResponse}"/>.</param>
-		public ResponseCoordinator(IServerHandler<TResponse> serverHandler)
+		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
+		public ResponseCoordinator(IServerHandler<TResponse> serverHandler, IBodyStore bodyStore)
 		{
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
+			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
+
 			serverHandler.ResponseReceived += OnResponseReceived;
 		}
 
@@ -52,14 +56,22 @@ namespace Thinktecture.Relay.Server.Transport
 		/// </summary>
 		/// <param name="requestId">The unique id of the request.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the response.</returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="IRelayTargetResponse"/>.</returns>
 		public async Task<TResponse> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
 		{
 			var waitingState = _waitingStates.GetOrAdd(requestId, _ => new WaitingState());
 			try
 			{
 				cancellationToken.Register(() => waitingState.TaskCompletionSource.TrySetCanceled());
-				return await waitingState.TaskCompletionSource.Task;
+
+				var response = await waitingState.TaskCompletionSource.Task;
+
+				if (response.BodySize > 0 && response.BodyContent == null)
+				{
+					response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
+				}
+
+				return response;
 			}
 			finally
 			{

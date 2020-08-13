@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
@@ -10,7 +11,7 @@ namespace Thinktecture.Relay.Connector
 		where TResponse : IRelayTargetResponse, new()
 	{
 		/// <inheritdoc />
-		public async Task<TResponse> CreateAsync(HttpResponseMessage message)
+		public async Task<TResponse> CreateAsync(HttpResponseMessage message, CancellationToken cancellationToken = default)
 		{
 			return new TResponse()
 			{

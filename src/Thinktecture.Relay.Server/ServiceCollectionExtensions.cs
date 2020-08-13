@@ -35,16 +35,15 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/>.</returns>
 		public static IRelayServerBuilder<TRequest, TResponse> AddRelayServer<TRequest, TResponse>(this IServiceCollection services)
 			where TRequest : IRelayClientRequest, new()
-			where TResponse : IRelayTargetResponse
+			where TResponse : IRelayTargetResponse, new()
 		{
-			services.AddHttpContextAccessor();
-
 			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
 			services.TryAddScoped<RelayMiddleware<TRequest, TResponse>>();
 			services.TryAddScoped<DiscoveryDocumentBuilder>();
 			services.TryAddSingleton<RelayServerContext>();
 			services.TryAddSingleton<ResponseCoordinator<TResponse>>();
 			services.TryAddSingleton<ITenantConnectorAdapterRegistry<TRequest>, TenantConnectorAdapterRegistry<TRequest, TResponse>>();
+			services.TryAddSingleton<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
 
 			services.AddHealthChecks()
 				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });

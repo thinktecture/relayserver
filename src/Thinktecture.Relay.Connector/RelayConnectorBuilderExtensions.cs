@@ -18,9 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="id">The unique id of the target.</param>
 		/// <param name="options">The <see cref="RelayWebTargetOptions"/>.</param>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
-		public static IRelayConnectorBuilder AddWebTarget(this IRelayConnectorBuilder builder,
-			string id,
-			RelayWebTargetOptions options)
+		public static IRelayConnectorBuilder AddWebTarget(this IRelayConnectorBuilder builder, string id, RelayWebTargetOptions options)
 		{
 			return builder.AddWebTarget<ClientRequest, TargetResponse>(id, options);
 		}
@@ -34,8 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
-		public static IRelayConnectorBuilder AddWebTarget<TRequest, TResponse>(this IRelayConnectorBuilder builder,
-			string id,
+		public static IRelayConnectorBuilder AddWebTarget<TRequest, TResponse>(this IRelayConnectorBuilder builder, string id,
 			RelayWebTargetOptions options)
 			where TResponse : IRelayTargetResponse
 			where TRequest : IRelayClientRequest
@@ -53,8 +50,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
-		public static IRelayConnectorBuilder AddTarget<TTarget, TRequest, TResponse>(this IRelayConnectorBuilder builder,
-			string id,
+		public static IRelayConnectorBuilder AddTarget<TTarget, TRequest, TResponse>(this IRelayConnectorBuilder builder, string id,
 			IRelayTargetOptions options = null)
 			where TTarget : IRelayTarget<TRequest, TResponse>
 			where TResponse : IRelayTargetResponse

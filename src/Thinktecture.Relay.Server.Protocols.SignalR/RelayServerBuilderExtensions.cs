@@ -1,9 +1,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.SignalR;
-using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 // ReSharper disable once CheckNamespace; (extension methods on ServiceCollector namespace)
@@ -27,6 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TResponse : IRelayTargetResponse
 		{
 			builder.Services.TryAddSingleton<ITenantConnectorAdapterFactory<TRequest>, TenantConnectorAdapterFactory<TRequest, TResponse>>();
+			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();
 			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse>>();
 			builder.Services.AddSignalR();
 

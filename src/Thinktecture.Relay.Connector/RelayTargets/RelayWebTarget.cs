@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Net.Http.Headers;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets
@@ -20,9 +21,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// <param name="responseFactory">The <see cref="IRelayTargetResponseFactory{TResponse}"/> for creating the <typeparamref name="TResponse"/></param>
 		/// <param name="clientFactory">The <see cref="IHttpClientFactory"/> for creating the <see cref="HttpClient"/>.</param>
 		/// <param name="options">The options.</param>
-		public RelayWebTarget(
-			IRelayTargetResponseFactory<TResponse> responseFactory,
-			IHttpClientFactory clientFactory,
+		public RelayWebTarget(IRelayTargetResponseFactory<TResponse> responseFactory, IHttpClientFactory clientFactory,
 			RelayWebTargetOptions options)
 		{
 			_responseFactory = responseFactory;
@@ -36,8 +35,9 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
 			var requestMessage = CreateHttpRequestMessage(request);
+			// TODO this needs to be disposed (after reading the stream)
 			var responseMessage = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-			return await CreateResponseAsync(request, responseMessage);
+			return await CreateResponseAsync(request, responseMessage, cancellationToken);
 		}
 
 		/// <summary>
@@ -51,6 +51,11 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 			foreach (var header in request.HttpHeaders)
 			{
+				if (header.Key == HeaderNames.Host)
+				{
+					continue;
+				}
+
 				requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
 			}
 
@@ -74,10 +79,12 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// </summary>
 		/// <param name="request">The client request.</param>
 		/// <param name="responseMessage">The <see cref="HttpResponseMessage"/> containing the result from the target.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the response.</returns>
-		protected virtual async Task<TResponse> CreateResponseAsync(TRequest request, HttpResponseMessage responseMessage)
+		protected virtual async Task<TResponse> CreateResponseAsync(TRequest request, HttpResponseMessage responseMessage,
+			CancellationToken cancellationToken = default)
 		{
-			var response = await _responseFactory.CreateAsync(responseMessage);
+			var response = await _responseFactory.CreateAsync(responseMessage, cancellationToken);
 
 			response.RequestId = request.RequestId;
 			response.RequestOriginId = request.RequestOriginId;
