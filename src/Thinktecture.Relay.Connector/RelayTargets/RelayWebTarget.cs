@@ -13,31 +13,48 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		where TResponse : IRelayTargetResponse
 	{
 		private readonly IRelayTargetResponseFactory<TResponse> _responseFactory;
-		private readonly HttpClient _client;
+
+		/// <summary>
+		/// A <see cref="System.Net.Http.HttpClient"/>.
+		/// </summary>
+		// ReSharper disable once MemberCanBePrivate.Global
+		protected readonly HttpClient HttpClient;
+
+		/// <summary>
+		/// Represents a HTTP request message.
+		/// </summary>
+		// ReSharper disable once MemberCanBePrivate.Global
+		protected HttpRequestMessage RequestMessage;
+
+		/// <summary>
+		/// Represents a HTTP response message including the status code and data.
+		/// </summary>
+		// ReSharper disable once MemberCanBePrivate.Global
+		protected HttpResponseMessage ResponseMessage;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="RelayWebTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="responseFactory">The <see cref="IRelayTargetResponseFactory{TResponse}"/> for creating the <typeparamref name="TResponse"/></param>
-		/// <param name="clientFactory">The <see cref="IHttpClientFactory"/> for creating the <see cref="HttpClient"/>.</param>
+		/// <param name="clientFactory">The <see cref="IHttpClientFactory"/> for creating the <see cref="System.Net.Http.HttpClient"/>.</param>
 		/// <param name="options">The options.</param>
 		public RelayWebTarget(IRelayTargetResponseFactory<TResponse> responseFactory, IHttpClientFactory clientFactory,
 			RelayWebTargetOptions options)
 		{
 			_responseFactory = responseFactory;
 
-			_client = clientFactory.CreateClient();
-			_client.BaseAddress = options.BaseAddress;
-			_client.Timeout = options.Timeout;
+			HttpClient = clientFactory.CreateClient();
+			HttpClient.BaseAddress = options.BaseAddress;
+			HttpClient.Timeout = options.Timeout;
 		}
 
 		/// <inheritdoc />
 		public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			var requestMessage = CreateHttpRequestMessage(request);
-			// TODO this needs to be disposed (after reading the stream)
-			var responseMessage = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-			return await CreateResponseAsync(request, responseMessage, cancellationToken);
+			RequestMessage = CreateHttpRequestMessage(request);
+			ResponseMessage = await HttpClient.SendAsync(RequestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+			return await CreateResponseAsync(request, ResponseMessage, cancellationToken);
 		}
 
 		/// <summary>
@@ -93,24 +110,12 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			return response;
 		}
 
-		/// <summary>
-		/// Releases the unmanaged resources used by the <see cref="RelayWebTarget{TRequest,TResponse}"/> and optionally releases the
-		/// managed resources.
-		/// </summary>
-		/// <param name="disposing">true to release both managed and unmanaged resources; false to releases only unmanaged resources.</param>
-		protected virtual void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				_client.Dispose();
-			}
-		}
-
 		/// <inheritdoc />
 		public void Dispose()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+			RequestMessage?.Dispose();
+			ResponseMessage?.Dispose();
+			HttpClient.Dispose();
 		}
 	}
 }
