@@ -7,9 +7,10 @@ Push-Location $PSScriptRoot
 # Wait for the DB to start up
 Start-Sleep 3
 
-./Thinktecture.Relay.Server.Docker/run-container.ps1
 ./Thinktecture.Relay.IdentityServer.Docker/run-container.ps1
+./Thinktecture.Relay.Server.Docker/run-container.ps1
 ./Thinktecture.Relay.ManagementApi.Docker/run-container.ps1
 ./Thinktecture.Relay.StatisticsApi.Docker/run-container.ps1
+./Thinktecture.Relay.Connector.Docker/run-container.ps1
 
 Pop-Location
