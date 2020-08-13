@@ -68,12 +68,13 @@ The scope should be the name of the npm package or namespace affected (as percei
 The following is the list of supported scopes:
 
 * **abstractions**
+* **connector**
 * **connector-abstractions**
 * **docker**
 * **persistence**  
+* **server**
 * **server-abstractions**
 * **idsrv**
-* **server**
 * **management**
 * **statistics**
 * _TBD_
