@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Thinktecture.Relay.Acknowledgement;
-using Thinktecture.Relay.Server.Connector;
+using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.SignalR
@@ -28,15 +28,15 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse
 	{
-		private readonly ITenantConnectorAdapterRegistry<TRequest> _tenantConnectorAdapterRegistry;
+		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
 		private readonly IServerDispatcher<TResponse> _serverDispatcher;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="ConnectorHub{TRequest,TResponse}"/>.
 		/// </summary>
-		/// <param name="tenantConnectorAdapterRegistry">An <see cref="ITenantConnectorAdapterRegistry{TRequest}"/>.</param>
+		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
 		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
-		public ConnectorHub(ITenantConnectorAdapterRegistry<TRequest> tenantConnectorAdapterRegistry,
+		public ConnectorHub(TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
 			IServerDispatcher<TResponse> serverDispatcher)
 		{
 			_tenantConnectorAdapterRegistry = tenantConnectorAdapterRegistry

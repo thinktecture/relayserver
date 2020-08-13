@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Server.Services
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DiscoveryDocumentBuilder"/>.
+		/// Initializes a new instance of <see cref="DiscoveryDocumentBuilder"/>.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>

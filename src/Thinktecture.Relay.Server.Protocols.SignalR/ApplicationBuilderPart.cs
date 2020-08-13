@@ -11,6 +11,6 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	{
 		/// <inheritdoc />
 		public void Use(IApplicationBuilder builder)
-			=> builder.UseSignalR(hubRouteBuilder => hubRouteBuilder.MapHub<ConnectorHub<TRequest, TResponse>>("/connector"));
+			=> builder.UseEndpoints(endpoints => endpoints.MapHub<ConnectorHub<TRequest, TResponse>>("/connector"));
 	}
 }
