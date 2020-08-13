@@ -12,11 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{5D35FB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-EA22-4F44-B60F-E82D36FCF5F7}"
 	ProjectSection(SolutionItems) = preProject
+		..\.editorconfig = ..\.editorconfig
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
 		..\global.json = ..\global.json
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
-		..\.editorconfig = ..\.editorconfig
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Abstractions", "Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj", "{F76D6870-8364-4EE7-B6B1-953B7D07C63B}"
@@ -38,12 +38,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{AD7561
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj", "{0E17E737-E4B5-4198-A784-D543187F15D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{DB91F41F-B977-4F2E-987B-38B4969EEF4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server", "Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj", "{DB91F41F-B977-4F2E-987B-38B4969EEF4F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}"
-ProjectSection(SolutionItems) = preProject
-	tools\create-migrations.ps1 = tools\create-migrations.ps1
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		tools\create-migrations.ps1 = tools\create-migrations.ps1
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer", "tools\MigrationCreation.SqlServer\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer.csproj", "{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}"
 EndProject
@@ -56,27 +56,29 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.IdentityServer", "Thinktecture.Relay.IdentityServer\Thinktecture.Relay.IdentityServer.csproj", "{BBA20B5D-7319-453E-918E-46BBAA6E0E06}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA1D-9755-4842-BDE0-34F7EADF9969}"
-ProjectSection(SolutionItems) = preProject
-	docker\build-images.ps1 = docker\build-images.ps1
-	docker\run-dependencies.ps1 = docker\run-dependencies.ps1
-	docker\run-environment.ps1 = docker\run-environment.ps1
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		docker\build-images.ps1 = docker\build-images.ps1
+		docker\run-dependencies.ps1 = docker\run-dependencies.ps1
+		docker\run-environment.ps1 = docker\run-environment.ps1
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Docker", "docker\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj", "{599D7AD9-7901-4A20-A81F-6C71E60A71DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Docker", "docker\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj", "{599D7AD9-7901-4A20-A81F-6C71E60A71DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.IdentityServer.Docker", "docker\Thinktecture.Relay.IdentityServer.Docker\Thinktecture.Relay.IdentityServer.Docker.csproj", "{A22125AE-D673-4B9C-908F-DE0270380DAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.IdentityServer.Docker", "docker\Thinktecture.Relay.IdentityServer.Docker\Thinktecture.Relay.IdentityServer.Docker.csproj", "{A22125AE-D673-4B9C-908F-DE0270380DAE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.ManagementApi.Docker", "docker\Thinktecture.Relay.ManagementApi.Docker\Thinktecture.Relay.ManagementApi.Docker.csproj", "{D1866E02-8665-4166-8F6D-ECED1BAAEF7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.ManagementApi.Docker", "docker\Thinktecture.Relay.ManagementApi.Docker\Thinktecture.Relay.ManagementApi.Docker.csproj", "{D1866E02-8665-4166-8F6D-ECED1BAAEF7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Docker", "docker\Thinktecture.Relay.Server.Docker\Thinktecture.Relay.Server.Docker.csproj", "{29B6CBFA-43A8-447E-90AB-6B22CD0EA413}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Docker", "docker\Thinktecture.Relay.Server.Docker\Thinktecture.Relay.Server.Docker.csproj", "{29B6CBFA-43A8-447E-90AB-6B22CD0EA413}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.StatisticsApi.Docker", "docker\Thinktecture.Relay.StatisticsApi.Docker\Thinktecture.Relay.StatisticsApi.Docker.csproj", "{055B9A9E-9A45-4100-BA64-378443F6AB73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.StatisticsApi.Docker", "docker\Thinktecture.Relay.StatisticsApi.Docker\Thinktecture.Relay.StatisticsApi.Docker.csproj", "{055B9A9E-9A45-4100-BA64-378443F6AB73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Connector", "Thinktecture.Relay.Connector\Thinktecture.Relay.Connector.csproj", "{FF37E5FF-65D3-4EFD-B87F-8D456075402E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Connector", "Thinktecture.Relay.Connector\Thinktecture.Relay.Connector.csproj", "{FF37E5FF-65D3-4EFD-B87F-8D456075402E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Protocols.SignalR", "Thinktecture.Relay.Server.Protocols.SignalR\Thinktecture.Relay.Server.Protocols.SignalR.csproj", "{1878FC63-129B-405E-B63B-386AB7CF0590}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Protocols.SignalR", "Thinktecture.Relay.Server.Protocols.SignalR\Thinktecture.Relay.Server.Protocols.SignalR.csproj", "{1878FC63-129B-405E-B63B-386AB7CF0590}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Protocols.RabbitMq", "Thinktecture.Relay.Server.Protocols.RabbitMq\Thinktecture.Relay.Server.Protocols.RabbitMq.csproj", "{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Protocols.RabbitMq", "Thinktecture.Relay.Server.Protocols.RabbitMq\Thinktecture.Relay.Server.Protocols.RabbitMq.csproj", "{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Connector.Docker", "docker\Thinktecture.Relay.Connector.Docker\Thinktecture.Relay.Connector.Docker.csproj", "{4884F96C-5129-424F-9DDB-8DD91229D4B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,10 +101,11 @@ Global
 		{0E17E737-E4B5-4198-A784-D543187F15D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E17E737-E4B5-4198-A784-D543187F15D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E17E737-E4B5-4198-A784-D543187F15D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E17E737-E4B5-4198-A784-D543187F15D0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E17E737-E4B5-4198-A784-D543187F15D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -122,7 +125,6 @@ Global
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB91F41F-B977-4F2E-987B-38B4969EEF4F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Release|Any CPU.Build.0 = Release|Any CPU
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -156,6 +158,10 @@ Global
 		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4884F96C-5129-424F-9DDB-8DD91229D4B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4884F96C-5129-424F-9DDB-8DD91229D4B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4884F96C-5129-424F-9DDB-8DD91229D4B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4884F96C-5129-424F-9DDB-8DD91229D4B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -169,6 +175,7 @@ Global
 		{D1866E02-8665-4166-8F6D-ECED1BAAEF7E} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{29B6CBFA-43A8-447E-90AB-6B22CD0EA413} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{055B9A9E-9A45-4100-BA64-378443F6AB73} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
+		{4884F96C-5129-424F-9DDB-8DD91229D4B3} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CE554FF-A10B-4F63-B480-ED9455F16873}
