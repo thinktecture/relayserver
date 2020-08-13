@@ -7,6 +7,7 @@ using Thinktecture.Relay;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.DependencyInjection;
 using Thinktecture.Relay.Connector.Options;
+using Thinktecture.Relay.Connector.RelayTargets;
 using Thinktecture.Relay.Transport;
 
 // ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
@@ -25,10 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
 		public static IRelayConnectorBuilder AddRelayConnector(this IServiceCollection services,
 			Action<RelayConnectorOptions<ClientRequest, TargetResponse>> configure)
-		{
-			return services
-				.AddRelayConnector<ClientRequest, TargetResponse>(configure);
-		}
+			=> services.AddRelayConnector<ClientRequest, TargetResponse>(configure);
 
 		/// <summary>
 		/// Adds the connector to the <see cref="IServiceCollection"/>.
@@ -45,7 +43,6 @@ namespace Microsoft.Extensions.DependencyInjection
 		{
 			var builder = new RelayConnectorBuilder(services);
 
-			// Options and configurations
 			builder.Services.Configure(configure);
 
 			builder.Services.AddTransient<IPostConfigureOptions<RelayConnectorOptions<TRequest, TResponse>>,
@@ -54,18 +51,19 @@ namespace Microsoft.Extensions.DependencyInjection
 			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>,
 				ConfigureAccessTokenManagementOptions<TRequest, TResponse>>();
 
-			// Http access management
 			builder.Services.AddAccessTokenManagement();
 			builder.Services
 				.AddHttpClient(Constants.RelayServerHttpClientName, (provider, client) =>
 				{
 					var options = provider.GetRequiredService<IOptions<RelayConnectorOptions<TRequest, TResponse>>>();
 					client.BaseAddress = options.Value.RelayServerBaseUri;
-					// Todo: set timeouts
+					// TODO set timeouts
 				})
 				.AddClientAccessTokenHandler();
 
 			builder.Services.TryAddSingleton<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
+			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();
+			builder.Services.AddSingleton<RelayClientRequestHandler<TRequest, TResponse>>();
 
 			return builder;
 		}

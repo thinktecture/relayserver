@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Connector
 			return new TResponse()
 			{
 				HttpStatusCode = message.StatusCode,
-				HttpHeaders = message.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray()),
+				HttpHeaders = message.Headers.Concat(message.Content.Headers).ToDictionary(h => h.Key, h => h.Value.ToArray()),
 				BodySize = message.Content.Headers.ContentLength,
 				BodyContent = await message.Content.ReadAsStreamAsync()
 			};

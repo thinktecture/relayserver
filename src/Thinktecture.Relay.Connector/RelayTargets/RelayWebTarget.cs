@@ -8,6 +8,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.RelayTargets
 {
 	/// <inheritdoc cref="IRelayTarget{TRequest,TResponse}"/>
+	// ReSharper disable once ClassNeverInstantiated.Global
 	public class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest, TResponse>, IDisposable
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse

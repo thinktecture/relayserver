@@ -11,8 +11,7 @@ namespace Thinktecture.Relay.Connector.Options
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
-	// ReSharper disable once ClassNeverInstantiated.Global
-	public sealed class RelayConnectorOptions<TRequest, TResponse>
+	public class RelayConnectorOptions<TRequest, TResponse>
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse
 	{
@@ -33,7 +32,7 @@ namespace Thinktecture.Relay.Connector.Options
 
 		internal IConfigurationManager<DiscoveryDocument> ConfigurationManager { get; set; }
 
-		internal readonly Dictionary<string, RelayTargetRegistration<TRequest, TResponse>> Targets =
-			new Dictionary<string, RelayTargetRegistration<TRequest, TResponse>>(StringComparer.InvariantCultureIgnoreCase);
+		internal readonly Dictionary<string, RelayTargetRegistration<TRequest, TResponse>> Targets
+			= new Dictionary<string, RelayTargetRegistration<TRequest, TResponse>>(StringComparer.InvariantCultureIgnoreCase);
 	}
 }

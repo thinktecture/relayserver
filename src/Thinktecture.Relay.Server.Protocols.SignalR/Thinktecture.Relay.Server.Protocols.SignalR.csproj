@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Description>Contains the SignalR server transport implementation for the RelayServer.</Description>
     <Summary></Summary>
   </PropertyGroup>
@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
+    <ProjectReference Include="..\Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj" />
   </ItemGroup>
 
   <!-- Use shared information for NuGet packaging -->
