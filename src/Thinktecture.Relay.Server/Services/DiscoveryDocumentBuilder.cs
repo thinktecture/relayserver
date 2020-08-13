@@ -14,43 +14,42 @@ namespace Thinktecture.Relay.Server.Services
 	public class DiscoveryDocumentBuilder
 	{
 		private readonly ILogger<DiscoveryDocumentBuilder> _logger;
-		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DiscoveryDocumentBuilder"/>.
 		/// </summary>
-		/// <param name="logger">An <see cref="ILogger"/> to log to.</param>
-		/// <param name="httpContextAccessor">An <see cref="IHttpContextAccessor"/> to retrieve the http context from.</param>
-		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> to retrieve services from.</param>
-		public DiscoveryDocumentBuilder(ILogger<DiscoveryDocumentBuilder> logger, IHttpContextAccessor httpContextAccessor,
-			IServiceProvider serviceProvider)
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
+		public DiscoveryDocumentBuilder(ILogger<DiscoveryDocumentBuilder> logger, IServiceProvider serviceProvider)
 		{
-			_logger = logger;
-			_httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
 		/// <summary>
 		/// Builds a discovery document.
 		/// </summary>
+		/// <param name="request">A <see cref="HttpRequest"/>.</param>
 		/// <returns>A new instance of the discovery document.</returns>
-		public DiscoveryDocument BuildDiscoveryDocument()
+		public DiscoveryDocument BuildDiscoveryDocument(HttpRequest request)
 		{
-			var baseUrl = BuildBaseUrl();
+			var baseUri = BuildBaseUri(request);
 
 			return new DiscoveryDocument()
 			{
 				ServerVersion = GetServerVersion(),
-				AuthorizationServer = GetAuthorizationServer(),
-				ConnectorEndpoint = baseUrl + "connector",
-				RequestEndpoint = baseUrl + "body/request",
-				ResponseEndpoint = baseUrl + "body/response",
+				AuthorizationServer = GetAuthority(),
+				ConnectorEndpoint = new Uri(baseUri, "connector").ToString(),
+				RequestEndpoint = new Uri(baseUri, "body/request").ToString(),
+				ResponseEndpoint = new Uri(baseUri, "body/response").ToString(),
 				ConnectionTimeout = (int)TimeSpan.FromSeconds(30).TotalSeconds,
 				ReconnectMinDelay = (int)TimeSpan.FromSeconds(30).TotalSeconds,
 				ReconnectMaxDelay = (int)TimeSpan.FromMinutes(5).TotalSeconds,
 			};
 		}
+
+		private Uri BuildBaseUri(HttpRequest request) => new Uri($"{request.Scheme}://{request.Host}{request.PathBase}", UriKind.Absolute);
 
 		private string GetServerVersion()
 		{
@@ -58,32 +57,7 @@ namespace Thinktecture.Relay.Server.Services
 				?? GetType().Assembly.GetCustomAttribute<AssemblyVersionAttribute>()?.Version;
 		}
 
-		private string GetAuthorizationServer()
-		{
-			var optionsMonitor = _serviceProvider.GetService<IOptionsMonitor<JwtBearerOptions>>();
-			var options = optionsMonitor?.Get(Constants.DefaultAuthenticationScheme);
-
-			return options?.Authority;
-		}
-
-		private string BuildBaseUrl()
-		{
-			var httpContext = _httpContextAccessor.HttpContext;
-
-			var scheme = httpContext.Request.Scheme;
-			var host = httpContext.Request.Host.ToUriComponent();
-			var basePath = httpContext.Request.PathBase.Value?.TrimEnd('/');
-
-			var baseUrl = $"{scheme}://{host}{basePath}";
-			// ensure trailing slash
-			if (!baseUrl.EndsWith("/"))
-			{
-				baseUrl += "/";
-			}
-
-			_logger?.LogDebug("Base url '{BaseUrl}' was build from: {Scheme}, {Host}, {BasePath}", baseUrl, scheme, host, basePath);
-
-			return baseUrl;
-		}
+		private string GetAuthority()
+			=> _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()?.Get(Constants.DefaultAuthenticationScheme)?.Authority;
 	}
 }
