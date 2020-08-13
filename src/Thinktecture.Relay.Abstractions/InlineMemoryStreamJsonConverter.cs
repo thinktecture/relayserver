@@ -14,7 +14,7 @@ namespace Thinktecture.Relay
 		{
 			if (value is MemoryStream stream)
 			{
-				writer.WriteBase64StringValue(stream.GetBuffer());
+				writer.WriteBase64StringValue(stream.ToArray());
 				return;
 			}
 

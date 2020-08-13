@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Transport;
@@ -13,13 +14,14 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private readonly IModel _model;
 
 		/// <inheritdoc />
-		public int? BinarySizeThreshold { get; } = 64 * 1024; // 64kb
+		public int? BinarySizeThreshold { get; }
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="ServerDispatcher{TResponse}"/>.
 		/// </summary>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
-		public ServerDispatcher(ModelFactory modelFactory)
+		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
+		public ServerDispatcher(ModelFactory modelFactory, IOptions<RabbitMqOptions> options)
 		{
 			if (modelFactory == null)
 			{
@@ -27,6 +29,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			}
 
 			_model = modelFactory.Create();
+			BinarySizeThreshold = options.Value.MaximumBinarySize;
 		}
 
 		/// <inheritdoc />

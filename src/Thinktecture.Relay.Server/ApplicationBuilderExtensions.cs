@@ -29,8 +29,8 @@ namespace Microsoft.AspNetCore.Builder
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IApplicationBuilder"/> instance.</returns>
 		public static IApplicationBuilder UseRelayServer<TRequest, TResponse>(this IApplicationBuilder builder)
-			where TRequest : IRelayClientRequest
-			where TResponse : IRelayTargetResponse
+			where TRequest : IRelayClientRequest, new()
+			where TResponse : IRelayTargetResponse, new()
 		{
 			builder.Map("/relay", app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse>>());
 			builder.Map("/health", app =>

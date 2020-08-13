@@ -22,8 +22,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		Task RequestTarget(TRequest request);
 	}
 
-	/// <inheritdoc cref="IConnectorTransport" />
-	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport
+	/// <inheritdoc cref="IConnectorTransport{TResponse}" />
+	// ReSharper disable once ClassNeverInstantiated.Global
+	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport<TResponse>
 		where TRequest : IRelayClientRequest
 		where TResponse : IRelayTargetResponse
 	{
@@ -44,6 +45,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
+		public int? BinarySizeThreshold { get; } = 64 * 1024; // 64kb
+
+		/// <inheritdoc />
 		public override async Task OnConnectedAsync()
 		{
 			await _tenantConnectorAdapterRegistry.RegisterAsync(Guid.Empty, Context.ConnectionId); // TODO get tenant id
@@ -56,6 +60,10 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
 			await base.OnDisconnectedAsync(exception);
 		}
+
+		/// <inheritdoc />
+		[HubMethodName("Deliver")]
+		public async Task DeliverAsync(TResponse response) => await _serverDispatcher.DispatchResponseAsync(response);
 
 		/// <inheritdoc />
 		[HubMethodName("Acknowledge")]

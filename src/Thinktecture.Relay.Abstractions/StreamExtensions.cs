@@ -35,7 +35,7 @@ namespace Thinktecture.Relay
 		{
 			stream.TryRewind();
 
-			var memoryStream = new MemoryStream();
+			var memoryStream = new MemoryStream(stream.CanSeek ? (int)stream.Length : 1024 * 1024);
 			await stream.CopyToAsync(memoryStream, 80 * 1024, cancellationToken);
 
 			memoryStream.Position = 0;
