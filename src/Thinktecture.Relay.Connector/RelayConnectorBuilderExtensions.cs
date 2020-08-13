@@ -1,5 +1,6 @@
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.DependencyInjection;
+using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Connector.RelayTargets;
 using Thinktecture.Relay.Transport;
 
