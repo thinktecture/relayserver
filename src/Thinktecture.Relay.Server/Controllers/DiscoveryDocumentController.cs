@@ -16,6 +16,6 @@ namespace Thinktecture.Relay.Server.Controllers
 		/// <returns>An object that holds the configuration information.</returns>
 		[HttpGet]
 		public IActionResult GetDiscoveryDocument([FromServices] DiscoveryDocumentBuilder documentBuilder)
-			=> Ok(documentBuilder.BuildDiscoveryDocument());
+			=> Ok(documentBuilder.BuildDiscoveryDocument(Request));
 	}
 }
