@@ -1,15 +1,15 @@
 using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// TODO add security
 
 namespace Thinktecture.Relay.Server.Controllers
 {
 	/// <summary>
 	/// Controller that provides access to stored bodies.
 	/// </summary>
+	[Authorize(Constants.DefaultAuthenticationPolicy)]
 	public class BodyContentController : Controller
 	{
 		/// <summary>

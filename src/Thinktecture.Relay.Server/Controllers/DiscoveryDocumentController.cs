@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Thinktecture.Relay.Server.Services;
 
@@ -6,6 +7,7 @@ namespace Thinktecture.Relay.Server.Controllers
 	/// <summary>
 	/// Controller that handles requests to the discovery document.
 	/// </summary>
+	[AllowAnonymous]
 	[Route(".well-known/relayserver-configuration")]
 	public class DiscoveryDocumentController : Controller
 	{
