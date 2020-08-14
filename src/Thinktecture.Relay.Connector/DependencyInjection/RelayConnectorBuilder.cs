@@ -1,12 +1,13 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.DependencyInjection
 {
-	internal class RelayConnectorBuilder : IRelayConnectorBuilder
+	internal class RelayConnectorBuilder<TRequest, TResponse> : IRelayConnectorBuilder<TRequest, TResponse>
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
-		public static readonly string RelayTargetCatchAllId = "*";
-
 		public IServiceCollection Services { get; }
 
 		public RelayConnectorBuilder(IServiceCollection services)

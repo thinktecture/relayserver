@@ -23,8 +23,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
 		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions"/>.</param>
-		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
-		public static IRelayConnectorBuilder AddRelayConnector(this IServiceCollection services,
+		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
+		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddRelayConnector(this IServiceCollection services,
 			Action<RelayConnectorOptions> configure)
 			=> services.AddRelayConnector<ClientRequest, TargetResponse>(configure);
 
@@ -35,13 +35,13 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions"/>.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
-		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
-		public static IRelayConnectorBuilder AddRelayConnector<TRequest, TResponse>(this IServiceCollection services,
+		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
+		public static IRelayConnectorBuilder<TRequest, TResponse> AddRelayConnector<TRequest, TResponse>(this IServiceCollection services,
 			Action<RelayConnectorOptions> configure)
 			where TRequest : IClientRequest, new()
 			where TResponse : ITargetResponse, new()
 		{
-			var builder = new RelayConnectorBuilder(services);
+			var builder = new RelayConnectorBuilder<TRequest, TResponse>(services);
 
 			builder.Services.Configure(configure);
 
@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				RelayConnectorPostConfigureOptions>();
 			builder.Services.AddTransient<IConfigurationRetriever<DiscoveryDocument>, RelayServerConfigurationRetriever>();
 			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>,
-				ConfigureAccessTokenManagementOptions<TRequest, TResponse>>();
+				ConfigureAccessTokenManagementOptions>();
 
 			builder.Services.AddAccessTokenManagement();
 			builder.Services

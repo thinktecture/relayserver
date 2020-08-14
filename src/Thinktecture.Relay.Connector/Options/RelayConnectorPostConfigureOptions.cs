@@ -24,8 +24,7 @@ namespace Thinktecture.Relay.Connector.Options
 				new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https", }
 			);
 
-			options.DiscoveryDocument = configManager.GetConfigurationAsync()
-				.GetAwaiter().GetResult();
+			options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
 		}
 	}
 }
