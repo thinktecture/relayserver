@@ -17,7 +17,9 @@ namespace Thinktecture.Relay.Connector.Docker
 		{
 			var configuration = hostBuilderContext.Configuration;
 
-			services.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options));
+			services
+				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
+				.AddSignalRConnectorTransport();
 
 			services.AddHostedService<DummyLogger>();
 		}

@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Thinktecture.Relay.Connector.Protocols.SignalR\Thinktecture.Relay.Connector.Protocols.SignalR.csproj" />
     <ProjectReference Include="..\..\Thinktecture.Relay.Connector\Thinktecture.Relay.Connector.csproj" />
     <ProjectReference Include="..\..\Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj" />
   </ItemGroup>

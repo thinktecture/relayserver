@@ -11,6 +11,7 @@ WORKDIR /src
 COPY ["Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj", "Thinktecture.Relay.Abstractions/"]
 COPY ["Thinktecture.Relay.Connector/Thinktecture.Relay.Connector.csproj", "Thinktecture.Relay.Connector/"]
 COPY ["Thinktecture.Relay.Connector.Abstractions/Thinktecture.Relay.Connector.Abstractions.csproj", "Thinktecture.Relay.Connector.Abstractions/"]
+COPY ["Thinktecture.Relay.Connector.Protocols.SignalR/Thinktecture.Relay.Connector.Protocols.SignalR.csproj", "Thinktecture.Relay.Connector.Protocols.SignalR/"]
 
 # Project
 COPY ["/docker/Thinktecture.Relay.Connector.Docker/Thinktecture.Relay.Connector.Docker.csproj", "docker/Thinktecture.Relay.Connector.Docker/"]
