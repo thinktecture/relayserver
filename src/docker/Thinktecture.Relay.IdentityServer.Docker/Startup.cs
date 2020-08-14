@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.IdentityServer.Docker
 				})
 				.AddInMemoryApiResources(new[]
 				{
-					new ApiResource("RelayServer")
+					new ApiResource("relayserver")
 					{
 						Scopes = new[]
 						{
