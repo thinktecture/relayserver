@@ -1,7 +1,5 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Thinktecture.Relay;
 using Thinktecture.Relay.Server;
-using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Factories;
 using Thinktecture.Relay.Server.HealthChecks;
@@ -37,6 +35,17 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest, new()
 			where TResponse : ITargetResponse, new()
 		{
+			services.AddAuthorization(configure =>
+			{
+				configure.AddPolicy(Constants.DefaultAuthenticationPolicy, policyBuilder =>
+				{
+					policyBuilder
+						.RequireAuthenticatedUser()
+						.RequireClaim("client_id")
+						.RequireClaim("scope", Constants.DefaultAuthenticationScope);
+				});
+			});
+
 			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
 			services.TryAddScoped<RelayMiddleware<TRequest, TResponse>>();
 			services.TryAddScoped<DiscoveryDocumentBuilder>();
