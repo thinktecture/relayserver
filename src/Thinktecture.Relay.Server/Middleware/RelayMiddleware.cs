@@ -17,8 +17,8 @@ namespace Thinktecture.Relay.Server.Middleware
 {
 	/// <inheritdoc />
 	public class RelayMiddleware<TRequest, TResponse> : IMiddleware
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse, new()
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse, new()
 	{
 		private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
 		private readonly ILogger<RelayMiddleware<TRequest, TResponse>> _logger;

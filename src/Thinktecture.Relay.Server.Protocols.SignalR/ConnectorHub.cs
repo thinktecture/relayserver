@@ -12,12 +12,12 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	public interface IConnector<in TRequest>
-		where TRequest : IRelayClientRequest
+		where TRequest : IClientRequest
 	{
 		/// <summary>
 		/// A strongly-typed method for a <see cref="Hub{T}"/>.
 		/// </summary>
-		/// <param name="request">An <see cref="IRelayClientRequest"/>.</param>
+		/// <param name="request">An <see cref="IClientRequest"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task RequestTarget(TRequest request);
 	}
@@ -25,8 +25,8 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	/// <inheritdoc cref="IConnectorTransport{TResponse}" />
 	// ReSharper disable once ClassNeverInstantiated.Global
 	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport<TResponse>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
 		private readonly IServerDispatcher<TResponse> _serverDispatcher;

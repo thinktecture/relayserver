@@ -6,8 +6,8 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 {
 	/// <inheritdoc />
 	public class ApplicationBuilderPart<TRequest, TResponse> : IApplicationBuilderPart
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		/// <inheritdoc />
 		public void Use(IApplicationBuilder builder)

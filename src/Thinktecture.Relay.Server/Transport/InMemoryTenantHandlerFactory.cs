@@ -4,8 +4,8 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport
 {
 	internal class InMemoryTenantHandlerFactory<TRequest, TResponse> : ITenantHandlerFactory<TRequest, TResponse>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
 

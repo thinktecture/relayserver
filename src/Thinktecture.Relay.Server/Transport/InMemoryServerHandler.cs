@@ -5,7 +5,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport
 {
 	internal class InMemoryServerHandler<TResponse> : IServerHandler<TResponse>
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		public event AsyncEventHandler<TResponse> ResponseReceived;
 		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
@@ -18,9 +18,10 @@ namespace Thinktecture.Relay.Server.Transport
 					throw new ArgumentNullException(nameof(serverDispatcher));
 
 				case InMemoryServerDispatcher<TResponse> inMemoryServerDispatcher:
-					inMemoryServerDispatcher.ResponseReceived += async (sender, @event) => await ResponseReceived.InvokeAsync(sender, @event);
+					inMemoryServerDispatcher.ResponseReceived
+						+= async (sender, response) => await ResponseReceived.InvokeAsync(sender, response);
 					inMemoryServerDispatcher.AcknowledgeReceived
-						+= async (sender, @event) => await AcknowledgeReceived.InvokeAsync(sender, @event);
+						+= async (sender, request) => await AcknowledgeReceived.InvokeAsync(sender, request);
 					break;
 
 				default:

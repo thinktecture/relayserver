@@ -44,8 +44,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
 		public static IRelayConnectorBuilder AddWebTarget<TRequest, TResponse>(this IRelayConnectorBuilder builder, string id,
 			RelayWebTargetOptions options)
-			where TResponse : IRelayTargetResponse
-			where TRequest : IRelayClientRequest
+			where TResponse : ITargetResponse
+			where TRequest : IClientRequest
 			=> builder.AddTarget<RelayWebTarget<TRequest, TResponse>, TRequest, TResponse>(id, options);
 
 		/// <summary>
@@ -58,8 +58,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
 		public static IRelayConnectorBuilder AddCatchAllWebTarget<TRequest, TResponse>(this IRelayConnectorBuilder builder,
 			RelayWebTargetOptions options)
-			where TResponse : IRelayTargetResponse
-			where TRequest : IRelayClientRequest
+			where TResponse : ITargetResponse
+			where TRequest : IClientRequest
 			=> builder.AddTargetInternal<RelayWebTarget<TRequest, TResponse>, TRequest, TResponse>(
 				RelayConnectorBuilder.RelayTargetCatchAllId,
 				options);
@@ -77,8 +77,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		public static IRelayConnectorBuilder AddTarget<TTarget, TRequest, TResponse>(this IRelayConnectorBuilder builder, string id,
 			IRelayTargetOptions options = null)
 			where TTarget : IRelayTarget<TRequest, TResponse>
-			where TResponse : IRelayTargetResponse
-			where TRequest : IRelayClientRequest
+			where TResponse : ITargetResponse
+			where TRequest : IClientRequest
 		{
 			if (id == RelayConnectorBuilder.RelayTargetCatchAllId)
 			{
@@ -102,8 +102,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		public static IRelayConnectorBuilder AddCatchAllTarget<TTarget, TRequest, TResponse>(this IRelayConnectorBuilder builder,
 			IRelayTargetOptions options = null)
 			where TTarget : IRelayTarget<TRequest, TResponse>
-			where TResponse : IRelayTargetResponse
-			where TRequest : IRelayClientRequest
+			where TResponse : ITargetResponse
+			where TRequest : IClientRequest
 		{
 			builder.AddTargetInternal<TTarget, TRequest, TResponse>(RelayConnectorBuilder.RelayTargetCatchAllId, options);
 
@@ -113,8 +113,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		private static IRelayConnectorBuilder AddTargetInternal<TTarget, TRequest, TResponse>(this IRelayConnectorBuilder builder, string id,
 			IRelayTargetOptions options)
 			where TTarget : IRelayTarget<TRequest, TResponse>
-			where TResponse : IRelayTargetResponse
-			where TRequest : IRelayClientRequest
+			where TResponse : ITargetResponse
+			where TRequest : IClientRequest
 		{
 			builder.Services.Configure<RelayConnectorOptions<TRequest, TResponse>>(
 				connector => connector.Targets[id] = new RelayTargetRegistration<TRequest, TResponse>(options, typeof(TTarget)));

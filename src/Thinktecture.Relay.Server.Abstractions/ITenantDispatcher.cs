@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	public interface ITenantDispatcher<in TRequest>
-		where TRequest : IRelayClientRequest
+		where TRequest : IClientRequest
 	{
 		/// <summary>
 		/// The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.

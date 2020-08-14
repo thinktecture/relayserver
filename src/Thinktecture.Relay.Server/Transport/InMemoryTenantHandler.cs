@@ -4,7 +4,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport
 {
 	internal class InMemoryTenantHandler<TRequest> : ITenantHandler<TRequest>
-		where TRequest : IRelayClientRequest
+		where TRequest : IClientRequest
 	{
 		public event AsyncEventHandler<TRequest> RequestReceived;
 
@@ -16,14 +16,14 @@ namespace Thinktecture.Relay.Server.Transport
 					throw new ArgumentNullException(nameof(tenantDispatcher));
 
 				case InMemoryTenantDispatcher<TRequest> inMemoryTenantDispatcher:
-					inMemoryTenantDispatcher.RequestReceived += async (sender, @event) =>
+					inMemoryTenantDispatcher.RequestReceived += async (sender, request) =>
 					{
-						if (@event.TenantId != tenantId)
+						if (request.TenantId != tenantId)
 						{
 							return;
 						}
 
-						await RequestReceived.InvokeAsync(sender, @event);
+						await RequestReceived.InvokeAsync(sender, request);
 					};
 					break;
 

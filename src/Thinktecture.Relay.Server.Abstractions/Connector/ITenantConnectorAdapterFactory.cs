@@ -7,7 +7,7 @@ namespace Thinktecture.Relay.Server.Connector
 	/// An implementation of a factory to create an instance of a class implementing <see cref="ITenantConnectorAdapter{TRequest}"/>.
 	/// </summary>
 	public interface ITenantConnectorAdapterFactory<in TRequest>
-		where TRequest : IRelayClientRequest
+		where TRequest : IClientRequest
 	{
 		/// <summary>
 		/// Creates an instance of a class implementing <see cref="ITenantConnectorAdapter{TRequest}"/>.

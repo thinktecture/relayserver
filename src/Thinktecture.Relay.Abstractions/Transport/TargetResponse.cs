@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace Thinktecture.Relay.Transport
 {
 	/// <inheritdoc />
-	public class TargetResponse : IRelayTargetResponse
+	public class TargetResponse : ITargetResponse
 	{
 		/// <inheritdoc />
 		public Guid RequestId { get; set; }

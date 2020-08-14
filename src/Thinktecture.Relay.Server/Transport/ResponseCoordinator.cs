@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Transport
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public class ResponseCoordinator<TResponse> : IDisposable
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		private readonly IServerHandler<TResponse> _serverHandler;
 		private readonly IBodyStore _bodyStore;
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// </summary>
 		/// <param name="requestId">The unique id of the request.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="IRelayTargetResponse"/>.</returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="ITargetResponse"/>.</returns>
 		public async Task<TResponse> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
 		{
 			var waitingState = _waitingStates.GetOrAdd(requestId, _ => new WaitingState());

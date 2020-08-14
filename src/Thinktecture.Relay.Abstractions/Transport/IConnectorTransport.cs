@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Transport
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IConnectorTransport<in TResponse>
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		/// <summary>
 		/// The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.

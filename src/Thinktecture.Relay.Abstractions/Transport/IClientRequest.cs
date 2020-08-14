@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Transport
 	/// <summary>
 	/// The metadata of a client request to be relayed.
 	/// </summary>
-	public interface IRelayClientRequest
+	public interface IClientRequest
 	{
 		/// <summary>
 		/// The unique id of the request.

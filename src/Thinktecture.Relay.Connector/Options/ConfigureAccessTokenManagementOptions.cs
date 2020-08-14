@@ -11,8 +11,8 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Options
 {
 	internal class ConfigureAccessTokenManagementOptions<TRequest, TResponse> : IConfigureOptions<AccessTokenManagementOptions>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly IOptions<RelayConnectorOptions<TRequest, TResponse>> _options;
 		private readonly IServiceProvider _serviceProvider;

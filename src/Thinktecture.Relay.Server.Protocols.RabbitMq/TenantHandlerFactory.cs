@@ -5,8 +5,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc />
 	public class TenantHandlerFactory<TRequest, TResponse> : ITenantHandlerFactory<TRequest, TResponse>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly IServerHandler<TResponse> _serverHandler;
 		private readonly ModelFactory _modelFactory;

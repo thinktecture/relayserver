@@ -5,8 +5,8 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.DependencyInjection
 {
 	internal class RelayServerBuilder<TRequest, TResponse> : IRelayServerBuilder<TRequest, TResponse>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		public IServiceCollection Services { get; }
 

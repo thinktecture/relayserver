@@ -6,7 +6,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport
 {
 	internal class InMemoryServerDispatcher<TResponse> : IServerDispatcher<TResponse>
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		public event AsyncEventHandler<TResponse> ResponseReceived;
 		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;

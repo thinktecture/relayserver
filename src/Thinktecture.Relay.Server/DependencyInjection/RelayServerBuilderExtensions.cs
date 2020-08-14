@@ -23,8 +23,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
 		public static IRelayServerBuilder<TRequest, TResponse> AddInMemoryServerRouting<TRequest, TResponse>(
 			this IRelayServerBuilder<TRequest, TResponse> builder)
-			where TRequest : IRelayClientRequest
-			where TResponse : IRelayTargetResponse
+			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
 		{
 			builder.Services.AddSingleton<IServerDispatcher<TResponse>, InMemoryServerDispatcher<TResponse>>();
 			builder.Services.AddSingleton<IServerHandler<TResponse>, InMemoryServerHandler<TResponse>>();
@@ -44,8 +44,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <remarks>This could harm the memory usage of the server.</remarks>
 		public static IRelayServerBuilder<TRequest, TResponse> AddInMemoryBodyStore<TRequest, TResponse>(
 			this IRelayServerBuilder<TRequest, TResponse> builder)
-			where TRequest : IRelayClientRequest
-			where TResponse : IRelayTargetResponse
+			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
 		{
 			builder.Services.AddSingleton<IBodyStore, InMemoryBodyStore>();
 
@@ -63,8 +63,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <remarks>Use a shared location between all server instances.</remarks>
 		public static IRelayServerBuilder<TRequest, TResponse> AddFileBodyStore<TRequest, TResponse>(
 			this IRelayServerBuilder<TRequest, TResponse> builder, Action<FileBodyStoreOptions> configure)
-			where TRequest : IRelayClientRequest
-			where TResponse : IRelayTargetResponse
+			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
 		{
 			builder.Services.Configure(configure);
 			builder.Services.AddTransient<IValidateOptions<FileBodyStoreOptions>, FileBodyStoreOptionsValidator>();

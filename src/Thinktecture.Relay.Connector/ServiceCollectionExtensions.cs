@@ -38,8 +38,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
 		public static IRelayConnectorBuilder AddRelayConnector<TRequest, TResponse>(this IServiceCollection services,
 			Action<RelayConnectorOptions<TRequest, TResponse>> configure)
-			where TRequest : IRelayClientRequest, new()
-			where TResponse : IRelayTargetResponse, new()
+			where TRequest : IClientRequest, new()
+			where TResponse : ITargetResponse, new()
 		{
 			var builder = new RelayConnectorBuilder(services);
 

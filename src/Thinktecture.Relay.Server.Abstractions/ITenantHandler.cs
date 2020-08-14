@@ -7,10 +7,10 @@ namespace Thinktecture.Relay.Server
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	public interface ITenantHandler<out TRequest>
-		where TRequest : IRelayClientRequest
+		where TRequest : IClientRequest
 	{
 		/// <summary>
-		/// Event fired when an <see cref="IRelayClientRequest"/> was received.
+		/// Event fired when an <see cref="IClientRequest"/> was received.
 		/// </summary>
 		event AsyncEventHandler<TRequest> RequestReceived;
 	}
