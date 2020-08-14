@@ -5,6 +5,7 @@
     <Title>Thinktecture RelayServer Connector</Title>
     <Description>Contains the connector implementations for the RelayServer.</Description>
     <Summary></Summary>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->

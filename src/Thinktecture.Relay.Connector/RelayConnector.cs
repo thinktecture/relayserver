@@ -12,9 +12,9 @@ namespace Thinktecture.Relay.Connector
 		private readonly IConnectorConnection _connection;
 
 		/// <summary>
-		/// 
+		/// Initializes a new instance of <see cref="RelayConnector"/>.
 		/// </summary>
-		/// <param name="connection"></param>
+		/// <param name="connection">An <see cref="IConnectorConnection"/>.</param>
 		public RelayConnector(IConnectorConnection connection)
 		{
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
@@ -25,15 +25,13 @@ namespace Thinktecture.Relay.Connector
 		/// </summary>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public Task ConnectAsync(CancellationToken cancellationToken = default)
-			=> _connection.ConnectAsync(cancellationToken);
+		public Task ConnectAsync(CancellationToken cancellationToken = default) => _connection.ConnectAsync(cancellationToken);
 
 		/// <summary>
 		/// Closes the connection to the server.
 		/// </summary>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public Task DisconnectAsync(CancellationToken cancellationToken = default)
-			=> _connection.DisconnectAsync(cancellationToken);
+		public Task DisconnectAsync(CancellationToken cancellationToken = default) => _connection.DisconnectAsync(cancellationToken);
 	}
 }

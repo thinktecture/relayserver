@@ -13,7 +13,6 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		where TResponse : ITargetResponse
 	{
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
-
 		private readonly HubConnection _connection;
 
 		private IConnectorTransport<TResponse> Transport => this;
