@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
 using Thinktecture.Relay;
 using Thinktecture.Relay.Connector;
+using Thinktecture.Relay.Connector.Authentication;
 using Thinktecture.Relay.Connector.DependencyInjection;
 using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Connector.RelayTargets;
@@ -52,6 +53,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				ConfigureAccessTokenManagementOptions>();
 
 			builder.Services.AddAccessTokenManagement();
+			builder.Services.TryAddTransient<IAccessTokenProvider, AccessTokenProvider>();
 			builder.Services
 				.AddHttpClient(Constants.RelayServerHttpClientName, (provider, client) =>
 				{
@@ -63,6 +65,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			builder.Services.TryAddSingleton<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
 			builder.Services.AddSingleton<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
+			builder.Services.AddSingleton<RelayConnector>();
 
 			return builder;
 		}
