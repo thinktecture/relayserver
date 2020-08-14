@@ -23,7 +23,6 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	}
 
 	/// <inheritdoc cref="IConnectorTransport{TResponse}" />
-	// ReSharper disable once ClassNeverInstantiated.Global
 	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport<TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse

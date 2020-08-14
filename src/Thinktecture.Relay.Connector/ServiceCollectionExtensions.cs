@@ -22,22 +22,22 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// Adds the connector to the <see cref="IServiceCollection"/>.
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
-		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions{ClientRequest,TargetResponse}"/>.</param>
+		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions"/>.</param>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
 		public static IRelayConnectorBuilder AddRelayConnector(this IServiceCollection services,
-			Action<RelayConnectorOptions<ClientRequest, TargetResponse>> configure)
+			Action<RelayConnectorOptions> configure)
 			=> services.AddRelayConnector<ClientRequest, TargetResponse>(configure);
 
 		/// <summary>
 		/// Adds the connector to the <see cref="IServiceCollection"/>.
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
-		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions{TRequest,TResponse}"/>.</param>
+		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions"/>.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder"/>.</returns>
 		public static IRelayConnectorBuilder AddRelayConnector<TRequest, TResponse>(this IServiceCollection services,
-			Action<RelayConnectorOptions<TRequest, TResponse>> configure)
+			Action<RelayConnectorOptions> configure)
 			where TRequest : IClientRequest, new()
 			where TResponse : ITargetResponse, new()
 		{
@@ -45,8 +45,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			builder.Services.Configure(configure);
 
-			builder.Services.AddTransient<IPostConfigureOptions<RelayConnectorOptions<TRequest, TResponse>>,
-				RelayConnectorPostConfigureOptions<TRequest, TResponse>>();
+			builder.Services.AddTransient<IPostConfigureOptions<RelayConnectorOptions>,
+				RelayConnectorPostConfigureOptions>();
 			builder.Services.AddTransient<IConfigurationRetriever<DiscoveryDocument>, RelayServerConfigurationRetriever>();
 			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>,
 				ConfigureAccessTokenManagementOptions<TRequest, TResponse>>();
@@ -55,14 +55,13 @@ namespace Microsoft.Extensions.DependencyInjection
 			builder.Services
 				.AddHttpClient(Constants.RelayServerHttpClientName, (provider, client) =>
 				{
-					var options = provider.GetRequiredService<IOptions<RelayConnectorOptions<TRequest, TResponse>>>();
+					var options = provider.GetRequiredService<IOptions<RelayConnectorOptions>>();
 					client.BaseAddress = options.Value.RelayServerBaseUri;
 					// TODO set timeouts
 				})
 				.AddClientAccessTokenHandler();
 
 			builder.Services.TryAddSingleton<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
-			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();
 			builder.Services.AddSingleton<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
 
 			return builder;

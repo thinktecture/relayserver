@@ -4,18 +4,18 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets
 {
-	/// <summary>
-	/// A registration of an <see cref="IRelayTarget{TRequest,TResponse}"/>.
-	/// </summary>
-	/// <typeparam name="TRequest">The type of request.</typeparam>
-	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public class RelayTargetRegistration<TRequest, TResponse>
+	internal class RelayTargetRegistration<TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		internal Func<IServiceProvider, IRelayTarget<TRequest, TResponse>> Factory { get; }
+		public string Id { get; }
 
-		internal RelayTargetRegistration(IRelayTargetOptions options, Type type)
-			=> Factory = provider => (IRelayTarget<TRequest, TResponse>)ActivatorUtilities.CreateInstance(provider, type, options);
+		public Func<IServiceProvider, IRelayTarget<TRequest, TResponse>> Factory { get; }
+
+		public RelayTargetRegistration(Type target, string id, IRelayTargetOptions options)
+		{
+			Id = id;
+			Factory = provider => (IRelayTarget<TRequest, TResponse>)ActivatorUtilities.CreateInstance(provider, target, options);
+		}
 	}
 }
