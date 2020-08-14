@@ -21,27 +21,30 @@ namespace Thinktecture.Relay.Connector.Docker
 				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
 				.AddSignalRConnectorTransport();
 
-			services.AddHostedService<DummyLogger>();
+			services.AddHostedService<ConnectorService>();
 		}
 	}
 
-	internal class DummyLogger : IHostedService, IDisposable
+	internal class ConnectorService : IHostedService, IDisposable
 	{
-		private readonly ILogger<DummyLogger> _logger;
-		private readonly IHttpClientFactory _httpClientFactory;
+		private readonly ILogger<ConnectorService> _logger;
+		private readonly RelayConnector _connector;
 		private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
 		private Task _runningTask;
 
-		public DummyLogger(ILogger<DummyLogger> logger, IHttpClientFactory httpClientFactory)
+		public ConnectorService(ILogger<ConnectorService> logger, RelayConnector connector)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+			_connector = connector;
 		}
 
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
-			_runningTask = RunAsync(_cancellationTokenSource.Token);
+			_runningTask = Task.WhenAny(
+				RunAsync(_cancellationTokenSource.Token),
+				_connector.ConnectAsync(cancellationToken)
+			);
 
 			// If the task is completed then return it,
 			// this will bubble cancellation and failure to the caller
@@ -68,7 +71,7 @@ namespace Thinktecture.Relay.Connector.Docker
 			finally
 			{
 				// Wait for the task to stop
-				await Task.WhenAny(_runningTask, Task.Delay(Timeout.Infinite, cancellationToken));
+				await Task.WhenAny(_runningTask, _connector.DisconnectAsync(cancellationToken), Task.Delay(Timeout.Infinite, cancellationToken));
 			}
 		}
 
@@ -79,23 +82,6 @@ namespace Thinktecture.Relay.Connector.Docker
 			while (!cancellationToken.IsCancellationRequested)
 			{
 				_logger.LogInformation("Internal loop running at {Time} and counting {i}", DateTime.UtcNow, i++);
-
-				using var client = _httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
-				var response = await client.GetAsync("/.well-known/relayserver-configuration", cancellationToken);
-				if (response.IsSuccessStatusCode)
-				{
-					var contentStream = await response.Content.ReadAsStreamAsync();
-					var document = await JsonSerializer.DeserializeAsync<DiscoveryDocument>(contentStream, new JsonSerializerOptions()
-					{
-						PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-					}, cancellationToken);
-					_logger.LogInformation("Read discovery document: {@DiscoveryDocument}", document);
-				}
-				else
-				{
-					_logger.LogInformation("Fetching document failed.");
-				}
-
 				await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
 			}
 		}

@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.Connector
 		/// </summary>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task DisconnectAsync(CancellationToken cancellationToken = default)
+		public Task DisconnectAsync(CancellationToken cancellationToken = default)
 			=> _connection.DisconnectAsync(cancellationToken);
 	}
 }
