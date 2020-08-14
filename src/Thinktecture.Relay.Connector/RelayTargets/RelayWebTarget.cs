@@ -22,18 +22,6 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		protected readonly HttpClient HttpClient;
 
 		/// <summary>
-		/// Represents a HTTP request message.
-		/// </summary>
-		// ReSharper disable once MemberCanBePrivate.Global
-		protected HttpRequestMessage RequestMessage;
-
-		/// <summary>
-		/// Represents a HTTP response message including the status code and data.
-		/// </summary>
-		// ReSharper disable once MemberCanBePrivate.Global
-		protected HttpResponseMessage ResponseMessage;
-
-		/// <summary>
 		/// Initializes a new instance of <see cref="RelayWebTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="responseFactory">The <see cref="IRelayTargetResponseFactory{TResponse}"/> for creating the <typeparamref name="TResponse"/></param>
@@ -52,10 +40,9 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// <inheritdoc />
 		public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			RequestMessage = CreateHttpRequestMessage(request);
-			ResponseMessage = await HttpClient.SendAsync(RequestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-
-			return await CreateResponseAsync(request, ResponseMessage, cancellationToken);
+			using var requestMessage = CreateHttpRequestMessage(request);
+			var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+			return await CreateResponseAsync(request, responseMessage, cancellationToken);
 		}
 
 		/// <summary>
@@ -112,11 +99,6 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		}
 
 		/// <inheritdoc />
-		public void Dispose()
-		{
-			RequestMessage?.Dispose();
-			ResponseMessage?.Dispose();
-			HttpClient.Dispose();
-		}
+		public void Dispose() => HttpClient.Dispose();
 	}
 }

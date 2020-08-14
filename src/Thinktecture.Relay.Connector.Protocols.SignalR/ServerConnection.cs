@@ -17,8 +17,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private IConnectorTransport<TResponse> Transport => this;
 
-		public ServerConnection(IClientRequestHandler<TRequest, TResponse> clientRequestHandler,
-			SignalRConnectionFactory connectionFactory)
+		public ServerConnection(IClientRequestHandler<TRequest, TResponse> clientRequestHandler, SignalRConnectionFactory connectionFactory)
 		{
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
 

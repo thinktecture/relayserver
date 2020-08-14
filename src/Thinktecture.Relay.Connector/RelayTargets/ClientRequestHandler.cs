@@ -20,6 +20,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 		private readonly IServiceProvider _serviceProvider;
 		private readonly HttpClient _httpClient;
+		private readonly Uri _requestEndpoint;
 		private readonly Uri _responseEndpoint;
 
 		private class CountingStreamContent : StreamContent
@@ -69,6 +70,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_httpClient = httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
+			_requestEndpoint = new Uri(options.Value.DiscoveryDocument.RequestEndpoint);
 			_responseEndpoint = new Uri(options.Value.DiscoveryDocument.ResponseEndpoint);
 
 			foreach (var target in targets)
@@ -84,6 +86,11 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				return default;
 			}
 
+			if (request.BodySize > 0 && request.BodyContent == null)
+			{
+				request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint, request.RequestId.ToString("N")));
+			}
+
 			try
 			{
 				var response = await target.HandleAsync(request, cancellationToken);
@@ -91,8 +98,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				if (response.BodySize > binarySizeThreshold)
 				{
 					using var content = new CountingStreamContent(response.BodyContent);
-					using var _ = await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content,
-						cancellationToken);
+					await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
 
 					// TODO error handling when post fails
 

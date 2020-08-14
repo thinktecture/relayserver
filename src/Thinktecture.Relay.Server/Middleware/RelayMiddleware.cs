@@ -77,7 +77,7 @@ namespace Thinktecture.Relay.Server.Middleware
 					requestMessage.Headers.TryAddWithoutValidation(name, values);
 				}
 
-				using var responseMessage = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+				var responseMessage = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
 
 				var response = new TResponse
 				{
