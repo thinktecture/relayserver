@@ -17,8 +17,13 @@ namespace Thinktecture.Relay.Server.Transport
 
 		public FileBodyStore(ILogger<FileBodyStore> logger, IOptions<FileBodyStoreOptions> options)
 		{
+			if (options == null)
+			{
+				throw new ArgumentNullException(nameof(options));
+			}
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_basePath = options?.Value?.StoragePath ?? throw new ArgumentNullException(nameof(options));
+			_basePath = options.Value.StoragePath;
 		}
 
 		/// <inheritdoc />
@@ -30,7 +35,8 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "writing", "request", requestId);
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "writing", "request",
+					requestId);
 				throw;
 			}
 		}
@@ -44,7 +50,8 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "writing", "response", requestId);
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "writing",
+					"response", requestId);
 				throw;
 			}
 		}
@@ -58,7 +65,8 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading ", "request", requestId);
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading ",
+					"request", requestId);
 				throw;
 			}
 		}
@@ -72,7 +80,8 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading ", "response", requestId);
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading ",
+					"response", requestId);
 				throw;
 			}
 		}
@@ -87,7 +96,8 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting ", "request", requestId);
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting ",
+					"request", requestId);
 				throw;
 			}
 		}
@@ -102,7 +112,8 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting ", "response", requestId);
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting ",
+					"response", requestId);
 				throw;
 			}
 		}
@@ -150,6 +161,11 @@ namespace Thinktecture.Relay.Server.Transport
 
 		public ValidateOptionsResult Validate(string name, FileBodyStoreOptions options)
 		{
+			if (string.IsNullOrWhiteSpace(options.StoragePath))
+			{
+				return ValidateOptionsResult.Fail("Storage path must be set.");
+			}
+
 			if (!Directory.Exists(options.StoragePath))
 			{
 				return ValidateOptionsResult.Fail("Configured path does not exist.");

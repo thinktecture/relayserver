@@ -78,7 +78,7 @@ namespace Thinktecture.Relay.Connector.Docker
 			{
 				_logger.LogInformation("Internal loop running at {Time} and counting {i}", DateTime.UtcNow, i++);
 
-				var client = _httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
+				using var client = _httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
 				var response = await client.GetAsync("/.well-known/relayserver-configuration", cancellationToken);
 				if (response.IsSuccessStatusCode)
 				{

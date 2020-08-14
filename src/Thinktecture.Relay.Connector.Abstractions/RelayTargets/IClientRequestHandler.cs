@@ -17,8 +17,9 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// Called when a request was received.
 		/// </summary>
 		/// <param name="request">The client request.</param>
+		/// <param name="binarySizeThreshold">The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the response.</returns>
-		Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
+		Task<TResponse> HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default);
 	}
 }

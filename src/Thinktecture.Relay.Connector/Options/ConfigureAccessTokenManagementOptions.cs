@@ -1,34 +1,34 @@
 using System;
 using System.Threading;
+using IdentityModel;
 using IdentityModel.AspNetCore.AccessTokenManagement;
 using IdentityModel.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Options
 {
-	internal class ConfigureAccessTokenManagementOptions<TRequest, TResponse> : IConfigureOptions<AccessTokenManagementOptions>
-		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+	internal class ConfigureAccessTokenManagementOptions : IConfigureOptions<AccessTokenManagementOptions>
 	{
-		private readonly IOptions<RelayConnectorOptions> _options;
 		private readonly IServiceProvider _serviceProvider;
+		private readonly RelayConnectorOptions _options;
 
-		public ConfigureAccessTokenManagementOptions(IOptions<RelayConnectorOptions> options,
-			IServiceProvider serviceProvider)
+		public ConfigureAccessTokenManagementOptions(IServiceProvider serviceProvider, IOptions<RelayConnectorOptions> options)
 		{
-			_options = options;
+			if (options == null)
+			{
+				throw new ArgumentNullException(nameof(options));
+			}
+
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_options = options.Value;
 		}
 
 		public void Configure(AccessTokenManagementOptions options)
 		{
-			var relayConnectorOptions = _options.Value;
-
-			var uri = new Uri(new Uri(relayConnectorOptions.DiscoveryDocument.AuthorizationServer), ".well-known/openid-configuration");
+			var uri = new Uri(new Uri(_options.DiscoveryDocument.AuthorizationServer), OidcConstants.Discovery.DiscoveryEndpoint);
 
 			var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
 				uri.ToString(),
@@ -36,15 +36,13 @@ namespace Thinktecture.Relay.Connector.Options
 				new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https", }
 			);
 
-			var configuration = configManager
-				.GetConfigurationAsync(CancellationToken.None)
-				.GetAwaiter().GetResult();
+			var configuration = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
 
 			options.Client.Clients.Add(Constants.RelayServerHttpClientName, new ClientCredentialsTokenRequest()
 			{
 				Address = configuration.TokenEndpoint,
-				ClientId = relayConnectorOptions.TenantName,
-				ClientSecret = relayConnectorOptions.TenantSecret,
+				ClientId = _options.TenantName,
+				ClientSecret = _options.TenantSecret,
 				Scope = Constants.RelayServerScopes,
 			});
 		}

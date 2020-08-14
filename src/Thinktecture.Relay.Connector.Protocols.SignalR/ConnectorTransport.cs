@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private async Task RequestTargetAsync(TRequest request)
 		{
-			var response = await _clientRequestHandler.HandleAsync(request);
+			var response = await _clientRequestHandler.HandleAsync(request, Transport.BinarySizeThreshold);
 			await Transport.DeliverAsync(response);
 		}
 
