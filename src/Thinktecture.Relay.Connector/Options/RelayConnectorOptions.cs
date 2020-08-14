@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Protocols;
 using Thinktecture.Relay.Connector.RelayTargets;
 using Thinktecture.Relay.Transport;
 
@@ -30,7 +29,7 @@ namespace Thinktecture.Relay.Connector.Options
 		/// </summary>
 		public string TenantSecret { get; set; }
 
-		internal IConfigurationManager<DiscoveryDocument> ConfigurationManager { get; set; }
+		internal DiscoveryDocument DiscoveryDocument { get; set; }
 
 		internal readonly Dictionary<string, RelayTargetRegistration<TRequest, TResponse>> Targets
 			= new Dictionary<string, RelayTargetRegistration<TRequest, TResponse>>(StringComparer.InvariantCultureIgnoreCase);
