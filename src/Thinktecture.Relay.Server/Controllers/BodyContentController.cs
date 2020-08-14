@@ -18,8 +18,7 @@ namespace Thinktecture.Relay.Server.Controllers
 		/// <param name="requestId">The unique id of the request.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="IActionResult"/>.</returns>
-		[Route("body/request/{requestId:guid}")]
-		[HttpGet]
+		[HttpGet, Route("body/request/{requestId:guid}")]
 		public async Task<IActionResult> GetRequestBodyContentAsync([FromRoute] Guid requestId, [FromServices] IBodyStore bodyStore)
 		{
 			var stream = await bodyStore.OpenRequestBodyAsync(requestId, HttpContext.RequestAborted);
@@ -33,8 +32,7 @@ namespace Thinktecture.Relay.Server.Controllers
 		/// <param name="requestId">The unique id of the request.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the amount of bytes written.</returns>
-		[Route("body/response/{requestId:guid}")]
-		[HttpPost]
+		[HttpPost, Route("body/response/{requestId:guid}")]
 		public async Task<IActionResult> StoreResponseBodyContentAsync([FromRoute] Guid requestId, [FromServices] IBodyStore bodyStore)
 		{
 			var length = await bodyStore.StoreResponseBodyAsync(requestId, Request.Body, HttpContext.RequestAborted);
