@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using Thinktecture.Relay.Acknowledgement;
@@ -7,24 +8,22 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
-	public class ServerConnection<TRequest, TResponse> : IConnectorTransport<TResponse>
+	internal class ServerConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
-		private HubConnection _connection;
+
+		private readonly HubConnection _connection;
 
 		private IConnectorTransport<TResponse> Transport => this;
 
-		public ServerConnection(IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
+		public ServerConnection(IClientRequestHandler<TRequest, TResponse> clientRequestHandler,
+			SignalRConnectionFactory connectionFactory)
 		{
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
-		}
 
-		// Todo: Create and open message
-
-		private void RegisterIncomingMessages()
-		{
+			_connection = connectionFactory.CreateConnection();
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 		}
 
@@ -44,5 +43,11 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		Task IConnectorTransport<TResponse>.PongAsync()
 			=> _connection.InvokeAsync("Pong");
+
+		Task IConnectorConnection.ConnectAsync(CancellationToken cancellationToken)
+			=> _connection.StartAsync(cancellationToken);
+
+		Task IConnectorConnection.DisconnectAsync(CancellationToken cancellationToken)
+			=> _connection.StopAsync(cancellationToken);
 	}
 }
