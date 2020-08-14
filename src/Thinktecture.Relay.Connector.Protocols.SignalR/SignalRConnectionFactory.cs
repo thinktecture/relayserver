@@ -8,26 +8,25 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 	internal class SignalRConnectionFactory
 	{
 		private readonly IAccessTokenProvider _accessTokenProvider;
-		private readonly IOptions<RelayConnectorOptions> _options;
+		private readonly RelayConnectorOptions _options;
 
-		private RelayConnectorOptions ConnectorOptions => _options.Value;
-
-		public SignalRConnectionFactory(IAccessTokenProvider accessTokenProvider,
-			IOptions<RelayConnectorOptions> options)
+		public SignalRConnectionFactory(IAccessTokenProvider accessTokenProvider, IOptions<RelayConnectorOptions> options)
 		{
-			_accessTokenProvider = accessTokenProvider;
-			_options = options;
+			if (options == null)
+			{
+				throw new ArgumentNullException(nameof(options));
+			}
+
+			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
+
+			_options = options.Value;
 		}
 
 		public HubConnection CreateConnection()
 		{
-			var configuration = ConnectorOptions.DiscoveryDocument;
-
 			return new HubConnectionBuilder()
-				.WithUrl(new Uri(configuration.ConnectorEndpoint), connectionOptions =>
-				{
-					connectionOptions.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync;
-				})
+				.WithUrl(new Uri(_options.DiscoveryDocument.ConnectorEndpoint),
+					connectionOptions => { connectionOptions.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync; })
 				.WithAutomaticReconnect() // TODO: Add retry policy based on discovery document config values
 				.Build();
 		}

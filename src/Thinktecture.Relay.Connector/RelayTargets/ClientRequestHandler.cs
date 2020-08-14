@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityModel.Client;
 using Microsoft.Extensions.Options;
-using Thinktecture.Relay.Connector.DependencyInjection;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets
 {
-	/// <inheritdoc />
 	internal class ClientRequestHandler<TRequest, TResponse> : IClientRequestHandler<TRequest, TResponse>, IDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
@@ -22,13 +22,38 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		private readonly HttpClient _httpClient;
 		private readonly Uri _responseEndpoint;
 
-		/// <summary>
-		/// Initializes a new instance of <see cref="ClientRequestHandler{TRequest,TResponse}"/>.
-		/// </summary>
-		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
-		/// <param name="targets">The registered <see cref="IRelayTarget{TRequest,TResponse}"/>s.</param>
-		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
-		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
+		private class CountingStreamContent : StreamContent
+		{
+			private readonly int _bufferSize;
+			private readonly Stream _content;
+
+			public long BytesWritten { get; private set; }
+
+			public CountingStreamContent(Stream content, int bufferSize = 80 * 1024) : base(content, bufferSize)
+			{
+				_content = content;
+				_bufferSize = bufferSize;
+			}
+
+			protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+			{
+				var buffer = new byte[_bufferSize];
+
+				while (true)
+				{
+					var length = await _content.ReadAsync(buffer, 0, buffer.Length);
+					if (length <= 0)
+					{
+						break;
+					}
+
+					BytesWritten += length;
+
+					await stream.WriteAsync(buffer, 0, length);
+				}
+			}
+		}
+
 		public ClientRequestHandler(IServiceProvider serviceProvider, IEnumerable<RelayTargetRegistration<TRequest, TResponse>> targets,
 			IHttpClientFactory httpClientFactory, IOptions<RelayConnectorOptions> options)
 		{
@@ -52,7 +77,6 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			}
 		}
 
-		/// <inheritdoc />
 		public async Task<TResponse> HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
 		{
 			if (!TryGetTarget(request.Target, out var target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
@@ -66,15 +90,21 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 				if (response.BodySize > binarySizeThreshold)
 				{
-					// _httpClient.PostAsync()
-					// TODO post to relay
+					using var content = new CountingStreamContent(response.BodyContent);
+					using var _ = await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content,
+						cancellationToken);
+
+					// TODO error handling when post fails
+
+					response.BodySize = content.BytesWritten;
+					response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
 				}
 				else
 				{
+					using var _ = response.BodyContent;
 					response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
 				}
 
-				// TODO optional post body first
 				return response;
 			}
 			finally

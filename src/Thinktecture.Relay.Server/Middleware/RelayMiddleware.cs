@@ -88,7 +88,7 @@ namespace Thinktecture.Relay.Server.Middleware
 					BodySize = responseMessage.Content.Headers.ContentLength,
 				};
 
-				var stream = await responseMessage.Content.ReadAsStreamAsync();
+				await using var stream = await responseMessage.Content.ReadAsStreamAsync();
 				response.BodyContent = await stream.CopyToMemoryStreamAsync();
 
 				return response;
@@ -118,7 +118,17 @@ namespace Thinktecture.Relay.Server.Middleware
 
 				// TODO call IClientRequestInterceptor
 
-				await TryStoreBodyContent(context, request);
+				if (request.BodyContent != null)
+				{
+					if (context.Request.Body != request.BodyContent)
+					{
+						// an interceptor changed the body content - need to dispose it properly
+						context.Response.RegisterForDisposeAsync(request.BodyContent);
+					}
+
+					await TryStoreBodyContent(context, request);
+				}
+
 				await _tenantDispatcher.DispatchRequestAsync(request);
 
 				// var response = await _responseCoordinator.GetResponseAsync(request.RequestId, context.RequestAborted);
@@ -140,11 +150,6 @@ namespace Thinktecture.Relay.Server.Middleware
 
 		private async Task TryStoreBodyContent(HttpContext context, TRequest request)
 		{
-			if (request.BodyContent == null)
-			{
-				return;
-			}
-
 			var maximumBodySize = Math.Min(
 				_tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(int.MaxValue),
 				_connectorTransport.BinarySizeThreshold.GetValueOrDefault(int.MaxValue));

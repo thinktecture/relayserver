@@ -1,6 +1,4 @@
 using System;
-using System.Net.Http;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -36,7 +34,7 @@ namespace Thinktecture.Relay.Connector.Docker
 		public ConnectorService(ILogger<ConnectorService> logger, RelayConnector connector)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_connector = connector;
+			_connector = connector ?? throw new ArgumentNullException(nameof(connector));
 		}
 
 		public Task StartAsync(CancellationToken cancellationToken)
@@ -75,9 +73,9 @@ namespace Thinktecture.Relay.Connector.Docker
 			}
 		}
 
-		public async Task RunAsync(CancellationToken cancellationToken)
+		private async Task RunAsync(CancellationToken cancellationToken)
 		{
-			int i = 0;
+			var i = 0;
 
 			while (!cancellationToken.IsCancellationRequested)
 			{
@@ -86,9 +84,6 @@ namespace Thinktecture.Relay.Connector.Docker
 			}
 		}
 
-		public void Dispose()
-		{
-			_cancellationTokenSource.Cancel();
-		}
+		public void Dispose() => _cancellationTokenSource.Cancel();
 	}
 }

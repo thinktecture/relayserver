@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Connector.Options
 
 		public void PostConfigure(string name, RelayConnectorOptions options)
 		{
-			var uri = new Uri(options.RelayServerBaseUri, Constants.WellKnownDiscoveryDocumentPath);
+			var uri = new Uri(options.RelayServerBaseUri, DiscoveryDocument.WellKnownPath);
 
 			var configManager = new ConfigurationManager<DiscoveryDocument>(
 				uri.ToString(),

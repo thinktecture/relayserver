@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Controllers
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="IActionResult"/>.</returns>
 		[Route("body/request")]
 		[HttpGet]
-		public async Task<IActionResult> GetBodyContentAsync(Guid requestId, [FromServices] IBodyStore bodyStore)
+		public async Task<IActionResult> GetRequestBodyContentAsync(Guid requestId, [FromServices] IBodyStore bodyStore)
 		{
 			var stream = await bodyStore.OpenRequestBodyAsync(requestId, HttpContext.RequestAborted);
 			Response.RegisterForDisposeAsync(stream);
@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.Server.Controllers
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the amount of bytes written.</returns>
 		[Route("body/response")]
 		[HttpPost]
-		public async Task<IActionResult> StoreBodyContentAsync(Guid requestId, [FromServices] IBodyStore bodyStore)
+		public async Task<IActionResult> StoreResponseBodyContentAsync(Guid requestId, [FromServices] IBodyStore bodyStore)
 		{
 			var length = await bodyStore.StoreResponseBodyAsync(requestId, Request.Body, HttpContext.RequestAborted);
 			return Content(length.ToString(), MediaTypeNames.Text.Plain);

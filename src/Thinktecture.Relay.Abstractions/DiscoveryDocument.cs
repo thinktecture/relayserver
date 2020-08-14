@@ -6,6 +6,11 @@ namespace Thinktecture.Relay
 	public class DiscoveryDocument
 	{
 		/// <summary>
+		/// The well-known relative path to the <see cref="DiscoveryDocument"/> endpoint.
+		/// </summary>
+		public const string WellKnownPath = ".well-known/relayserver-configuration";
+
+		/// <summary>
 		/// The version of the RelayServer.
 		/// </summary>
 		public string ServerVersion { get; set; }

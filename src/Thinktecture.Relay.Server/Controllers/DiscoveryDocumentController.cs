@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Server.Controllers
 	/// Controller that handles requests to the discovery document.
 	/// </summary>
 	[AllowAnonymous]
-	[Route(".well-known/relayserver-configuration")]
+	[Route(DiscoveryDocument.WellKnownPath)]
 	public class DiscoveryDocumentController : Controller
 	{
 		/// <summary>
