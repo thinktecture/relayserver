@@ -22,11 +22,14 @@ namespace Thinktecture.Relay.Connector.Options
 		{
 			var uri = new Uri(options.RelayServerBaseUri, Constants.WellKnownDiscoveryDocumentPath);
 
-			options.ConfigurationManager = new ConfigurationManager<DiscoveryDocument>(
+			var configManager = new ConfigurationManager<DiscoveryDocument>(
 				uri.ToString(),
 				ActivatorUtilities.CreateInstance<RelayServerConfigurationRetriever>(_serviceProvider),
 				new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https", }
 			);
+
+			options.DiscoveryDocument = configManager.GetConfigurationAsync()
+				.GetAwaiter().GetResult();
 		}
 	}
 }
