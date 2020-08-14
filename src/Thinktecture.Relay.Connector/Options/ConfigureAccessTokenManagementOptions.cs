@@ -14,10 +14,10 @@ namespace Thinktecture.Relay.Connector.Options
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly IOptions<RelayConnectorOptions<TRequest, TResponse>> _options;
+		private readonly IOptions<RelayConnectorOptions> _options;
 		private readonly IServiceProvider _serviceProvider;
 
-		public ConfigureAccessTokenManagementOptions(IOptions<RelayConnectorOptions<TRequest, TResponse>> options,
+		public ConfigureAccessTokenManagementOptions(IOptions<RelayConnectorOptions> options,
 			IServiceProvider serviceProvider)
 		{
 			_options = options;

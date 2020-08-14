@@ -2,14 +2,10 @@ using System;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols;
-using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Options
 {
-	internal class RelayConnectorPostConfigureOptions<TRequest, TResponse>
-		: IPostConfigureOptions<RelayConnectorOptions<TRequest, TResponse>>
-		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+	internal class RelayConnectorPostConfigureOptions : IPostConfigureOptions<RelayConnectorOptions>
 	{
 		private readonly IServiceProvider _serviceProvider;
 
@@ -18,7 +14,7 @@ namespace Thinktecture.Relay.Connector.Options
 			_serviceProvider = serviceProvider;
 		}
 
-		public void PostConfigure(string name, RelayConnectorOptions<TRequest, TResponse> options)
+		public void PostConfigure(string name, RelayConnectorOptions options)
 		{
 			var uri = new Uri(options.RelayServerBaseUri, Constants.WellKnownDiscoveryDocumentPath);
 
