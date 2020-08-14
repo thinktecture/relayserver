@@ -7,8 +7,6 @@ namespace Thinktecture.Relay.Connector
 	/// </summary>
 	public class RelayConnectorOptions
 	{
-		private DiscoveryDocument _discoveryDocument;
-
 		/// <summary>
 		/// The base uri of the server.
 		/// </summary>
