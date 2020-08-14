@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server.Services
 {
 	/// <inheritdoc />
 	public class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<TResponse>
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		/// <inheritdoc />
 		public async Task WriteAsync(TResponse targetResponse, HttpResponse httpResponse, CancellationToken cancellationToken = default)

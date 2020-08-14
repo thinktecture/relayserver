@@ -7,12 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
-    <ProjectReference Include="..\Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj" />
   </ItemGroup>
 
   <!-- Use shared information for NuGet packaging -->

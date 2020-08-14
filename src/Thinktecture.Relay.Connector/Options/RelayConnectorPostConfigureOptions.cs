@@ -8,8 +8,8 @@ namespace Thinktecture.Relay.Connector.Options
 {
 	internal class RelayConnectorPostConfigureOptions<TRequest, TResponse>
 		: IPostConfigureOptions<RelayConnectorOptions<TRequest, TResponse>>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly IServiceProvider _serviceProvider;
 

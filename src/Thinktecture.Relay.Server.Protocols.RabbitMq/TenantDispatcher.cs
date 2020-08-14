@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="ITenantDispatcher{TRequest}" />
 	public class TenantDispatcher<TRequest> : ITenantDispatcher<TRequest>, IDisposable
-		where TRequest : IRelayClientRequest
+		where TRequest : IClientRequest
 	{
 		private readonly IModel _model;
 

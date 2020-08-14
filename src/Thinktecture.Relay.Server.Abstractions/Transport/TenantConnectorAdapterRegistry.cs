@@ -12,8 +12,8 @@ namespace Thinktecture.Relay.Server.Transport
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public class TenantConnectorAdapterRegistry<TRequest, TResponse>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly ITenantConnectorAdapterFactory<TRequest> _tenantConnectorAdapterFactory;
 		private readonly ITenantHandlerFactory<TRequest, TResponse> _tenantHandlerFactory;
@@ -34,7 +34,7 @@ namespace Thinktecture.Relay.Server.Transport
 				tenantHandler.RequestReceived += OnRequestReceived;
 			}
 
-			private async Task OnRequestReceived(object sender, TRequest @event) => await _tenantConnectorAdapter.RequestTargetAsync(@event);
+			private async Task OnRequestReceived(object sender, TRequest request) => await _tenantConnectorAdapter.RequestTargetAsync(request);
 
 			public void Dispose()
 			{

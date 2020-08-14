@@ -7,7 +7,7 @@ using Thinktecture.Relay.Acknowledgement;
 namespace Thinktecture.Relay.Transport
 {
 	/// <inheritdoc />
-	public class ClientRequest : IRelayClientRequest
+	public class ClientRequest : IClientRequest
 	{
 		/// <inheritdoc />
 		public Guid RequestId { get; set; }

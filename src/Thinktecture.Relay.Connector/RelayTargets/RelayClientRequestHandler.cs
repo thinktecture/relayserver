@@ -12,8 +12,8 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public class RelayClientRequestHandler<TRequest, TResponse>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
 		private readonly IServiceProvider _serviceProvider;

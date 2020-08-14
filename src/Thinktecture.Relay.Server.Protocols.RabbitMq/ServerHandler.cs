@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="IServerHandler{TResponse}" />
 	public class ServerHandler<TResponse> : IServerHandler<TResponse>, IDisposable
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		private readonly IModel _model;
 		private readonly AsyncEventingBasicConsumer _responseConsumer;

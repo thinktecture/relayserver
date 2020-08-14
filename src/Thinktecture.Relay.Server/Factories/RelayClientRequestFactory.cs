@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Factories
 {
 	/// <inheritdoc />
 	public class RelayClientRequestFactory<TRequest> : IRelayClientRequestFactory<TRequest>
-		where TRequest : IRelayClientRequest, new()
+		where TRequest : IClientRequest, new()
 	{
 		private readonly RelayServerContext _relayServerContext;
 

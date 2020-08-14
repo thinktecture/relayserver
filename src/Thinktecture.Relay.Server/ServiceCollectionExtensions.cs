@@ -34,8 +34,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/>.</returns>
 		public static IRelayServerBuilder<TRequest, TResponse> AddRelayServer<TRequest, TResponse>(this IServiceCollection services)
-			where TRequest : IRelayClientRequest, new()
-			where TResponse : IRelayTargetResponse, new()
+			where TRequest : IClientRequest, new()
+			where TResponse : ITargetResponse, new()
 		{
 			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
 			services.TryAddScoped<RelayMiddleware<TRequest, TResponse>>();

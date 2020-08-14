@@ -10,8 +10,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="ITenantHandler{TRequest}" />
 	public class TenantHandler<TRequest, TResponse> : ITenantHandler<TRequest>, IDisposable
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly RelayServerContext _relayServerContext;
 		private readonly IServerHandler<TResponse> _serverHandler;

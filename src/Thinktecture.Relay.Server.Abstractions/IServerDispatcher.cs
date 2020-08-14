@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IServerDispatcher<in TResponse>
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		/// <summary>
 		/// The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.

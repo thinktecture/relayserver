@@ -9,8 +9,8 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 {
 	/// <inheritdoc />
 	public class TenantConnectorAdapter<TRequest, TResponse> : ITenantConnectorAdapter<TRequest>
-		where TRequest : IRelayClientRequest
-		where TResponse : IRelayTargetResponse
+		where TRequest : IClientRequest
+		where TResponse : ITargetResponse
 	{
 		private readonly IHubContext<ConnectorHub<TRequest, TResponse>, IConnector<TRequest>> _hubContext;
 

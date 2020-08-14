@@ -28,8 +28,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		public static IRelayServerBuilder<TRequest, TResponse> AddRabbitMqRouting<TRequest, TResponse>(
 			this IRelayServerBuilder<TRequest, TResponse> builder, Action<RabbitMqOptions> configure, bool useServerRouting = true,
 			bool useTenantRouting = true)
-			where TRequest : IRelayClientRequest
-			where TResponse : IRelayTargetResponse
+			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
 		{
 			builder.Services.TryAddSingleton<IServerDispatcher<TResponse>, ServerDispatcher<TResponse>>();
 			builder.Services.TryAddSingleton<IServerHandler<TResponse>, ServerHandler<TResponse>>();
@@ -40,8 +40,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
 		private static void AddRabbitMq<TRequest, TResponse>(this IServiceCollection services, bool useServerRouting, bool useTenantRouting,
 			Action<RabbitMqOptions> configure)
-			where TRequest : IRelayClientRequest
-			where TResponse : IRelayTargetResponse
+			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
 		{
 			services.Configure(configure);
 

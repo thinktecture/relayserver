@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="IServerDispatcher{TResponse}" />
 	public class ServerDispatcher<TResponse> : IServerDispatcher<TResponse>, IDisposable
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		private readonly IModel _model;
 

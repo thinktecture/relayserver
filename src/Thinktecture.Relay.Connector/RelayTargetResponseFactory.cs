@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Connector
 {
 	/// <inheritdoc />
 	public class RelayTargetResponseFactory<TResponse> : IRelayTargetResponseFactory<TResponse>
-		where TResponse : IRelayTargetResponse, new()
+		where TResponse : ITargetResponse, new()
 	{
 		/// <inheritdoc />
 		public async Task<TResponse> CreateAsync(HttpResponseMessage message, CancellationToken cancellationToken = default)

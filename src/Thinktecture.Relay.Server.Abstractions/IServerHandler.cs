@@ -9,10 +9,10 @@ namespace Thinktecture.Relay.Server
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IServerHandler<out TResponse>
-		where TResponse : IRelayTargetResponse
+		where TResponse : ITargetResponse
 	{
 		/// <summary>
-		/// Event fired when an <see cref="IRelayTargetResponse"/> was received.
+		/// Event fired when an <see cref="ITargetResponse"/> was received.
 		/// </summary>
 		event AsyncEventHandler<TResponse> ResponseReceived;
 

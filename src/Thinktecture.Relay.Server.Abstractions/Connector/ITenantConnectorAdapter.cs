@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Connector
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	public interface ITenantConnectorAdapter<in TRequest>
-		where TRequest : IRelayClientRequest
+		where TRequest : IClientRequest
 	{
 		/// <summary>
 		/// The unique id of the tenant.
