@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.SignalR;
@@ -28,6 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();
 			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse>>();
 			builder.Services.AddSignalR();
+			builder.Services.AddTransient<IPostConfigureOptions<JwtBearerOptions>, ConfigureSignalRJwtAccessTokenOptions>();
 
 			return builder;
 		}
