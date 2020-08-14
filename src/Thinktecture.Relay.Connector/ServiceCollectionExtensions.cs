@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			builder.Services.TryAddSingleton<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
 			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();
-			builder.Services.AddSingleton<RelayClientRequestHandler<TRequest, TResponse>>();
+			builder.Services.AddSingleton<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
 
 			return builder;
 		}

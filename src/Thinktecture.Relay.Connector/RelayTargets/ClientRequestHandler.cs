@@ -6,12 +6,8 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets
 {
-	/// <summary>
-	/// A client request handler determining the <see cref="IRelayTarget{TRequest,TResponse}"/> handling the request.
-	/// </summary>
-	/// <typeparam name="TRequest">The type of request.</typeparam>
-	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public class RelayClientRequestHandler<TRequest, TResponse>
+	/// <inheritdoc />
+	public class ClientRequestHandler<TRequest, TResponse> : IClientRequestHandler<TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
@@ -19,22 +15,17 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayClientRequestHandler{TRequest,TResponse}"/>.
+		/// Initializes a new instance of <see cref="ClientRequestHandler{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="relayTargetRegistry">The <see cref="RelayTargetRegistry{TRequest,TResponse}"/>.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
-		public RelayClientRequestHandler(RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry, IServiceProvider serviceProvider)
+		public ClientRequestHandler(RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry, IServiceProvider serviceProvider)
 		{
 			_relayTargetRegistry = relayTargetRegistry ?? throw new ArgumentNullException(nameof(relayTargetRegistry));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
-		/// <summary>
-		/// Called when a request was received.
-		/// </summary>
-		/// <param name="request">The client request.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the response.</returns>
+		/// <inheritdoc />
 		public async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
 			if (!TryCreateTarget(request.Target, out var target))
