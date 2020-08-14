@@ -27,10 +27,6 @@ namespace Thinktecture.Relay.Connector
 		/// <summary>
 		/// The <see cref="DiscoveryDocument"/>.
 		/// </summary>
-		public DiscoveryDocument DiscoveryDocument
-		{
-			get => _discoveryDocument ?? throw new InvalidOperationException("The discovery document is not yet available.");
-			set => _discoveryDocument = value;
-		}
+		public DiscoveryDocument DiscoveryDocument { get; set; }
 	}
 }
