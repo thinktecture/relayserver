@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.AspNet.SignalR;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
@@ -19,13 +18,16 @@ namespace Thinktecture.Relay.Server.SignalR
 		private readonly IBackendCommunication _backendCommunication;
 		private readonly IConfiguration _configuration;
 		private readonly ILifetimeScope _lifetimeScope;
+		private readonly IOnPremisesConnectionOnReceivedHandler _onPremisesConnectionOnReceivedHandler;
 
-		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IConfiguration configuration, ILifetimeScope lifetimeScope)
+		public OnPremisesConnection(ILogger logger, IBackendCommunication backendCommunication, IConfiguration configuration, ILifetimeScope lifetimeScope,
+			IOnPremisesConnectionOnReceivedHandler onPremisesConnectionOnReceivedHandler)
 		{
 			_logger = logger;
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_lifetimeScope = lifetimeScope ?? throw new ArgumentNullException(nameof(lifetimeScope));
+			_onPremisesConnectionOnReceivedHandler = onPremisesConnectionOnReceivedHandler ?? throw new ArgumentNullException(nameof(onPremisesConnectionOnReceivedHandler));
 		}
 
 		protected override bool AuthorizeRequest(IRequest request)
@@ -57,6 +59,14 @@ namespace Thinktecture.Relay.Server.SignalR
 			await RegisterOnPremiseAsync(request, connectionId, onPremiseClaims).ConfigureAwait(false);
 
 			await base.OnReconnected(request, connectionId).ConfigureAwait(false);
+		}
+
+		protected override async Task OnReceived(IRequest request, string connectionId, string data)
+		{
+			_logger?.Debug("On-premise sent. connection-id={ConnectionId}, data={Data}", connectionId, data);
+
+			await _onPremisesConnectionOnReceivedHandler.HandleAsync(connectionId, data);
+			await base.OnReceived(request, connectionId, data);
 		}
 
 		protected override async Task OnDisconnected(IRequest request, string connectionId, bool stopCalled)

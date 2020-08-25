@@ -17,7 +17,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.3.0-rc5
+## Version 2.3.0-rc6
 
 * RabbitMQ Improvements
 
@@ -50,6 +50,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * For an easier migration scenario of changed IOnPremiseTargetRequest implementations a property called "Properties" was introduced, which will be serialized onto the root JSON object to be deserialized as properties on the on-premise side.
   * A PING will be removed from the RabbitMQ queue directly by the server because of using AcknowledgeMode.Auto.
   * The Entity Framework Context (RelayContext) is now public.
+  * It is possible to use a custom implementation of an `IOnPremiseConnectionOnReceivedHandler` by registering that in an Autofac module within a custom code assembly to handle incoming data on a SignalR connection.
 
 * Bugfixes
 

@@ -7,7 +7,7 @@
 
 # Release Notes
 
-## Version 2.3.0-rc5
+## Version 2.3.0-rc6
 
 * RabbitMQ Verbesserungen
 
@@ -41,6 +41,7 @@
   * Um eine einfachere Migration von geänderten IOnPremiseTargetRequest Implementierungen durchführen zu können, wurde eine Property mit dem Namen "Properties" eingeführt, welche in den Root des JSON serialisiert wird, um im On-Premise Connector in die jeweiligen Properties deserialisiert zu werden.
   * Ein PING wird nun bereits auf dem Server durch AcknowledgeMode.Auto aus der RabbitMQ-Queue entfernt.
   * Der Entity Framework Context (RelayContext) ist nun öffentlich nutzbar.
+  * Es kann nun ein `IOnPremiseConnectionOnReceivedHandler` implementiert und über ein eigenes Autofac-Modul aus einem eigenen CustomCodeAssembly registriert werden, um eingehende Daten einer SignalR-Verbindung zu verarbeiten.
 
 * Fehlerbehebungen
 
