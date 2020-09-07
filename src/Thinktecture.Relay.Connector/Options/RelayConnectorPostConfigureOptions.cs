@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols;
@@ -18,13 +19,25 @@ namespace Thinktecture.Relay.Connector.Options
 		{
 			var uri = new Uri(options.RelayServerBaseUri, DiscoveryDocument.WellKnownPath);
 
-			var configManager = new ConfigurationManager<DiscoveryDocument>(
-				uri.ToString(),
-				ActivatorUtilities.CreateInstance<RelayServerConfigurationRetriever>(_serviceProvider),
-				new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https", }
-			);
+			while (true)
+			{
+				var configManager = new ConfigurationManager<DiscoveryDocument>(
+					uri.ToString(),
+					ActivatorUtilities.CreateInstance<RelayServerConfigurationRetriever>(_serviceProvider),
+					new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https", }
+				);
 
-			options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
+				try
+				{
+					options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
+					break;
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Could not get discovery document {ex.Message} from {uri}");
+					Task.Delay(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
+				}
+			}
 		}
 	}
 }

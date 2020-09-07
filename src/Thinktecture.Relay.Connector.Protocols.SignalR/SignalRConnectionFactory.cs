@@ -18,7 +18,6 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			}
 
 			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
-
 			_options = options.Value;
 		}
 

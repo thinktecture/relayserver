@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Thinktecture.Relay.Connector.RelayTargets;
 
 namespace Thinktecture.Relay.Connector.Docker
 {
@@ -17,7 +18,8 @@ namespace Thinktecture.Relay.Connector.Docker
 
 			services
 				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
-				.AddSignalRConnectorTransport();
+				.AddSignalRConnectorTransport()
+				.AddWebTarget("swapi", new RelayWebTargetOptions(new Uri("https://swapi.dev/")));
 
 			services.AddHostedService<ConnectorService>();
 		}
