@@ -34,6 +34,11 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 				throw new ArgumentNullException(nameof(modelFactory));
 			}
 
+			if (relayServerContext == null)
+			{
+				throw new ArgumentNullException(nameof(relayServerContext));
+			}
+
 			_model = modelFactory.Create();
 
 			_responseConsumer = _model.ConsumeQueue($"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
