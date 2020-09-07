@@ -45,7 +45,6 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		{
 			_logger.LogTrace("Delivering response {@Response}", response);
 			return _connection.InvokeAsync("Deliver", response);
-			// TODO and the body is where?
 		}
 
 		Task IConnectorTransport<TResponse>.AcknowledgeAsync(IAcknowledgeRequest request)

@@ -65,7 +65,7 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading ",
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading",
 					"request", requestId);
 				throw;
 			}
@@ -80,7 +80,7 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading ",
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "reading",
 					"response", requestId);
 				throw;
 			}
@@ -96,7 +96,7 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting ",
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting",
 					"request", requestId);
 				throw;
 			}
@@ -112,7 +112,7 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting ",
+				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "deleting",
 					"response", requestId);
 				throw;
 			}
