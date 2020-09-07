@@ -28,8 +28,8 @@ namespace Microsoft.Extensions.DependencyInjection
 			builder.Services.AddTransient<SignalRConnectionFactory>();
 			builder.Services.AddSingleton<ServerConnection<TRequest, TResponse>>();
 
-			builder.Services.TryAddTransient<IConnectorTransport<TResponse>>(provider => provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
-			builder.Services.TryAddTransient<IConnectorConnection>(provider => provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
+			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>>(provider => provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
+			builder.Services.TryAddSingleton<IConnectorConnection>(provider => provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
 
 			return builder;
 		}

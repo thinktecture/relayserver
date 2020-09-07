@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Acknowledgement;
@@ -24,6 +25,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	}
 
 	/// <inheritdoc cref="IConnectorTransport{TResponse}" />
+	[Authorize(Constants.DefaultAuthenticationPolicy)]
 	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport<TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
@@ -57,7 +59,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			var tenantId = Guid.Parse(Context.User.FindFirst("client_id").Value);
 
 			_logger.LogDebug("Connection incoming for tenant {TenantName} with id {TenantId}",
-				Context.User?.FindFirst("client_name")?.Value, tenantId);
+				Context.User.FindFirst("client_name").Value, tenantId);
 
 			await _tenantConnectorAdapterRegistry.RegisterAsync(tenantId, Context.ConnectionId);
 			await base.OnConnectedAsync();

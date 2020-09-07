@@ -1,5 +1,7 @@
 using System;
+using System.Linq.Expressions;
 using System.Threading;
+using System.Threading.Tasks;
 using IdentityModel;
 using IdentityModel.AspNetCore.AccessTokenManagement;
 using IdentityModel.Client;
@@ -30,21 +32,33 @@ namespace Thinktecture.Relay.Connector.Options
 		{
 			var uri = new Uri(new Uri(_options.DiscoveryDocument.AuthorizationServer), OidcConstants.Discovery.DiscoveryEndpoint);
 
-			var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-				uri.ToString(),
-				ActivatorUtilities.CreateInstance<OpenIdConnectConfigurationRetriever>(_serviceProvider),
-				new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https", }
-			);
-
-			var configuration = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
-
-			options.Client.Clients.Add(Constants.RelayServerHttpClientName, new ClientCredentialsTokenRequest()
+			while (true)
 			{
-				Address = configuration.TokenEndpoint,
-				ClientId = _options.TenantName,
-				ClientSecret = _options.TenantSecret,
-				Scope = Constants.RelayServerScopes,
-			});
+				var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+					uri.ToString(),
+					ActivatorUtilities.CreateInstance<OpenIdConnectConfigurationRetriever>(_serviceProvider),
+					new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https", }
+				);
+
+				try
+				{
+					var configuration = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
+
+					options.Client.Clients.Add(Constants.RelayServerHttpClientName, new ClientCredentialsTokenRequest()
+					{
+						Address = configuration.TokenEndpoint,
+						ClientId = _options.TenantName,
+						ClientSecret = _options.TenantSecret,
+						Scope = Constants.RelayServerScopes,
+					});
+					break;
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Could not get discovery document {ex.Message} from {uri}");
+					Task.Delay(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
+				}
+			}
 		}
 	}
 }

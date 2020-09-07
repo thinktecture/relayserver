@@ -131,8 +131,8 @@ namespace Thinktecture.Relay.Server.Middleware
 
 				await _tenantDispatcher.DispatchRequestAsync(request);
 
-				// var response = await _responseCoordinator.GetResponseAsync(request.RequestId, context.RequestAborted);
-				var response = await new FakeResponseGenerator().GenerateAsync(request); // TODO remove this when connector is available
+				var response = await _responseCoordinator.GetResponseAsync(request.RequestId, context.RequestAborted);
+				// var response = await new FakeResponseGenerator().GenerateAsync(request); // TODO remove this when connector is available
 
 				_logger?.LogTrace("Received response {@TargetResponse}", response);
 
