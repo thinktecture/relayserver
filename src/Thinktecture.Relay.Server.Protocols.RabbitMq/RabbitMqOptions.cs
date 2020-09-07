@@ -1,5 +1,3 @@
-using RabbitMQ.Client;
-
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <summary>

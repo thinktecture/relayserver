@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		{
 			// We have to hook the OnMessageReceived event in order to
 			// allow the JWT authentication handler to read the access
-			// token from the query string when a WebSocket or 
+			// token from the query string when a WebSocket or
 			// Server-Sent Events request comes in.
 
 			// Sending the access token in the query string is required due to
@@ -27,8 +27,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 
 					// If the request is for our hub...
 					var path = context.HttpContext.Request.Path;
-					if (!string.IsNullOrEmpty(accessToken) &&
-					    (path.StartsWithSegments("/connector")))
+					if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/connector")))
 					{
 						// Read the token out of the query string
 						context.Token = accessToken;

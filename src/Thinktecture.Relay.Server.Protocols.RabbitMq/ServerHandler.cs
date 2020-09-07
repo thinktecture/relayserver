@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Thinktecture.Relay.Acknowledgement;
@@ -12,6 +13,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 	public class ServerHandler<TResponse> : IServerHandler<TResponse>, IDisposable
 		where TResponse : ITargetResponse
 	{
+		private readonly ILogger<ServerHandler<TResponse>> _logger;
 		private readonly IModel _model;
 		private readonly AsyncEventingBasicConsumer _responseConsumer;
 		private readonly AsyncEventingBasicConsumer _acknowledgeConsumer;
@@ -25,10 +27,13 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <summary>
 		/// Initializes a new instance of <see cref="ServerHandler{TResponse}"/>.
 		/// </summary>
+		/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		public ServerHandler(ModelFactory modelFactory, RelayServerContext relayServerContext)
+		public ServerHandler(ILogger<ServerHandler<TResponse>> logger, ModelFactory modelFactory, RelayServerContext relayServerContext)
 		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
 			if (modelFactory == null)
 			{
 				throw new ArgumentNullException(nameof(modelFactory));
@@ -61,9 +66,19 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		}
 
 		private async Task OnResponseReceived(object sender, BasicDeliverEventArgs @event)
-			=> await ResponseReceived.InvokeAsync(sender, JsonSerializer.Deserialize<TResponse>(@event.Body.Span));
+		{
+			var eventData = JsonSerializer.Deserialize<TResponse>(@event.Body.Span);
+			_logger.LogTrace("Received response {@Response} from queue", eventData);
+
+			await ResponseReceived.InvokeAsync(sender, eventData);
+		}
 
 		private async Task OnAcknowledgeReceived(object sender, BasicDeliverEventArgs @event)
-			=> await AcknowledgeReceived.InvokeAsync(sender, JsonSerializer.Deserialize<IAcknowledgeRequest>(@event.Body.Span));
+		{
+			var eventData = JsonSerializer.Deserialize<IAcknowledgeRequest>(@event.Body.Span);
+			_logger.LogTrace("Received acknowledge request {@AcknowledgeRequest} from queue", eventData);
+
+			await AcknowledgeReceived.InvokeAsync(sender, eventData);
+		}
 	}
 }

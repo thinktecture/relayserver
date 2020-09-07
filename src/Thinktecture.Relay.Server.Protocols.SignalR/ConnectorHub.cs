@@ -69,6 +69,10 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public override async Task OnDisconnectedAsync(Exception exception)
 		{
 			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
+
+			_logger.LogDebug("Connection disconnected for tenant {TenantName} with id {TenantId}",
+				Context.User.FindFirst("client_name").Value, Guid.Parse(Context.User.FindFirst("client_id").Value));
+
 			await base.OnDisconnectedAsync(exception);
 		}
 
