@@ -22,26 +22,26 @@ namespace Thinktecture.Relay.Server.Transport
 
 		private class TenantConnectorAdapterRegistration : IDisposable
 		{
-			private readonly ITenantHandler<TRequest> _tenantHandler;
 			private readonly ITenantConnectorAdapter<TRequest> _tenantConnectorAdapter;
 
+			public ITenantHandler<TRequest> TenantHandler { get; }
 			public Guid TenantId => _tenantConnectorAdapter.TenantId;
 
-			public TenantConnectorAdapterRegistration(ITenantHandler<TRequest> tenantHandler,
-				ITenantConnectorAdapter<TRequest> tenantConnectorAdapter)
+			public TenantConnectorAdapterRegistration(ITenantConnectorAdapter<TRequest> tenantConnectorAdapter,
+				ITenantHandler<TRequest> tenantHandler)
 			{
-				_tenantHandler = tenantHandler ?? throw new ArgumentNullException(nameof(tenantHandler));
 				_tenantConnectorAdapter = tenantConnectorAdapter ?? throw new ArgumentNullException(nameof(tenantConnectorAdapter));
 
-				tenantHandler.RequestReceived += OnRequestReceived;
+				TenantHandler = tenantHandler ?? throw new ArgumentNullException(nameof(tenantHandler));
+				TenantHandler.RequestReceived += OnRequestReceived;
 			}
 
 			private async Task OnRequestReceived(object sender, TRequest request) => await _tenantConnectorAdapter.RequestTargetAsync(request);
 
 			public void Dispose()
 			{
-				_tenantHandler.RequestReceived -= OnRequestReceived;
-				(_tenantHandler as IDisposable)?.Dispose();
+				TenantHandler.RequestReceived -= OnRequestReceived;
+				(TenantHandler as IDisposable)?.Dispose();
 
 				// ReSharper disable once SuspiciousTypeConversion.Global
 				(_tenantConnectorAdapter as IDisposable)?.Dispose();
@@ -74,19 +74,19 @@ namespace Thinktecture.Relay.Server.Transport
 		/// Registers the connection by creating an <see cref="ITenantConnectorAdapter{TRequest}"/>.
 		/// </summary>
 		/// <param name="tenantId">The unique id of the tenant.</param>
-		/// <param name="connectionId">The unique id for the connection.</param>
+		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public Task RegisterAsync(Guid tenantId, string connectionId)
 		{
 			_logger.LogDebug("Registering connection {ConnectionId} for tenant {TenantId}", connectionId, tenantId);
 
-			var tenantHandler = _tenantHandlerFactory.Create(tenantId);
+			var tenantHandler = _tenantHandlerFactory.Create(tenantId, connectionId);
 			var tenantConnectorAdapter = _tenantConnectorAdapterFactory.Create(tenantId, connectionId);
 
 			var adapters = _tenants.GetOrAdd(tenantId, _ => new ConcurrentDictionary<string, ITenantConnectorAdapter<TRequest>>());
 			adapters[connectionId] = tenantConnectorAdapter;
 
-			_registrations[connectionId] = new TenantConnectorAdapterRegistration(tenantHandler, tenantConnectorAdapter);
+			_registrations[connectionId] = new TenantConnectorAdapterRegistration(tenantConnectorAdapter, tenantHandler);
 
 			return Task.CompletedTask;
 		}
@@ -94,7 +94,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <summary>
 		/// Unregisters the connection by destroying the corresponding <see cref="ITenantConnectorAdapter{TRequest}"/>.
 		/// </summary>
-		/// <param name="connectionId">The unique id for the connection.</param>
+		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public Task UnregisterAsync(string connectionId)
 		{
@@ -106,12 +106,27 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			else
 			{
-				_logger.LogWarning($"Could not unregister {nameof(ITenantConnectorAdapter<TRequest>)} for connection {{ConnectionId}}, as registration was not found", connectionId);
+				_logger.LogWarning(
+					$"Could not unregister {nameof(ITenantConnectorAdapter<TRequest>)} for connection {{ConnectionId}}, as registration was not found",
+					connectionId);
 			}
 
 			registration?.Dispose();
 
 			return Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Acknowledges
+		/// </summary>
+		/// <param name="connectionId">The unique id of the connection.</param>
+		/// <param name="acknowledgeId">The id to acknowledge.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		public Task AcknowledgeRequestAsync(string connectionId, string acknowledgeId)
+		{
+			return _registrations.TryGetValue(connectionId, out var tenantConnectorAdapterRegistration)
+				? tenantConnectorAdapterRegistration.TenantHandler.AcknowledgeAsync(acknowledgeId)
+				: Task.CompletedTask;
 		}
 	}
 }

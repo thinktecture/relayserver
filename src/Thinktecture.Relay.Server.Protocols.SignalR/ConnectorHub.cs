@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		Task RequestTarget(TRequest request);
 	}
 
-	/// <inheritdoc cref="IConnectorTransport{TResponse}" />
+	/// <inheritdoc cref="Hub{T}" />
 	[Authorize(Constants.DefaultAuthenticationPolicy)]
 	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport<TResponse>
 		where TRequest : IClientRequest
@@ -32,22 +32,25 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	{
 		private readonly ILogger<ConnectorHub<TRequest, TResponse>> _logger;
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
+		private readonly AcknowledgeCoordinator<TRequest, TResponse> _acknowledgeCoordinator;
 		private readonly IServerDispatcher<TResponse> _serverDispatcher;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="ConnectorHub{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
 		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
-		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse>> logger,
+		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
+		/// <param name="acknowledgeCoordinator">The <see cref="AcknowledgeCoordinator{TRequest,TResponse}"/>.</param>
+		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse>> logger, IServerDispatcher<TResponse> serverDispatcher,
 			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
-			IServerDispatcher<TResponse> serverDispatcher)
+			AcknowledgeCoordinator<TRequest, TResponse> acknowledgeCoordinator)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
 			_tenantConnectorAdapterRegistry = tenantConnectorAdapterRegistry
 				?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
-			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
+			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
 		}
 
 		/// <inheritdoc />
@@ -76,16 +79,35 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			await base.OnDisconnectedAsync(exception);
 		}
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Hub method.
+		/// </summary>
+		/// <param name="response">The target response.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		/// <seealso cref="IConnectorTransport{TResponse}.DeliverAsync"/>
 		[HubMethodName("Deliver")]
+		// ReSharper disable once UnusedMember.Global
 		public async Task DeliverAsync(TResponse response) => await _serverDispatcher.DispatchResponseAsync(response);
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Hub method.
+		/// </summary>
+		/// <param name="requestId">The unique id of the request.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		/// <seealso cref="IConnectorTransport{TResponse}.AcknowledgeAsync"/>
 		[HubMethodName("Acknowledge")]
-		public async Task AcknowledgeAsync(IAcknowledgeRequest request) => await _serverDispatcher.DispatchAcknowledgeAsync(request);
+		// ReSharper disable once UnusedMember.Global
+		public async Task AcknowledgeAsync(Guid requestId) => await _acknowledgeCoordinator.AcknowledgeRequestAsync(requestId);
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Hub method.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		/// <seealso cref="IConnectorTransport{TResponse}.PongAsync"/>
 		[HubMethodName("Pong")]
+		// ReSharper disable once UnusedMember.Global
 		public Task PongAsync() => throw new NotImplementedException();
+
+		Task IConnectorTransport<TResponse>.AcknowledgeAsync(IAcknowledgeRequest request) => throw new InvalidOperationException();
 	}
 }

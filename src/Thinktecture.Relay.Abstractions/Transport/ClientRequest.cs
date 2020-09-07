@@ -22,9 +22,6 @@ namespace Thinktecture.Relay.Transport
 		public Guid? AcknowledgeOriginId { get; set; }
 
 		/// <inheritdoc />
-		public string AcknowledgeId { get; set; }
-
-		/// <inheritdoc />
 		public string Target { get; set; }
 
 		/// <inheritdoc />

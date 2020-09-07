@@ -6,12 +6,9 @@ namespace Thinktecture.Relay.Acknowledgement
 	public class AcknowledgeRequest : IAcknowledgeRequest
 	{
 		/// <inheritdoc />
-		public string AcknowledgeId { get; set; }
-
-		/// <inheritdoc />
-		public string ConnectionId { get; set; }
-
-		/// <inheritdoc />
 		public Guid OriginId { get; set; }
+
+		/// <inheritdoc />
+		public Guid RequestId { get; set; }
 	}
 }

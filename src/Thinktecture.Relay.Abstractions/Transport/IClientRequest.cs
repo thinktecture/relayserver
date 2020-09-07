@@ -35,13 +35,6 @@ namespace Thinktecture.Relay.Transport
 		Guid? AcknowledgeOriginId { get; set; }
 
 		/// <summary>
-		/// The unique id of the message to be used for acknowledging. This will be null when <see cref="AcknowledgeMode"/> is disabled.
-		/// </summary>
-		/// <remarks>This should not be changed.</remarks>
-		/// <seealso cref="AcknowledgeMode"/>
-		string AcknowledgeId { get; set; }
-
-		/// <summary>
 		/// The name of the target used to request the response from.
 		/// </summary>
 		string Target { get; set; }

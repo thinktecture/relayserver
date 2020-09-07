@@ -1,7 +1,5 @@
 using System;
 
-// TODO factorize me
-
 namespace Thinktecture.Relay.Acknowledgement
 {
 	/// <summary>
@@ -10,18 +8,13 @@ namespace Thinktecture.Relay.Acknowledgement
 	public interface IAcknowledgeRequest
 	{
 		/// <summary>
-		/// The unique id of the message.
-		/// </summary>
-		string AcknowledgeId { get; set; }
-
-		/// <summary>
-		/// The unique id of the connection.
-		/// </summary>
-		string ConnectionId { get; set; }
-
-		/// <summary>
 		/// The unique id of the server where the acknowledgment should be send to.
 		/// </summary>
 		Guid OriginId { get; set; }
+
+		/// <summary>
+		/// The unique id of the message.
+		/// </summary>
+		Guid RequestId { get; set; }
 	}
 }
