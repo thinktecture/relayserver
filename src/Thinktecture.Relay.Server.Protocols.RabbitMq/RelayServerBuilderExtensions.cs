@@ -64,6 +64,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
 				var factory = new ConnectionFactory
 				{
+					DispatchConsumersAsync = true,
 					EndpointResolverFactory = endpoints => new RoundRobinEndpointResolver(endpoints),
 					Uri = new Uri(options.Value.Uri),
 				};
