@@ -18,20 +18,12 @@ namespace Thinktecture.Relay.Connector.Options
 
 		public async Task<DiscoveryDocument> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
 		{
-			try
-			{
-				var document = await retriever.GetDocumentAsync(address, cancel);
+			var document = await retriever.GetDocumentAsync(address, cancel);
 
-				return JsonSerializer.Deserialize<DiscoveryDocument>(document, new JsonSerializerOptions()
-				{
-					PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-				});
-			}
-			catch (Exception ex)
+			return JsonSerializer.Deserialize<DiscoveryDocument>(document, new JsonSerializerOptions()
 			{
-				_logger.LogError(ex, "An error occured while fetching the discovery document.");
-				throw;
-			}
+				PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+			});
 		}
 	}
 }

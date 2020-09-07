@@ -10,6 +10,8 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private readonly IAccessTokenProvider _accessTokenProvider;
 		private readonly RelayConnectorOptions _options;
 
+		public string Endpoint => _options.DiscoveryDocument.ConnectorEndpoint;
+
 		public SignalRConnectionFactory(IAccessTokenProvider accessTokenProvider, IOptions<RelayConnectorOptions> options)
 		{
 			if (options == null)
