@@ -19,6 +19,7 @@ namespace Thinktecture.Relay.Connector.Docker
 			services
 				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
 				.AddSignalRConnectorTransport()
+				.AddWebTarget("mocky", new RelayWebTargetOptions(new Uri("https://run.mocky.io/v3/")))
 				.AddWebTarget("swapi", new RelayWebTargetOptions(new Uri("http://swapi.dev/")));
 
 			services.AddHostedService<ConnectorService>();

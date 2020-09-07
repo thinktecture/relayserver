@@ -100,6 +100,8 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				return default;
 			}
 
+			_logger.LogTrace("Found {Target} for {RequestId} as {TargetClass}", request.Target, request.RequestId, target.GetType().Name);
+
 			if (request.BodySize > 0 && request.BodyContent == null)
 			{
 				_logger.LogDebug("Requesting outsourced body for {RequestId} with {BodySize} bytes", request.RequestId, request.BodySize);
@@ -113,6 +115,16 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
 				{
+					if (response.BodySize == null)
+					{
+						_logger.LogWarning("Unknown body size triggered mandatory outsourcing for {RequestId}", request.RequestId);
+					}
+					else
+					{
+						_logger.LogTrace("Outsourcing {BodySize} bytes because of a maximum of {BinarySizeThreshold} for {RequestId}",
+							response.BodySize, binarySizeThreshold, request.RequestId);
+					}
+
 					using var content = new CountingStreamContent(response.BodyContent);
 					await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
 
@@ -120,11 +132,13 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 					response.BodySize = content.BytesWritten;
 					response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
+					_logger.LogTrace("Outsourced {BodySize} bytes for {RequestId}", content.BytesWritten, request.RequestId);
 				}
-				else
+				else if (response.BodySize > 0)
 				{
 					using var _ = response.BodyContent;
 					response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
+					_logger.LogTrace("Inlined {BodySize} bytes into response for {RequestId}", response.BodySize, request.RequestId);
 				}
 
 				return response;

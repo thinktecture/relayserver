@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Thinktecture.Relay.Transport;
 
@@ -14,6 +15,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		where TResponse : ITargetResponse
 	{
 		private readonly IRelayTargetResponseFactory<TResponse> _responseFactory;
+		private readonly ILogger<RelayWebTarget<TRequest, TResponse>> _logger;
 
 		/// <summary>
 		/// A <see cref="System.Net.Http.HttpClient"/>.
@@ -27,10 +29,12 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// <param name="responseFactory">The <see cref="IRelayTargetResponseFactory{TResponse}"/> for creating the <typeparamref name="TResponse"/></param>
 		/// <param name="clientFactory">The <see cref="IHttpClientFactory"/> for creating the <see cref="System.Net.Http.HttpClient"/>.</param>
 		/// <param name="options">The options.</param>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		public RelayWebTarget(IRelayTargetResponseFactory<TResponse> responseFactory, IHttpClientFactory clientFactory,
-			RelayWebTargetOptions options)
+			RelayWebTargetOptions options, ILogger<RelayWebTarget<TRequest, TResponse>> logger)
 		{
 			_responseFactory = responseFactory;
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 			HttpClient = clientFactory.CreateClient();
 			HttpClient.BaseAddress = options.BaseAddress;
@@ -40,6 +44,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// <inheritdoc />
 		public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
+			_logger.LogTrace("Requesting target {@Request}", request);
 			using var requestMessage = CreateHttpRequestMessage(request);
 			var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 			return await CreateResponseAsync(request, responseMessage, cancellationToken);
