@@ -2,7 +2,13 @@
 
 When you are new to **RelayServer** or coming from an older version, there can be a lot of words to learn. This glossary aims to give you a 25.000-feet overview of common terms and what they mean in the context of RelayServer.
 
-[C](#c) | [I](#i) | [R](#r) | [T](#t)
+[B](#b) | [C](#c) | [I](#i) | [R](#r) | [T](#t)
+
+## B
+
+### Body Store
+
+The body store is a storage where the body contents of requests and responses are stored while a request is being processed. By default a file-based storage is used. An in-memory store is available, too.
 
 ## C
 
