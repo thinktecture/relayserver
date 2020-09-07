@@ -67,18 +67,18 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 		private async Task OnResponseReceived(object sender, BasicDeliverEventArgs @event)
 		{
-			var eventData = JsonSerializer.Deserialize<TResponse>(@event.Body.Span);
-			_logger.LogTrace("Received response {@Response} from queue", eventData);
-
-			await ResponseReceived.InvokeAsync(sender, eventData);
+			var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span);
+			_logger.LogTrace("Received response {@Response} from queue {QueueName} by consumer {ConsumerTag}", response, @event.RoutingKey,
+				@event.ConsumerTag);
+			await ResponseReceived.InvokeAsync(sender, response);
 		}
 
 		private async Task OnAcknowledgeReceived(object sender, BasicDeliverEventArgs @event)
 		{
-			var eventData = JsonSerializer.Deserialize<IAcknowledgeRequest>(@event.Body.Span);
-			_logger.LogTrace("Received acknowledge request {@AcknowledgeRequest} from queue", eventData);
-
-			await AcknowledgeReceived.InvokeAsync(sender, eventData);
+			var response = JsonSerializer.Deserialize<IAcknowledgeRequest>(@event.Body.Span);
+			_logger.LogTrace("Received acknowledge request {@AcknowledgeRequest} from queue {QueueName} by consumer {ConsumerTag}", response,
+				@event.RoutingKey, @event.ConsumerTag);
+			await AcknowledgeReceived.InvokeAsync(sender, response);
 		}
 	}
 }

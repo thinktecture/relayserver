@@ -35,7 +35,6 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private async Task OnAcknowledge(object sender, IAcknowledgeRequest request)
 		{
-			request.ConnectionId = _connection.ConnectionId;
 			await Transport.AcknowledgeAsync(request);
 		}
 
@@ -58,7 +57,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		Task IConnectorTransport<TResponse>.AcknowledgeAsync(IAcknowledgeRequest request)
 		{
 			_logger.LogTrace("Acknowledging request {@Request}", request);
-			return _connection.InvokeAsync("Acknowledge", request);
+			return _connection.InvokeAsync("Acknowledge", request.RequestId);
 		}
 
 		Task IConnectorTransport<TResponse>.PongAsync()

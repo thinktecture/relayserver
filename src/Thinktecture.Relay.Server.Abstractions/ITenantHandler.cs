@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server
@@ -13,5 +14,12 @@ namespace Thinktecture.Relay.Server
 		/// Event fired when an <see cref="IClientRequest"/> was received.
 		/// </summary>
 		event AsyncEventHandler<TRequest> RequestReceived;
+
+		/// <summary>
+		/// Acknowledges an <see cref="IClientRequest"/>.
+		/// </summary>
+		/// <param name="acknowledgeId">The id to acknowledge.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task AcknowledgeAsync(string acknowledgeId);
 	}
 }

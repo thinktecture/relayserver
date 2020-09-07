@@ -89,39 +89,39 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		{
 			if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
 			{
-				_logger.LogDebug("Acknowledging on {OriginId} with {AcknowledgeId}", request.AcknowledgeOriginId, request.AcknowledgeId);
-				await Acknowledge.InvokeAsync(this,
-					new AcknowledgeRequest() { AcknowledgeId = request.AcknowledgeId, OriginId = request.AcknowledgeOriginId!.Value });
+				await AcknowledgeRequest(request);
 			}
 
 			if (!TryGetTarget(request.Target, out var target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
 			{
-				_logger.LogError("Could not find any target for {RequestId} named {Target}", request.RequestId, request.Target);
+				_logger.LogError("Could not find any target for request {RequestId} named {Target}", request.RequestId, request.Target);
 				return default;
 			}
 
-			_logger.LogTrace("Found {Target} for {RequestId} as {TargetClass}", request.Target, request.RequestId, target.GetType().Name);
+			_logger.LogTrace("Found target {Target} for request {RequestId} as {TargetClass}", request.Target, request.RequestId,
+				target.GetType().Name);
 
 			if (request.BodySize > 0 && request.BodyContent == null)
 			{
-				_logger.LogDebug("Requesting outsourced body for {RequestId} with {BodySize} bytes", request.RequestId, request.BodySize);
+				_logger.LogDebug("Requesting outsourced body for request {RequestId} with {BodySize} bytes", request.RequestId,
+					request.BodySize);
 				request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint, request.RequestId.ToString("N")));
 			}
 
 			try
 			{
-				_logger.LogInformation("Requesting {Target} for {RequestId}", request.Target, request.RequestId);
+				_logger.LogInformation("Requesting target {Target} for request {RequestId}", request.Target, request.RequestId);
 				var response = await target.HandleAsync(request, cancellationToken);
 
 				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
 				{
 					if (response.BodySize == null)
 					{
-						_logger.LogWarning("Unknown body size triggered mandatory outsourcing for {RequestId}", request.RequestId);
+						_logger.LogWarning("Unknown body size triggered mandatory outsourcing for request {RequestId}", request.RequestId);
 					}
 					else
 					{
-						_logger.LogTrace("Outsourcing {BodySize} bytes because of a maximum of {BinarySizeThreshold} for {RequestId}",
+						_logger.LogTrace("Outsourcing {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
 							response.BodySize, binarySizeThreshold, request.RequestId);
 					}
 
@@ -132,13 +132,13 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 					response.BodySize = content.BytesWritten;
 					response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
-					_logger.LogTrace("Outsourced {BodySize} bytes for {RequestId}", content.BytesWritten, request.RequestId);
+					_logger.LogTrace("Outsourced {BodySize} bytes for request {RequestId}", content.BytesWritten, request.RequestId);
 				}
 				else if (response.BodySize > 0)
 				{
 					using var _ = response.BodyContent;
 					response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
-					_logger.LogTrace("Inlined {BodySize} bytes into response for {RequestId}", response.BodySize, request.RequestId);
+					_logger.LogTrace("Inlined {BodySize} bytes into response for request {RequestId}", response.BodySize, request.RequestId);
 				}
 
 				return response;
@@ -147,13 +147,18 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			{
 				if (request.AcknowledgeMode == AcknowledgeMode.ConnectorFinished)
 				{
-					_logger.LogDebug("Acknowledging on {OriginId} with {AcknowledgeId}", request.AcknowledgeOriginId, request.AcknowledgeId);
-					await Acknowledge.InvokeAsync(this,
-						new AcknowledgeRequest() { AcknowledgeId = request.AcknowledgeId, OriginId = request.AcknowledgeOriginId!.Value });
+					await AcknowledgeRequest(request);
 				}
 
 				(target as IDisposable)?.Dispose();
 			}
+		}
+
+		private async Task AcknowledgeRequest(TRequest request)
+		{
+			_logger.LogDebug("Acknowledging request {RequestId} on origin {OriginId}", request.RequestId, request.AcknowledgeOriginId);
+			await Acknowledge.InvokeAsync(this,
+				new AcknowledgeRequest() { OriginId = request.AcknowledgeOriginId!.Value, RequestId = request.RequestId });
 		}
 
 		private bool TryGetTarget(string id, out IRelayTarget<TRequest, TResponse> target)

@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		}
 
 		/// <inheritdoc />
-		public ITenantHandler<TRequest> Create(Guid tenantId)
-			=> ActivatorUtilities.CreateInstance<TenantHandler<TRequest, TResponse>>(_serviceProvider, tenantId);
+		public ITenantHandler<TRequest> Create(Guid tenantId, string connectionId)
+			=> ActivatorUtilities.CreateInstance<TenantHandler<TRequest, TResponse>>(_serviceProvider, tenantId, connectionId);
 	}
 }

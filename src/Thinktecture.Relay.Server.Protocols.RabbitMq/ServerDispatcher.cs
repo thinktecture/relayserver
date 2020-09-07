@@ -40,19 +40,17 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <inheritdoc />
 		public async Task DispatchResponseAsync(TResponse response)
 		{
-			_logger.LogTrace("Dispatching response {@Response} to other server");
+			_logger.LogTrace("Dispatching response {@Response}", response);
 			await _model.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}", response);
-
-			_logger.LogDebug("Response for request {RequestId} was dispatched to server {OriginId}", response.RequestId, response.RequestOriginId);
+			_logger.LogDebug("Dispatched response for request {RequestId} to origin {OriginId}", response.RequestId, response.RequestOriginId);
 		}
 
 		/// <inheritdoc />
 		public async Task DispatchAcknowledgeAsync(IAcknowledgeRequest request)
 		{
-			_logger.LogTrace("Dispatching acknowledge {@AcknowledgeRequest} to other server");
+			_logger.LogTrace("Dispatching acknowledge {@AcknowledgeRequest}", request);
 			await _model.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix}{request.OriginId}", request);
-
-			_logger.LogDebug("Acknowledge request {AcknowledgeId} was dispatched to server {OriginId}", request.AcknowledgeId, request.OriginId);
+			_logger.LogDebug("Dispatched acknowledge for request {RequestId} to origin {OriginId}", request.RequestId, request.OriginId);
 		}
 
 		/// <inheritdoc />

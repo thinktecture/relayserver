@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
@@ -15,9 +16,10 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly RelayServerContext _relayServerContext;
+		private readonly Guid _originId;
 		private readonly ILogger<TenantHandler<TRequest, TResponse>> _logger;
-		private readonly IServerHandler<TResponse> _serverHandler;
+		private readonly string _connectionId;
+		private readonly AcknowledgeCoordinator<TRequest, TResponse> _acknowledgeCoordinator;
 		private readonly IModel _model;
 		private readonly AsyncEventingBasicConsumer _consumer;
 
@@ -29,45 +31,50 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
 		/// <param name="tenantId">The unique id of the tenant.</param>
-		/// <param name="serverHandler">An <see cref="IServerHandler{TResponse}"/>.</param>
+		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		public TenantHandler(ILogger<TenantHandler<TRequest, TResponse>> logger, Guid tenantId, IServerHandler<TResponse> serverHandler,
-			ModelFactory modelFactory, RelayServerContext relayServerContext)
+		/// <param name="acknowledgeCoordinator">The <see cref="AcknowledgeCoordinator{TRequest,TResponse}"/>.</param>
+		public TenantHandler(ILogger<TenantHandler<TRequest, TResponse>> logger, Guid tenantId, string connectionId,
+			ModelFactory modelFactory, RelayServerContext relayServerContext,
+			AcknowledgeCoordinator<TRequest, TResponse> acknowledgeCoordinator)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
+			_connectionId = connectionId;
+			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
 
 			if (modelFactory == null)
 			{
 				throw new ArgumentNullException(nameof(modelFactory));
 			}
 
+			if (relayServerContext == null)
+			{
+				throw new ArgumentNullException(nameof(relayServerContext));
+			}
+
+			_originId = relayServerContext.OriginId;
+
 			_model = modelFactory.Create();
-
-			serverHandler.AcknowledgeReceived += OnAcknowledgeReceived;
-
 			_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
 			_consumer.Received += OnRequestReceived;
-
-			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
 		}
 
 		/// <inheritdoc />
 		public void Dispose()
 		{
-			_serverHandler.AcknowledgeReceived -= OnAcknowledgeReceived;
 			_consumer.Received -= OnRequestReceived;
 
 			_model.CancelConsumerTags(_consumer.ConsumerTags);
 			_model.Dispose();
 		}
 
-		private Task OnAcknowledgeReceived(object sender, IAcknowledgeRequest request)
+		/// <inheritdoc />
+		public Task AcknowledgeAsync(string acknowledgeId)
 		{
-			if (ulong.TryParse(request.AcknowledgeId, out var deliveryTag))
+			if (ulong.TryParse(acknowledgeId, out var deliveryTag))
 			{
-				_logger.LogDebug("Acknowledging message {AcknowledgeId}", request.AcknowledgeId);
+				_logger.LogDebug("Acknowledging {AcknowledgeId}", acknowledgeId);
 				_model.BasicAck(deliveryTag, false);
 			}
 
@@ -77,12 +84,13 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private async Task OnRequestReceived(object sender, BasicDeliverEventArgs @event)
 		{
 			var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span);
-			_logger.LogTrace("Received request {@Request} from queue", request);
+			_logger.LogTrace("Received request {@Request} from queue {QueueName} by consumer {ConsumerTag}", request, @event.RoutingKey,
+				@event.ConsumerTag);
 
 			if (request.AcknowledgeMode != AcknowledgeMode.Disabled)
 			{
-				request.AcknowledgeOriginId = _relayServerContext.OriginId;
-				request.AcknowledgeId = @event.DeliveryTag.ToString();
+				request.AcknowledgeOriginId = _originId;
+				_acknowledgeCoordinator.RegisterRequest(request.RequestId, _connectionId, @event.DeliveryTag.ToString());
 			}
 			else
 			{

@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		where TResponse : ITargetResponse
 	{
 		/// <summary>
-		/// Event fired when a <see cref="IClientRequest"/> should be acknowledged.
+		/// Event fired when a request should be acknowledged.
 		/// </summary>
 		event AsyncEventHandler<IAcknowledgeRequest> Acknowledge;
 
