@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Contains the RabbitMQ server transport implementation for the RelayServer.</Description>
     <Summary></Summary>
   </PropertyGroup>
@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.7" />
     <PackageReference Include="RabbitMQ.Client" Version="6.1.0" />
   </ItemGroup>
