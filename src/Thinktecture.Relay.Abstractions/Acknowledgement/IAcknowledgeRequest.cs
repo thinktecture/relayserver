@@ -1,5 +1,7 @@
 using System;
 
+// TODO factorize me
+
 namespace Thinktecture.Relay.Acknowledgement
 {
 	/// <summary>

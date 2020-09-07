@@ -32,9 +32,9 @@ namespace Thinktecture.Relay.Connector.Options
 					options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
 					break;
 				}
-				catch (Exception ex)
+				catch
 				{
-					Console.WriteLine($"Could not get discovery document {ex.Message} from {uri}");
+					Console.WriteLine($"Could not get discovery document from {uri}");
 					Task.Delay(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
 				}
 			}

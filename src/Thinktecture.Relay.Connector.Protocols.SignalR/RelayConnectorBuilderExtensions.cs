@@ -20,16 +20,16 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="builder">An instance of the <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
 		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/> instance.</returns>
 		public static IRelayConnectorBuilder<TRequest, TResponse> AddSignalRConnectorTransport<TRequest, TResponse>(
-				this IRelayConnectorBuilder<TRequest, TResponse> builder
-			)
+			this IRelayConnectorBuilder<TRequest, TResponse> builder
+		)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.Services.AddTransient<SignalRConnectionFactory>();
+			builder.Services.AddSingleton<SignalRConnectionFactory>();
 			builder.Services.AddSingleton<ServerConnection<TRequest, TResponse>>();
 
-			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>>(provider => provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
-			builder.Services.TryAddSingleton<IConnectorConnection>(provider => provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
+			builder.Services.TryAddSingleton<IConnectorConnection>(provider =>
+				provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
 
 			return builder;
 		}

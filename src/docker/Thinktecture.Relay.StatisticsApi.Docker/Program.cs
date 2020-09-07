@@ -22,7 +22,8 @@ namespace Thinktecture.Relay.StatisticsApi.Docker
 			}
 			catch (Exception ex)
 			{
-				Log.Fatal(ex, "A fatal error cause service crash.");
+				Console.WriteLine("A fatal error cause service crash: {0}", ex.Message);
+				Log.Fatal(ex, "A fatal error cause service crash");
 				return 1;
 			}
 			finally
