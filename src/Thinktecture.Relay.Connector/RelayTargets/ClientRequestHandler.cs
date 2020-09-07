@@ -70,8 +70,8 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_httpClient = httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
-			_requestEndpoint = new Uri(options.Value.DiscoveryDocument.RequestEndpoint);
-			_responseEndpoint = new Uri(options.Value.DiscoveryDocument.ResponseEndpoint);
+			_requestEndpoint = new Uri($"{options.Value.DiscoveryDocument.RequestEndpoint}/");
+			_responseEndpoint = new Uri($"{options.Value.DiscoveryDocument.ResponseEndpoint}/");
 
 			foreach (var target in targets)
 			{
@@ -95,7 +95,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			{
 				var response = await target.HandleAsync(request, cancellationToken);
 
-				if (response.BodySize > binarySizeThreshold)
+				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
 				{
 					using var content = new CountingStreamContent(response.BodyContent);
 					await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
