@@ -201,7 +201,7 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error while checking file creation, read and write permission on configured body store path.");
+				_logger.LogError(ex, "Error while checking file creation, read and write permission on configured body store path");
 				return false;
 			}
 		}

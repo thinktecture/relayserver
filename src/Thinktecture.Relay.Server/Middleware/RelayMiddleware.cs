@@ -104,7 +104,7 @@ namespace Thinktecture.Relay.Server.Middleware
 				var tenant = await _tenantRepository.LoadTenantByNameAsync(tenantName);
 				if (tenant == null)
 				{
-					_logger?.LogWarning("Unknown tenant in request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
+					_logger.LogWarning("Unknown tenant in request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
 
 					await next.Invoke(context);
 					return;
@@ -114,7 +114,7 @@ namespace Thinktecture.Relay.Server.Middleware
 				await context.Request.Body.DrainAsync(context.RequestAborted);
 
 				var request = await _requestFactory.CreateAsync(tenant.Id, context.Request);
-				_logger?.LogTrace("Parsed request into {@ClientRequest}", request);
+				_logger.LogTrace("Parsed request into {@ClientRequest}", request);
 
 				// TODO call IClientRequestInterceptor
 
@@ -134,7 +134,7 @@ namespace Thinktecture.Relay.Server.Middleware
 				var response = await _responseCoordinator.GetResponseAsync(request.RequestId, context.RequestAborted);
 				// var response = await new FakeResponseGenerator().GenerateAsync(request); // TODO remove this when connector is available
 
-				_logger?.LogTrace("Received response {@TargetResponse}", response);
+				_logger.LogTrace("Received response {@TargetResponse}", response);
 
 				// TODO call ITargetResponseInterceptor
 
@@ -143,7 +143,7 @@ namespace Thinktecture.Relay.Server.Middleware
 				return;
 			}
 
-			_logger?.LogWarning("Invalid request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
+			_logger.LogWarning("Invalid request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
 
 			await next.Invoke(context);
 		}
@@ -156,12 +156,12 @@ namespace Thinktecture.Relay.Server.Middleware
 
 			if (request.BodySize > maximumBodySize)
 			{
-				_logger?.LogTrace("Storing too large body {BodySize}", request.BodySize);
+				_logger.LogTrace("Storing too large body {BodySize}", request.BodySize);
 				request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, context.RequestAborted);
 			}
 			else
 			{
-				_logger?.LogTrace("Inlining small body {BodySize}", request.BodySize);
+				_logger.LogTrace("Inlining small body {BodySize}", request.BodySize);
 				request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(context.RequestAborted);
 				context.Response.RegisterForDisposeAsync(request.BodyContent);
 			}
