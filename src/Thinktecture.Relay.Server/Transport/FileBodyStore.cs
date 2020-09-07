@@ -31,7 +31,11 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			try
 			{
-				return await StoreBodyAsync(BuildRequestFilePath(requestId), bodyStream, cancellationToken);
+				_logger.LogTrace("{FileOperation} {FileBodyType} body for request {RequestId}", "Writing", "request", requestId);
+				var size = await StoreBodyAsync(BuildRequestFilePath(requestId), bodyStream, cancellationToken);
+
+				_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes", "request", requestId, size);
+				return size;
 			}
 			catch (Exception ex)
 			{
@@ -46,7 +50,11 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			try
 			{
-				return await StoreBodyAsync(BuildResponseFilePath(requestId), bodyStream, cancellationToken);
+				_logger.LogTrace("{FileOperation} {FileBodyType} body for request {RequestId}", "Writing", "response", requestId);
+				var size = await StoreBodyAsync(BuildResponseFilePath(requestId), bodyStream, cancellationToken);
+
+				_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes", "response", requestId, size);
+				return size;
 			}
 			catch (Exception ex)
 			{
@@ -61,6 +69,7 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			try
 			{
+				_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Reading", "request", requestId);
 				return Task.FromResult(File.OpenRead(BuildRequestFilePath(requestId)) as Stream);
 			}
 			catch (Exception ex)
@@ -76,6 +85,7 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			try
 			{
+				_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Reading", "response", requestId);
 				return Task.FromResult(File.OpenRead(BuildResponseFilePath(requestId)) as Stream);
 			}
 			catch (Exception ex)
@@ -91,6 +101,7 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			try
 			{
+				_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Deleting", "request", requestId);
 				File.Delete(BuildRequestFilePath(requestId));
 				return Task.CompletedTask;
 			}
@@ -107,6 +118,7 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			try
 			{
+				_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Deleting", "response", requestId);
 				File.Delete(BuildResponseFilePath(requestId));
 				return Task.CompletedTask;
 			}
@@ -132,6 +144,7 @@ namespace Thinktecture.Relay.Server.Transport
 			CancellationToken cancellationToken = default)
 		{
 			bodyStream.TryRewind();
+
 			await using var fs = File.OpenWrite(fileName);
 			await bodyStream.CopyToAsync(fs, cancellationToken);
 
