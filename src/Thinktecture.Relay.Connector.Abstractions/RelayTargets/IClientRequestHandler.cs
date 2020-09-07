@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets
@@ -13,6 +14,11 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
+		/// <summary>
+		/// Event fired when a <see cref="IClientRequest"/> should be acknowledged.
+		/// </summary>
+		event AsyncEventHandler<IAcknowledgeRequest> Acknowledge;
+
 		/// <summary>
 		/// Called when a request was received.
 		/// </summary>
