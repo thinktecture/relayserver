@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Transport;
 
@@ -15,6 +16,7 @@ namespace Thinktecture.Relay.Server.Transport
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
+		private readonly ILogger<TenantConnectorAdapterRegistry<TRequest, TResponse>> _logger;
 		private readonly ITenantConnectorAdapterFactory<TRequest> _tenantConnectorAdapterFactory;
 		private readonly ITenantHandlerFactory<TRequest, TResponse> _tenantHandlerFactory;
 
@@ -55,11 +57,14 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <summary>
 		/// Initializes a new instance of <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.
 		/// </summary>
+		/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
 		/// <param name="tenantConnectorAdapterFactory">An <see cref="ITenantConnectorAdapterFactory{TRequest}"/>.</param>
 		/// <param name="tenantHandlerFactory">An <see cref="ITenantHandlerFactory{TRequest,TResponse}"/>.</param>
-		public TenantConnectorAdapterRegistry(ITenantConnectorAdapterFactory<TRequest> tenantConnectorAdapterFactory,
+		public TenantConnectorAdapterRegistry(ILogger<TenantConnectorAdapterRegistry<TRequest, TResponse>> logger,
+			ITenantConnectorAdapterFactory<TRequest> tenantConnectorAdapterFactory,
 			ITenantHandlerFactory<TRequest, TResponse> tenantHandlerFactory)
 		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_tenantConnectorAdapterFactory
 				= tenantConnectorAdapterFactory ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterFactory));
 			_tenantHandlerFactory = tenantHandlerFactory ?? throw new ArgumentNullException(nameof(tenantHandlerFactory));
@@ -73,6 +78,8 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public Task RegisterAsync(Guid tenantId, string connectionId)
 		{
+			_logger.LogDebug("Registering connection {ConnectionId} for tenant {TenantId}", connectionId, tenantId);
+
 			var tenantHandler = _tenantHandlerFactory.Create(tenantId);
 			var tenantConnectorAdapter = _tenantConnectorAdapterFactory.Create(tenantId, connectionId);
 
@@ -93,7 +100,13 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			if (_registrations.TryRemove(connectionId, out var registration) && _tenants.TryGetValue(registration.TenantId, out var adapters))
 			{
+				_logger.LogDebug("Unregistering connection {ConnectionId} for tenant {TenantId}", connectionId, registration.TenantId);
+
 				adapters.TryRemove(connectionId, out _);
+			}
+			else
+			{
+				_logger.LogWarning($"Could not unregister {nameof(ITenantConnectorAdapter<TRequest>)} for connection {{ConnectionId}}, as registration was not found", connectionId);
 			}
 
 			registration?.Dispose();
