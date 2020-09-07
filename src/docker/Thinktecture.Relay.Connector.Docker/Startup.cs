@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Connector.Docker
 			services
 				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
 				.AddSignalRConnectorTransport()
-				.AddWebTarget("swapi", new RelayWebTargetOptions(new Uri("https://swapi.dev/")));
+				.AddWebTarget("swapi", new RelayWebTargetOptions(new Uri("http://swapi.dev/")));
 
 			services.AddHostedService<ConnectorService>();
 		}
