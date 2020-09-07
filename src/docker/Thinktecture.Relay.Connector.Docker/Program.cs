@@ -31,6 +31,7 @@ namespace Thinktecture.Relay.Connector.Docker
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
 			Host
 				.CreateDefaultBuilder(args)
+				.UseConsoleLifetime()
 				.UseSerilog((context, loggerConfiguration) =>
 				{
 					loggerConfiguration
