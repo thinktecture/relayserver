@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
@@ -31,6 +32,11 @@ namespace Thinktecture.Relay.Server.Transport
 					throw new ArgumentException($"The registered tenant dispatcher must be of type {nameof(InMemoryTenantDispatcher<TRequest>)}",
 						nameof(tenantDispatcher));
 			}
+		}
+
+		public Task AcknowledgeAsync(string acknowledgeId)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

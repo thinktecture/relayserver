@@ -14,6 +14,7 @@ namespace Thinktecture.Relay.Server.Transport
 			_tenantDispatcher = tenantDispatcher ?? throw new ArgumentNullException(nameof(tenantDispatcher));
 		}
 
-		public ITenantHandler<TRequest> Create(Guid tenantId) => new InMemoryTenantHandler<TRequest>(tenantId, _tenantDispatcher);
+		public ITenantHandler<TRequest> Create(Guid tenantId, string connectionId)
+			=> new InMemoryTenantHandler<TRequest>(tenantId, _tenantDispatcher);
 	}
 }

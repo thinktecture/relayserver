@@ -59,5 +59,19 @@ namespace Thinktecture.Relay.Server
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task RemoveResponseBodyAsync(Guid requestId, CancellationToken cancellationToken = default);
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="requestId"></param>
+		/// <returns></returns>
+		IAsyncDisposable GetRequestRemoveDisposable(Guid requestId);
+
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="requestId"></param>
+		/// <returns></returns>
+		IAsyncDisposable GetResponseRemoveDisposable(Guid requestId);
 	}
 }

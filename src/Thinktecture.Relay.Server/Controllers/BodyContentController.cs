@@ -17,12 +17,19 @@ namespace Thinktecture.Relay.Server.Controllers
 		/// </summary>
 		/// <param name="requestId">The unique id of the request.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
+		/// <param name="delete">Indicates if the element should be deleted at the end of the request.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="IActionResult"/>.</returns>
 		[HttpGet, Route("body/request/{requestId:guid}")]
-		public async Task<IActionResult> GetRequestBodyContentAsync([FromRoute] Guid requestId, [FromServices] IBodyStore bodyStore)
+		public async Task<IActionResult> GetRequestBodyContentAsync([FromRoute] Guid requestId, [FromServices] IBodyStore bodyStore, [FromQuery] bool delete = false)
 		{
 			var stream = await bodyStore.OpenRequestBodyAsync(requestId, HttpContext.RequestAborted);
 			Response.RegisterForDisposeAsync(stream);
+
+			if (delete)
+			{
+				Response.RegisterForDisposeAsync(bodyStore.GetRequestRemoveDisposable(requestId));
+			}
+
 			return new FileStreamResult(stream, MediaTypeNames.Application.Octet);
 		}
 
