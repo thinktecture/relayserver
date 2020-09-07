@@ -37,7 +37,7 @@ namespace Thinktecture.Relay.Server.Factories
 				Target = parts.Length > 1 ? parts[1] : string.Empty,
 				TenantId = tenantId,
 				HttpMethod = request.Method,
-				Url = $"/{string.Join("/", parts.Skip(2))}{request.QueryString}",
+				Url = $"{string.Join("/", parts.Skip(2))}{request.QueryString}",
 				HttpHeaders = request.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray()),
 				BodySize = request.Body.Length,
 				BodyContent = request.Body.Length == 0 ? null : request.Body,
