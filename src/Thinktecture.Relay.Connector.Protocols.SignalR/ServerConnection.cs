@@ -9,7 +9,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
-	internal class ServerConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>
+	internal class ServerConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
@@ -27,8 +27,16 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+			_clientRequestHandler.Acknowledge += OnAcknowledge;
+
 			_connection = connectionFactory.CreateConnection();
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
+		}
+
+		private async Task OnAcknowledge(object sender, IAcknowledgeRequest request)
+		{
+			request.ConnectionId = _connection.ConnectionId;
+			await Transport.AcknowledgeAsync(request);
 		}
 
 		private async Task RequestTargetAsync(TRequest request)
@@ -71,6 +79,12 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_logger.LogDebug("Disconnecting from {ConnectorEndpoint}", _connectionFactory.Endpoint);
 			await _connection.StopAsync(cancellationToken);
 			_logger.LogInformation("Disconnected from {ConnectorEndpoint}", _connectionFactory.Endpoint);
+		}
+
+		public async ValueTask DisposeAsync()
+		{
+			await _connection.DisposeAsync();
+			_clientRequestHandler.Acknowledge -= OnAcknowledge;
 		}
 	}
 }

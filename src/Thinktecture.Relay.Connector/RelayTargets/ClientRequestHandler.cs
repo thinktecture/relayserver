@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets
@@ -19,6 +20,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			= new Dictionary<string, RelayTargetRegistration<TRequest, TResponse>>(StringComparer.InvariantCultureIgnoreCase);
 
 		private readonly IServiceProvider _serviceProvider;
+		private readonly ILogger<ClientRequestHandler<TRequest, TResponse>> _logger;
 		private readonly HttpClient _httpClient;
 		private readonly Uri _requestEndpoint;
 		private readonly Uri _responseEndpoint;
@@ -56,7 +58,8 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		}
 
 		public ClientRequestHandler(IServiceProvider serviceProvider, IEnumerable<RelayTargetRegistration<TRequest, TResponse>> targets,
-			IHttpClientFactory httpClientFactory, IOptions<RelayConnectorOptions> options)
+			IHttpClientFactory httpClientFactory, IOptions<RelayConnectorOptions> options,
+			ILogger<ClientRequestHandler<TRequest, TResponse>> logger)
 		{
 			if (httpClientFactory == null)
 			{
@@ -69,6 +72,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			}
 
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_httpClient = httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
 			_requestEndpoint = new Uri($"{options.Value.DiscoveryDocument.RequestEndpoint}/");
 			_responseEndpoint = new Uri($"{options.Value.DiscoveryDocument.ResponseEndpoint}/");
@@ -79,20 +83,32 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			}
 		}
 
+		public event AsyncEventHandler<IAcknowledgeRequest> Acknowledge;
+
 		public async Task<TResponse> HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
 		{
+			if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
+			{
+				_logger.LogDebug("Acknowledging on {OriginId} with {AcknowledgeId}", request.AcknowledgeOriginId, request.AcknowledgeId);
+				await Acknowledge.InvokeAsync(this,
+					new AcknowledgeRequest() { AcknowledgeId = request.AcknowledgeId, OriginId = request.AcknowledgeOriginId!.Value });
+			}
+
 			if (!TryGetTarget(request.Target, out var target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
 			{
+				_logger.LogError("Could not find any target for {RequestId} named {Target}", request.RequestId, request.Target);
 				return default;
 			}
 
 			if (request.BodySize > 0 && request.BodyContent == null)
 			{
+				_logger.LogDebug("Requesting outsourced body for {RequestId} with {BodySize} bytes", request.RequestId, request.BodySize);
 				request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint, request.RequestId.ToString("N")));
 			}
 
 			try
 			{
+				_logger.LogInformation("Requesting {Target} for {RequestId}", request.Target, request.RequestId);
 				var response = await target.HandleAsync(request, cancellationToken);
 
 				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
@@ -115,6 +131,13 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			}
 			finally
 			{
+				if (request.AcknowledgeMode == AcknowledgeMode.ConnectorFinished)
+				{
+					_logger.LogDebug("Acknowledging on {OriginId} with {AcknowledgeId}", request.AcknowledgeOriginId, request.AcknowledgeId);
+					await Acknowledge.InvokeAsync(this,
+						new AcknowledgeRequest() { AcknowledgeId = request.AcknowledgeId, OriginId = request.AcknowledgeOriginId!.Value });
+				}
+
 				(target as IDisposable)?.Dispose();
 			}
 		}
