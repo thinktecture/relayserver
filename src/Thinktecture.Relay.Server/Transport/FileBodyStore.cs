@@ -130,6 +130,12 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 		}
 
+		/// <inheritdoc />
+		public IAsyncDisposable GetRequestRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveRequestBodyAsync(requestId));
+
+		/// <inheritdoc />
+		public IAsyncDisposable GetResponseRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveResponseBodyAsync(requestId));
+
 		private string BuildRequestFilePath(Guid id)
 			=> BuildFilePath("req_", id);
 

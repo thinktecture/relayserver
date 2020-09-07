@@ -10,13 +10,15 @@ namespace Thinktecture.Relay.Server.Transport
 	/// <summary>
 	/// An implementation of a coordinator for responses.
 	/// </summary>
+	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public class ResponseCoordinator<TResponse> : IDisposable
+	public class ResponseCoordinator<TRequest, TResponse> : IDisposable
+		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
 		private readonly IServerHandler<TResponse> _serverHandler;
 		private readonly IBodyStore _bodyStore;
-		private readonly ILogger<ResponseCoordinator<TResponse>> _logger;
+		private readonly ILogger<ResponseCoordinator<TRequest, TResponse>> _logger;
 
 		private class WaitingState
 		{
@@ -27,13 +29,13 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly ConcurrentDictionary<Guid, WaitingState> _waitingStates = new ConcurrentDictionary<Guid, WaitingState>();
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="ResponseCoordinator{TResponse}"/>.
+		/// Initializes a new instance of <see cref="ResponseCoordinator{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="serverHandler">The <see cref="IServerHandler{TResponse}"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		public ResponseCoordinator(IServerHandler<TResponse> serverHandler, IBodyStore bodyStore,
-			ILogger<ResponseCoordinator<TResponse>> logger)
+			ILogger<ResponseCoordinator<TRequest, TResponse>> logger)
 		{
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
@@ -50,11 +52,12 @@ namespace Thinktecture.Relay.Server.Transport
 			var waitingState = _waitingStates.GetOrAdd(response.RequestId, _ => new WaitingState());
 			if (waitingState.TaskCompletionSource.TrySetResult(response))
 			{
-				_logger.LogTrace("Response for {RequestId} received {@Response}", response.RequestId, response);
+				_logger.LogDebug("Response for request {RequestId} received", response.RequestId);
+				_logger.LogTrace("Response received {@Response}", response);
 			}
 			else
 			{
-				_logger.LogDebug("Response for {RequestId} ignored", response.RequestId);
+				_logger.LogDebug("Response for request {RequestId} ignored", response.RequestId);
 				_waitingStates.TryRemove(response.RequestId, out _);
 			}
 
@@ -64,37 +67,40 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <summary>
 		/// Gets the response for the request.
 		/// </summary>
-		/// <param name="requestId">The unique id of the request.</param>
+		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="ITargetResponse"/>.</returns>
-		public async Task<TResponse> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
+		public async Task<TResponse> GetResponseAsync(IRelayContext<TRequest, TResponse> relayContext,
+			CancellationToken cancellationToken = default)
 		{
-			_logger.LogDebug("Waiting for response for {@RequestId}", requestId);
+			_logger.LogDebug("Waiting for response for request {@RequestId}", relayContext.RequestId);
 
-			var waitingState = _waitingStates.GetOrAdd(requestId, _ => new WaitingState());
+			var waitingState = _waitingStates.GetOrAdd(relayContext.RequestId, _ => new WaitingState());
 			try
 			{
 				cancellationToken.Register(() => waitingState.TaskCompletionSource.TrySetCanceled());
 
 				var response = await waitingState.TaskCompletionSource.Task;
 
-				_logger.LogTrace("Response {@Response} received", response);
+				_logger.LogTrace("Response received {@Response}", response);
 
 				if (response.BodySize > 0 && response.BodyContent == null)
 				{
-					_logger.LogInformation("Response with outsourced body for {@RequestId} with {BodySize} bytes", requestId, response.BodySize);
-					response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
+					_logger.LogInformation("Response with outsourced body for {RequestId} with {BodySize} bytes", relayContext.RequestId,
+						response.BodySize);
+					response.BodyContent = await _bodyStore.OpenResponseBodyAsync(relayContext.RequestId, cancellationToken);
+					relayContext.ResponseDisposable = _bodyStore.GetResponseRemoveDisposable(relayContext.RequestId);
 				}
 				else
 				{
-					_logger.LogInformation("Response with inlined body for {@RequestId} received {@Response}", requestId, response);
+					_logger.LogTrace("Response with inlined body for {RequestId} received {@Response}", relayContext.RequestId, response);
 				}
 
 				return response;
 			}
 			finally
 			{
-				_waitingStates.TryRemove(requestId, out _);
+				_waitingStates.TryRemove(relayContext.RequestId, out _);
 			}
 		}
 	}

@@ -1,3 +1,4 @@
+using System;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
@@ -11,6 +12,11 @@ namespace Thinktecture.Relay.Server.Transport
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
+		/// <summary>
+		/// The unique id of the request.
+		/// </summary>
+		Guid RequestId { get; }
+
 		/// <summary>
 		/// The client request.
 		/// </summary>
@@ -33,5 +39,10 @@ namespace Thinktecture.Relay.Server.Transport
 		/// to a connector for further processing by a target (ignoring the results).
 		/// </summary>
 		bool ForceConnectorDelivery { get; set; }
+
+		/// <summary>
+		/// An <see cref="IAsyncDisposable"/> which will be disposed when an optional store response should be deleted.
+		/// </summary>
+		IAsyncDisposable ResponseDisposable { get; set; }
 	}
 }
