@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
@@ -14,7 +13,7 @@ namespace Thinktecture.Relay.Server.Factories
 	public class RelayClientRequestFactory<TRequest> : IRelayClientRequestFactory<TRequest>
 		where TRequest : IClientRequest, new()
 	{
-		private readonly RelayServerContext _relayServerContext;
+		private readonly Guid _originId;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="RelayClientRequestFactory{TRequest}"/>.
@@ -22,7 +21,12 @@ namespace Thinktecture.Relay.Server.Factories
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		public RelayClientRequestFactory(RelayServerContext relayServerContext)
 		{
-			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
+			if (relayServerContext == null)
+			{
+				throw new ArgumentNullException(nameof(relayServerContext));
+			}
+
+			_originId = relayServerContext.OriginId;
 		}
 
 		/// <inheritdoc />
@@ -33,7 +37,7 @@ namespace Thinktecture.Relay.Server.Factories
 			return Task.FromResult(new TRequest()
 			{
 				RequestId = Guid.NewGuid(),
-				RequestOriginId = _relayServerContext.OriginId,
+				RequestOriginId = _originId,
 				Target = parts.Length > 1 ? parts[1] : string.Empty,
 				TenantId = tenantId,
 				HttpMethod = request.Method,

@@ -80,7 +80,7 @@ namespace Thinktecture.Relay.Server.Middleware
 
 			// TODO call IClientRequestInterceptor
 
-			if (context.Request.Body != _relayContext.ClientRequest.BodyContent)
+			if (_relayContext.ClientRequest.BodyContent != null && context.Request.Body != _relayContext.ClientRequest.BodyContent)
 			{
 				// an interceptor changed the body content - need to dispose it properly
 				context.Response.RegisterForDisposeAsync(_relayContext.ClientRequest.BodyContent);

@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	{
 		private readonly ILogger<ConnectorHub<TRequest, TResponse>> _logger;
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
-		private readonly AcknowledgeCoordinator<TRequest, TResponse> _acknowledgeCoordinator;
+		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
 		private readonly IServerDispatcher<TResponse> _serverDispatcher;
 
 		/// <summary>
@@ -42,10 +42,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
 		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
-		/// <param name="acknowledgeCoordinator">The <see cref="AcknowledgeCoordinator{TRequest,TResponse}"/>.</param>
+		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
 		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse>> logger, IServerDispatcher<TResponse> serverDispatcher,
-			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
-			AcknowledgeCoordinator<TRequest, TResponse> acknowledgeCoordinator)
+			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, IAcknowledgeCoordinator acknowledgeCoordinator)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
