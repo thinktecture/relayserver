@@ -8,12 +8,8 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
 {
-	/// <summary>
-	/// An implementation of a coordinator for acknowledgements.
-	/// </summary>
-	/// <typeparam name="TRequest">The type of request.</typeparam>
-	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public class AcknowledgeCoordinator<TRequest, TResponse> : IDisposable
+	/// <inheritdoc cref="IAcknowledgeCoordinator" />
+	public class AcknowledgeCoordinator<TRequest, TResponse> : IDisposable, IAcknowledgeCoordinator
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
@@ -21,6 +17,8 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly IServerHandler<TResponse> _serverHandler;
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
 		private readonly IBodyStore _bodyStore;
+		private readonly IServerDispatcher<TResponse> _serverDispatcher;
+		private readonly Guid _originId;
 
 		private class AcknowledgeState
 		{
@@ -40,14 +38,24 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <param name="serverHandler">An <see cref="IServerHandler{TResponse}"/>.</param>
 		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
+		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
+		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
 		public AcknowledgeCoordinator(ILogger<AcknowledgeCoordinator<TRequest, TResponse>> logger, IServerHandler<TResponse> serverHandler,
-			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, IBodyStore bodyStore)
+			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, IBodyStore bodyStore,
+			RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher)
 		{
+			if (relayServerContext == null)
+			{
+				throw new ArgumentNullException(nameof(relayServerContext));
+			}
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			_tenantConnectorAdapterRegistry =
 				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
+			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
+			_originId = relayServerContext.OriginId;
 
 			_serverHandler.AcknowledgeReceived += OnAcknowledgeReceived;
 		}
@@ -57,13 +65,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <inheritdoc />
 		public void Dispose() => _serverHandler.AcknowledgeReceived -= OnAcknowledgeReceived;
 
-		/// <summary>
-		/// Registers an <see cref="AcknowledgeState"/>.
-		/// </summary>
-		/// <param name="requestId">The unique id of the request.</param>
-		/// <param name="connectionId">The unique id of the connection.</param>
-		/// <param name="acknowledgeId">The id to acknowledge.</param>
-		/// <param name="outsourcedRequestBodyContent">The request body content is outsourced.</param>
+		/// <inheritdoc />
 		public void RegisterRequest(Guid requestId, string connectionId, string acknowledgeId, bool outsourcedRequestBodyContent)
 		{
 			_logger.LogTrace("Registering acknowledge state of request {RequestId} from connection {ConnectionId} for id {AcknowledgeId}",
@@ -72,14 +74,16 @@ namespace Thinktecture.Relay.Server.Transport
 				{ ConnectionId = connectionId, AcknowledgeId = acknowledgeId, OutsourcedRequestBodyContent = outsourcedRequestBodyContent };
 		}
 
-		/// <summary>
-		/// Acknowledges the request.
-		/// </summary>
-		/// <param name="request">An <see cref="IAcknowledgeRequest"/>.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		/// <inheritdoc />
 		public async Task AcknowledgeRequestAsync(IAcknowledgeRequest request, CancellationToken cancellationToken = default)
 		{
+			if (request.OriginId != _originId)
+			{
+				_logger.LogDebug("Redirecting acknowledgment for request {RequestId} to origin {OriginId}", request.RequestId, request.OriginId);
+				await _serverDispatcher.DispatchAcknowledgeAsync(request);
+				return;
+			}
+
 			if (!_requests.TryRemove(request.RequestId, out var acknowledgeState))
 			{
 				_logger.LogWarning("Unknown request {RequestId} to acknowledge received", request.RequestId);

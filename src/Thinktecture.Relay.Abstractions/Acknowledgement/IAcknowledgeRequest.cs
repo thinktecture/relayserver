@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Acknowledgement
 		Guid OriginId { get; set; }
 
 		/// <summary>
-		/// The unique id of the message.
+		/// The unique id of the request.
 		/// </summary>
 		Guid RequestId { get; set; }
 

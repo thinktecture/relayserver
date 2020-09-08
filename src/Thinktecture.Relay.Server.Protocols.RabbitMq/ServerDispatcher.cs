@@ -41,7 +41,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public async Task DispatchResponseAsync(TResponse response)
 		{
 			_logger.LogTrace("Dispatching response {@Response}", response);
-			await _model.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}", response);
+			await _model.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}", response, durable: false,
+				persistent: false);
 			_logger.LogDebug("Dispatched response for request {RequestId} to origin {OriginId}", response.RequestId, response.RequestOriginId);
 		}
 
@@ -49,8 +50,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public async Task DispatchAcknowledgeAsync(IAcknowledgeRequest request)
 		{
 			_logger.LogTrace("Dispatching acknowledge {@AcknowledgeRequest}", request);
-			await _model.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix}{request.OriginId}", request);
-			_logger.LogDebug("Dispatched acknowledge for request {RequestId} to origin {OriginId}", request.RequestId, request.OriginId);
+			await _model.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix}{request.OriginId}", request, durable: false, persistent: false);
+			_logger.LogDebug("Dispatched acknowledgement for request {RequestId} to origin {OriginId}", request.RequestId, request.OriginId);
 		}
 
 		/// <inheritdoc />

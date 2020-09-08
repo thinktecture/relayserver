@@ -54,7 +54,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.TryAddSingleton<ResponseCoordinator<TRequest, TResponse>>();
 			services.TryAddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();
 			services.TryAddSingleton<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
-			services.TryAddSingleton<AcknowledgeCoordinator<TRequest, TResponse>>();
+			services.TryAddSingleton<IAcknowledgeCoordinator, AcknowledgeCoordinator<TRequest, TResponse>>();
 
 			services.AddHealthChecks()
 				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });

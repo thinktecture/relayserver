@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private readonly Guid _originId;
 		private readonly ILogger<TenantHandler<TRequest, TResponse>> _logger;
 		private readonly string _connectionId;
-		private readonly AcknowledgeCoordinator<TRequest, TResponse> _acknowledgeCoordinator;
+		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
 		private readonly IModel _model;
 		private readonly AsyncEventingBasicConsumer _consumer;
 
@@ -34,10 +34,10 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		/// <param name="acknowledgeCoordinator">The <see cref="AcknowledgeCoordinator{TRequest,TResponse}"/>.</param>
+		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
 		public TenantHandler(ILogger<TenantHandler<TRequest, TResponse>> logger, Guid tenantId, string connectionId,
 			ModelFactory modelFactory, RelayServerContext relayServerContext,
-			AcknowledgeCoordinator<TRequest, TResponse> acknowledgeCoordinator)
+			IAcknowledgeCoordinator acknowledgeCoordinator)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_connectionId = connectionId;
