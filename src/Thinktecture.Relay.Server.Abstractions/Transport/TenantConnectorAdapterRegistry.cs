@@ -114,16 +114,21 @@ namespace Thinktecture.Relay.Server.Transport
 		}
 
 		/// <summary>
-		/// Acknowledges
+		/// Acknowledges an <see cref="IClientRequest"/>.
 		/// </summary>
 		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <param name="acknowledgeId">The id to acknowledge.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public Task AcknowledgeRequestAsync(string connectionId, string acknowledgeId)
 		{
-			return _registrations.TryGetValue(connectionId, out var tenantConnectorAdapterRegistration)
-				? tenantConnectorAdapterRegistration.TenantHandler.AcknowledgeAsync(acknowledgeId)
-				: Task.CompletedTask;
+			if (_registrations.TryGetValue(connectionId, out var tenantConnectorAdapterRegistration))
+			{
+				_logger.LogDebug("Acknowledging {AcknowledgeId} on connection {ConnectionId}", acknowledgeId, connectionId);
+				return tenantConnectorAdapterRegistration.TenantHandler.AcknowledgeAsync(acknowledgeId);
+			}
+
+			_logger.LogWarning("Unknown connection {ConnectionId} to acknowledge {AcknowledgeId} received", connectionId, acknowledgeId);
+			return Task.CompletedTask;
 		}
 	}
 }

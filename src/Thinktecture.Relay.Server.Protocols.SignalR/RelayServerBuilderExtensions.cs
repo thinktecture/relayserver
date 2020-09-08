@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		public static IRelayServerBuilder<TRequest, TResponse> AddSignalRConnectorTransport<TRequest, TResponse>(
 			this IRelayServerBuilder<TRequest, TResponse> builder)
 			where TRequest : IClientRequest
-			where TResponse : ITargetResponse
+			where TResponse : class, ITargetResponse
 		{
 			builder.Services.TryAddSingleton<ITenantConnectorAdapterFactory<TRequest>, TenantConnectorAdapterFactory<TRequest, TResponse>>();
 			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();

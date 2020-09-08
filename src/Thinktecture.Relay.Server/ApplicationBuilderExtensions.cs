@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Builder
 		/// <returns>The <see cref="IApplicationBuilder"/> instance.</returns>
 		public static IApplicationBuilder UseRelayServer<TRequest, TResponse>(this IApplicationBuilder builder)
 			where TRequest : IClientRequest, new()
-			where TResponse : ITargetResponse, new()
+			where TResponse : class, ITargetResponse, new()
 		{
 			builder.Map("/relay", app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse>>());
 			builder.Map("/health", app =>

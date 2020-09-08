@@ -7,10 +7,10 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
 {
-	/// <inheritdoc cref="IResponseCoordinator{TRequest,TResponse}" />
-	public class ResponseCoordinator<TRequest, TResponse> : IDisposable, IResponseCoordinator<TRequest, TResponse>
+	/// <inheritdoc cref="IResponseCoordinator{TResponse}" />
+	public class ResponseCoordinator<TRequest, TResponse> : IDisposable, IResponseCoordinator<TResponse>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		private readonly ILogger<ResponseCoordinator<TRequest, TResponse>> _logger;
 		private readonly IServerHandler<TResponse> _serverHandler;
@@ -25,6 +25,18 @@ namespace Thinktecture.Relay.Server.Transport
 		}
 
 		private readonly ConcurrentDictionary<Guid, WaitingState> _waitingStates = new ConcurrentDictionary<Guid, WaitingState>();
+
+		private class ResponseContext : IResponseContext<TResponse>
+		{
+			public TResponse Response { get; set; }
+			public IAsyncDisposable Disposable { get; set; }
+
+			void IResponseContext<TResponse>.Deconstruct(out TResponse response, out IAsyncDisposable disposable)
+			{
+				response = Response;
+				disposable = Disposable;
+			}
+		}
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="ResponseCoordinator{TRequest,TResponse}"/>.
@@ -52,41 +64,43 @@ namespace Thinktecture.Relay.Server.Transport
 		private Task OnResponseReceived(object sender, TResponse response) => ProcessResponseAsync(response);
 
 		/// <inheritdoc />
-		public async Task<TResponse> GetResponseAsync(IRelayContext<TRequest, TResponse> relayContext,
-			CancellationToken cancellationToken = default)
+		public async Task<IResponseContext<TResponse>> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
 		{
-			_logger.LogDebug("Waiting for response for request {RequestId}", relayContext.RequestId);
+			_logger.LogDebug("Waiting for response for request {RequestId}", requestId);
 
-			var waitingState = _waitingStates.GetOrAdd(relayContext.RequestId, _ => new WaitingState());
+			var waitingState = _waitingStates.GetOrAdd(requestId, _ => new WaitingState());
 			try
 			{
 				cancellationToken.Register(() => waitingState.TaskCompletionSource.TrySetCanceled());
 
-				var response = await waitingState.TaskCompletionSource.Task;
-
-				_logger.LogTrace("Response received {@Response}", response);
-
-				if (response.IsBodyContentOutsourced())
+				var responseContext = new ResponseContext
 				{
-					response.BodyContent = await _bodyStore.OpenResponseBodyAsync(relayContext.RequestId, cancellationToken);
-					_logger.LogDebug("Opened outsourced response body for {RequestId} with {BodySize} bytes", relayContext.RequestId,
-						response.BodySize);
-					relayContext.ResponseDisposable = _bodyStore.GetResponseBodyRemoveDisposable(relayContext.RequestId);
+					Response = await waitingState.TaskCompletionSource.Task
+				};
+
+				_logger.LogTrace("Response received {@Response}", responseContext.Response);
+
+				if (responseContext.Response.IsBodyContentOutsourced())
+				{
+					responseContext.Response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
+					_logger.LogDebug("Opened outsourced response body for {RequestId} with {BodySize} bytes", requestId,
+						responseContext.Response.BodySize);
+					responseContext.Disposable = _bodyStore.GetResponseBodyRemoveDisposable(requestId);
 				}
-				else if (response.BodySize > 0)
+				else if (responseContext.Response.BodySize > 0)
 				{
-					_logger.LogDebug("Response with inlined response body for request {RequestId} received", relayContext.RequestId);
+					_logger.LogDebug("Response with inlined response body for request {RequestId} received", requestId);
 				}
 				else
 				{
-					_logger.LogDebug("Response for request {RequestId} received", relayContext.RequestId);
+					_logger.LogDebug("Response for request {RequestId} received", requestId);
 				}
 
-				return response;
+				return responseContext;
 			}
 			finally
 			{
-				_waitingStates.TryRemove(relayContext.RequestId, out _);
+				_waitingStates.TryRemove(requestId, out _);
 			}
 		}
 

@@ -29,12 +29,12 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	[Authorize(Constants.DefaultAuthenticationPolicy)]
 	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport<TResponse>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		private readonly ILogger<ConnectorHub<TRequest, TResponse>> _logger;
 		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
-		private readonly IResponseCoordinator<TRequest, TResponse> _responseCoordinator;
+		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="ConnectorHub{TRequest,TResponse}"/>.
@@ -42,10 +42,10 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
 		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
-		/// <param name="responseCoordinator">An <see cref="IResponseCoordinator{TRequest,TResponse}"/>.</param>
+		/// <param name="responseCoordinator">An <see cref="IResponseCoordinator{TResponse}"/>.</param>
 		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
 			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
-			IResponseCoordinator<TRequest, TResponse> responseCoordinator)
+			IResponseCoordinator<TResponse> responseCoordinator)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
@@ -55,7 +55,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		public int? BinarySizeThreshold { get; } = 64 * 1024; // 64kb
+		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 64 * 1024; // 64kb
 
 		/// <inheritdoc />
 		public override async Task OnConnectedAsync()
