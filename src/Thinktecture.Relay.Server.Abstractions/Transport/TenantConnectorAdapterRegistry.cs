@@ -101,14 +101,11 @@ namespace Thinktecture.Relay.Server.Transport
 			if (_registrations.TryRemove(connectionId, out var registration) && _tenants.TryGetValue(registration.TenantId, out var adapters))
 			{
 				_logger.LogDebug("Unregistering connection {ConnectionId} for tenant {TenantId}", connectionId, registration.TenantId);
-
 				adapters.TryRemove(connectionId, out _);
 			}
 			else
 			{
-				_logger.LogWarning(
-					$"Could not unregister {nameof(ITenantConnectorAdapter<TRequest>)} for connection {{ConnectionId}}, as registration was not found",
-					connectionId);
+				_logger.LogWarning("Could not unregister connection {ConnectionId}", connectionId);
 			}
 
 			registration?.Dispose();

@@ -77,6 +77,10 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 				_logger.LogDebug("Acknowledging {AcknowledgeId}", acknowledgeId);
 				_model.BasicAck(deliveryTag, false);
 			}
+			else
+			{
+				_logger.LogWarning("Could not parse acknowledge id {AcknowledgeId}", acknowledgeId);
+			}
 
 			return Task.CompletedTask;
 		}

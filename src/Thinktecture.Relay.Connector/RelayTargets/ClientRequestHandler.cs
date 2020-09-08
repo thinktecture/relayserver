@@ -103,9 +103,11 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 			if (request.BodySize > 0 && request.BodyContent == null)
 			{
-				_logger.LogDebug("Requesting outsourced body for request {RequestId} with {BodySize} bytes", request.RequestId,
+				_logger.LogDebug("Requesting outsourced request body for request {RequestId} with {BodySize} bytes", request.RequestId,
 					request.BodySize);
 				request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint, request.RequestId.ToString("N")));
+
+				// TODO error handling when get fails
 			}
 
 			try
@@ -117,11 +119,13 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				{
 					if (response.BodySize == null)
 					{
-						_logger.LogWarning("Unknown body size triggered mandatory outsourcing for request {RequestId}", request.RequestId);
+						_logger.LogWarning("Unknown response body size triggered mandatory outsourcing for request {RequestId}",
+							request.RequestId);
 					}
 					else
 					{
-						_logger.LogTrace("Outsourcing {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
+						_logger.LogInformation(
+							"Outsourcing from response {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
 							response.BodySize, binarySizeThreshold, request.RequestId);
 					}
 
@@ -132,13 +136,14 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 					response.BodySize = content.BytesWritten;
 					response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
-					_logger.LogTrace("Outsourced {BodySize} bytes for request {RequestId}", content.BytesWritten, request.RequestId);
+					_logger.LogDebug("Outsourced from response {BodySize} bytes for request {RequestId}", content.BytesWritten,
+						request.RequestId);
 				}
 				else if (response.BodySize > 0)
 				{
 					using var _ = response.BodyContent;
 					response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
-					_logger.LogTrace("Inlined {BodySize} bytes into response for request {RequestId}", response.BodySize, request.RequestId);
+					_logger.LogDebug("Inlined from response {BodySize} bytes for request {RequestId}", response.BodySize, request.RequestId);
 				}
 
 				return response;

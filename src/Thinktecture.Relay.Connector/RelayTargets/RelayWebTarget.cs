@@ -47,6 +47,9 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			_logger.LogTrace("Requesting target {@Request}", request);
 			using var requestMessage = CreateHttpRequestMessage(request);
 			var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+			// TODO error handling when request fails
+
 			return await CreateResponseAsync(request, responseMessage, cancellationToken);
 		}
 
@@ -100,6 +103,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			response.RequestOriginId = request.RequestOriginId;
 
 			// TODO tracing into RequestStart, RequestDuration
+
 			return response;
 		}
 
