@@ -25,3 +25,14 @@ docker run `
   -p 15672:15672 `
   -d `
   rabbitmq:management
+
+docker volume create relay_persistence_seq
+docker rm -f relay_logging_seq
+docker run `
+  --name relay_logging_seq `
+  --hostname relay-logging-seq `
+  -e ACCEPT_EULA=Y `
+  -v relay_persistence_seq:/data `
+  -p 5341:80 `
+  -d `
+  datalust/seq:latest
