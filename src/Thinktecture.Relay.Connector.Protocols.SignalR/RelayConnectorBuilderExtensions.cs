@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.Services.AddSingleton<SignalRConnectionFactory>();
+			builder.Services.AddSingleton<ConnectionFactory>();
 			builder.Services.AddSingleton<ServerConnection<TRequest, TResponse>>();
 
 			builder.Services.TryAddSingleton<IConnectorConnection>(provider =>
