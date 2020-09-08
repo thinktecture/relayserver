@@ -37,7 +37,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 				return NotFound();
 			}
 
-			tenant?.ClientSecrets.Clear();
+			tenant.ClientSecrets.Clear();
 			return Ok(tenant);
 		}
 
@@ -51,7 +51,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 				return NotFound();
 			}
 
-			tenant?.ClientSecrets.Clear();
+			tenant.ClientSecrets.Clear();
 			return Ok(tenant);
 		}
 
