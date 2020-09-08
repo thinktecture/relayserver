@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		public HubConnection CreateConnection()
 		{
-			_logger.LogDebug("Creating connection to {ConnectorEndpoint}", _options.DiscoveryDocument.ConnectorEndpoint);
+			_logger.LogDebug("Creating SignalR connection to {ConnectorEndpoint}", _options.DiscoveryDocument.ConnectorEndpoint);
 			return new HubConnectionBuilder()
 				.WithUrl(new Uri(_options.DiscoveryDocument.ConnectorEndpoint),
 					connectionOptions => { connectionOptions.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync; })

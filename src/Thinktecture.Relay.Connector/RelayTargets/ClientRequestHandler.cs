@@ -93,7 +93,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			{
 				if (!TryGetTarget(request.Target, out target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
 				{
-					_logger.LogError("Could not find any target for request {RequestId} named {Target}", request.RequestId, request.Target);
+				    _logger.LogInformation("Could not find any target for request {RequestId} named {Target}", request.RequestId, request.Target);
 					return default;
 				}
 
@@ -155,6 +155,11 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				}
 
 				return response;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while processing request {@Request}", request);
+				throw;
 			}
 			finally
 			{
