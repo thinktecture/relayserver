@@ -8,7 +8,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport
 {
 	/// <inheritdoc cref="IResponseCoordinator{TResponse}" />
-	public class ResponseCoordinator<TRequest, TResponse> : IDisposable, IResponseCoordinator<TResponse>
+	public class ResponseCoordinator<TRequest, TResponse> : IResponseCoordinator<TResponse>, IDisposable
 		where TRequest : IClientRequest
 		where TResponse : class, ITargetResponse
 	{

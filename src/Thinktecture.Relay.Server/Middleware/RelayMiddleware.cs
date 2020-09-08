@@ -15,15 +15,15 @@ namespace Thinktecture.Relay.Server.Middleware
 		where TRequest : IClientRequest
 		where TResponse : class, ITargetResponse, new()
 	{
-		private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
 		private readonly ILogger<RelayMiddleware<TRequest, TResponse>> _logger;
+		private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
 		private readonly ITenantRepository _tenantRepository;
-		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
-		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 		private readonly IBodyStore _bodyStore;
+		private readonly IRequestCoordinator<TRequest> _requestCoordinator;
 		private readonly IRelayTargetResponseWriter<TResponse> _responseWriter;
-		private readonly IConnectorTransport<TResponse> _connectorTransport;
+		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 		private readonly IRelayContext<TRequest, TResponse> _relayContext;
+		private readonly int _maximumBodySize;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="RelayMiddleware{TRequest,TResponse}"/>.
@@ -31,26 +31,33 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="requestFactory">An <see cref="IRelayClientRequestFactory{TRequest}"/>.</param>
 		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
-		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
+		/// <param name="requestCoordinator">An <see cref="IRequestCoordinator{TRequest}"/>.</param>
 		/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{TResponse}"/>.</param>
 		/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{TResponse}"/>.</param>
-		/// <param name="connectorTransport">An <see cref="IConnectorTransport{TResponse}"/>.</param>
 		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
+		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
+		/// <param name="connectorTransport">An <see cref="IConnectorTransport{TResponse}"/>.</param>
 		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse>> logger, IRelayClientRequestFactory<TRequest> requestFactory,
-			ITenantRepository tenantRepository, ITenantDispatcher<TRequest> tenantDispatcher, IBodyStore bodyStore,
+			ITenantRepository tenantRepository, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
 			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
-			IConnectorTransport<TResponse> connectorTransport, IRelayContext<TRequest, TResponse> relayContext)
+			IRelayContext<TRequest, TResponse> relayContext, ITenantDispatcher<TRequest> tenantDispatcher,
+			IConnectorTransport<TResponse> connectorTransport)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
-			_tenantDispatcher = tenantDispatcher ?? throw new ArgumentNullException(nameof(tenantDispatcher));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
+			_requestCoordinator = requestCoordinator ?? throw new ArgumentNullException(nameof(requestCoordinator));
 			_responseWriter = responseWriter ?? throw new ArgumentNullException(nameof(responseWriter));
 			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
-			_connectorTransport = connectorTransport ?? throw new ArgumentNullException(nameof(connectorTransport));
 			_relayContext = relayContext ?? throw new ArgumentNullException(nameof(relayContext));
+
+			if (tenantDispatcher == null) throw new ArgumentNullException(nameof(tenantDispatcher));
+			if (connectorTransport == null) throw new ArgumentNullException(nameof(connectorTransport));
+
+			_maximumBodySize = Math.Min(tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(),
+				connectorTransport.BinarySizeThreshold.GetValueOrDefault());
 		}
 
 		/// <inheritdoc />
@@ -93,7 +100,7 @@ namespace Thinktecture.Relay.Server.Middleware
 					await TryStoreBodyContent(context, _relayContext.ClientRequest);
 				}
 
-				await _tenantDispatcher.DispatchRequestAsync(_relayContext.ClientRequest);
+				await _requestCoordinator.DeliverRequestAsync(_relayContext.ClientRequest, context.RequestAborted);
 
 				var (response, disposable) = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, context.RequestAborted);
 				_relayContext.TargetResponse = response;
@@ -113,15 +120,11 @@ namespace Thinktecture.Relay.Server.Middleware
 
 		private async Task TryStoreBodyContent(HttpContext context, TRequest request)
 		{
-			var maximumBodySize = Math.Min(
-				_tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(int.MaxValue),
-				_connectorTransport.BinarySizeThreshold.GetValueOrDefault(int.MaxValue));
-
-			if (request.BodySize > maximumBodySize)
+			if (request.BodySize > _maximumBodySize)
 			{
 				_logger.LogInformation(
 					"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
-					request.BodySize, maximumBodySize, request.RequestId);
+					request.BodySize, _maximumBodySize, request.RequestId);
 				request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, context.RequestAborted);
 				_logger.LogDebug("Outsourced from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
 			}
