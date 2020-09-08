@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Server.Connector;
@@ -129,6 +131,33 @@ namespace Thinktecture.Relay.Server.Transport
 
 			_logger.LogWarning("Unknown connection {ConnectionId} to acknowledge {AcknowledgeId} received", connectionId, acknowledgeId);
 			return Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Tries to deliver the request to a random connected <see cref="ITenantConnectorAdapter{TRequest}"/>.
+		/// </summary>
+		/// <param name="request">The client request.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the result.</returns>
+		public async Task<bool> TryDeliverRequestAsync(TRequest request, CancellationToken cancellationToken = default)
+		{
+			if (!_tenants.TryGetValue(request.TenantId, out var adapters))
+			{
+				return false;
+			}
+
+			var snapshot = adapters.Values.ToArray();
+			if (snapshot.Length == 0)
+			{
+				return false;
+			}
+
+			var tenantConnectorAdapter = snapshot[new Random().Next(adapters.Count)];
+			_logger.LogDebug("Delivering request {RequestId} to local connection {ConnectionId}", request.RequestId,
+				tenantConnectorAdapter.ConnectionId);
+			await tenantConnectorAdapter.RequestTargetAsync(request, cancellationToken);
+
+			return true;
 		}
 	}
 }
