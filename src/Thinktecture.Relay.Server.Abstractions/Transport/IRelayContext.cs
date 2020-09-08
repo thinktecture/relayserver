@@ -39,10 +39,5 @@ namespace Thinktecture.Relay.Server.Transport
 		/// to a connector for further processing by a target (ignoring the results).
 		/// </summary>
 		bool ForceConnectorDelivery { get; set; }
-
-		/// <summary>
-		/// An <see cref="IAsyncDisposable"/> which will be disposed when an optional store response should be deleted.
-		/// </summary>
-		IAsyncDisposable ResponseDisposable { get; set; }
 	}
 }

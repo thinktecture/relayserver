@@ -1,5 +1,5 @@
 using System;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Transport;
 
@@ -8,21 +8,19 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	/// <inheritdoc />
 	public class TenantConnectorAdapterFactory<TRequest, TResponse> : ITenantConnectorAdapterFactory<TRequest>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
-		private readonly IHubContext<ConnectorHub<TRequest, TResponse>, IConnector<TRequest>> _hubContext;
+		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="TenantConnectorAdapterFactory{TRequest,TResponse}"/>.
 		/// </summary>
-		/// <param name="hubContext">An <see cref="IHubContext{THub}"/>.</param>
-		public TenantConnectorAdapterFactory(IHubContext<ConnectorHub<TRequest, TResponse>, IConnector<TRequest>> hubContext)
-		{
-			_hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
-		}
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
+		public TenantConnectorAdapterFactory(IServiceProvider serviceProvider)
+			=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 		/// <inheritdoc />
 		public ITenantConnectorAdapter<TRequest> Create(Guid tenantId, string connectionId)
-			=> new TenantConnectorAdapter<TRequest, TResponse>(tenantId, connectionId, _hubContext);
+			=> ActivatorUtilities.CreateInstance<TenantConnectorAdapter<TRequest, TResponse>>(_serviceProvider, tenantId, connectionId);
 	}
 }

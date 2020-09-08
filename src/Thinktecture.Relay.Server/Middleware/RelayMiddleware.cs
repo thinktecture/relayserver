@@ -13,13 +13,13 @@ namespace Thinktecture.Relay.Server.Middleware
 	/// <inheritdoc />
 	public class RelayMiddleware<TRequest, TResponse> : IMiddleware
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse, new()
+		where TResponse : class, ITargetResponse, new()
 	{
 		private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
 		private readonly ILogger<RelayMiddleware<TRequest, TResponse>> _logger;
 		private readonly ITenantRepository _tenantRepository;
 		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
-		private readonly IResponseCoordinator<TRequest, TResponse> _responseCoordinator;
+		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 		private readonly IBodyStore _bodyStore;
 		private readonly IRelayTargetResponseWriter<TResponse> _responseWriter;
 		private readonly IConnectorTransport<TResponse> _connectorTransport;
@@ -34,12 +34,12 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{TResponse}"/>.</param>
-		/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{TRequest,TResponse}"/>.</param>
+		/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{TResponse}"/>.</param>
 		/// <param name="connectorTransport">An <see cref="IConnectorTransport{TResponse}"/>.</param>
 		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
 		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse>> logger, IRelayClientRequestFactory<TRequest> requestFactory,
 			ITenantRepository tenantRepository, ITenantDispatcher<TRequest> tenantDispatcher, IBodyStore bodyStore,
-			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TRequest, TResponse> responseCoordinator,
+			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
 			IConnectorTransport<TResponse> connectorTransport, IRelayContext<TRequest, TResponse> relayContext)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -95,11 +95,12 @@ namespace Thinktecture.Relay.Server.Middleware
 
 				await _tenantDispatcher.DispatchRequestAsync(_relayContext.ClientRequest);
 
-				_relayContext.TargetResponse = await _responseCoordinator.GetResponseAsync(_relayContext, context.RequestAborted);
+				var (response, disposable) = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, context.RequestAborted);
+				_relayContext.TargetResponse = response;
 
-				if (_relayContext.ResponseDisposable != null)
+				if (disposable != null)
 				{
-					context.Response.RegisterForDisposeAsync(_relayContext.ResponseDisposable);
+					context.Response.RegisterForDisposeAsync(disposable);
 				}
 			}
 
