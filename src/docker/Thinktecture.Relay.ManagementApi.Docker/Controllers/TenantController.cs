@@ -10,7 +10,7 @@ using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 {
-	[AllowAnonymous]
+	[AllowAnonymous] // TODO Authentication
 	[Route("api/{controller}")]
 	public class TenantController : Controller
 	{
@@ -58,9 +58,9 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		}
 
 		[HttpPost("{tenantId:guid}/secret")]
-		public async Task<IActionResult> CreateClientSecret([FromRoute] Guid tenantId)
+		public async Task<IActionResult> CreateClientSecret([FromRoute] Guid tenantId, string secret = null)
 		{
-			var secret = KeyGenerator.GetUniqueKey(8);
+			secret ??= KeyGenerator.GetUniqueKey(8);
 			var hash = secret.Sha512();
 
 			await _tenantRepository.CreateClientSecretAsync(new ClientSecret()
