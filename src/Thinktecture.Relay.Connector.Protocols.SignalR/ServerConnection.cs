@@ -14,17 +14,20 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		where TResponse : ITargetResponse
 	{
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
-		private readonly SignalRConnectionFactory _connectionFactory;
 		private readonly ILogger<ServerConnection<TRequest, TResponse>> _logger;
 		private readonly HubConnection _connection;
 
 		private IConnectorTransport<TResponse> Transport => this;
 
-		public ServerConnection(IClientRequestHandler<TRequest, TResponse> clientRequestHandler, SignalRConnectionFactory connectionFactory,
+		public ServerConnection(IClientRequestHandler<TRequest, TResponse> clientRequestHandler, ConnectionFactory connectionFactory,
 			ILogger<ServerConnection<TRequest, TResponse>> logger)
 		{
+			if (connectionFactory == null)
+			{
+				throw new ArgumentNullException(nameof(connectionFactory));
+			}
+
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
-			_connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 			_clientRequestHandler.Acknowledge += OnAcknowledge;
@@ -33,10 +36,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 		}
 
-		private async Task OnAcknowledge(object sender, IAcknowledgeRequest request)
-		{
-			await Transport.AcknowledgeAsync(request);
-		}
+		private async Task OnAcknowledge(object sender, IAcknowledgeRequest request) => await Transport.AcknowledgeAsync(request);
 
 		private async Task RequestTargetAsync(TRequest request)
 		{
@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		Task IConnectorTransport<TResponse>.AcknowledgeAsync(IAcknowledgeRequest request)
 		{
-			_logger.LogTrace("Acknowledging request {@Request}", request);
+			_logger.LogTrace("Acknowledging request {@AcknowledgeRequest}", request);
 			return _connection.InvokeAsync("Acknowledge", request.RequestId);
 		}
 
@@ -68,16 +68,16 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		async Task IConnectorConnection.ConnectAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogDebug("Connecting to {ConnectorEndpoint}", _connectionFactory.Endpoint);
+			_logger.LogDebug("Connecting");
 			await _connection.StartAsync(cancellationToken);
-			_logger.LogInformation("Connected to {ConnectorEndpoint}", _connectionFactory.Endpoint);
+			_logger.LogInformation("Connected");
 		}
 
 		async Task IConnectorConnection.DisconnectAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogDebug("Disconnecting from {ConnectorEndpoint}", _connectionFactory.Endpoint);
+			_logger.LogDebug("Disconnecting");
 			await _connection.StopAsync(cancellationToken);
-			_logger.LogInformation("Disconnected from {ConnectorEndpoint}", _connectionFactory.Endpoint);
+			_logger.LogInformation("Disconnected");
 		}
 
 		public async ValueTask DisposeAsync()
