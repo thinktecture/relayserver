@@ -62,7 +62,6 @@ namespace Thinktecture.Relay.Server.Middleware
 			if (string.IsNullOrEmpty(tenantName))
 			{
 				_logger.LogWarning("Invalid request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
-
 				await next.Invoke(context);
 				return;
 			}
@@ -71,7 +70,6 @@ namespace Thinktecture.Relay.Server.Middleware
 			if (tenant == null)
 			{
 				_logger.LogWarning("Unknown tenant in request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
-
 				await next.Invoke(context);
 				return;
 			}
@@ -79,36 +77,32 @@ namespace Thinktecture.Relay.Server.Middleware
 			context.Request.EnableBuffering();
 			await context.Request.Body.DrainAsync(context.RequestAborted);
 
-			var request = await _requestFactory.CreateAsync(tenant.Id, context.Request);
-			_logger.LogTrace("Parsed request into {@ClientRequest}", request);
-
-			_relayContext.ClientRequest = request;
+			_relayContext.ClientRequest = await _requestFactory.CreateAsync(tenant.Id, context.Request);
+			_logger.LogTrace("Parsed request into {@Request}", _relayContext.ClientRequest);
 
 			// TODO call IClientRequestInterceptor
 
-			if (context.Request.Body != request.BodyContent)
+			if (context.Request.Body != _relayContext.ClientRequest.BodyContent)
 			{
 				// an interceptor changed the body content - need to dispose it properly
-				context.Response.RegisterForDisposeAsync(request.BodyContent);
+				context.Response.RegisterForDisposeAsync(_relayContext.ClientRequest.BodyContent);
 			}
 
 			if (_relayContext.TargetResponse == null || _relayContext.ForceConnectorDelivery)
 			{
-				if (request.BodyContent != null)
+				if (_relayContext.ClientRequest.BodyContent != null)
 				{
-					await TryStoreBodyContent(context, request);
+					await TryStoreBodyContent(context, _relayContext.ClientRequest);
 				}
 
-				await _tenantDispatcher.DispatchRequestAsync(request);
+				await _tenantDispatcher.DispatchRequestAsync(_relayContext.ClientRequest);
 
-				var response = await _responseCoordinator.GetResponseAsync(_relayContext, context.RequestAborted);
+				_relayContext.TargetResponse = await _responseCoordinator.GetResponseAsync(_relayContext, context.RequestAborted);
 
 				if (_relayContext.ResponseDisposable != null)
 				{
-					// context.Response.RegisterForDisposeAsync(_relayContext.ResponseDisposable);
+					context.Response.RegisterForDisposeAsync(_relayContext.ResponseDisposable);
 				}
-
-				_relayContext.TargetResponse = response;
 			}
 
 			_logger.LogTrace("Received response {@Response}", _relayContext.TargetResponse);
@@ -116,8 +110,6 @@ namespace Thinktecture.Relay.Server.Middleware
 			// TODO call ITargetResponseInterceptor
 
 			await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, context.RequestAborted);
-
-			return;
 		}
 
 		private async Task TryStoreBodyContent(HttpContext context, TRequest request)
@@ -128,13 +120,17 @@ namespace Thinktecture.Relay.Server.Middleware
 
 			if (request.BodySize > maximumBodySize)
 			{
-				_logger.LogTrace("Storing too large body with {BodySize} bytes", request.BodySize);
+				_logger.LogInformation(
+					"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
+					request.BodySize, maximumBodySize, request.RequestId);
 				request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, context.RequestAborted);
+				_logger.LogDebug("Outsourced from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
 			}
 			else
 			{
-				_logger.LogTrace("Inlining small body with {BodySize} bytes", request.BodySize);
 				request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(context.RequestAborted);
+				_logger.LogDebug("Inlined from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
+
 				context.Response.RegisterForDisposeAsync(request.BodyContent);
 			}
 		}

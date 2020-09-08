@@ -73,7 +73,7 @@ namespace Thinktecture.Relay.Server.Transport
 		public async Task<TResponse> GetResponseAsync(IRelayContext<TRequest, TResponse> relayContext,
 			CancellationToken cancellationToken = default)
 		{
-			_logger.LogDebug("Waiting for response for request {@RequestId}", relayContext.RequestId);
+			_logger.LogDebug("Waiting for response for request {RequestId}", relayContext.RequestId);
 
 			var waitingState = _waitingStates.GetOrAdd(relayContext.RequestId, _ => new WaitingState());
 			try
@@ -86,14 +86,18 @@ namespace Thinktecture.Relay.Server.Transport
 
 				if (response.BodySize > 0 && response.BodyContent == null)
 				{
-					_logger.LogInformation("Response with outsourced body for {RequestId} with {BodySize} bytes", relayContext.RequestId,
-						response.BodySize);
 					response.BodyContent = await _bodyStore.OpenResponseBodyAsync(relayContext.RequestId, cancellationToken);
+					_logger.LogDebug("Opened outsourced response body for {RequestId} with {BodySize} bytes", relayContext.RequestId,
+						response.BodySize);
 					relayContext.ResponseDisposable = _bodyStore.GetResponseRemoveDisposable(relayContext.RequestId);
+				}
+				else if (response.BodySize > 0)
+				{
+					_logger.LogDebug("Response with inlined response body for request {RequestId} received", relayContext.RequestId);
 				}
 				else
 				{
-					_logger.LogTrace("Response with inlined body for {RequestId} received {@Response}", relayContext.RequestId, response);
+					_logger.LogDebug("Response for request {RequestId} received", relayContext.RequestId);
 				}
 
 				return response;

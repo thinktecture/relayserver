@@ -10,17 +10,15 @@ trim_trailing_whitespace = true
 end_of_line = lf
 max_line_length = 140
 
-# ReSharper properties
-resharper_csharp_indent_size=3
-
 [*.md]
 max_line_length = off
 trim_trailing_whitespace = false
 
 [*.cs]
-indent_style = tab  
+indent_style = tab
 tab_width = 3
 indent_size=tab
+resharper_csharp_indent_size=3
 
 [*.ts]
 ij_typescript_spaces_within_imports = true

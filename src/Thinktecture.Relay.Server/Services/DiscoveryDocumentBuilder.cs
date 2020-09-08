@@ -3,7 +3,6 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Thinktecture.Relay.Server.Services
@@ -13,17 +12,14 @@ namespace Thinktecture.Relay.Server.Services
 	/// </summary>
 	public class DiscoveryDocumentBuilder
 	{
-		private readonly ILogger<DiscoveryDocumentBuilder> _logger;
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="DiscoveryDocumentBuilder"/>.
 		/// </summary>
-		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
-		public DiscoveryDocumentBuilder(ILogger<DiscoveryDocumentBuilder> logger, IServiceProvider serviceProvider)
+		public DiscoveryDocumentBuilder(IServiceProvider serviceProvider)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
