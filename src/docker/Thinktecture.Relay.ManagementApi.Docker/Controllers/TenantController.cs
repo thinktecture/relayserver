@@ -31,6 +31,12 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		public async Task<ActionResult<Tenant>> GetTenantById([FromRoute] Guid id)
 		{
 			var tenant = await _tenantRepository.LoadTenantByIdAsync(id);
+
+			if (tenant == null)
+			{
+				return NotFound();
+			}
+
 			tenant?.ClientSecrets.Clear();
 			return Ok(tenant);
 		}
@@ -39,6 +45,12 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		public async Task<ActionResult<Tenant>> GetTenantByName([FromRoute] string name)
 		{
 			var tenant = await _tenantRepository.LoadTenantByNameAsync(name);
+
+			if (tenant == null)
+			{
+				return NotFound();
+			}
+
 			tenant?.ClientSecrets.Clear();
 			return Ok(tenant);
 		}
@@ -46,6 +58,11 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTenant([FromBody] Tenant tenantToCreate)
 		{
+			if (tenantToCreate == null)
+			{
+				return UnprocessableEntity();
+			}
+
 			try
 			{
 				var id = await _tenantRepository.CreateTenantAsync(tenantToCreate);
