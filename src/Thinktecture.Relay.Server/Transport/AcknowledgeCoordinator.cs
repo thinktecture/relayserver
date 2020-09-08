@@ -44,18 +44,13 @@ namespace Thinktecture.Relay.Server.Transport
 			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, IBodyStore bodyStore,
 			RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher)
 		{
-			if (relayServerContext == null)
-			{
-				throw new ArgumentNullException(nameof(relayServerContext));
-			}
-
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			_tenantConnectorAdapterRegistry =
 				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
 			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
-			_originId = relayServerContext.OriginId;
+			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
 
 			_serverHandler.AcknowledgeReceived += OnAcknowledgeReceived;
 		}
@@ -79,7 +74,8 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			if (request.OriginId != _originId)
 			{
-				_logger.LogDebug("Redirecting acknowledgment for request {RequestId} to origin {OriginId}", request.RequestId, request.OriginId);
+				_logger.LogDebug("Redirecting acknowledgment for request {RequestId} to origin {OriginId}", request.RequestId,
+					request.OriginId);
 				await _serverDispatcher.DispatchAcknowledgeAsync(request);
 				return;
 			}

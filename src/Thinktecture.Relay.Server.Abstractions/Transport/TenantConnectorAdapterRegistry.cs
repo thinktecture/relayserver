@@ -65,8 +65,8 @@ namespace Thinktecture.Relay.Server.Transport
 			ITenantHandlerFactory<TRequest, TResponse> tenantHandlerFactory)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_tenantConnectorAdapterFactory
-				= tenantConnectorAdapterFactory ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterFactory));
+			_tenantConnectorAdapterFactory =
+				tenantConnectorAdapterFactory ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterFactory));
 			_tenantHandlerFactory = tenantHandlerFactory ?? throw new ArgumentNullException(nameof(tenantHandlerFactory));
 		}
 

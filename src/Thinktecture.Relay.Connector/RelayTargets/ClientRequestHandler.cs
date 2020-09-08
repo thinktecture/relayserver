@@ -19,8 +19,8 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		private readonly Dictionary<string, RelayTargetRegistration<TRequest, TResponse>> _targets
 			= new Dictionary<string, RelayTargetRegistration<TRequest, TResponse>>(StringComparer.InvariantCultureIgnoreCase);
 
-		private readonly IServiceProvider _serviceProvider;
 		private readonly ILogger<ClientRequestHandler<TRequest, TResponse>> _logger;
+		private readonly IServiceProvider _serviceProvider;
 		private readonly HttpClient _httpClient;
 		private readonly Uri _requestEndpoint;
 		private readonly Uri _responseEndpoint;
@@ -57,23 +57,17 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			}
 		}
 
-		public ClientRequestHandler(IServiceProvider serviceProvider, IEnumerable<RelayTargetRegistration<TRequest, TResponse>> targets,
-			IHttpClientFactory httpClientFactory, IOptions<RelayConnectorOptions> options,
-			ILogger<ClientRequestHandler<TRequest, TResponse>> logger)
+		public ClientRequestHandler(ILogger<ClientRequestHandler<TRequest, TResponse>> logger, IServiceProvider serviceProvider,
+			IEnumerable<RelayTargetRegistration<TRequest, TResponse>> targets, IHttpClientFactory httpClientFactory,
+			IOptions<RelayConnectorOptions> options)
 		{
-			if (httpClientFactory == null)
-			{
-				throw new ArgumentNullException(nameof(httpClientFactory));
-			}
+			if (options == null) throw new ArgumentNullException(nameof(options));
 
-			if (options == null)
-			{
-				throw new ArgumentNullException(nameof(options));
-			}
-
-			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_httpClient = httpClientFactory.CreateClient(Constants.RelayServerHttpClientName);
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_httpClient =
+				httpClientFactory?.CreateClient(Constants.RelayServerHttpClientName) ??
+				throw new ArgumentNullException(nameof(httpClientFactory));
 			_requestEndpoint = new Uri($"{options.Value.DiscoveryDocument.RequestEndpoint}/");
 			_responseEndpoint = new Uri($"{options.Value.DiscoveryDocument.ResponseEndpoint}/");
 
@@ -93,7 +87,8 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			{
 				if (!TryGetTarget(request.Target, out target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
 				{
-					_logger.LogInformation("Could not find any target for request {RequestId} named {Target}", request.RequestId, request.Target);
+					_logger.LogInformation("Could not find any target for request {RequestId} named {Target}", request.RequestId,
+						request.Target);
 					return default;
 				}
 

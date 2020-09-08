@@ -27,14 +27,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public ServerDispatcher(ILogger<ServerDispatcher<TResponse>> logger, ModelFactory modelFactory, IOptions<RabbitMqOptions> options)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-			if (modelFactory == null)
-			{
-				throw new ArgumentNullException(nameof(modelFactory));
-			}
-
-			_model = modelFactory.Create();
-			BinarySizeThreshold = options.Value.MaximumBinarySize;
+			BinarySizeThreshold = options?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(options));
+			_model = modelFactory?.Create() ?? throw new ArgumentNullException(nameof(modelFactory));
 		}
 
 		/// <inheritdoc />

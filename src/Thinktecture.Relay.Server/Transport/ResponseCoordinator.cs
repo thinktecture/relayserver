@@ -7,18 +7,16 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
 {
-	/// <summary>
-	/// An implementation of a coordinator for responses.
-	/// </summary>
-	/// <typeparam name="TRequest">The type of request.</typeparam>
-	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public class ResponseCoordinator<TRequest, TResponse> : IDisposable
+	/// <inheritdoc cref="IResponseCoordinator{TRequest,TResponse}" />
+	public class ResponseCoordinator<TRequest, TResponse> : IDisposable, IResponseCoordinator<TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
+		private readonly ILogger<ResponseCoordinator<TRequest, TResponse>> _logger;
 		private readonly IServerHandler<TResponse> _serverHandler;
 		private readonly IBodyStore _bodyStore;
-		private readonly ILogger<ResponseCoordinator<TRequest, TResponse>> _logger;
+		private readonly IServerDispatcher<TResponse> _serverDispatcher;
+		private readonly Guid _originId;
 
 		private class WaitingState
 		{
@@ -31,15 +29,19 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <summary>
 		/// Initializes a new instance of <see cref="ResponseCoordinator{TRequest,TResponse}"/>.
 		/// </summary>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="serverHandler">The <see cref="IServerHandler{TResponse}"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
-		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		public ResponseCoordinator(IServerHandler<TResponse> serverHandler, IBodyStore bodyStore,
-			ILogger<ResponseCoordinator<TRequest, TResponse>> logger)
+		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
+		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
+		public ResponseCoordinator(ILogger<ResponseCoordinator<TRequest, TResponse>> logger, IServerHandler<TResponse> serverHandler,
+			IBodyStore bodyStore, RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher)
 		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
+			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
 
 			serverHandler.ResponseReceived += OnResponseReceived;
 		}
@@ -47,29 +49,9 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <inheritdoc />
 		public void Dispose() => _serverHandler.ResponseReceived -= OnResponseReceived;
 
-		private Task OnResponseReceived(object sender, TResponse response)
-		{
-			var waitingState = _waitingStates.GetOrAdd(response.RequestId, _ => new WaitingState());
-			if (waitingState.TaskCompletionSource.TrySetResult(response))
-			{
-				_logger.LogDebug("Response for request {RequestId} received", response.RequestId);
-				_logger.LogTrace("Response received {@Response}", response);
-			}
-			else
-			{
-				_logger.LogDebug("Response for request {RequestId} ignored", response.RequestId);
-				_waitingStates.TryRemove(response.RequestId, out _);
-			}
+		private Task OnResponseReceived(object sender, TResponse response) => ProcessResponseAsync(response);
 
-			return Task.CompletedTask;
-		}
-
-		/// <summary>
-		/// Gets the response for the request.
-		/// </summary>
-		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="ITargetResponse"/>.</returns>
+		/// <inheritdoc />
 		public async Task<TResponse> GetResponseAsync(IRelayContext<TRequest, TResponse> relayContext,
 			CancellationToken cancellationToken = default)
 		{
@@ -105,6 +87,30 @@ namespace Thinktecture.Relay.Server.Transport
 			finally
 			{
 				_waitingStates.TryRemove(relayContext.RequestId, out _);
+			}
+		}
+
+		/// <inheritdoc />
+		public async Task ProcessResponseAsync(TResponse response)
+		{
+			if (response.RequestOriginId != _originId)
+			{
+				_logger.LogDebug("Redirecting response for request {RequestId} to origin {OriginId}", response.RequestId,
+					response.RequestOriginId);
+				await _serverDispatcher.DispatchResponseAsync(response);
+				return;
+			}
+
+			var waitingState = _waitingStates.GetOrAdd(response.RequestId, _ => new WaitingState());
+			if (waitingState.TaskCompletionSource.TrySetResult(response))
+			{
+				_logger.LogDebug("Response for request {RequestId} received", response.RequestId);
+				_logger.LogTrace("Response received {@Response}", response);
+			}
+			else
+			{
+				_logger.LogDebug("Response for request {RequestId} ignored", response.RequestId);
+				_waitingStates.TryRemove(response.RequestId, out _);
 			}
 		}
 	}

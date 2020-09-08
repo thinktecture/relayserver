@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.TryAddScoped<DiscoveryDocumentBuilder>();
 			services.TryAddScoped<IRelayContext<TRequest, TResponse>, RelayContext<TRequest, TResponse>>();
 			services.TryAddSingleton<RelayServerContext>();
-			services.TryAddSingleton<ResponseCoordinator<TRequest, TResponse>>();
+			services.TryAddSingleton<IResponseCoordinator<TRequest, TResponse>, ResponseCoordinator<TRequest, TResponse>>();
 			services.TryAddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();
 			services.TryAddSingleton<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
 			services.TryAddSingleton<IAcknowledgeCoordinator, AcknowledgeCoordinator<TRequest, TResponse>>();

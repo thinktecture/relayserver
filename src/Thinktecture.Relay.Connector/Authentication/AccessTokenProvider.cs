@@ -7,14 +7,14 @@ namespace Thinktecture.Relay.Connector.Authentication
 {
 	internal class AccessTokenProvider : IAccessTokenProvider
 	{
-		private readonly IAccessTokenManagementService _accessTokenManagementService;
 		private readonly ILogger<AccessTokenProvider> _logger;
+		private readonly IAccessTokenManagementService _accessTokenManagementService;
 
-		public AccessTokenProvider(IAccessTokenManagementService accessTokenManagementService, ILogger<AccessTokenProvider> logger)
+		public AccessTokenProvider(ILogger<AccessTokenProvider> logger, IAccessTokenManagementService accessTokenManagementService)
 		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_accessTokenManagementService =
 				accessTokenManagementService ?? throw new ArgumentNullException(nameof(accessTokenManagementService));
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		public Task<string> GetAccessTokenAsync()

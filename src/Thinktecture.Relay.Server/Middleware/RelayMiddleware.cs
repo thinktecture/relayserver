@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Middleware
 		private readonly ILogger<RelayMiddleware<TRequest, TResponse>> _logger;
 		private readonly ITenantRepository _tenantRepository;
 		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
-		private readonly ResponseCoordinator<TRequest, TResponse> _responseCoordinator;
+		private readonly IResponseCoordinator<TRequest, TResponse> _responseCoordinator;
 		private readonly IBodyStore _bodyStore;
 		private readonly IRelayTargetResponseWriter<TResponse> _responseWriter;
 		private readonly IConnectorTransport<TResponse> _connectorTransport;
@@ -28,22 +28,22 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <summary>
 		/// Initializes a new instance of <see cref="RelayMiddleware{TRequest,TResponse}"/>.
 		/// </summary>
-		/// <param name="requestFactory">An <see cref="IRelayClientRequestFactory{TRequest}"/>.</param>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
+		/// <param name="requestFactory">An <see cref="IRelayClientRequestFactory{TRequest}"/>.</param>
 		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
 		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{TResponse}"/>.</param>
-		/// <param name="responseCoordinator">The <see cref="ResponseCoordinator{TRequest,TResponse}"/>.</param>
+		/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{TRequest,TResponse}"/>.</param>
 		/// <param name="connectorTransport">An <see cref="IConnectorTransport{TResponse}"/>.</param>
 		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
-		public RelayMiddleware(IRelayClientRequestFactory<TRequest> requestFactory, ILogger<RelayMiddleware<TRequest, TResponse>> logger,
+		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse>> logger, IRelayClientRequestFactory<TRequest> requestFactory,
 			ITenantRepository tenantRepository, ITenantDispatcher<TRequest> tenantDispatcher, IBodyStore bodyStore,
-			IRelayTargetResponseWriter<TResponse> responseWriter, ResponseCoordinator<TRequest, TResponse> responseCoordinator,
+			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TRequest, TResponse> responseCoordinator,
 			IConnectorTransport<TResponse> connectorTransport, IRelayContext<TRequest, TResponse> relayContext)
 		{
-			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 			_tenantDispatcher = tenantDispatcher ?? throw new ArgumentNullException(nameof(tenantDispatcher));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));

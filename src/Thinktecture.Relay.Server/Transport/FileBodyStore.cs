@@ -17,13 +17,8 @@ namespace Thinktecture.Relay.Server.Transport
 
 		public FileBodyStore(ILogger<FileBodyStore> logger, IOptions<FileBodyStoreOptions> options)
 		{
-			if (options == null)
-			{
-				throw new ArgumentNullException(nameof(options));
-			}
-
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_basePath = options.Value.StoragePath;
+			_basePath = options?.Value.StoragePath ?? throw new ArgumentNullException(nameof(options));
 		}
 
 		/// <inheritdoc />
@@ -34,7 +29,8 @@ namespace Thinktecture.Relay.Server.Transport
 				_logger.LogTrace("{FileOperation} {FileBodyType} body for request {RequestId}", "Writing", "request", requestId);
 				var size = await StoreBodyAsync(BuildRequestFilePath(requestId), bodyStream, cancellationToken);
 
-				_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes", "request", requestId, size);
+				_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes", "request", requestId,
+					size);
 				return size;
 			}
 			catch (Exception ex)
@@ -53,7 +49,8 @@ namespace Thinktecture.Relay.Server.Transport
 				_logger.LogTrace("{FileOperation} {FileBodyType} body for request {RequestId}", "Writing", "response", requestId);
 				var size = await StoreBodyAsync(BuildResponseFilePath(requestId), bodyStream, cancellationToken);
 
-				_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes", "response", requestId, size);
+				_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes", "response",
+					requestId, size);
 				return size;
 			}
 			catch (Exception ex)
@@ -134,7 +131,8 @@ namespace Thinktecture.Relay.Server.Transport
 		public IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveRequestBodyAsync(requestId));
 
 		/// <inheritdoc />
-		public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveResponseBodyAsync(requestId));
+		public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId) =>
+			new DisposeAction(() => RemoveResponseBodyAsync(requestId));
 
 		private string BuildRequestFilePath(Guid id)
 			=> BuildFilePath("req_", id);
