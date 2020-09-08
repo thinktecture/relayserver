@@ -11,7 +11,7 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 {
 	[AllowAnonymous]
-	[Route("{controller}")]
+	[Route("api/{controller}")]
 	public class TenantController : Controller
 	{
 		private readonly ITenantRepository _tenantRepository;

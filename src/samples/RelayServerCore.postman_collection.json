@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8defca57-a15c-474d-99ab-f96dcd5d01a0",
+		"_postman_id": "497dc70c-d02f-4018-a1a8-f28ccab644d9",
 		"name": "RelayServer Core",
 		"description": "Requests for RelayServer Core",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -90,7 +90,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "bcfe572e-7410-4373-abd1-87d501b00d82",
+						"id": "6f61cac3-ebcf-4d4a-aa3b-5425ea5a08b7",
 						"exec": [
 							"var jsonData = pm.response.json();",
 							"if (jsonData.length > 0) {",
@@ -127,7 +127,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "27ea8e87-949e-4f84-9624-84ae6739091a",
+						"id": "57619a6f-98a1-40a8-96f3-bd6f0962313b",
 						"exec": [
 							"var jsonData = pm.response.json();",
 							"if (jsonData) {",
@@ -141,7 +141,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "1cd003df-656e-4990-82ee-9e848e1d86cf",
+						"id": "edb16477-3bd1-4b40-acf4-612a6ee928a9",
 						"exec": [
 							"var name = pm.environment.get(\"clientName\");",
 							"if (!name) {",
@@ -183,7 +183,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "ba813189-c1f5-4bc2-ba7c-f5d4a39eb8ee",
+						"id": "6238bbde-3413-493f-8a75-b5c049e6ed35",
 						"exec": [
 							"var jsonData = pm.response.json();",
 							"if (jsonData) {",
@@ -197,7 +197,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "5d052001-97c8-4293-bf08-f816a4e0c3d4",
+						"id": "73afbe6a-b324-44f1-b20a-dcb6452f353b",
 						"exec": [
 							""
 						],
@@ -325,7 +325,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "b79f9dc9-d709-4806-ba9e-8262437ddec6",
+				"id": "d3ad90b3-5c23-4719-82aa-34f9e92f8168",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -335,7 +335,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "3237db17-3cdc-4579-81ca-ceb901baae5c",
+				"id": "6b1441ee-8140-4e76-9d17-91007e7b806c",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -345,46 +345,39 @@
 	],
 	"variable": [
 		{
-			"id": "65dedf5f-9a86-49c6-9c71-af1ab3f3b50e",
+			"id": "55f2eddb-a3ad-48aa-9f67-30119d984d9f",
 			"key": "relayserver",
-			"value": "http://localhost:5000",
-			"type": "string"
+			"value": "http://localhost:5000"
 		},
 		{
-			"id": "5f8a012b-be7c-4dac-88c7-48a4fbc5fe9b",
+			"id": "9304bceb-c861-4e42-91d3-5a0c45fc3e74",
 			"key": "identityserver",
-			"value": "http://localhost:5002",
-			"type": "string"
+			"value": "http://localhost:5002"
 		},
 		{
-			"id": "1e6175dd-9f42-48d5-8a1e-f93a66bf3ed6",
+			"id": "ed6dc09b-2cce-40e4-8b59-d9fefdaf93bb",
 			"key": "managementapi",
-			"value": "http://localhost:5004",
-			"type": "string"
+			"value": "http://localhost:5004/api"
 		},
 		{
-			"id": "e21e24ff-7491-456b-af2c-c6c1ebf7aa35",
+			"id": "e6ee4248-67ef-4e87-ac01-1a08d34acbbb",
 			"key": "statisticsapi",
-			"value": "http://localhost:5006",
-			"type": "string"
+			"value": "http://localhost:5006"
 		},
 		{
-			"id": "9605369c-e6fd-41d3-9593-9d7cfa9e3ad8",
+			"id": "8d75c357-0a58-49f6-99ae-9cc8c30f99a7",
 			"key": "clientName",
-			"value": "someTenant",
-			"type": "string"
+			"value": "someTenant"
 		},
 		{
-			"id": "c94639f5-46d2-4c39-9e39-db9721c800a0",
+			"id": "9303f3ed-f2f3-4d7f-8e43-3256bd06523f",
 			"key": "clientId",
-			"value": "",
-			"type": "string"
+			"value": ""
 		},
 		{
-			"id": "060cabef-f087-4935-8b34-5f1f97e8fda6",
+			"id": "470dfac7-fb7e-47f4-958e-5c451997f761",
 			"key": "clientSecret",
-			"value": "",
-			"type": "string"
+			"value": ""
 		}
 	],
 	"protocolProfileBehavior": {}
