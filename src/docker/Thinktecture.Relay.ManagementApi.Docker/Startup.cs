@@ -35,8 +35,8 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 
 			app.UseRouting();
 
-			app.UseAuthorization();
 			app.UseAuthentication();
+			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
 			{
