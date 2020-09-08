@@ -32,19 +32,10 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		public ServerHandler(ILogger<ServerHandler<TResponse>> logger, ModelFactory modelFactory, RelayServerContext relayServerContext)
 		{
+			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-			if (modelFactory == null)
-			{
-				throw new ArgumentNullException(nameof(modelFactory));
-			}
-
-			if (relayServerContext == null)
-			{
-				throw new ArgumentNullException(nameof(relayServerContext));
-			}
-
-			_model = modelFactory.Create();
+			_model = modelFactory?.Create() ?? throw new ArgumentNullException(nameof(modelFactory));
 
 			_responseConsumer = _model.ConsumeQueue($"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
 			_responseConsumer.Received += OnResponseReceived;

@@ -19,13 +19,8 @@ namespace Thinktecture.Relay.Connector.Options
 
 		public ConfigureAccessTokenManagementOptions(IServiceProvider serviceProvider, IOptions<RelayConnectorOptions> options)
 		{
-			if (options == null)
-			{
-				throw new ArgumentNullException(nameof(options));
-			}
-
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-			_options = options.Value;
+			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		}
 
 		public void Configure(AccessTokenManagementOptions options)

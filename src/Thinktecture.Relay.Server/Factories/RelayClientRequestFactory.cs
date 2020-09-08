@@ -20,14 +20,7 @@ namespace Thinktecture.Relay.Server.Factories
 		/// </summary>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		public RelayClientRequestFactory(RelayServerContext relayServerContext)
-		{
-			if (relayServerContext == null)
-			{
-				throw new ArgumentNullException(nameof(relayServerContext));
-			}
-
-			_originId = relayServerContext.OriginId;
-		}
+			=> _originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
 
 		/// <inheritdoc />
 		public Task<TRequest> CreateAsync(Guid tenantId, HttpRequest request, CancellationToken cancellationToken = default)

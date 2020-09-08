@@ -13,27 +13,22 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 		private readonly ILogger<ServerConnection<TRequest, TResponse>> _logger;
+		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 		private readonly HubConnection _connection;
 
 		private IConnectorTransport<TResponse> Transport => this;
 
-		public ServerConnection(IClientRequestHandler<TRequest, TResponse> clientRequestHandler, ConnectionFactory connectionFactory,
-			ILogger<ServerConnection<TRequest, TResponse>> logger)
+		public ServerConnection(ILogger<ServerConnection<TRequest, TResponse>> logger,
+			IClientRequestHandler<TRequest, TResponse> clientRequestHandler, ConnectionFactory connectionFactory)
 		{
-			if (connectionFactory == null)
-			{
-				throw new ArgumentNullException(nameof(connectionFactory));
-			}
-
-			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
+
+			_connection = connectionFactory?.CreateConnection() ?? throw new ArgumentNullException(nameof(connectionFactory));
+			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 
 			_clientRequestHandler.Acknowledge += OnAcknowledge;
-
-			_connection = connectionFactory.CreateConnection();
-			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 		}
 
 		private async Task OnAcknowledge(object sender, IAcknowledgeRequest request) => await Transport.AcknowledgeAsync(request);

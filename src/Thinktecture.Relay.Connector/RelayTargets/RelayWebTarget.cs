@@ -14,8 +14,8 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly IRelayTargetResponseFactory<TResponse> _responseFactory;
 		private readonly ILogger<RelayWebTarget<TRequest, TResponse>> _logger;
+		private readonly IRelayTargetResponseFactory<TResponse> _responseFactory;
 
 		/// <summary>
 		/// A <see cref="System.Net.Http.HttpClient"/>.
@@ -26,17 +26,19 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// <summary>
 		/// Initializes a new instance of <see cref="RelayWebTarget{TRequest,TResponse}"/>.
 		/// </summary>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="responseFactory">The <see cref="IRelayTargetResponseFactory{TResponse}"/> for creating the <typeparamref name="TResponse"/></param>
 		/// <param name="clientFactory">The <see cref="IHttpClientFactory"/> for creating the <see cref="System.Net.Http.HttpClient"/>.</param>
 		/// <param name="options">The options.</param>
-		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		public RelayWebTarget(IRelayTargetResponseFactory<TResponse> responseFactory, IHttpClientFactory clientFactory,
-			RelayWebTargetOptions options, ILogger<RelayWebTarget<TRequest, TResponse>> logger)
+		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, IRelayTargetResponseFactory<TResponse> responseFactory,
+			IHttpClientFactory clientFactory, RelayWebTargetOptions options)
 		{
-			_responseFactory = responseFactory;
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			if (options == null) throw new ArgumentNullException(nameof(options));
 
-			HttpClient = clientFactory.CreateClient();
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_responseFactory = responseFactory ?? throw new ArgumentNullException(nameof(responseFactory));
+
+			HttpClient = clientFactory?.CreateClient() ?? throw new ArgumentNullException(nameof(clientFactory));
 			HttpClient.BaseAddress = options.BaseAddress;
 			HttpClient.Timeout = options.Timeout;
 		}

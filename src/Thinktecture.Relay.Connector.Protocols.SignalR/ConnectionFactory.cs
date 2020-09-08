@@ -8,20 +8,16 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
 	internal class ConnectionFactory
 	{
-		private readonly IAccessTokenProvider _accessTokenProvider;
 		private readonly ILogger<ConnectionFactory> _logger;
+		private readonly IAccessTokenProvider _accessTokenProvider;
 		private readonly RelayConnectorOptions _options;
 
-		public ConnectionFactory(IAccessTokenProvider accessTokenProvider, IOptions<RelayConnectorOptions> options, ILogger<ConnectionFactory> logger)
+		public ConnectionFactory(ILogger<ConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
+			IOptions<RelayConnectorOptions> options)
 		{
-			if (options == null)
-			{
-				throw new ArgumentNullException(nameof(options));
-			}
-
-			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_options = options.Value;
+			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
+			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		}
 
 		public HubConnection CreateConnection()

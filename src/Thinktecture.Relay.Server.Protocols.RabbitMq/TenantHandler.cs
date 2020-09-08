@@ -16,10 +16,10 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly Guid _originId;
 		private readonly ILogger<TenantHandler<TRequest, TResponse>> _logger;
-		private readonly string _connectionId;
 		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
+		private readonly Guid _originId;
+		private readonly string _connectionId;
 		private readonly IModel _model;
 		private readonly AsyncEventingBasicConsumer _consumer;
 
@@ -30,32 +30,21 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// Initializes a new instance of <see cref="TenantHandler{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
+		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
+		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
+		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="tenantId">The unique id of the tenant.</param>
 		/// <param name="connectionId">The unique id of the connection.</param>
-		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
-		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
-		public TenantHandler(ILogger<TenantHandler<TRequest, TResponse>> logger, Guid tenantId, string connectionId,
-			ModelFactory modelFactory, RelayServerContext relayServerContext,
-			IAcknowledgeCoordinator acknowledgeCoordinator)
+		public TenantHandler(ILogger<TenantHandler<TRequest, TResponse>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
+			RelayServerContext relayServerContext, ModelFactory modelFactory, Guid tenantId, string connectionId)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_connectionId = connectionId;
 			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
+			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
+			_connectionId = connectionId;
 
-			if (modelFactory == null)
-			{
-				throw new ArgumentNullException(nameof(modelFactory));
-			}
+			_model = modelFactory?.Create() ?? throw new ArgumentNullException(nameof(modelFactory));
 
-			if (relayServerContext == null)
-			{
-				throw new ArgumentNullException(nameof(relayServerContext));
-			}
-
-			_originId = relayServerContext.OriginId;
-
-			_model = modelFactory.Create();
 			_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
 			_consumer.Received += OnRequestReceived;
 		}
