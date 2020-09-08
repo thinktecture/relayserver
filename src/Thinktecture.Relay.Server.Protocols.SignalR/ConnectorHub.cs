@@ -86,18 +86,16 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		/// <seealso cref="IConnectorTransport{TResponse}.DeliverAsync"/>
 		[HubMethodName("Deliver")]
-		// ReSharper disable once UnusedMember.Global
 		public async Task DeliverAsync(TResponse response) => await _serverDispatcher.DispatchResponseAsync(response);
 
 		/// <summary>
 		/// Hub method.
 		/// </summary>
-		/// <param name="requestId">The unique id of the request.</param>
+		/// <param name="request">An <see cref="IAcknowledgeRequest"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		/// <seealso cref="IConnectorTransport{TResponse}.AcknowledgeAsync"/>
 		[HubMethodName("Acknowledge")]
-		// ReSharper disable once UnusedMember.Global
-		public async Task AcknowledgeAsync(Guid requestId) => await _acknowledgeCoordinator.AcknowledgeRequestAsync(requestId);
+		public async Task AcknowledgeAsync(IAcknowledgeRequest request) => await _acknowledgeCoordinator.AcknowledgeRequestAsync(request);
 
 		/// <summary>
 		/// Hub method.
@@ -105,9 +103,6 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		/// <seealso cref="IConnectorTransport{TResponse}.PongAsync"/>
 		[HubMethodName("Pong")]
-		// ReSharper disable once UnusedMember.Global
 		public Task PongAsync() => throw new NotImplementedException();
-
-		Task IConnectorTransport<TResponse>.AcknowledgeAsync(IAcknowledgeRequest request) => throw new InvalidOperationException();
 	}
 }

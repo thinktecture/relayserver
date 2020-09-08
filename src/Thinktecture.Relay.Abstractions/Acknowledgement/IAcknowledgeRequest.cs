@@ -16,5 +16,10 @@ namespace Thinktecture.Relay.Acknowledgement
 		/// The unique id of the message.
 		/// </summary>
 		Guid RequestId { get; set; }
+
+		/// <summary>
+		/// The request body content should be removed.
+		/// </summary>
+		bool RemoveRequestBodyContent { get; set; }
 	}
 }

@@ -87,27 +87,35 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 		public async Task<TResponse> HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
 		{
-			if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
+			IRelayTarget<TRequest, TResponse> target;
+
+			try
 			{
-				await AcknowledgeRequest(request);
+				if (!TryGetTarget(request.Target, out target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
+				{
+					_logger.LogError("Could not find any target for request {RequestId} named {Target}", request.RequestId, request.Target);
+					return default;
+				}
+
+				_logger.LogTrace("Found target {Target} for request {RequestId} as {TargetClass}", request.Target, request.RequestId,
+					target.GetType().Name);
+
+				if (request.IsBodyContentOutsourced())
+				{
+					_logger.LogDebug("Requesting outsourced request body for request {RequestId} with {BodySize} bytes", request.RequestId,
+						request.BodySize);
+					request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint,
+						$"{request.RequestId:N}?delete={request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived}".ToLowerInvariant()));
+
+					// TODO error handling when get fails
+				}
 			}
-
-			if (!TryGetTarget(request.Target, out var target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
+			finally
 			{
-				_logger.LogError("Could not find any target for request {RequestId} named {Target}", request.RequestId, request.Target);
-				return default;
-			}
-
-			_logger.LogTrace("Found target {Target} for request {RequestId} as {TargetClass}", request.Target, request.RequestId,
-				target.GetType().Name);
-
-			if (request.BodySize > 0 && request.BodyContent == null)
-			{
-				_logger.LogDebug("Requesting outsourced request body for request {RequestId} with {BodySize} bytes", request.RequestId,
-					request.BodySize);
-				request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint, request.RequestId.ToString("N")));
-
-				// TODO error handling when get fails
+				if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
+				{
+					await AcknowledgeRequest(request, false);
+				}
 			}
 
 			try
@@ -152,18 +160,23 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			{
 				if (request.AcknowledgeMode == AcknowledgeMode.ConnectorFinished)
 				{
-					await AcknowledgeRequest(request);
+					await AcknowledgeRequest(request, true);
 				}
 
 				(target as IDisposable)?.Dispose();
 			}
 		}
 
-		private async Task AcknowledgeRequest(TRequest request)
+		private async Task AcknowledgeRequest(TRequest request, bool removeRequestBodyContent)
 		{
 			_logger.LogDebug("Acknowledging request {RequestId} on origin {OriginId}", request.RequestId, request.AcknowledgeOriginId);
 			await Acknowledge.InvokeAsync(this,
-				new AcknowledgeRequest() { OriginId = request.AcknowledgeOriginId!.Value, RequestId = request.RequestId });
+				new AcknowledgeRequest()
+				{
+					OriginId = request.AcknowledgeOriginId!.Value,
+					RequestId = request.RequestId,
+					RemoveRequestBodyContent = removeRequestBodyContent
+				});
 		}
 
 		private bool TryGetTarget(string id, out IRelayTarget<TRequest, TResponse> target)

@@ -10,5 +10,8 @@ namespace Thinktecture.Relay.Acknowledgement
 
 		/// <inheritdoc />
 		public Guid RequestId { get; set; }
+
+		/// <inheritdoc />
+		public bool RemoveRequestBodyContent { get; set; }
 	}
 }

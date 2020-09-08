@@ -84,12 +84,12 @@ namespace Thinktecture.Relay.Server.Transport
 
 				_logger.LogTrace("Response received {@Response}", response);
 
-				if (response.BodySize > 0 && response.BodyContent == null)
+				if (response.IsBodyContentOutsourced())
 				{
 					response.BodyContent = await _bodyStore.OpenResponseBodyAsync(relayContext.RequestId, cancellationToken);
 					_logger.LogDebug("Opened outsourced response body for {RequestId} with {BodySize} bytes", relayContext.RequestId,
 						response.BodySize);
-					relayContext.ResponseDisposable = _bodyStore.GetResponseRemoveDisposable(relayContext.RequestId);
+					relayContext.ResponseDisposable = _bodyStore.GetResponseBodyRemoveDisposable(relayContext.RequestId);
 				}
 				else if (response.BodySize > 0)
 				{

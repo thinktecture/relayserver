@@ -61,17 +61,17 @@ namespace Thinktecture.Relay.Server
 		Task RemoveResponseBodyAsync(Guid requestId, CancellationToken cancellationToken = default);
 
 		/// <summary>
-		///
+		/// Returns an <see cref="IAsyncDisposable"/> which removes the stored request body when disposed.
 		/// </summary>
-		/// <param name="requestId"></param>
-		/// <returns></returns>
-		IAsyncDisposable GetRequestRemoveDisposable(Guid requestId);
+		/// <param name="requestId">The id of the request.</param>
+		/// <returns>An <see cref="IAsyncDisposable"/>.</returns>
+		IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId);
 
 		/// <summary>
-		///
+		/// Returns an <see cref="IAsyncDisposable"/> which removes the stored response body when disposed.
 		/// </summary>
-		/// <param name="requestId"></param>
-		/// <returns></returns>
-		IAsyncDisposable GetResponseRemoveDisposable(Guid requestId);
+		/// <param name="requestId">The id of the request.</param>
+		/// <returns>An <see cref="IAsyncDisposable"/>.</returns>
+		IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId);
 	}
 }
