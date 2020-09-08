@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 			return Ok(tenant);
 		}
 
-		[HttpGet("{name:alpha}")]
+		[HttpGet("{name}")]
 		public async Task<ActionResult<Tenant>> GetTenantByName([FromRoute] string name)
 		{
 			var tenant = await _tenantRepository.LoadTenantByNameAsync(name);
