@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -59,12 +60,10 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <inheritdoc />
 		public override async Task OnConnectedAsync()
 		{
-			var tenantId = Guid.Parse(Context.User.FindFirst("client_id").Value);
+			var tenant = Context.User.GetTenantInfo();
+			_logger.LogDebug("Connection incoming for tenant {@Tenant}", tenant);
 
-			_logger.LogDebug("Connection incoming for tenant {TenantName} with id {TenantId}",
-				Context.User.FindFirst("client_name").Value, tenantId);
-
-			await _tenantConnectorAdapterRegistry.RegisterAsync(tenantId, Context.ConnectionId);
+			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
 			await base.OnConnectedAsync();
 		}
 
@@ -72,9 +71,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public override async Task OnDisconnectedAsync(Exception exception)
 		{
 			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
-
-			_logger.LogDebug("Connection disconnected for tenant {TenantName} with id {TenantId}",
-				Context.User.FindFirst("client_name").Value, Guid.Parse(Context.User.FindFirst("client_id").Value));
+			_logger.LogDebug("Connection disconnected for tenant {@Tenant}", Context.User.GetTenantInfo());
 
 			await base.OnDisconnectedAsync(exception);
 		}
