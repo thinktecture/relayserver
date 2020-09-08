@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Transport
 		/// <summary>
 		/// Send an acknowledge request to the server.
 		/// </summary>
-		/// <param name="request">The acknowledge request.</param>
+		/// <param name="request">An <see cref="IAcknowledgeRequest"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task AcknowledgeAsync(IAcknowledgeRequest request);
 

@@ -69,6 +69,26 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			_model.Dispose();
 		}
 
+		private async Task OnRequestReceived(object sender, BasicDeliverEventArgs @event)
+		{
+			var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span);
+			_logger.LogTrace("Received request {@Request} from queue {QueueName} by consumer {ConsumerTag}", request, @event.RoutingKey,
+				@event.ConsumerTag);
+
+			if (request.AcknowledgeMode != AcknowledgeMode.Disabled)
+			{
+				request.AcknowledgeOriginId = _originId;
+				_acknowledgeCoordinator.RegisterRequest(request.RequestId, _connectionId, @event.DeliveryTag.ToString(),
+					request.IsBodyContentOutsourced());
+			}
+			else
+			{
+				_model.BasicAck(@event.DeliveryTag, false);
+			}
+
+			await RequestReceived.InvokeAsync(sender, request);
+		}
+
 		/// <inheritdoc />
 		public Task AcknowledgeAsync(string acknowledgeId)
 		{
@@ -83,25 +103,6 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			}
 
 			return Task.CompletedTask;
-		}
-
-		private async Task OnRequestReceived(object sender, BasicDeliverEventArgs @event)
-		{
-			var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span);
-			_logger.LogTrace("Received request {@Request} from queue {QueueName} by consumer {ConsumerTag}", request, @event.RoutingKey,
-				@event.ConsumerTag);
-
-			if (request.AcknowledgeMode != AcknowledgeMode.Disabled)
-			{
-				request.AcknowledgeOriginId = _originId;
-				_acknowledgeCoordinator.RegisterRequest(request.RequestId, _connectionId, @event.DeliveryTag.ToString());
-			}
-			else
-			{
-				_model.BasicAck(@event.DeliveryTag, false);
-			}
-
-			await RequestReceived.InvokeAsync(sender, request);
 		}
 	}
 }

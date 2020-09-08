@@ -44,10 +44,10 @@ namespace Thinktecture.Relay.Server.Transport
 		}
 
 		/// <inheritdoc />
-		public IAsyncDisposable GetRequestRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveRequestBodyAsync(requestId));
+		public IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveRequestBodyAsync(requestId));
 
 		/// <inheritdoc />
-		public IAsyncDisposable GetResponseRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveResponseBodyAsync(requestId));
+		public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveResponseBodyAsync(requestId));
 
 		private async Task<long> StoreDataAsync(Guid id, Stream stream, ConcurrentDictionary<Guid, byte[]> store,
 			CancellationToken cancellationToken)

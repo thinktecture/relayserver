@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Controllers
 
 			if (delete)
 			{
-				Response.RegisterForDisposeAsync(bodyStore.GetRequestRemoveDisposable(requestId));
+				Response.RegisterForDisposeAsync(bodyStore.GetRequestBodyRemoveDisposable(requestId));
 			}
 
 			return new FileStreamResult(stream, MediaTypeNames.Application.Octet);

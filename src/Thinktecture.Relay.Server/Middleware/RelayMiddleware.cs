@@ -1,11 +1,9 @@
 using System;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
