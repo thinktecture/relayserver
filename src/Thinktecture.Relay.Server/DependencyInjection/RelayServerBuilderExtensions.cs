@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;

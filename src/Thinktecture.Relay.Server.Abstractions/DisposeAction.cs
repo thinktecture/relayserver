@@ -14,10 +14,7 @@ namespace Thinktecture.Relay.Server
 		/// Initializes a new instance of <see cref="DisposeAction"/>.
 		/// </summary>
 		/// <param name="dispose">The asynchronous action to execute when disposing.</param>
-		public DisposeAction(Func<Task> dispose)
-		{
-			_dispose = dispose ?? throw new ArgumentNullException(nameof(dispose));
-		}
+		public DisposeAction(Func<Task> dispose) => _dispose = dispose ?? throw new ArgumentNullException(nameof(dispose));
 
 		/// <inheritdoc />
 		public async ValueTask DisposeAsync() => await _dispose();
