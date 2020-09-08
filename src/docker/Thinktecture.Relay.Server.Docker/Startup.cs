@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,8 +27,10 @@ namespace Thinktecture.Relay.Server.Docker
 				.AddAuthentication(Constants.DefaultAuthenticationScheme)
 				.AddJwtBearer(Constants.DefaultAuthenticationScheme, options =>
 				{
-					options.Authority = Configuration.GetValue<string>("Authentication:Authority");
+					var authorityUri = new Uri(Configuration.GetValue<string>("Authentication:Authority"));
+					options.Authority = authorityUri.AbsoluteUri;
 					options.Audience = Constants.AuthenticationAudience;
+					options.RequireHttpsMetadata = authorityUri.Scheme == "https";
 				});
 
 			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
@@ -45,7 +48,7 @@ namespace Thinktecture.Relay.Server.Docker
 				app.UseDeveloperExceptionPage();
 			}
 
-			app.UseHttpsRedirection();
+			// app.UseHttpsRedirection();
 
 			app.UseRouting();
 
