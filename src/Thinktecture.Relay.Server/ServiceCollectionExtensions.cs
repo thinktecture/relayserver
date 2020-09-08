@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
@@ -20,26 +21,34 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// Adds the server to the <see cref="IServiceCollection"/>.
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
+		/// <param name="configure">An optional configuration action.</param>
 		/// <returns>The <see cref="IRelayServerBuilder{ClientRequest,TargetResponse}"/>.</returns>
-		public static IRelayServerBuilder<ClientRequest, TargetResponse> AddRelayServer(this IServiceCollection services)
-			=> services.AddRelayServer<ClientRequest, TargetResponse>();
+		public static IRelayServerBuilder<ClientRequest, TargetResponse> AddRelayServer(this IServiceCollection services, Action<RelayServerOptions> configure = null)
+			=> services.AddRelayServer<ClientRequest, TargetResponse>(configure);
 
 		/// <summary>
 		/// Adds the server to the <see cref="IServiceCollection"/>.
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
+		/// <param name="configure">An optional configuration action.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayServerBuilder<TRequest, TResponse> AddRelayServer<TRequest, TResponse>(this IServiceCollection services)
+		public static IRelayServerBuilder<TRequest, TResponse> AddRelayServer<TRequest, TResponse>(this IServiceCollection services,
+			Action<RelayServerOptions> configure = null)
 			where TRequest : IClientRequest, new()
 			where TResponse : class, ITargetResponse, new()
 		{
-			services.AddAuthorization(configure =>
+			if (configure != null)
 			{
-				configure.AddPolicy(Constants.DefaultAuthenticationPolicy, policyBuilder =>
+				services.Configure(configure);
+			}
+
+			services.AddAuthorization(configureAuthorization =>
+			{
+				configureAuthorization.AddPolicy(Constants.DefaultAuthenticationPolicy, configurePolicy =>
 				{
-					policyBuilder
+					configurePolicy
 						.RequireAuthenticatedUser()
 						.RequireClaim("client_id")
 						.RequireClaim("scope", Constants.DefaultAuthenticationScope);

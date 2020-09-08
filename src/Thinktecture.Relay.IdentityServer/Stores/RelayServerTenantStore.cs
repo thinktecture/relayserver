@@ -12,6 +12,7 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 	/// <summary>
 	/// Loads IdentityServer4 <see cref="Client"/> objects from the tenant store.
 	/// </summary>
+	// ReSharper disable once ClassNeverInstantiated.Global
 	public class RelayServerTenantStore : IClientStore
 	{
 		private readonly ITenantRepository _tenantRepository;
@@ -20,9 +21,7 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 		/// Initializes a new instance of <see cref="RelayServerTenantStore"/>.
 		/// </summary>
 		public RelayServerTenantStore(ITenantRepository tenantRepository)
-		{
-			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
-		}
+			=> _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 
 		/// <inheritdoc />
 		async Task<Client> IClientStore.FindClientByIdAsync(string clientId)
@@ -37,8 +36,7 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 		}
 
 		private Client ConvertToClient(Tenant tenant)
-		{
-			return new Client()
+			=> new Client()
 			{
 				ClientId = tenant.Id.ToString(),
 				ClientName = tenant.Name,
@@ -60,14 +58,11 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 				},
 				// TODO: Fill access token lifetime etc. from config
 			};
-		}
 
 		private ICollection<Secret> GetClientSecrets(Tenant tenant)
-		{
-			return tenant
+			=> tenant
 				.ClientSecrets
 				.Select(secret => new Secret(secret.Value, secret.Expiration))
 				.ToArray();
-		}
 	}
 }

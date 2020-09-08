@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
@@ -17,6 +18,7 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly IBodyStore _bodyStore;
 		private readonly IServerDispatcher<TResponse> _serverDispatcher;
 		private readonly Guid _originId;
+		private readonly bool _enableResponseShortcut;
 
 		private class WaitingState
 		{
@@ -46,14 +48,20 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
+		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
 		public ResponseCoordinator(ILogger<ResponseCoordinator<TRequest, TResponse>> logger, IServerHandler<TResponse> serverHandler,
-			IBodyStore bodyStore, RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher)
+			IBodyStore bodyStore, RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher,
+			IOptions<RelayServerOptions> options)
 		{
+			if (options == null) throw new ArgumentNullException(nameof(options));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
 			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
 			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
+
+			_enableResponseShortcut = options.Value.EnableResponseShortcut;
 
 			serverHandler.ResponseReceived += OnResponseReceived;
 		}
@@ -61,7 +69,11 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <inheritdoc />
 		public void Dispose() => _serverHandler.ResponseReceived -= OnResponseReceived;
 
-		private Task OnResponseReceived(object sender, TResponse response) => ProcessResponseAsync(response);
+		private Task OnResponseReceived(object sender, TResponse response)
+		{
+			ProcessResponse(response);
+			return Task.CompletedTask;
+		}
 
 		/// <inheritdoc />
 		public async Task<IResponseContext<TResponse>> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
@@ -107,7 +119,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <inheritdoc />
 		public async Task ProcessResponseAsync(TResponse response)
 		{
-			if (response.RequestOriginId != _originId)
+			if (!_enableResponseShortcut || response.RequestOriginId != _originId)
 			{
 				_logger.LogDebug("Redirecting response for request {RequestId} to origin {OriginId}", response.RequestId,
 					response.RequestOriginId);
@@ -115,6 +127,11 @@ namespace Thinktecture.Relay.Server.Transport
 				return;
 			}
 
+			ProcessResponse(response);
+		}
+
+		private void ProcessResponse(TResponse response)
+		{
 			var waitingState = _waitingStates.GetOrAdd(response.RequestId, _ => new WaitingState());
 			if (waitingState.TaskCompletionSource.TrySetResult(response))
 			{
