@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Thinktecture.Relay.Server.Protocols.SignalR
 {
-	internal class ConfigureSignalRJwtAccessTokenOptions : IPostConfigureOptions<JwtBearerOptions>
+	internal class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
 	{
 		public void PostConfigure(string name, JwtBearerOptions options)
 		{

@@ -10,7 +10,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="IServerHandler{TResponse}" />
-	public class ServerHandler<TResponse> : IServerHandler<TResponse>, IDisposable
+	public class ServerHandler<TResponse> : IServerHandler<TResponse>, IAsyncDisposable
 		where TResponse : ITargetResponse
 	{
 		private readonly ILogger<ServerHandler<TResponse>> _logger;
@@ -44,18 +44,6 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			_acknowledgeConsumer.Received += OnAcknowledgeReceived;
 		}
 
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			_responseConsumer.Received -= OnResponseReceived;
-			_acknowledgeConsumer.Received -= OnAcknowledgeReceived;
-
-			_model.CancelConsumerTags(_responseConsumer.ConsumerTags);
-			_model.CancelConsumerTags(_acknowledgeConsumer.ConsumerTags);
-
-			_model.Dispose();
-		}
-
 		private async Task OnResponseReceived(object sender, BasicDeliverEventArgs @event)
 		{
 			var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span);
@@ -70,6 +58,18 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			_logger.LogTrace("Received acknowledge request {@AcknowledgeRequest} from queue {QueueName} by consumer {ConsumerTag}", response,
 				@event.RoutingKey, @event.ConsumerTag);
 			await AcknowledgeReceived.InvokeAsync(sender, response);
+		}
+
+		/// <inheritdoc />
+		public async ValueTask DisposeAsync()
+		{
+			_responseConsumer.Received -= OnResponseReceived;
+			_acknowledgeConsumer.Received -= OnAcknowledgeReceived;
+
+			await _model.CancelConsumerTagsAsync(_responseConsumer.ConsumerTags);
+			await _model.CancelConsumerTagsAsync(_acknowledgeConsumer.ConsumerTags);
+
+			_model.Dispose();
 		}
 	}
 }

@@ -1,6 +1,5 @@
-using Thinktecture.Relay.Transport;
-
-namespace Thinktecture.Relay
+// ReSharper disable once CheckNamespace; (extension methods on ITargetResponse namespace)
+namespace Thinktecture.Relay.Transport
 {
 	/// <summary>
 	/// Extension methods for <see cref="ITargetResponse"/>.

@@ -6,7 +6,7 @@ using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.SignalR;
 using Thinktecture.Relay.Transport;
 
-// ReSharper disable once CheckNamespace; (extension methods on ServiceCollector namespace)
+// ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
 namespace Microsoft.Extensions.DependencyInjection
 {
 	/// <summary>
@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			builder.Services.AddSignalR();
 
-			builder.Services.AddTransient<IPostConfigureOptions<JwtBearerOptions>, ConfigureSignalRJwtAccessTokenOptions>();
+			builder.Services.AddTransient<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
 
 			return builder;
 		}

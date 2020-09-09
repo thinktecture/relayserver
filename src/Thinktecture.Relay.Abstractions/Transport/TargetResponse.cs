@@ -33,5 +33,8 @@ namespace Thinktecture.Relay.Transport
 		/// <inheritdoc />
 		[JsonConverter(typeof(InlineMemoryStreamJsonConverter))]
 		public Stream BodyContent { get; set; }
+
+		/// <inheritdoc />
+		public bool RequestFailed { get; set; }
 	}
 }

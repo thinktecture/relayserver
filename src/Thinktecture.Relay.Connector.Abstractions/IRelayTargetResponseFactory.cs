@@ -13,13 +13,13 @@ namespace Thinktecture.Relay.Connector
 		where TResponse : ITargetResponse
 	{
 		/// <summary>
-		/// Creates an instance of a class implementing <see cref="ITargetResponse"/> from <paramref name="message"/>.
+		/// Creates an instance of a class implementing <see cref="ITargetResponse"/> from <paramref name="request"/> and <paramref name="message"/>.
 		/// </summary>
-		/// <param name="message">The <see cref="HttpResponseMessage"/> from the target.</param>
+		/// <param name="request">An <see cref="IClientRequest"/>.</param>
+		/// <param name="message">The <see cref="HttpResponseMessage"/>.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the creation of an instance
 		/// implementing <see cref="ITargetResponse"/>.</returns>
-		/// <remarks>Some properties will always be set on the result after calling this method (e.g. RequestId).</remarks>
-		Task<TResponse> CreateAsync(HttpResponseMessage message, CancellationToken cancellationToken = default);
+		Task<TResponse> CreateAsync(IClientRequest request, HttpResponseMessage message, CancellationToken cancellationToken = default);
 	}
 }

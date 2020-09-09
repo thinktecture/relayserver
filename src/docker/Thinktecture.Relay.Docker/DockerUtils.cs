@@ -14,6 +14,7 @@ namespace Thinktecture.Relay.Docker
 				{
 					loggerConfiguration
 						.MinimumLevel.Information()
+						.Destructure.With<StreamDestructuringPolicy>()
 						.Enrich.FromLogContext()
 						.Enrich.WithProperty("Application", applicationName)
 						.ReadFrom.Configuration(context.Configuration)

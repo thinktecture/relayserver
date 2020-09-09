@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
@@ -30,14 +31,19 @@ namespace Thinktecture.Relay.Server.Transport
 		TResponse TargetResponse { get; set; }
 
 		/// <summary>
-		/// Indicates if at least one connector is available for processing the <see cref="ClientRequest"/>
+		/// Indicates if at least one connector is available for processing the <see cref="ClientRequest"/>.
 		/// </summary>
-		bool IsConnectorAvailable { get; }
+		bool ConnectorAvailable { get; }
 
 		/// <summary>
 		/// Indicates that the regardless of an already available <see cref="TargetResponse"/> the <see cref="ClientRequest"/> should be send
 		/// to a connector for further processing by a target (ignoring the results).
 		/// </summary>
 		bool ForceConnectorDelivery { get; set; }
+
+		/// <summary>
+		/// One or more <see cref="IAsyncDisposable"/> which needs to be disposed at the end of the request.
+		/// </summary>
+		IList<IAsyncDisposable> ResponseDisposables { get; }
 	}
 }

@@ -63,12 +63,15 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			properties.Persistent = persistent;
 			properties.ContentType = "application/json";
 
-			if (persistent)
+			lock (model)
 			{
-				model.EnsureQueue(queueName, durable, autoDelete);
-			}
+				if (persistent)
+				{
+					model.EnsureQueue(queueName, durable, autoDelete);
+				}
 
-			model.BasicPublish(Constants.ExchangeName, queueName, properties, JsonSerializer.SerializeToUtf8Bytes(payload));
+				model.BasicPublish(Constants.ExchangeName, queueName, properties, JsonSerializer.SerializeToUtf8Bytes(payload));
+			}
 
 			return Task.CompletedTask;
 		}
@@ -79,13 +82,25 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
 		/// <param name="consumerTags">The consumer tags the consumer is registered as.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public static Task CancelConsumerTags(this IModel model, IEnumerable<string> consumerTags)
+		public static Task CancelConsumerTagsAsync(this IModel model, IEnumerable<string> consumerTags)
 		{
 			foreach (var consumerTag in consumerTags)
 			{
 				model.BasicCancel(consumerTag);
 			}
 
+			return Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Convenience method to acknowledge a message.
+		/// </summary>
+		/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
+		/// <param name="deliveryTag">The delivery tag to acknowledge.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		public static Task AcknowledgeAsync(this IModel model, ulong deliveryTag)
+		{
+			lock (model) model.BasicAck(deliveryTag, false);
 			return Task.CompletedTask;
 		}
 	}

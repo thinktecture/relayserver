@@ -1,8 +1,8 @@
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Thinktecture.Relay
+// ReSharper disable once CheckNamespace; (extension methods on Stream namespace)
+namespace System.IO
 {
 	/// <summary>
 	/// Extension methods for streams.
@@ -12,7 +12,7 @@ namespace Thinktecture.Relay
 		/// <summary>
 		/// Sets the position of the stream to zero, if the stream supports seeking.
 		/// </summary>
-		/// <param name="stream">The <see cref="Stream"/> that will be rewinded.</param>
+		/// <param name="stream">The <see cref="Stream"/> that will be rewound.</param>
 		/// <returns>true, if rewinding was possible; otherwise, false</returns>
 		public static bool TryRewind(this Stream stream)
 		{

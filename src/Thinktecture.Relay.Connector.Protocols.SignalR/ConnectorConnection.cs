@@ -51,7 +51,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private Task OnReconnecting(Exception ex)
 		{
-			_logger.LogInformation(ex, "Trying to reconnect after connection was lost on connection {ConnectionId}", _connectionId);
+			_logger.LogInformation("Trying to reconnect after connection was lost on connection {ConnectionId}", _connectionId);
 			_logger.LogTrace(ex, "Reconnecting on {ConnectionId}", _connectionId);
 			return Task.CompletedTask;
 		}

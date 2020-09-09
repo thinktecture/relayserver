@@ -1,16 +1,18 @@
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Middleware
 {
-	/// <inheritdoc />
-	public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TResponse>
+	/// <inheritdoc cref="IRelayContext{TRequest,TResponse}" />
+	public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TResponse>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
 		/// <inheritdoc />
-		public Guid RequestId => ClientRequest.RequestId;
+		public Guid RequestId { get; } = Guid.NewGuid();
 
 		/// <inheritdoc />
 		public TRequest ClientRequest { get; set; }
@@ -19,12 +21,21 @@ namespace Thinktecture.Relay.Server.Middleware
 		public TResponse TargetResponse { get; set; }
 
 		/// <inheritdoc />
-		public bool IsConnectorAvailable { get; }
+		public bool ConnectorAvailable { get; }
 
 		/// <inheritdoc />
 		public bool ForceConnectorDelivery { get; set; }
 
 		/// <inheritdoc />
-		public IAsyncDisposable ResponseDisposable { get; set; }
+		public IList<IAsyncDisposable> ResponseDisposables { get; } = new List<IAsyncDisposable>();
+
+		/// <inheritdoc />
+		public async ValueTask DisposeAsync()
+		{
+			foreach (var responseDisposable in ResponseDisposables)
+			{
+				await responseDisposable.DisposeAsync();
+			}
+		}
 	}
 }
