@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -79,46 +80,59 @@ namespace Thinktecture.Relay.Server.Middleware
 				return;
 			}
 
-			context.Request.EnableBuffering();
-			await context.Request.Body.DrainAsync(context.RequestAborted);
-
-			_relayContext.ClientRequest = await _requestFactory.CreateAsync(tenant.Id, context.Request);
-			_logger.LogTrace("Parsed request into {@Request}", _relayContext.ClientRequest);
-
-			// TODO call IClientRequestInterceptor
-
-			if (_relayContext.ClientRequest.BodyContent != null && context.Request.Body != _relayContext.ClientRequest.BodyContent)
+			try
 			{
-				// an interceptor changed the body content - need to dispose it properly
-				context.Response.RegisterForDisposeAsync(_relayContext.ClientRequest.BodyContent);
-			}
+				context.Request.EnableBuffering();
+				await context.Request.Body.DrainAsync(context.RequestAborted);
 
-			if (_relayContext.TargetResponse == null || _relayContext.ForceConnectorDelivery)
-			{
-				if (_relayContext.ClientRequest.BodyContent != null)
+				_relayContext.ClientRequest = await _requestFactory.CreateAsync(tenant.Id, _relayContext.RequestId, context.Request);
+				_logger.LogTrace("Parsed request {@Request}", _relayContext.ClientRequest);
+
+				// TODO call IClientRequestInterceptor
+
+				if (_relayContext.ClientRequest.BodyContent != null && context.Request.Body != _relayContext.ClientRequest.BodyContent)
 				{
-					await TryStoreBodyContent(context, _relayContext.ClientRequest);
+					// an interceptor changed the body content - need to dispose it properly
+					_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
 				}
 
-				await _requestCoordinator.DeliverRequestAsync(_relayContext.ClientRequest, context.RequestAborted);
-
-				var (response, disposable) = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, context.RequestAborted);
-				_relayContext.TargetResponse = response;
-
-				if (disposable != null)
+				if (_relayContext.TargetResponse == null || _relayContext.ForceConnectorDelivery)
 				{
-					context.Response.RegisterForDisposeAsync(disposable);
+					if (_relayContext.ClientRequest.BodyContent != null && await TryInlineBodyContent(context, _relayContext.ClientRequest))
+					{
+						_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
+					}
+
+					await _requestCoordinator.DeliverRequestAsync(_relayContext.ClientRequest, context.RequestAborted);
+
+					var (response, disposable) = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, context.RequestAborted);
+					_relayContext.TargetResponse = response;
+
+					if (disposable != null)
+					{
+						_relayContext.ResponseDisposables.Add(disposable);
+					}
 				}
+
+				_logger.LogTrace("Received response {@Response}", _relayContext.TargetResponse);
+
+				if (_relayContext.TargetResponse.RequestFailed)
+				{
+					_logger.LogWarning("The request {RequestId} failed on the connector side with {HttpStatusCode}", _relayContext.RequestId,
+						_relayContext.TargetResponse.HttpStatusCode);
+				}
+
+				// TODO call ITargetResponseInterceptor
+
+				await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, context.RequestAborted);
 			}
-
-			_logger.LogTrace("Received response {@Response}", _relayContext.TargetResponse);
-
-			// TODO call ITargetResponseInterceptor
-
-			await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, context.RequestAborted);
+			catch (TaskCanceledException)
+			{
+				_logger.LogDebug("Client aborted request {RequestId}", _relayContext.RequestId);
+			}
 		}
 
-		private async Task TryStoreBodyContent(HttpContext context, TRequest request)
+		private async Task<bool> TryInlineBodyContent(HttpContext context, TRequest request)
 		{
 			if (request.BodySize > _maximumBodySize)
 			{
@@ -126,15 +140,14 @@ namespace Thinktecture.Relay.Server.Middleware
 					"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
 					request.BodySize, _maximumBodySize, request.RequestId);
 				request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, context.RequestAborted);
+				request.BodyContent = null;
 				_logger.LogDebug("Outsourced from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
+				return false;
 			}
-			else
-			{
-				request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(context.RequestAborted);
-				_logger.LogDebug("Inlined from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
 
-				context.Response.RegisterForDisposeAsync(request.BodyContent);
-			}
+			request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(context.RequestAborted);
+			_logger.LogDebug("Inlined from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
+			return true;
 		}
 	}
 }

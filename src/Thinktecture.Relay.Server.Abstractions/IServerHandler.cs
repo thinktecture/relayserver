@@ -1,4 +1,3 @@
-using System;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Transport;
 

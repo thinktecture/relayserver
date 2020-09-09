@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly ITenantConnectorAdapterFactory<TRequest> _tenantConnectorAdapterFactory;
 		private readonly ITenantHandlerFactory<TRequest, TResponse> _tenantHandlerFactory;
 
-		private class TenantConnectorAdapterRegistration : IDisposable
+		private class TenantConnectorAdapterRegistration : IAsyncDisposable
 		{
 			private readonly ITenantConnectorAdapter<TRequest> _tenantConnectorAdapter;
 
@@ -40,13 +40,27 @@ namespace Thinktecture.Relay.Server.Transport
 
 			private async Task OnRequestReceived(object sender, TRequest request) => await _tenantConnectorAdapter.RequestTargetAsync(request);
 
-			public void Dispose()
+			public async ValueTask DisposeAsync()
 			{
 				TenantHandler.RequestReceived -= OnRequestReceived;
+
+				// ReSharper disable once SuspiciousTypeConversion.Global
 				(TenantHandler as IDisposable)?.Dispose();
 
 				// ReSharper disable once SuspiciousTypeConversion.Global
+				if (TenantHandler is IAsyncDisposable tenantHandler)
+				{
+					await tenantHandler.DisposeAsync();
+				}
+
+				// ReSharper disable once SuspiciousTypeConversion.Global
 				(_tenantConnectorAdapter as IDisposable)?.Dispose();
+
+				// ReSharper disable once SuspiciousTypeConversion.Global
+				if (_tenantConnectorAdapter is IAsyncDisposable tenantConnectorAdapter)
+				{
+					await tenantConnectorAdapter.DisposeAsync();
+				}
 			}
 		}
 
@@ -98,7 +112,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// </summary>
 		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public Task UnregisterAsync(string connectionId)
+		public async Task UnregisterAsync(string connectionId)
 		{
 			if (_registrations.TryRemove(connectionId, out var registration) && _tenants.TryGetValue(registration.TenantId, out var adapters))
 			{
@@ -110,9 +124,10 @@ namespace Thinktecture.Relay.Server.Transport
 				_logger.LogWarning("Could not unregister connection {ConnectionId}", connectionId);
 			}
 
-			registration?.Dispose();
-
-			return Task.CompletedTask;
+			if (registration != null)
+			{
+				await registration.DisposeAsync();
+			}
 		}
 
 		/// <summary>

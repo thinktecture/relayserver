@@ -105,7 +105,7 @@ namespace Thinktecture.Relay.Server.Transport
 				}
 				else
 				{
-					_logger.LogDebug("Response for request {RequestId} received", requestId);
+					_logger.LogDebug("Response for request {RequestId} without body received", requestId);
 				}
 
 				return responseContext;

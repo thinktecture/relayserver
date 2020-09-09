@@ -52,7 +52,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// Deletes a <see cref="Tenant"/>.
 		/// </summary>
 		/// <param name="id">The id of the <see cref="Tenant"/> to delete.</param>
-		/// <returns>True, if <see cref="Tenant"/> fas found and deleted; otherwise false.</returns>
+		/// <returns>true, if <see cref="Tenant"/> was found and deleted; otherwise false.</returns>
 		Task<bool> DeleteTenantByIdAsync(Guid id);
 	}
 }

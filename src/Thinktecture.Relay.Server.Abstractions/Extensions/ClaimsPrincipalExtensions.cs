@@ -1,6 +1,6 @@
 using Thinktecture.Relay.Server.Security;
 
-// ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace; (extension methods on ClaimsPrincipal namespace)
 namespace System.Security.Claims
 {
 	/// <summary>

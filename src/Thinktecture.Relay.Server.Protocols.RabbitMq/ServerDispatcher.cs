@@ -13,7 +13,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		where TResponse : ITargetResponse
 	{
 		private readonly ILogger<ServerDispatcher<TResponse>> _logger;
-		private readonly IModel _model;
+		private readonly IModel _responseModel;
+		private readonly IModel _acknowledgeModel;
 
 		/// <inheritdoc />
 		public int? BinarySizeThreshold { get; }
@@ -26,16 +27,20 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
 		public ServerDispatcher(ILogger<ServerDispatcher<TResponse>> logger, ModelFactory modelFactory, IOptions<RabbitMqOptions> options)
 		{
+			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_responseModel = modelFactory.Create();
+			_acknowledgeModel = modelFactory.Create();
+
 			BinarySizeThreshold = options?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(options));
-			_model = modelFactory?.Create() ?? throw new ArgumentNullException(nameof(modelFactory));
 		}
 
 		/// <inheritdoc />
 		public async Task DispatchResponseAsync(TResponse response)
 		{
 			_logger.LogTrace("Dispatching response {@Response}", response);
-			await _model.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}", response, durable: false,
+			await _responseModel.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}", response, durable: false,
 				persistent: false);
 			_logger.LogDebug("Dispatched response for request {RequestId} to origin {OriginId}", response.RequestId, response.RequestOriginId);
 		}
@@ -44,11 +49,16 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public async Task DispatchAcknowledgeAsync(IAcknowledgeRequest request)
 		{
 			_logger.LogTrace("Dispatching acknowledge {@AcknowledgeRequest}", request);
-			await _model.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix}{request.OriginId}", request, durable: false, persistent: false);
+			await _acknowledgeModel.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix}{request.OriginId}", request, durable: false,
+				persistent: false);
 			_logger.LogDebug("Dispatched acknowledgement for request {RequestId} to origin {OriginId}", request.RequestId, request.OriginId);
 		}
 
 		/// <inheritdoc />
-		public void Dispose() => _model.Dispose();
+		public void Dispose()
+		{
+			_responseModel.Dispose();
+			_acknowledgeModel.Dispose();
+		}
 	}
 }

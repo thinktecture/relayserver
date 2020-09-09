@@ -4,7 +4,7 @@ using Thinktecture.Relay.Connector.DependencyInjection;
 using Thinktecture.Relay.Connector.RelayTargets;
 using Thinktecture.Relay.Transport;
 
-// ReSharper disable once CheckNamespace; (same IServiceCollection namespace)
+// ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
 namespace Microsoft.Extensions.DependencyInjection
 {
 	/// <summary>
@@ -12,32 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
 	/// </summary>
 	public static class RelayConnectorBuilderExtensions
 	{
-		/// <summary>
-		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
-		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
-		/// <param name="id">The unique id of the target.</param>
-		/// <param name="factory">The factory function to create an instance of the target.</param>
-		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddTarget(
-			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id,
-			Func<IServiceProvider, IRelayTarget<ClientRequest, TargetResponse>> factory, TimeSpan? timeout = null)
-			=> builder.AddTarget<ClientRequest, TargetResponse>(id, factory, timeout);
-
-		/// <summary>
-		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
-		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
-		/// <param name="id">The unique id of the target.</param>
-		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
-		/// <typeparam name="TTarget">The type of target.</typeparam>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddTarget<TTarget>(
-			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id, params object[] parameters)
-			where TTarget : IRelayTarget<ClientRequest, TargetResponse>
-			=> builder.AddTarget<TTarget, ClientRequest, TargetResponse>(id, default, parameters);
-
 		/// <summary>
 		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
 		/// </summary>

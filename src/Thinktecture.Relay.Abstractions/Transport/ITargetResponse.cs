@@ -37,11 +37,15 @@ namespace Thinktecture.Relay.Transport
 		/// <summary>
 		/// The <see cref="HttpStatusCode"/> received from the target.
 		/// </summary>
+		/// <remarks>This contains the result status when the request internally failed.</remarks>
+		/// <seealso cref="RequestFailed"/>
 		HttpStatusCode HttpStatusCode { get; set; }
 
 		/// <summary>
 		/// The HTTP headers provided.
 		/// </summary>
+		/// <remarks>This is null in case of a failure response.</remarks>
+		/// <seealso cref="RequestFailed"/>
 		IDictionary<string, string[]> HttpHeaders { get; set; }
 
 		/// <summary>
@@ -56,5 +60,12 @@ namespace Thinktecture.Relay.Transport
 		/// <seealso cref="BodySize"/>
 		/// <remarks>Depending on the transport the stream content may be serialized inline.</remarks>
 		Stream BodyContent { get; set; }
+
+		/// <summary>
+		/// Indicates if the request failed or didn't reach a target.
+		/// </summary>
+		/// <remarks>When this is true, the <see cref="HttpStatusCode"/> indicates the internal result status.</remarks>
+		/// <seealso cref="HttpStatusCode"/>
+		bool RequestFailed { get; set; }
 	}
 }

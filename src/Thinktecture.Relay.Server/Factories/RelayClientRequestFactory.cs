@@ -23,13 +23,13 @@ namespace Thinktecture.Relay.Server.Factories
 			=> _originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
 
 		/// <inheritdoc />
-		public Task<TRequest> CreateAsync(Guid tenantId, HttpRequest request, CancellationToken cancellationToken = default)
+		public Task<TRequest> CreateAsync(Guid tenantId, Guid requestId, HttpRequest request, CancellationToken cancellationToken = default)
 		{
 			var parts = request.Path.Value.Split('/').Skip(1).ToArray();
 
 			return Task.FromResult(new TRequest()
 			{
-				RequestId = Guid.NewGuid(),
+				RequestId = requestId,
 				RequestOriginId = _originId,
 				Target = parts.Length > 1 ? parts[1] : string.Empty,
 				TenantId = tenantId,

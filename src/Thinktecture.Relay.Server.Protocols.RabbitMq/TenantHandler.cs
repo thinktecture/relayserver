@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="ITenantHandler{TRequest}" />
 	// ReSharper disable once ClassNeverInstantiated.Global
-	public class TenantHandler<TRequest, TResponse> : ITenantHandler<TRequest>, IDisposable
+	public class TenantHandler<TRequest, TResponse> : ITenantHandler<TRequest>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
@@ -49,15 +49,6 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			_consumer.Received += OnRequestReceived;
 		}
 
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			_consumer.Received -= OnRequestReceived;
-
-			_model.CancelConsumerTags(_consumer.ConsumerTags);
-			_model.Dispose();
-		}
-
 		private async Task OnRequestReceived(object sender, BasicDeliverEventArgs @event)
 		{
 			var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span);
@@ -72,26 +63,33 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			}
 			else
 			{
-				_model.BasicAck(@event.DeliveryTag, false);
+				await _model.AcknowledgeAsync(@event.DeliveryTag);
 			}
 
 			await RequestReceived.InvokeAsync(sender, request);
 		}
 
 		/// <inheritdoc />
-		public Task AcknowledgeAsync(string acknowledgeId)
+		public async Task AcknowledgeAsync(string acknowledgeId)
 		{
 			if (ulong.TryParse(acknowledgeId, out var deliveryTag))
 			{
 				_logger.LogDebug("Acknowledging {AcknowledgeId}", acknowledgeId);
-				_model.BasicAck(deliveryTag, false);
+				await _model.AcknowledgeAsync(deliveryTag);
 			}
 			else
 			{
 				_logger.LogWarning("Could not parse acknowledge id {AcknowledgeId}", acknowledgeId);
 			}
+		}
 
-			return Task.CompletedTask;
+		/// <inheritdoc />
+		public async ValueTask DisposeAsync()
+		{
+			_consumer.Received -= OnRequestReceived;
+
+			await _model.CancelConsumerTagsAsync(_consumer.ConsumerTags);
+			_model.Dispose();
 		}
 	}
 }

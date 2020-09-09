@@ -12,17 +12,18 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		where TResponse : ITargetResponse, new()
 	{
 		/// <inheritdoc />
-		public async Task<TResponse> CreateAsync(HttpResponseMessage message, CancellationToken cancellationToken = default)
+		public async Task<TResponse> CreateAsync(IClientRequest request, HttpResponseMessage message,
+			CancellationToken cancellationToken = default)
 		{
 			var hasBody = message.StatusCode != HttpStatusCode.NoContent;
 
-			return new TResponse()
-			{
-				HttpStatusCode = message.StatusCode,
-				HttpHeaders = message.Headers.Concat(message.Content.Headers).ToDictionary(h => h.Key, h => h.Value.ToArray()),
-				BodySize = hasBody ? message.Content.Headers.ContentLength : 0,
-				BodyContent = hasBody ? await message.Content.ReadAsStreamAsync() : null
-			};
+			var response = request.CreateResponse<TResponse>();
+			response.HttpStatusCode = message.StatusCode;
+			response.HttpHeaders = message.Headers.Concat(message.Content.Headers).ToDictionary(h => h.Key, h => h.Value.ToArray());
+			response.BodySize = hasBody ? message.Content.Headers.ContentLength : 0;
+			response.BodyContent = hasBody ? await message.Content.ReadAsStreamAsync() : null;
+
+			return response;
 		}
 	}
 }

@@ -14,7 +14,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 	/// <inheritdoc cref="IClientRequestHandler{TRequest,TResponse}" />
 	public class ClientRequestHandler<TRequest, TResponse> : IClientRequestHandler<TRequest, TResponse>, IDisposable
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : ITargetResponse, new()
 	{
 		private readonly ILogger<ClientRequestHandler<TRequest, TResponse>> _logger;
 		private readonly RelayTargetService<TRequest, TResponse> _relayTargetService;
@@ -95,7 +95,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				{
 					_logger.LogInformation("Could not find any target for request {RequestId} named {Target}", request.RequestId,
 						request.Target);
-					return default;
+					return request.CreateResponse<TResponse>(HttpStatusCode.NotFound);
 				}
 
 				_logger.LogTrace("Found target {Target} for request {RequestId}", request.Target, request.RequestId);
@@ -145,9 +145,19 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 						}
 
 						using var content = new CountingStreamContent(response.BodyContent);
-						await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
-
-						// TODO error handling when post fails
+						try
+						{
+							await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
+						}
+						catch (TaskCanceledException)
+						{
+							throw;
+						}
+						catch (Exception ex)
+						{
+							_logger.LogError(ex, "An error occured while uploading the body of request {RequestId}", request.RequestId);
+							return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+						}
 
 						response.BodySize = content.BytesWritten;
 						response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
@@ -168,10 +178,15 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 					(target as IDisposable)?.Dispose();
 				}
 			}
+			catch (TaskCanceledException)
+			{
+				_logger.LogWarning("The request {RequestId} timed out", request.RequestId);
+				return request.CreateResponse<TResponse>(HttpStatusCode.GatewayTimeout);
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occured while processing request {@Request}", request);
-				throw;
+				return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 			}
 			finally
 			{

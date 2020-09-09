@@ -16,14 +16,17 @@ namespace Thinktecture.Relay.Server.Services
 		{
 			httpResponse.StatusCode = (int)targetResponse.HttpStatusCode;
 
-			foreach (var (name, values) in targetResponse.HttpHeaders)
+			if (targetResponse.HttpHeaders != null)
 			{
-				if (name == HeaderNames.TransferEncoding)
+				foreach (var (name, values) in targetResponse.HttpHeaders)
 				{
-					continue;
-				}
+					if (name == HeaderNames.TransferEncoding)
+					{
+						continue;
+					}
 
-				httpResponse.Headers.Add(name, values);
+					httpResponse.Headers.Add(name, values);
+				}
 			}
 
 			httpResponse.ContentLength = targetResponse.BodySize;

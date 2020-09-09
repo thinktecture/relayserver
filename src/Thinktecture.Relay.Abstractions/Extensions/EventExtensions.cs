@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
+// ReSharper disable once CheckNamespace; (extension methods on global namespace)
 namespace Thinktecture.Relay
 {
 	/// <summary>

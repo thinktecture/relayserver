@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Thinktecture.Relay.Docker;
 
 namespace Thinktecture.Relay.Connector.Docker
 {
@@ -37,6 +38,7 @@ namespace Thinktecture.Relay.Connector.Docker
 				{
 					loggerConfiguration
 						.MinimumLevel.Information()
+						.Destructure.With<StreamDestructuringPolicy>()
 						.Enrich.FromLogContext()
 						.Enrich.WithProperty("Application", "Connector")
 						.ReadFrom.Configuration(context.Configuration)
