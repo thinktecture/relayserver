@@ -27,20 +27,18 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// Initializes a new instance of <see cref="RelayWebTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="responseFactory">The <see cref="IRelayTargetResponseFactory{TResponse}"/> for creating the <typeparamref name="TResponse"/></param>
-		/// <param name="clientFactory">The <see cref="IHttpClientFactory"/> for creating the <see cref="System.Net.Http.HttpClient"/>.</param>
-		/// <param name="options">The options.</param>
+		/// <param name="responseFactory">An <see cref="IRelayTargetResponseFactory{TResponse}"/>.</param>
+		/// <param name="clientFactory">An <see cref="IHttpClientFactory"/>.</param>
+		/// <param name="baseAddress">The base <see cref="Uri"/> used for the request.</param>
 		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, IRelayTargetResponseFactory<TResponse> responseFactory,
-			IHttpClientFactory clientFactory, RelayWebTargetOptions options)
+			IHttpClientFactory clientFactory, Uri baseAddress)
 		{
-			if (options == null) throw new ArgumentNullException(nameof(options));
-
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_responseFactory = responseFactory ?? throw new ArgumentNullException(nameof(responseFactory));
 
 			HttpClient = clientFactory?.CreateClient() ?? throw new ArgumentNullException(nameof(clientFactory));
-			HttpClient.BaseAddress = options.BaseAddress;
-			HttpClient.Timeout = options.Timeout;
+			HttpClient.BaseAddress = baseAddress ?? throw new ArgumentNullException(nameof(baseAddress));
+			HttpClient.Timeout = Timeout.InfiniteTimeSpan; // will be handled by a cancellation token
 		}
 
 		/// <inheritdoc />
@@ -48,6 +46,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		{
 			_logger.LogTrace("Requesting target {@Request}", request);
 			using var requestMessage = CreateHttpRequestMessage(request);
+
 			var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
 			// TODO error handling when request fails
@@ -111,5 +110,17 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 
 		/// <inheritdoc />
 		public void Dispose() => HttpClient.Dispose();
+	}
+
+	/// <inheritdoc />
+	// ReSharper disable once ClassNeverInstantiated.Global
+	public class RelayWebTarget : RelayWebTarget<ClientRequest, TargetResponse>
+	{
+		/// <inheritdoc />
+		public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger,
+			IRelayTargetResponseFactory<TargetResponse> responseFactory, IHttpClientFactory clientFactory, Uri baseAddress)
+			: base(logger, responseFactory, clientFactory, baseAddress)
+		{
+		}
 	}
 }

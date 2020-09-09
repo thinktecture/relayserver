@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Connector
+namespace Thinktecture.Relay.Connector.RelayTargets
 {
 	/// <inheritdoc />
 	public class RelayTargetResponseFactory<TResponse> : IRelayTargetResponseFactory<TResponse>

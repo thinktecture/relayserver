@@ -6,7 +6,7 @@ using Thinktecture.Relay.Connector.Authentication;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
-	internal class ConnectionFactory
+	public class ConnectionFactory
 	{
 		private readonly ILogger<ConnectionFactory> _logger;
 		private readonly IAccessTokenProvider _accessTokenProvider;
@@ -23,6 +23,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		public HubConnection CreateConnection()
 		{
 			_logger.LogDebug("Creating connection to {ConnectorEndpoint}", _options.DiscoveryDocument.ConnectorEndpoint);
+
 			return new HubConnectionBuilder()
 				.WithUrl(new Uri(_options.DiscoveryDocument.ConnectorEndpoint),
 					connectionOptions => { connectionOptions.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync; })

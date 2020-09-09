@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -12,14 +11,13 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets
 {
-	internal class ClientRequestHandler<TRequest, TResponse> : IClientRequestHandler<TRequest, TResponse>, IDisposable
+	/// <inheritdoc cref="IClientRequestHandler{TRequest,TResponse}" />
+	public class ClientRequestHandler<TRequest, TResponse> : IClientRequestHandler<TRequest, TResponse>, IDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly Dictionary<string, RelayTargetRegistration<TRequest, TResponse>> _targets
-			= new Dictionary<string, RelayTargetRegistration<TRequest, TResponse>>(StringComparer.InvariantCultureIgnoreCase);
-
 		private readonly ILogger<ClientRequestHandler<TRequest, TResponse>> _logger;
+		private readonly RelayTargetService<TRequest, TResponse> _relayTargetService;
 		private readonly IServiceProvider _serviceProvider;
 		private readonly HttpClient _httpClient;
 		private readonly Uri _requestEndpoint;
@@ -57,43 +55,50 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			}
 		}
 
-		public ClientRequestHandler(ILogger<ClientRequestHandler<TRequest, TResponse>> logger, IServiceProvider serviceProvider,
-			IEnumerable<RelayTargetRegistration<TRequest, TResponse>> targets, IHttpClientFactory httpClientFactory,
-			IOptions<RelayConnectorOptions> options)
+		/// <summary>
+		/// Initializes a new instance of <see cref="ClientRequestHandler{TRequest,TResponse}"/>.
+		/// </summary>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
+		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
+		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
+		/// <param name="relayTargetService">The <see cref="RelayTargetService{TRequest,TResponse}"/>.</param>
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
+		public ClientRequestHandler(ILogger<ClientRequestHandler<TRequest, TResponse>> logger, IHttpClientFactory httpClientFactory,
+			IOptions<RelayConnectorOptions> options, RelayTargetService<TRequest, TResponse> relayTargetService,
+			IServiceProvider serviceProvider)
 		{
 			if (options == null) throw new ArgumentNullException(nameof(options));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_relayTargetService = relayTargetService ?? throw new ArgumentNullException(nameof(relayTargetService));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
 			_httpClient =
 				httpClientFactory?.CreateClient(Constants.RelayServerHttpClientName) ??
 				throw new ArgumentNullException(nameof(httpClientFactory));
+
 			_requestEndpoint = new Uri($"{options.Value.DiscoveryDocument.RequestEndpoint}/");
 			_responseEndpoint = new Uri($"{options.Value.DiscoveryDocument.ResponseEndpoint}/");
-
-			foreach (var target in targets)
-			{
-				_targets[target.Id] = target;
-			}
 		}
 
+		/// <inheritdoc />
 		public event AsyncEventHandler<IAcknowledgeRequest> Acknowledge;
 
+		/// <inheritdoc />
 		public async Task<TResponse> HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
 		{
-			IRelayTarget<TRequest, TResponse> target;
+			var registration = _relayTargetService.GetRelayTargetRegistration(request.Target);
 
 			try
 			{
-				if (!TryGetTarget(request.Target, out target) && !TryGetTarget(Constants.RelayTargetCatchAllId, out target))
+				if (registration == null)
 				{
 					_logger.LogInformation("Could not find any target for request {RequestId} named {Target}", request.RequestId,
 						request.Target);
 					return default;
 				}
 
-				_logger.LogTrace("Found target {Target} for request {RequestId} as {TargetClass}", request.Target, request.RequestId,
-					target.GetType().Name);
+				_logger.LogTrace("Found target {Target} for request {RequestId}", request.Target, request.RequestId);
 
 				if (request.IsBodyContentOutsourced())
 				{
@@ -116,40 +121,52 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			try
 			{
 				_logger.LogInformation("Requesting target {Target} for request {RequestId}", request.Target, request.RequestId);
-				var response = await target.HandleAsync(request, cancellationToken);
 
-				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
+				var target = registration.Factory(_serviceProvider);
+
+				try
 				{
-					if (response.BodySize == null)
+					using var timeout = new CancellationTokenSource(registration.Timeout);
+					using var cts = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
+					var response = await target.HandleAsync(request, cts.Token);
+
+					if (response.BodySize == null || response.BodySize > binarySizeThreshold)
 					{
-						_logger.LogWarning("Unknown response body size triggered mandatory outsourcing for request {RequestId}",
+						if (response.BodySize == null)
+						{
+							_logger.LogWarning("Unknown response body size triggered mandatory outsourcing for request {RequestId}",
+								request.RequestId);
+						}
+						else
+						{
+							_logger.LogInformation(
+								"Outsourcing from response {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
+								response.BodySize, binarySizeThreshold, request.RequestId);
+						}
+
+						using var content = new CountingStreamContent(response.BodyContent);
+						await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
+
+						// TODO error handling when post fails
+
+						response.BodySize = content.BytesWritten;
+						response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
+						_logger.LogDebug("Outsourced from response {BodySize} bytes for request {RequestId}", content.BytesWritten,
 							request.RequestId);
 					}
-					else
+					else if (response.BodySize > 0)
 					{
-						_logger.LogInformation(
-							"Outsourcing from response {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
-							response.BodySize, binarySizeThreshold, request.RequestId);
+						using var _ = response.BodyContent;
+						response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
+						_logger.LogDebug("Inlined from response {BodySize} bytes for request {RequestId}", response.BodySize, request.RequestId);
 					}
 
-					using var content = new CountingStreamContent(response.BodyContent);
-					await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
-
-					// TODO error handling when post fails
-
-					response.BodySize = content.BytesWritten;
-					response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
-					_logger.LogDebug("Outsourced from response {BodySize} bytes for request {RequestId}", content.BytesWritten,
-						request.RequestId);
+					return response;
 				}
-				else if (response.BodySize > 0)
+				finally
 				{
-					using var _ = response.BodyContent;
-					response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
-					_logger.LogDebug("Inlined from response {BodySize} bytes for request {RequestId}", response.BodySize, request.RequestId);
+					(target as IDisposable)?.Dispose();
 				}
-
-				return response;
 			}
 			catch (Exception ex)
 			{
@@ -162,8 +179,6 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				{
 					await AcknowledgeRequest(request, true);
 				}
-
-				(target as IDisposable)?.Dispose();
 			}
 		}
 
@@ -179,18 +194,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 				});
 		}
 
-		private bool TryGetTarget(string id, out IRelayTarget<TRequest, TResponse> target)
-		{
-			if (_targets.TryGetValue(id, out var registration))
-			{
-				target = registration.Factory(_serviceProvider);
-				return true;
-			}
-
-			target = null;
-			return false;
-		}
-
+		/// <inheritdoc />
 		public void Dispose() => _httpClient.Dispose();
 	}
 }

@@ -9,18 +9,18 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
-	internal class ServerConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
+	public class ConnectorConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly ILogger<ServerConnection<TRequest, TResponse>> _logger;
+		private readonly ILogger<ConnectorConnection<TRequest, TResponse>> _logger;
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 		private readonly HubConnection _connection;
 
 		private IConnectorTransport<TResponse> Transport => this;
 
-		public ServerConnection(ILogger<ServerConnection<TRequest, TResponse>> logger,
-			IClientRequestHandler<TRequest, TResponse> clientRequestHandler, ConnectionFactory connectionFactory)
+		public ConnectorConnection(ILogger<ConnectorConnection<TRequest, TResponse>> logger, ConnectionFactory connectionFactory,
+			IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
