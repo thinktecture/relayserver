@@ -63,8 +63,10 @@ namespace Microsoft.Extensions.DependencyInjection
 				})
 				.AddClientAccessTokenHandler();
 
-			builder.Services.TryAddSingleton<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
-			builder.Services.AddSingleton<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
+			builder.Services.TryAddTransient<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
+			builder.Services.TryAddTransient<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
+			builder.Services.AddTransient<RelayTargetService<TRequest, TResponse>>();
+
 			builder.Services.AddSingleton<RelayConnector>();
 
 			return builder;

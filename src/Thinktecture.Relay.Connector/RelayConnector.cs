@@ -16,9 +16,7 @@ namespace Thinktecture.Relay.Connector
 		/// </summary>
 		/// <param name="connection">An <see cref="IConnectorConnection"/>.</param>
 		public RelayConnector(IConnectorConnection connection)
-		{
-			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
-		}
+			=> _connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
 		/// <summary>
 		/// Opens a connection to the server.

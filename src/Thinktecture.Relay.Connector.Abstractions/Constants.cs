@@ -5,8 +5,15 @@ namespace Thinktecture.Relay.Connector
 	/// </summary>
 	public static class Constants
 	{
-		internal const string RelayServerScopes = "relaying";
-		internal const string RelayTargetCatchAllId = "*";
+		/// <summary>
+		/// The identity scopes.
+		/// </summary>
+		public const string RelayServerScopes = "relaying";
+
+		/// <summary>
+		/// The id for the catch-all target.
+		/// </summary>
+		public const string RelayTargetCatchAllId = "** CATCH-ALL **";
 
 		/// <summary>
 		/// The name of the http client used for communicating with the server.

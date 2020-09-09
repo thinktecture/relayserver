@@ -55,15 +55,12 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 64 * 1024; // 64kb
-
-		/// <inheritdoc />
 		public override async Task OnConnectedAsync()
 		{
 			var tenant = Context.User.GetTenantInfo();
 			_logger.LogDebug("Connection incoming for tenant {@Tenant}", tenant);
-
 			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
+
 			await base.OnConnectedAsync();
 		}
 
@@ -75,6 +72,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 
 			await base.OnDisconnectedAsync(exception);
 		}
+
+		/// <inheritdoc />
+		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 64 * 1024; // 64kb
 
 		/// <summary>
 		/// Hub method.

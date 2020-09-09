@@ -50,11 +50,11 @@ namespace Thinktecture.Relay.Server.Transport
 			}
 		}
 
-		private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<string, ITenantConnectorAdapter<TRequest>>> _tenants
-			= new ConcurrentDictionary<Guid, ConcurrentDictionary<string, ITenantConnectorAdapter<TRequest>>>();
+		private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<string, ITenantConnectorAdapter<TRequest>>> _tenants =
+			new ConcurrentDictionary<Guid, ConcurrentDictionary<string, ITenantConnectorAdapter<TRequest>>>();
 
-		private readonly ConcurrentDictionary<string, TenantConnectorAdapterRegistration> _registrations
-			= new ConcurrentDictionary<string, TenantConnectorAdapterRegistration>();
+		private readonly ConcurrentDictionary<string, TenantConnectorAdapterRegistration> _registrations =
+			new ConcurrentDictionary<string, TenantConnectorAdapterRegistration>();
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.

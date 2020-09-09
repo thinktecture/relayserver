@@ -13,108 +13,92 @@ namespace Microsoft.Extensions.DependencyInjection
 	public static class RelayConnectorBuilderExtensions
 	{
 		/// <summary>
-		/// Adds a <see cref="RelayWebTarget{ClientRequest,TargetResponse}"/> to the <see cref="IServiceCollection"/>.
+		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
 		/// <param name="id">The unique id of the target.</param>
-		/// <param name="options">The <see cref="RelayWebTargetOptions"/>.</param>
+		/// <param name="factory">The factory function to create an instance of the target.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
 		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddWebTarget(
-			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id, RelayWebTargetOptions options)
-			=> builder.AddWebTarget<ClientRequest, TargetResponse>(id, options);
+		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddTarget(
+			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id,
+			Func<IServiceProvider, IRelayTarget<ClientRequest, TargetResponse>> factory, TimeSpan? timeout = null)
+			=> builder.AddTarget<ClientRequest, TargetResponse>(id, factory, timeout);
 
 		/// <summary>
-		/// Adds a <see cref="RelayWebTarget{ClientRequest,TargetResponse}"/> to the <see cref="IServiceCollection"/> as catch-all fallback.
-		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
-		/// <param name="options">The <see cref="RelayWebTargetOptions"/>.</param>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddCatchAllWebTarget(
-			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, RelayWebTargetOptions options)
-			=> builder.AddCatchAllWebTarget<ClientRequest, TargetResponse>(options);
-
-		/// <summary>
-		/// Adds a <see cref="RelayWebTarget{TRequest,TResponse}"/> to the <see cref="IServiceCollection"/>.
+		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
 		/// <param name="id">The unique id of the target.</param>
-		/// <param name="options">The <see cref="RelayWebTargetOptions"/>.</param>
-		/// <typeparam name="TRequest">The type of request.</typeparam>
-		/// <typeparam name="TResponse">The type of response.</typeparam>
+		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
+		/// <typeparam name="TTarget">The type of target.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<TRequest, TResponse> AddWebTarget<TRequest, TResponse>(
-			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id, RelayWebTargetOptions options)
-			where TResponse : ITargetResponse
-			where TRequest : IClientRequest
-			=> builder.AddTarget<RelayWebTarget<TRequest, TResponse>, TRequest, TResponse>(id, options);
+		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddTarget<TTarget>(
+			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id, params object[] parameters)
+			where TTarget : IRelayTarget<ClientRequest, TargetResponse>
+			=> builder.AddTarget<TTarget, ClientRequest, TargetResponse>(id, default, parameters);
 
 		/// <summary>
-		/// Adds a <see cref="RelayWebTarget{TRequest,TResponse}"/> to the <see cref="IServiceCollection"/> as catch-all fallback.
-		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
-		/// <param name="options">The <see cref="RelayWebTargetOptions"/>.</param>
-		/// <typeparam name="TRequest">The type of request.</typeparam>
-		/// <typeparam name="TResponse">The type of response.</typeparam>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<TRequest, TResponse> AddCatchAllWebTarget<TRequest, TResponse>(
-			this IRelayConnectorBuilder<TRequest, TResponse> builder, RelayWebTargetOptions options)
-			where TResponse : ITargetResponse
-			where TRequest : IClientRequest
-			=> builder.AddTargetInternal<RelayWebTarget<TRequest, TResponse>, TRequest, TResponse>(Constants.RelayTargetCatchAllId, options);
-
-		/// <summary>
-		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/> to the <see cref="IServiceCollection"/>.
+		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
 		/// <param name="id">The unique id of the target.</param>
-		/// <param name="options">The <see cref="IRelayTargetOptions"/>.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
+		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
+		/// <typeparam name="TTarget">The type of target.</typeparam>
+		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
+		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddTarget<TTarget>(
+			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id, TimeSpan? timeout = null,
+			params object[] parameters)
+			where TTarget : IRelayTarget<ClientRequest, TargetResponse>
+			=> builder.AddTarget<TTarget, ClientRequest, TargetResponse>(id, timeout, parameters);
+
+		/// <summary>
+		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
+		/// </summary>
+		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
+		/// <param name="id">The unique id of the target.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
+		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
 		/// <typeparam name="TTarget">The type of target.</typeparam>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
 		public static IRelayConnectorBuilder<TRequest, TResponse> AddTarget<TTarget, TRequest, TResponse>(
-			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id, IRelayTargetOptions options = null)
+			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id, TimeSpan? timeout = null,
+			params object[] parameters)
 			where TTarget : IRelayTarget<TRequest, TResponse>
-			where TResponse : ITargetResponse
 			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
 		{
-			if (id == Constants.RelayTargetCatchAllId)
+			builder.Services.Configure<RelayTargetServiceOptions<TRequest, TResponse>>(configure =>
 			{
-				throw new ArgumentOutOfRangeException(nameof(id), id, $"The value cannot be '{Constants.RelayTargetCatchAllId}'");
-			}
-
-			builder.AddTargetInternal<TTarget, TRequest, TResponse>(id, options);
+				configure.Registrations.Add(new RelayTargetRegistration<TTarget, TRequest, TResponse>(id, timeout, parameters));
+			});
 
 			return builder;
 		}
 
 		/// <summary>
-		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/> to the <see cref="IServiceCollection"/> as catch-all fallback.
+		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
-		/// <param name="options">The <see cref="IRelayTargetOptions"/>.</param>
-		/// <typeparam name="TTarget">The type of target.</typeparam>
+		/// <param name="id">The unique id of the target.</param>
+		/// <param name="factory">The factory function to create an instance of the target.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<TRequest, TResponse> AddCatchAllTarget<TTarget, TRequest, TResponse>(
-			this IRelayConnectorBuilder<TRequest, TResponse> builder, IRelayTargetOptions options = null)
-			where TTarget : IRelayTarget<TRequest, TResponse>
+		public static IRelayConnectorBuilder<TRequest, TResponse> AddTarget<TRequest, TResponse>(
+			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id,
+			Func<IServiceProvider, IRelayTarget<TRequest, TResponse>> factory, TimeSpan? timeout = null)
 			where TResponse : ITargetResponse
 			where TRequest : IClientRequest
 		{
-			builder.AddTargetInternal<TTarget, TRequest, TResponse>(Constants.RelayTargetCatchAllId, options);
-
-			return builder;
-		}
-
-		private static IRelayConnectorBuilder<TRequest, TResponse> AddTargetInternal<TTarget, TRequest, TResponse>(
-			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id, IRelayTargetOptions options)
-			where TTarget : IRelayTarget<TRequest, TResponse>
-			where TResponse : ITargetResponse
-			where TRequest : IClientRequest
-		{
-			builder.Services.AddSingleton(provider => new RelayTargetRegistration<TRequest, TResponse>(typeof(TTarget), id, options));
+			builder.Services.Configure<RelayTargetServiceOptions<TRequest, TResponse>>(configure =>
+			{
+				configure.Registrations.Add(new RelayTargetRegistration<TRequest, TResponse>(id, factory, timeout));
+			});
 
 			return builder;
 		}

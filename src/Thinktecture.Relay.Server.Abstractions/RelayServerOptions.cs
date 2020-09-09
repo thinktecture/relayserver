@@ -1,7 +1,7 @@
 namespace Thinktecture.Relay.Server
 {
 	/// <summary>
-	/// Configuration options for the server.
+	/// Options for the server.
 	/// </summary>
 	public class RelayServerOptions
 	{

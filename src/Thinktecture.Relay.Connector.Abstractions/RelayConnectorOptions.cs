@@ -3,7 +3,7 @@ using System;
 namespace Thinktecture.Relay.Connector
 {
 	/// <summary>
-	/// The configuration object to use for the connector.
+	/// Options for the connector.
 	/// </summary>
 	public class RelayConnectorOptions
 	{

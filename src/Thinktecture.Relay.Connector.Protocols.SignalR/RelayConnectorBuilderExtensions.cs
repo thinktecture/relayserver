@@ -25,11 +25,8 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.Services.AddSingleton<ConnectionFactory>();
-			builder.Services.AddSingleton<ServerConnection<TRequest, TResponse>>();
-
-			builder.Services.TryAddSingleton<IConnectorConnection>(provider =>
-				provider.GetRequiredService<ServerConnection<TRequest, TResponse>>());
+			builder.Services.AddTransient<ConnectionFactory>();
+			builder.Services.AddTransient<IConnectorConnection, ConnectorConnection<TRequest, TResponse>>();
 
 			return builder;
 		}
