@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Services
 
 			httpResponse.ContentLength = targetResponse.BodySize;
 
-			if (targetResponse.BodyContent.CanRead)
+			if (targetResponse.BodyContent?.CanRead == true)
 			{
 				await targetResponse.BodyContent.CopyToAsync(httpResponse.Body, cancellationToken);
 			}
