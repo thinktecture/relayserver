@@ -67,9 +67,12 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private async Task RequestTargetAsync(TRequest request)
 		{
-			_logger.LogTrace("Received request {@Request} on connection {ConnectionId}", request, _connectionId);
+			_logger.LogTrace("Received request {RequestId} {@Request}", request.RequestId, request);
+			_logger.LogDebug("Received request {RequestId} on connection {ConnectionId} from origin {OriginId}", request.RequestId,
+				_connectionId, request.RequestOriginId);
 			var response = await _clientRequestHandler.HandleAsync(request, Transport.BinarySizeThreshold);
-			_logger.LogTrace("Received response {@Response} on connection {ConnectionId}", response, _connectionId);
+			_logger.LogTrace("Received response for request {RequestId} {@Response}", request.RequestId, response);
+			_logger.LogDebug("Received response for request {RequestId} on connection {ConnectionId}", request.RequestId, _connectionId);
 			await Transport.DeliverAsync(response);
 		}
 
@@ -77,7 +80,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		Task IConnectorTransport<TResponse>.DeliverAsync(TResponse response)
 		{
-			_logger.LogTrace("Delivering response {@Response} on connection {ConnectionId}", response, _connectionId);
+			_logger.LogTrace("Delivering response for request {RequestId} on connection {ConnectionId}", response.RequestId, _connectionId);
 			return _connection.InvokeAsync("Deliver", response);
 		}
 
@@ -89,7 +92,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		Task IConnectorTransport<TResponse>.PongAsync()
 		{
-			_logger.LogTrace("Pong on connection {ConnectionId}",  _connectionId);
+			_logger.LogTrace("Pong on connection {ConnectionId}", _connectionId);
 			return _connection.InvokeAsync("Pong");
 		}
 

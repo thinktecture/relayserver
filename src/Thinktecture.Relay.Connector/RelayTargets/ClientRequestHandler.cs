@@ -185,7 +185,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while processing request {@Request}", request);
+				_logger.LogError(ex, "An error occured while processing request {RequestId} {@Request}", request.RequestId, request);
 				return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 			}
 			finally

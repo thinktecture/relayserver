@@ -44,9 +44,9 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		/// <inheritdoc />
 		public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			_logger.LogTrace("Requesting target {@Request}", request);
 			using var requestMessage = CreateHttpRequestMessage(request);
 			var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+			_logger.LogDebug("Requested target for request {RequestId}", request.RequestId);
 			return await CreateResponseAsync(request, responseMessage, cancellationToken);
 
 			// TODO error handling when request fails
