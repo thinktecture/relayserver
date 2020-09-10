@@ -1,11 +1,11 @@
 using System;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityModel.AspNetCore.AccessTokenManagement;
 using IdentityModel.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -16,10 +16,13 @@ namespace Thinktecture.Relay.Connector.Options
 	{
 		private readonly IServiceProvider _serviceProvider;
 		private readonly RelayConnectorOptions _options;
+		private readonly IApplicationLifetime _applicationLifetime;
 
-		public ConfigureAccessTokenManagementOptions(IServiceProvider serviceProvider, IOptions<RelayConnectorOptions> options)
+		public ConfigureAccessTokenManagementOptions(IServiceProvider serviceProvider, IOptions<RelayConnectorOptions> options,
+			IApplicationLifetime applicationLifetime)
 		{
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_applicationLifetime = applicationLifetime ?? throw new ArgumentNullException(nameof(applicationLifetime));
 			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		}
 
@@ -27,7 +30,7 @@ namespace Thinktecture.Relay.Connector.Options
 		{
 			var uri = new Uri(new Uri(_options.DiscoveryDocument.AuthorizationServer), OidcConstants.Discovery.DiscoveryEndpoint);
 
-			while (true)
+			while (!_applicationLifetime.ApplicationStopping.IsCancellationRequested)
 			{
 				var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
 					uri.ToString(),
