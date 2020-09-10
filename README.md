@@ -14,6 +14,8 @@ See the [glossary](./docs/glossary.md) for a further description of terms used i
 
 See [concepts](./docs/concepts.md) for an explanation of concepts used in RelayServer.
 
+See [deployment options](./docs/deployment.md) for an overview of deployment options.
+
 ## Features
 
 - Open Source under BSD-3-Clause license
