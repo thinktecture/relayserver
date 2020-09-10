@@ -37,7 +37,7 @@ namespace Thinktecture.Relay.Server.Docker
 			services.AddRelayServer()
 				.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 				.AddSignalRConnectorTransport()
-				.AddFileBodyStore(options => options.StoragePath = Path.GetTempPath());
+				.AddFileBodyStore(options => options.StoragePath = Configuration.GetValue<string>("BodyStore:Path") ?? Path.GetTempPath());
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
