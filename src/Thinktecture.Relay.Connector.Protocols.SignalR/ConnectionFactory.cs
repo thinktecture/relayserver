@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 			return new HubConnectionBuilder()
 				.WithUrl(new Uri(_options.DiscoveryDocument.ConnectorEndpoint),
-					connectionOptions => { connectionOptions.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync; })
+					options => options.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync)
 				.WithAutomaticReconnect() // TODO add retry policy based on discovery document config values
 				.Build();
 		}

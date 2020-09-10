@@ -16,6 +16,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private readonly ILogger<ConnectorConnection<TRequest, TResponse>> _logger;
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 		private readonly HubConnection _connection;
+		private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
 		private IConnectorTransport<TResponse> Transport => this;
 		private string _connectionId;
@@ -45,7 +46,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			else
 			{
 				_logger.LogError(ex, "Connection {ConnectionId} closed", _connectionId);
-				await _connection.StartAsync();
+				await (this as IConnectorConnection).ConnectAsync(_cancellationTokenSource.Token);
 			}
 		}
 
@@ -98,15 +99,25 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		async Task IConnectorConnection.ConnectAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogDebug("Connecting");
-			await _connection.StartAsync(cancellationToken);
-			_connectionId = _connection.ConnectionId;
-			_logger.LogInformation("Connected on connection {ConnectionId}", _connection.ConnectionId);
+			_logger.LogTrace("Connecting");
+			try
+			{
+				await _connection.StartAsync(cancellationToken);
+				_connectionId = _connection.ConnectionId;
+				_logger.LogInformation("Connected on connection {ConnectionId}", _connection.ConnectionId);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while trying to connect");
+				await Task.Delay(5000, cancellationToken); // TODO make this configurable
+				await (this as IConnectorConnection).ConnectAsync(cancellationToken);
+			}
 		}
 
 		async Task IConnectorConnection.DisconnectAsync(CancellationToken cancellationToken)
 		{
 			_logger.LogDebug("Disconnecting");
+			_cancellationTokenSource.Cancel();
 			await _connection.StopAsync(cancellationToken);
 			_logger.LogInformation("Disconnected on connection {ConnectionId}", _connectionId);
 		}
@@ -114,6 +125,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		public async ValueTask DisposeAsync()
 		{
 			await _connection.DisposeAsync();
+			_cancellationTokenSource.Dispose();
 			_clientRequestHandler.Acknowledge -= OnAcknowledge;
 		}
 	}
