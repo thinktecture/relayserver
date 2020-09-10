@@ -33,7 +33,6 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <inheritdoc />
 		public async Task DispatchRequestAsync(TRequest request)
 		{
-			_logger.LogTrace("Sending request {@Request}", request);
 			await _model.PublishJsonAsync($"{Constants.RequestQueuePrefix}{request.TenantId}", request, autoDelete: false);
 			_logger.LogDebug("Sent request {RequestId} to tenant {TenantId}", request.RequestId, request.TenantId);
 		}

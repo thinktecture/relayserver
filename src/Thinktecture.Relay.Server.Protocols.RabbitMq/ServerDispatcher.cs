@@ -39,7 +39,6 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <inheritdoc />
 		public async Task DispatchResponseAsync(TResponse response)
 		{
-			_logger.LogTrace("Dispatching response {@Response}", response);
 			await _responseModel.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}", response, durable: false,
 				persistent: false);
 			_logger.LogDebug("Dispatched response for request {RequestId} to origin {OriginId}", response.RequestId, response.RequestOriginId);

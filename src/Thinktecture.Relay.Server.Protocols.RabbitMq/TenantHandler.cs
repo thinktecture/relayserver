@@ -52,8 +52,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private async Task OnRequestReceived(object sender, BasicDeliverEventArgs @event)
 		{
 			var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span);
-			_logger.LogTrace("Received request {@Request} from queue {QueueName} by consumer {ConsumerTag}", request, @event.RoutingKey,
-				@event.ConsumerTag);
+			_logger.LogTrace("Received request {RequestId} from queue {QueueName} by consumer {ConsumerTag}", request.RequestId,
+				@event.RoutingKey, @event.ConsumerTag);
 
 			if (request.AcknowledgeMode != AcknowledgeMode.Disabled)
 			{

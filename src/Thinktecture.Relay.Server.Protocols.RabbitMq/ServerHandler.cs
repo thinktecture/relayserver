@@ -47,8 +47,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private async Task OnResponseReceived(object sender, BasicDeliverEventArgs @event)
 		{
 			var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span);
-			_logger.LogTrace("Received response {@Response} from queue {QueueName} by consumer {ConsumerTag}", response, @event.RoutingKey,
-				@event.ConsumerTag);
+			_logger.LogTrace("Received response for {RequestId} from queue {QueueName} by consumer {ConsumerTag}", response.RequestId,
+				@event.RoutingKey, @event.ConsumerTag);
 			await ResponseReceived.InvokeAsync(sender, response);
 		}
 

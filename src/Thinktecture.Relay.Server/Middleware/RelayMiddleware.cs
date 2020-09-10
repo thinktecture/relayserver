@@ -114,7 +114,7 @@ namespace Thinktecture.Relay.Server.Middleware
 					}
 				}
 
-				_logger.LogTrace("Received response {@Response}", _relayContext.TargetResponse);
+				_logger.LogTrace("Received response for request {RequestId}", _relayContext.RequestId);
 
 				if (_relayContext.TargetResponse.RequestFailed)
 				{
