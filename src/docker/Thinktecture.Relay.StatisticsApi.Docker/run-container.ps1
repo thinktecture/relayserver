@@ -1,8 +1,9 @@
-docker rm -f relay_statistics
+docker rm -f relay_statisticsapi
 
 docker run `
-  --name relay_statistics `
-  --link relay_persistence_postgresql:database `
+  --name relay_statisticsapi `
+  --network relay_network `
+  --hostname relay_statisticsapi `
   -p 5006:80 `
   -d `
   relay_statistics
