@@ -160,7 +160,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 						}
 
 						response.BodySize = content.BytesWritten;
-						response.BodyContent = Stream.Null; // stream was disposed by stream content already - no need to keep it
+						response.BodyContent = null;
 						_logger.LogDebug("Outsourced from response {BodySize} bytes for request {RequestId}", content.BytesWritten,
 							request.RequestId);
 					}
