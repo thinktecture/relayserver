@@ -36,7 +36,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_clientRequestHandler.Acknowledge += OnAcknowledge;
 		}
 
-		private Task OnClosed(Exception ex)
+		private async Task OnClosed(Exception ex)
 		{
 			if (ex == null)
 			{
@@ -45,8 +45,8 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			else
 			{
 				_logger.LogError(ex, "Connection {ConnectionId} closed", _connectionId);
+				await _connection.StartAsync();
 			}
-			return Task.CompletedTask;
 		}
 
 		private Task OnReconnecting(Exception ex)
