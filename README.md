@@ -12,6 +12,8 @@ All data communication will be secured via https with complete control and audit
 
 See the [glossary](./docs/glossary.md) for a further description of terms used in the context of RelayServer.
 
+See [concepts](./docs/concepts.md) for an explanation of concepts used in RelayServer.
+
 ## Features
 
 - Open Source under BSD-3-Clause license
