@@ -20,11 +20,14 @@ namespace Thinktecture.Relay.Connector.Docker
 				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
 				.AddSignalRConnectorTransport()
 				// returns simple JSON ({ "Hello": "World" }) (followed by "?mocky-delay=#ms" to simulate a long running request delayed by #)
-				.AddTarget<RelayWebTarget>("mocky1", TimeSpan.FromSeconds(2), new Uri("https://run.mocky.io/v3/ac6dd3d6-f351-4475-9bd1-c0f58030e31a"))
+				.AddTarget<RelayWebTarget>("mocky1", TimeSpan.FromSeconds(2),
+					new Uri("https://run.mocky.io/v3/ac6dd3d6-f351-4475-9bd1-c0f58030e31a"))
 				// returns HTTP status NO CONTENT (followed by "?mocky-delay=#ms" to simulate a long running request delayed by #)
-				.AddTarget<RelayWebTarget>("mocky2", TimeSpan.FromSeconds(2), new Uri("https://run.mocky.io/v3/dd0c23d8-6802-46ea-a188-675d022d0e4d"))
+				.AddTarget<RelayWebTarget>("mocky2", TimeSpan.FromSeconds(2),
+					new Uri("https://run.mocky.io/v3/dd0c23d8-6802-46ea-a188-675d022d0e4d"))
 				// returns big JOSN (followed by "?mocky-delay=#ms" to simulate a long running request delayed by #)
-				.AddTarget<RelayWebTarget>("mocky3", TimeSpan.FromSeconds(2), new Uri("https://run.mocky.io/v3/b0949784-114b-4ea9-80a8-f08aca93c796"))
+				.AddTarget<RelayWebTarget>("mocky3", TimeSpan.FromSeconds(2),
+					new Uri("https://run.mocky.io/v3/b0949784-114b-4ea9-80a8-f08aca93c796"))
 				// returns HTTP status by appended code (followed by "?sleep=#" to simulate a long running request delayed by # msec)
 				.AddTarget<RelayWebTarget>("status", TimeSpan.FromSeconds(2), new Uri("https://httpstat.us/"))
 				// returns more complex JSON (e.g. "/api/people/1/")
@@ -32,17 +35,17 @@ namespace Thinktecture.Relay.Connector.Docker
 				// returns a random 4k image
 				.AddTarget<RelayWebTarget>("picsum", default, new Uri("https://picsum.photos/3840/2160"))
 				// returns a really big pdf
-				.AddTarget<RelayWebTarget>("bigpdf", default, new Uri("https://cartographicperspectives.org/index.php/journal/article/download/cp43-complete-issue/pdf/"));
+				.AddTarget<RelayWebTarget>("bigpdf", default,
+					new Uri("https://cartographicperspectives.org/index.php/journal/article/download/cp43-complete-issue/pdf/"));
 
 			services.AddHostedService<ConnectorService>();
 		}
 	}
 
-	internal class ConnectorService : IHostedService, IDisposable
+	internal class ConnectorService : IHostedService
 	{
 		private readonly ILogger<ConnectorService> _logger;
 		private readonly RelayConnector _connector;
-		private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
 		public ConnectorService(ILogger<ConnectorService> logger, RelayConnector connector)
 		{
@@ -50,20 +53,16 @@ namespace Thinktecture.Relay.Connector.Docker
 			_connector = connector ?? throw new ArgumentNullException(nameof(connector));
 		}
 
-		public Task StartAsync(CancellationToken cancellationToken)
+		public async Task StartAsync(CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Starting connector");
-			_connector.ConnectAsync(_cancellationTokenSource.Token);
-			return Task.CompletedTask;
+			await _connector.ConnectAsync(cancellationToken);
 		}
 
 		public async Task StopAsync(CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Gracefully stopping connector");
-			_cancellationTokenSource.Cancel();
 			await _connector.DisconnectAsync(cancellationToken);
 		}
-
-		public void Dispose() => _cancellationTokenSource.Dispose();
 	}
 }
