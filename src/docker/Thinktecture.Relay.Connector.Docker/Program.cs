@@ -34,6 +34,8 @@ namespace Thinktecture.Relay.Connector.Docker
 			Host
 				.CreateDefaultBuilder(args)
 				.UseConsoleLifetime()
+				.UseSystemd()
+				.UseWindowsService()
 				.UseSerilog((context, loggerConfiguration) =>
 				{
 					loggerConfiguration
