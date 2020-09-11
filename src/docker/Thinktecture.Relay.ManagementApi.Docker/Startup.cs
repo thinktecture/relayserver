@@ -1,13 +1,15 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 namespace Thinktecture.Relay.ManagementApi.Docker
 {
-	public class Startup
+	internal class Startup
 	{
 		public Startup(IConfiguration configuration)
 		{
@@ -21,6 +23,19 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 		{
 			services.AddControllers();
 			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
+
+			services.AddSwaggerGen(c =>
+			{
+				c.SwaggerDoc("Management", new OpenApiInfo()
+				{
+					Version = "v1",
+					Title = "RelayServer Management API",
+					Description = "An API to manage RelayServer configuration",
+				});
+
+				c.EnableAnnotations();
+				c.IncludeXmlComments("./ManagementApiDocumentation.xml");
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +56,16 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
+			});
+
+			app.UseSwagger(c =>
+			{
+				c.RouteTemplate = "/docs/{DocumentName}/openapi.json";
+			});
+			app.UseSwaggerUI(c =>
+			{
+				c.RoutePrefix = String.Empty;
+				c.SwaggerEndpoint("/docs/Management/openapi.json", "RelayServer Management API");
 			});
 		}
 	}
