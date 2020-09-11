@@ -4,7 +4,7 @@ using Thinktecture.Relay.Acknowledgement;
 namespace Thinktecture.Relay.Transport
 {
 	/// <summary>
-	/// An implementation of a connector transport between connector and relay server.
+	/// An implementation of a connector transport between connector and RelayServer.
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IConnectorTransport<in TResponse>
