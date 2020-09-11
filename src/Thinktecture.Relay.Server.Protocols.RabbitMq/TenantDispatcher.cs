@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
@@ -33,8 +34,16 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <inheritdoc />
 		public async Task DispatchRequestAsync(TRequest request)
 		{
-			await _model.PublishJsonAsync($"{Constants.RequestQueuePrefix}{request.TenantId}", request, autoDelete: false);
-			_logger.LogDebug("Sent request {RequestId} to tenant {TenantId}", request.RequestId, request.TenantId);
+			try
+			{
+				await _model.PublishJsonAsync($"{Constants.RequestQueuePrefix}{request.TenantId}", request, autoDelete: false);
+				_logger.LogDebug("Sent request {RequestId} to tenant {TenantId}", request.RequestId, request.TenantId);
+			}
+			catch (RabbitMQClientException ex)
+			{
+				_logger.LogError(ex, "An error occured while dispatching request {RequestId} to tenant {TenantId} queue", request.RequestId, request.TenantId);
+				throw new TransportException(ex);
+			}
 		}
 
 		/// <inheritdoc />

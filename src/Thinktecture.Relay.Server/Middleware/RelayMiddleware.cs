@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
@@ -125,6 +126,11 @@ namespace Thinktecture.Relay.Server.Middleware
 				// TODO call ITargetResponseInterceptor
 
 				await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, context.RequestAborted);
+			}
+			catch (TransportException)
+			{
+				await _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable),
+					context.Response, context.RequestAborted);
 			}
 			catch (TaskCanceledException)
 			{
