@@ -9,7 +9,7 @@ When you are new to **RelayServer** or coming from an older version, there can b
 
 ### Body Store
 
-The body store is a storage where the body contents of requests and responses are stored while a request is being processed. By default a
+The _Body Store_ is a storage where the body contents of requests and responses are stored while a request is being processed. By default a
 file-based storage is used. An in-memory store is available, too.
 
 ## C
@@ -21,16 +21,16 @@ through the [RelayServer](#relayserver).
 
 ### Connector
 
-The RelayServer _Connector_ is a piece of software that runs on a physical location where you want to access local services (aka
-[Targets](#target)). The network the _Connector_ is located in is usually not accessible from the internet. The _Connector_ creates a
-connection to the [RelayServer](#relayserver), through which the server can send a [Request](#request) to the connector. The connector then
-requests the internal [Target](#target) and relays its [Response](#response) back to the server, which then relays it back to the requesting
+The _Connector_ is a piece of software that runs on a physical location where you want to access local services (aka [Targets](#target)).
+The network the _Connector_ is located in is usually not accessible from the internet. The _Connector_ creates a connection to the
+[RelayServer](#relayserver), through which the server can send a [Request](#request) to the connector. The connector then requests the
+internal [Target](#target) and relays its [Response](#response) back to the server, which then relays it back to the requesting
 [Client](#client).
 
-For reasons of availability and load balacing the _Connector_ can be run multiple times at the same location / network. All _Connectors_ on
+For reasons of availability and load balancing the _Connector_ can be run multiple times at the same location / network. All _Connectors_ on
 a specific physical location are logically referred to as a [Tenant](#tenant).
 
-The _Connector_ was formerly called _OnPremisesConnector_ (short _OPC_) in RelayServer 2.
+The _Connector_ was formerly called _OnPremisesConnector_ (short _OPC_) in RelayServer v2.
 
 ## R
 
@@ -77,4 +77,4 @@ relay it back to the [Client](#client).
 The _Tenant_ describes a physical location (on-premises) where one or more [Connectors](#connector) are installed and ready to relay
 requests to local [Targets](#target) that are provided by the _Tenant_.
 
-The _Tenant_ was formerly called _Link_ in RelayServer 2.
+The _Tenant_ was formerly called _Link_ in RelayServer v2.

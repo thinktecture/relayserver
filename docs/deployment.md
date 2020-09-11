@@ -8,7 +8,7 @@ able to run cross platform on Windows, macOS and Linux.
 All scripts are located in the folder `src/docker`.
 
 First, a script is provided to build the docker images (`build-images.ps1`) and to run a test environment with one server
-(`run-environment.ps1`) and in a multiserver environment (`run-environment-multiserver.ps1`).
+(`run-environment.ps1`) and in a multi-server environment (`run-environment-multiserver.ps1`).
 
 The external components (database, message queue, details see below) can be started with the `run-dependencies.ps1` script.
 
@@ -20,7 +20,7 @@ credentials.
 
 The _development_ environment also comes with a [Seq](https://datalust.co/seq) logging server in a local docker container (using the local,
 free single-user license). For production the RelayServer components log to stdout and stderr as this is default in docker environments, but
-you can also slightly modify the images to use other logging targets or aquire a commercial Seq license.
+you can also slightly modify the images to use other logging targets or acquire a commercial Seq license.
 
 ## Components
 
@@ -37,7 +37,7 @@ The relay server environment consists of several parts.
   - Only needs to be accessible from specifically listed components.
 
 - IdentityServer  
-  The IdentityServer provides an authentication servicer for the other components.
+  The IdentityServer provides an authentication service for the other components.
 
   - Needs to be accessible from outside the system.
   - Needs access to the configuration database.
