@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
+using Thinktecture.Relay.Server.Protocols.RabbitMq;
 
 namespace Thinktecture.Relay.Server.Docker
 {
@@ -37,7 +38,7 @@ namespace Thinktecture.Relay.Server.Docker
 			services.AddRelayServer()
 				.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 				.AddSignalRConnectorTransport()
-				.AddFileBodyStore(options => options.StoragePath = Configuration.GetValue<string>("BodyStore:Path") ?? Path.GetTempPath());
+				.AddFileBodyStore(options => Configuration.GetSection("BodyStore").Bind(options));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

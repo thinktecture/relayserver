@@ -19,45 +19,39 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// Adds the routing based on Rabbit MQ.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
-		/// <param name="configure">A configure callback for setting the <see cref="RabbitMqOptions"/>.</param>
+		/// <param name="configure">An optional configure callback for setting the <see cref="RabbitMqOptions"/>.</param>
 		/// <param name="useServerRouting">Enables Rabbit MQ for server-to-server communication.</param>
 		/// <param name="useTenantRouting">Enables Rabbit MQ for server-to-tenant communication.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
 		public static IRelayServerBuilder<TRequest, TResponse> AddRabbitMqRouting<TRequest, TResponse>(
-			this IRelayServerBuilder<TRequest, TResponse> builder, Action<RabbitMqOptions> configure, bool useServerRouting = true,
+			this IRelayServerBuilder<TRequest, TResponse> builder, Action<RabbitMqOptions> configure = null, bool useServerRouting = true,
 			bool useTenantRouting = true)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
 			builder.Services.TryAddSingleton<IServerDispatcher<TResponse>, ServerDispatcher<TResponse>>();
 			builder.Services.TryAddSingleton<IServerHandler<TResponse>, ServerHandler<TResponse>>();
-			builder.Services.AddRabbitMq<TRequest, TResponse>(useServerRouting, useTenantRouting, configure);
 
-			return builder;
-		}
-
-		private static void AddRabbitMq<TRequest, TResponse>(this IServiceCollection services, bool useServerRouting, bool useTenantRouting,
-			Action<RabbitMqOptions> configure)
-			where TRequest : IClientRequest
-			where TResponse : ITargetResponse
-		{
-			services.Configure(configure);
+			if (configure != null)
+			{
+				builder.Services.Configure(configure);
+			}
 
 			if (useServerRouting)
 			{
-				services.TryAddSingleton<IServerDispatcher<TResponse>, ServerDispatcher<TResponse>>();
-				services.TryAddSingleton<IServerHandler<TResponse>, ServerHandler<TResponse>>();
+				builder.Services.TryAddSingleton<IServerDispatcher<TResponse>, ServerDispatcher<TResponse>>();
+				builder.Services.TryAddSingleton<IServerHandler<TResponse>, ServerHandler<TResponse>>();
 			}
 
 			if (useTenantRouting)
 			{
-				services.TryAddSingleton<ITenantDispatcher<TRequest>, TenantDispatcher<TRequest>>();
-				services.TryAddSingleton<ITenantHandlerFactory<TRequest, TResponse>, TenantHandlerFactory<TRequest, TResponse>>();
+				builder.Services.TryAddSingleton<ITenantDispatcher<TRequest>, TenantDispatcher<TRequest>>();
+				builder.Services.TryAddSingleton<ITenantHandlerFactory<TRequest, TResponse>, TenantHandlerFactory<TRequest, TResponse>>();
 			}
 
-			services.TryAddSingleton<IConnection>(provider =>
+			builder.Services.TryAddSingleton<IConnection>(provider =>
 			{
 				var relayServerContext = provider.GetRequiredService<RelayServerContext>();
 				var options = provider.GetRequiredService<IOptions<RabbitMqOptions>>();
@@ -79,7 +73,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
 				return connection;
 			});
-			services.AddSingleton<ModelFactory>();
+			builder.Services.AddSingleton<ModelFactory>();
+
+			return builder;
 		}
 	}
 }

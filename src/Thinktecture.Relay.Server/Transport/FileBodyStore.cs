@@ -164,7 +164,8 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <summary>
 		/// The path where to store files.
 		/// </summary>
-		public string StoragePath { get; set; }
+		/// <remarks>Defaults to the system temporary path.</remarks>
+		public string StoragePath { get; set; } = Path.GetTempPath();
 	}
 
 	internal class FileBodyStoreOptionsValidator : IValidateOptions<FileBodyStoreOptions>
