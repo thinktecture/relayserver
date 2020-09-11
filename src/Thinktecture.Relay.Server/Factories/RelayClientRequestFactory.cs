@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Server.Factories
 		private readonly Guid _originId;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayClientRequestFactory{TRequest}"/>.
+		/// Initializes a new instance of the <see cref="RelayClientRequestFactory{TRequest}"/> class.
 		/// </summary>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		public RelayClientRequestFactory(RelayServerContext relayServerContext)

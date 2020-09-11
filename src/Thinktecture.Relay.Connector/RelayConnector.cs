@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Connector
 		private readonly IConnectorConnection _connection;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayConnector"/>.
+		/// Initializes a new instance of the <see cref="RelayConnector"/> class.
 		/// </summary>
 		/// <param name="connection">An <see cref="IConnectorConnection"/>.</param>
 		public RelayConnector(IConnectorConnection connection)

@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly bool _enableRequestShortcut;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RequestCoordinator{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="RequestCoordinator{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>

@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		private readonly List<RelayTargetRegistration<TRequest, TResponse>> _targets;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayTargetService{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="RelayTargetService{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
 		public RelayTargetService(IOptions<RelayTargetServiceOptions<TRequest, TResponse>> options)

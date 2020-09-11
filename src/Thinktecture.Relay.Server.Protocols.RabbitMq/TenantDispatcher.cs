@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public int? BinarySizeThreshold { get; }
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="TenantDispatcher{TRequest}"/>.
+		/// Initializes a new instance of the <see cref="TenantDispatcher{TRequest}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>

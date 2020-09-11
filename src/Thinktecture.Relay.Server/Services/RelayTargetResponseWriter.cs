@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Server.Services
 		private readonly ILogger<RelayTargetResponseWriter<TResponse>> _logger;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayTargetResponseWriter{TResponse}"/>.
+		/// Initializes a new instance of the <see cref="RelayTargetResponseWriter{TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		public RelayTargetResponseWriter(ILogger<RelayTargetResponseWriter<TResponse>> logger)

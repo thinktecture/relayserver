@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="TenantConnectorAdapterFactory{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="TenantConnectorAdapterFactory{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
 		public TenantConnectorAdapterFactory(IServiceProvider serviceProvider)

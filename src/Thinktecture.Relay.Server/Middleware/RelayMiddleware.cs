@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Middleware
 		private readonly int _maximumBodySize;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayMiddleware{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="RelayMiddleware{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="requestFactory">An <see cref="IRelayClientRequestFactory{TRequest}"/>.</param>

@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="TenantHandlerFactory{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="TenantHandlerFactory{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
 		public TenantHandlerFactory(IServiceProvider serviceProvider)
