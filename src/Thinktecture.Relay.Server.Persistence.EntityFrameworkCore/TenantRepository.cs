@@ -49,6 +49,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		{
 			return _dbContext.Tenants
 				.AsNoTracking()
+				.OrderBy(t => t.NormalizedName)
 				.Skip(skip)
 				.Take(take)
 				.AsAsyncEnumerable();
