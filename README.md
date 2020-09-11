@@ -1,10 +1,16 @@
 # Thinktecture RelayServer
 
-Thinktecture RelayServer enables secure communication from clients - including mobile devices, web, and native applications - to their on-premises backend applications.
+Thinktecture RelayServer enables secure communication from clients - including mobile devices, web, and native applications - to their
+on-premises backend applications.
 
-The client can be any kind of application which uses REST-style HTTPS requests to exchange data with on-premises applications. You can use RelayServer to provide backend communication for your HTML5 apps and for native apps on Windows, iOS, Android, Blackberry, Smart TVs, and many more. There is no special library or code change needed as RelayServer acts as a transparent HTTPS reverse proxy.
+The client can be any kind of application which uses REST-style HTTPS requests to exchange data with on-premises applications. You can use
+RelayServer to provide backend communication for your HTML5 apps and for native apps on Windows, iOS, Android, Blackberry, Smart TVs, and
+many more. There is no special library or code change needed as RelayServer acts as a transparent HTTPS reverse proxy.
 
-The on-premises applications can be located behind routers and firewalls and only need a single outgoing port to be able to handle clients' requests. They will use this port to establish a persistent connection with your internet-accessible RelayServer instance. This connection will be managed by an embeddable component (or windows service) called RelayServer Connector. If your on-premises application uses some kind of Web-based API to communicate with the client you are ready to go.
+The on-premises applications can be located behind routers and firewalls and only need a single outgoing port to be able to handle clients'
+requests. They will use this port to establish a persistent connection with your internet-accessible RelayServer instance. This connection
+will be managed by an embeddable component (or windows service) called RelayServer Connector. If your on-premises application uses some kind
+of Web-based API to communicate with the client you are ready to go.
 
 All data communication will be secured via https with complete control and auditing of allowed participants and permitted data.
 
