@@ -1,0 +1,42 @@
+{
+  "name": "relayserver",
+  "version": "3.0.0",
+  "description": "Thinktecture RelayServer enables secure communication from clients - including mobile devices, web, and native applications - to their on-premises backend applications.",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "prettier": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thinktecture/relayserver.git"
+  },
+  "keywords": [
+    "relay",
+    "connector",
+    "tenant",
+    "on-premise",
+    "proxy",
+    "gateway"
+  ],
+  "author": "Thinktecture AG",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/thinktecture/relayserver/issues"
+  },
+  "homepage": "https://github.com/thinktecture/relayserver#readme",
+  "devDependencies": {
+    "husky": "^4.3.0",
+    "lint-staged": "^10.3.0",
+    "prettier": "^2.1.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.md": "prettier --write"
+  }
+}
