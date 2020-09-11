@@ -57,15 +57,19 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
-		/// <param name="configure">A configure callback for setting the <see cref="FileBodyStoreOptions"/>.</param>
+		/// <param name="configure">An optional configure callback for setting the <see cref="FileBodyStoreOptions"/>.</param>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
 		/// <remarks>Use a shared location between all server instances.</remarks>
 		public static IRelayServerBuilder<TRequest, TResponse> AddFileBodyStore<TRequest, TResponse>(
-			this IRelayServerBuilder<TRequest, TResponse> builder, Action<FileBodyStoreOptions> configure)
+			this IRelayServerBuilder<TRequest, TResponse> builder, Action<FileBodyStoreOptions> configure = null)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.Services.Configure(configure);
+			if (configure != null)
+			{
+				builder.Services.Configure(configure);
+			}
+
 			builder.Services.AddTransient<IValidateOptions<FileBodyStoreOptions>, FileBodyStoreOptionsValidator>();
 			builder.Services.AddSingleton<IBodyStore, FileBodyStore>();
 
