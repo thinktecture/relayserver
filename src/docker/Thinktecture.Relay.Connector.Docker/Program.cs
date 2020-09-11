@@ -30,8 +30,8 @@ namespace Thinktecture.Relay.Connector.Docker
 			return 0;
 		}
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host
+		public static IHostBuilder CreateHostBuilder(string[] args)
+			=> Host
 				.CreateDefaultBuilder(args)
 				.UseConsoleLifetime()
 				.UseSystemd()

@@ -63,15 +63,9 @@ namespace Microsoft.Extensions.DependencyInjection
 					Uri = new Uri(options.Value.Uri),
 				};
 
-				var connection = (IAutorecoveringConnection)factory.CreateConnection(
+				return factory.CreateConnection(
 					AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts ?? factory.Uri.Host),
 					$"RelayServer {relayServerContext.OriginId}");
-
-				// TODO better logging
-				connection.RecoverySucceeded += (sender, args) => Console.WriteLine("Connection Recovered!");
-				connection.ConnectionShutdown += (sender, args) => Console.WriteLine("Connection Shutdown! {0}", args.ReplyText);
-
-				return connection;
 			});
 			builder.Services.AddSingleton<ModelFactory>();
 

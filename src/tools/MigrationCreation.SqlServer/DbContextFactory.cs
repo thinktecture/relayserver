@@ -17,12 +17,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCre
 
 			var builder = new DbContextOptionsBuilder<RelayServerConfigurationDbContext>();
 
-			builder.UseSqlServer(
-				configuration.GetConnectionString("SqlServer"),
-				optionsBuilder =>
-				{
-					optionsBuilder.MigrationsAssembly("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer");
-				});
+			builder.UseSqlServer(configuration.GetConnectionString("SqlServer"),
+				optionsBuilder => optionsBuilder.MigrationsAssembly("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer"));
 
 			return new RelayServerConfigurationDbContext(builder.Options);
 		}

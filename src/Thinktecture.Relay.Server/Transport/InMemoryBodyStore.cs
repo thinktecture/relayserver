@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Thinktecture.Relay.Server.Transport
 {
@@ -12,6 +13,9 @@ namespace Thinktecture.Relay.Server.Transport
 	{
 		private readonly ConcurrentDictionary<Guid, byte[]> _requestStore = new ConcurrentDictionary<Guid, byte[]>();
 		private readonly ConcurrentDictionary<Guid, byte[]> _responseStore = new ConcurrentDictionary<Guid, byte[]>();
+
+		public InMemoryBodyStore(ILogger<InMemoryBodyStore> logger)
+			=> logger.LogDebug("Using {StorageType} as body store", nameof(InMemoryBodyStore));
 
 		/// <inheritdoc />
 		public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream, CancellationToken cancellationToken = default)
@@ -47,7 +51,8 @@ namespace Thinktecture.Relay.Server.Transport
 		public IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveRequestBodyAsync(requestId));
 
 		/// <inheritdoc />
-		public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveResponseBodyAsync(requestId));
+		public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId) =>
+			new DisposeAction(() => RemoveResponseBodyAsync(requestId));
 
 		private async Task<long> StoreDataAsync(Guid id, Stream stream, ConcurrentDictionary<Guid, byte[]> store,
 			CancellationToken cancellationToken)
