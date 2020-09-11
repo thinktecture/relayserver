@@ -5,32 +5,53 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 {
+	/// <summary>
+	/// Manages tenants.
+	/// </summary>
 	[AllowAnonymous] // TODO Authentication
-	[Route("api/{controller}")]
+	[Route("api/[controller]")]
 	public class TenantController : Controller
 	{
 		private readonly ITenantRepository _tenantRepository;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TenantController"/> class.
+		/// </summary>
+		/// <param name="tenantRepository">An instance of an <see cref="ITenantRepository"/>.</param>
 		public TenantController(ITenantRepository tenantRepository)
 		{
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 		}
 
+		/// <summary>
+		/// Returns tenants in a pageable way.
+		/// </summary>
+		/// <param name="skip">The amount of tenants to skip while loading.</param>
+		/// <param name="take">The amount of tenants to return. Defaults to 10.</param>
+		/// <returns>A page that contains <paramref name="take"/> tenants, starting at the <paramref name="skip"/> tenant.</returns>
 		[HttpGet]
 		public IAsyncEnumerable<Tenant> GetAllTenants(int skip = 0, int take = 10)
 		{
-			return _tenantRepository.LoadAllTenantsPagedAsync(skip, take);
+			return _tenantRepository.LoadAllTenantsPagedAsync(skip, take).ToTenantModels();
 		}
 
-		[HttpGet("{id:guid}")]
-		public async Task<ActionResult<Tenant>> GetTenantById([FromRoute] Guid id)
+		/// <summary>
+		/// Finds a tenant by its id.
+		/// </summary>
+		/// <param name="tenantId">The id of the tenant to load.</param>
+		/// <returns>A tenant if found; otherwise 404.</returns>
+		[HttpGet("{tenantId:guid}")]
+		[SwaggerResponse(200, "Tenant with given id.", typeof(Tenant))]
+		[SwaggerResponse(404, "Tenant with given id was not found.")]
+		public async Task<ActionResult<Tenant>> GetTenantById([FromRoute] Guid tenantId)
 		{
-			var tenant = await _tenantRepository.LoadTenantByIdAsync(id);
+			var tenant = await _tenantRepository.LoadTenantByIdAsync(tenantId);
 
 			if (tenant == null)
 			{
@@ -38,13 +59,20 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 			}
 
 			tenant.ClientSecrets.Clear();
-			return Ok(tenant);
+			return Ok(tenant.ToTenantModel());
 		}
 
-		[HttpGet("{name}")]
-		public async Task<ActionResult<Tenant>> GetTenantByName([FromRoute] string name)
+		/// <summary>
+		/// Finds a tenant by its name.
+		/// </summary>
+		/// <param name="tenantName">The name of the tenant to load.</param>
+		/// <returns>A tenant if found; otherwise 404.</returns>
+		[HttpGet("{tenantName}")]
+		[SwaggerResponse(200, "Tenant with given name.", typeof(Tenant))]
+		[SwaggerResponse(404, "Tenant with given name was not found.")]
+		public async Task<ActionResult<Tenant>> GetTenantByName([FromRoute] string tenantName)
 		{
-			var tenant = await _tenantRepository.LoadTenantByNameAsync(name);
+			var tenant = await _tenantRepository.LoadTenantByNameAsync(tenantName);
 
 			if (tenant == null)
 			{
@@ -52,10 +80,18 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 			}
 
 			tenant.ClientSecrets.Clear();
-			return Ok(tenant);
+			return Ok(tenant.ToTenantModel());
 		}
 
+		/// <summary>
+		/// Creates a new tenant.
+		/// </summary>
+		/// <param name="tenantToCreate">The tenant to create.</param>
+		/// <returns></returns>
 		[HttpPost]
+		[SwaggerResponse(201, "Response with the uri of the newly created tenant.")]
+		[SwaggerResponse(409, "Tenant could not be created because a tenant with the same name or id already existed.")]
+		[SwaggerResponse(422, "Tenant could not be created because the provided data was invalid.")]
 		public async Task<IActionResult> CreateTenant([FromBody] Tenant tenantToCreate)
 		{
 			if (tenantToCreate == null)
@@ -65,7 +101,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 
 			try
 			{
-				var id = await _tenantRepository.CreateTenantAsync(tenantToCreate);
+				var id = await _tenantRepository.CreateTenantAsync(tenantToCreate.ToTenant());
 				return CreatedAtAction(nameof(GetTenantById), new { id }, new { id });
 			}
 			catch
@@ -74,9 +110,23 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Creates a client secret for the <see cref="Tenant"/> to authenticate with.
+		/// </summary>
+		/// <param name="tenantId">The id of the <see cref="Tenant"/> to set a client secret for.</param>
+		/// <param name="secret">An optional secret. If none is provided, a random secret will be generated and returned.</param>
+		/// <returns>The secret the <see cref="Tenant"/> can use to authenticate against the security token service.</returns>
 		[HttpPost("{tenantId:guid}/secret")]
-		public async Task<IActionResult> CreateClientSecret([FromRoute] Guid tenantId, string secret = null)
+		[SwaggerResponse(200, "Secret for the Tenant with given id.", typeof(Secret))]
+		[SwaggerResponse(404, "Could not create secret because tenant with given id was not found.", typeof(Secret))]
+		public async Task<ActionResult<Secret>> CreateClientSecret([FromRoute] Guid tenantId, string secret = null)
 		{
+			var tenant = await _tenantRepository.LoadTenantByIdAsync(tenantId);
+			if (tenant == null)
+			{
+				return NotFound();
+			}
+
 			secret ??= KeyGenerator.GetUniqueKey(8);
 			var hash = secret.Sha512();
 
@@ -88,13 +138,20 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 				Value = hash,
 			});
 
-			return Ok(new { secret });
+			return Ok(new Secret(secret));
 		}
 
-		[HttpDelete("{id:guid}")]
-		public async Task<IActionResult> DeleteTenantById([FromRoute] Guid id)
+		/// <summary>
+		/// Deletes a tenant with a given id.
+		/// </summary>
+		/// <param name="tenantId">The id of the <see cref="Tenant"/> to delete.</param>
+		/// <returns>200, if deletion was successful; 404 if tenant was not found.</returns>
+		[HttpDelete("{tenantId:guid}")]
+		[SwaggerResponse(200, "Tenant with given id was successfully deleted.")]
+		[SwaggerResponse(404, "Tenant with given id was not found.")]
+		public async Task<IActionResult> DeleteTenantById([FromRoute] Guid tenantId)
 		{
-			if (await _tenantRepository.DeleteTenantByIdAsync(id))
+			if (await _tenantRepository.DeleteTenantByIdAsync(tenantId))
 				return Ok();
 
 			return NotFound();
@@ -147,7 +204,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		}
 	}
 
-	public static class HashExtensions
+	internal static class HashExtensions
 	{
 		/// <summary>
 		/// Creates a SHA256 hash of the specified input.
