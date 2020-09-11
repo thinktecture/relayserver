@@ -19,6 +19,8 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_basePath = options?.Value.StoragePath ?? throw new ArgumentNullException(nameof(options));
+
+			_logger.LogDebug("Using {StorageType} with storage path {StoragePath} as body store", nameof(FileBodyStore), _basePath);
 		}
 
 		/// <inheritdoc />
@@ -131,8 +133,8 @@ namespace Thinktecture.Relay.Server.Transport
 		public IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId) => new DisposeAction(() => RemoveRequestBodyAsync(requestId));
 
 		/// <inheritdoc />
-		public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId) =>
-			new DisposeAction(() => RemoveResponseBodyAsync(requestId));
+		public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId)
+			=> new DisposeAction(() => RemoveResponseBodyAsync(requestId));
 
 		private string BuildRequestFilePath(Guid id)
 			=> BuildFilePath("req_", id);

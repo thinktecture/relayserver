@@ -13,6 +13,13 @@ namespace Thinktecture.Relay.Server.Transport
 		where TResponse : class, ITargetResponse
 	{
 		/// <summary>
+		/// Registers the request for coordination.
+		/// </summary>
+		/// <param name="requestId">The unique id of the request.</param>
+		/// <returns>An <see cref="IAsyncDisposable"/> which has to be disposed when the response should be discarded.</returns>
+		IAsyncDisposable RegisterRequest(Guid requestId);
+
+		/// <summary>
 		/// Gets the response for the request.
 		/// </summary>
 		/// <param name="requestId">The unique id of the request.</param>

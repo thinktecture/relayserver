@@ -17,12 +17,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCre
 
 			var builder = new DbContextOptionsBuilder<RelayServerConfigurationDbContext>();
 
-			builder.UseNpgsql(
-				configuration.GetConnectionString("PostgreSql"),
-				optionsBuilder =>
-				{
-					optionsBuilder.MigrationsAssembly("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql");
-				});
+			builder.UseNpgsql(configuration.GetConnectionString("PostgreSql"),
+				optionsBuilder => optionsBuilder.MigrationsAssembly("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql"));
 
 			return new RelayServerConfigurationDbContext(builder.Options);
 		}

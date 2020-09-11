@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Connector.Docker
 				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
 				.AddSignalRConnectorTransport()
 				// returns simple JSON ({ "Hello": "World" }) (followed by "?mocky-delay=#ms" to simulate a long running request delayed by #)
-				.AddTarget<RelayWebTarget>("mocky1", TimeSpan.FromSeconds(2),
+				.AddTarget<RelayWebTarget>("mocky1", TimeSpan.FromSeconds(30),
 					new Uri("https://run.mocky.io/v3/ac6dd3d6-f351-4475-9bd1-c0f58030e31a"))
 				// returns HTTP status NO CONTENT (followed by "?mocky-delay=#ms" to simulate a long running request delayed by #)
 				.AddTarget<RelayWebTarget>("mocky2", TimeSpan.FromSeconds(2),

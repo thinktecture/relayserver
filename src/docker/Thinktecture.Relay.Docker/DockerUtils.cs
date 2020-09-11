@@ -9,8 +9,8 @@ namespace Thinktecture.Relay.Docker
 	public static class DockerUtils
 	{
 		public static IHostBuilder CreateHostBuilder<TStartup>(string applicationName, string[] args)
-			where TStartup : class =>
-			Host
+			where TStartup : class
+			=> Host
 				.CreateDefaultBuilder(args)
 				.ConfigureServices((context, services) => services.Configure<KestrelServerOptions>(context.Configuration.GetSection("Kestrel")))
 				.UseSerilog((context, loggerConfiguration) =>

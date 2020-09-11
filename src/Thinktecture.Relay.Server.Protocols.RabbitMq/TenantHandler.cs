@@ -43,7 +43,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
 			_connectionId = connectionId;
 
-			_model = modelFactory?.Create() ?? throw new ArgumentNullException(nameof(modelFactory));
+			_model = modelFactory?.Create($"tenant handler for {tenantId} of connection {connectionId}") ??
+				throw new ArgumentNullException(nameof(modelFactory));
 
 			_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
 			_consumer.Received += OnRequestReceived;

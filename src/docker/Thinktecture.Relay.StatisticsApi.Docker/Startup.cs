@@ -39,10 +39,7 @@ namespace Thinktecture.Relay.StatisticsApi.Docker
 			app.UseAuthorization();
 			app.UseAuthentication();
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllers();
-			});
+			app.UseEndpoints(endpoints => endpoints.MapControllers());
 		}
 	}
 }

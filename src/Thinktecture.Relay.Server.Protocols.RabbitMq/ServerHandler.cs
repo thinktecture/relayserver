@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_model = modelFactory?.Create() ?? throw new ArgumentNullException(nameof(modelFactory));
+			_model = modelFactory?.Create("server handler") ?? throw new ArgumentNullException(nameof(modelFactory));
 
 			_responseConsumer = _model.ConsumeQueue($"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
 			_responseConsumer.Received += OnResponseReceived;

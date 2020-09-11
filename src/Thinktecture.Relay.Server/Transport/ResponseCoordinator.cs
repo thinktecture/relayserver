@@ -76,45 +76,62 @@ namespace Thinktecture.Relay.Server.Transport
 		}
 
 		/// <inheritdoc />
+		public IAsyncDisposable RegisterRequest(Guid requestId)
+		{
+			if (!_waitingStates.TryAdd(requestId, new WaitingState()))
+			{
+				_logger.LogError("Request {RequestId} is already registered", requestId);
+				throw new InvalidOperationException($"Duplicate request registration for {requestId}");
+			}
+
+			return new DisposeAction(() =>
+			{
+				_waitingStates.TryRemove(requestId, out var _);
+				return Task.CompletedTask;
+			});
+		}
+
+		/// <inheritdoc />
 		public async Task<IResponseContext<TResponse>> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Waiting for response for request {RequestId}", requestId);
 
-			var waitingState = _waitingStates.GetOrAdd(requestId, _ => new WaitingState());
-			try
+			if (!_waitingStates.TryGetValue(requestId, out var waitingState))
 			{
-				cancellationToken.Register(() => waitingState.TaskCompletionSource.TrySetCanceled());
-
-				var responseContext = new ResponseContext
-				{
-					Response = await waitingState.TaskCompletionSource.Task
-				};
-
-				_logger.LogTrace("Response for request {RequestId} received {@Response}", responseContext.Response.RequestId,
-					responseContext.Response);
-
-				if (responseContext.Response.IsBodyContentOutsourced())
-				{
-					responseContext.Response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
-					_logger.LogDebug("Opened outsourced response body for {RequestId} with {BodySize} bytes", requestId,
-						responseContext.Response.BodySize);
-					responseContext.Disposable = _bodyStore.GetResponseBodyRemoveDisposable(requestId);
-				}
-				else if (responseContext.Response.BodySize > 0)
-				{
-					_logger.LogDebug("Response with inlined response body for request {RequestId} received", requestId);
-				}
-				else
-				{
-					_logger.LogDebug("Response for request {RequestId} without body received", requestId);
-				}
-
-				return responseContext;
+				return null;
 			}
-			finally
+
+			cancellationToken.Register(() =>
 			{
-				_waitingStates.TryRemove(requestId, out _);
+				_logger.LogTrace("Cancelling response waiting for request {RequestId}", requestId);
+				waitingState.TaskCompletionSource.TrySetCanceled();
+			});
+
+			var responseContext = new ResponseContext
+			{
+				Response = await waitingState.TaskCompletionSource.Task
+			};
+
+			_logger.LogTrace("Response for request {RequestId} received {@Response}", responseContext.Response.RequestId,
+				responseContext.Response);
+
+			if (responseContext.Response.IsBodyContentOutsourced())
+			{
+				responseContext.Response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
+				_logger.LogDebug("Opened outsourced response body for {RequestId} with {BodySize} bytes", requestId,
+					responseContext.Response.BodySize);
+				responseContext.Disposable = _bodyStore.GetResponseBodyRemoveDisposable(requestId);
 			}
+			else if (responseContext.Response.BodySize > 0)
+			{
+				_logger.LogDebug("Response with inlined response body for request {RequestId} received", requestId);
+			}
+			else
+			{
+				_logger.LogDebug("Response for request {RequestId} without body received", requestId);
+			}
+
+			return responseContext;
 		}
 
 		/// <inheritdoc />
@@ -133,16 +150,14 @@ namespace Thinktecture.Relay.Server.Transport
 
 		private void ProcessResponse(TResponse response)
 		{
-			var waitingState = _waitingStates.GetOrAdd(response.RequestId, _ => new WaitingState());
-			if (waitingState.TaskCompletionSource.TrySetResult(response))
+			if (!_waitingStates.TryGetValue(response.RequestId, out var waitingState) ||
+				!waitingState.TaskCompletionSource.TrySetResult(response))
 			{
-				_logger.LogDebug("Response for request {RequestId} received", response.RequestId);
+				_logger.LogDebug("Response for request {RequestId} discarded", response.RequestId);
+				return;
 			}
-			else
-			{
-				_logger.LogDebug("Response for request {RequestId} ignored", response.RequestId);
-				_waitingStates.TryRemove(response.RequestId, out _);
-			}
+
+			_logger.LogDebug("Response for request {RequestId} received", response.RequestId);
 		}
 	}
 }

@@ -24,17 +24,17 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 			services.AddControllers();
 			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
 
-			services.AddSwaggerGen(c =>
+			services.AddSwaggerGen(options =>
 			{
-				c.SwaggerDoc("Management", new OpenApiInfo()
+				options.SwaggerDoc("Management", new OpenApiInfo()
 				{
 					Version = "v1",
 					Title = "RelayServer Management API",
 					Description = "An API to manage RelayServer configuration",
 				});
 
-				c.EnableAnnotations();
-				c.IncludeXmlComments("./ManagementApiDocumentation.xml");
+				options.EnableAnnotations();
+				options.IncludeXmlComments("./ManagementApiDocumentation.xml");
 			});
 		}
 
@@ -53,19 +53,13 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllers();
-			});
+			app.UseEndpoints(endpoints => endpoints.MapControllers());
 
-			app.UseSwagger(c =>
+			app.UseSwagger(options => options.RouteTemplate = "/docs/{DocumentName}/openapi.json");
+			app.UseSwaggerUI(options =>
 			{
-				c.RouteTemplate = "/docs/{DocumentName}/openapi.json";
-			});
-			app.UseSwaggerUI(c =>
-			{
-				c.RoutePrefix = String.Empty;
-				c.SwaggerEndpoint("/docs/Management/openapi.json", "RelayServer Management API");
+				options.RoutePrefix = String.Empty;
+				options.SwaggerEndpoint("/docs/Management/openapi.json", "RelayServer Management API");
 			});
 		}
 	}

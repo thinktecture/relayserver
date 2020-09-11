@@ -2,10 +2,12 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
@@ -25,6 +27,7 @@ namespace Thinktecture.Relay.Server.Middleware
 		private readonly IRelayTargetResponseWriter<TResponse> _responseWriter;
 		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 		private readonly IRelayContext<TRequest, TResponse> _relayContext;
+		private readonly TimeSpan? _requestExpiration;
 		private readonly int _maximumBodySize;
 
 		/// <summary>
@@ -40,11 +43,12 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
 		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
 		/// <param name="connectorTransport">An <see cref="IConnectorTransport{TResponse}"/>.</param>
+		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
 		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse>> logger, IRelayClientRequestFactory<TRequest> requestFactory,
 			ITenantRepository tenantRepository, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
 			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
 			IRelayContext<TRequest, TResponse> relayContext, ITenantDispatcher<TRequest> tenantDispatcher,
-			IConnectorTransport<TResponse> connectorTransport)
+			IConnectorTransport<TResponse> connectorTransport, IOptions<RelayServerOptions> options)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
@@ -57,7 +61,9 @@ namespace Thinktecture.Relay.Server.Middleware
 
 			if (tenantDispatcher == null) throw new ArgumentNullException(nameof(tenantDispatcher));
 			if (connectorTransport == null) throw new ArgumentNullException(nameof(connectorTransport));
+			if (options == null) throw new ArgumentNullException(nameof(options));
 
+			_requestExpiration = options.Value.RequestExpiration;
 			_maximumBodySize = Math.Min(tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(),
 				connectorTransport.BinarySizeThreshold.GetValueOrDefault());
 		}
@@ -81,79 +87,112 @@ namespace Thinktecture.Relay.Server.Middleware
 				return;
 			}
 
+			using var aborted = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
+			if (_requestExpiration != null)
+			{
+				aborted.CancelAfter(_requestExpiration.Value);
+			}
+
+			_relayContext.ResponseDisposables.Add(_responseCoordinator.RegisterRequest(_relayContext.RequestId));
+
 			try
 			{
 				context.Request.EnableBuffering();
-				await context.Request.Body.DrainAsync(context.RequestAborted);
+				await context.Request.Body.DrainAsync(aborted.Token);
 
-				_relayContext.ClientRequest = await _requestFactory.CreateAsync(tenant.Id, _relayContext.RequestId, context.Request);
+				_relayContext.ClientRequest =
+					await _requestFactory.CreateAsync(tenant.Id, _relayContext.RequestId, context.Request, aborted.Token);
 				_logger.LogTrace("Parsed request {@Request}", _relayContext.ClientRequest);
 
-				// TODO call IClientRequestInterceptor
-
-				if (_relayContext.ClientRequest.BodyContent != null && context.Request.Body != _relayContext.ClientRequest.BodyContent)
-				{
-					// an interceptor changed the body content - need to dispose it properly
-					_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
-				}
+				await InterceptClientRequestAsync(context);
 
 				if (_relayContext.TargetResponse == null || _relayContext.ForceConnectorDelivery)
 				{
-					if (_relayContext.ClientRequest.BodyContent != null && await TryInlineBodyContent(context, _relayContext.ClientRequest))
-					{
-						_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
-					}
-
-					await _requestCoordinator.DeliverRequestAsync(_relayContext.ClientRequest, context.RequestAborted);
-
-					var (response, disposable) = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, context.RequestAborted);
-					_relayContext.TargetResponse = response;
-
-					if (disposable != null)
-					{
-						_relayContext.ResponseDisposables.Add(disposable);
-					}
+					await DeliverToConnectorAsync(aborted);
 				}
 
 				_logger.LogTrace("Received response for request {RequestId}", _relayContext.RequestId);
 
-				if (_relayContext.TargetResponse.RequestFailed)
-				{
-					_logger.LogWarning("The request {RequestId} failed on the connector side with {HttpStatusCode}", _relayContext.RequestId,
-						_relayContext.TargetResponse.HttpStatusCode);
-				}
+				await InterceptTargetResponseAsync();
 
-				// TODO call ITargetResponseInterceptor
-
-				await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, context.RequestAborted);
+				await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, aborted.Token);
 			}
 			catch (TransportException)
 			{
-				await _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable),
-					context.Response, context.RequestAborted);
+				await WriteErrorResponse(HttpStatusCode.ServiceUnavailable, context.Response, aborted.Token);
 			}
 			catch (TaskCanceledException)
 			{
-				_logger.LogDebug("Client aborted request {RequestId}", _relayContext.RequestId);
+				if (context.RequestAborted.IsCancellationRequested)
+				{
+					_logger.LogDebug("Client aborted request {RequestId}", _relayContext.RequestId);
+				}
+				else
+				{
+					_logger.LogWarning("Request {RequestId} expired", _relayContext.RequestId);
+					await WriteErrorResponse(HttpStatusCode.RequestTimeout, context.Response, aborted.Token);
+				}
 			}
 		}
 
-		private async Task<bool> TryInlineBodyContent(HttpContext context, TRequest request)
+		private Task InterceptClientRequestAsync(HttpContext context)
+		{
+			// TODO call IClientRequestInterceptor
+
+			if (_relayContext.ClientRequest.BodyContent != null && context.Request.Body != _relayContext.ClientRequest.BodyContent)
+			{
+				// an interceptor changed the body content - need to dispose it properly
+				_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
+			}
+
+			return Task.CompletedTask;
+		}
+
+		private async Task DeliverToConnectorAsync(CancellationTokenSource aborted)
+		{
+			if (_relayContext.ClientRequest.BodyContent != null &&
+				await TryInlineBodyContentAsync(_relayContext.ClientRequest, aborted.Token))
+			{
+				_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
+			}
+
+			await _requestCoordinator.DeliverRequestAsync(_relayContext.ClientRequest, aborted.Token);
+
+			var (response, disposable) = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, aborted.Token);
+			_relayContext.TargetResponse = response;
+
+			if (disposable != null)
+			{
+				_relayContext.ResponseDisposables.Add(disposable);
+			}
+		}
+
+		private Task InterceptTargetResponseAsync()
+		{
+			// TODO call ITargetResponseInterceptor
+
+			return Task.CompletedTask;
+		}
+
+		private async Task<bool> TryInlineBodyContentAsync(TRequest request, CancellationToken cancellationToken)
 		{
 			if (request.BodySize > _maximumBodySize)
 			{
 				_logger.LogInformation(
 					"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
 					request.BodySize, _maximumBodySize, request.RequestId);
-				request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, context.RequestAborted);
+				request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, cancellationToken);
 				request.BodyContent = null;
 				_logger.LogDebug("Outsourced from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
 				return false;
 			}
 
-			request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(context.RequestAborted);
+			request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
 			_logger.LogDebug("Inlined from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
 			return true;
 		}
+
+		private Task WriteErrorResponse(HttpStatusCode httpStatusCode, HttpResponse response, CancellationToken cancellationToken)
+			=> _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(httpStatusCode), response, cancellationToken);
 	}
 }

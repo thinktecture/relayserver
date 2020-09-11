@@ -30,8 +30,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_responseModel = modelFactory.Create();
-			_acknowledgeModel = modelFactory.Create();
+			_responseModel = modelFactory.Create("response dispatcher");
+			_acknowledgeModel = modelFactory.Create("acknowledge dispatcher");
 
 			BinarySizeThreshold = options?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(options));
 		}

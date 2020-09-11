@@ -15,8 +15,6 @@ docker run `
   -d `
   postgres
 
-docker volume create relay_transport_rabbitmq1
-
 docker rm -f relay_transport_rabbitmq1
 docker run `
   --name relay_transport_rabbitmq1 `
@@ -25,13 +23,10 @@ docker run `
   -e RABBITMQ_DEFAULT_USER=relayserver `
   -e RABBITMQ_DEFAULT_PASS=<Strong!Passw0rd> `
   -e RABBITMQ_ERLANG_COOKIE=<ThisIsSecret> `
-  -v relay_transport_rabbitmq1:/var/lib/rabbitmq `
   -p 5672:5672 `
   -p 15672:15672 `
   -d `
   rabbitmq:management
-
-docker volume create relay_transport_rabbitmq2
 
 docker rm -f relay_transport_rabbitmq2
 docker run `
@@ -41,22 +36,31 @@ docker run `
   -e RABBITMQ_DEFAULT_USER=relayserver `
   -e RABBITMQ_DEFAULT_PASS=<Strong!Passw0rd> `
   -e RABBITMQ_ERLANG_COOKIE=<ThisIsSecret> `
-  -v relay_transport_rabbitmq2:/var/lib/rabbitmq `
   -p 5673:5672 `
   -p 15673:15672 `
   -d `
   rabbitmq:management
 
 # Wait for rabbits to start up
-Start-Sleep 5
+Start-Sleep 10
 
-# Enable Rabbit clustering
+# Enable clustering
 docker exec --user rabbitmq relay_transport_rabbitmq2 rabbitmqctl stop_app
 docker exec --user rabbitmq relay_transport_rabbitmq2 rabbitmqctl join_cluster rabbit@relay_transport_rabbitmq1
 docker exec --user rabbitmq relay_transport_rabbitmq2 rabbitmqctl start_app
 
 # Set all queues to mirror on all nodes
-docker exec --user rabbitmq relay_transport_rabbitmq1 rabbitmqctl set_policy ha "." '{\"ha-mode\":\"all\"}'
+docker exec --user rabbitmq relay_transport_rabbitmq1 rabbitmqctl set_policy ha '.*' '{\"ha-mode\":\"all\"}'
+docker exec --user rabbitmq relay_transport_rabbitmq1 rabbitmqctl set_cluster_name relay_transport_rabbitmq
+
+# Enable well-known guest user
+
+docker exec --user rabbitmq relay_transport_rabbitmq1 rabbitmqctl add_user guest guest
+docker exec --user rabbitmq relay_transport_rabbitmq1 rabbitmqctl set_user_tags guest administrator
+docker exec --user rabbitmq relay_transport_rabbitmq1 rabbitmqctl set_permissions --vhost '/' guest '.*' '.*' '.*'
+
+# Enable request queue expiration
+docker exec --user rabbitmq relay_transport_rabbitmq1 rabbitmqctl set_policy expiry 'Requests .+' '{\"expires\":5000,\"ha-mode\":\"all\"}' --apply-to queues
 
 docker volume create relay_persistence_seq
 docker rm -f relay_logging_seq

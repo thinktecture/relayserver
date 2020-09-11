@@ -36,11 +36,9 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <param name="queueName">The name of the queue.</param>
 		/// <param name="durable">The queue should survive a broker restart.</param>
 		/// <param name="autoDelete">The queue should be deleted when the last consumer goes away.</param>
-		public static void EnsureQueue(this IModel model, string queueName, bool durable = true, bool autoDelete = true)
+		private static void EnsureQueue(this IModel model, string queueName, bool durable = true, bool autoDelete = true)
 		{
 			model.ExchangeDeclare(Constants.ExchangeName, ExchangeType.Direct);
-			// TODO queue TTL "x-expires"
-			// TODO message TTL "x-message-ttl"
 			model.QueueDeclare(queueName, autoDelete: autoDelete, durable: durable, exclusive: false);
 			model.QueueBind(queueName, Constants.ExchangeName, queueName);
 		}
