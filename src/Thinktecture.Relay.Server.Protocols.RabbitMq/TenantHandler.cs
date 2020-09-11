@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public event AsyncEventHandler<TRequest> RequestReceived;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="TenantHandler{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="TenantHandler{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
 		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>

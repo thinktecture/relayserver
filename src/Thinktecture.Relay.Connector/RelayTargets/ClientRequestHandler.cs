@@ -56,7 +56,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		}
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="ClientRequestHandler{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="ClientRequestHandler{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>

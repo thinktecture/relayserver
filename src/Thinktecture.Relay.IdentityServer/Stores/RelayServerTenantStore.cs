@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 		private readonly ITenantRepository _tenantRepository;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayServerTenantStore"/>.
+		/// Initializes a new instance of the <see cref="RelayServerTenantStore"/> class.
 		/// </summary>
 		public RelayServerTenantStore(ITenantRepository tenantRepository)
 			=> _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));

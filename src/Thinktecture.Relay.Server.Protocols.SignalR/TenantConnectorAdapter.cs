@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public string ConnectionId { get; }
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="TenantConnectorAdapter{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="TenantConnectorAdapter{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="hubContext">An <see cref="IHubContext{THub}"/>.</param>
 		/// <param name="tenantId">The unique id of the tenant.</param>

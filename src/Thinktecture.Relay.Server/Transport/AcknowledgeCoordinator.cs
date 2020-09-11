@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly ConcurrentDictionary<Guid, AcknowledgeState> _requests = new ConcurrentDictionary<Guid, AcknowledgeState>();
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="AcknowledgeCoordinator{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="AcknowledgeCoordinator{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="serverHandler">An <see cref="IServerHandler{TResponse}"/>.</param>

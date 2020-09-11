@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private readonly IConnection _connection;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="ModelFactory"/>.
+		/// Initializes a new instance of the <see cref="ModelFactory"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="connection">The <see cref="IConnection"/>.</param>

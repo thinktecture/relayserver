@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		protected readonly HttpClient HttpClient;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayWebTarget{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="RelayWebTarget{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="responseFactory">An <see cref="IRelayTargetResponseFactory{TResponse}"/>.</param>

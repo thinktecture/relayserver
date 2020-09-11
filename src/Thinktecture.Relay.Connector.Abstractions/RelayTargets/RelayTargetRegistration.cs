@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		public TimeSpan Timeout { get; }
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayTargetRegistration{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="RelayTargetRegistration{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="id">The unique id of the target.</param>
 		/// <param name="factory">The factory function to create an instance of the target.</param>
@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 		where TResponse : ITargetResponse
 	{
 		/// <summary>
-		/// Initializes a new instance of <see cref="RelayTargetRegistration{TTarget,TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="RelayTargetRegistration{TTarget,TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="id">The unique id of the target.</param>
 		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>

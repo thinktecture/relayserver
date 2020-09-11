@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="ServerHandler{TResponse}"/>.
+		/// Initializes a new instance of the <see cref="ServerHandler{TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>

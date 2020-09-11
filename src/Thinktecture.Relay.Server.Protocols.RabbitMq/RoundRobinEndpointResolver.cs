@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private readonly AmqpTcpEndpoint[] _endpoints;
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="RoundRobinEndpointResolver"/>.
+		/// Initializes a new instance of the <see cref="RoundRobinEndpointResolver"/> class.
 		/// </summary>
 		/// <param name="endpoints">The <see cref="AmqpTcpEndpoint"/>s to use.</param>
 		public RoundRobinEndpointResolver(IEnumerable<AmqpTcpEndpoint> endpoints)

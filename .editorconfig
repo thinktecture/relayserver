@@ -17,7 +17,6 @@ trim_trailing_whitespace = false
 indent_style = tab
 tab_width = 3
 indent_size=tab
-resharper_csharp_indent_size=3
 
 [*.ts]
 ij_typescript_spaces_within_imports = true

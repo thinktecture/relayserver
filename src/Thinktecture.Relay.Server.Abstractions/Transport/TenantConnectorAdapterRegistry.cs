@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Server.Transport
 			new ConcurrentDictionary<string, TenantConnectorAdapterRegistration>();
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.
+		/// Initializes a new instance of the <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
 		/// <param name="tenantConnectorAdapterFactory">An <see cref="ITenantConnectorAdapterFactory{TRequest}"/>.</param>
