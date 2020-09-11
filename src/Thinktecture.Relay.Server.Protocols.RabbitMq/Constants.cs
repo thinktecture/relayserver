@@ -2,7 +2,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	internal static class Constants
 	{
-		public const string ExchangeName = "Relay Server";
+		public const string ExchangeName = "RelayServer";
 
 		/// <summary>
 		/// The prefix (including trailing white-space) for request queues.

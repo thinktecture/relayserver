@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.Connector
 {
 	/// <summary>
-	/// A connection to a relay server.
+	/// A connection to a RelayServer.
 	/// </summary>
 	public class RelayConnector
 	{
