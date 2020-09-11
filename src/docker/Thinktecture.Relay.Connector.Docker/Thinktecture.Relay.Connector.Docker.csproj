@@ -2,10 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>ad7f0824-82ea-4e35-aa6b-fde043b65d0c</UserSecretsId>
-    <OutputType>Exe</OutputType>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\</DockerfileContext>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <!-- Use shared information for NuGet packaging -->
+  <Import Project="..\..\shared\ProjectProperties.shared.props" />
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,4 +40,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
 </Project>

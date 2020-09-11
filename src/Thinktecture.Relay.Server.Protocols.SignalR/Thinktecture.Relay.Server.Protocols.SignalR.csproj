@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Title>Thinktecture RelayServer Server SignalR Protocol</Title>
     <Description>Contains the SignalR server transport implementation for the RelayServer.</Description>
     <Summary></Summary>
   </PropertyGroup>

@@ -40,8 +40,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="\" Visible="false" />
-    <None Include="$(MSBuildThisFileDirectory)Logo_T_Nontransparent.png" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="\" Visible="false"/>
+    <None Include="$(MSBuildThisFileDirectory)Logo_T_Nontransparent.png" Pack="true" PackagePath="\" Visible="false"/>
   </ItemGroup>
 
   <!-- Enable sourcelink support for debugging our sources -->
@@ -53,6 +53,7 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup Condition="'$(DISABLE_SOURCELINK)' != 'true'">
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <SourceRoot Include="$(MSBuildThisFileDirectory)/"/>
   </ItemGroup>
 </Project>

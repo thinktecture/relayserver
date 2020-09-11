@@ -9,6 +9,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
+	/// <inheritdoc cref="IConnectorConnection" />
 	public class ConnectorConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
@@ -21,6 +22,12 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private IConnectorTransport<TResponse> Transport => this;
 		private string _connectionId;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ConnectorConnection{TRequest,TResponse}"/> class.
+		/// </summary>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
+		/// <param name="connectionFactory">The <see cref="ConnectionFactory"/>.</param>
+		/// <param name="clientRequestHandler">An <see cref="IClientRequestHandler{TRequest,TResponse}"/>.</param>
 		public ConnectorConnection(ILogger<ConnectorConnection<TRequest, TResponse>> logger, ConnectionFactory connectionFactory,
 			IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
 		{
@@ -122,6 +129,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_logger.LogInformation("Disconnected on connection {ConnectionId}", _connectionId);
 		}
 
+		/// <inheritdoc />
 		public async ValueTask DisposeAsync()
 		{
 			await _connection.DisposeAsync();

@@ -4,9 +4,11 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\</DockerfileContext>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DocumentationFile>ManagementApiDocumentation.xml</DocumentationFile>
   </PropertyGroup>
+
+  <!-- Use shared information for NuGet packaging -->
+  <Import Project="..\..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
     <None Update="ManagementApiDocumentation.xml">

@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <summary>
-	/// A factory implementation for creating <see cref="IModel"/> instances.
+	/// An implementation of a factory to create an instance of a class implementing <see cref="IModel"/>.
 	/// </summary>
 	public class ModelFactory
 	{
