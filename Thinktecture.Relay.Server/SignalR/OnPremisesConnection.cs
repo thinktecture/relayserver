@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Config;
+using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.SignalR
@@ -81,23 +82,28 @@ namespace Thinktecture.Relay.Server.SignalR
 
 		private async Task ForwardClientRequestAsync(string connectionId, IOnPremiseConnectorRequest request)
 		{
-			var uri = new Uri(new Uri("http://localhost"), request.Url);
-
-			_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
-				connectionId, request.RequestId, request.HttpMethod, _configuration.LogSensitiveData ? uri.PathAndQuery : uri.AbsolutePath, request.OriginId, request.ContentLength);
-
-			var json = JObject.FromObject(request);
-			if (request.Properties != null)
+			try
 			{
-				json.Remove(nameof(IOnPremiseConnectorRequest.Properties));
+				_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
+					connectionId, request.RequestId, request.HttpMethod, _configuration.LogSensitiveData ? request.Url : new UrlParameterFilter(request.Url).ToString(), request.OriginId, request.ContentLength);
 
-				foreach (var kvp in request.Properties)
+				var json = JObject.FromObject(request);
+				if (request.Properties != null)
 				{
-					json[kvp.Key] = JToken.FromObject(kvp.Value);
-				}
-			}
+					json.Remove(nameof(IOnPremiseConnectorRequest.Properties));
 
-			await Connection.Send(connectionId, json).ConfigureAwait(false);
+					foreach (var kvp in request.Properties)
+					{
+						json[kvp.Key] = JToken.FromObject(kvp.Value);
+					}
+				}
+
+				await Connection.Send(connectionId, json).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "An error occured forwarding request to connector. request={@Request}");
+			}
 		}
 
 		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
