@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		protected readonly Encoding Encoding = new UTF8Encoding(false, true);
 		protected readonly ILogger Logger;
-		
+
 		protected string Exchange { get; private set; }
 		protected string ChannelId { get; private set; }
 		protected IConfiguration Configuration { get; private set; }
@@ -98,7 +98,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		protected void Send(byte[] data, IBasicProperties properties)
 		{
-			Logger.Verbose("Sending data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+			Logger.Verbose("Sending data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, data-length={DataLength}", Exchange, QueueName, ChannelId, data.Length);
 
 			lock (_model)
 			{
@@ -129,6 +129,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 					void OnReceived(object sender, BasicDeliverEventArgs args)
 					{
+						Logger?.Verbose("Received data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, data-length={DataLength}", Exchange, QueueName, ChannelId, args.Body.Length);
 						try
 						{
 							var json = Encoding.GetString(args.Body);

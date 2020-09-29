@@ -17,7 +17,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
-## Version 2.3.0-rc6
+## Version 2.3.0-rc7
 
 * RabbitMQ Improvements
 
@@ -63,6 +63,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * The acknowledgement was not done on the correct RabbitMQ model.
   * An already deactivated connection was repeatingly deactivated again.
   * The config message was accidentally sent to On-Premise Connectors not supporting it.
+  * Malformed query strings prevented the relaying of the request.
 
 ## Version 2.2.0
 
