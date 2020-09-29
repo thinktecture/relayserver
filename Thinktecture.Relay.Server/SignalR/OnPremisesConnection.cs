@@ -102,7 +102,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "An error occured forwarding request to connector. request={@Request}");
+				_logger?.Error(ex, "An error occured forwarding request to connection. connection-id={ConnectionId}, request={@Request}", connectionId, request);
 			}
 		}
 

@@ -54,7 +54,7 @@
   * Das Acknowledgement wurde nicht auf dem korrekten RabbitMQ-Model durchgeführt.
   * Eine bereits deaktivierter On-Premise Connector wurde wiederholt deaktiviert.
   * Eine Konfigurationsnachricht wurde auch an On-Premise Connectoren geschickt, welche diese gar nicht unterstützt haben.
-  * Inkorrekte query strings verhindern nun nicht mehr das weiterleiten von Requests.
+  * Inkorrekte Query Strings verhinderten das Weiterleiten von Requests.
 
 ## Version 2.2.0
 

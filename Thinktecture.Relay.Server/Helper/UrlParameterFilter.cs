@@ -4,16 +4,16 @@ using System.Linq;
 
 namespace Thinktecture.Relay.Server.Helper
 {
-	public class UrlParameterFilter
+	internal class UrlParameterFilter
 	{
 		private readonly List<string> _queryKeys = new List<string>();
+
 		private string _path;
 		private bool _wrongQueryStart;
 
 		private string Separator => _wrongQueryStart ? "&" : "?";
 
-		public UrlParameterFilter(string url)
-			=> ParseUrl(url);
+		public UrlParameterFilter(string url) => ParseUrl(url);
 
 		private void ParseUrl(string url)
 		{
