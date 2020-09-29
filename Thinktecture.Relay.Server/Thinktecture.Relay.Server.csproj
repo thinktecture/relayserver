@@ -300,7 +300,7 @@
     <Compile Include="Communication\RabbitMq\RabbitMqRequestChannel.cs" />
     <Compile Include="Communication\RabbitMq\RabbitMqResponseChannel.cs" />
     <Compile Include="Dto\LinkConfiguration.cs" />
-    <Compile Include="Helper\UrlParameterFilter.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Interceptor\IInterceptedStream.cs" />
     <Compile Include="Interceptor\InterceptedStreamExtensions.cs" />
     <Compile Include="IO\SimpleBase64InplaceDecoder.cs" />
@@ -514,7 +514,6 @@
       <Name>Thinktecture.Relay</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

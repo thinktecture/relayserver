@@ -8,7 +8,6 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Config;
-using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.OnPremise;
 
 namespace Thinktecture.Relay.Server.SignalR
@@ -85,7 +84,7 @@ namespace Thinktecture.Relay.Server.SignalR
 			try
 			{
 				_logger?.Verbose("Forwarding client request to connection. connection-id={ConnectionId}, request-id={RequestId}, http-method={RequestMethod}, url={RequestUrl}, origin-id={OriginId}, body-length={RequestContentLength}",
-					connectionId, request.RequestId, request.HttpMethod, _configuration.LogSensitiveData ? request.Url : new UrlParameterFilter(request.Url).ToString(), request.OriginId, request.ContentLength);
+					connectionId, request.RequestId, request.HttpMethod, _configuration.LogSensitiveData ? request.Url : request.Url.StripQueryString(), request.OriginId, request.ContentLength);
 
 				var json = JObject.FromObject(request);
 				if (request.Properties != null)
