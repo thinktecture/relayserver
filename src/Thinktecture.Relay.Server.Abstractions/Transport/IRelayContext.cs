@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
@@ -36,7 +37,7 @@ namespace Thinktecture.Relay.Server.Transport
 		bool ConnectorAvailable { get; }
 
 		/// <summary>
-		/// Indicates that the regardless of an already available <see cref="TargetResponse"/> the <see cref="ClientRequest"/> should be send
+		/// Indicates that regardless of an already available <see cref="TargetResponse"/> the <see cref="ClientRequest"/> should be send
 		/// to a connector for further processing by a target (ignoring the results).
 		/// </summary>
 		bool ForceConnectorDelivery { get; set; }
@@ -45,5 +46,10 @@ namespace Thinktecture.Relay.Server.Transport
 		/// One or more <see cref="IAsyncDisposable"/> which needs to be disposed at the end of the request.
 		/// </summary>
 		IList<IAsyncDisposable> ResponseDisposables { get; }
+
+		/// <summary>
+		/// The <see cref="HttpContext"/>.
+		/// </summary>
+		HttpContext HttpContext { get; }
 	}
 }
