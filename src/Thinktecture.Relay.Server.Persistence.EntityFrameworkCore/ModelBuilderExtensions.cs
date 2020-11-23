@@ -18,7 +18,9 @@ namespace Microsoft.EntityFrameworkCore
 		{
 			return modelBuilder
 				.ConfigureTenant()
-				.ConfigureClientSecret();
+				.ConfigureClientSecret()
+				.ConfigureOrigin()
+				.ConfigureConnection();
 		}
 
 		/// <summary>
@@ -83,6 +85,48 @@ namespace Microsoft.EntityFrameworkCore
 					.Property(t => t.Value)
 					.HasMaxLength(4000)
 					.IsRequired();
+			});
+		}
+
+		/// <summary>
+		/// Configures the <see cref="Origin"/> entity.
+		/// </summary>
+		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
+		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
+		public static ModelBuilder ConfigureOrigin(this ModelBuilder modelBuilder)
+		{
+			return modelBuilder.Entity<Origin>(origin =>
+			{
+				origin
+					.Property(o => o.Id)
+					.ValueGeneratedNever();
+
+				origin
+					.HasKey(t => t.Id);
+			});
+		}
+
+		/// <summary>
+		/// Configures the <see cref="Connection"/> entity.
+		/// </summary>
+		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
+		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
+		public static ModelBuilder ConfigureConnection(this ModelBuilder modelBuilder)
+		{
+			return modelBuilder.Entity<Connection>(connection =>
+			{
+				connection
+					.HasKey(t => t.Id);
+
+				connection
+					.HasOne(c => c.Origin)
+					.WithMany(o => o.Connections)
+					.HasForeignKey(c => c.OriginId);
+
+				connection
+					.HasOne(c => c.Tenant)
+					.WithMany(t => t.Connections)
+					.HasForeignKey(c => c.TenantId);
 			});
 		}
 	}
