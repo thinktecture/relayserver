@@ -14,7 +14,7 @@ namespace Microsoft.EntityFrameworkCore
 		/// </summary>
 		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
 		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
-		public static ModelBuilder ConfigureConfigurationEntities(this ModelBuilder modelBuilder)
+		public static ModelBuilder ConfigureEntities(this ModelBuilder modelBuilder)
 		{
 			return modelBuilder
 				.ConfigureTenant()
