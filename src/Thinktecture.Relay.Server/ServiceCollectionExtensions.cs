@@ -68,6 +68,8 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.TryAddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();
 			services.TryAddSingleton<IAcknowledgeCoordinator, AcknowledgeCoordinator<TRequest, TResponse>>();
 
+			services.AddHostedService<OriginStatisticsWriter>();
+
 			services.AddHealthChecks()
 				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });
 
