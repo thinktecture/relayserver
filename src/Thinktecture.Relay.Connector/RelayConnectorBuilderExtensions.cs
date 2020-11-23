@@ -13,19 +13,19 @@ namespace Microsoft.Extensions.DependencyInjection
 	public static class RelayConnectorBuilderExtensions
 	{
 		/// <summary>
-		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
+		/// Adds an <see cref="IRelayTarget{ClientRequest,TargetResponse}"/>.
 		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
+		/// <param name="builder">The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse}"/>.</param>
 		/// <param name="id">The unique id of the target.</param>
 		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
 		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
 		/// <typeparam name="TTarget">The type of target.</typeparam>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
+		/// <returns>The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse}"/>.</returns>
 		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddTarget<TTarget>(
 			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id, TimeSpan? timeout = null,
 			params object[] parameters)
 			where TTarget : IRelayTarget<ClientRequest, TargetResponse>
-			=> builder.AddTarget<TTarget, ClientRequest, TargetResponse>(id, timeout, parameters);
+			=> builder.AddTarget<ClientRequest, TargetResponse, TTarget>(id, timeout, parameters);
 
 		/// <summary>
 		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
@@ -34,16 +34,16 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="id">The unique id of the target.</param>
 		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
 		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
-		/// <typeparam name="TTarget">The type of target.</typeparam>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
+		/// <typeparam name="TTarget">The type of target.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<TRequest, TResponse> AddTarget<TTarget, TRequest, TResponse>(
+		public static IRelayConnectorBuilder<TRequest, TResponse> AddTarget<TRequest, TResponse, TTarget>(
 			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id, TimeSpan? timeout = null,
 			params object[] parameters)
-			where TTarget : IRelayTarget<TRequest, TResponse>
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
+			where TTarget : IRelayTarget<TRequest, TResponse>
 		{
 			builder.Services.Configure<RelayTargetServiceOptions<TRequest, TResponse>>(configure =>
 			{
