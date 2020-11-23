@@ -17,6 +17,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		public static IServiceCollection AddRelayServerEntityFrameworkCoreRepositories(this IServiceCollection services)
 		{
 			services.TryAddScoped<ITenantRepository, TenantRepository>();
+			services.TryAddScoped<IStatisticsRepository, StatisticsRepository>();
 			services.AddHealthChecks()
 				.AddDbContextCheck<RelayDbContext>();
 
