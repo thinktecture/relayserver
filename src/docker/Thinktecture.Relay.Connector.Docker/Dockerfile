@@ -1,35 +1,45 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
-WORKDIR /app
-
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS dependencies
 WORKDIR /src
 
 # Copy only project files for restore
 # Dependencies
-COPY ["Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj", "Thinktecture.Relay.Abstractions/"]
-COPY ["Thinktecture.Relay.Connector/Thinktecture.Relay.Connector.csproj", "Thinktecture.Relay.Connector/"]
-COPY ["Thinktecture.Relay.Connector.Abstractions/Thinktecture.Relay.Connector.Abstractions.csproj", "Thinktecture.Relay.Connector.Abstractions/"]
-COPY ["Thinktecture.Relay.Connector.Protocols.SignalR/Thinktecture.Relay.Connector.Protocols.SignalR.csproj", "Thinktecture.Relay.Connector.Protocols.SignalR/"]
+COPY ./docker/Thinktecture.Relay.Docker/Thinktecture.Relay.Docker.csproj ./docker/Thinktecture.Relay.Docker/
+COPY ./Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj ./Thinktecture.Relay.Abstractions/
+COPY ./Thinktecture.Relay.Connector/Thinktecture.Relay.Connector.csproj ./Thinktecture.Relay.Connector/
+COPY ./Thinktecture.Relay.Connector.Abstractions/Thinktecture.Relay.Connector.Abstractions.csproj ./Thinktecture.Relay.Connector.Abstractions/
+COPY ./Thinktecture.Relay.Connector.Protocols.SignalR/Thinktecture.Relay.Connector.Protocols.SignalR.csproj ./Thinktecture.Relay.Connector.Protocols.SignalR/
 
 # Project
-COPY ["/docker/Thinktecture.Relay.Connector.Docker/Thinktecture.Relay.Connector.Docker.csproj", "docker/Thinktecture.Relay.Connector.Docker/"]
-RUN dotnet restore "docker/Thinktecture.Relay.Connector.Docker/Thinktecture.Relay.Connector.Docker.csproj"
+FROM dependencies AS project
+COPY ./docker/Thinktecture.Relay.Connector.Docker/Thinktecture.Relay.Connector.Docker.csproj ./docker/Thinktecture.Relay.Connector.Docker/
 
-# Copy all sources (complete src directory)
-COPY . .
+# Restore packages
+FROM project AS restore
+WORKDIR /src/docker/Thinktecture.Relay.Connector.Docker
+RUN dotnet restore Thinktecture.Relay.Connector.Docker.csproj
 
-# Build
-WORKDIR "/src/docker/Thinktecture.Relay.Connector.Docker"
-RUN dotnet build "Thinktecture.Relay.Connector.Docker.csproj" -c Release -o /app/build -p:DISABLE_SOURCELINK=true
+# Copy sources
+FROM restore AS source
+WORKDIR /src
 
-FROM build AS publish
-RUN dotnet publish "Thinktecture.Relay.Connector.Docker.csproj" -c Release -o /app/publish -p:DISABLE_SOURCELINK=true
+COPY ./shared ./shared
+COPY ./docker/Thinktecture.Relay.Docker ./docker/Thinktecture.Relay.Docker
+COPY ./Thinktecture.Relay.Abstractions ./Thinktecture.Relay.Abstractions
+COPY ./Thinktecture.Relay.Connector ./Thinktecture.Relay.Connector
+COPY ./Thinktecture.Relay.Connector.Abstractions ./Thinktecture.Relay.Connector.Abstractions
+COPY ./Thinktecture.Relay.Connector.Protocols.SignalR ./Thinktecture.Relay.Connector.Protocols.SignalR
 
-FROM base AS final
+COPY ./docker/Thinktecture.Relay.Connector.Docker ./docker/Thinktecture.Relay.Connector.Docker
+
+# Build and publish
+FROM source AS publish
+WORKDIR /src/docker/Thinktecture.Relay.Connector.Docker
+RUN dotnet publish Thinktecture.Relay.Connector.Docker.csproj --no-restore -c Release -o /app -p:DISABLE_SOURCELINK=true
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+COPY --from=publish /app .
 
 EXPOSE 80
 

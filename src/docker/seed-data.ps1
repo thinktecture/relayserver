@@ -1,5 +1,4 @@
 # Helper script that seeds tenants
-Push-Location $PSScriptRoot
 
 function Create-Tenant {
     $resultCode
