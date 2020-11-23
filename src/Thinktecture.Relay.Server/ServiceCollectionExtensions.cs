@@ -5,6 +5,7 @@ using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Factories;
 using Thinktecture.Relay.Server.HealthChecks;
 using Thinktecture.Relay.Server.Middleware;
+using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Services;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
@@ -67,8 +68,10 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.TryAddSingleton<IResponseCoordinator<TResponse>, ResponseCoordinator<TRequest, TResponse>>();
 			services.TryAddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();
 			services.TryAddSingleton<IAcknowledgeCoordinator, AcknowledgeCoordinator<TRequest, TResponse>>();
+			services.TryAddSingleton<IOriginStatisticsWriter, OriginStatisticsWriter>();
+			services.TryAddSingleton<IConnectionStatisticsWriter, ConnectionStatisticsWriter>();
 
-			services.AddHostedService<OriginStatisticsWriter>();
+			services.AddHostedService<ServerStatisticsWriter>();
 
 			services.AddHealthChecks()
 				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready", });
