@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.ConfigureConfigurationEntities();
+			modelBuilder.ConfigureEntities();
 		}
 	}
 }
