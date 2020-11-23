@@ -10,7 +10,7 @@ namespace Microsoft.EntityFrameworkCore
 	public static class ModelBuilderExtensions
 	{
 		/// <summary>
-		/// Configures the <see cref="RelayServerConfigurationDbContext"/> entities.
+		/// Configures the <see cref="RelayDbContext"/> entities for configuration.
 		/// </summary>
 		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
 		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>

@@ -11,13 +11,13 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 	/// <inheritdoc />
 	public class TenantRepository : ITenantRepository
 	{
-		private readonly RelayServerConfigurationDbContext _dbContext;
+		private readonly RelayDbContext _dbContext;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TenantRepository"/> class.
 		/// </summary>
 		/// <param name="dbContext">The Entity Framework Core database context.</param>
-		public TenantRepository(RelayServerConfigurationDbContext dbContext)
+		public TenantRepository(RelayDbContext dbContext)
 		{
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}

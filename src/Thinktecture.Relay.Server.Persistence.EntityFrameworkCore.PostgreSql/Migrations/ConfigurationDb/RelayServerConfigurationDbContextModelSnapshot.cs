@@ -8,7 +8,7 @@ using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.Migrations.ConfigurationDb
 {
-    [DbContext(typeof(RelayServerConfigurationDbContext))]
+    [DbContext(typeof(RelayDbContext))]
     partial class RelayServerConfigurationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
