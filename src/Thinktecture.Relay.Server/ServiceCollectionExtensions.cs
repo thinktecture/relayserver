@@ -71,7 +71,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddHostedService<OriginStatisticsWriter>();
 
 			services.AddHealthChecks()
-				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });
+				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready", });
 
 			return new RelayServerBuilder<TRequest, TResponse>(services);
 		}

@@ -1,12 +1,10 @@
 using System;
-using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
-using Thinktecture.Relay.Server.Protocols.RabbitMq;
 
 namespace Thinktecture.Relay.Server.Docker
 {
