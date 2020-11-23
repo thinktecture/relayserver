@@ -56,10 +56,10 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <summary>
 		/// Adds the file-based body store.
 		/// </summary>
-		/// <typeparam name="TRequest">The type of request.</typeparam>
-		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
 		/// <param name="configure">An optional configure callback for setting the <see cref="FileBodyStoreOptions"/>.</param>
+		/// <typeparam name="TRequest">The type of request.</typeparam>
+		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
 		/// <remarks>Use a shared location between all server instances.</remarks>
 		public static IRelayServerBuilder<TRequest, TResponse> AddFileBodyStore<TRequest, TResponse>(

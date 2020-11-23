@@ -46,8 +46,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			builder.Services.Configure(configure);
 
-			builder.Services.AddTransient<IPostConfigureOptions<RelayConnectorOptions>,
-				RelayConnectorPostConfigureOptions>();
+			builder.Services.AddTransient<IPostConfigureOptions<RelayConnectorOptions>, RelayConnectorPostConfigureOptions>();
 			builder.Services.AddTransient<IConfigurationRetriever<DiscoveryDocument>, RelayServerConfigurationRetriever>();
 			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>,
 				ConfigureAccessTokenManagementOptions>();
