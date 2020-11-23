@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace Thinktecture.Relay.Server.Persistence.Models
 {
 	/// <summary>
-	/// Represents a tenant. A tenant can have multiple connectors on one physical on-premises
+	/// Represents a tenant. A tenant can have multiple connectors on one physical on-premises.
 	/// </summary>
 	public class Tenant
 	{
