@@ -44,6 +44,8 @@ namespace Microsoft.Extensions.DependencyInjection
 				services.Configure(configure);
 			}
 
+			services.AddHttpContextAccessor();
+
 			services.AddAuthorization(configureAuthorization =>
 			{
 				configureAuthorization.AddPolicy(Constants.DefaultAuthenticationPolicy, configurePolicy =>
