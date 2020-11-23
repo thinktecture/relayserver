@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
@@ -35,6 +36,8 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
 		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
+		private readonly IConnectionStatisticsWriter _connectionStatisticsWriter;
+		private readonly RelayServerContext _relayServerContext;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ConnectorHub{TRequest,TResponse}"/> class.
@@ -43,15 +46,22 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
 		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
 		/// <param name="responseCoordinator">An <see cref="IResponseCoordinator{TResponse}"/>.</param>
+		/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
+		/// <param name="relayServerContext">An <see cref="RelayServerContext"/>.</param>
 		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
 			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
-			IResponseCoordinator<TResponse> responseCoordinator)
+			IResponseCoordinator<TResponse> responseCoordinator,
+			IConnectionStatisticsWriter connectionStatisticsWriter,
+			RelayServerContext relayServerContext)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
 			_tenantConnectorAdapterRegistry =
 				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
 			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
+			this._connectionStatisticsWriter =
+				connectionStatisticsWriter ?? throw new ArgumentNullException(nameof(connectionStatisticsWriter));
+			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
 		}
 
 		/// <inheritdoc />
@@ -61,6 +71,11 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			_logger.LogDebug("Connection incoming for tenant {@Tenant}", tenant);
 			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
 
+			await _connectionStatisticsWriter.CreateConnectionAsync(Context.ConnectionId,
+				tenant.Id,
+				_relayServerContext.OriginId,
+				Context.GetHttpContext().Connection.RemoteIpAddress);
+
 			await base.OnConnectedAsync();
 		}
 
@@ -69,6 +84,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		{
 			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
 			_logger.LogDebug("Connection disconnected for tenant {@Tenant}", Context.User.GetTenantInfo());
+			await _connectionStatisticsWriter.CloseConnectionAsync(Context.ConnectionId);
 
 			await base.OnDisconnectedAsync(exception);
 		}
@@ -83,7 +99,11 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		/// <seealso cref="IConnectorTransport{TResponse}.DeliverAsync"/>
 		[HubMethodName("Deliver")]
-		public async Task DeliverAsync(TResponse response) => await _responseCoordinator.ProcessResponseAsync(response);
+		public async Task DeliverAsync(TResponse response)
+		{
+			await _responseCoordinator.ProcessResponseAsync(response);
+			await _connectionStatisticsWriter.HeartbeatConnectionAsync(Context.ConnectionId);
+		}
 
 		/// <summary>
 		/// Hub method.
@@ -92,7 +112,11 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		/// <seealso cref="IConnectorTransport{TResponse}.AcknowledgeAsync"/>
 		[HubMethodName("Acknowledge")]
-		public async Task AcknowledgeAsync(IAcknowledgeRequest request) => await _acknowledgeCoordinator.AcknowledgeRequestAsync(request);
+		public async Task AcknowledgeAsync(IAcknowledgeRequest request)
+		{
+			await _acknowledgeCoordinator.AcknowledgeRequestAsync(request);
+			await _connectionStatisticsWriter.HeartbeatConnectionAsync(Context.ConnectionId);
+		}
 
 		/// <summary>
 		/// Hub method.

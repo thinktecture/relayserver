@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -85,21 +86,103 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		{
 			var filterTime = DateTime.UtcNow - oldestToKeep;
 
-			_logger.LogDebug("Cleaning up statistics storage: Deleting all origins that have not been updates since {OldestOriginToKeep}.", filterTime);
-
-			var entitiesToDelete = await _dbContext.Origins
-				.Where(o => o.HeartbeatTime < filterTime)
-				.ToArrayAsync();
-
-			_dbContext.Origins.RemoveRange(entitiesToDelete);
+			_logger.LogDebug("Cleaning up statistics storage: Deleting all origins that have not been updated since {OldestOriginToKeep}.", filterTime);
 
 			try
 			{
+				var originsToDelete = await _dbContext.Origins
+					.Where(o => o.HeartbeatTime < filterTime)
+					.ToArrayAsync();
+
+				_dbContext.Origins.RemoveRange(originsToDelete);
 				await _dbContext.SaveChangesAsync();
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occured while cleaning up old origins.");
+			}
+		}
+
+		/// <inheritdoc />
+		public async Task CreateConnectionAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
+		{
+			_logger.LogDebug("Adding a new connection with id {ConnectionId} to statistics tracking.", connectionId);
+
+			try
+			{
+				var entity = new Connection()
+				{
+					Id = connectionId,
+					ConnectTime = DateTime.UtcNow,
+					TenantId = tenantId,
+					OriginId = originId,
+					RemoteIpAddress = remoteIpAddress.ToString(),
+				};
+
+				await _dbContext.Connections.AddAsync(entity);
+				await _dbContext.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while saving connection with id {ConnectionId} to statistics database.", originId);
+			}
+		}
+
+		/// <inheritdoc />
+		public async Task HeartbeatConnectionAsync(string connectionId)
+		{
+			_logger.LogDebug("Updating heartbeat time of connection with id {ConnectionId} in statistics tracking.", connectionId);
+
+			try
+			{
+				var entity = await _dbContext.Connections.FirstAsync(c => c.Id == connectionId);
+				entity.LastActivityTime = DateTime.UtcNow;
+
+				await _dbContext.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while updating origin with id {ConnectionId} in statistics database.", connectionId);
+			}
+		}
+
+		/// <inheritdoc />
+		public async Task CloseConnectionAsync(string connectionId)
+		{
+			_logger.LogDebug("Marking connection with id {ConnectionId} as stopped in statistics tracking.", connectionId);
+
+			try
+			{
+				var entity = await _dbContext.Connections.FirstAsync(c => c.Id == connectionId);
+				entity.DisconnectTime = DateTime.UtcNow;
+
+				await _dbContext.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while updating connection with id {ConnectionId} in statistics database.", connectionId);
+			}
+		}
+
+		/// <inheritdoc />
+		public async Task CleanUpConnectionsAsync(TimeSpan oldestToKeep)
+		{
+			var filterTime = DateTime.UtcNow - oldestToKeep;
+
+			_logger.LogDebug("Cleaning up statistics storage: Deleting all connections that have not been updated since {OldestOriginToKeep}.", filterTime);
+
+			try
+			{
+				var connectionsToDelete = await _dbContext.Connections
+					.Where(c => c.LastActivityTime < filterTime)
+					.ToArrayAsync();
+
+				_dbContext.Connections.RemoveRange(connectionsToDelete);
+				await _dbContext.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while cleaning up old connections.");
 			}
 		}
 
