@@ -16,7 +16,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.3")
+                .HasAnnotation("ProductVersion", "3.1.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.ClientSecret", b =>
@@ -44,6 +44,57 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.HasIndex("TenantId");
 
                     b.ToTable("ClientSecrets");
+                });
+
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Connection", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("ConnectTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DisconnectTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("LastActivityTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OriginId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RemoteIpAddress")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OriginId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("Connections");
+                });
+
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Origin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("HeartbeatTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("ShutdownTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Origins");
                 });
 
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
@@ -85,6 +136,21 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                 {
                     b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", "Tenant")
                         .WithMany("ClientSecrets")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Connection", b =>
+                {
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Origin", "Origin")
+                        .WithMany("Connections")
+                        .HasForeignKey("OriginId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", "Tenant")
+                        .WithMany("Connections")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
