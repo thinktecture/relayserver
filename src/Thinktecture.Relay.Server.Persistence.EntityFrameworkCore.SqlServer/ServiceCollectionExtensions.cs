@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer
 	public static class ServiceCollectionExtensions
 	{
 		/// <summary>
-		/// Registers the <see cref="RelayServerConfigurationDbContext"/> as a service in the <see cref="IServiceCollection"/>.
+		/// Registers the <see cref="RelayDbContext"/> as a service in the <see cref="IServiceCollection"/>.
 		/// </summary>
 		/// <param name="serviceCollection">The <see cref="IServiceCollection" /> to add services to.</param>
 		/// <param name="connectionString">The connection string to use.</param>
@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer
 			ServiceLifetime contextLifetime = ServiceLifetime.Scoped,
 			ServiceLifetime optionsLifetime = ServiceLifetime.Scoped)
 		{
-			return serviceCollection.AddDbContext<RelayServerConfigurationDbContext>(contextOptionsBuilder =>
+			return serviceCollection.AddDbContext<RelayDbContext>(contextOptionsBuilder =>
 					{
 						contextOptionsBuilder.UseSqlServer(connectionString, optionsBuilder =>
 						{

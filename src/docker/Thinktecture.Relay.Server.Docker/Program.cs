@@ -40,7 +40,7 @@ namespace Thinktecture.Relay.Server.Docker
 		private static async Task ApplyMigrationsAsync(IHost host)
 		{
 			using var scope = host.Services.CreateScope();
-			await using var dbContext = scope.ServiceProvider.GetRequiredService<RelayServerConfigurationDbContext>();
+			await using var dbContext = scope.ServiceProvider.GetRequiredService<RelayDbContext>();
 			await dbContext.Database.MigrateAsync();
 		}
 	}
