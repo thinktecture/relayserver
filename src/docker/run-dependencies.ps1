@@ -1,4 +1,5 @@
 # Helper script that runs a test environment for the RelayServer docker image
+
 docker network create relay_network
 
 docker volume create relay_persistence_postgresql

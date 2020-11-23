@@ -1,33 +1,45 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
-WORKDIR /app
-
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS dependencies
 WORKDIR /src
 
 # Copy only project files for restore
 # Dependencies
-COPY ["Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj", "Thinktecture.Relay.Abstractions/"]
-COPY ["Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstractions.csproj", "Thinktecture.Relay.Server.Abstractions/"]
-COPY ["Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/"]
-COPY ["Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/"]
-COPY ["/docker/Thinktecture.Relay.Docker/Thinktecture.Relay.Docker.csproj", "docker/Thinktecture.Relay.Docker/"]
+COPY ./docker/Thinktecture.Relay.Docker/Thinktecture.Relay.Docker.csproj ./docker/Thinktecture.Relay.Docker/
+COPY ./Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj ./Thinktecture.Relay.Abstractions/
+COPY ./Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstractions.csproj ./Thinktecture.Relay.Server.Abstractions/
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/
 
 # Project
-COPY ["/docker/Thinktecture.Relay.ManagementApi.Docker/Thinktecture.Relay.ManagementApi.Docker.csproj", "docker/Thinktecture.Relay.ManagementApi.Docker/"]
-RUN dotnet restore "docker/Thinktecture.Relay.ManagementApi.Docker/Thinktecture.Relay.ManagementApi.Docker.csproj"
+FROM dependencies AS project
+COPY ./docker/Thinktecture.Relay.ManagementApi.Docker/Thinktecture.Relay.ManagementApi.Docker.csproj ./docker/Thinktecture.Relay.ManagementApi.Docker/
 
-COPY . .
-WORKDIR "/src/docker/Thinktecture.Relay.ManagementApi.Docker"
-RUN dotnet build "Thinktecture.Relay.ManagementApi.Docker.csproj" -c Release -o /app/build -p:DISABLE_SOURCELINK=true
+# Restore packages
+FROM project AS restore
+WORKDIR /src/docker/Thinktecture.Relay.ManagementApi.Docker
+RUN dotnet restore Thinktecture.Relay.ManagementApi.Docker.csproj
 
-FROM build AS publish
-RUN dotnet publish "Thinktecture.Relay.ManagementApi.Docker.csproj" -c Release -o /app/publish -p:DISABLE_SOURCELINK=true
+# Copy sources
+FROM restore AS source
+WORKDIR /src
 
-FROM base AS final
+COPY ./shared ./shared
+COPY ./docker/Thinktecture.Relay.Docker ./docker/Thinktecture.Relay.Docker
+COPY ./Thinktecture.Relay.Abstractions ./Thinktecture.Relay.Abstractions
+COPY ./Thinktecture.Relay.Server.Abstractions ./Thinktecture.Relay.Server.Abstractions
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql
+
+COPY ./docker/Thinktecture.Relay.ManagementApi.Docker ./docker/Thinktecture.Relay.ManagementApi.Docker
+
+# Build and publish
+FROM source AS publish
+WORKDIR /src/docker/Thinktecture.Relay.ManagementApi.Docker
+RUN dotnet publish Thinktecture.Relay.ManagementApi.Docker.csproj --no-restore -c Release -o /app -p:DISABLE_SOURCELINK=true
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+COPY --from=publish /app .
 
 EXPOSE 80
 
