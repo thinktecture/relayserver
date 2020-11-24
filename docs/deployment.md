@@ -5,26 +5,25 @@ RelayServer v3 is designed for containerized deployments using Docker.
 Scripts to help building and running the system are provided as [PowerShell Core](https://github.com/powershell/powershell) scripts, to be
 able to run cross platform on Windows, macOS and Linux.
 
-All scripts are located in the folder `src/docker`.
+First, a script is provided to build all the docker images (`src/build-docker-images.ps1`).
 
-First, a script is provided to build the docker images (`build-images.ps1`) and to run a test environment with one server
-(`run-environment.ps1`) and in a multi-server environment (`run-environment-multiserver.ps1`).
+All other scripts are located in the folder `src/docker`:
 
-The external components (database, message queue, details see below) can be started with the `run-dependencies.ps1` script.
+* The external components (database, message queue, details see below) can be started with the `run-dependencies.ps1` script.
+* Then the environment with one relay server (`run-environment.ps1`)
+* or a multi-server environment (`run-environment-multiserver.ps1`) can be started.
 
 ## First time Development & Test-Setup
 
-Prerequisites:  
+__Prerequisites__:  
 In order to build and run the development environment, you need the following components on your system:
 - Docker
 - .NET Core SDK 3.1.100 or newer features within 3.1
 - PowerShell Core 6 or newer
 
-When you run the system locally for the first time, only start the dependencies (`run-dependencies.ps1`), the relay server (to apply the
-database migration) and then the management api. To run both components locally start them with `dotnet run` in the
-`src/docker/Thinktecture.Relay.Server.Docker` and `src/docker/Thinktecture.Relay.ManagementApi.Docker` folders. Then you can execute the
-`seed-data.ps1` script, which will create the first initial configuration for the tenants, so that the connectors can connect with their
-default development credentials. After that you can run the environment or the multiserver environment.
+After you start the system for the first time, you need to execute the `seed-data.ps1` script, which will create the first initial
+configuration for the tenants, so that the connectors can connect with their default development credentials. After that you can run the
+environment or the multiserver environment.
 
 The _development_ environment also comes with a [Seq](https://datalust.co/seq) logging server in a local docker container (using the local,
 free single-user license). For production the RelayServer components log to stdout and stderr as this is default in docker environments, but
