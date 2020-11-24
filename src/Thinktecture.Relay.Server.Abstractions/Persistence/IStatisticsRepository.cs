@@ -33,9 +33,9 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// <summary>
 		/// Cleans up stale origins older than the specified timespan.
 		/// </summary>
-		/// <param name="oldestToKeep">The time span in which to still keep old entries.</param>
+		/// <param name="maxAge">The time span in which to still keep old entries.</param>
 		/// <returns></returns>
-		Task CleanUpOriginsAsync(TimeSpan oldestToKeep);
+		Task CleanUpOriginsAsync(TimeSpan maxAge);
 
 		/// <summary>
 		/// Creates a new statistics entry for a connection.
@@ -64,8 +64,8 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// <summary>
 		/// Cleans up stale connections older than the specified timespan.
 		/// </summary>
-		/// <param name="oldestToKeep">The time span in which to still keep old entries.</param>
+		/// <param name="maxAge">The time span in which to still keep old entries.</param>
 		/// <returns></returns>
-		Task CleanUpConnectionsAsync(TimeSpan fromMinutes);
+		Task CleanUpConnectionsAsync(TimeSpan maxAge);
 	}
 }
