@@ -28,13 +28,17 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken)
+		public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Adding new origin {OriginId} to statistics tracking", originId);
 			try
 			{
 				await CreateOriginInternalAsync(originId, cancellationToken);
 				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
 			catch (Exception ex)
 			{
@@ -43,7 +47,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken)
+		public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Updating last seen time of origin {OriginId} in statistics tracking", originId);
 
@@ -54,6 +58,10 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occured while updating origin {OriginId} for statistics tracking", originId);
@@ -61,7 +69,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken)
+		public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Setting shutdown time of origin {OriginId} in statistics tracking", originId);
 
@@ -72,6 +80,10 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occured while updating origin {OriginId} for statistics tracking", originId);
@@ -79,7 +91,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CleanUpOriginsAsync(TimeSpan maxAge, CancellationToken cancellationToken)
+		public async Task CleanUpOriginsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 		{
 			var lastSeen = DateTime.UtcNow - maxAge;
 
@@ -104,7 +116,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress, CancellationToken cancellationToken)
+		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress,
+			CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Adding new connection {ConnectionId} for statistics tracking", connectionId);
 
@@ -133,7 +146,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken)
+		public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Updating last activity time of connection {ConnectionId} in statistics tracking", connectionId);
 
@@ -155,7 +168,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken)
+		public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Setting disconnect time of connection {ConnectionId} in statistics tracking", connectionId);
 
@@ -177,7 +190,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken)
+		public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 		{
 			var lastActivity = DateTime.UtcNow - maxAge;
 
@@ -218,7 +231,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		private async Task<Origin> GetOrCreateOriginEntityAsync(Guid originId, CancellationToken cancellationToken)
-			=> await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId, cancellationToken: cancellationToken)
-			   ?? await CreateOriginInternalAsync(originId, cancellationToken);
+			=> await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId, cancellationToken)
+				?? await CreateOriginInternalAsync(originId, cancellationToken);
 	}
 }

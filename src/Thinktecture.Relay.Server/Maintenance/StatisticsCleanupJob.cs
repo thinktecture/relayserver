@@ -13,10 +13,10 @@ namespace Thinktecture.Relay.Server.Maintenance
 		private readonly StatisticsOptions _statisticsOptions;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="StatisticsCleanupJob"/>.
+		/// Initializes a new instance of the <see cref="StatisticsCleanupJob"/> class.
 		/// </summary>
-		/// <param name="statisticsRepository">An instance of an <see cref="IStatisticsRepository"/>.</param>
-		/// <param name="statisticsOptions">An instance of an <see cref="IOptions{StatisticsOptions}"/>.</param>
+		/// <param name="statisticsRepository">An <see cref="IStatisticsRepository"/>.</param>
+		/// <param name="statisticsOptions">An <see cref="IOptions{StatisticsOptions}"/>.</param>
 		public StatisticsCleanupJob(IStatisticsRepository statisticsRepository, IOptions<StatisticsOptions> statisticsOptions)
 		{
 			_statisticsRepository = statisticsRepository ?? throw new ArgumentNullException(nameof(statisticsRepository));
@@ -24,10 +24,10 @@ namespace Thinktecture.Relay.Server.Maintenance
 		}
 
 		/// <inheritdoc />
-		public async Task DoMaintenanceAsync(CancellationToken stoppingToken)
+		public async Task DoMaintenanceAsync(CancellationToken cancellationToken = default)
 		{
-			await _statisticsRepository.CleanUpOriginsAsync(_statisticsOptions.EntryMaxAge, stoppingToken);
-			await _statisticsRepository.CleanUpConnectionsAsync(_statisticsOptions.EntryMaxAge, stoppingToken);
+			await _statisticsRepository.CleanUpOriginsAsync(_statisticsOptions.EntryMaxAge, cancellationToken);
+			await _statisticsRepository.CleanUpConnectionsAsync(_statisticsOptions.EntryMaxAge, cancellationToken);
 		}
 	}
 }

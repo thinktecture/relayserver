@@ -5,6 +5,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace Thinktecture.Relay.Server.HealthChecks
 {
 	/// <inheritdoc />
+	// ReSharper disable once ClassNeverInstantiated.Global
 	public class TransportHealthCheck : IHealthCheck
 	{
 		/// <inheritdoc />

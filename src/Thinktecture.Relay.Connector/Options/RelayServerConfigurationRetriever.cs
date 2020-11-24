@@ -7,9 +7,10 @@ namespace Thinktecture.Relay.Connector.Options
 {
 	internal class RelayServerConfigurationRetriever : IConfigurationRetriever<DiscoveryDocument>
 	{
-		public async Task<DiscoveryDocument> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+		public async Task<DiscoveryDocument> GetConfigurationAsync(string address, IDocumentRetriever retriever,
+			CancellationToken cancellationToken = default)
 		{
-			var document = await retriever.GetDocumentAsync(address, cancel);
+			var document = await retriever.GetDocumentAsync(address, cancellationToken);
 
 			return JsonSerializer.Deserialize<DiscoveryDocument>(document, new JsonSerializerOptions()
 			{

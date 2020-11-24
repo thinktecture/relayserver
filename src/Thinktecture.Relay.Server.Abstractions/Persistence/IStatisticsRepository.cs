@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="originId">The id of the origin to store.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 
 		/// <summary>
@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="originId">The id of the origin to update.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 
 		/// <summary>
@@ -31,7 +31,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="originId">The id of the origin to mark as stopped.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 
 		/// <summary>
@@ -39,7 +39,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="maxAge">The time span in which to still keep old entries.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task CleanUpOriginsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default);
 
 		/// <summary>
@@ -50,15 +50,16 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// <param name="originId">The id of the server this connection is created to.</param>
 		/// <param name="remoteIpAddress">The remote ip address that initiated this connection.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
-		Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress, CancellationToken cancellationToken = default);
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress,
+			CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Updates the last activity of a connection.
 		/// </summary>
 		/// <param name="connectionId">The id of the connection that showed an activity.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default);
 
 		/// <summary>
@@ -66,7 +67,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="connectionId">The id of the connection to mark as stopped.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default);
 
 		/// <summary>
@@ -74,7 +75,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="maxAge">The time span in which to still keep old entries.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default);
 	}
 }

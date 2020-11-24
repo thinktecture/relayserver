@@ -69,11 +69,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		{
 			var tenant = Context.User.GetTenantInfo();
 			_logger.LogDebug("Connection incoming for tenant {@Tenant}", tenant);
-			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
 
-			await _connectionStatisticsWriter.SetConnectionTimeAsync(Context.ConnectionId,
-				tenant.Id,
-				_relayServerContext.OriginId,
+			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
+			await _connectionStatisticsWriter.SetConnectionTimeAsync(Context.ConnectionId, tenant.Id, _relayServerContext.OriginId,
 				Context.GetHttpContext().Connection.RemoteIpAddress);
 
 			await base.OnConnectedAsync();
@@ -82,8 +80,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <inheritdoc />
 		public override async Task OnDisconnectedAsync(Exception exception)
 		{
-			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
 			_logger.LogDebug("Connection disconnected for tenant {@Tenant}", Context.User.GetTenantInfo());
+
+			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
 			await _connectionStatisticsWriter.SetDisconnectTimeAsync(Context.ConnectionId);
 
 			await base.OnDisconnectedAsync(exception);
