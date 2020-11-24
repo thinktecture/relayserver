@@ -20,33 +20,33 @@ namespace Thinktecture.Relay.Server.Services
 		}
 
 		/// <inheritdoc />
-		public async Task CreateOriginAsync(Guid originId)
+		public async Task SetStartupTimeAsync(Guid originId)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.CreateOriginAsync(originId);
+			await repo.SetStartupTimeAsync(originId);
 		}
 
 		/// <inheritdoc />
-		public async Task HeartbeatOriginAsync(Guid originId)
+		public async Task UpdateLastSeenTimeAsync(Guid originId)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.HeartbeatOriginAsync(originId);
+			await repo.UpdateLastSeenTimeAsync(originId);
 		}
 
 		/// <inheritdoc />
-		public async Task ShutdownOriginAsync(Guid originId)
+		public async Task SetShutdownTimeAsync(Guid originId)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.ShutdownOriginAsync(originId);
+			await repo.SetShutdownTimeAsync(originId);
 		}
 	}
 }

@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CreateOriginAsync(Guid originId)
+		public async Task SetStartupTimeAsync(Guid originId)
 		{
 			_logger.LogDebug("Adding a new origin with id {OriginId} to statistics tracking.", originId);
 			await CreateOriginInternalAsync(originId);
@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task HeartbeatOriginAsync(Guid originId)
+		public async Task UpdateLastSeenTimeAsync(Guid originId)
 		{
 			_logger.LogDebug("Updating heartbeat time of origin with id {OriginId} in statistics tracking.", originId);
 
@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task ShutdownOriginAsync(Guid originId)
+		public async Task SetShutdownTimeAsync(Guid originId)
 		{
 			_logger.LogDebug("Marking origin with id {OriginId} as stopped in statistics tracking.", originId);
 
@@ -104,7 +104,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CreateConnectionAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
+		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
 		{
 			_logger.LogDebug("Adding a new connection with id {ConnectionId} to statistics tracking.", connectionId);
 
@@ -129,7 +129,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task HeartbeatConnectionAsync(string connectionId)
+		public async Task UpdateLastActivityTimeAsync(string connectionId)
 		{
 			_logger.LogDebug("Updating heartbeat time of connection with id {ConnectionId} in statistics tracking.", connectionId);
 
@@ -147,7 +147,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CloseConnectionAsync(string connectionId)
+		public async Task SetDisconnectTimeAsync(string connectionId)
 		{
 			_logger.LogDebug("Marking connection with id {ConnectionId} as stopped in statistics tracking.", connectionId);
 

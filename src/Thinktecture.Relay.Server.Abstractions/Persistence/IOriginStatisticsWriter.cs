@@ -13,20 +13,20 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="originId">The id of the origin to store.</param>
 		/// <returns></returns>
-		Task CreateOriginAsync(Guid originId);
+		Task SetStartupTimeAsync(Guid originId);
 
 		/// <summary>
-		/// Updates the heartbeat of an origin.
+		/// Updates the last seen time stamp of an origin statistics entry.
 		/// </summary>
 		/// <param name="originId">The id of the origin to update.</param>
 		/// <returns></returns>
-		Task HeartbeatOriginAsync(Guid originId);
+		Task UpdateLastSeenTimeAsync(Guid originId);
 
 		/// <summary>
-		/// Updates the shutdown info of an origin.
+		/// Updates the statistic entry of an origin when it shuts down.
 		/// </summary>
 		/// <param name="originId">The id of the origin to mark as stopped.</param>
 		/// <returns></returns>
-		Task ShutdownOriginAsync(Guid originId);
+		Task SetShutdownTimeAsync(Guid originId);
 	}
 }

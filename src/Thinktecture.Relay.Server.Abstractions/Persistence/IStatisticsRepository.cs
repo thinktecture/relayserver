@@ -10,25 +10,25 @@ namespace Thinktecture.Relay.Server.Persistence
 	public interface IStatisticsRepository
 	{
 		/// <summary>
-		/// Creates a new entry for an origin.
+		/// Writes a new statistics entry when an origin started.
 		/// </summary>
 		/// <param name="originId">The id of the origin to store.</param>
 		/// <returns></returns>
-		Task CreateOriginAsync(Guid originId);
+		Task SetStartupTimeAsync(Guid originId);
 
 		/// <summary>
-		/// Updates the heartbeat of an origin.
+		/// Updates the last seen time stamp of an origin statistics entry.
 		/// </summary>
 		/// <param name="originId">The id of the origin to update.</param>
 		/// <returns></returns>
-		Task HeartbeatOriginAsync(Guid originId);
+		Task UpdateLastSeenTimeAsync(Guid originId);
 
 		/// <summary>
-		/// Updates the shutdown info of an origin.
+		/// Updates the statistic entry of an origin when it shuts down.
 		/// </summary>
 		/// <param name="originId">The id of the origin to mark as stopped.</param>
 		/// <returns></returns>
-		Task ShutdownOriginAsync(Guid originId);
+		Task SetShutdownTimeAsync(Guid originId);
 
 		/// <summary>
 		/// Cleans up stale origins older than the specified timespan.
@@ -38,28 +38,28 @@ namespace Thinktecture.Relay.Server.Persistence
 		Task CleanUpOriginsAsync(TimeSpan oldestToKeep);
 
 		/// <summary>
-		/// Creates a new entry for a connection.
+		/// Creates a new statistics entry for a connection.
 		/// </summary>
 		/// <param name="connectionId">The connection id from the corresponding transport.</param>
 		/// <param name="tenantId">The id of the tenant this connection is created for.</param>
 		/// <param name="originId">The id of the server this connection is created to.</param>
 		/// <param name="remoteIpAddress">The remote ip address that initiated this connection.</param>
 		/// <returns></returns>
-		Task CreateConnectionAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress);
+		Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress);
 
 		/// <summary>
 		/// Updates the last activity of a connection.
 		/// </summary>
 		/// <param name="connectionId">The id of the connection that showed an activity.</param>
 		/// <returns></returns>
-		Task HeartbeatConnectionAsync(string connectionId);
+		Task UpdateLastActivityTimeAsync(string connectionId);
 
 		/// <summary>
-		/// Updates the information that a connection was shut down.
+		/// Writes the information that a connection was shut down.
 		/// </summary>
 		/// <param name="connectionId">The id of the connection to mark as stopped.</param>
 		/// <returns></returns>
-		Task CloseConnectionAsync(string connectionId);
+		Task SetDisconnectTimeAsync(string connectionId);
 
 		/// <summary>
 		/// Cleans up stale connections older than the specified timespan.

@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public async Task RequestTargetAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
 			await _hubContext.Clients.Client(ConnectionId).RequestTarget(request);
-			await _connectionStatisticsWriter.HeartbeatConnectionAsync(ConnectionId);
+			await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(ConnectionId);
 		}
 	}
 }
