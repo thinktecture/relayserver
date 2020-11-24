@@ -26,13 +26,8 @@ namespace Thinktecture.Relay.Server.Maintenance
 		/// <inheritdoc />
 		public async Task DoMaintenanceAsync(CancellationToken stoppingToken)
 		{
-			if (stoppingToken.IsCancellationRequested)
-			{
-				return;
-			}
-
-			await _statisticsRepository.CleanUpOriginsAsync(_statisticsOptions.EntryMaxAge);
-			await _statisticsRepository.CleanUpConnectionsAsync(_statisticsOptions.EntryMaxAge);
+			await _statisticsRepository.CleanUpOriginsAsync(_statisticsOptions.EntryMaxAge, stoppingToken);
+			await _statisticsRepository.CleanUpConnectionsAsync(_statisticsOptions.EntryMaxAge, stoppingToken);
 		}
 	}
 }
