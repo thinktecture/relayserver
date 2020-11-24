@@ -1,7 +1,9 @@
 using System;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
+using Thinktecture.Relay.Server.Maintenance;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
@@ -72,6 +74,30 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			builder.Services.AddTransient<IValidateOptions<FileBodyStoreOptions>, FileBodyStoreOptionsValidator>();
 			builder.Services.AddSingleton<IBodyStore, FileBodyStore>();
+
+			return builder;
+		}
+
+		/// <summary>
+		/// Adds and enables the maintenance jobs feature.
+		/// </summary>
+		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
+		/// <param name="configure">An optional configure callback for setting the <see cref="MaintenanceOptions"/>.</param>
+		/// <typeparam name="TRequest">The type of request.</typeparam>
+		/// <typeparam name="TResponse">The type of response.</typeparam>
+		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
+		public static IRelayServerBuilder<TRequest, TResponse> AddMaintenanceJobs<TRequest, TResponse>(
+			this IRelayServerBuilder<TRequest, TResponse> builder, Action<MaintenanceOptions> configure = null)
+			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
+		{
+			if (configure != null)
+			{
+				builder.Services.Configure(configure);
+			}
+
+			builder.Services.TryAddScoped<IMaintenanceJob, StatisticsCleanupJob>();
+			builder.Services.AddHostedService<MaintenanceJobRunner>();
 
 			return builder;
 		}
