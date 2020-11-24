@@ -17,21 +17,25 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The name of the tenant. Also used as ClientId for connector authentication.
 		/// </summary>
+		/// <remarks>The maximum length is 100 unicode characters.</remarks>
 		public string Name { get; set; }
 
 		/// <summary>
 		/// The display name of the tenant. Will be used as a visual identifier on the management UI.
 		/// </summary>
+		/// <remarks>The maximum length is 200 unicode characters.</remarks>
 		public string DisplayName { get; set; }
 
 		/// <summary>
 		/// An optional, longer, textual description of this tenant.
 		/// </summary>
+		/// <remarks>The maximum length is 1000 unicode characters.</remarks>
 		public string Description { get; set; }
 
 		/// <summary>
 		/// The normalized (e.g. ToUpperInvariant()) name of the tenant. Use this for case-insensitive comparison in the database.
 		/// </summary>
+		/// <remarks>The maximum length is 100 unicode characters.</remarks>
 		[JsonIgnore]
 		public string NormalizedName { get; set; }
 
