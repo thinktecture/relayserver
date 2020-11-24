@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Maintenance
 		/// Called when the maintenance interval
 		/// </summary>
 		/// <param name="stoppingToken">Indicates that the maintenance loop has been aborted.</param>
-		/// <returns>An awaitable task.</returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task DoMaintenanceAsync(CancellationToken stoppingToken);
 	}
 }
