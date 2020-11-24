@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -17,7 +18,18 @@ namespace Thinktecture.Relay.Server.Docker
 			{
 				var host = CreateHostBuilder(args).Build();
 
-				await ApplyMigrationsAsync(host);
+				var config = host.Services.GetRequiredService<IConfiguration>();
+				if (config.GetValue<bool>("migrate") || config.GetValue<bool>("migrate-only"))
+				{
+					Log.Information("Applying migrations.");
+					await ApplyMigrationsAsync(host);
+
+					if (config.GetValue<bool>("migrate-only"))
+					{
+						Log.Information("Only migrations should be executed. Terminating gracefully.");
+						return 0;
+					}
+				}
 
 				await host.RunAsync();
 			}
