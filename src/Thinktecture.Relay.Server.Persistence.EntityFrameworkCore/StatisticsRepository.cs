@@ -29,7 +29,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		/// <inheritdoc />
 		public async Task SetStartupTimeAsync(Guid originId)
 		{
-			_logger.LogDebug("Adding a new origin with id {OriginId} to statistics tracking.", originId);
+			_logger.LogDebug("Adding new origin {OriginId} to statistics tracking", originId);
 			await CreateOriginInternalAsync(originId);
 
 			try
@@ -38,14 +38,14 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while saving origin with id {OriginId} to statistics database.", originId);
+				_logger.LogError(ex, "An error occured while creating origin {OriginId} for statistics tracking", originId);
 			}
 		}
 
 		/// <inheritdoc />
 		public async Task UpdateLastSeenTimeAsync(Guid originId)
 		{
-			_logger.LogDebug("Updating heartbeat time of origin with id {OriginId} in statistics tracking.", originId);
+			_logger.LogDebug("Updating last seen time of origin {OriginId} in statistics tracking", originId);
 
 			var entity = await GetOrCreateOriginEntityAsync(originId);
 			entity.LastSeenTime = DateTime.UtcNow;
@@ -56,14 +56,14 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while updating origin with id {OriginId} in statistics database.", originId);
+				_logger.LogError(ex, "An error occured while updating origin {OriginId} for statistics tracking", originId);
 			}
 		}
 
 		/// <inheritdoc />
 		public async Task SetShutdownTimeAsync(Guid originId)
 		{
-			_logger.LogDebug("Marking origin with id {OriginId} as stopped in statistics tracking.", originId);
+			_logger.LogDebug("Setting shutdown time of origin {OriginId} in statistics tracking", originId);
 
 			var now = DateTime.UtcNow;
 
@@ -77,21 +77,22 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while updating origin with id {OriginId} in statistics database.", originId);
+				_logger.LogError(ex, "An error occured while updating origin {OriginId} for statistics tracking", originId);
 			}
 		}
 
 		/// <inheritdoc />
 		public async Task CleanUpOriginsAsync(TimeSpan maxAge)
 		{
-			var filterTime = DateTime.UtcNow - maxAge;
+			var lastSeen = DateTime.UtcNow - maxAge;
 
-			_logger.LogDebug("Cleaning up statistics storage: Deleting all origins that have not been updated since {OldestOriginToKeep}.", filterTime);
+			_logger.LogDebug("Cleaning up statistics storage by deleting all origins that have not been seen since {OriginLastSeen}.",
+				lastSeen);
 
 			try
 			{
 				var originsToDelete = await _dbContext.Origins
-					.Where(o => o.LastSeenTime < filterTime)
+					.Where(o => o.LastSeenTime < lastSeen)
 					.ToArrayAsync();
 
 				_dbContext.Origins.RemoveRange(originsToDelete);
@@ -99,14 +100,14 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while cleaning up old origins.");
+				_logger.LogError(ex, "An error occured while deleting old origins");
 			}
 		}
 
 		/// <inheritdoc />
 		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
 		{
-			_logger.LogDebug("Adding a new connection with id {ConnectionId} to statistics tracking.", connectionId);
+			_logger.LogDebug("Adding new connection {ConnectionId} for statistics tracking", connectionId);
 
 			try
 			{
@@ -124,14 +125,14 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while saving connection with id {ConnectionId} to statistics database.", originId);
+				_logger.LogError(ex, "An error occured while creating connection {ConnectionId} for statistics tracking", originId);
 			}
 		}
 
 		/// <inheritdoc />
 		public async Task UpdateLastActivityTimeAsync(string connectionId)
 		{
-			_logger.LogDebug("Updating heartbeat time of connection with id {ConnectionId} in statistics tracking.", connectionId);
+			_logger.LogDebug("Updating last activity time of connection {ConnectionId} in statistics tracking", connectionId);
 
 			try
 			{
@@ -142,14 +143,14 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while updating origin with id {ConnectionId} in statistics database.", connectionId);
+				_logger.LogError(ex, "An error occured while updating connection {ConnectionId} in statistics tracking", connectionId);
 			}
 		}
 
 		/// <inheritdoc />
 		public async Task SetDisconnectTimeAsync(string connectionId)
 		{
-			_logger.LogDebug("Marking connection with id {ConnectionId} as stopped in statistics tracking.", connectionId);
+			_logger.LogDebug("Setting disconnect time of connection {ConnectionId} in statistics tracking", connectionId);
 
 			try
 			{
@@ -160,21 +161,23 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while updating connection with id {ConnectionId} in statistics database.", connectionId);
+				_logger.LogError(ex, "An error occured while updating connection {ConnectionId} in statistics tracking", connectionId);
 			}
 		}
 
 		/// <inheritdoc />
 		public async Task CleanUpConnectionsAsync(TimeSpan maxAge)
 		{
-			var filterTime = DateTime.UtcNow - maxAge;
+			var lastActivity = DateTime.UtcNow - maxAge;
 
-			_logger.LogDebug("Cleaning up statistics storage: Deleting all connections that have not been updated since {OldestOriginToKeep}.", filterTime);
+			_logger.LogDebug(
+				"Cleaning up statistics storage by deleting all connections that have no activity since {ConnectionLastActivity}.",
+				lastActivity);
 
 			try
 			{
 				var connectionsToDelete = await _dbContext.Connections
-					.Where(c => c.LastActivityTime < filterTime)
+					.Where(c => c.LastActivityTime < lastActivity)
 					.ToArrayAsync();
 
 				_dbContext.Connections.RemoveRange(connectionsToDelete);
@@ -182,7 +185,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while cleaning up old connections.");
+				_logger.LogError(ex, "An error occured while deleting old connections");
 			}
 		}
 
@@ -202,9 +205,6 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		private async Task<Origin> GetOrCreateOriginEntityAsync(Guid originId)
-		{
-			return await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId)
-			       ?? await CreateOriginInternalAsync(originId);
-		}
+			=> await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId) ?? await CreateOriginInternalAsync(originId);
 	}
 }
