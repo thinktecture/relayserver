@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.Server.Persistence;
@@ -21,33 +22,33 @@ namespace Thinktecture.Relay.Server.Services
 		}
 
 		/// <inheritdoc />
-		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
+		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress, CancellationToken cancellationToken)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.SetConnectionTimeAsync(connectionId, tenantId, originId, remoteIpAddress);
+			await repo.SetConnectionTimeAsync(connectionId, tenantId, originId, remoteIpAddress, cancellationToken);
 		}
 
 		/// <inheritdoc />
-		public async Task UpdateLastActivityTimeAsync(string connectionId)
+		public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.UpdateLastActivityTimeAsync(connectionId);
+			await repo.UpdateLastActivityTimeAsync(connectionId, cancellationToken);
 		}
 
 		/// <inheritdoc />
-		public async Task SetDisconnectTimeAsync(string connectionId)
+		public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.SetDisconnectTimeAsync(connectionId);
+			await repo.SetDisconnectTimeAsync(connectionId, cancellationToken);
 		}
 	}
 }

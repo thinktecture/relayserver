@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Thinktecture.Relay.Server.Persistence
@@ -12,21 +13,24 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// Creates a new entry for an origin.
 		/// </summary>
 		/// <param name="originId">The id of the origin to store.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns></returns>
-		Task SetStartupTimeAsync(Guid originId);
+		Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Updates the last seen time stamp of an origin statistics entry.
 		/// </summary>
 		/// <param name="originId">The id of the origin to update.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns></returns>
-		Task UpdateLastSeenTimeAsync(Guid originId);
+		Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Updates the statistic entry of an origin when it shuts down.
 		/// </summary>
 		/// <param name="originId">The id of the origin to mark as stopped.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns></returns>
-		Task SetShutdownTimeAsync(Guid originId);
+		Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 	}
 }

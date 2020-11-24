@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,14 +28,13 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetStartupTimeAsync(Guid originId)
+		public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken)
 		{
 			_logger.LogDebug("Adding new origin {OriginId} to statistics tracking", originId);
-			await CreateOriginInternalAsync(originId);
-
 			try
 			{
-				await _dbContext.SaveChangesAsync();
+				await CreateOriginInternalAsync(originId, cancellationToken);
+				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
 			catch (Exception ex)
 			{
@@ -43,16 +43,16 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task UpdateLastSeenTimeAsync(Guid originId)
+		public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken)
 		{
 			_logger.LogDebug("Updating last seen time of origin {OriginId} in statistics tracking", originId);
 
-			var entity = await GetOrCreateOriginEntityAsync(originId);
-			entity.LastSeenTime = DateTime.UtcNow;
-
 			try
 			{
-				await _dbContext.SaveChangesAsync();
+				var entity = await GetOrCreateOriginEntityAsync(originId, cancellationToken);
+				entity.LastSeenTime = DateTime.UtcNow;
+
+				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
 			catch (Exception ex)
 			{
@@ -61,19 +61,16 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetShutdownTimeAsync(Guid originId)
+		public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken)
 		{
 			_logger.LogDebug("Setting shutdown time of origin {OriginId} in statistics tracking", originId);
 
-			var now = DateTime.UtcNow;
-
-			var entity = await GetOrCreateOriginEntityAsync(originId);
-			entity.LastSeenTime = now;
-			entity.ShutdownTime = now;
-
 			try
 			{
-				await _dbContext.SaveChangesAsync();
+				var entity = await GetOrCreateOriginEntityAsync(originId, cancellationToken);
+				entity.ShutdownTime = entity.LastSeenTime = DateTime.UtcNow;
+
+				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
 			catch (Exception ex)
 			{
@@ -82,7 +79,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CleanUpOriginsAsync(TimeSpan maxAge)
+		public async Task CleanUpOriginsAsync(TimeSpan maxAge, CancellationToken cancellationToken)
 		{
 			var lastSeen = DateTime.UtcNow - maxAge;
 
@@ -91,12 +88,14 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 
 			try
 			{
-				var originsToDelete = await _dbContext.Origins
-					.Where(o => o.LastSeenTime < lastSeen)
-					.ToArrayAsync();
+				var origins = await _dbContext.Origins.Where(o => o.LastSeenTime < lastSeen).ToArrayAsync(cancellationToken);
 
-				_dbContext.Origins.RemoveRange(originsToDelete);
-				await _dbContext.SaveChangesAsync();
+				_dbContext.Origins.RemoveRange(origins);
+				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
 			catch (Exception ex)
 			{
@@ -105,7 +104,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
+		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress, CancellationToken cancellationToken)
 		{
 			_logger.LogDebug("Adding new connection {ConnectionId} for statistics tracking", connectionId);
 
@@ -120,8 +119,12 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 					RemoteIpAddress = remoteIpAddress.ToString(),
 				};
 
-				await _dbContext.Connections.AddAsync(entity);
-				await _dbContext.SaveChangesAsync();
+				await _dbContext.Connections.AddAsync(entity, cancellationToken);
+				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
 			catch (Exception ex)
 			{
@@ -130,16 +133,20 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task UpdateLastActivityTimeAsync(string connectionId)
+		public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken)
 		{
 			_logger.LogDebug("Updating last activity time of connection {ConnectionId} in statistics tracking", connectionId);
 
 			try
 			{
-				var entity = await _dbContext.Connections.FirstAsync(c => c.Id == connectionId);
+				var entity = await _dbContext.Connections.FirstAsync(c => c.Id == connectionId, cancellationToken);
 				entity.LastActivityTime = DateTime.UtcNow;
 
-				await _dbContext.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
 			catch (Exception ex)
 			{
@@ -148,16 +155,20 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetDisconnectTimeAsync(string connectionId)
+		public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken)
 		{
 			_logger.LogDebug("Setting disconnect time of connection {ConnectionId} in statistics tracking", connectionId);
 
 			try
 			{
-				var entity = await _dbContext.Connections.FirstAsync(c => c.Id == connectionId);
+				var entity = await _dbContext.Connections.FirstAsync(c => c.Id == connectionId, cancellationToken);
 				entity.DisconnectTime = DateTime.UtcNow;
 
-				await _dbContext.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
 			catch (Exception ex)
 			{
@@ -166,7 +177,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CleanUpConnectionsAsync(TimeSpan maxAge)
+		public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken)
 		{
 			var lastActivity = DateTime.UtcNow - maxAge;
 
@@ -176,12 +187,14 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 
 			try
 			{
-				var connectionsToDelete = await _dbContext.Connections
-					.Where(c => c.LastActivityTime < lastActivity)
-					.ToArrayAsync();
+				var connections = await _dbContext.Connections.Where(c => c.LastActivityTime < lastActivity).ToArrayAsync(cancellationToken);
 
-				_dbContext.Connections.RemoveRange(connectionsToDelete);
-				await _dbContext.SaveChangesAsync();
+				_dbContext.Connections.RemoveRange(connections);
+				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
 			catch (Exception ex)
 			{
@@ -189,7 +202,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 		}
 
-		private async Task<Origin> CreateOriginInternalAsync(Guid originId)
+		private async Task<Origin> CreateOriginInternalAsync(Guid originId, CancellationToken cancellationToken)
 		{
 			var now = DateTime.UtcNow;
 
@@ -200,11 +213,12 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				LastSeenTime = now,
 			};
 
-			await _dbContext.Origins.AddAsync(entity);
+			await _dbContext.Origins.AddAsync(entity, cancellationToken);
 			return entity;
 		}
 
-		private async Task<Origin> GetOrCreateOriginEntityAsync(Guid originId)
-			=> await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId) ?? await CreateOriginInternalAsync(originId);
+		private async Task<Origin> GetOrCreateOriginEntityAsync(Guid originId, CancellationToken cancellationToken)
+			=> await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId, cancellationToken: cancellationToken)
+			   ?? await CreateOriginInternalAsync(originId, cancellationToken);
 	}
 }

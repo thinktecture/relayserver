@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.Server.Persistence;
@@ -20,33 +21,33 @@ namespace Thinktecture.Relay.Server.Services
 		}
 
 		/// <inheritdoc />
-		public async Task SetStartupTimeAsync(Guid originId)
+		public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.SetStartupTimeAsync(originId);
+			await repo.SetStartupTimeAsync(originId, cancellationToken);
 		}
 
 		/// <inheritdoc />
-		public async Task UpdateLastSeenTimeAsync(Guid originId)
+		public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.UpdateLastSeenTimeAsync(originId);
+			await repo.UpdateLastSeenTimeAsync(originId, cancellationToken);
 		}
 
 		/// <inheritdoc />
-		public async Task SetShutdownTimeAsync(Guid originId)
+		public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.SetShutdownTimeAsync(originId);
+			await repo.SetShutdownTimeAsync(originId, cancellationToken);
 		}
 	}
 }
