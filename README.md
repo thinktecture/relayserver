@@ -22,6 +22,8 @@ See [concepts](./docs/concepts.md) for an explanation of concepts used in RelayS
 
 See [deployment options](./docs/deployment.md) for an overview of deployment options.
 
+See [modules](./docs/modules.md) for an overview of the new modular design of RelayServer 3 and modules supported out of the box.
+
 ## Features
 
 - Open Source under BSD-3-Clause license
