@@ -102,7 +102,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 			try
 			{
 				var id = await _tenantRepository.CreateTenantAsync(tenantToCreate.ToTenant());
-				return CreatedAtAction(nameof(GetTenantById), new { id }, new { id });
+				return CreatedAtAction(nameof(GetTenantById), new { TenantId = id }, id);
 			}
 			catch
 			{
