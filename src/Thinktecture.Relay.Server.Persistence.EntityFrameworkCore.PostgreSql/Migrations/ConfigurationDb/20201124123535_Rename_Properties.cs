@@ -7,25 +7,15 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "HeartbeatTime",
-                table: "Origins");
+	        migrationBuilder.RenameColumn(
+		        name: "HeartbeatTime",
+		        newName: "LastSeenTime",
+		        table: "Origins");
 
-            migrationBuilder.DropColumn(
-                name: "StartTime",
-                table: "Origins");
-
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "LastSeenTime",
-                table: "Origins",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
-
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "StartupTime",
-                table: "Origins",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
+	        migrationBuilder.RenameColumn(
+		        name: "StartTime",
+		        newName: "StartupTime",
+		        table: "Origins");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Id",
@@ -38,27 +28,15 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "LastSeenTime",
-                table: "Origins");
+	        migrationBuilder.RenameColumn(
+		        name: "LastSeenTime",
+		        newName: "HeartbeatTime",
+		        table: "Origins");
 
-            migrationBuilder.DropColumn(
-                name: "StartupTime",
-                table: "Origins");
-
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "HeartbeatTime",
-                table: "Origins",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
-
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "StartTime",
-                table: "Origins",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
+	        migrationBuilder.RenameColumn(
+		        name: "StartupTime",
+		        newName: "StartTime",
+		        table: "Origins");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Id",
