@@ -86,6 +86,7 @@ The following is the list of supported scopes:
 - **idsrv**
 - **management**
 - **statistics**
+- **interceptor**
 - _TBD_
 
 There are currently a few exceptions to the "use package name" rule:
