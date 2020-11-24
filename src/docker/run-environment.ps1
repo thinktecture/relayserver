@@ -4,7 +4,7 @@ Push-Location $PSScriptRoot
 
 ./run-dependencies.ps1
 
-# Wait for the DB and rabbit to start up
+# Wait for the database and rabbit to start up
 Start-Sleep 3
 
 # First apply migrations
