@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Title>Thinktecture RelayServer Interceptors X-Forwarded Header</Title>
-    <Description>Contains an interceptor for the RelayServer server.</Description>
+    <Title>Thinktecture RelayServer Interceptors</Title>
+    <Description>Contains interceptors for the RelayServer server.</Description>
     <Summary></Summary>
     <RootNamespace>Thinktecture.Relay.Interceptors</RootNamespace>
     <LangVersion>latest</LangVersion>
