@@ -15,9 +15,8 @@ function Create-Tenant {
 
 function Create-Secret {
     $resultCode
-    $result = Invoke-RestMethod -Method Get -Uri https://localhost:5005/api/tenant/$tenantName -contenttype 'application/json'
-
-    $result = Invoke-RestMethod -Method Post -Uri "https://localhost:5005/api/tenant/$($result.id)/secret" -Form @{ secret = "$tenantSecret" } -contenttype 'application/json'
+    $result = Invoke-RestMethod -Method Get -Uri https://localhost:5005/api/tenant/$tenantName -contenttype 'application/json' -StatusCodeVariable "resultCode"
+    $result = Invoke-RestMethod -Method Post -Uri "https://localhost:5005/api/tenant/$($result.id)/secret" -Form @{ secret = "$tenantSecret" } -contenttype 'application/json' -StatusCodeVariable "resultCode"
     Write-Host "Added secret $($result.secret) to tenant $tenantName"
 }
 
