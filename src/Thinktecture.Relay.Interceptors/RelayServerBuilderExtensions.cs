@@ -11,18 +11,18 @@ namespace Microsoft.Extensions.DependencyInjection
 	public static class RelayServerBuilderExtensions
 	{
 		/// <summary>
-		/// Adds the X-Forwarded Header interceptor.
+		/// Adds the X-Forwarded header interceptor.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
-		public static IRelayServerBuilder<TRequest, TResponse> AddXForwardedHeaderInterceptor<TRequest, TResponse>(
+		public static IRelayServerBuilder<TRequest, TResponse> AddForwardedHeaderInterceptor<TRequest, TResponse>(
 			this IRelayServerBuilder<TRequest, TResponse> builder)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.AddClientRequestInterceptor<TRequest, TResponse, ClientRequestInterceptor<TRequest, TResponse>>();
+			builder.AddClientRequestInterceptor<TRequest, TResponse, ForwardedHeaderInterceptor<TRequest, TResponse>>();
 
 			return builder;
 		}

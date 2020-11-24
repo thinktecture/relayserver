@@ -6,7 +6,8 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Interceptors
 {
-	internal class ClientRequestInterceptor<TRequest, TResponse> : IClientRequestInterceptor<TRequest, TResponse>
+	// ReSharper disable once ClassNeverInstantiated.Global
+	internal class ForwardedHeaderInterceptor<TRequest, TResponse> : IClientRequestInterceptor<TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
