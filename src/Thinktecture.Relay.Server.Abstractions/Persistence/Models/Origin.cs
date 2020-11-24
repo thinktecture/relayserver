@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The time when this instance started.
 		/// </summary>
-		public DateTimeOffset StartTime { get; set; }
+		public DateTimeOffset StartupTime { get; set; }
 
 		/// <summary>
 		/// The time when this instance shut down.
@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The last time when this instance said it is still alive.
 		/// </summary>
-		public DateTimeOffset HeartbeatTime { get; set; }
+		public DateTimeOffset LastSeenTime { get; set; }
 
 		/// <summary>
 		/// All connections that are currently registered for this origin.

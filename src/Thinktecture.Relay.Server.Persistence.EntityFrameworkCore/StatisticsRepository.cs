@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			_logger.LogDebug("Updating heartbeat time of origin with id {OriginId} in statistics tracking.", originId);
 
 			var entity = await GetOrCreateOriginEntityAsync(originId);
-			entity.HeartbeatTime = DateTime.UtcNow;
+			entity.LastSeenTime = DateTime.UtcNow;
 
 			try
 			{
@@ -68,7 +68,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			var now = DateTime.UtcNow;
 
 			var entity = await GetOrCreateOriginEntityAsync(originId);
-			entity.HeartbeatTime = now;
+			entity.LastSeenTime = now;
 			entity.ShutdownTime = now;
 
 			try
@@ -91,7 +91,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			try
 			{
 				var originsToDelete = await _dbContext.Origins
-					.Where(o => o.HeartbeatTime < filterTime)
+					.Where(o => o.LastSeenTime < filterTime)
 					.ToArrayAsync();
 
 				_dbContext.Origins.RemoveRange(originsToDelete);
@@ -193,8 +193,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			var entity = new Origin()
 			{
 				Id = originId,
-				StartTime = now,
-				HeartbeatTime = now,
+				StartupTime = now,
+				LastSeenTime = now,
 			};
 
 			await _dbContext.Origins.AddAsync(entity);

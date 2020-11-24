@@ -119,6 +119,10 @@ namespace Microsoft.EntityFrameworkCore
 					.HasKey(t => t.Id);
 
 				connection
+					.Property(c => c.Id)
+					.HasMaxLength(100);
+
+				connection
 					.HasOne(c => c.Origin)
 					.WithMany(o => o.Connections)
 					.HasForeignKey(c => c.OriginId);
