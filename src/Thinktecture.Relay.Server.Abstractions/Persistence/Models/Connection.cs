@@ -12,6 +12,7 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The transport-specific connection id.
 		/// </summary>
+		/// <remarks>The maximum length is 100 unicode characters.</remarks>
 		public string Id { get; set; }
 
 		/// <summary>
