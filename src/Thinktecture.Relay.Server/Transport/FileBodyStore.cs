@@ -145,7 +145,7 @@ namespace Thinktecture.Relay.Server.Transport
 		private string BuildFilePath(string prefix, Guid id)
 			=> Path.Combine(_basePath, $"{prefix}{id:D}");
 
-		private async Task<long> StoreBodyAsync(string fileName, Stream bodyStream, CancellationToken cancellationToken = default)
+		private async Task<long> StoreBodyAsync(string fileName, Stream bodyStream, CancellationToken cancellationToken)
 		{
 			bodyStream.TryRewind();
 

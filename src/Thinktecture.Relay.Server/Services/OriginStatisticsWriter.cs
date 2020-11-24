@@ -12,42 +12,31 @@ namespace Thinktecture.Relay.Server.Services
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
-		/// Initializes a new instance of an <see cref="OriginStatisticsWriter"/>.
+		/// Initializes a new instance of the <see cref="OriginStatisticsWriter"/> class.
 		/// </summary>
-		/// <param name="serviceProvider">The service provider to create scopes from.</param>
+		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
 		public OriginStatisticsWriter(IServiceProvider serviceProvider)
+			=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
+		/// <inheritdoc />
+		public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 		{
-			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			using var scope = _serviceProvider.CreateScope();
+			await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>().SetStartupTimeAsync(originId, cancellationToken);
 		}
 
 		/// <inheritdoc />
-		public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken)
+		public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 		{
 			using var scope = _serviceProvider.CreateScope();
-			var sp = scope.ServiceProvider;
-
-			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.SetStartupTimeAsync(originId, cancellationToken);
+			await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>().UpdateLastSeenTimeAsync(originId, cancellationToken);
 		}
 
 		/// <inheritdoc />
-		public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken)
+		public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 		{
 			using var scope = _serviceProvider.CreateScope();
-			var sp = scope.ServiceProvider;
-
-			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.UpdateLastSeenTimeAsync(originId, cancellationToken);
-		}
-
-		/// <inheritdoc />
-		public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken)
-		{
-			using var scope = _serviceProvider.CreateScope();
-			var sp = scope.ServiceProvider;
-
-			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.SetShutdownTimeAsync(originId, cancellationToken);
+			await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>().SetShutdownTimeAsync(originId, cancellationToken);
 		}
 	}
 }

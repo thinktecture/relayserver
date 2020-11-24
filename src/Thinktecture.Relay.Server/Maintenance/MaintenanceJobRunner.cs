@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,12 +20,13 @@ namespace Thinktecture.Relay.Server.Maintenance
 		private readonly MaintenanceOptions _maintenanceOptions;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MaintenanceJobRunner"/>.
+		/// Initializes a new instance of the <see cref="MaintenanceJobRunner"/> class.
 		/// </summary>
 		/// <param name="logger">An instance of an <see cref="ILogger{MaintenanceJobRunner}"/>.</param>
 		/// <param name="serviceProvider">An instance of an <see cref="IServiceProvider"/>.</param>
 		/// <param name="maintenanceOptions">An instance of an <see cref="IOptions{MaintenanceOptions}"/>.</param>
-		public MaintenanceJobRunner(ILogger<MaintenanceJobRunner> logger, IServiceProvider serviceProvider, IOptions<MaintenanceOptions> maintenanceOptions)
+		public MaintenanceJobRunner(ILogger<MaintenanceJobRunner> logger, IServiceProvider serviceProvider,
+			IOptions<MaintenanceOptions> maintenanceOptions)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
@@ -39,7 +41,6 @@ namespace Thinktecture.Relay.Server.Maintenance
 				while (!stoppingToken.IsCancellationRequested)
 				{
 					await RunMaintenanceJobsAsync(stoppingToken);
-
 					await Task.Delay(_maintenanceOptions.RunInterval, stoppingToken);
 				}
 			}
@@ -49,14 +50,13 @@ namespace Thinktecture.Relay.Server.Maintenance
 			}
 		}
 
-		private async Task RunMaintenanceJobsAsync(CancellationToken stoppingToken)
+		private async Task RunMaintenanceJobsAsync(CancellationToken cancellationToken)
 		{
 			using var scope = _serviceProvider.CreateScope();
-			var jobs = scope.ServiceProvider.GetServices<IMaintenanceJob>();
 
-			foreach (var job in jobs)
+			foreach (var job in scope.ServiceProvider.GetServices<IMaintenanceJob>())
 			{
-				if (stoppingToken.IsCancellationRequested)
+				if (cancellationToken.IsCancellationRequested)
 				{
 					return;
 				}
@@ -64,7 +64,7 @@ namespace Thinktecture.Relay.Server.Maintenance
 				try
 				{
 					_logger.LogTrace("Running maintenance job {MaintenanceJob}.", job.GetType().FullName);
-					await job.DoMaintenanceAsync(stoppingToken);
+					await job.DoMaintenanceAsync(cancellationToken);
 				}
 				catch (TaskCanceledException)
 				{
