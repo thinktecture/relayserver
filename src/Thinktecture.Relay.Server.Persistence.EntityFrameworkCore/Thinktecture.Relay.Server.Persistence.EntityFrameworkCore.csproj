@@ -5,6 +5,7 @@
     <Title>Thinktecture RelayServer EntityFramework</Title>
     <Description>Contains the EF Core context for data persistence.</Description>
     <Summary></Summary>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->

@@ -1,12 +1,11 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Thinktecture.Relay.Docker;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
+using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
 namespace Thinktecture.Relay.Server.Docker
 {
@@ -22,7 +21,7 @@ namespace Thinktecture.Relay.Server.Docker
 				if (config.GetValue<bool>("migrate") || config.GetValue<bool>("migrate-only"))
 				{
 					Log.Information("Applying migrations");
-					await ApplyMigrationsAsync(host);
+					await host.Services.ApplyMigrations();
 
 					if (config.GetValue<bool>("migrate-only"))
 					{
@@ -48,12 +47,5 @@ namespace Thinktecture.Relay.Server.Docker
 		}
 
 		public static IHostBuilder CreateHostBuilder(string[] args) => DockerUtils.CreateHostBuilder<Startup>("RelayServer", args);
-
-		private static async Task ApplyMigrationsAsync(IHost host)
-		{
-			using var scope = host.Services.CreateScope();
-			await using var dbContext = scope.ServiceProvider.GetRequiredService<RelayDbContext>();
-			await dbContext.Database.MigrateAsync();
-		}
 	}
 }
