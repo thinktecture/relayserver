@@ -12,7 +12,7 @@
 
     <!-- Version -->
     <Version Condition="'$(Version)' == ''">3.0.0</Version>
-    <PreReleasePrefix Condition="'$(PreReleasePrefix)' == ''">-alpha.1</PreReleasePrefix>
+    <PreReleasePrefix Condition="'$(PreReleasePrefix)' == ''">-alpha.2</PreReleasePrefix>
     <PreReleaseSuffix Condition="'$(PreReleaseSuffix)' == ''"></PreReleaseSuffix>
     <PreRelease Condition="'$(PreReleasePrefix)' != ''">$(PreReleasePrefix)$(PreReleaseSuffix)</PreRelease>
     <VersionPrefix>$(Version)</VersionPrefix>
