@@ -5,4 +5,4 @@ docker run `
   --network relay_network `
   -p 5000:80 `
   -d `
-  relay_server
+  relay_server $args

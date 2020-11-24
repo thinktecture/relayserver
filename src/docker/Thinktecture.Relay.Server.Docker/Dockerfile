@@ -50,3 +50,4 @@ COPY --from=publish /app .
 EXPOSE 80
 
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.Server.Docker.dll"]
+CMD[""]
