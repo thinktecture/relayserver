@@ -82,9 +82,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CleanUpOriginsAsync(TimeSpan oldestToKeep)
+		public async Task CleanUpOriginsAsync(TimeSpan maxAge)
 		{
-			var filterTime = DateTime.UtcNow - oldestToKeep;
+			var filterTime = DateTime.UtcNow - maxAge;
 
 			_logger.LogDebug("Cleaning up statistics storage: Deleting all origins that have not been updated since {OldestOriginToKeep}.", filterTime);
 
@@ -165,9 +165,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task CleanUpConnectionsAsync(TimeSpan oldestToKeep)
+		public async Task CleanUpConnectionsAsync(TimeSpan maxAge)
 		{
-			var filterTime = DateTime.UtcNow - oldestToKeep;
+			var filterTime = DateTime.UtcNow - maxAge;
 
 			_logger.LogDebug("Cleaning up statistics storage: Deleting all connections that have not been updated since {OldestOriginToKeep}.", filterTime);
 

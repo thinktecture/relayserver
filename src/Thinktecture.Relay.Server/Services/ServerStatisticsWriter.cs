@@ -1,8 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Thinktecture.Relay.Server.Maintenance;
 using Thinktecture.Relay.Server.Persistence;
 
 namespace Thinktecture.Relay.Server.Services
@@ -12,21 +13,21 @@ namespace Thinktecture.Relay.Server.Services
 	/// </summary>
 	public class ServerStatisticsWriter : BackgroundService
 	{
-		private readonly IServiceProvider _serviceProvider;
 		private readonly IOriginStatisticsWriter _statisticsWriter;
 		private readonly RelayServerContext _serverContext;
+		private readonly StatisticsOptions _statisticsOptions;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="OriginStatisticsWriter"/>.
 		/// </summary>
-		/// <param name="serviceProvider">The service provider to access services from.</param>
 		/// <param name="statisticsWriter">An instance of an <see cref="IOriginStatisticsWriter"/>.</param>
 		/// <param name="serverContext">An instance of an <see cref="RelayServerContext"/>.</param>
-		public ServerStatisticsWriter(IServiceProvider serviceProvider, IOriginStatisticsWriter statisticsWriter, RelayServerContext serverContext)
+		/// <param name="statisticsOptions">An instance of an <see cref="IOptions{StatisticsOptions}"/>.</param>
+		public ServerStatisticsWriter(IOriginStatisticsWriter statisticsWriter, RelayServerContext serverContext, IOptions<StatisticsOptions> statisticsOptions)
 		{
-			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_statisticsWriter = statisticsWriter ?? throw new ArgumentNullException(nameof(statisticsWriter));
 			_serverContext = serverContext ?? throw new ArgumentNullException(nameof(serverContext));
+			_statisticsOptions = statisticsOptions?.Value ?? throw new ArgumentNullException(nameof(statisticsOptions));
 		}
 
 		/// <inheritdoc />
@@ -46,17 +47,7 @@ namespace Thinktecture.Relay.Server.Services
 				{
 					await _statisticsWriter.UpdateLastSeenTimeAsync(_serverContext.OriginId);
 
-					using (var scope = _serviceProvider.CreateScope())
-					{
-						var repo = scope.ServiceProvider.GetRequiredService<IStatisticsRepository>();
-
-						// TODO: Use configuration for timespan to keep entries for
-						await repo.CleanUpOriginsAsync(TimeSpan.FromMinutes(15));
-						await repo.CleanUpConnectionsAsync(TimeSpan.FromMinutes(15));
-					}
-
-					// TODO: Use configuration for cleanup
-					await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
+					await Task.Delay(_statisticsOptions.LastActivityUpdateInterval, stoppingToken);
 				}
 			}
 			catch (TaskCanceledException)
