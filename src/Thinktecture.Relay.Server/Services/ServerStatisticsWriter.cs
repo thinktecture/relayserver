@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Server.Services
 		/// <inheritdoc />
 		public override async Task StartAsync(CancellationToken cancellationToken)
 		{
-			await _statisticsWriter.CreateOriginAsync(_serverContext.OriginId);
+			await _statisticsWriter.SetStartupTimeAsync(_serverContext.OriginId);
 
 			await base.StartAsync(cancellationToken);
 		}
@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Server.Services
 			{
 				while (!stoppingToken.IsCancellationRequested)
 				{
-					await _statisticsWriter.HeartbeatOriginAsync(_serverContext.OriginId);
+					await _statisticsWriter.UpdateLastSeenTimeAsync(_serverContext.OriginId);
 
 					using (var scope = _serviceProvider.CreateScope())
 					{
@@ -68,7 +68,7 @@ namespace Thinktecture.Relay.Server.Services
 		/// <inheritdoc />
 		public override async Task StopAsync(CancellationToken cancellationToken)
 		{
-			await _statisticsWriter.ShutdownOriginAsync(_serverContext.OriginId);
+			await _statisticsWriter.SetShutdownTimeAsync(_serverContext.OriginId);
 
 			await base.StopAsync(cancellationToken);
 		}

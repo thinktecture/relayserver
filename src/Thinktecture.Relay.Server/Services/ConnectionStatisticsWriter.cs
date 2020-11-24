@@ -21,33 +21,33 @@ namespace Thinktecture.Relay.Server.Services
 		}
 
 		/// <inheritdoc />
-		public async Task CreateConnectionAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
+		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.CreateConnectionAsync(connectionId, tenantId, originId, remoteIpAddress);
+			await repo.SetConnectionTimeAsync(connectionId, tenantId, originId, remoteIpAddress);
 		}
 
 		/// <inheritdoc />
-		public async Task HeartbeatConnectionAsync(string connectionId)
+		public async Task UpdateLastActivityTimeAsync(string connectionId)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.HeartbeatConnectionAsync(connectionId);
+			await repo.UpdateLastActivityTimeAsync(connectionId);
 		}
 
 		/// <inheritdoc />
-		public async Task CloseConnectionAsync(string connectionId)
+		public async Task SetDisconnectTimeAsync(string connectionId)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			var sp = scope.ServiceProvider;
 
 			var repo = sp.GetRequiredService<IStatisticsRepository>();
-			await repo.CloseConnectionAsync(connectionId);
+			await repo.SetDisconnectTimeAsync(connectionId);
 		}
 	}
 }
