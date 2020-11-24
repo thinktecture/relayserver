@@ -49,7 +49,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Connection", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(100);
 
                     b.Property<DateTimeOffset>("ConnectTime")
                         .HasColumnType("timestamp with time zone");
@@ -83,13 +84,13 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("HeartbeatTime")
+                    b.Property<DateTimeOffset>("LastSeenTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("ShutdownTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset>("StartTime")
+                    b.Property<DateTimeOffset>("StartupTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
