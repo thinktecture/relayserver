@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			_logger.LogDebug("Connection incoming for tenant {@Tenant}", tenant);
 			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
 
-			await _connectionStatisticsWriter.CreateConnectionAsync(Context.ConnectionId,
+			await _connectionStatisticsWriter.SetConnectionTimeAsync(Context.ConnectionId,
 				tenant.Id,
 				_relayServerContext.OriginId,
 				Context.GetHttpContext().Connection.RemoteIpAddress);
@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		{
 			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
 			_logger.LogDebug("Connection disconnected for tenant {@Tenant}", Context.User.GetTenantInfo());
-			await _connectionStatisticsWriter.CloseConnectionAsync(Context.ConnectionId);
+			await _connectionStatisticsWriter.SetDisconnectTimeAsync(Context.ConnectionId);
 
 			await base.OnDisconnectedAsync(exception);
 		}
@@ -102,7 +102,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public async Task DeliverAsync(TResponse response)
 		{
 			await _responseCoordinator.ProcessResponseAsync(response);
-			await _connectionStatisticsWriter.HeartbeatConnectionAsync(Context.ConnectionId);
+			await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 		}
 
 		/// <summary>
@@ -115,7 +115,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public async Task AcknowledgeAsync(IAcknowledgeRequest request)
 		{
 			await _acknowledgeCoordinator.AcknowledgeRequestAsync(request);
-			await _connectionStatisticsWriter.HeartbeatConnectionAsync(Context.ConnectionId);
+			await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 		}
 
 		/// <summary>
