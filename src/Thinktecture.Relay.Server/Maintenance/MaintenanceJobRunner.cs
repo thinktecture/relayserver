@@ -72,7 +72,7 @@ namespace Thinktecture.Relay.Server.Maintenance
 				}
 				catch (Exception ex)
 				{
-					_logger.LogError(ex, "An error occured while running maintenance job {MaintenanceJob}.", job.GetType().FullName);
+					_logger.LogError(ex, "An error occured while running maintenance job {MaintenanceJob}", job.GetType().FullName);
 				}
 			}
 		}
