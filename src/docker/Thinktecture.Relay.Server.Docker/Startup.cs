@@ -38,8 +38,7 @@ namespace Thinktecture.Relay.Server.Docker
 				.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 				.AddSignalRConnectorTransport()
 				.AddFileBodyStore(options => Configuration.GetSection("BodyStore").Bind(options))
-				.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options))
-				;
+				.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options));
 
 			services.Configure<StatisticsOptions>(options => Configuration.GetSection("Statistics").Bind(options));
 		}
