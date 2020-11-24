@@ -37,6 +37,12 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Tenant"/> class.
 		/// </summary>
+		/// <remarks>Parameterless constructor is needed for deserialization</remarks>
+		public Tenant() {}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Tenant"/> class.
+		/// </summary>
 		/// <param name="tenant">The <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/> to clone.</param>
 		public Tenant(Thinktecture.Relay.Server.Persistence.Models.Tenant tenant)
 		{
