@@ -20,9 +20,11 @@ In order to build and run the development environment, you need the following co
 - .NET Core SDK 3.1.100 or newer features within 3.1
 - PowerShell Core 6 or newer
 
-When you run the system locally for the first time, only start the dependencies and the management api. Then you can run the `seed-data.ps1`
-script, which will create the first initial configuration for the tenants, so that the connectors can connect with their default development
-credentials.
+When you run the system locally for the first time, only start the dependencies (`run-dependencies.ps1`), the relay server (to apply the
+database migration) and then the management api. To run both components locally start them with `dotnet run` in the
+`src/docker/Thinktecture.Relay.Server.Docker` and `src/docker/Thinktecture.Relay.ManagementApi.Docker` folders. Then you can execute the
+`seed-data.ps1` script, which will create the first initial configuration for the tenants, so that the connectors can connect with their
+default development credentials. After that you can run the environment or the multiserver environment.
 
 The _development_ environment also comes with a [Seq](https://datalust.co/seq) logging server in a local docker container (using the local,
 free single-user license). For production the RelayServer components log to stdout and stderr as this is default in docker environments, but
