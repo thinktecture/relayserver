@@ -23,7 +23,7 @@ In order to build and run the development environment, you need the following co
 
 After you start the system for the first time, you need to execute the `seed-data.ps1` script, which will create the first initial
 configuration for the tenants, so that the connectors can connect with their default development credentials. After that you can run the
-environment or the multiserver environment.
+environment or the multi-server environment.
 
 The _development_ environment also comes with a [Seq](https://datalust.co/seq) logging server in a local docker container (using the local,
 free single-user license). For production the RelayServer components log to stdout and stderr as this is default in docker environments, but
