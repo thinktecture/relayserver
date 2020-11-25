@@ -6,12 +6,8 @@
     <DockerfileContext>..\..\</DockerfileContext>
   </PropertyGroup>
 
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\..\shared\ProjectProperties.shared.props" />
-
-  <PropertyGroup>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-  </PropertyGroup>
+  <!-- Don't create a NuGet package for this project -->
+  <Import Project="..\..\shared\NoPackProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="IdentityServer4" Version="4.0.4" />

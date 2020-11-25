@@ -51,9 +51,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{AAA28426
 		tools\create-migrations.ps1 = tools\create-migrations.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer", "tools\MigrationCreation.SqlServer\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer.csproj", "{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigrationCreation.SqlServer", "tools\MigrationCreation.SqlServer\MigrationCreation.SqlServer.csproj", "{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.PostgreSql", "tools\MigrationCreation.PostgreSql\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.PostgreSql.csproj", "{329E6E2B-FEB6-4FA9-A893-0435300A122D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigrationCreation.PostgreSql", "tools\MigrationCreation.PostgreSql\MigrationCreation.PostgreSql.csproj", "{329E6E2B-FEB6-4FA9-A893-0435300A122D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj", "{734C4AFA-41C3-49AE-A39F-51DD5FAAF462}"
 EndProject
