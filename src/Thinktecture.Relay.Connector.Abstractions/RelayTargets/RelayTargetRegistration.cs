@@ -42,13 +42,13 @@ namespace Thinktecture.Relay.Connector.RelayTargets
 	}
 
 	/// <inheritdoc />
-	public class RelayTargetRegistration<TTarget, TRequest, TResponse> : RelayTargetRegistration<TRequest, TResponse>
-		where TTarget : IRelayTarget<TRequest, TResponse>
+	public class RelayTargetRegistration<TRequest, TResponse, TTarget> : RelayTargetRegistration<TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
+		where TTarget : IRelayTarget<TRequest, TResponse>
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RelayTargetRegistration{TTarget,TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="RelayTargetRegistration{TRequest,TResponse,TTarget}"/> class.
 		/// </summary>
 		/// <param name="id">The unique id of the target.</param>
 		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
