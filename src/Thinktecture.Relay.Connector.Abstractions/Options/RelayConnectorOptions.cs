@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 
-namespace Thinktecture.Relay.Connector
+namespace Thinktecture.Relay.Connector.Options
 {
 	/// <summary>
 	/// Options for the connector.
@@ -26,5 +27,10 @@ namespace Thinktecture.Relay.Connector
 		/// The <see cref="DiscoveryDocument"/>.
 		/// </summary>
 		public DiscoveryDocument DiscoveryDocument { get; set; }
+
+		/// <summary>
+		/// The web targets.
+		/// </summary>
+		public Dictionary<string, RelayWebTargetOptions> WebTargets { get; set; }
 	}
 }

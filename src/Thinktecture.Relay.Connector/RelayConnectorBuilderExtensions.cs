@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		{
 			builder.Services.Configure<RelayTargetServiceOptions<TRequest, TResponse>>(configure =>
 			{
-				configure.Registrations.Add(new RelayTargetRegistration<TTarget, TRequest, TResponse>(id, timeout, parameters));
+				configure.Registrations.Add(new RelayTargetRegistration<TRequest, TResponse, TTarget>(id, timeout, parameters));
 			});
 
 			return builder;
