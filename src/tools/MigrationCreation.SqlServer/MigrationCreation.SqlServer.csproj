@@ -4,15 +4,10 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Creates EF Core migrations for MS SQL Server</Title>
-    <Summary></Summary>
   </PropertyGroup>
 
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\..\shared\ProjectProperties.shared.props" />
-
-  <PropertyGroup>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-  </PropertyGroup>
+  <!-- Don't create a NuGet package for this project -->
+  <Import Project="..\..\shared\NoPackProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />

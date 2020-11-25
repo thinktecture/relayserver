@@ -1,0 +1,12 @@
+<Project>
+  <!-- WARNING: This file is shared between all RelayServer .NET Core projects that don't produce NuGet packages -->
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>
