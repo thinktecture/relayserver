@@ -28,7 +28,7 @@ jobs:
         working-directory: src
 
       - name: Build
-        run: dotnet build -c:Release -p:ContinuousIntegrationBuild=true -p:PreReleaseSuffix=-$GITHUB_RUN_NUMBER
+        run: dotnet build -c:Release -p:ContinuousIntegrationBuild=true -p:PreReleaseSuffix=-$GITHUB_RUN_NUMBER --no-restore
         working-directory: src
 
       - name: Create NuGet packages
