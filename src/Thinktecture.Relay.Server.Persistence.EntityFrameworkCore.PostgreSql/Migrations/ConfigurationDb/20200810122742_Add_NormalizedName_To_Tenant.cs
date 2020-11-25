@@ -13,6 +13,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                 nullable: false,
                 defaultValue: "");
 
+				migrationBuilder.Sql("UPDATE \"Tenants\" SET \"NormalizedName\" = UPPER(\"Name\")");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Tenants_NormalizedName",
                 table: "Tenants",
