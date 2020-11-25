@@ -20,12 +20,18 @@ namespace Thinktecture.Relay.Server.Docker
 				var config = host.Services.GetRequiredService<IConfiguration>();
 				if (config.GetValue<bool>("migrate") || config.GetValue<bool>("migrate-only"))
 				{
-					Log.Information("Applying migrations");
-					await host.Services.ApplyMigrations();
+					var rollback = config.GetValue<string>("rollback");
+					if (rollback == null)
+					{
+						await host.Services.ApplyPendingMigrationsAsync();
+					}
+					else
+					{
+						await host.Services.RollbackMigrationsAsync(rollback);
+					}
 
 					if (config.GetValue<bool>("migrate-only"))
 					{
-						Log.Information("Only migrations should be executed");
 						return 0;
 					}
 				}
