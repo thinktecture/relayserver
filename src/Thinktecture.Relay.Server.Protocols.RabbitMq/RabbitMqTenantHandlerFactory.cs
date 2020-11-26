@@ -5,23 +5,21 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc />
-	public class TenantHandlerFactory<TRequest, TResponse> : ITenantHandlerFactory<TRequest, TResponse>
+	public class RabbitMqTenantHandlerFactory<TRequest, TResponse> : ITenantHandlerFactory<TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
 		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TenantHandlerFactory{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="RabbitMqTenantHandlerFactory{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
-		public TenantHandlerFactory(IServiceProvider serviceProvider)
-		{
-			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-		}
+		public RabbitMqTenantHandlerFactory(IServiceProvider serviceProvider)
+			=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 		/// <inheritdoc />
 		public ITenantHandler<TRequest> Create(Guid tenantId, string connectionId)
-			=> ActivatorUtilities.CreateInstance<TenantHandler<TRequest, TResponse>>(_serviceProvider, tenantId, connectionId);
+			=> ActivatorUtilities.CreateInstance<RabbitMqTenantHandler<TRequest, TResponse>>(_serviceProvider, tenantId, connectionId);
 	}
 }

@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 {
 	/// <inheritdoc />
 	// ReSharper disable once ClassNeverInstantiated.Global
-	public class TenantConnectorAdapter<TRequest, TResponse> : ITenantConnectorAdapter<TRequest>
+	public class SignalRTenantConnectorAdapter<TRequest, TResponse> : ITenantConnectorAdapter<TRequest>
 		where TRequest : IClientRequest
 		where TResponse : class, ITargetResponse
 	{
@@ -24,13 +24,13 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public string ConnectionId { get; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TenantConnectorAdapter{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="SignalRTenantConnectorAdapter{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="hubContext">An <see cref="IHubContext{THub}"/>.</param>
 		/// <param name="tenantId">The unique id of the tenant.</param>
 		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
-		public TenantConnectorAdapter(IHubContext<ConnectorHub<TRequest, TResponse>, IConnector<TRequest>> hubContext, Guid tenantId,
+		public SignalRTenantConnectorAdapter(IHubContext<ConnectorHub<TRequest, TResponse>, IConnector<TRequest>> hubContext, Guid tenantId,
 			string connectionId, IConnectionStatisticsWriter connectionStatisticsWriter)
 		{
 			_hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));

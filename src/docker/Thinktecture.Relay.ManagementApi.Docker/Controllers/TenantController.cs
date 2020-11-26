@@ -33,7 +33,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		/// Returns tenants in a pageable way.
 		/// </summary>
 		/// <param name="skip">The amount of tenants to skip while loading.</param>
-		/// <param name="take">The amount of tenants to return. Defaults to 10.</param>
+		/// <param name="take">The amount of tenants to return. The default value is 10.</param>
 		/// <returns>A page that contains <paramref name="take"/> tenants, starting at the <paramref name="skip"/> tenant.</returns>
 		[HttpGet]
 		public IAsyncEnumerable<Tenant> GetAllTenants(int skip = 0, int take = 10)

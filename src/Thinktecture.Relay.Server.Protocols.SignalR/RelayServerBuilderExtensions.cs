@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest
 			where TResponse : class, ITargetResponse
 		{
-			builder.Services.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, TenantConnectorAdapterFactory<TRequest, TResponse>>();
+			builder.Services.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, SignalRTenantConnectorAdapterFactory<TRequest, TResponse>>();
 			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();
 			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse>>();
 

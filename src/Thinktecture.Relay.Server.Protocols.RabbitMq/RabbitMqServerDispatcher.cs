@@ -9,10 +9,10 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="IServerDispatcher{TResponse}" />
-	public class ServerDispatcher<TResponse> : IServerDispatcher<TResponse>, IDisposable
+	public class RabbitMqServerDispatcher<TResponse> : IServerDispatcher<TResponse>, IDisposable
 		where TResponse : ITargetResponse
 	{
-		private readonly ILogger<ServerDispatcher<TResponse>> _logger;
+		private readonly ILogger<RabbitMqServerDispatcher<TResponse>> _logger;
 		private readonly IModel _responseModel;
 		private readonly IModel _acknowledgeModel;
 
@@ -20,12 +20,12 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public int? BinarySizeThreshold { get; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ServerDispatcher{TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="RabbitMqServerDispatcher{TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgegory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
-		public ServerDispatcher(ILogger<ServerDispatcher<TResponse>> logger, ModelFactory modelFactory,
+		public RabbitMqServerDispatcher(ILogger<RabbitMqServerDispatcher<TResponse>> logger, ModelFactory modelFactory,
 			IOptions<RabbitMqOptions> rabbitMqOptions)
 		{
 			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));

@@ -12,11 +12,11 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="ITenantHandler{TRequest}" />
 	// ReSharper disable once ClassNeverInstantiated.Global
-	public class TenantHandler<TRequest, TResponse> : ITenantHandler<TRequest>, IAsyncDisposable
+	public class RabbitMqTenantHandler<TRequest, TResponse> : ITenantHandler<TRequest>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly ILogger<TenantHandler<TRequest, TResponse>> _logger;
+		private readonly ILogger<RabbitMqTenantHandler<TRequest, TResponse>> _logger;
 		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
 		private readonly Guid _originId;
 		private readonly string _connectionId;
@@ -27,20 +27,20 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public event AsyncEventHandler<TRequest> RequestReceived;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TenantHandler{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="RabbitMqTenantHandler{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
-		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
+		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="tenantId">The unique id of the tenant.</param>
 		/// <param name="connectionId">The unique id of the connection.</param>
-		public TenantHandler(ILogger<TenantHandler<TRequest, TResponse>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
-			RelayServerContext relayServerContext, ModelFactory modelFactory, Guid tenantId, string connectionId)
+		public RabbitMqTenantHandler(ILogger<RabbitMqTenantHandler<TRequest, TResponse>> logger, RelayServerContext relayServerContext,
+			IAcknowledgeCoordinator acknowledgeCoordinator, ModelFactory modelFactory, Guid tenantId, string connectionId)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
 			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
+			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
 			_connectionId = connectionId;
 
 			_model = modelFactory?.Create($"tenant handler for {tenantId} of connection {connectionId}") ??
