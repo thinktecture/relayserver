@@ -47,13 +47,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			if (useTenantRouting)
 			{
-				builder.Services.TryAddSingleton<ITenantDispatcher<TRequest>, TenantDispatcher<TRequest>>();
+				builder.Services.TryAddSingleton<ITenantDispatcher<TRequest>, RabbitMqTenantDispatcher<TRequest>>();
 				builder.Services.TryAddSingleton<ITenantHandlerFactory<TRequest, TResponse>, TenantHandlerFactory<TRequest, TResponse>>();
 			}
 
 			builder.Services.TryAddSingleton<IConnection>(provider =>
 			{
-				var relayServerContext = provider.GetRequiredService<RelayServerContext>();
+				var context = provider.GetRequiredService<RelayServerContext>();
 				var options = provider.GetRequiredService<IOptions<RabbitMqOptions>>();
 
 				var factory = new ConnectionFactory
@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
 				return factory.CreateConnection(
 					AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts ?? factory.Uri.Host),
-					$"RelayServer {relayServerContext.OriginId}");
+					$"RelayServer {context.OriginId}");
 			});
 			builder.Services.AddSingleton<ModelFactory>();
 

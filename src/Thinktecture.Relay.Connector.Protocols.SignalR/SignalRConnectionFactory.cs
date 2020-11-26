@@ -14,20 +14,20 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 	{
 		private readonly ILogger<ConnectionFactory> _logger;
 		private readonly IAccessTokenProvider _accessTokenProvider;
-		private readonly RelayConnectorOptions _options;
+		private readonly RelayConnectorOptions _relayConnectorOptions;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ConnectionFactory"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="accessTokenProvider">An <see cref="IAccessTokenProvider"/>.</param>
-		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
+		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		public ConnectionFactory(ILogger<ConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
-			IOptions<RelayConnectorOptions> options)
+			IOptions<RelayConnectorOptions> relayConnectorOptions)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
-			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+			_relayConnectorOptions = relayConnectorOptions?.Value ?? throw new ArgumentNullException(nameof(relayConnectorOptions));
 		}
 
 		/// <summary>
@@ -36,10 +36,10 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		/// <returns>The <see cref="HubConnection"/>.</returns>
 		public HubConnection CreateConnection()
 		{
-			_logger.LogDebug("Creating connection to {ConnectorEndpoint}", _options.DiscoveryDocument.ConnectorEndpoint);
+			_logger.LogDebug("Creating connection to {ConnectorEndpoint}", _relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint);
 
 			return new HubConnectionBuilder()
-				.WithUrl(new Uri(_options.DiscoveryDocument.ConnectorEndpoint),
+				.WithUrl(new Uri(_relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint),
 					options => options.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync)
 				.WithAutomaticReconnect() // TODO add retry policy based on discovery document config values
 				.Build();
