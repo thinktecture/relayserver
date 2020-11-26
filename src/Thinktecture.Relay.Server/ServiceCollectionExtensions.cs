@@ -58,15 +58,17 @@ namespace Microsoft.Extensions.DependencyInjection
 				});
 			});
 
-			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
-			services.TryAddScoped<RelayMiddleware<TRequest, TResponse>>();
 			services.TryAddScoped<DiscoveryDocumentBuilder>();
+			services.TryAddScoped<RelayMiddleware<TRequest, TResponse>>();
+			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
 			services.TryAddScoped<IRelayContext<TRequest, TResponse>, RelayContext<TRequest, TResponse>>();
 			services.TryAddScoped<IRequestCoordinator<TRequest>, RequestCoordinator<TRequest, TResponse>>();
 			services.TryAddScoped<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
-			services.TryAddSingleton<RelayServerContext>();
+
+			services.AddSingleton<RelayServerContext>();
+			services.AddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();
+
 			services.TryAddSingleton<IResponseCoordinator<TResponse>, ResponseCoordinator<TRequest, TResponse>>();
-			services.TryAddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();
 			services.TryAddSingleton<IAcknowledgeCoordinator, AcknowledgeCoordinator<TRequest, TResponse>>();
 			services.TryAddSingleton<IOriginStatisticsWriter, OriginStatisticsWriter>();
 			services.TryAddSingleton<IConnectionStatisticsWriter, ConnectionStatisticsWriter>();
