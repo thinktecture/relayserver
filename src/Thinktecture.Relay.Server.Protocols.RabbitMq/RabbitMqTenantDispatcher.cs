@@ -9,25 +9,28 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="ITenantDispatcher{TRequest}" />
-	public class TenantDispatcher<TRequest> : ITenantDispatcher<TRequest>, IDisposable
+	public class RabbitMqTenantDispatcher<TRequest> : ITenantDispatcher<TRequest>, IDisposable
 		where TRequest : IClientRequest
 	{
-		private readonly ILogger<TenantDispatcher<TRequest>> _logger;
+		private readonly ILogger<RabbitMqTenantDispatcher<TRequest>> _logger;
 		private readonly IModel _model;
 
 		/// <inheritdoc />
 		public int? BinarySizeThreshold { get; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TenantDispatcher{TRequest}"/> class.
+		/// Initializes a new instance of the <see cref="RabbitMqTenantDispatcher{TRequest}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
-		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
-		public TenantDispatcher(ILogger<TenantDispatcher<TRequest>> logger, ModelFactory modelFactory, IOptions<RabbitMqOptions> options)
+		/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
+		public RabbitMqTenantDispatcher(ILogger<RabbitMqTenantDispatcher<TRequest>> logger, ModelFactory modelFactory,
+			IOptions<RabbitMqOptions> rabbitMqOptions)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			BinarySizeThreshold = options?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(options));
+
+			BinarySizeThreshold = rabbitMqOptions?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(rabbitMqOptions));
+
 			_model = modelFactory?.Create("tenant dispatcher") ?? throw new ArgumentNullException(nameof(modelFactory));
 		}
 
@@ -41,7 +44,8 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			}
 			catch (RabbitMQClientException ex)
 			{
-				_logger.LogError(ex, "An error occured while dispatching request {RequestId} to tenant {TenantId} queue", request.RequestId, request.TenantId);
+				_logger.LogError(ex, "An error occured while dispatching request {RequestId} to tenant {TenantId} queue", request.RequestId,
+					request.TenantId);
 				throw new TransportException(ex);
 			}
 		}

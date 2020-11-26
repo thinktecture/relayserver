@@ -24,16 +24,18 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgegory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
-		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
-		public ServerDispatcher(ILogger<ServerDispatcher<TResponse>> logger, ModelFactory modelFactory, IOptions<RabbitMqOptions> options)
+		/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
+		public ServerDispatcher(ILogger<ServerDispatcher<TResponse>> logger, ModelFactory modelFactory,
+			IOptions<RabbitMqOptions> rabbitMqOptions)
 		{
 			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+			BinarySizeThreshold = rabbitMqOptions?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(rabbitMqOptions));
+
 			_responseModel = modelFactory.Create("response dispatcher");
 			_acknowledgeModel = modelFactory.Create("acknowledge dispatcher");
-
-			BinarySizeThreshold = options?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(options));
 		}
 
 		/// <inheritdoc />

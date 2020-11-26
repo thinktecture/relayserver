@@ -47,17 +47,21 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
 		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
 		/// <param name="connectorTransport">An <see cref="IConnectorTransport{TResponse}"/>.</param>
-		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
+		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="clientRequestInterceptors">An enumeration of <see cref="IClientRequestInterceptor{TRequest,TResponse}"/>.</param>
 		/// <param name="targetResponseInterceptors">An enumeration of <see cref="ITargetResponseInterceptor{TRequest,TResponse}"/>.</param>
 		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse>> logger, IRelayClientRequestFactory<TRequest> requestFactory,
 			ITenantRepository tenantRepository, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
 			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
 			IRelayContext<TRequest, TResponse> relayContext, ITenantDispatcher<TRequest> tenantDispatcher,
-			IConnectorTransport<TResponse> connectorTransport, IOptions<RelayServerOptions> options,
+			IConnectorTransport<TResponse> connectorTransport, IOptions<RelayServerOptions> relayServerOptions,
 			IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
 			IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors)
 		{
+			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+			if (tenantDispatcher == null) throw new ArgumentNullException(nameof(tenantDispatcher));
+			if (connectorTransport == null) throw new ArgumentNullException(nameof(connectorTransport));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
@@ -69,11 +73,7 @@ namespace Thinktecture.Relay.Server.Middleware
 			_clientRequestInterceptors = clientRequestInterceptors ?? Array.Empty<IClientRequestInterceptor<TRequest, TResponse>>();
 			_targetResponseInterceptors = targetResponseInterceptors ?? Array.Empty<ITargetResponseInterceptor<TRequest, TResponse>>();
 
-			if (tenantDispatcher == null) throw new ArgumentNullException(nameof(tenantDispatcher));
-			if (connectorTransport == null) throw new ArgumentNullException(nameof(connectorTransport));
-			if (options == null) throw new ArgumentNullException(nameof(options));
-
-			_requestExpiration = options.Value.RequestExpiration;
+			_requestExpiration = relayServerOptions.Value.RequestExpiration;
 			_maximumBodySize = Math.Min(tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(),
 				connectorTransport.BinarySizeThreshold.GetValueOrDefault());
 		}

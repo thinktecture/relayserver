@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Maintenance
 		public StatisticsCleanupJob(IStatisticsRepository statisticsRepository, IOptions<StatisticsOptions> statisticsOptions)
 		{
 			_statisticsRepository = statisticsRepository ?? throw new ArgumentNullException(nameof(statisticsRepository));
-			_statisticsOptions = statisticsOptions.Value ?? throw new ArgumentNullException(nameof(statisticsOptions));
+			_statisticsOptions = statisticsOptions?.Value ?? throw new ArgumentNullException(nameof(statisticsOptions));
 		}
 
 		/// <inheritdoc />

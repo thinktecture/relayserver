@@ -23,7 +23,8 @@ namespace Thinktecture.Relay.Server.Services
 		/// <param name="statisticsWriter">An instance of an <see cref="IOriginStatisticsWriter"/>.</param>
 		/// <param name="serverContext">An instance of an <see cref="RelayServerContext"/>.</param>
 		/// <param name="statisticsOptions">An instance of an <see cref="IOptions{StatisticsOptions}"/>.</param>
-		public ServerStatisticsWriter(IOriginStatisticsWriter statisticsWriter, RelayServerContext serverContext, IOptions<StatisticsOptions> statisticsOptions)
+		public ServerStatisticsWriter(IOriginStatisticsWriter statisticsWriter, RelayServerContext serverContext,
+			IOptions<StatisticsOptions> statisticsOptions)
 		{
 			_statisticsWriter = statisticsWriter ?? throw new ArgumentNullException(nameof(statisticsWriter));
 			_serverContext = serverContext ?? throw new ArgumentNullException(nameof(serverContext));

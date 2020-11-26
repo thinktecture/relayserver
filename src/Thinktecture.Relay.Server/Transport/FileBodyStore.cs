@@ -15,10 +15,10 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly ILogger<FileBodyStore> _logger;
 		private readonly string _basePath;
 
-		public FileBodyStore(ILogger<FileBodyStore> logger, IOptions<FileBodyStoreOptions> options)
+		public FileBodyStore(ILogger<FileBodyStore> logger, IOptions<FileBodyStoreOptions> fileBodyStoreOptions)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_basePath = options?.Value.StoragePath ?? throw new ArgumentNullException(nameof(options));
+			_basePath = fileBodyStoreOptions?.Value.StoragePath ?? throw new ArgumentNullException(nameof(fileBodyStoreOptions));
 
 			_logger.LogDebug("Using {StorageType} with storage path {StoragePath} as body store", nameof(FileBodyStore), _basePath);
 		}

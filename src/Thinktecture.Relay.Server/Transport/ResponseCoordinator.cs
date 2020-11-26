@@ -48,12 +48,12 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
-		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
+		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		public ResponseCoordinator(ILogger<ResponseCoordinator<TRequest, TResponse>> logger, IServerHandler<TResponse> serverHandler,
 			IBodyStore bodyStore, RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher,
-			IOptions<RelayServerOptions> options)
+			IOptions<RelayServerOptions> relayServerOptions)
 		{
-			if (options == null) throw new ArgumentNullException(nameof(options));
+			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
@@ -61,7 +61,7 @@ namespace Thinktecture.Relay.Server.Transport
 			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
 			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
 
-			_enableResponseShortcut = options.Value.EnableResponseShortcut;
+			_enableResponseShortcut = relayServerOptions.Value.EnableResponseShortcut;
 
 			serverHandler.ResponseReceived += OnResponseReceived;
 		}

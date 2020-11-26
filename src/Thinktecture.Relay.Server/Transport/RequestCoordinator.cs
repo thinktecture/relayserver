@@ -21,20 +21,20 @@ namespace Thinktecture.Relay.Server.Transport
 		/// Initializes a new instance of the <see cref="RequestCoordinator{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
+		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
-		/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
-		public RequestCoordinator(ILogger<RequestCoordinator<TRequest, TResponse>> logger, ITenantDispatcher<TRequest> tenantDispatcher,
-			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, IOptions<RelayServerOptions> options)
+		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
+		public RequestCoordinator(ILogger<RequestCoordinator<TRequest, TResponse>> logger, IOptions<RelayServerOptions> relayServerOptions,
+			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, ITenantDispatcher<TRequest> tenantDispatcher)
 		{
-			if (options == null) throw new ArgumentNullException(nameof(options));
+			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_tenantDispatcher = tenantDispatcher ?? throw new ArgumentNullException(nameof(tenantDispatcher));
 			_tenantConnectorAdapterRegistry =
 				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
 
-			_enableRequestShortcut = options.Value.EnableRequestShortcut;
+			_enableRequestShortcut = relayServerOptions.Value.EnableRequestShortcut;
 		}
 
 		/// <inheritdoc />

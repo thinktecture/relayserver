@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <summary>
 		/// The maximum size for inline binary data in a Rabbit MQ message.
 		/// </summary>
-		/// <remarks>Defaults to 64 kb.</remarks>
+		/// <remarks>The default value is 64 kb.</remarks>
 		public int MaximumBinarySize { get; set; } = 64 * 1024; // 64kb
 	}
 }
