@@ -10,10 +10,10 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc cref="IServerHandler{TResponse}" />
-	public class ServerHandler<TResponse> : IServerHandler<TResponse>, IAsyncDisposable
+	public class RabbitMqServerHandler<TResponse> : IServerHandler<TResponse>, IAsyncDisposable
 		where TResponse : ITargetResponse
 	{
-		private readonly ILogger<ServerHandler<TResponse>> _logger;
+		private readonly ILogger<RabbitMqServerHandler<TResponse>> _logger;
 		private readonly IModel _model;
 		private readonly AsyncEventingBasicConsumer _responseConsumer;
 		private readonly AsyncEventingBasicConsumer _acknowledgeConsumer;
@@ -25,12 +25,13 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ServerHandler{TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="RabbitMqServerHandler{TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		public ServerHandler(ILogger<ServerHandler<TResponse>> logger, ModelFactory modelFactory, RelayServerContext relayServerContext)
+		public RabbitMqServerHandler(ILogger<RabbitMqServerHandler<TResponse>> logger, ModelFactory modelFactory,
+			RelayServerContext relayServerContext)
 		{
 			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
 
