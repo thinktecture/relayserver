@@ -112,6 +112,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// </summary>
 		/// <param name="connectionId">The unique id of the connection.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		/// <remarks>This method does not fail if the connection was not registered.</remarks>
 		public async Task UnregisterAsync(string connectionId)
 		{
 			if (_registrations.TryRemove(connectionId, out var registration) && _tenants.TryGetValue(registration.TenantId, out var adapters))

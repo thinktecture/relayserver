@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server
 		/// <summary>
 		/// The expiration time of a request until a response must be received.
 		/// </summary>
-		/// <remarks>Defaults to 10 seconds.</remarks>
+		/// <remarks>The default value is 10 seconds.</remarks>
 		public TimeSpan? RequestExpiration { get; set; } = TimeSpan.FromSeconds(10);
 	}
 }
