@@ -193,8 +193,8 @@
       <HintPath>..\packages\Microsoft.Extensions.Logging.3.1.7\lib\netstandard2.0\Microsoft.Extensions.Logging.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=3.1.7.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
-      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.3.1.7\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=3.1.8.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.3.1.8\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Extensions.ObjectPool, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
@@ -421,19 +421,19 @@
       <HintPath>..\packages\System.Xml.ReaderWriter.4.3.1\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
     </Reference>
     <Reference Include="Thinktecture.Relay.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Thinktecture.Relay.Abstractions.3.0.0-alpha.2-91\lib\netstandard2.0\Thinktecture.Relay.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Abstractions.3.0.0-alpha.2-93\lib\netstandard2.0\Thinktecture.Relay.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Thinktecture.Relay.Connector, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Thinktecture.Relay.Connector.3.0.0-alpha.2-91\lib\netstandard2.0\Thinktecture.Relay.Connector.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Connector.3.0.0-alpha.2-93\lib\netstandard2.0\Thinktecture.Relay.Connector.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Thinktecture.Relay.Connector.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Thinktecture.Relay.Connector.Abstractions.3.0.0-alpha.2-91\lib\netstandard2.0\Thinktecture.Relay.Connector.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Connector.Abstractions.3.0.0-alpha.2-93\lib\netstandard2.0\Thinktecture.Relay.Connector.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Thinktecture.Relay.Connector.Protocols.SignalR, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Thinktecture.Relay.Connector.Protocols.SignalR.3.0.0-alpha.2-91\lib\netstandard2.0\Thinktecture.Relay.Connector.Protocols.SignalR.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Connector.Protocols.SignalR.3.0.0-alpha.2-93\lib\netstandard2.0\Thinktecture.Relay.Connector.Protocols.SignalR.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Topshelf, Version=4.1.0.172, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
