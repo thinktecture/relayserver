@@ -79,7 +79,7 @@ namespace Thinktecture.Relay.Connector.Options
 				parameters.Remove(Constants.RelayConnectorOptionsTargetType);
 				parameters.Remove(Constants.RelayConnectorOptionsTargetTimeout);
 
-				_relayTargetRegistry.RegisterAsync(kvp.Key, type, timeout, parameters).GetAwaiter().GetResult();
+				_relayTargetRegistry.Register(kvp.Key, type, timeout, parameters);
 			}
 		}
 	}
