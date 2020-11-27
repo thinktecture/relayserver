@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 	{
 		private const int _CONNECTOR_VERSION = 3;
 
-		private static int _nextInstanceId;
+		internal static int _nextInstanceId;
 		private static readonly Random _random = new Random();
 
 		private readonly string _userName;

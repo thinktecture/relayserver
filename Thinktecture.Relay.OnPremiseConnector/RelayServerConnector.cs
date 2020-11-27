@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Thinktecture.Relay.OnPremiseConnector.NewServerSupport;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector
@@ -270,6 +271,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			// Build dotnet core DI for new connector v3
 			IServiceCollection services = new ServiceCollection();
 			services
+				.AddScoped<NewServerConnection>()
 				.AddRelayConnector(options =>
 				{
 					options.RelayServerBaseUri = relayServerBaseUri;
