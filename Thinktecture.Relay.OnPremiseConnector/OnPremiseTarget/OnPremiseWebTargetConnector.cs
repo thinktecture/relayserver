@@ -30,6 +30,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 			_requestMessageBuilder = requestMessageBuilder ?? throw new ArgumentNullException(nameof(requestMessageBuilder));
 			_logSensitiveData = logSensitiveData;
 
+			// TODO: Adjust names from the new one in v3
 			_httpClient = httpClientFactory.CreateClient(followRedirects ? "FollowRedirectsWebTarget" : "WebTarget");
 		}
 

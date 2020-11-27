@@ -1,3 +1,4 @@
+using System.Net.Http;
 using AutofacSerilogIntegration;
 using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
