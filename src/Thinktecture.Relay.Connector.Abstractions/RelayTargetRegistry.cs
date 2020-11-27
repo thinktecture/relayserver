@@ -62,14 +62,7 @@ namespace Thinktecture.Relay.Connector
 		/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
 		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
 		/// <exception cref="ArgumentException">A registration with the same key already exists.</exception>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public Task RegisterAsync(string id, Type type, TimeSpan? timeout = null, params object[] parameters)
-		{
-			Register(id, type, timeout, parameters);
-			return Task.CompletedTask;
-		}
-
-		private void Register(string id, Type type, TimeSpan? timeout, params object[] parameters)
+		public void Register(string id, Type type, TimeSpan? timeout = null, params object[] parameters)
 		{
 			if (type.IsGenericTypeDefinition)
 			{
@@ -90,9 +83,8 @@ namespace Thinktecture.Relay.Connector
 		/// Unregisters an <see cref="IRelayTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="id">The unique id of the target.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		/// <remarks>This method does not fail when the relay target was not registered.</remarks>
-		public Task UnregisterAsync(string id)
+		public void Unregister(string id)
 		{
 			if (_targets.TryRemove(id, out _))
 			{
@@ -102,8 +94,6 @@ namespace Thinktecture.Relay.Connector
 			{
 				_logger.LogWarning("Could not unregister relay target {Target}", id);
 			}
-
-			return Task.CompletedTask;
 		}
 
 		/// <summary>
