@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
@@ -28,8 +29,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 		public event EventHandler Connected;
 		public event EventHandler Disconnected;
 
-		public NewServerConnection(IConnectorConnection connection)
+		public NewServerConnection(ILogger<NewServerConnection> logger, IConnectorConnection connection)
 		{
+			logger.LogInformation("Creating new v3 connection for RelayServer");
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
 			// TODO: Subscribe to events when they become available
