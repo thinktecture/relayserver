@@ -32,7 +32,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			set
 			{
 				_oldServerConnection.RelayedRequestHeader = value;
-				_newServerConnection.RelayedRequestHeader = value;
+				// use the static directly, as we might not have an instance at the moment
+				NewServerConnection._relayedRequestHeader = value;
 			}
 		}
 
@@ -40,13 +41,13 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		private readonly IHttpClientFactory _httpClientFactory;
 		private readonly IServiceProvider _serviceProvider;
 
-		private bool _isNewConnectionActive = false;
-
-		private IRelayServerConnection CurrentlyActiveConnection =>
-			_isNewConnectionActive ? _newServerConnection : _oldServerConnection;
-
 		private IRelayServerConnection _oldServerConnection;
 		private IRelayServerConnection _newServerConnection;
+
+		private bool _isNewConnectionActive => _newServerConnection != null;
+
+		private IRelayServerConnection CurrentlyActiveConnection =>
+			_newServerConnection ?? _oldServerConnection;
 
 		private bool _disposed;
 
@@ -103,7 +104,14 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			CheckDisposed();
 			_oldServerConnection.RegisterOnPremiseTarget(key, uri, followRedirects);
-			_newServerConnection.RegisterOnPremiseTarget(key, uri, followRedirects);
+			if (_isNewConnectionActive)
+			{
+				_newServerConnection.RegisterOnPremiseTarget(key, uri, followRedirects);
+			}
+			else
+			{
+				NewServerConnection.RegisterStaticOnPremiseTarget(key, uri, followRedirects);
+			}
 		}
 
 		/// <summary>
@@ -115,7 +123,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			CheckDisposed();
 			_oldServerConnection.RegisterOnPremiseTarget(key, handlerType);
-			_newServerConnection.RegisterOnPremiseTarget(key, handlerType);
+			_newServerConnection?.RegisterOnPremiseTarget(key, handlerType); // will throw if active
 		}
 
 		/// <summary>
@@ -127,7 +135,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			CheckDisposed();
 			_oldServerConnection.RegisterOnPremiseTarget(key, handlerFactory);
-			_newServerConnection.RegisterOnPremiseTarget(key, handlerFactory);
+			_newServerConnection?.RegisterOnPremiseTarget(key, handlerFactory); // will throw if active
 		}
 
 		/// <summary>
@@ -140,7 +148,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			CheckDisposed();
 			_oldServerConnection.RegisterOnPremiseTarget<T>(key);
-			_newServerConnection.RegisterOnPremiseTarget<T>(key);
+			_newServerConnection?.RegisterOnPremiseTarget<T>(key); // will throw if active
 		}
 
 		/// <summary>
@@ -151,7 +159,14 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			CheckDisposed();
 			_oldServerConnection.RemoveOnPremiseTarget(key);
-			_newServerConnection.RemoveOnPremiseTarget(key);
+			if (_isNewConnectionActive)
+			{
+				_newServerConnection.RemoveOnPremiseTarget(key);
+			}
+			else
+			{
+				NewServerConnection.RemoveStaticOnPremiseTarget(key);
+			}
 		}
 
 		/// <summary>
@@ -328,9 +343,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				httpClient.BaseAddress = _relayServerBaseUri;
 				var response = await httpClient.GetAsync(DiscoveryDocument.WellKnownPath);
 
-				_isNewConnectionActive = response.IsSuccessStatusCode;
-
-				if (_isNewConnectionActive)
+				if (response.IsSuccessStatusCode)
 				{
 					_newServerConnection = _serviceProvider.GetRequiredService<NewServerConnection>();
 					_newServerConnection.Connected += (s, e) => Connected?.Invoke(s, e);
@@ -345,8 +358,6 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			{
 				_newServerConnection.Dispose();
 				_newServerConnection = null;
-
-				_isNewConnectionActive = false;
 			}
 
 			Disconnected?.Invoke(sender, e);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -13,6 +14,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 	internal class NewServerConnection : IRelayServerConnection
 	{
 		internal static string _relayedRequestHeader;
+		private static ConcurrentDictionary<string, (Uri, bool)> _registeredTargets = new ConcurrentDictionary<String, (Uri, Boolean)>();
 
 		private readonly IConnectorConnection _connection;
 
@@ -36,20 +38,36 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 			logger.LogInformation("Creating new v3 connection for RelayServer");
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
+			// TODO: Add all targets that are currently registered in the static dictionary
 			// TODO: Subscribe to events when they become available
 		}
 
-		public void RegisterOnPremiseTarget(String key, Uri baseUri, Boolean followRedirects)
+		public void RegisterOnPremiseTarget(string key, Uri baseUri, Boolean followRedirects)
 		{
+			RegisterStaticOnPremiseTarget(key, baseUri, followRedirects);
+
 			// TODO: Add registering when it becomes available
 			throw new NotImplementedException();
 		}
 
-		public void RemoveOnPremiseTarget(String key)
+		public static void RegisterStaticOnPremiseTarget(string key, Uri baseUri, Boolean followRedirects)
 		{
+			_registeredTargets.TryAdd(key, (baseUri, followRedirects));
+		}
+
+		public void RemoveOnPremiseTarget(string key)
+		{
+			RemoveStaticOnPremiseTarget(key);
+
 			// TODO: Add registering when it becomes available
 			throw new NotImplementedException();
 		}
+
+		public static void RemoveStaticOnPremiseTarget(string key)
+		{
+			_registeredTargets.TryRemove(key, out _);
+		}
+
 
 		// Need to Implement
 		public Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, String acknowledgeId, String connectionId = null)
