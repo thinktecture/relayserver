@@ -44,6 +44,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public event EventHandler Connected;
 		public event EventHandler Disconnected;
+		public new event EventHandler Reconnecting;
+		public new event EventHandler Reconnected;
 		public event EventHandler Disposing;
 
 		public Uri Uri { get; }
@@ -81,8 +83,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 
-			Reconnecting += OnReconnecting;
-			Reconnected += OnReconnected;
+			base.Reconnecting += OnReconnecting;
+			base.Reconnected += OnReconnected;
 		}
 
 		public string RelayedRequestHeader { get; set; }
@@ -287,14 +289,16 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private void OnReconnected()
-		{
-			_logger?.Verbose("Connection restored. connection-id={ConnectionId}", ConnectionId);
-		}
-
 		private void OnReconnecting()
 		{
 			_logger?.Verbose("Connection lost. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			this.Reconnecting?.Invoke(this, EventArgs.Empty);
+		}
+
+		private void OnReconnected()
+		{
+			_logger?.Verbose("Connection restored. connection-id={ConnectionId}", ConnectionId);
+			this.Reconnected?.Invoke(this, EventArgs.Empty);
 		}
 
 		protected override async void OnMessageReceived(JToken message)

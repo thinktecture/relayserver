@@ -28,6 +28,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 		public event EventHandler Disposing;
 		public event EventHandler Connected;
 		public event EventHandler Disconnected;
+		public event EventHandler Reconnecting;
+		public event EventHandler Reconnected;
 
 		public NewServerConnection(ILogger<NewServerConnection> logger, IConnectorConnection connection)
 		{
@@ -56,9 +58,19 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 			throw new NotImplementedException();
 		}
 
-		public Task ConnectAsync() => _connection.ConnectAsync();
+		public async Task ConnectAsync()
+		{
+			 await _connection.ConnectAsync();
+			 Connected?.Invoke(this, EventArgs.Empty);
+		}
 
-		public void Disconnect() => _connection.DisconnectAsync();
+		public void Disconnect() => DisconnectAsync().GetAwaiter().GetResult();
+
+		private async Task DisconnectAsync()
+		{
+			await _connection.DisconnectAsync();
+			Disconnected?.Invoke(this, EventArgs.Empty);
+		}
 
 
 		#region Not supported stuff used by maintenance loop
