@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector
@@ -14,8 +15,6 @@ namespace Thinktecture.Relay.OnPremiseConnector
 	/// <inheritdoc cref="IRelayServerConnector" />
 	public class RelayServerConnector : IDisposable, IRelayServerConnector
 	{
-		private static readonly IServiceProvider _serviceProvider;
-
 		/// <inheritdoc />
 		public bool LogSensitiveData { get; set; }
 
@@ -23,17 +22,6 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public event EventHandler Connected;
 		/// <inheritdoc />
 		public event EventHandler Disconnected;
-
-		static RelayServerConnector()
-		{
-			var builder = new ContainerBuilder();
-
-			builder.RegisterOnPremiseConnectorTypes();
-			builder.Register(ctx => _serviceProvider);
-			var container = builder.Build();
-
-			_serviceProvider = new AutofacServiceProvider(container);
-		}
 
 		/// <inheritdoc />
 		public string RelayedRequestHeader
@@ -61,8 +49,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = true)
 		{
 			LogSensitiveData = logSensitiveData;
+			serviceProvider = serviceProvider ?? CreateServiceProvider(relayServer, userName, password);
 
-			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
+			var factory = serviceProvider.GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
 			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
 			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
 			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
@@ -274,6 +263,31 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public Task AcknowledgeRequestAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null)
 		{
 			return _connection.SendAcknowledgmentAsync(acknowledgeOriginId, acknowledgeId, connectionId);
+		}
+
+		private IServiceProvider CreateServiceProvider(Uri relayServerBaseUri, string tenantName, string tenantSecret)
+		{
+			// Build dotnet core DI for new connector v3
+			IServiceCollection services = new ServiceCollection();
+			services
+				.AddRelayConnector(options =>
+				{
+					options.RelayServerBaseUri = relayServerBaseUri;
+					options.TenantName = tenantName;
+					options.TenantSecret = tenantSecret;
+				})
+				.AddSignalRConnectorTransport();
+
+			// create autofac container for connector v2
+			var builder = new ContainerBuilder();
+			builder.RegisterOnPremiseConnectorTypes();
+
+			// also add v3 services to autofac
+			builder.Populate(services);
+
+			// create ServiceProvider
+			var container = builder.Build();
+			return new AutofacServiceProvider(container);
 		}
 
 		private void CheckDisposed()
