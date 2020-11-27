@@ -27,11 +27,26 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <inheritdoc />
 		public string RelayedRequestHeader
 		{
-			get => _connection.RelayedRequestHeader;
-			set => _connection.RelayedRequestHeader = value;
+			get => _oldServerConnection.RelayedRequestHeader;
+
+			set
+			{
+				_oldServerConnection.RelayedRequestHeader = value;
+				_newServerConnection.RelayedRequestHeader = value;
+			}
 		}
 
-		private IRelayServerConnection _connection;
+		private readonly Uri _relayServerBaseUri;
+		private readonly IHttpClientFactory _httpClientFactory;
+
+		private bool _isNewConnectionActive = false;
+
+		private IRelayServerConnection CurrentlyActiveConnection =>
+			_isNewConnectionActive ? _newServerConnection : _oldServerConnection;
+
+		private IRelayServerConnection _oldServerConnection;
+		private IRelayServerConnection _newServerConnection;
+
 		private bool _disposed;
 
 		/// <summary>
@@ -50,12 +65,19 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = true)
 		{
 			LogSensitiveData = logSensitiveData;
-			serviceProvider = serviceProvider ?? CreateServiceProvider(relayServer, userName, password);
+			_relayServerBaseUri = relayServer ?? throw new ArgumentNullException(nameof(relayServer));
 
-			var factory = serviceProvider.GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
-			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
-			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
-			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
+			serviceProvider = serviceProvider ?? CreateServiceProvider(_relayServerBaseUri, userName, password);
+			_httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+
+			var factory = serviceProvider.GetRequiredService<IRelayServerConnectionFactory>();
+			_oldServerConnection = factory.Create(versionAssembly, userName, password, _relayServerBaseUri, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
+			_oldServerConnection.Connected += (s, e) => Connected?.Invoke(s, e);
+			_oldServerConnection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
+
+			_newServerConnection = serviceProvider.GetRequiredService<NewServerConnection>();
+			_newServerConnection.Connected += (s, e) => Connected?.Invoke(s, e);
+			_newServerConnection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
 		}
 
 		/// <summary>
@@ -83,7 +105,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public void RegisterOnPremiseTarget(string key, Uri uri, bool followRedirects = true)
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget(key, uri, followRedirects);
+			_oldServerConnection.RegisterOnPremiseTarget(key, uri, followRedirects);
+			_newServerConnection.RegisterOnPremiseTarget(key, uri, followRedirects);
 		}
 
 		/// <summary>
@@ -94,7 +117,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public void RegisterOnPremiseTarget(string key, Type handlerType)
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget(key, handlerType);
+			_oldServerConnection.RegisterOnPremiseTarget(key, handlerType);
+			_newServerConnection.RegisterOnPremiseTarget(key, handlerType);
 		}
 
 		/// <summary>
@@ -105,7 +129,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public void RegisterOnPremiseTarget(string key, Func<IOnPremiseInProcHandler> handlerFactory)
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget(key, handlerFactory);
+			_oldServerConnection.RegisterOnPremiseTarget(key, handlerFactory);
+			_newServerConnection.RegisterOnPremiseTarget(key, handlerFactory);
 		}
 
 		/// <summary>
@@ -117,7 +142,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			where T : IOnPremiseInProcHandler, new()
 		{
 			CheckDisposed();
-			_connection.RegisterOnPremiseTarget<T>(key);
+			_oldServerConnection.RegisterOnPremiseTarget<T>(key);
+			_newServerConnection.RegisterOnPremiseTarget<T>(key);
 		}
 
 		/// <summary>
@@ -127,7 +153,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public void RemoveOnPremiseTarget(string key)
 		{
 			CheckDisposed();
-			_connection.RemoveOnPremiseTarget(key);
+			_oldServerConnection.RemoveOnPremiseTarget(key);
+			_newServerConnection.RemoveOnPremiseTarget(key);
 		}
 
 		/// <summary>
@@ -136,7 +163,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public List<string> GetOnPremiseTargetKeys()
 		{
 			CheckDisposed();
-			return _connection.GetOnPremiseTargetKeys();
+			return _oldServerConnection.GetOnPremiseTargetKeys();
 		}
 
 		/// <summary>
@@ -145,7 +172,9 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public async Task ConnectAsync()
 		{
 			CheckDisposed();
-			await _connection.ConnectAsync().ConfigureAwait(false);
+
+			await DetermineCurrentlyActiveConnectionAsync();
+			await CurrentlyActiveConnection.ConnectAsync().ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -154,7 +183,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		public void Disconnect()
 		{
 			CheckDisposed();
-			_connection.Disconnect();
+			CurrentlyActiveConnection.Disconnect();
 		}
 
 		/// <summary>
@@ -189,7 +218,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
 
-			return _connection.GetToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, cancellationToken);
+			return CurrentlyActiveConnection.GetToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, cancellationToken);
 		}
 
 		/// <summary>
@@ -251,7 +280,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			if (!relativeUrl.StartsWith("/"))
 				relativeUrl = "/" + relativeUrl;
 
-			return _connection.PostToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, content, cancellationToken);
+			return CurrentlyActiveConnection.PostToRelayAsync("relay/" + linkName + relativeUrl, setHeaders, content, cancellationToken);
 		}
 
 		/// <summary>
@@ -263,7 +292,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <returns>A Task that completes when the acknowledge http request is answered.</returns>
 		public Task AcknowledgeRequestAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null)
 		{
-			return _connection.SendAcknowledgmentAsync(acknowledgeOriginId, acknowledgeId, connectionId);
+			return CurrentlyActiveConnection.SendAcknowledgmentAsync(acknowledgeOriginId, acknowledgeId, connectionId);
 		}
 
 		private IServiceProvider CreateServiceProvider(Uri relayServerBaseUri, string tenantName, string tenantSecret)
@@ -271,7 +300,6 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			// Build dotnet core DI for new connector v3
 			IServiceCollection services = new ServiceCollection();
 			services
-				.AddScoped<NewServerConnection>()
 				.AddRelayConnector(options =>
 				{
 					options.RelayServerBaseUri = relayServerBaseUri;
@@ -290,6 +318,21 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			// create ServiceProvider
 			var container = builder.Build();
 			return new AutofacServiceProvider(container);
+		}
+
+		/// <summary>
+		/// Checks what relay server to use
+		/// </summary>
+		/// <returns></returns>
+		private async Task DetermineCurrentlyActiveConnectionAsync()
+		{
+			using (var httpClient = _httpClientFactory.CreateClient())
+			{
+				httpClient.BaseAddress = _relayServerBaseUri;
+				var response = await httpClient.GetAsync(DiscoveryDocument.WellKnownPath);
+
+				_isNewConnectionActive = response.IsSuccessStatusCode;
+			}
 		}
 
 		private void CheckDisposed()
@@ -318,10 +361,16 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			{
 				_disposed = true;
 
-				if (_connection != null)
+				if (_oldServerConnection != null)
 				{
-					_connection.Dispose();
-					_connection = null;
+					_oldServerConnection.Dispose();
+					_oldServerConnection = null;
+				}
+
+				if (_newServerConnection != null)
+				{
+					_newServerConnection.Dispose();
+					_newServerConnection = null;
 				}
 			}
 		}

@@ -9,7 +9,7 @@ using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 {
-	public class NewServerConnection : IRelayServerConnection
+	internal class NewServerConnection : IRelayServerConnection
 	{
 		internal static string _relayedRequestHeader;
 

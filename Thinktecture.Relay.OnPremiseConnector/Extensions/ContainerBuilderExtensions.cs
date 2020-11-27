@@ -2,6 +2,7 @@ using System.Net.Http;
 using AutofacSerilogIntegration;
 using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
+using Thinktecture.Relay.OnPremiseConnector.NewServerSupport;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
@@ -30,6 +31,7 @@ namespace Autofac
 			builder.RegisterType<AutomaticDisconnectChecker>().As<IAutomaticDisconnectChecker>();
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
 			builder.RegisterType<OnPremiseInterceptorFactory>().As<IOnPremiseInterceptorFactory>();
+			builder.RegisterType<NewServerConnection>();
 
 			return builder;
 		}
