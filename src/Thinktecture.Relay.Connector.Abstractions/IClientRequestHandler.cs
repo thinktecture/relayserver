@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Connector.RelayTargets
+namespace Thinktecture.Relay.Connector
 {
 	/// <summary>
 	/// A client request handler determining the <see cref="IRelayTarget{TRequest,TResponse}"/> handling the request.

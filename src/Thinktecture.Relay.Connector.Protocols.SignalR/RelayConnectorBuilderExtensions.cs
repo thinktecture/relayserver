@@ -24,8 +24,8 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.Services.AddTransient<ConnectionFactory>();
-			builder.Services.AddTransient<IConnectorConnection, ConnectorConnection<TRequest, TResponse>>();
+			builder.Services.AddTransient<SignalRConnectionFactory>();
+			builder.Services.AddTransient<IConnectorConnection, SignalRConnectorConnection<TRequest, TResponse>>();
 
 			return builder;
 		}

@@ -29,8 +29,8 @@ namespace Thinktecture.Relay.Connector.Options
 		public DiscoveryDocument DiscoveryDocument { get; set; }
 
 		/// <summary>
-		/// The web targets.
+		/// The targets keyed by type.
 		/// </summary>
-		public Dictionary<string, RelayWebTargetOptions> WebTargets { get; set; }
+		public Dictionary<string, Dictionary<string, string>> Targets { get; set; }
 	}
 }

@@ -2,8 +2,6 @@ using System;
 using IdentityModel.AspNetCore.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols;
-using Thinktecture.Relay;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.Authentication;
 using Thinktecture.Relay.Connector.DependencyInjection;
@@ -46,10 +44,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			builder.Services.Configure(configure);
 
-			builder.Services.AddTransient<IPostConfigureOptions<RelayConnectorOptions>, RelayConnectorPostConfigureOptions>();
-			builder.Services.AddTransient<IConfigurationRetriever<DiscoveryDocument>, RelayServerConfigurationRetriever>();
-			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>,
-				ConfigureAccessTokenManagementOptions>();
+			builder.Services
+				.AddTransient<IConfigureOptions<RelayConnectorOptions>, RelayConnectorConfigureOptions>()
+				.AddTransient<IPostConfigureOptions<RelayConnectorOptions>, RelayConnectorPostConfigureOptions<TRequest, TResponse>>()
+				.AddTransient<IValidateOptions<RelayConnectorOptions>, RelayConnectorValidateOptions>();
+			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>, AccessTokenManagementConfigureOptions>();
 
 			builder.Services.AddAccessTokenManagement();
 			builder.Services.TryAddTransient<IAccessTokenProvider, AccessTokenProvider>();
@@ -63,9 +62,9 @@ namespace Microsoft.Extensions.DependencyInjection
 				.AddClientAccessTokenHandler();
 
 			builder.Services.TryAddTransient<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
-			builder.Services.TryAddTransient<IRelayTargetResponseFactory<TResponse>, RelayTargetResponseFactory<TResponse>>();
-			builder.Services.AddTransient<RelayTargetService<TRequest, TResponse>>();
+			builder.Services.TryAddTransient<IRelayTargetResponseFactory<TResponse>, HttpResponseRelayTargetResponseFactory<TResponse>>();
 
+			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();
 			builder.Services.AddSingleton<RelayConnector>();
 
 			return builder;

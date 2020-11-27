@@ -1,4 +1,3 @@
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Thinktecture.Relay.Connector.Authentication
@@ -11,7 +10,7 @@ namespace Thinktecture.Relay.Connector.Authentication
 		/// <summary>
 		/// Retrieves an access token.
 		/// </summary>
-		/// <returns>A task that returns an access token.</returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the access token.</returns>
 		Task<string> GetAccessTokenAsync();
 	}
 }

@@ -13,7 +13,7 @@ namespace System.IO
 		/// Sets the position of the stream to zero, if the stream supports seeking.
 		/// </summary>
 		/// <param name="stream">The <see cref="Stream"/> that will be rewound.</param>
-		/// <returns>true, if rewinding was possible; otherwise, false</returns>
+		/// <returns>true if rewinding was possible; otherwise, false</returns>
 		public static bool TryRewind(this Stream stream)
 		{
 			if (!stream.CanSeek)

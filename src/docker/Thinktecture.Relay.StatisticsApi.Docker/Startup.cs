@@ -7,7 +7,7 @@ using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 namespace Thinktecture.Relay.StatisticsApi.Docker
 {
-	public class Startup
+	internal class Startup
 	{
 		public Startup(IConfiguration configuration)
 		{
