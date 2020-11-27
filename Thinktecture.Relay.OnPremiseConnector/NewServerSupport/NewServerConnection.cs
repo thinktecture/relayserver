@@ -8,15 +8,18 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
+using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 {
 	internal class NewServerConnection : IRelayServerConnection
 	{
 		internal static string _relayedRequestHeader;
-		private static ConcurrentDictionary<string, (Uri, bool)> _registeredTargets = new ConcurrentDictionary<String, (Uri, Boolean)>();
+		private static ConcurrentDictionary<string, (Uri Uri, bool FollowRedirects)> _registeredTargets = new ConcurrentDictionary<String, (Uri, Boolean)>();
 
 		private readonly IConnectorConnection _connection;
+		private readonly RelayTargetRegistry<ClientRequest, TargetResponse> _targetRegistry;
+		private readonly IHttpClientFactory _httpClientFactory;
 
 		/// <inheritdoc />
 		public String RelayedRequestHeader
@@ -33,12 +36,19 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 		public event EventHandler Reconnecting;
 		public event EventHandler Reconnected;
 
-		public NewServerConnection(ILogger<NewServerConnection> logger, IConnectorConnection connection)
+		public NewServerConnection(ILogger<NewServerConnection> logger, IConnectorConnection connection, RelayTargetRegistry<ClientRequest, TargetResponse> targetRegistry, IHttpClientFactory httpClientFactory)
 		{
 			logger.LogInformation("Creating new v3 connection for RelayServer");
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
+			_targetRegistry = targetRegistry ?? throw new ArgumentNullException(nameof(targetRegistry));
+			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 
-			// TODO: Add all targets that are currently registered in the static dictionary
+			foreach (var registration in _registeredTargets)
+			{
+				// TODO: Add support for follow redirects
+				_targetRegistry.Register(registration.Key, typeof(WebTarget), null, registration.Value.Uri);
+			}
+
 			// TODO: Subscribe to events when they become available
 		}
 
@@ -46,8 +56,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 		{
 			RegisterStaticOnPremiseTarget(key, baseUri, followRedirects);
 
-			// TODO: Add registering when it becomes available
-			throw new NotImplementedException();
+			// TODO: Add support for follow redirects
+			_targetRegistry.Register(key, typeof(WebTarget), null, baseUri);
 		}
 
 		public static void RegisterStaticOnPremiseTarget(string key, Uri baseUri, Boolean followRedirects)
@@ -58,9 +68,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 		public void RemoveOnPremiseTarget(string key)
 		{
 			RemoveStaticOnPremiseTarget(key);
-
-			// TODO: Add registering when it becomes available
-			throw new NotImplementedException();
+			_targetRegistry.Unregister(key);
 		}
 
 		public static void RemoveStaticOnPremiseTarget(string key)
@@ -68,18 +76,18 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 			_registeredTargets.TryRemove(key, out _);
 		}
 
-
-		// Need to Implement
-		public Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, String acknowledgeId, String connectionId = null)
+		public async Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, String acknowledgeId, String connectionId = null)
 		{
-			// TODO: Add support for acknowledgement when it becomes available
-			throw new NotImplementedException();
+			using (var client = _httpClientFactory.CreateClient(Constants.RelayServerHttpClientName))
+			{
+				await client.PostAsync($"acknowledge/{acknowledgeOriginId.ToString()}/{acknowledgeId}", new StringContent(String.Empty));
+			}
 		}
 
 		public async Task ConnectAsync()
 		{
-			 await _connection.ConnectAsync();
-			 Connected?.Invoke(this, EventArgs.Empty);
+			await _connection.ConnectAsync();
+			Connected?.Invoke(this, EventArgs.Empty);
 		}
 
 		public void Disconnect() => DisconnectAsync().GetAwaiter().GetResult();
