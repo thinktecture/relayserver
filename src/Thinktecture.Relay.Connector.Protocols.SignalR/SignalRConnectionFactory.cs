@@ -10,19 +10,19 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 	/// <summary>
 	/// An implementation of a factory to create an instance of the <see cref="HubConnection"/> class.
 	/// </summary>
-	public class ConnectionFactory
+	public class SignalRConnectionFactory
 	{
-		private readonly ILogger<ConnectionFactory> _logger;
+		private readonly ILogger<SignalRConnectionFactory> _logger;
 		private readonly IAccessTokenProvider _accessTokenProvider;
 		private readonly RelayConnectorOptions _relayConnectorOptions;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ConnectionFactory"/> class.
+		/// Initializes a new instance of the <see cref="SignalRConnectionFactory"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="accessTokenProvider">An <see cref="IAccessTokenProvider"/>.</param>
 		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
-		public ConnectionFactory(ILogger<ConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
+		public SignalRConnectionFactory(ILogger<SignalRConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
 			IOptions<RelayConnectorOptions> relayConnectorOptions)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));

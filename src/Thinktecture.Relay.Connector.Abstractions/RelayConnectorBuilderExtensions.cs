@@ -1,7 +1,7 @@
 using System;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.DependencyInjection;
-using Thinktecture.Relay.Connector.RelayTargets;
+using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Transport;
 
 // ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse}"/>.</param>
 		/// <param name="id">The unique id of the target.</param>
-		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
 		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
 		/// <typeparam name="TTarget">The type of target.</typeparam>
 		/// <returns>The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse}"/>.</returns>
@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
 		/// <param name="id">The unique id of the target.</param>
-		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
 		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
@@ -45,34 +45,8 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TResponse : ITargetResponse
 			where TTarget : IRelayTarget<TRequest, TResponse>
 		{
-			builder.Services.Configure<RelayTargetServiceOptions<TRequest, TResponse>>(configure =>
-			{
-				configure.Registrations.Add(new RelayTargetRegistration<TRequest, TResponse, TTarget>(id, timeout, parameters));
-			});
-
-			return builder;
-		}
-
-		/// <summary>
-		/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
-		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
-		/// <param name="id">The unique id of the target.</param>
-		/// <param name="factory">The factory function to create an instance of the target.</param>
-		/// <param name="timeout">An optional <see cref="TimeSpan"/> as the request timeout.</param>
-		/// <typeparam name="TRequest">The type of request.</typeparam>
-		/// <typeparam name="TResponse">The type of response.</typeparam>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<TRequest, TResponse> AddTarget<TRequest, TResponse>(
-			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id,
-			Func<IServiceProvider, IRelayTarget<TRequest, TResponse>> factory, TimeSpan? timeout = null)
-			where TResponse : ITargetResponse
-			where TRequest : IClientRequest
-		{
-			builder.Services.Configure<RelayTargetServiceOptions<TRequest, TResponse>>(configure =>
-			{
-				configure.Registrations.Add(new RelayTargetRegistration<TRequest, TResponse>(id, factory, timeout));
-			});
+			builder.Services.Configure<RelayTargetOptions>(options => options.Targets.Add(new RelayTargetOptions.RelayTargetRegistration
+				{ Id = id, Type = typeof(TTarget), Timeout = timeout, Parameters = parameters }));
 
 			return builder;
 		}

@@ -8,7 +8,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.RelayTargets
 {
 	/// <inheritdoc />
-	public class RelayTargetResponseFactory<TResponse> : IRelayTargetResponseFactory<TResponse>
+	public class HttpResponseRelayTargetResponseFactory<TResponse> : IRelayTargetResponseFactory<TResponse>
 		where TResponse : ITargetResponse, new()
 	{
 		/// <inheritdoc />

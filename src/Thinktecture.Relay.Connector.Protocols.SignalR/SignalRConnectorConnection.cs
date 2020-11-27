@@ -9,11 +9,11 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
 	/// <inheritdoc cref="IConnectorConnection" />
-	public class ConnectorConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
+	public class SignalRConnectorConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly ILogger<ConnectorConnection<TRequest, TResponse>> _logger;
+		private readonly ILogger<SignalRConnectorConnection<TRequest, TResponse>> _logger;
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 		private readonly HubConnection _connection;
 		private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
@@ -22,18 +22,18 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private string _connectionId;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ConnectorConnection{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="SignalRConnectorConnection{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="connectionFactory">The <see cref="ConnectionFactory"/>.</param>
+		/// <param name="signalRConnectionFactory">The <see cref="SignalRConnectionFactory"/>.</param>
 		/// <param name="clientRequestHandler">An <see cref="IClientRequestHandler{TRequest,TResponse}"/>.</param>
-		public ConnectorConnection(ILogger<ConnectorConnection<TRequest, TResponse>> logger, ConnectionFactory connectionFactory,
-			IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
+		public SignalRConnectorConnection(ILogger<SignalRConnectorConnection<TRequest, TResponse>> logger,
+			SignalRConnectionFactory signalRConnectionFactory, IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
 
-			_connection = connectionFactory?.CreateConnection() ?? throw new ArgumentNullException(nameof(connectionFactory));
+			_connection = signalRConnectionFactory?.CreateConnection() ?? throw new ArgumentNullException(nameof(signalRConnectionFactory));
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 
 			_connection.Closed += OnClosed;

@@ -1,11 +1,14 @@
 using System;
+using System.IO;
+using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Thinktecture.Relay.Connector.RelayTargets;
+using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Docker
 {
@@ -18,9 +21,22 @@ namespace Thinktecture.Relay.Connector.Docker
 
 			services
 				.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
-				.AddSignalRConnectorTransport();
+				.AddSignalRConnectorTransport()
+				.AddTarget<InProcTarget>("inproc");
 
 			services.AddHostedService<ConnectorService>();
+		}
+	}
+
+	internal class InProcTarget : IRelayTarget<ClientRequest, TargetResponse>
+	{
+		public Task<TargetResponse> HandleAsync(ClientRequest request, CancellationToken cancellationToken = default)
+		{
+			var response = request.CreateResponse();
+			response.HttpStatusCode = HttpStatusCode.OK;
+			response.BodyContent = new MemoryStream(Encoding.UTF8.GetBytes("👋"));
+			response.BodySize = response.BodyContent.Length;
+			return Task.FromResult(response);
 		}
 	}
 
