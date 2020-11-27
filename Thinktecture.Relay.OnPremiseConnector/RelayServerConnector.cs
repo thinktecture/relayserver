@@ -38,6 +38,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 		private readonly Uri _relayServerBaseUri;
 		private readonly IHttpClientFactory _httpClientFactory;
+		private readonly IServiceProvider _serviceProvider;
 
 		private bool _isNewConnectionActive = false;
 
@@ -67,17 +68,13 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			LogSensitiveData = logSensitiveData;
 			_relayServerBaseUri = relayServer ?? throw new ArgumentNullException(nameof(relayServer));
 
-			serviceProvider = serviceProvider ?? CreateServiceProvider(_relayServerBaseUri, userName, password);
-			_httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+			_serviceProvider = serviceProvider ?? CreateServiceProvider(_relayServerBaseUri, userName, password);
+			_httpClientFactory = _serviceProvider.GetRequiredService<IHttpClientFactory>();
 
-			var factory = serviceProvider.GetRequiredService<IRelayServerConnectionFactory>();
+			var factory = _serviceProvider.GetRequiredService<IRelayServerConnectionFactory>();
 			_oldServerConnection = factory.Create(versionAssembly, userName, password, _relayServerBaseUri, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
 			_oldServerConnection.Connected += (s, e) => Connected?.Invoke(s, e);
-			_oldServerConnection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
-
-			_newServerConnection = serviceProvider.GetRequiredService<NewServerConnection>();
-			_newServerConnection.Connected += (s, e) => Connected?.Invoke(s, e);
-			_newServerConnection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
+			_oldServerConnection.Disconnected += HandleDisconnected;
 		}
 
 		/// <summary>
@@ -332,7 +329,27 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				var response = await httpClient.GetAsync(DiscoveryDocument.WellKnownPath);
 
 				_isNewConnectionActive = response.IsSuccessStatusCode;
+
+				if (_isNewConnectionActive)
+				{
+					_newServerConnection = _serviceProvider.GetRequiredService<NewServerConnection>();
+					_newServerConnection.Connected += (s, e) => Connected?.Invoke(s, e);
+					_newServerConnection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
+				}
 			}
+		}
+
+		private void HandleDisconnected(object sender, EventArgs e)
+		{
+			if (_isNewConnectionActive)
+			{
+				_newServerConnection.Dispose();
+				_newServerConnection = null;
+
+				_isNewConnectionActive = false;
+			}
+
+			Disconnected?.Invoke(sender, e);
 		}
 
 		private void CheckDisposed()
