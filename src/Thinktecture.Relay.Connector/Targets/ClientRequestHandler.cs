@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Connector.Options;
+using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.RelayTargets

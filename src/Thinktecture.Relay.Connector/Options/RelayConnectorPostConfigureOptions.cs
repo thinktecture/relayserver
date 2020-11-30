@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols;
+using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Options
@@ -58,20 +59,20 @@ namespace Thinktecture.Relay.Connector.Options
 		{
 			foreach (var kvp in targets)
 			{
-				var parameters = new Dictionary<string, string>(kvp.Value);
+				var parameters = new Dictionary<string, string>(kvp.Value, StringComparer.OrdinalIgnoreCase);
 
 				var type = Type.GetType(parameters[Constants.RelayConnectorOptionsTargetType]);
 				TimeSpan? timeout = null;
 
-				if (parameters.TryGetValue(Constants.RelayConnectorOptionsTargetTimeout, out var timeoutString))
+				if (parameters.TryGetValue(Constants.RelayConnectorOptionsTargetTimeout, out var timeoutParameter))
 				{
-					if (TimeSpan.TryParse(timeoutString, out var timeoutValue))
+					if (TimeSpan.TryParse(timeoutParameter, out var timeoutValue))
 					{
 						timeout = timeoutValue;
 					}
 					else
 					{
-						_logger.LogWarning("Could not parse timeout \"{TargetTimeout}\" for target {Target}", timeoutString, kvp.Key);
+						_logger.LogWarning("Could not parse timeout \"{TargetTimeout}\" for target {Target}", timeoutParameter, kvp.Key);
 					}
 				}
 

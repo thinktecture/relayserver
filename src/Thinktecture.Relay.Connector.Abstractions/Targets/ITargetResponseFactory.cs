@@ -3,13 +3,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Connector
+namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <summary>
 	/// An implementation of a factory to create an instance of a class implementing <see cref="ITargetResponse"/>.
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public interface IRelayTargetResponseFactory<TResponse>
+	public interface ITargetResponseFactory<TResponse>
 		where TResponse : ITargetResponse
 	{
 		/// <summary>

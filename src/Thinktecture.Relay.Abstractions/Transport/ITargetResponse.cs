@@ -25,14 +25,12 @@ namespace Thinktecture.Relay.Transport
 		/// <summary>
 		/// The time when the target was requested in behalf.
 		/// </summary>
-		/// <remarks>This will only be set when tracing is enabled.</remarks>
-		DateTime? RequestStart { get; set; }
+		DateTime RequestStart { get; set; }
 
 		/// <summary>
 		/// The duration until the target returned its results.
 		/// </summary>
-		/// <remarks>This will only be set when tracing is enabled.</remarks>
-		TimeSpan? RequestDuration { get; set; }
+		TimeSpan RequestDuration { get; set; }
 
 		/// <summary>
 		/// The <see cref="HttpStatusCode"/> received from the target.
