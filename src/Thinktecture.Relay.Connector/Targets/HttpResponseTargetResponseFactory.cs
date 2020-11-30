@@ -5,10 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Connector.RelayTargets
+namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <inheritdoc />
-	public class HttpResponseRelayTargetResponseFactory<TResponse> : IRelayTargetResponseFactory<TResponse>
+	public class HttpResponseTargetResponseFactory<TResponse> : ITargetResponseFactory<TResponse>
 		where TResponse : ITargetResponse, new()
 	{
 		/// <inheritdoc />

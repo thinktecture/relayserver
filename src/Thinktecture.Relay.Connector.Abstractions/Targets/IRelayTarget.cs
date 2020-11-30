@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Connector
+namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <summary>
 	/// An implementation of a target requesting the necessary information for a connector.

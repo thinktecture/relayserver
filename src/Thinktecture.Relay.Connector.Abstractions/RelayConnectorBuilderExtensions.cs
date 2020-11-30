@@ -2,6 +2,7 @@ using System;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.DependencyInjection;
 using Thinktecture.Relay.Connector.Options;
+using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
 // ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)

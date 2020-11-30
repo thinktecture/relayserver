@@ -1,4 +1,6 @@
 using System;
+using System.Net.Http;
+using System.Threading;
 using IdentityModel.AspNetCore.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -7,6 +9,7 @@ using Thinktecture.Relay.Connector.Authentication;
 using Thinktecture.Relay.Connector.DependencyInjection;
 using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Connector.RelayTargets;
+using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
 // ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
@@ -61,8 +64,12 @@ namespace Microsoft.Extensions.DependencyInjection
 				})
 				.AddClientAccessTokenHandler();
 
+			builder.Services
+				.AddHttpClient(Constants.RelayWebTargetHttpClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
+				.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false, AllowAutoRedirect = false });
+
 			builder.Services.TryAddTransient<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
-			builder.Services.TryAddTransient<IRelayTargetResponseFactory<TResponse>, HttpResponseRelayTargetResponseFactory<TResponse>>();
+			builder.Services.TryAddTransient<ITargetResponseFactory<TResponse>, HttpResponseTargetResponseFactory<TResponse>>();
 
 			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();
 			builder.Services.AddSingleton<RelayConnector>();

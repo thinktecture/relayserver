@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Connector
+namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <summary>
 	/// A registry for <see cref="IRelayTarget{TRequest,TResponse}"/> types.
@@ -35,7 +34,7 @@ namespace Thinktecture.Relay.Connector
 		}
 
 		private readonly ConcurrentDictionary<string, RelayTargetRegistration> _targets =
-			new ConcurrentDictionary<string, RelayTargetRegistration>();
+			new ConcurrentDictionary<string, RelayTargetRegistration>(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RelayTargetRegistry{TRequest,TResponse}"/> class.

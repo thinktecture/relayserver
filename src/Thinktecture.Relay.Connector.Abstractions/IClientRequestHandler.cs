@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector
