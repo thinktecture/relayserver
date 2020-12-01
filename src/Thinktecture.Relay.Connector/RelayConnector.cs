@@ -7,6 +7,7 @@ namespace Thinktecture.Relay.Connector
 	/// <summary>
 	/// A connection to a RelayServer.
 	/// </summary>
+	/// <remarks>This is just a convenient class for holding the transient <see cref="IConnectorConnection"/>.</remarks>
 	public class RelayConnector
 	{
 		private readonly IConnectorConnection _connection;
