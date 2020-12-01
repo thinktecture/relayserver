@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +22,7 @@ namespace Thinktecture.Relay.Connector.Targets
 		private readonly ITargetResponseFactory<TResponse> _targetResponseFactory;
 
 		/// <summary>
-		/// A <see cref="System.Net.Http.HttpClient"/>.
+		/// A <see cref="HttpClient"/>.
 		/// </summary>
 		// ReSharper disable once MemberCanBePrivate.Global
 		protected readonly HttpClient HttpClient;
@@ -33,12 +32,12 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="targetResponseFactory">An <see cref="ITargetResponseFactory{TResponse}"/>.</param>
-		/// <param name="clientFactory">An <see cref="IHttpClientFactory"/>.</param>
+		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
 		/// <param name="baseAddress">The base <see cref="Uri"/> used for the request.</param>
 		/// <param name="options">An optional flag build <see cref="RelayWebTargetOptions"/>.</param>
 		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
-			IHttpClientFactory clientFactory, Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
-			: this(logger, targetResponseFactory, clientFactory)
+			IHttpClientFactory httpClientFactory, Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
+			: this(logger, targetResponseFactory, httpClientFactory)
 		{
 			_options = options;
 			HttpClient.BaseAddress = baseAddress ?? throw new ArgumentNullException(nameof(baseAddress));
@@ -49,11 +48,11 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="targetResponseFactory">An <see cref="ITargetResponseFactory{TResponse}"/>.</param>
-		/// <param name="clientFactory">An <see cref="IHttpClientFactory"/>.</param>
+		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
 		/// <param name="parameters">The configured parameters.</param>
 		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
-			IHttpClientFactory clientFactory, Dictionary<string, string> parameters)
-			: this(logger, targetResponseFactory, clientFactory)
+			IHttpClientFactory httpClientFactory, Dictionary<string, string> parameters)
+			: this(logger, targetResponseFactory, httpClientFactory)
 		{
 			if (!parameters.TryGetValue("Url", out var url) || string.IsNullOrWhiteSpace(url))
 			{
@@ -70,12 +69,12 @@ namespace Thinktecture.Relay.Connector.Targets
 		}
 
 		private RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
-			IHttpClientFactory clientFactory)
+			IHttpClientFactory httpClientFactory)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_targetResponseFactory = targetResponseFactory ?? throw new ArgumentNullException(nameof(targetResponseFactory));
-			HttpClient = clientFactory?.CreateClient(Constants.RelayWebTargetHttpClientName) ??
-				throw new ArgumentNullException(nameof(clientFactory));
+			HttpClient = httpClientFactory?.CreateClient(Constants.RelayWebTargetHttpClientName) ??
+				throw new ArgumentNullException(nameof(httpClientFactory));
 		}
 
 		/// <inheritdoc />
@@ -172,16 +171,17 @@ namespace Thinktecture.Relay.Connector.Targets
 	{
 		/// <inheritdoc />
 		public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger,
-			ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory clientFactory, Uri baseAddress)
-			: base(logger, targetResponseFactory, clientFactory, baseAddress)
+			ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory httpClientFactory, Uri baseAddress,
+			RelayWebTargetOptions options = RelayWebTargetOptions.None)
+			: base(logger, targetResponseFactory, httpClientFactory, baseAddress, options)
 		{
 		}
 
 		/// <inheritdoc />
 		public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger,
-			ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory clientFactory,
+			ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory httpClientFactory,
 			Dictionary<string, string> parameters)
-			: base(logger, targetResponseFactory, clientFactory, parameters)
+			: base(logger, targetResponseFactory, httpClientFactory, parameters)
 		{
 		}
 	}
