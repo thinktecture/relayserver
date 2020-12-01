@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using Thinktecture.Relay.Connector.RelayTargets;
 using Thinktecture.Relay.Connector.Targets;
 
 namespace Thinktecture.Relay.Connector.Options
