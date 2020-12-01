@@ -43,7 +43,8 @@ namespace Thinktecture.Relay.Connector.Options
 				try
 				{
 					options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
-					_logger.LogTrace("Got discover document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri, options.DiscoveryDocument);
+					_logger.LogTrace("Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri,
+						options.DiscoveryDocument);
 
 					break;
 				}
