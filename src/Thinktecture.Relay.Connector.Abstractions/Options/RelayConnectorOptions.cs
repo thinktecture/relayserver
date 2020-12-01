@@ -29,7 +29,7 @@ namespace Thinktecture.Relay.Connector.Options
 		public DiscoveryDocument DiscoveryDocument { get; set; }
 
 		/// <summary>
-		/// The targets keyed by type.
+		/// The targets keyed by id.
 		/// </summary>
 		public Dictionary<string, Dictionary<string, string>> Targets { get; set; }
 	}
