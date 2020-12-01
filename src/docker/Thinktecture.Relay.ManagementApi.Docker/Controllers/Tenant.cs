@@ -33,37 +33,27 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		/// </summary>
 		/// <example>On premise connector in the Thinktecture office in Karlsruhe</example>
 		public string Description { get; set; }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Tenant"/> class.
-		/// </summary>
-		/// <remarks>Parameterless constructor is needed for deserialization</remarks>
-		public Tenant() {}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Tenant"/> class.
-		/// </summary>
-		/// <param name="tenant">The <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/> to clone.</param>
-		public Tenant(Thinktecture.Relay.Server.Persistence.Models.Tenant tenant)
-		{
-			Id = tenant.Id;
-			Name = tenant.Name;
-			DisplayName = tenant.DisplayName;
-			Description = tenant.Description;
-		}
 	}
 
 	internal static class TenantExtensions
 	{
-		public static Tenant ToTenantModel(this Thinktecture.Relay.Server.Persistence.Models.Tenant tenant)
+		public static Tenant ToModel(this Thinktecture.Relay.Server.Persistence.Models.Tenant tenant)
 		{
-			return new Tenant(tenant);
+			return new Tenant()
+			{
+				Id = tenant.Id,
+				Name = tenant.Name,
+				DisplayName = tenant.DisplayName,
+				Description = tenant.Description,
+			};
 		}
 
-		public static async IAsyncEnumerable<Tenant> ToTenantModels(this IAsyncEnumerable<Thinktecture.Relay.Server.Persistence.Models.Tenant> tenants)
+		public static async IAsyncEnumerable<Tenant> ToModels(this IAsyncEnumerable<Thinktecture.Relay.Server.Persistence.Models.Tenant> tenants)
 		{
 			await foreach (var tenant in tenants)
-				yield return tenant.ToTenantModel();
+			{
+				yield return tenant.ToModel();
+			}
 		}
 
 		public static Thinktecture.Relay.Server.Persistence.Models.Tenant ToTenant(this Tenant tenant)
