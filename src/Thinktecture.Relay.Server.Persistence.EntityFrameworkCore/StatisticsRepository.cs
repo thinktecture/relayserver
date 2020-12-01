@@ -194,8 +194,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		{
 			var lastActivity = DateTime.UtcNow - maxAge;
 
-			_logger.LogDebug(
-				"Cleaning up statistics storage by deleting all connections that have no activity since {ConnectionLastActivity}.",
+			_logger.LogDebug("Cleaning up statistics storage by deleting all connections that have no activity since {ConnectionLastActivity}",
 				lastActivity);
 
 			try
