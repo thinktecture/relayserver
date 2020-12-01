@@ -79,6 +79,17 @@ namespace Thinktecture.Relay.Connector.Targets
 		}
 
 		/// <summary>
+		/// Registers an <see cref="IRelayTarget{TRequest,TResponse}"/> type.
+		/// </summary>
+		/// <param name="id">The unique id of the target.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
+		/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
+		/// <typeparam name="T">The type of target.</typeparam>
+		public void Register<T>(string id, TimeSpan? timeout = null, params object[] parameters)
+			where T : IRelayTarget<TRequest, TResponse>
+			=> Register(id, typeof(T), timeout, parameters);
+
+		/// <summary>
 		/// Unregisters an <see cref="IRelayTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="id">The unique id of the target.</param>
@@ -103,7 +114,7 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <param name="target">When this method returns, <paramref name="target"/> contains the <see cref="IRelayTarget{TRequest,TResponse}"/> or null, if the target was not found.</param>
 		/// <param name="timeout">When this method returns, <paramref name="timeout"/> contains the <see cref="CancellationTokenSource"/> or null, if the target was not found.</param>
 		/// <returns>true if the target was found; otherwise, false.</returns>
-		public bool TryCreateRelayTarget(string id, IServiceProvider serviceProvider, out IRelayTarget<TRequest, TResponse> target,
+		internal bool TryCreateRelayTarget(string id, IServiceProvider serviceProvider, out IRelayTarget<TRequest, TResponse> target,
 			out CancellationTokenSource timeout)
 		{
 			if (_targets.TryGetValue(id, out var registration) || _targets.TryGetValue(Constants.RelayTargetCatchAllId, out registration))
