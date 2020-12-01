@@ -31,9 +31,10 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Adding new origin {OriginId} to statistics tracking", originId);
+
 			try
 			{
-				await CreateOriginInternalAsync(originId, cancellationToken);
+				CreateOrigin(originId, DateTime.UtcNow);
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
 			catch (TaskCanceledException)
@@ -214,23 +215,15 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			}
 		}
 
-		private async Task<Origin> CreateOriginInternalAsync(Guid originId, CancellationToken cancellationToken)
+		private Origin CreateOrigin(Guid originId, DateTime startup)
 		{
-			var now = DateTime.UtcNow;
-
-			var entity = new Origin()
-			{
-				Id = originId,
-				StartupTime = now,
-				LastSeenTime = now,
-			};
-
-			await _dbContext.Origins.AddAsync(entity, cancellationToken);
+			var entity = new Origin() { Id = originId, StartupTime = startup, LastSeenTime = startup };
+			_dbContext.Origins.Add(entity);
 			return entity;
 		}
 
 		private async Task<Origin> GetOrCreateOriginEntityAsync(Guid originId, CancellationToken cancellationToken)
-			=> await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId, cancellationToken)
-				?? await CreateOriginInternalAsync(originId, cancellationToken);
+			=> await _dbContext.Origins.FirstOrDefaultAsync(o => o.Id == originId, cancellationToken) ??
+				CreateOrigin(originId, DateTime.UtcNow);
 	}
 }
