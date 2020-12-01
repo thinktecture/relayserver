@@ -6,8 +6,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Abstract
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{5D35FB5F-DDE6-4BBB-AEF3-CA2E87596F26}"
 	ProjectSection(SolutionItems) = preProject
-		shared\Logo_T_Nontransparent.png = shared\Logo_T_Nontransparent.png
+		shared\ProjectLogo.png = shared\ProjectLogo.png
 		shared\ProjectProperties.shared.props = shared\ProjectProperties.shared.props
+		shared\NoPackProperties.shared.props = shared\NoPackProperties.shared.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-EA22-4F44-B60F-E82D36FCF5F7}"

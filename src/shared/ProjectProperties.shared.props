@@ -6,8 +6,9 @@
 
     <!-- Ignore Warnings: -->
     <NoWarn>NU5105;$(NoWarn)</NoWarn>
+
     <!--
-      NU5105: PackageVersion is semver2 and older NuGet clients don't support that yet; This is on purpose
+      NU5105: PackageVersion is semver2 and older NuGet clients don't support that yet; this is on purpose
     -->
 
     <!-- Version -->
@@ -24,9 +25,9 @@
     <Company>Thinktecture AG</Company>
     <Product>Thinktecture RelayServer</Product>
     <Copyright>Copyright © $(Company) 2015 - 2020. All rights reserved.</Copyright>
-    <Authors>Sebastian Gingter; Thomas Hilzendegen</Authors>
+    <Authors>Sebastian Gingter;Thomas Hilzendegen</Authors>
     <PackageTags>thinktecture;relayserver</PackageTags>
-    <PackageIcon>Logo_T_Nontransparent.png</PackageIcon>
+    <PackageIcon>ProjectLogo.png</PackageIcon>
     <PackageProjectUrl>https://github.com/thinktecture/relayserver</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/thinktecture/relayserver/releases</PackageReleaseNotes>
 
@@ -41,7 +42,7 @@
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="\" Visible="false"/>
-    <None Include="$(MSBuildThisFileDirectory)Logo_T_Nontransparent.png" Pack="true" PackagePath="\" Visible="false"/>
+    <None Include="$(MSBuildThisFileDirectory)ProjectLogo.png" Pack="true" PackagePath="\" Visible="false"/>
   </ItemGroup>
 
   <!-- Enable sourcelink support for debugging our sources -->
