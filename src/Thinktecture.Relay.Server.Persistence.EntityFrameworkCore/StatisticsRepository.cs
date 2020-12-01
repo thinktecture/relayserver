@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		/// <summary>
 		/// Initializes a new instance of the <see cref="StatisticsRepository"/> class.
 		/// </summary>
-		/// <param name="logger">The logger to log to.</param>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="dbContext">The Entity Framework Core database context.</param>
 		public StatisticsRepository(ILogger<StatisticsRepository> logger, RelayDbContext dbContext)
 		{

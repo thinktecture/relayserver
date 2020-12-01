@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Server.Services
 		private readonly StatisticsOptions _statisticsOptions;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="OriginStatisticsWriter"/>.
+		/// Initializes a new instance of the <see cref="OriginStatisticsWriter"/> class.
 		/// </summary>
 		/// <param name="statisticsWriter">An instance of an <see cref="IOriginStatisticsWriter"/>.</param>
 		/// <param name="serverContext">An instance of an <see cref="RelayServerContext"/>.</param>
