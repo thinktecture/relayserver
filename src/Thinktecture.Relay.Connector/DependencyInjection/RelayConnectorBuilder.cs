@@ -10,9 +10,6 @@ namespace Thinktecture.Relay.Connector.DependencyInjection
 	{
 		public IServiceCollection Services { get; }
 
-		public RelayConnectorBuilder(IServiceCollection services)
-		{
-			Services = services ?? throw new ArgumentNullException(nameof(services));
-		}
+		public RelayConnectorBuilder(IServiceCollection services) => Services = services ?? throw new ArgumentNullException(nameof(services));
 	}
 }

@@ -11,12 +11,9 @@ namespace Thinktecture.Relay.Connector.Options
 
 			foreach (var kvp in options.Targets)
 			{
-				if (kvp.Value.TryGetValue(Constants.RelayConnectorOptionsTargetType, out var type))
+				if (kvp.Value.TryGetValue(Constants.RelayConnectorOptionsTargetType, out var type) && !type.Contains("."))
 				{
-					if (!type.Contains("."))
-					{
-						kvp.Value[Constants.RelayConnectorOptionsTargetType] = $"{typeof(RelayWebTarget).Namespace}.{type}";
-					}
+					kvp.Value[Constants.RelayConnectorOptionsTargetType] = $"{typeof(RelayWebTarget).Namespace}.{type}";
 				}
 			}
 		}
