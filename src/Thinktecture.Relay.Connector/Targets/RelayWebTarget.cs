@@ -192,18 +192,6 @@ namespace Thinktecture.Relay.Connector.Targets
 	public static class RelayConnectorBuilderExtensions
 	{
 		/// <summary>
-		/// Adds a <see cref="RelayWebTarget"/>.
-		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse}"/>.</param>
-		/// <param name="id">The unique id of the target.</param>
-		/// <param name="baseAddress">An <see cref="Uri"/> containing the base address of the target.</param>
-		/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
-		/// <returns>The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddWebTarget(
-			this IRelayConnectorBuilder<ClientRequest, TargetResponse> builder, string id, Uri baseAddress, TimeSpan? timeout = null)
-			=> builder.AddTarget<ClientRequest, TargetResponse, RelayWebTarget>(id, timeout, baseAddress);
-
-		/// <summary>
 		/// Adds a <see cref="RelayWebTarget{TRequest,TResponse}"/>.
 		/// </summary>
 		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
@@ -218,5 +206,26 @@ namespace Thinktecture.Relay.Connector.Targets
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 			=> builder.AddTarget<TRequest, TResponse, RelayWebTarget<TRequest, TResponse>>(id, timeout, baseAddress);
+	}
+
+	/// <summary>
+	/// Extension methods for the <see cref="RelayTargetRegistry{TRequest,TResponse}"/>.
+	/// </summary>
+	public static class RelayTargetRegistryExtensions
+	{
+		/// <summary>
+		/// Registers a <see cref="RelayWebTarget{TRequest,TResponse}"/>.
+		/// </summary>
+		/// <param name="relayTargetRegistry">The <see cref="RelayTargetRegistry{TRequest,TResponse}"/>.</param>
+		/// <param name="id">The unique id of the target.</param>
+		/// <param name="baseAddress">An <see cref="Uri"/> containing the base address of the target.</param>
+		/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
+		/// <typeparam name="TRequest">The type of request.</typeparam>
+		/// <typeparam name="TResponse">The type of response.</typeparam>
+		public static void RegisterWebTarget<TRequest, TResponse>(this RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry,
+			string id, Uri baseAddress, TimeSpan? timeout = null)
+			where TRequest : IClientRequest
+			where TResponse : ITargetResponse
+			=> relayTargetRegistry.Register<RelayWebTarget<TRequest, TResponse>>(id, timeout, baseAddress);
 	}
 }
