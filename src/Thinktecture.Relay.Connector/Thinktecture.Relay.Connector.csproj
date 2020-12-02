@@ -4,7 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer Connector</Title>
     <Description>Contains the connector implementations for the RelayServer.</Description>
-    <Summary></Summary>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
@@ -12,12 +11,18 @@
   <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj" />
+    <PackageReference Include="IdentityModel.AspNetCore" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Core" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="IdentityModel.AspNetCore" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Net.Http.Headers" Version="2.2.8" />
+    <ProjectReference Include="..\Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

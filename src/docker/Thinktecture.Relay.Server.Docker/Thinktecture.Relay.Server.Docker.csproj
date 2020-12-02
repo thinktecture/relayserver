@@ -10,13 +10,6 @@
   <Import Project="..\..\shared\NoPackProperties.shared.props" />
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.7" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
-    <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
     <ProjectReference Include="..\..\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj" />

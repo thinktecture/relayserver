@@ -4,7 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer Connector Abstractions</Title>
     <Description>Contains abstractions for the RelayServer connector.</Description>
-    <Summary></Summary>
     <RootNamespace>Thinktecture.Relay.Connector</RootNamespace>
   </PropertyGroup>
 
@@ -12,12 +11,12 @@
   <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.7" />
+    <ProjectReference Include="..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

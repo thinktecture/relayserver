@@ -4,7 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer Server Abstractions</Title>
     <Description>Contains abstractions for the RelayServer server.</Description>
-    <Summary></Summary>
     <RootNamespace>Thinktecture.Relay.Server</RootNamespace>
   </PropertyGroup>
 
@@ -12,13 +11,13 @@
   <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

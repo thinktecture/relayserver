@@ -4,20 +4,25 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Thinktecture RelayServer Server SignalR Protocol</Title>
     <Description>Contains the SignalR server transport implementation for the RelayServer.</Description>
-    <Summary></Summary>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->
   <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="3.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

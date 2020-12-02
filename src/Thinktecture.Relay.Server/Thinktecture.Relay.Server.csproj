@@ -4,7 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Thinktecture RelayServer Server</Title>
     <Description>Contains the server implementations for the RelayServer.</Description>
-    <Summary></Summary>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->

@@ -4,7 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer EntityFramework</Title>
     <Description>Contains the EF Core context for data persistence.</Description>
-    <Summary></Summary>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
@@ -12,7 +11,6 @@
   <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="2.2.0" />
   </ItemGroup>

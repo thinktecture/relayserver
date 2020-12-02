@@ -7,7 +7,6 @@
 
       This usually should not be referenced directly but provides shared types for
       the more specific connector and server abstractions.</Description>
-    <Summary></Summary>
     <RootNamespace>Thinktecture.Relay</RootNamespace>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -16,6 +15,7 @@
   <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
     <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 
