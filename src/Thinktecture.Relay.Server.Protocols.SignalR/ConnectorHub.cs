@@ -59,8 +59,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			_tenantConnectorAdapterRegistry =
 				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
 			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
-			this._connectionStatisticsWriter =
-				connectionStatisticsWriter ?? throw new ArgumentNullException(nameof(connectionStatisticsWriter));
+			_connectionStatisticsWriter = connectionStatisticsWriter ?? throw new ArgumentNullException(nameof(connectionStatisticsWriter));
 			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
 		}
 

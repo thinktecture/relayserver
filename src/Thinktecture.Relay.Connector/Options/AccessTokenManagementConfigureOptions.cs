@@ -39,7 +39,7 @@ namespace Thinktecture.Relay.Connector.Options
 				try
 				{
 					var configuration = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
-					_logger.LogTrace("Got discover document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri, configuration);
+					_logger.LogTrace("Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri, configuration);
 
 					options.Client.Clients.Add(Constants.RelayServerHttpClientName, new ClientCredentialsTokenRequest()
 					{
@@ -53,7 +53,15 @@ namespace Thinktecture.Relay.Connector.Options
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Could not get discovery document from {DiscoverDocumentUrl}", uri);
-					Task.Delay(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
+
+					try
+					{
+						Task.Delay(TimeSpan.FromSeconds(10), _applicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
+					}
+					catch (TaskCanceledException)
+					{
+						// Ignore this, as this will be thrown when the service shuts down gracefully
+					}
 				}
 			}
 		}
