@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCre
 	{
 		public RelayDbContext CreateDbContext(string[] args)
 		{
-			IConfigurationRoot configuration = new ConfigurationBuilder()
+			var configuration = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
 				.AddJsonFile("appsettings.json")
 				.Build();
