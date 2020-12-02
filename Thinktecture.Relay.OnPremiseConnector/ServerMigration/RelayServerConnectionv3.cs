@@ -11,7 +11,7 @@ using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
+namespace Thinktecture.Relay.OnPremiseConnector.ServerMigration
 {
 	internal class RelayServerConnectionv3 : IRelayServerConnection
 	{
@@ -40,6 +40,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 
 			foreach (var registration in _registeredTargets)
 			{
+				_targetRegistry.Unregister(registration.Key);
 				_targetRegistry.Register(registration.Key, typeof(WebTarget), null, registration.Value.Uri, registration.Value.FollowRedirects ? RelayWebTargetOptions.FollowRedirect : RelayWebTargetOptions.None);
 			}
 

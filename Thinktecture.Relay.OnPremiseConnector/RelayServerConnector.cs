@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Thinktecture.Relay.OnPremiseConnector.NewServerSupport;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Thinktecture.Relay.OnPremiseConnector.ServerMigration;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 namespace Thinktecture.Relay.OnPremiseConnector
@@ -299,6 +301,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			// build dotnet core DI for connector v3
 			IServiceCollection services = new ServiceCollection();
+			services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(Log.Logger));
+			services.AddDistributedMemoryCache();
 			services
 				.AddRelayConnector(options =>
 				{
@@ -328,14 +332,26 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			using (var client = _httpClientFactory.CreateClient())
 			{
 				client.BaseAddress = _relayServerBaseUri;
-				var response = await client.GetAsync(DiscoveryDocument.WellKnownPath).ConfigureAwait(false);
-
-				if (response.IsSuccessStatusCode)
+				while (true)
 				{
-					_connectionv3 = _serviceProvider.GetRequiredService<RelayServerConnectionv3>();
-					_connectionv3.Connected += (s, e) => Connected?.Invoke(s, e);
-					_connectionv3.Reconnecting += HandleReconnecting;
-					_connectionv3.Reconnected += HandleReconnected;
+					try
+					{
+						var response = await client.GetAsync(DiscoveryDocument.WellKnownPath).ConfigureAwait(false);
+
+						if (response.IsSuccessStatusCode)
+						{
+							_connectionv3 = _serviceProvider.GetRequiredService<RelayServerConnectionv3>();
+							_connectionv3.Connected += (s, e) => Connected?.Invoke(s, e);
+							_connectionv3.Reconnecting += HandleReconnecting;
+							_connectionv3.Reconnected += HandleReconnected;
+						}
+
+						break;
+					}
+					catch
+					{
+						await Task.Delay(TimeSpan.FromSeconds(10));
+					}
 				}
 			}
 		}

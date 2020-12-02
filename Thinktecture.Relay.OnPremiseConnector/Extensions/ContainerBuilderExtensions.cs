@@ -3,8 +3,8 @@ using AutofacSerilogIntegration;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
-using Thinktecture.Relay.OnPremiseConnector.NewServerSupport;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector.ServerMigration;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 // ReSharper disable once CheckNamespace

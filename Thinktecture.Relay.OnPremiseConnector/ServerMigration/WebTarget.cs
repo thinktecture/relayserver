@@ -6,7 +6,7 @@ using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
+namespace Thinktecture.Relay.OnPremiseConnector.ServerMigration
 {
 	internal class WebTarget : RelayWebTarget
 	{
@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 
 		protected override HttpRequestMessage CreateHttpRequestMessage(ClientRequest request, string url = null)
 		{
-			var message = base.CreateHttpRequestMessage(request);
+			var message = base.CreateHttpRequestMessage(request, url);
 
 			if (request.AcknowledgeMode == AcknowledgeMode.Manual)
 			{
