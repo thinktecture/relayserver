@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 {
-	internal class DummyApplicationLifetime : IApplicationLifetime
+	internal class FakeApplicationLifetime : IApplicationLifetime
 	{
 		private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
@@ -11,10 +11,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.NewServerSupport
 		public CancellationToken ApplicationStopping => CancellationToken.None;
 		public CancellationToken ApplicationStopped => _cts.Token;
 
-
-		public void StopApplication()
-		{
-			_cts.Cancel();
-		}
+		public void StopApplication() => _cts.Cancel();
 	}
 }

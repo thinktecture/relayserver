@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public IRelayServerConnection Create(Assembly versionAssembly, string userName, string password, Uri relayServer, TimeSpan requestTimeout, TimeSpan tokenRefreshWindow, bool logSensitiveData)
 		{
-			_logger?.Information("Creating new v2 connection for RelayServer {RelayServerUrl} and link user {UserName}", relayServer, userName);
+			_logger?.Information("Creating new connection for RelayServer {RelayServerUrl} and link user {UserName}", relayServer, userName);
 			var httpConnection = new RelayServerHttpConnection(_logger, relayServer, requestTimeout);
 			var signalRConnection = new RelayServerSignalRConnection(versionAssembly, userName, password, relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, httpConnection, _logger, logSensitiveData, _onPremiseInterceptorFactory);
 

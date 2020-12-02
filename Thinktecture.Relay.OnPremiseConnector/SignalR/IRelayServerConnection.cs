@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal interface IRelayServerConnection : IDisposable
 	{
-		string RelayedRequestHeader { get; set; }
+		string RelayedRequestHeader { get; }
 		Uri Uri { get; }
 		TimeSpan TokenRefreshWindow { get; }
 		DateTime TokenExpiry { get; }

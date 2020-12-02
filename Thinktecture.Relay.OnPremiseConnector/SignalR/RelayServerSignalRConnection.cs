@@ -23,7 +23,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 	{
 		private const int _CONNECTOR_VERSION = 3;
 
-		internal static int _nextInstanceId;
 		private static readonly Random _random = new Random();
 
 		private readonly string _userName;
@@ -44,14 +43,14 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public event EventHandler Connected;
 		public event EventHandler Disconnected;
+		public event EventHandler Disposing;
 		public new event EventHandler Reconnecting;
 		public new event EventHandler Reconnected;
-		public event EventHandler Disposing;
 
 		public Uri Uri { get; }
 		public TimeSpan TokenRefreshWindow { get; private set; }
 		public DateTime TokenExpiry { get; private set; } = DateTime.MaxValue;
-		public int RelayServerConnectionInstanceId { get; }
+		public int RelayServerConnectionInstanceId { get; } = RelayServerConnector.GetNextInstanceId();
 		public DateTime LastHeartbeat { get; private set; } = DateTime.MinValue;
 		public TimeSpan HeartbeatInterval { get; private set; }
 		public DateTime? ConnectedSince { get; private set; }
@@ -64,8 +63,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			ILogger logger, bool logSensitiveData, IOnPremiseInterceptorFactory onPremiseInterceptorFactory)
 			: base(new Uri(relayServerUri, "/signalr").AbsoluteUri, $"cv={_CONNECTOR_VERSION}&av={versionAssembly.GetName().Version}")
 		{
-			RelayServerConnectionInstanceId = Interlocked.Increment(ref _nextInstanceId);
-
 			_userName = userName;
 			_password = password;
 			_requestTimeout = requestTimeout;
@@ -79,7 +76,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_logSensitiveData = logSensitiveData;
 			_onPremiseInterceptorFactory = onPremiseInterceptorFactory ?? throw new ArgumentNullException(nameof(onPremiseInterceptorFactory));
 
-
 			_connectors = new ConcurrentDictionary<string, IOnPremiseTargetConnector>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 
@@ -87,7 +83,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			base.Reconnected += OnReconnected;
 		}
 
-		public string RelayedRequestHeader { get; set; }
+		public string RelayedRequestHeader => RelayServerConnector.GetRelayedRequestHeader();
 
 		public void RegisterOnPremiseTarget(string key, Uri baseUri, bool followRedirects)
 		{
@@ -192,22 +188,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public async Task ConnectAsync()
 		{
-			_logger?.Information("Connecting to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
-
 			_stopRequested = false;
 
-			if (!await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
+			if (await ConnectAsyncInternal().ConfigureAwait(false))
 			{
-				return;
-			}
-
-			try
-			{
-				await Start().ConfigureAwait(false);
-				ConnectedSince = DateTime.UtcNow;
-
-				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
-
 				try
 				{
 					Connected?.Invoke(this, EventArgs.Empty);
@@ -217,10 +201,31 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 					_logger?.Error(ex, "Error handling connected event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 				}
 			}
+		}
+
+		private async Task<bool> ConnectAsyncInternal()
+		{
+			_logger?.Information("Connecting to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+
+			if (_stopRequested || !await TryRequestAuthorizationTokenAsync().ConfigureAwait(false))
+			{
+				return false;
+			}
+
+			try
+			{
+				await Start().ConfigureAwait(false);
+				ConnectedSince = DateTime.UtcNow;
+
+				_logger?.Information("Connected to RelayServer {RelayServerUri} with connection {ConnectionId}", Uri, ConnectionId);
+				return true;
+			}
 			catch (Exception ex)
 			{
 				_logger?.Error(ex, "Error while connecting to RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 			}
+
+			return false;
 		}
 
 		public async Task<bool> TryRequestAuthorizationTokenAsync()
@@ -240,11 +245,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		public void Reconnect()
 		{
-			_logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
-
 			Disconnect(true);
-
-			Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => ConnectAsync()).ConfigureAwait(false);
 		}
 
 		public void Disconnect()
@@ -289,16 +290,34 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			}
 		}
 
-		private void OnReconnecting()
-		{
-			_logger?.Verbose("Connection lost. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
-			this.Reconnecting?.Invoke(this, EventArgs.Empty);
-		}
-
 		private void OnReconnected()
 		{
 			_logger?.Verbose("Connection restored. connection-id={ConnectionId}", ConnectionId);
-			this.Reconnected?.Invoke(this, EventArgs.Empty);
+
+			try
+			{
+				Reconnected?.Invoke(this, EventArgs.Empty);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error handling reconnected event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			}
+
+		}
+
+		private void OnReconnecting()
+		{
+			_logger?.Verbose("Connection lost. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+
+			try
+			{
+				Reconnecting?.Invoke(this, EventArgs.Empty);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error handling reconnecting event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			}
+
 		}
 
 		protected override async void OnMessageReceived(JToken message)
@@ -348,7 +367,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 						LastActivity = DateTime.UtcNow;
 
-						await RequestLocalTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false); // TODO no cancellation token here?
+						await RequestLocalTargetAsync(ctx, key, connector, request, CancellationToken.None).ConfigureAwait(false);
 						return;
 					}
 				}
@@ -518,6 +537,10 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			{
 				_logger?.Debug("Forcing reconnect. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 			}
+			else
+			{
+				_stopRequested = true;
+			}
 
 			_logger?.Information("Disconnecting from RelayServer {RelayServerUri} with connection instance {RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
 
@@ -530,7 +553,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				LastActivity = null;
 			}
 
-			_stopRequested = true;
 			Stop();
 		}
 
@@ -586,7 +608,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		private async Task<InterceptedResponse> GetResponseFromLocalTargetAsync(IOnPremiseTargetConnector connector, string url, IOnPremiseTargetRequest onPremiseTargetRequest, string relayedRequestHeader)
 		{
-			var request= new InterceptedRequest(onPremiseTargetRequest);
+			var request = new InterceptedRequest(onPremiseTargetRequest);
 
 			try
 			{
@@ -626,20 +648,44 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 			base.OnClosed();
 
-			if (!_stopRequested)
+			if (_stopRequested)
+			{
+				try
+				{
+					Disconnected?.Invoke(this, EventArgs.Empty);
+				}
+				catch (Exception ex)
+				{
+					_logger?.Error(ex, "Error handling disconnected event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+				}
+			}
+			else
 			{
 				var randomWaitTime = GetRandomWaitTime();
 				_logger?.Debug("Connection closed. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}, reconnect-wait-time={ReconnectWaitTime}", Uri, RelayServerConnectionInstanceId, randomWaitTime.TotalSeconds);
-				Task.Delay(randomWaitTime).ContinueWith(_ => ConnectAsync()).ConfigureAwait(false);
-			}
 
-			try
-			{
-				Disconnected?.Invoke(this, EventArgs.Empty);
-			}
-			catch (Exception ex)
-			{
-				_logger?.Error(ex, "Error handling disconnected event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+				try
+				{
+					Reconnecting?.Invoke(this, EventArgs.Empty);
+				}
+				catch (Exception ex)
+				{
+					_logger?.Error(ex, "Error handling reconnecting event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+				}
+
+				Task.Delay(randomWaitTime).ContinueWith(async _ =>
+				{
+					await ConnectAsyncInternal();
+
+					try
+					{
+						Reconnected?.Invoke(this, EventArgs.Empty);
+					}
+					catch (Exception ex)
+					{
+						_logger?.Error(ex, "Error handling reconnected event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+					}
+				}).ConfigureAwait(false);
 			}
 		}
 
@@ -675,7 +721,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 
 		protected virtual void OnDisposing()
 		{
-			Disposing?.Invoke(this, EventArgs.Empty);
+			try
+			{
+				Disposing?.Invoke(this, EventArgs.Empty);
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error handling disposing event. relay-server={RelayServerUri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}", Uri, RelayServerConnectionInstanceId);
+			}
+
 		}
 
 		protected override void Dispose(bool disposing)
