@@ -103,7 +103,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		public int? BinarySizeThreshold { get; } = 64 * 1024;
+		public int? BinarySizeThreshold { get; } = 32 * 1024; // 32kb
 
 		/// <inheritdoc />
 		public event AsyncEventHandler<string> Connected;

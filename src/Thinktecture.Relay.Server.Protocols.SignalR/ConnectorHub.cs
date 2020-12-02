@@ -88,7 +88,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 64 * 1024; // 64kb
+		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 32 * 1024; // 32kb
 
 		/// <summary>
 		/// Hub method.
