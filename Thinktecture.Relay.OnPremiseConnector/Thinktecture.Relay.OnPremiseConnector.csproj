@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2</TargetFrameworks>
     <Title>Thinktecture RelayServer On Premise Connector</Title>
     <Description>The OnPremiseConnector library should be used to connect to a Thinktecture RelayServer and provide local connectivity. It can be incorporated into services to provide in-process access to local services via the RelayServer. It could also be used in a separate service to provide http(s)-based access to one or multiple services.</Description>
     <Summary>This OnPremiseConnector library should be used to implement local connectors to the Thinktecture RelayServer.</Summary>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <!-- Use AssemblyInfo.shared.cs for shared info, so include that file and disable auto-generation -->
@@ -16,10 +16,10 @@
     <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNet.SignalR.Client" Version="2.3.0" />
     <PackageReference Include="Serilog" Version="2.7.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <PackageReference Include="System.Net.Requests" Version="4.3.0" />
+    <PackageReference Include="Thinktecture.Relay.Abstractions" Version="3.0.0-alpha.2-91" />
+    <PackageReference Include="Thinktecture.Relay.Connector" Version="3.0.0-alpha.2-91" />
+    <PackageReference Include="Thinktecture.Relay.Connector.Abstractions" Version="3.0.0-alpha.2-91" />
+    <PackageReference Include="Thinktecture.Relay.Connector.Protocols.SignalR" Version="3.0.0-alpha.2-91" />
   </ItemGroup>
 
 </Project>
