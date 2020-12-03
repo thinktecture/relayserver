@@ -33,7 +33,7 @@ namespace Autofac
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
 			builder.RegisterType<OnPremiseInterceptorFactory>().As<IOnPremiseInterceptorFactory>();
 
-			// Types for new server support
+			// Types for server migration
 			builder.RegisterType<RelayServerConnectionv3>();
 			builder.RegisterType<FakeApplicationLifetime>().As<IApplicationLifetime>().SingleInstance();
 

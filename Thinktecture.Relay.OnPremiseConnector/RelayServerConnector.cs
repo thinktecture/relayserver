@@ -29,7 +29,6 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 		/// <inheritdoc />
 		public event EventHandler Connected;
-
 		/// <inheritdoc />
 		public event EventHandler Disconnected;
 
@@ -40,13 +39,13 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			set => _relayedRequestHeader = value;
 		}
 
-		private readonly Uri _relayServerBaseUri;
-		private readonly IHttpClientFactory _httpClientFactory;
-		private readonly IServiceProvider _serviceProvider;
-
 		private IRelayServerConnection _connectionv2;
 		private IRelayServerConnection _connectionv3;
 		private CancellationTokenSource _reconnecting;
+
+		private readonly Uri _relayServerBaseUri;
+		private readonly IHttpClientFactory _httpClientFactory;
+		private readonly IServiceProvider _serviceProvider;
 
 		private IRelayServerConnection ActiveConnection => _connectionv3 ?? _connectionv2;
 
@@ -299,11 +298,11 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 		private IServiceProvider CreateServiceProvider(Uri relayServerBaseUri, string tenantName, string tenantSecret)
 		{
-			// build dotnet core DI for connector v3
+			// Build dotnet core DI for connector v3
 			IServiceCollection services = new ServiceCollection();
-			services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(Log.Logger));
-			services.AddDistributedMemoryCache();
 			services
+				.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(Log.Logger))
+				.AddDistributedMemoryCache()
 				.AddRelayConnector(options =>
 				{
 					options.RelayServerBaseUri = relayServerBaseUri;
@@ -312,21 +311,16 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				})
 				.AddSignalRConnectorTransport();
 
-			// create autofac container for connector v2
+			// Create autofac container for v2 connector
 			var builder = new ContainerBuilder();
 			builder.RegisterOnPremiseConnectorTypes();
 
-			// also add v3 services to autofac
+			// Also add v3 services to autofac
 			builder.Populate(services);
 
-			var container = builder.Build();
-			return new AutofacServiceProvider(container);
+			return new AutofacServiceProvider(builder.Build());
 		}
 
-		/// <summary>
-		/// Checks what relay server to use
-		/// </summary>
-		/// <returns></returns>
 		private async Task DetermineCurrentlyActiveConnectionAsync()
 		{
 			using (var client = _httpClientFactory.CreateClient())
@@ -360,7 +354,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			_reconnecting = new CancellationTokenSource();
 
-			// restart connecting after one minute (maybe the server got upgraded in the meantime)
+			// Restart connecting after one minute (maybe the server got upgraded in the meantime)
 			Task.Delay(TimeSpan.FromMinutes(1), _reconnecting.Token).ContinueWith(async _ =>
 			{
 				CheckDisposed();

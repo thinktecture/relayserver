@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer On Premise Connector</Title>
     <Description>The OnPremiseConnector library should be used to connect to a Thinktecture RelayServer and provide local connectivity. It can be incorporated into services to provide in-process access to local services via the RelayServer. It could also be used in a separate service to provide http(s)-based access to one or multiple services.</Description>
     <Summary>This OnPremiseConnector library should be used to implement local connectors to the Thinktecture RelayServer.</Summary>
-    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <!-- Use AssemblyInfo.shared.cs for shared info, so include that file and disable auto-generation -->
