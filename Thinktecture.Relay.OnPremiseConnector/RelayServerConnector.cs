@@ -74,7 +74,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 			var factory = _serviceProvider.GetRequiredService<IRelayServerConnectionFactory>();
 			_connectionv2 = factory.Create(versionAssembly, userName, password, _relayServerBaseUri, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
-			_connectionv2.Connected += (s, e) => Connected?.Invoke(s, e);
+			_connectionv2.Connected += HandleConnected;
 			_connectionv2.Reconnecting += HandleReconnecting;
 			_connectionv2.Reconnected += HandleReconnected;
 		}
@@ -325,6 +325,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			using (var client = _httpClientFactory.CreateClient())
 			{
+				client.Timeout = TimeSpan.FromSeconds(20);
 				client.BaseAddress = _relayServerBaseUri;
 				while (true)
 				{
@@ -335,7 +336,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 						if (response.IsSuccessStatusCode)
 						{
 							_connectionv3 = _serviceProvider.GetRequiredService<RelayServerConnectionv3>();
-							_connectionv3.Connected += (s, e) => Connected?.Invoke(s, e);
+							_connectionv3.Connected += HandleConnected;
 							_connectionv3.Reconnecting += HandleReconnecting;
 							_connectionv3.Reconnected += HandleReconnected;
 						}
@@ -348,6 +349,14 @@ namespace Thinktecture.Relay.OnPremiseConnector
 					}
 				}
 			}
+		}
+
+		private void HandleConnected(object sender, EventArgs e)
+		{
+			_reconnecting?.Cancel();
+			_reconnecting?.Dispose();
+			_reconnecting = null;
+			Connected?.Invoke(sender, e);
 		}
 
 		private void HandleReconnecting(object sender, EventArgs e)
@@ -372,6 +381,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		{
 			_reconnecting?.Cancel();
 			_reconnecting?.Dispose();
+			_reconnecting = null;
 		}
 
 		private void CheckDisposed()
