@@ -51,8 +51,10 @@ namespace Thinktecture.Relay.Server.Docker
 			{
 				app.UseDeveloperExceptionPage();
 			}
-
-			// app.UseHttpsRedirection();
+			else
+			{
+				app.UseHttpsRedirection();
+			}
 
 			app.UseRouting();
 

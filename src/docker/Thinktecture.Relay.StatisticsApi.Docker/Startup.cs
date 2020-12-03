@@ -31,8 +31,10 @@ namespace Thinktecture.Relay.StatisticsApi.Docker
 			{
 				app.UseDeveloperExceptionPage();
 			}
-
-			app.UseHttpsRedirection();
+			else
+			{
+				app.UseHttpsRedirection();
+			}
 
 			app.UseRouting();
 
