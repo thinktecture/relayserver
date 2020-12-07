@@ -26,6 +26,11 @@ namespace Thinktecture.Relay
 		public string ConnectorEndpoint { get; set; }
 
 		/// <summary>
+		/// The endpoint where requests should be acknowledged.
+		/// </summary>
+		public string AcknowledgeEndpoint { get; set; }
+
+		/// <summary>
 		/// The endpoint the connector should fetch large request bodies from.
 		/// </summary>
 		public string RequestEndpoint { get; set; }

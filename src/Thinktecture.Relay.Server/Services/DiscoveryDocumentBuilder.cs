@@ -37,6 +37,7 @@ namespace Thinktecture.Relay.Server.Services
 				ServerVersion = GetServerVersion(),
 				AuthorizationServer = GetAuthority(),
 				ConnectorEndpoint = new Uri(baseUri, "connector").ToString(),
+				AcknowledgeEndpoint = new Uri(baseUri, "acknowledge").ToString(),
 				RequestEndpoint = new Uri(baseUri, "body/request").ToString(),
 				ResponseEndpoint = new Uri(baseUri, "body/response").ToString(),
 				ConnectionTimeout = (int)TimeSpan.FromSeconds(30).TotalSeconds,
