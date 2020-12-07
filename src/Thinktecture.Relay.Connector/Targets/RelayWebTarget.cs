@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
@@ -17,7 +16,6 @@ namespace Thinktecture.Relay.Connector.Targets
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly RelayWebTargetOptions _options;
 		private readonly ILogger<RelayWebTarget<TRequest, TResponse>> _logger;
 		private readonly ITargetResponseFactory<TResponse> _targetResponseFactory;
 
@@ -37,10 +35,23 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <param name="options">An optional flag build <see cref="RelayWebTargetOptions"/>.</param>
 		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
 			IHttpClientFactory httpClientFactory, Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
-			: this(logger, targetResponseFactory, httpClientFactory)
+			: this(logger, targetResponseFactory)
+			=> HttpClient = CreateHttpClient(httpClientFactory, options, baseAddress);
+
+		private HttpClient CreateHttpClient(IHttpClientFactory httpClientFactory, RelayWebTargetOptions options, Uri baseAddress)
 		{
-			_options = options;
-			HttpClient.BaseAddress = baseAddress ?? throw new ArgumentNullException(nameof(baseAddress));
+			if (httpClientFactory == null) throw new ArgumentNullException(nameof(httpClientFactory));
+			if (baseAddress == null) throw new ArgumentNullException(nameof(baseAddress));
+
+			var httpClient = options switch
+			{
+				RelayWebTargetOptions.FollowRedirect => httpClientFactory.CreateClient(Constants.HttpClientNames.RelayWebTargetFollowRedirect),
+				_ => httpClientFactory.CreateClient(Constants.HttpClientNames.RelayWebTargetDefault)
+			};
+
+			httpClient.BaseAddress = baseAddress;
+
+			return httpClient;
 		}
 
 		/// <summary>
@@ -52,29 +63,24 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <param name="parameters">The configured parameters.</param>
 		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
 			IHttpClientFactory httpClientFactory, Dictionary<string, string> parameters)
-			: this(logger, targetResponseFactory, httpClientFactory)
+			: this(logger, targetResponseFactory)
 		{
 			if (!parameters.TryGetValue("Url", out var url) || string.IsNullOrWhiteSpace(url))
 			{
-				throw new ArgumentException(
-					$"The target \"{parameters[Constants.RelayConnectorOptionsTargetId]}\" has no configured base address", nameof(parameters));
+				var targetId = parameters[Constants.RelayConnectorOptionsTargetId];
+				throw new ArgumentException($"The target \"{targetId}\" has no configured base address", nameof(parameters));
 			}
 
-			if (!parameters.TryGetValue("Options", out var parameter) || !Enum.TryParse(parameter, true, out _options))
-			{
-				_options = RelayWebTargetOptions.None;
-			}
+			parameters.TryGetValue("Options", out var parameter);
+			Enum.TryParse<RelayWebTargetOptions>(parameter, true, out var options);
 
-			HttpClient.BaseAddress = new Uri(url);
+			HttpClient = CreateHttpClient(httpClientFactory, options, new Uri(url));
 		}
 
-		private RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
-			IHttpClientFactory httpClientFactory)
+		private RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_targetResponseFactory = targetResponseFactory ?? throw new ArgumentNullException(nameof(targetResponseFactory));
-			HttpClient = httpClientFactory?.CreateClient(Constants.RelayWebTargetHttpClientName) ??
-				throw new ArgumentNullException(nameof(httpClientFactory));
 		}
 
 		/// <inheritdoc />
@@ -82,60 +88,36 @@ namespace Thinktecture.Relay.Connector.Targets
 		{
 			var start = DateTime.UtcNow;
 
-			_logger.LogTrace("Requesting target for request {RequestId}", request.RequestId);
-			var responseMessage = await SendAsync(request, cancellationToken);
-			_logger.LogDebug("Requested target for request {RequestId}", request.RequestId);
+			_logger.LogTrace("Requesting target for request {RequestId} at {BaseAddress} for {Url}", request.RequestId, HttpClient.BaseAddress,
+				request.Url);
+
+			var requestMessage = CreateHttpRequestMessage(request);
+			var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+			_logger.LogDebug("Requested target for request {RequestId} returned {HttpStatusCode}", request.RequestId,
+				responseMessage.StatusCode);
 
 			var response = await _targetResponseFactory.CreateAsync(request, responseMessage, cancellationToken);
 
 			response.RequestStart = start;
 			response.RequestDuration = DateTime.UtcNow - start;
 
+#if DEBUG
+			response.HttpHeaders["X-RelayServer-Connector-Host"] = new[] { Environment.MachineName };
+			response.HttpHeaders["X-RelayServer-Connector-Version"] = new[] { RelayConnector.AssemblyVersion };
+#endif
+
 			return response;
-		}
-
-		private async Task<HttpResponseMessage> SendAsync(TRequest request, CancellationToken cancellationToken, string url = null)
-		{
-			while (true)
-			{
-				var response = await HttpClient.SendAsync(CreateHttpRequestMessage(request, url), HttpCompletionOption.ResponseHeadersRead,
-					cancellationToken);
-
-				if ((_options & RelayWebTargetOptions.FollowRedirect) != RelayWebTargetOptions.FollowRedirect)
-					return response;
-
-				switch ((int)response.StatusCode)
-				{
-					// using StatusCodes here, because HttpStatusCode.PermanentRedirect needs netstandard2.1
-					case StatusCodes.Status300MultipleChoices:
-					case StatusCodes.Status301MovedPermanently:
-					case StatusCodes.Status302Found:
-					case StatusCodes.Status303SeeOther:
-					case StatusCodes.Status307TemporaryRedirect:
-					case StatusCodes.Status308PermanentRedirect:
-						url = response.Headers.Location?.ToString();
-						response.Dispose();
-
-						if (url == null) throw new InvalidOperationException($"Missing \"{HeaderNames.Location}\" header in redirect");
-
-						_logger.LogTrace("Following redirect to location {RedirectLocation} for request {RequestId}", url, request.RequestId);
-						break;
-
-					default:
-						return response;
-				}
-			}
 		}
 
 		/// <summary>
 		/// Transforms the <typeparamref name="TRequest"/> into a <see cref="HttpRequestMessage"/>.
 		/// </summary>
 		/// <param name="request">The client request.</param>
-		/// <param name="url">An optional alternative url (e.g. from response's location header).</param>
 		/// <returns>A <see cref="HttpRequestMessage"/>.</returns>
-		protected virtual HttpRequestMessage CreateHttpRequestMessage(TRequest request, string url = null)
+		protected virtual HttpRequestMessage CreateHttpRequestMessage(TRequest request)
 		{
-			var requestMessage = new HttpRequestMessage(new HttpMethod(request.HttpMethod), url ?? request.Url);
+			var requestMessage = new HttpRequestMessage(new HttpMethod(request.HttpMethod), request.Url);
 
 			foreach (var header in request.HttpHeaders)
 			{

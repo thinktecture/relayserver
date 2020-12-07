@@ -41,7 +41,7 @@ namespace Thinktecture.Relay.Connector.Options
 					var configuration = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
 					_logger.LogTrace("Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri, configuration);
 
-					options.Client.Clients.Add(Constants.RelayServerHttpClientName, new ClientCredentialsTokenRequest()
+					options.Client.Clients.Add(Constants.HttpClientNames.RelayServer, new ClientCredentialsTokenRequest()
 					{
 						Address = configuration.TokenEndpoint,
 						ClientId = _relayConnectorOptions.TenantName,

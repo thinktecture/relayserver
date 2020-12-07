@@ -43,7 +43,7 @@ docker run `
   rabbitmq:management
 
 # Wait for rabbits to start up
-Start-Sleep 10
+Start-Sleep 30
 
 # Enable clustering
 docker exec --user rabbitmq relay_transport_rabbitmq2 rabbitmqctl stop_app

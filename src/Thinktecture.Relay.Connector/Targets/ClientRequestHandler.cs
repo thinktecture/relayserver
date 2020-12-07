@@ -75,7 +75,7 @@ namespace Thinktecture.Relay.Connector.Targets
 			_relayTargetRegistry = relayTargetRegistry ?? throw new ArgumentNullException(nameof(relayTargetRegistry));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-			_httpClient = httpClientFactory?.CreateClient(Constants.RelayServerHttpClientName) ??
+			_httpClient = httpClientFactory?.CreateClient(Constants.HttpClientNames.RelayServer) ??
 				throw new ArgumentNullException(nameof(httpClientFactory));
 
 			_requestEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.RequestEndpoint}/");
@@ -144,7 +144,15 @@ namespace Thinktecture.Relay.Connector.Targets
 					using var content = new CountingStreamContent(response.BodyContent);
 					try
 					{
-						await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content, cancellationToken);
+						var responseMessage = await _httpClient.PostAsync(new Uri(_responseEndpoint, response.RequestId.ToString("N")), content,
+							cancellationToken);
+
+						if (!responseMessage.IsSuccessStatusCode)
+						{
+							_logger.LogError("Uploading the body of request {RequestId} failed with {HttpStatusCode}", request.RequestId,
+								responseMessage.StatusCode);
+							return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+						}
 					}
 					catch (TaskCanceledException)
 					{

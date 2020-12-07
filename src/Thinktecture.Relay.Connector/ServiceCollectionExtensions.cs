@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			builder.Services.AddAccessTokenManagement();
 			builder.Services.TryAddTransient<IAccessTokenProvider, AccessTokenProvider>();
 			builder.Services
-				.AddHttpClient(Constants.RelayServerHttpClientName, (provider, client) =>
+				.AddHttpClient(Constants.HttpClientNames.RelayServer, (provider, client) =>
 				{
 					var options = provider.GetRequiredService<IOptions<RelayConnectorOptions>>();
 					client.BaseAddress = options.Value.RelayServerBaseUri;
@@ -64,8 +64,11 @@ namespace Microsoft.Extensions.DependencyInjection
 				.AddClientAccessTokenHandler();
 
 			builder.Services
-				.AddHttpClient(Constants.RelayWebTargetHttpClientName, client => client.Timeout = Timeout.InfiniteTimeSpan)
+				.AddHttpClient(Constants.HttpClientNames.RelayWebTargetDefault, client => client.Timeout = Timeout.InfiniteTimeSpan)
 				.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false, AllowAutoRedirect = false });
+			builder.Services
+				.AddHttpClient(Constants.HttpClientNames.RelayWebTargetFollowRedirect, client => client.Timeout = Timeout.InfiniteTimeSpan)
+				.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
 
 			builder.Services.TryAddTransient<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
 			builder.Services.TryAddTransient<ITargetResponseFactory<TResponse>, HttpResponseTargetResponseFactory<TResponse>>();

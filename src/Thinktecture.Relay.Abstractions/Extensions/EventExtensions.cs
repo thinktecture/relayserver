@@ -32,7 +32,18 @@ namespace Thinktecture.Relay
 			{
 				foreach (var handler in eventHandler.GetInvocationList().Cast<AsyncEventHandler<T>>())
 				{
-					await handler(sender, @event);
+					try
+					{
+						await handler(sender, @event);
+					}
+					catch (TaskCanceledException)
+					{
+						break;
+					}
+					catch (Exception)
+					{
+						// Ignore and continue with next handler
+					}
 				}
 			}
 		}

@@ -51,6 +51,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			else
 			{
 				_logger.LogError(ex, "Connection {ConnectionId} closed", _connectionId);
+
 				await Reconnecting.InvokeAsync(this, _connectionId);
 				await ConnectAsyncInternal(_cancellationTokenSource.Token);
 				await Reconnected.InvokeAsync(this, _connectionId);
@@ -75,12 +76,16 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private async Task RequestTargetAsync(TRequest request)
 		{
-			_logger.LogTrace("Received request {RequestId} {@Request}", request.RequestId, request);
-			_logger.LogDebug("Received request {RequestId} on connection {ConnectionId} from origin {OriginId}", request.RequestId,
+			_logger.LogTrace("Handling request {RequestId} on connection {ConnectionId} {@Request}", request.RequestId, _connection, request);
+			_logger.LogDebug("Handling request {RequestId} on connection {ConnectionId} from origin {OriginId}", request.RequestId,
 				_connectionId, request.RequestOriginId);
+
 			var response = await _clientRequestHandler.HandleAsync(request, BinarySizeThreshold);
-			_logger.LogTrace("Received response for request {RequestId} {@Response}", request.RequestId, response);
-			_logger.LogDebug("Received response for request {RequestId} on connection {ConnectionId}", request.RequestId, _connectionId);
+
+			_logger.LogTrace("Received response for request {RequestId} on connection {ConnectionId} {@Response}", request.RequestId,
+				_connectionId, response);
+			_logger.LogDebug("Received response for request {RequestId}", request.RequestId);
+
 			await DeliverAsync(response);
 		}
 
@@ -92,6 +97,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			{
 				await _connection.StartAsync(cancellationToken);
 				_connectionId = _connection.ConnectionId;
+
 				_logger.LogInformation("Connected on connection {ConnectionId}", _connection.ConnectionId);
 			}
 			catch (Exception ex)
@@ -148,7 +154,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		/// <inheritdoc />
 		public async Task DisconnectAsync(CancellationToken cancellationToken)
 		{
-			_logger.LogDebug("Disconnecting");
+			_logger.LogTrace("Disconnecting connection {ConnectionId}", _connectionId);
 
 			_cancellationTokenSource.Cancel();
 			await _connection.StopAsync(cancellationToken);
@@ -161,7 +167,10 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		public async ValueTask DisposeAsync()
 		{
 			await _connection.DisposeAsync();
+
+			_cancellationTokenSource.Cancel();
 			_cancellationTokenSource.Dispose();
+
 			_clientRequestHandler.Acknowledge -= OnAcknowledge;
 		}
 	}

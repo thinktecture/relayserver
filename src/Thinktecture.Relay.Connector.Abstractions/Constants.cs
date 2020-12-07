@@ -19,11 +19,6 @@ namespace Thinktecture.Relay.Connector
 		public const string RelayTargetCatchAllId = "** CATCH-ALL **";
 
 		/// <summary>
-		/// The name of the <see cref="HttpClient"/> used for communicating with the server.
-		/// </summary>
-		public const string RelayServerHttpClientName = "relay-server";
-
-		/// <summary>
 		/// The name of the configuration key in a target definition for the id.
 		/// </summary>
 		public const string RelayConnectorOptionsTargetId = "Id";
@@ -39,8 +34,25 @@ namespace Thinktecture.Relay.Connector
 		public const string RelayConnectorOptionsTargetTimeout = "Timeout";
 
 		/// <summary>
-		/// The name of the default <see cref="HttpClient"/>.
+		/// Constants for named <see cref="HttpClient"/>.
 		/// </summary>
-		public const string RelayWebTargetHttpClientName = "relay-web-target";
+		public static class HttpClientNames
+		{
+			/// <summary>
+			/// The name of the <see cref="HttpClient"/> used for communicating with the server.
+			/// </summary>
+			public static readonly string RelayServer = $"{typeof(Constants).Namespace}.{nameof(RelayServer)}";
+
+			/// <summary>
+			/// The name of the default <see cref="HttpClient"/>.
+			/// </summary>
+			public static readonly string RelayWebTargetDefault = $"{typeof(Constants).Namespace}.{nameof(RelayWebTargetDefault)}";
+
+			/// <summary>
+			/// The name of the <see cref="HttpClient"/> following redirects.
+			/// </summary>
+			public static readonly string RelayWebTargetFollowRedirect =
+				$"{typeof(Constants).Namespace}.{nameof(RelayWebTargetFollowRedirect)}";
+		}
 	}
 }
