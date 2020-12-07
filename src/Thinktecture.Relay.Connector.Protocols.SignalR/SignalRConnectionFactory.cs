@@ -14,6 +14,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 	{
 		private readonly ILogger<SignalRConnectionFactory> _logger;
 		private readonly IAccessTokenProvider _accessTokenProvider;
+		private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 		private readonly RelayConnectorOptions _relayConnectorOptions;
 
 		/// <summary>
@@ -22,12 +23,14 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="accessTokenProvider">An <see cref="IAccessTokenProvider"/>.</param>
 		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
+		/// <param name="retryPolicy">The <see cref="DiscoveryDocumentRetryPolicy"/>.</param>
 		public SignalRConnectionFactory(ILogger<SignalRConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
-			IOptions<RelayConnectorOptions> relayConnectorOptions)
+			IOptions<RelayConnectorOptions> relayConnectorOptions, DiscoveryDocumentRetryPolicy retryPolicy)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
 			_relayConnectorOptions = relayConnectorOptions?.Value ?? throw new ArgumentNullException(nameof(relayConnectorOptions));
+			_retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
 		}
 
 		/// <summary>
@@ -41,7 +44,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			return new HubConnectionBuilder()
 				.WithUrl(new Uri(_relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint),
 					options => options.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync)
-				.WithAutomaticReconnect() // TODO add retry policy based on discovery document config values
+				.WithAutomaticReconnect(_retryPolicy)
 				.Build();
 		}
 	}

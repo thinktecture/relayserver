@@ -25,6 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		{
 			builder.Services.AddTransient<SignalRConnectionFactory>();
 			builder.Services.AddTransient<IConnectorConnection, SignalRConnectorConnection<TRequest, TResponse>>();
+			builder.Services.AddTransient<DiscoveryDocumentRetryPolicy>();
 
 			return builder;
 		}

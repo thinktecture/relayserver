@@ -46,12 +46,12 @@ namespace Thinktecture.Relay
 		public int ConnectionTimeout { get; set; }
 
 		/// <summary>
-		/// The minimum delay to wait for until a reconnect should be attempted in seconds.
+		/// The minimum delay to wait for until a reconnect of a connector should be attempted in seconds.
 		/// </summary>
 		public int ReconnectMinDelay { get; set; }
 
 		/// <summary>
-		/// The maximum delay to wait for until a reconnect should be attempted in seconds.
+		/// The maximum delay to wait for until a reconnect of a connector should be attempted in seconds.
 		/// </summary>
 		public int ReconnectMaxDelay { get; set; }
 	}
