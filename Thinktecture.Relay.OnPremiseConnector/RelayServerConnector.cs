@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Thinktecture.Relay.OnPremiseConnector.ServerMigration;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
@@ -335,6 +334,8 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 						if (response.IsSuccessStatusCode)
 						{
+							StopReconnectingOverwatch();
+
 							_connectionv3 = _serviceProvider.GetRequiredService<RelayServerConnectionv3>();
 							_connectionv3.Connected += HandleConnected;
 							_connectionv3.Reconnecting += HandleReconnecting;
@@ -353,36 +354,43 @@ namespace Thinktecture.Relay.OnPremiseConnector
 
 		private void HandleConnected(object sender, EventArgs e)
 		{
-			_reconnecting?.Cancel();
-			_reconnecting?.Dispose();
-			_reconnecting = null;
+			StopReconnectingOverwatch();
 			Connected?.Invoke(sender, e);
+		}
+
+		private void StopReconnectingOverwatch()
+		{
+			lock (this)
+			{
+				_reconnecting?.Cancel();
+				_reconnecting?.Dispose();
+				_reconnecting = null;
+			}
 		}
 
 		private void HandleReconnecting(object sender, EventArgs e)
 		{
-			_reconnecting = new CancellationTokenSource();
-
-			// Restart connecting after one minute (maybe the server got upgraded in the meantime)
-			Task.Delay(TimeSpan.FromMinutes(1), _reconnecting.Token).ContinueWith(async _ =>
+			lock (this)
 			{
-				CheckDisposed();
-				_connectionv2.Disconnect();
+				if (_reconnecting == null)
+				{
+					_reconnecting = new CancellationTokenSource();
 
-				_connectionv3?.Disconnect();
-				_connectionv3?.Dispose();
-				_connectionv3 = null;
+					// Restart connecting after one minute (maybe the server got upgraded in the meantime)
+					Task.Delay(TimeSpan.FromMinutes(1), _reconnecting.Token).ContinueWith(async _ =>
+					{
+						if (_disposed) return;
 
-				await ConnectAsync().ConfigureAwait(false);
-			});
+						_connectionv2.Disconnect();
+						DisposeConnection();
+
+						await ConnectAsync().ConfigureAwait(false);
+					});
+				}
+			}
 		}
 
-		private void HandleReconnected(object sender, EventArgs e)
-		{
-			_reconnecting?.Cancel();
-			_reconnecting?.Dispose();
-			_reconnecting = null;
-		}
+		private void HandleReconnected(object sender, EventArgs e) => StopReconnectingOverwatch();
 
 		private void CheckDisposed()
 		{
@@ -390,6 +398,19 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			{
 				throw new ObjectDisposedException(nameof(RelayServerConnector));
 			}
+		}
+
+		private void DisposeConnection()
+		{
+			if (_connectionv3 == null) return;
+
+			_connectionv3.Connected -= HandleConnected;
+			_connectionv3.Reconnecting -= HandleReconnecting;
+			_connectionv3.Reconnected -= HandleReconnected;
+
+			_connectionv3.Disconnect();
+			_connectionv3.Dispose();
+			_connectionv3 = null;
 		}
 
 		#region IDisposable
@@ -413,8 +434,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 				_connectionv2?.Dispose();
 				_connectionv2 = null;
 
-				_connectionv3?.Dispose();
-				_connectionv3 = null;
+				DisposeConnection();
 			}
 		}
 

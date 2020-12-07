@@ -155,6 +155,11 @@ namespace Thinktecture.Relay.OnPremiseConnector.ServerMigration
 
 			if (disposing)
 			{
+				_connection.Connected -= ConnectionConnected;
+				_connection.Disconnected -= ConnectionDisconnected;
+				_connection.Reconnecting -= ConnectionReconnecting;
+				_connection.Reconnected -= ConnectionReconnected;
+
 				(_connection as IDisposable)?.Dispose();
 				(_connection as IAsyncDisposable)?.DisposeAsync().GetAwaiter().GetResult();
 			}
