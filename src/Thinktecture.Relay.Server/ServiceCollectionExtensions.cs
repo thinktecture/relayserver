@@ -24,7 +24,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
 		/// <param name="configure">An optional configuration action.</param>
 		/// <returns>The <see cref="IRelayServerBuilder{ClientRequest,TargetResponse}"/>.</returns>
-		public static IRelayServerBuilder<ClientRequest, TargetResponse> AddRelayServer(this IServiceCollection services, Action<RelayServerOptions> configure = null)
+		public static IRelayServerBuilder<ClientRequest, TargetResponse> AddRelayServer(this IServiceCollection services,
+			Action<RelayServerOptions> configure = null)
 			=> services.AddRelayServer<ClientRequest, TargetResponse>(configure);
 
 		/// <summary>
