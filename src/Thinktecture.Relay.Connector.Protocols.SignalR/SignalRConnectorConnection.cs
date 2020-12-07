@@ -61,14 +61,13 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private async Task OnReconnecting(Exception ex)
 		{
 			_logger.LogInformation("Trying to reconnect after connection was lost on connection {ConnectionId}", _connectionId);
-			_logger.LogTrace(ex, "Reconnecting on {ConnectionId}", _connectionId);
 			await Reconnecting.InvokeAsync(this, _connectionId);
 		}
 
 		private async Task OnReconnected(string connectionId)
 		{
+			_logger.LogInformation("Reconnected on connection {ConnectionId} as {ConnectionId}", _connectionId, connectionId);
 			_connectionId = connectionId;
-			_logger.LogInformation("Reconnected on connection {ConnectionId}", _connectionId);
 			await Reconnected.InvokeAsync(this, _connectionId);
 		}
 
