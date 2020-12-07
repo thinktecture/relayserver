@@ -19,6 +19,12 @@ namespace Thinktecture.Relay.Connector
 		public const string RelayTargetCatchAllId = "** CATCH-ALL **";
 
 		/// <summary>
+		/// The url to use for acknowledging a request by issuing as POST with an empty body to it.
+		/// </summary>
+		/// <remarks>This is only present when manual acknowledgment is needed.</remarks>
+		public const string RelayServerAcknowledgeUrlHeaderName = "X-RelayServer-AcknowledgeUrl";
+
+		/// <summary>
 		/// The name of the configuration key in a target definition for the id.
 		/// </summary>
 		public const string RelayConnectorOptionsTargetId = "Id";

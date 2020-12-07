@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -21,6 +22,7 @@ namespace Thinktecture.Relay.Connector.Targets
 		private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
 		private readonly IServiceProvider _serviceProvider;
 		private readonly HttpClient _httpClient;
+		private readonly Uri _acknowledgeEndpoint;
 		private readonly Uri _requestEndpoint;
 		private readonly Uri _responseEndpoint;
 
@@ -78,6 +80,7 @@ namespace Thinktecture.Relay.Connector.Targets
 			_httpClient = httpClientFactory?.CreateClient(Constants.HttpClientNames.RelayServer) ??
 				throw new ArgumentNullException(nameof(httpClientFactory));
 
+			_acknowledgeEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.AcknowledgeEndpoint}/");
 			_requestEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.RequestEndpoint}/");
 			_responseEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.ResponseEndpoint}/");
 		}
@@ -123,6 +126,14 @@ namespace Thinktecture.Relay.Connector.Targets
 				}
 
 				_logger.LogInformation("Requesting target {Target} for request {RequestId}", request.Target, request.RequestId);
+
+				if (request.AcknowledgeMode == AcknowledgeMode.Manual)
+				{
+					request.HttpHeaders ??= new Dictionary<string, string[]>();
+
+					var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
+					request.HttpHeaders[Constants.RelayServerAcknowledgeUrlHeaderName] = new[] { url };
+				}
 
 				using var cts = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
 				var response = await target.HandleAsync(request, cts.Token);
