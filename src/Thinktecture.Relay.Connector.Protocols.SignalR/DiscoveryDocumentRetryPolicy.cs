@@ -27,7 +27,8 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 			_minimumDelay = (int)relayConnectorOptions.Value.DiscoveryDocument.ReconnectMinimumDelay.TotalSeconds;
-			_maximumDelay = (int)(relayConnectorOptions.Value.DiscoveryDocument.ReconnectMaximumDelay.TotalSeconds + 1);
+			// add one second because it's used as an exclusive upper bound later
+			_maximumDelay = (int)relayConnectorOptions.Value.DiscoveryDocument.ReconnectMaximumDelay.TotalSeconds + 1;
 
 			if (_minimumDelay > _maximumDelay)
 				throw new ArgumentOutOfRangeException(nameof(relayConnectorOptions), "The minimum delay cannot be greater than the maximum");
