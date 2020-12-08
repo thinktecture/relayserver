@@ -45,7 +45,9 @@ namespace Thinktecture.Relay.Server.Services
 				ResponseEndpoint = new Uri(baseUri, "body/response").ToString(),
 				ConnectionTimeout = (int)TimeSpan.FromSeconds(30).TotalSeconds,
 				ReconnectMinimumDelay = _relayServerOptions.ReconnectMinimumDelay,
-				ReconnectMaximumDelay = _relayServerOptions.ReconnectMaximumDelay
+				ReconnectMaximumDelay = _relayServerOptions.ReconnectMaximumDelay,
+				HandshakeTimeout = _relayServerOptions.HandshakeTimeout,
+				KeepAliveInterval = _relayServerOptions.KeepAliveInterval
 			};
 		}
 

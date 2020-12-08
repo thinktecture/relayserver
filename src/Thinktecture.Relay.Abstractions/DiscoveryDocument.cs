@@ -61,5 +61,19 @@ namespace Thinktecture.Relay
 		/// <seealso cref="ReconnectMinimumDelay"/>
 		[JsonConverter(typeof(TimeSpanJsonConverter))]
 		public TimeSpan ReconnectMaximumDelay { get; set; }
+
+		/// <summary>
+		/// The timeout of the handshake between the server and a connector.
+		/// </summary>
+		/// <remarks>The concrete use is an implementation detail of the protocols.</remarks>
+		[JsonConverter(typeof(TimeSpanJsonConverter))]
+		public TimeSpan HandshakeTimeout { get; set; }
+
+		/// <summary>
+		/// The interval used to send keep alive pings between the server and a connector.
+		/// </summary>
+		/// <remarks>The concrete use is an implementation detail of the protocols.</remarks>
+		[JsonConverter(typeof(TimeSpanJsonConverter))]
+		public TimeSpan KeepAliveInterval { get; set; }
 	}
 }

@@ -36,5 +36,17 @@ namespace Thinktecture.Relay.Server
 		/// <remarks>The default value is 5 minutes.</remarks>
 		/// <seealso cref="ReconnectMinimumDelay"/>
 		public TimeSpan ReconnectMaximumDelay { get; set; } = TimeSpan.FromMinutes(5);
+
+		/// <summary>
+		/// The number of seconds used to timeout the handshake between the server and a connector.
+		/// </summary>
+		/// <remarks>The default value is 15 seconds. The concrete use is an implementation detail of the protocols.</remarks>
+		public TimeSpan HandshakeTimeout { get; set; } = TimeSpan.FromSeconds(15);
+
+		/// <summary>
+		/// The interval used to send keep alive pings in seconds between the server and a connector.
+		/// </summary>
+		/// <remarks>The default value is 15 seconds. The concrete use is an implementation detail of the protocols.</remarks>
+		public TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromSeconds(15);
 	}
 }
