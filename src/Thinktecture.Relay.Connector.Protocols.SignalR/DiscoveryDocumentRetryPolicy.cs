@@ -11,8 +11,8 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 	{
 		private readonly Random _random = new Random();
 		private readonly ILogger<DiscoveryDocumentRetryPolicy> _logger;
-		private readonly int _minDelay;
-		private readonly int _maxDelay;
+		private readonly int _minimumDelay;
+		private readonly int _maximumDelay;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DiscoveryDocumentRetryPolicy"/> class.
@@ -26,8 +26,11 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 			if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
-			_minDelay = relayConnectorOptions.Value.DiscoveryDocument.ReconnectMinDelay;
-			_maxDelay = relayConnectorOptions.Value.DiscoveryDocument.ReconnectMaxDelay + 1;
+			_minimumDelay = (int)relayConnectorOptions.Value.DiscoveryDocument.ReconnectMinimumDelay.TotalSeconds;
+			_maximumDelay = (int)(relayConnectorOptions.Value.DiscoveryDocument.ReconnectMaximumDelay.TotalSeconds + 1);
+
+			if (_minimumDelay > _maximumDelay)
+				throw new ArgumentOutOfRangeException(nameof(relayConnectorOptions), "The minimum delay cannot be greater than the maximum");
 		}
 
 		/// <inheritdoc />
@@ -36,7 +39,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			// try an instant reconnect first
 			if (retryContext.PreviousRetryCount == 0) return TimeSpan.Zero;
 
-			var seconds = _random.Next(_minDelay, _maxDelay);
+			var seconds = _random.Next(_minimumDelay, _maximumDelay);
 			_logger.LogDebug("Connecting attempt {ConnectionAttempt} failed and will be tried again in {ReconnectDelay} seconds",
 				retryContext.PreviousRetryCount, seconds);
 			return TimeSpan.FromSeconds(seconds);

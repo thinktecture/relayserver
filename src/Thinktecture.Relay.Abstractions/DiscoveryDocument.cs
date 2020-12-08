@@ -1,3 +1,6 @@
+using System;
+using System.Text.Json.Serialization;
+
 namespace Thinktecture.Relay
 {
 	/// <summary>
@@ -46,13 +49,17 @@ namespace Thinktecture.Relay
 		public int ConnectionTimeout { get; set; }
 
 		/// <summary>
-		/// The minimum delay to wait for until a reconnect of a connector should be attempted in seconds.
+		/// The minimum delay to wait for until a reconnect of a connector should be attempted again.
 		/// </summary>
-		public int ReconnectMinDelay { get; set; }
+		/// <seealso cref="ReconnectMaximumDelay"/>
+		[JsonConverter(typeof(TimeSpanJsonConverter))]
+		public TimeSpan ReconnectMinimumDelay { get; set; }
 
 		/// <summary>
-		/// The maximum delay to wait for until a reconnect of a connector should be attempted in seconds.
+		/// The maximum delay to wait for until a reconnect of a connector should be attempted again.
 		/// </summary>
-		public int ReconnectMaxDelay { get; set; }
+		/// <seealso cref="ReconnectMinimumDelay"/>
+		[JsonConverter(typeof(TimeSpanJsonConverter))]
+		public TimeSpan ReconnectMaximumDelay { get; set; }
 	}
 }
