@@ -47,7 +47,7 @@ namespace Thinktecture.Relay.Server.Services
 				ReconnectMinimumDelay = _relayServerOptions.ReconnectMinimumDelay,
 				ReconnectMaximumDelay = _relayServerOptions.ReconnectMaximumDelay,
 				HandshakeTimeout = _relayServerOptions.HandshakeTimeout,
-				KeepAliveInterval = _relayServerOptions.KeepAliveInterval
+				KeepAliveInterval = _relayServerOptions.KeepAliveInterval,
 			};
 		}
 
