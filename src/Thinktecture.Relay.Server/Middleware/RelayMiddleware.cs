@@ -110,8 +110,7 @@ namespace Thinktecture.Relay.Server.Middleware
 				context.Request.EnableBuffering();
 				await context.Request.Body.DrainAsync(cts.Token);
 
-				_relayContext.ClientRequest =
-					await _requestFactory.CreateAsync(tenant.Id, _relayContext.RequestId, context.Request, cts.Token);
+				_relayContext.ClientRequest = await _requestFactory.CreateAsync(tenant.Id, _relayContext.RequestId, context.Request, cts.Token);
 				_logger.LogTrace("Parsed request {@Request}", _relayContext.ClientRequest);
 
 				await InterceptClientRequestAsync(cts.Token);
