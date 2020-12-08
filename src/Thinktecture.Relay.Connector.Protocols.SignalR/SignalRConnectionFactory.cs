@@ -41,11 +41,18 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		{
 			_logger.LogDebug("Creating connection to {ConnectorEndpoint}", _relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint);
 
-			return new HubConnectionBuilder()
+			var connection = new HubConnectionBuilder()
 				.WithUrl(new Uri(_relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint),
 					options => options.AccessTokenProvider = _accessTokenProvider.GetAccessTokenAsync)
 				.WithAutomaticReconnect(_retryPolicy)
 				.Build();
+
+			connection.HandshakeTimeout = _relayConnectorOptions.DiscoveryDocument.HandshakeTimeout;
+			connection.KeepAliveInterval = _relayConnectorOptions.DiscoveryDocument.KeepAliveInterval;
+			// should always be twice of keep-alive
+			connection.ServerTimeout = TimeSpan.FromSeconds(_relayConnectorOptions.DiscoveryDocument.KeepAliveInterval.TotalSeconds * 2);
+
+			return connection;
 		}
 	}
 }

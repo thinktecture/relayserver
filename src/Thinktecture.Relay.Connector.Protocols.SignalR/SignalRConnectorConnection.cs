@@ -35,14 +35,14 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_connection = signalRConnectionFactory?.CreateConnection() ?? throw new ArgumentNullException(nameof(signalRConnectionFactory));
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 
-			_connection.Closed += OnClosed;
-			_connection.Reconnecting += OnReconnecting;
-			_connection.Reconnected += OnReconnected;
+			_connection.Closed += ConnectionClosed;
+			_connection.Reconnecting += ConnectionReconnecting;
+			_connection.Reconnected += ConnectionReconnected;
 
 			_clientRequestHandler.Acknowledge += OnAcknowledge;
 		}
 
-		private async Task OnClosed(Exception ex)
+		private async Task ConnectionClosed(Exception ex)
 		{
 			if (ex == null)
 			{
@@ -58,13 +58,13 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			}
 		}
 
-		private async Task OnReconnecting(Exception ex)
+		private async Task ConnectionReconnecting(Exception ex)
 		{
 			_logger.LogInformation("Trying to reconnect after connection was lost on connection {ConnectionId}", _connectionId);
 			await Reconnecting.InvokeAsync(this, _connectionId);
 		}
 
-		private async Task OnReconnected(string connectionId)
+		private async Task ConnectionReconnected(string connectionId)
 		{
 			_logger.LogInformation("Reconnected on connection {ConnectionId} as {ConnectionId}", _connectionId, connectionId);
 			_connectionId = connectionId;
@@ -166,6 +166,10 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		public async ValueTask DisposeAsync()
 		{
 			await _connection.DisposeAsync();
+
+			_connection.Closed -= ConnectionClosed;
+			_connection.Reconnecting -= ConnectionReconnecting;
+			_connection.Reconnected -= ConnectionReconnected;
 
 			_cancellationTokenSource.Cancel();
 			_cancellationTokenSource.Dispose();

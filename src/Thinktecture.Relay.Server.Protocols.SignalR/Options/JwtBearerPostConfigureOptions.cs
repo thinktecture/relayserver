@@ -2,9 +2,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 
-namespace Thinktecture.Relay.Server.Protocols.SignalR
+namespace Thinktecture.Relay.Server.Protocols.SignalR.Options
 {
-	internal class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
+	internal class JwtBearerPostConfigureOptions : IPostConfigureOptions<JwtBearerOptions>
 	{
 		public void PostConfigure(string name, JwtBearerOptions options)
 		{

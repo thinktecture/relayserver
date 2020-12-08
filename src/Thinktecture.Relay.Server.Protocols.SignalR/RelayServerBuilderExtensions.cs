@@ -1,10 +1,14 @@
+using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.SignalR;
+using Thinktecture.Relay.Server.Protocols.SignalR.Options;
 using Thinktecture.Relay.Transport;
+using JwtBearerPostConfigureOptions = Thinktecture.Relay.Server.Protocols.SignalR.Options.JwtBearerPostConfigureOptions;
 
 // ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
 namespace Microsoft.Extensions.DependencyInjection
@@ -26,13 +30,15 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest
 			where TResponse : class, ITargetResponse
 		{
+			builder.Services
+				.AddTransient<IPostConfigureOptions<JwtBearerOptions>, JwtBearerPostConfigureOptions>()
+				.AddTransient<IPostConfigureOptions<HubOptions<ConnectorHub<TRequest, TResponse>>>, HubOptionsPostConfigureOptions<TRequest, TResponse>>();
+
 			builder.Services.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, SignalRTenantConnectorAdapterFactory<TRequest, TResponse>>();
 			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();
 			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse>>();
 
 			builder.Services.AddSignalR();
-
-			builder.Services.AddTransient<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
 
 			return builder;
 		}
