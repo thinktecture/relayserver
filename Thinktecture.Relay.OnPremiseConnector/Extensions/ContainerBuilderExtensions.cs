@@ -34,7 +34,7 @@ namespace Autofac
 			builder.RegisterType<OnPremiseInterceptorFactory>().As<IOnPremiseInterceptorFactory>();
 
 			// Types for server migration
-			builder.RegisterType<RelayServerConnectionv3>();
+			builder.RegisterType<RelayServerConnection>();
 			builder.RegisterType<FakeApplicationLifetime>().As<IApplicationLifetime>().SingleInstance();
 
 			return builder;

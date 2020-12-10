@@ -13,7 +13,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.OnPremiseConnector.ServerMigration
 {
-	internal class RelayServerConnectionv3 : IRelayServerConnection
+	internal class RelayServerConnection : IRelayServerConnection
 	{
 		private static ConcurrentDictionary<string, (Uri Uri, bool FollowRedirects)> _registeredTargets = new ConcurrentDictionary<string, (Uri, bool)>();
 
@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.ServerMigration
 		public event EventHandler Reconnecting;
 		public event EventHandler Reconnected;
 
-		public RelayServerConnectionv3(ILogger<RelayServerConnectionv3> logger, IConnectorConnection connection, RelayTargetRegistry<ClientRequest, TargetResponse> targetRegistry, IHttpClientFactory httpClientFactory)
+		public RelayServerConnection(ILogger<RelayServerConnection> logger, IConnectorConnection connection, RelayTargetRegistry<ClientRequest, TargetResponse> targetRegistry, IHttpClientFactory httpClientFactory)
 		{
 			logger.LogInformation("Creating v3 connection for RelayServer");
 
@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.ServerMigration
 
 		public async Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, string requestId, string connectionId = null)
 		{
-			using (var client = _httpClientFactory.CreateClient(Constants.RelayServerHttpClientName))
+			using (var client = _httpClientFactory.CreateClient(Constants.HttpClientNames.RelayServer))
 			{
 				await client.PostAsync($"acknowledge/{acknowledgeOriginId}/{requestId}", new StringContent(string.Empty)).ConfigureAwait(false);
 			}

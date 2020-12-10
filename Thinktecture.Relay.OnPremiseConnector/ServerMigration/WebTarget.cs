@@ -12,21 +12,21 @@ namespace Thinktecture.Relay.OnPremiseConnector.ServerMigration
 	{
 		private readonly ILogger<RelayWebTarget> _logger;
 
-		public WebTarget(ILogger<RelayWebTarget> logger, ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory httpClientFactory, Dictionary<string, string> parameters)
-			: base(logger, targetResponseFactory, httpClientFactory, parameters)
+		public WebTarget(ILogger<RelayWebTarget> logger, IHttpClientFactory httpClientFactory, Dictionary<string, string> parameters)
+			: base(logger, httpClientFactory, parameters)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
-		public WebTarget(ILogger<RelayWebTarget> logger, ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory httpClientFactory, Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
-			: base(logger, targetResponseFactory, httpClientFactory, baseAddress, options)
+		public WebTarget(ILogger<RelayWebTarget> logger, IHttpClientFactory httpClientFactory, Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
+			: base(logger, httpClientFactory, baseAddress, options)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
-		protected override HttpRequestMessage CreateHttpRequestMessage(ClientRequest request, string url = null)
+		protected override HttpRequestMessage CreateHttpRequestMessage(ClientRequest request)
 		{
-			var message = base.CreateHttpRequestMessage(request, url);
+			var message = base.CreateHttpRequestMessage(request);
 
 			if (request.AcknowledgeMode == AcknowledgeMode.Manual)
 			{

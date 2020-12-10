@@ -105,7 +105,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			CheckDisposed();
 			_connectionv2.RegisterOnPremiseTarget(key, uri, followRedirects);
 			_connectionv3?.RegisterOnPremiseTarget(key, uri, followRedirects);
-			RelayServerConnectionv3.RegisterStaticOnPremiseTarget(key, uri, followRedirects);
+			RelayServerConnection.RegisterStaticOnPremiseTarget(key, uri, followRedirects);
 		}
 
 		/// <summary>
@@ -154,7 +154,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 			CheckDisposed();
 			_connectionv2.RemoveOnPremiseTarget(key);
 			_connectionv3?.RemoveOnPremiseTarget(key);
-			RelayServerConnectionv3.RemoveStaticOnPremiseTarget(key);
+			RelayServerConnection.RemoveStaticOnPremiseTarget(key);
 		}
 
 		/// <summary>
@@ -336,7 +336,7 @@ namespace Thinktecture.Relay.OnPremiseConnector
 						{
 							StopReconnectingOverwatch();
 
-							_connectionv3 = _serviceProvider.GetRequiredService<RelayServerConnectionv3>();
+							_connectionv3 = _serviceProvider.GetRequiredService<RelayServerConnection>();
 							_connectionv3.Connected += HandleConnected;
 							_connectionv3.Reconnecting += HandleReconnecting;
 							_connectionv3.Reconnected += HandleReconnected;

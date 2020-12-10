@@ -273,16 +273,16 @@
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Thinktecture.Relay.Abstractions, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Thinktecture.Relay.Abstractions.3.0.0-alpha.2-100\lib\netstandard2.0\Thinktecture.Relay.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Abstractions.3.0.0-alpha.2-109\lib\netstandard2.0\Thinktecture.Relay.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Thinktecture.Relay.Connector, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Thinktecture.Relay.Connector.3.0.0-alpha.2-100\lib\netstandard2.0\Thinktecture.Relay.Connector.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Connector.3.0.0-alpha.2-109\lib\netstandard2.0\Thinktecture.Relay.Connector.dll</HintPath>
     </Reference>
     <Reference Include="Thinktecture.Relay.Connector.Abstractions, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Thinktecture.Relay.Connector.Abstractions.3.0.0-alpha.2-100\lib\netstandard2.0\Thinktecture.Relay.Connector.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Connector.Abstractions.3.0.0-alpha.2-109\lib\netstandard2.0\Thinktecture.Relay.Connector.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Thinktecture.Relay.Connector.Protocols.SignalR, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Thinktecture.Relay.Connector.Protocols.SignalR.3.0.0-alpha.2-100\lib\netstandard2.0\Thinktecture.Relay.Connector.Protocols.SignalR.dll</HintPath>
+      <HintPath>..\packages\Thinktecture.Relay.Connector.Protocols.SignalR.3.0.0-alpha.2-109\lib\netstandard2.0\Thinktecture.Relay.Connector.Protocols.SignalR.dll</HintPath>
     </Reference>
     <Reference Include="Topshelf, Version=4.1.0.172, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <HintPath>..\packages\Topshelf.4.1.0\lib\net452\Topshelf.dll</HintPath>
