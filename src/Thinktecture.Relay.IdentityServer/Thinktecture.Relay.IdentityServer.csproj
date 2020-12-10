@@ -4,7 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer IdentityServer</Title>
     <Description>Contains support for RelayServer authentication.</Description>
-    <Summary></Summary>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->

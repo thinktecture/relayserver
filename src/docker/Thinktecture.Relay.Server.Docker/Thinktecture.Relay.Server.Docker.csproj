@@ -18,4 +18,5 @@
     <ProjectReference Include="..\..\Thinktecture.Relay.Server\Thinktecture.Relay.Server.csproj" />
     <ProjectReference Include="..\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj" />
   </ItemGroup>
+
 </Project>
