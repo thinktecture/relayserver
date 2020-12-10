@@ -34,7 +34,7 @@ COPY ./docker/Thinktecture.Relay.ManagementApi.Docker ./docker/Thinktecture.Rela
 # Build and publish
 FROM source AS publish
 WORKDIR /src/docker/Thinktecture.Relay.ManagementApi.Docker
-RUN dotnet publish Thinktecture.Relay.ManagementApi.Docker.csproj --no-restore -c Release -o /app -p:DISABLE_SOURCELINK=true
+RUN dotnet publish Thinktecture.Relay.ManagementApi.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim
 WORKDIR /app

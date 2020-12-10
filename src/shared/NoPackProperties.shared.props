@@ -5,7 +5,6 @@
     <IsPackable>false</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
-
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 

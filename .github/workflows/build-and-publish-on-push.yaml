@@ -5,7 +5,8 @@ on:
     branches:
       - feature/dotnet-core
     pull_request:
-      branches: [ feature/dotnet-core ]
+      branches:
+       - feature/dotnet-core
 
 jobs:
   build:
@@ -28,12 +29,12 @@ jobs:
         working-directory: src
 
       - name: Build
-        run: dotnet build -c:Release -p:ContinuousIntegrationBuild=true -p:PreReleaseSuffix=-$GITHUB_RUN_NUMBER --no-restore
+        run: dotnet build --configuration Release --no-restore -p:BuildNumber=$GITHUB_RUN_NUMBER -p:ContinuousIntegrationBuild=true
         working-directory: src
 
       - name: Create NuGet packages
         if: github.ref == 'refs/heads/feature/dotnet-core' # only publish on pushes, not on PRs
-        run: dotnet pack -c:Release -p:ContinuousIntegrationBuild=true -p:PreReleaseSuffix=-$GITHUB_RUN_NUMBER -o ../packages
+        run: dotnet pack --configuration Release --no-build --output ../packages -p:BuildNumber=$GITHUB_RUN_NUMBER -p:ContinuousIntegrationBuild=true
         working-directory: src
 
       - name: Upload NuGet packages as artifacts

@@ -36,7 +36,7 @@ COPY ./docker/Thinktecture.Relay.IdentityServer.Docker ./docker/Thinktecture.Rel
 # Build and publish
 FROM source AS publish
 WORKDIR /src/docker/Thinktecture.Relay.IdentityServer.Docker
-RUN dotnet publish Thinktecture.Relay.IdentityServer.Docker.csproj --no-restore -c Release -o /app -p:DISABLE_SOURCELINK=true
+RUN dotnet publish Thinktecture.Relay.IdentityServer.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim
 WORKDIR /app
