@@ -58,7 +58,7 @@ namespace Thinktecture.Relay.Connector.Options
 					{
 						Task.Delay(TimeSpan.FromSeconds(10), _applicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
 					}
-					catch (TaskCanceledException)
+					catch (OperationCanceledException)
 					{
 						// Ignore this, as this will be thrown when the service shuts down gracefully
 					}

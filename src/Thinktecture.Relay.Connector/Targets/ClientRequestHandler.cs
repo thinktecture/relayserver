@@ -120,7 +120,7 @@ namespace Thinktecture.Relay.Connector.Targets
 							request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint,
 								$"{request.RequestId:N}?delete={request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived}".ToLowerInvariant()));
 						}
-						catch (TaskCanceledException)
+						catch (OperationCanceledException)
 						{
 							throw;
 						}
@@ -150,6 +150,11 @@ namespace Thinktecture.Relay.Connector.Targets
 
 				request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
 				request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString() };
+
+				if (request.EnableTracing)
+				{
+
+				}
 
 				using var cts = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
 				response = await target.HandleAsync(request, cts.Token);
@@ -182,7 +187,7 @@ namespace Thinktecture.Relay.Connector.Targets
 							return response;
 						}
 					}
-					catch (TaskCanceledException)
+					catch (OperationCanceledException)
 					{
 						throw;
 					}
@@ -205,7 +210,7 @@ namespace Thinktecture.Relay.Connector.Targets
 					_logger.LogDebug("Inlined from response {BodySize} bytes for request {RequestId}", response.BodySize, request.RequestId);
 				}
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				_logger.LogWarning("The request {RequestId} timed out", request.RequestId);
 				response = request.CreateResponse<TResponse>(HttpStatusCode.GatewayTimeout);
