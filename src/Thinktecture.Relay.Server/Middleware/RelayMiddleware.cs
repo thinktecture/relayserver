@@ -135,7 +135,7 @@ namespace Thinktecture.Relay.Server.Middleware
 			{
 				await WriteErrorResponse(HttpStatusCode.ServiceUnavailable, context.Response, cts.Token);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				if (context.RequestAborted.IsCancellationRequested)
 				{

@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Server.Maintenance
 					await Task.Delay(_maintenanceOptions.RunInterval, stoppingToken);
 				}
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -66,7 +66,7 @@ namespace Thinktecture.Relay.Server.Maintenance
 					_logger.LogTrace("Running maintenance job {MaintenanceJob}.", job.GetType().FullName);
 					await job.DoMaintenanceAsync(cancellationToken);
 				}
-				catch (TaskCanceledException)
+				catch (OperationCanceledException)
 				{
 					// Ignore this, as this will be thrown when the service shuts down gracefully
 				}

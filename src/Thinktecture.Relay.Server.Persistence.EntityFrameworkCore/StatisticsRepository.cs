@@ -43,7 +43,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				});
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -65,7 +65,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				entity.LastSeenTime = DateTimeOffset.UtcNow;
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -87,7 +87,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				entity.ShutdownTime = entity.LastSeenTime = DateTimeOffset.UtcNow;
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -111,7 +111,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				_dbContext.Origins.RemoveRange(origins);
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -140,7 +140,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				});
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -162,7 +162,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				entity.LastActivityTime = DateTimeOffset.UtcNow;
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -184,7 +184,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				entity.DisconnectTime = DateTimeOffset.UtcNow;
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}
@@ -208,7 +208,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				_dbContext.Connections.RemoveRange(connections);
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}

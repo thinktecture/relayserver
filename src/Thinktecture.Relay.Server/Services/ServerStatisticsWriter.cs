@@ -49,7 +49,7 @@ namespace Thinktecture.Relay.Server.Services
 					await _statisticsWriter.UpdateLastSeenTimeAsync(_serverContext.OriginId, stoppingToken);
 				}
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				// Ignore this, as this will be thrown when the service shuts down gracefully
 			}

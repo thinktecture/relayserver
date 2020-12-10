@@ -36,7 +36,7 @@ namespace Thinktecture.Relay
 					{
 						await handler(sender, @event);
 					}
-					catch (TaskCanceledException)
+					catch (OperationCanceledException)
 					{
 						break;
 					}
