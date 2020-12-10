@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 {

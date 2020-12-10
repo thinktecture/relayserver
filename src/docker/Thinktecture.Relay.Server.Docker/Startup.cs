@@ -33,13 +33,12 @@ namespace Thinktecture.Relay.Server.Docker
 					options.RequireHttpsMetadata = authorityUri.Scheme == "https";
 				});
 
-			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
+			services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql"));
 			services.AddRelayServer(options => Configuration.GetSection("RelayServer").Bind(options))
 				.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 				.AddSignalRConnectorTransport()
 				.AddFileBodyStore(options => Configuration.GetSection("BodyStore").Bind(options))
-				.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options))
-				.AddClientRequestInterceptor<ClientRequestInterceptor>();
+				.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options));
 
 			services.Configure<StatisticsOptions>(options => Configuration.GetSection("Statistics").Bind(options));
 		}

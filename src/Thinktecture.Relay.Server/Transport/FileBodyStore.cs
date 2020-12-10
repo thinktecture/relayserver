@@ -168,31 +168,21 @@ namespace Thinktecture.Relay.Server.Transport
 		public string StoragePath { get; set; } = Path.GetTempPath();
 	}
 
-	internal class FileBodyStoreOptionsValidator : IValidateOptions<FileBodyStoreOptions>
+	internal class FileBodyStoreValidateOptions : IValidateOptions<FileBodyStoreOptions>
 	{
-		private readonly ILogger<FileBodyStoreOptionsValidator> _logger;
+		private readonly ILogger<FileBodyStoreValidateOptions> _logger;
 
-		public FileBodyStoreOptionsValidator(ILogger<FileBodyStoreOptionsValidator> logger)
-		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		}
+		public FileBodyStoreValidateOptions(ILogger<FileBodyStoreValidateOptions> logger)
+			=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 		public ValidateOptionsResult Validate(string name, FileBodyStoreOptions options)
 		{
-			if (string.IsNullOrWhiteSpace(options.StoragePath))
-			{
-				return ValidateOptionsResult.Fail("Storage path must be set.");
-			}
+			if (string.IsNullOrWhiteSpace(options.StoragePath)) return ValidateOptionsResult.Fail("Storage path must be set.");
 
-			if (!Directory.Exists(options.StoragePath))
-			{
-				return ValidateOptionsResult.Fail("Configured path does not exist.");
-			}
+			if (!Directory.Exists(options.StoragePath)) return ValidateOptionsResult.Fail("Configured path does not exist.");
 
 			if (!CheckForFilePermissions(options.StoragePath))
-			{
 				return ValidateOptionsResult.Fail("Not able to create, write, read and delete files on configured path.");
-			}
 
 			return ValidateOptionsResult.Success;
 		}
@@ -215,11 +205,13 @@ namespace Thinktecture.Relay.Server.Transport
 				}
 
 				File.Delete(path);
+
 				return true;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error while checking file creation, read and write permission on configured body store path");
+				_logger.LogError(ex, "Error while checking file creation, read and write permission on configured body store path {Path}",
+					basePath);
 				return false;
 			}
 		}

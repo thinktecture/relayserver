@@ -37,10 +37,7 @@ namespace Thinktecture.Relay.Server.Services
 			{
 				foreach (var (name, values) in targetResponse.HttpHeaders)
 				{
-					if (name == HeaderNames.TransferEncoding)
-					{
-						continue;
-					}
+					if (name == HeaderNames.TransferEncoding) continue;
 
 					httpResponse.Headers.Add(name, values);
 				}

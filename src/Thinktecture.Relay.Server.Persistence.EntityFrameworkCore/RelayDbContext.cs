@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Thinktecture.Relay.Server.Persistence.Models;
 
-namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts
+namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 {
 	/// <summary>
 	/// Provides EntityFrameworkCore data access.

@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Transport
 		Guid RequestId { get; set; }
 
 		/// <summary>
-		/// The unique id of the server which created the request.
+		/// The unique id of the origin which created the request.
 		/// </summary>
 		/// <remarks>This should not be changed.</remarks>
 		Guid RequestOriginId { get; set; }
@@ -25,12 +25,14 @@ namespace Thinktecture.Relay.Transport
 		/// <summary>
 		/// The time when the target was requested in behalf.
 		/// </summary>
-		DateTime RequestStart { get; set; }
+		/// <remarks>This will only be set when tracing is enabled.</remarks>
+		DateTime? RequestStart { get; set; }
 
 		/// <summary>
 		/// The duration until the target returned its results.
 		/// </summary>
-		TimeSpan RequestDuration { get; set; }
+		/// <remarks>This will only be set when tracing is enabled.</remarks>
+		TimeSpan? RequestDuration { get; set; }
 
 		/// <summary>
 		/// The <see cref="HttpStatusCode"/> received from the target.
@@ -42,7 +44,6 @@ namespace Thinktecture.Relay.Transport
 		/// <summary>
 		/// The HTTP headers provided.
 		/// </summary>
-		/// <remarks>This is null in case of a failure response.</remarks>
 		/// <seealso cref="RequestFailed"/>
 		IDictionary<string, string[]> HttpHeaders { get; set; }
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Net;
 
 // ReSharper disable once CheckNamespace; (extension methods on IClientRequest namespace)
@@ -34,9 +35,16 @@ namespace Thinktecture.Relay.Transport
 		public static TResponse CreateResponse<TResponse>(this IClientRequest request, HttpStatusCode? failureStatusCode = null)
 			where TResponse : ITargetResponse, new()
 		{
-			var response = new TResponse { RequestId = request.RequestId, RequestOriginId = request.RequestOriginId };
+			var response = new TResponse
+			{
+				RequestId = request.RequestId,
+				RequestOriginId = request.RequestOriginId,
+				HttpHeaders = new Dictionary<string, string[]>()
+			};
+
 			if (failureStatusCode != null)
 			{
+				response.BodySize = 0;
 				response.HttpStatusCode = failureStatusCode.Value;
 				response.RequestFailed = true;
 			}

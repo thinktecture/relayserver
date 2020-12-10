@@ -20,6 +20,11 @@ namespace Thinktecture.Relay.Server.Transport
 		Guid RequestId { get; }
 
 		/// <summary>
+		/// The unique id of the origin.
+		/// </summary>
+		Guid OriginId { get; }
+
+		/// <summary>
 		/// The client request.
 		/// </summary>
 		TRequest ClientRequest { get; set; }

@@ -16,10 +16,10 @@ namespace Thinktecture.Relay.Transport
 		public Guid RequestOriginId { get; set; }
 
 		/// <inheritdoc />
-		public DateTime RequestStart { get; set; }
+		public DateTime? RequestStart { get; set; }
 
 		/// <inheritdoc />
-		public TimeSpan RequestDuration { get; set; }
+		public TimeSpan? RequestDuration { get; set; }
 
 		/// <inheritdoc />
 		public HttpStatusCode HttpStatusCode { get; set; }

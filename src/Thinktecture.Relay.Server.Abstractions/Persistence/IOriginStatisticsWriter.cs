@@ -5,30 +5,31 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.Server.Persistence
 {
 	/// <summary>
-	/// Adapter that allows scoped writing to statistics for origins.
+	/// Adapter that allows writing statistics for origins.
 	/// </summary>
+	/// <remarks>This class should always be registered as a singleton, because it is creating an own scope during the execution of any method.</remarks>
 	public interface IOriginStatisticsWriter
 	{
 		/// <summary>
-		/// Creates a new entry for an origin.
+		/// Sets the startup time of an origin.
 		/// </summary>
-		/// <param name="originId">The id of the origin to store.</param>
+		/// <param name="originId">The unique id of the origin.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 
 		/// <summary>
-		/// Updates the last seen time stamp of an origin statistics entry.
+		/// Updates the last seen time of an origin.
 		/// </summary>
-		/// <param name="originId">The id of the origin to update.</param>
+		/// <param name="originId">The unique id of the origin.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default);
 
 		/// <summary>
-		/// Updates the statistic entry of an origin when it shuts down.
+		/// Sets the shutdown time of an origin..
 		/// </summary>
-		/// <param name="originId">The id of the origin to mark as stopped.</param>
+		/// <param name="originId">The unique id of the origin.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default);

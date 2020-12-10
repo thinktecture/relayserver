@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 {
@@ -18,6 +17,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		{
 			services.TryAddScoped<ITenantRepository, TenantRepository>();
 			services.TryAddScoped<IStatisticsRepository, StatisticsRepository>();
+			services.TryAddScoped<IConnectionRepository, ConnectionRepository>();
 			services.AddHealthChecks()
 				.AddDbContextCheck<RelayDbContext>();
 

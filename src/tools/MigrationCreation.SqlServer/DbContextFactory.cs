@@ -1,10 +1,11 @@
+using System;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.DbContexts;
+using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
-namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer
+namespace MigrationCreation.SqlServer
 {
 	public class DbContextFactory : IDesignTimeDbContextFactory<RelayDbContext>
 	{
@@ -17,8 +18,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCre
 
 			var builder = new DbContextOptionsBuilder<RelayDbContext>();
 
+			var assemblyName = typeof(Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.ServiceCollectionExtensions)
+				.GetAssemblySimpleName();
+
 			builder.UseSqlServer(configuration.GetConnectionString("SqlServer"),
-				optionsBuilder => optionsBuilder.MigrationsAssembly("Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer"));
+				optionsBuilder => optionsBuilder.MigrationsAssembly(assemblyName));
 
 			return new RelayDbContext(builder.Options);
 		}

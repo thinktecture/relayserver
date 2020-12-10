@@ -93,6 +93,8 @@ namespace Thinktecture.Relay.Connector.Targets
 		{
 			IRelayTarget<TRequest, TResponse> target = null;
 			CancellationTokenSource timeout = null;
+			var start = DateTime.UtcNow;
+			TResponse response = default;
 
 			try
 			{
@@ -102,7 +104,8 @@ namespace Thinktecture.Relay.Connector.Targets
 					{
 						_logger.LogInformation("Could not find any target for request {RequestId} named {Target}", request.RequestId,
 							request.Target);
-						return request.CreateResponse<TResponse>(HttpStatusCode.NotFound);
+						response = request.CreateResponse<TResponse>(HttpStatusCode.NotFound);
+						return response;
 					}
 
 					_logger.LogTrace("Found target {Target} for request {RequestId}", request.Target, request.RequestId);
@@ -111,10 +114,22 @@ namespace Thinktecture.Relay.Connector.Targets
 					{
 						_logger.LogDebug("Requesting outsourced request body for request {RequestId} with {BodySize} bytes", request.RequestId,
 							request.BodySize);
-						request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint,
-							$"{request.RequestId:N}?delete={request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived}".ToLowerInvariant()));
 
-						// TODO error handling when get fails
+						try
+						{
+							request.BodyContent = await _httpClient.GetStreamAsync(new Uri(_requestEndpoint,
+								$"{request.RequestId:N}?delete={request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived}".ToLowerInvariant()));
+						}
+						catch (TaskCanceledException)
+						{
+							throw;
+						}
+						catch (Exception ex)
+						{
+							_logger.LogError(ex, "An error occured while downloading the body of request {RequestId}", request.RequestId);
+							response = request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+							return response;
+						}
 					}
 				}
 				finally
@@ -129,14 +144,15 @@ namespace Thinktecture.Relay.Connector.Targets
 
 				if (request.AcknowledgeMode == AcknowledgeMode.Manual)
 				{
-					request.HttpHeaders ??= new Dictionary<string, string[]>();
-
 					var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
-					request.HttpHeaders[Constants.RelayServerAcknowledgeUrlHeaderName] = new[] { url };
+					request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = new[] { url };
 				}
 
+				request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
+				request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString() };
+
 				using var cts = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
-				var response = await target.HandleAsync(request, cts.Token);
+				response = await target.HandleAsync(request, cts.Token);
 
 				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
 				{
@@ -162,7 +178,8 @@ namespace Thinktecture.Relay.Connector.Targets
 						{
 							_logger.LogError("Uploading the body of request {RequestId} failed with {HttpStatusCode}", request.RequestId,
 								responseMessage.StatusCode);
-							return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+							response = request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+							return response;
 						}
 					}
 					catch (TaskCanceledException)
@@ -172,7 +189,8 @@ namespace Thinktecture.Relay.Connector.Targets
 					catch (Exception ex)
 					{
 						_logger.LogError(ex, "An error occured while uploading the body of request {RequestId}", request.RequestId);
-						return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+						response = request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+						return response;
 					}
 
 					response.BodySize = content.BytesWritten;
@@ -186,29 +204,39 @@ namespace Thinktecture.Relay.Connector.Targets
 					response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
 					_logger.LogDebug("Inlined from response {BodySize} bytes for request {RequestId}", response.BodySize, request.RequestId);
 				}
-
-				return response;
 			}
 			catch (TaskCanceledException)
 			{
 				_logger.LogWarning("The request {RequestId} timed out", request.RequestId);
-				return request.CreateResponse<TResponse>(HttpStatusCode.GatewayTimeout);
+				response = request.CreateResponse<TResponse>(HttpStatusCode.GatewayTimeout);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occured while processing request {RequestId} {@Request}", request.RequestId, request);
-				return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+				response = request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 			}
 			finally
 			{
+				if (response != null && request.EnableTracing)
+				{
+					response.RequestStart = start;
+					response.RequestDuration = DateTime.UtcNow - start;
+
+					response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
+					response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion };
+				}
+
 				if (request.AcknowledgeMode == AcknowledgeMode.ConnectorFinished)
 				{
 					await AcknowledgeRequest(request, true);
 				}
 
+				timeout?.Cancel();
 				timeout?.Dispose();
 				(target as IDisposable)?.Dispose();
 			}
+
+			return response;
 		}
 
 		private async Task AcknowledgeRequest(TRequest request, bool removeRequestBodyContent)

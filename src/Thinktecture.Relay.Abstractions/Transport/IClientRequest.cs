@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Transport
 		Guid RequestId { get; set; }
 
 		/// <summary>
-		/// The unique id of the server which created the request.
+		/// The unique id of the origin which created the request.
 		/// </summary>
 		/// <remarks>This should not be changed.</remarks>
 		Guid RequestOriginId { get; set; }
@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Transport
 		AcknowledgeMode AcknowledgeMode { get; set; }
 
 		/// <summary>
-		/// The unique id of the server where the acknowledgment should be send to. This will be null when <see cref="AcknowledgeMode"/> is disabled.
+		/// The unique id of the origin where the acknowledgment should be send to. This will be null when <see cref="AcknowledgeMode"/> is disabled.
 		/// </summary>
 		/// <remarks>This should not be changed.</remarks>
 		/// <seealso cref="AcknowledgeMode"/>
@@ -72,5 +72,10 @@ namespace Thinktecture.Relay.Transport
 		/// <seealso cref="BodySize"/>
 		/// <remarks>Depending on the transport the stream content may be serialized inline.</remarks>
 		Stream BodyContent { get; set; }
+
+		/// <summary>
+		/// Enables tracing of this particular request.
+		/// </summary>
+		bool EnableTracing { get; set; }
 	}
 }

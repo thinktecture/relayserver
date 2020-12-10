@@ -45,8 +45,8 @@ namespace Thinktecture.Relay.Server.Services
 			{
 				while (!stoppingToken.IsCancellationRequested)
 				{
-					await _statisticsWriter.UpdateLastSeenTimeAsync(_serverContext.OriginId, stoppingToken);
 					await Task.Delay(_statisticsOptions.LastActivityUpdateInterval, stoppingToken);
+					await _statisticsWriter.UpdateLastSeenTimeAsync(_serverContext.OriginId, stoppingToken);
 				}
 			}
 			catch (TaskCanceledException)

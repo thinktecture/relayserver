@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +36,7 @@ namespace Thinktecture.Relay.Server.Services
 
 			return new DiscoveryDocument()
 			{
-				ServerVersion = GetServerVersion(),
+				ServerVersion = GetType().GetAssemblyVersion(),
 				AuthorizationServer = GetAuthority(),
 				ConnectorEndpoint = new Uri(baseUri, "connector").ToString(),
 				AcknowledgeEndpoint = new Uri(baseUri, "acknowledge").ToString(),
@@ -52,10 +51,6 @@ namespace Thinktecture.Relay.Server.Services
 		}
 
 		private Uri BuildBaseUri(HttpRequest request) => new Uri($"{request.Scheme}://{request.Host}{request.PathBase}", UriKind.Absolute);
-
-		private string GetServerVersion()
-			=> GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-				?? GetType().Assembly.GetCustomAttribute<AssemblyVersionAttribute>()?.Version;
 
 		private string GetAuthority()
 			=> _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()?.Get(Constants.DefaultAuthenticationScheme)?.Authority;

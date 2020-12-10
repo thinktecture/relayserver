@@ -72,7 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				builder.Services.Configure(configure);
 			}
 
-			builder.Services.AddTransient<IValidateOptions<FileBodyStoreOptions>, FileBodyStoreOptionsValidator>();
+			builder.Services.AddTransient<IValidateOptions<FileBodyStoreOptions>, FileBodyStoreValidateOptions>();
 			builder.Services.AddSingleton<IBodyStore, FileBodyStore>();
 
 			return builder;

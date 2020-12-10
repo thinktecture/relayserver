@@ -1,4 +1,4 @@
-namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.SqlServer
+namespace MigrationCreation.SqlServer
 {
 	public class Program
 	{

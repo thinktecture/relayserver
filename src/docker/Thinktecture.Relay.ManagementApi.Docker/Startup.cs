@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers();
-			services.AddRelayServerConfigurationDbContext(Configuration.GetConnectionString("PostgreSql"));
+			services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql"));
 
 			services.AddSwaggerGen(options =>
 			{

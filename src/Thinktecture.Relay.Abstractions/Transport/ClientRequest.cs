@@ -42,5 +42,8 @@ namespace Thinktecture.Relay.Transport
 		/// <inheritdoc />
 		[JsonConverter(typeof(InlineMemoryStreamJsonConverter))]
 		public Stream BodyContent { get; set; }
+
+		/// <inheritdoc />
+		public bool EnableTracing { get; set; }
 	}
 }

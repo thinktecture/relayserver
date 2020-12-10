@@ -19,10 +19,36 @@ namespace Thinktecture.Relay.Connector
 		public const string RelayTargetCatchAllId = "** CATCH-ALL **";
 
 		/// <summary>
-		/// The url to use for acknowledging a request by issuing as POST with an empty body to it.
+		/// Constants for HTTP headers.
 		/// </summary>
-		/// <remarks>This is only present when manual acknowledgment is needed.</remarks>
-		public const string RelayServerAcknowledgeUrlHeaderName = "X-RelayServer-AcknowledgeUrl";
+		public static class HeaderNames
+		{
+			/// <summary>
+			/// The url to use for acknowledging a request by issuing as POST with an empty body to it.
+			/// </summary>
+			/// <remarks>This will only be present when manual acknowledgment is needed.</remarks>
+			public const string AcknowledgeUrl = "X-RelayServer-AcknowledgeUrl";
+
+			/// <summary>
+			/// The unique id of the request.
+			/// </summary>
+			public const string RequestId = "X-RelayServer-RequestId";
+
+			/// <summary>
+			/// The unique id of the origin receiving the request.
+			/// </summary>
+			public const string OriginId = "X-RelayServer-OriginId";
+
+			/// <summary>
+			/// The machine name of the connector handling the request.
+			/// </summary>
+			public const string ConnectorMachineName = "X-RelayServer-Connector-MachineName";
+
+			/// <summary>
+			/// The version of the connector handling the request.
+			/// </summary>
+			public const string ConnectorVersion = "X-RelayServer-Connector-Version";
+		}
 
 		/// <summary>
 		/// The name of the configuration key in a target definition for the id.

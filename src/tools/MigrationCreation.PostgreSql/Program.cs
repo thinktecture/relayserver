@@ -1,4 +1,4 @@
-namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.MigrationCreation.PostgreSql
+namespace MigrationCreation.PostgreSql
 {
 	public class Program
 	{

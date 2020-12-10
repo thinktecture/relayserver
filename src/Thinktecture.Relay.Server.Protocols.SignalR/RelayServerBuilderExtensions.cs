@@ -32,9 +32,11 @@ namespace Microsoft.Extensions.DependencyInjection
 		{
 			builder.Services
 				.AddTransient<IPostConfigureOptions<JwtBearerOptions>, JwtBearerPostConfigureOptions>()
-				.AddTransient<IPostConfigureOptions<HubOptions<ConnectorHub<TRequest, TResponse>>>, HubOptionsPostConfigureOptions<TRequest, TResponse>>();
+				.AddTransient<IPostConfigureOptions<HubOptions<ConnectorHub<TRequest, TResponse>>>,
+					HubOptionsPostConfigureOptions<TRequest, TResponse>>();
 
-			builder.Services.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, SignalRTenantConnectorAdapterFactory<TRequest, TResponse>>();
+			builder.Services
+				.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, SignalRTenantConnectorAdapterFactory<TRequest, TResponse>>();
 			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();
 			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse>>();
 

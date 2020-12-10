@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
@@ -14,10 +16,9 @@ namespace Thinktecture.Relay.Connector.Targets
 	/// <inheritdoc cref="IRelayTarget{TRequest,TResponse}"/>
 	public class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest, TResponse>, IDisposable
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : ITargetResponse, new()
 	{
 		private readonly ILogger<RelayWebTarget<TRequest, TResponse>> _logger;
-		private readonly ITargetResponseFactory<TResponse> _targetResponseFactory;
 
 		/// <summary>
 		/// A <see cref="HttpClient"/>.
@@ -29,14 +30,38 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// Initializes a new instance of the <see cref="RelayWebTarget{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="targetResponseFactory">An <see cref="ITargetResponseFactory{TResponse}"/>.</param>
 		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
 		/// <param name="baseAddress">The base <see cref="Uri"/> used for the request.</param>
 		/// <param name="options">An optional flag build <see cref="RelayWebTargetOptions"/>.</param>
-		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
-			IHttpClientFactory httpClientFactory, Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
-			: this(logger, targetResponseFactory)
-			=> HttpClient = CreateHttpClient(httpClientFactory, options, baseAddress);
+		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, IHttpClientFactory httpClientFactory, Uri baseAddress,
+			RelayWebTargetOptions options = RelayWebTargetOptions.None)
+		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			HttpClient = CreateHttpClient(httpClientFactory, options, baseAddress);
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="RelayWebTarget{TRequest,TResponse}"/> class.
+		/// </summary>
+		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
+		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
+		/// <param name="parameters">The configured parameters.</param>
+		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, IHttpClientFactory httpClientFactory,
+			Dictionary<string, string> parameters)
+		{
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+			if (!parameters.TryGetValue("Url", out var url) || string.IsNullOrWhiteSpace(url))
+			{
+				var targetId = parameters[Constants.RelayConnectorOptionsTargetId];
+				throw new ArgumentException($"The target \"{targetId}\" has no configured base address", nameof(parameters));
+			}
+
+			parameters.TryGetValue("Options", out var parameter);
+			Enum.TryParse<RelayWebTargetOptions>(parameter, true, out var options);
+
+			HttpClient = CreateHttpClient(httpClientFactory, options, new Uri(url));
+		}
 
 		private HttpClient CreateHttpClient(IHttpClientFactory httpClientFactory, RelayWebTargetOptions options, Uri baseAddress)
 		{
@@ -54,40 +79,9 @@ namespace Thinktecture.Relay.Connector.Targets
 			return httpClient;
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RelayWebTarget{TRequest,TResponse}"/> class.
-		/// </summary>
-		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="targetResponseFactory">An <see cref="ITargetResponseFactory{TResponse}"/>.</param>
-		/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
-		/// <param name="parameters">The configured parameters.</param>
-		public RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory,
-			IHttpClientFactory httpClientFactory, Dictionary<string, string> parameters)
-			: this(logger, targetResponseFactory)
-		{
-			if (!parameters.TryGetValue("Url", out var url) || string.IsNullOrWhiteSpace(url))
-			{
-				var targetId = parameters[Constants.RelayConnectorOptionsTargetId];
-				throw new ArgumentException($"The target \"{targetId}\" has no configured base address", nameof(parameters));
-			}
-
-			parameters.TryGetValue("Options", out var parameter);
-			Enum.TryParse<RelayWebTargetOptions>(parameter, true, out var options);
-
-			HttpClient = CreateHttpClient(httpClientFactory, options, new Uri(url));
-		}
-
-		private RelayWebTarget(ILogger<RelayWebTarget<TRequest, TResponse>> logger, ITargetResponseFactory<TResponse> targetResponseFactory)
-		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_targetResponseFactory = targetResponseFactory ?? throw new ArgumentNullException(nameof(targetResponseFactory));
-		}
-
 		/// <inheritdoc />
 		public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			var start = DateTime.UtcNow;
-
 			_logger.LogTrace("Requesting target for request {RequestId} at {BaseAddress} for {Url}", request.RequestId, HttpClient.BaseAddress,
 				request.Url);
 
@@ -97,17 +91,7 @@ namespace Thinktecture.Relay.Connector.Targets
 			_logger.LogDebug("Requested target for request {RequestId} returned {HttpStatusCode}", request.RequestId,
 				responseMessage.StatusCode);
 
-			var response = await _targetResponseFactory.CreateAsync(request, responseMessage, cancellationToken);
-
-			response.RequestStart = start;
-			response.RequestDuration = DateTime.UtcNow - start;
-
-#if DEBUG
-			response.HttpHeaders["X-RelayServer-Connector-Host"] = new[] { Environment.MachineName };
-			response.HttpHeaders["X-RelayServer-Connector-Version"] = new[] { RelayConnector.AssemblyVersion };
-#endif
-
-			return response;
+			return await responseMessage.CreateResponseAsync<TResponse>(request, cancellationToken);
 		}
 
 		/// <summary>
@@ -121,10 +105,7 @@ namespace Thinktecture.Relay.Connector.Targets
 
 			foreach (var header in request.HttpHeaders)
 			{
-				if (header.Key == HeaderNames.Host)
-				{
-					continue;
-				}
+				if (header.Key == HeaderNames.Host) continue;
 
 				requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
 			}
@@ -152,18 +133,16 @@ namespace Thinktecture.Relay.Connector.Targets
 	public class RelayWebTarget : RelayWebTarget<ClientRequest, TargetResponse>
 	{
 		/// <inheritdoc />
-		public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger,
-			ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory httpClientFactory, Uri baseAddress,
-			RelayWebTargetOptions options = RelayWebTargetOptions.None)
-			: base(logger, targetResponseFactory, httpClientFactory, baseAddress, options)
+		public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger, IHttpClientFactory httpClientFactory,
+			Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
+			: base(logger, httpClientFactory, baseAddress, options)
 		{
 		}
 
 		/// <inheritdoc />
-		public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger,
-			ITargetResponseFactory<TargetResponse> targetResponseFactory, IHttpClientFactory httpClientFactory,
+		public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger, IHttpClientFactory httpClientFactory,
 			Dictionary<string, string> parameters)
-			: base(logger, targetResponseFactory, httpClientFactory, parameters)
+			: base(logger, httpClientFactory, parameters)
 		{
 		}
 	}
@@ -186,7 +165,7 @@ namespace Thinktecture.Relay.Connector.Targets
 		public static IRelayConnectorBuilder<TRequest, TResponse> AddWebTarget<TRequest, TResponse>(
 			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id, Uri baseAddress, TimeSpan? timeout = null)
 			where TRequest : IClientRequest
-			where TResponse : ITargetResponse
+			where TResponse : ITargetResponse, new()
 			=> builder.AddTarget<TRequest, TResponse, RelayWebTarget<TRequest, TResponse>>(id, timeout, baseAddress);
 	}
 
@@ -207,7 +186,45 @@ namespace Thinktecture.Relay.Connector.Targets
 		public static void RegisterWebTarget<TRequest, TResponse>(this RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry,
 			string id, Uri baseAddress, TimeSpan? timeout = null)
 			where TRequest : IClientRequest
-			where TResponse : ITargetResponse
+			where TResponse : ITargetResponse, new()
 			=> relayTargetRegistry.Register<RelayWebTarget<TRequest, TResponse>>(id, timeout, baseAddress);
+	}
+
+	/// <summary>
+	/// Extension methods for the <see cref="HttpResponseMessage"/>.
+	/// </summary>
+	public static class HttpResponseMessageExtensions
+	{
+		/// <summary>
+		/// Creates an instance of a class implementing <see cref="ITargetResponse"/> from <paramref name="request"/> and <paramref name="message"/>.
+		/// </summary>
+		/// <param name="message">The <see cref="HttpResponseMessage"/>.</param>
+		/// <param name="request">An <see cref="IClientRequest"/>.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+		/// <typeparam name="TResponse">The type of response.</typeparam>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the creation of an instance implementing <see cref="ITargetResponse"/>.</returns>
+		public static async Task<TResponse> CreateResponseAsync<TResponse>(this HttpResponseMessage message, IClientRequest request,
+			CancellationToken cancellationToken = default)
+			where TResponse : ITargetResponse, new()
+		{
+			var hasBody = (int)message.StatusCode switch
+			{
+				StatusCodes.Status100Continue => false,
+				StatusCodes.Status101SwitchingProtocols => false,
+				StatusCodes.Status102Processing => false,
+				StatusCodes.Status204NoContent => false,
+				StatusCodes.Status304NotModified => false,
+				_ => true
+			};
+
+			var response = request.CreateResponse<TResponse>();
+
+			response.HttpStatusCode = message.StatusCode;
+			response.HttpHeaders = message.Headers.Concat(message.Content.Headers).ToDictionary(h => h.Key, h => h.Value.ToArray());
+			response.BodySize = hasBody ? message.Content.Headers.ContentLength : 0;
+			response.BodyContent = hasBody ? await message.Content.ReadAsStreamAsync() : null;
+
+			return response;
+		}
 	}
 }

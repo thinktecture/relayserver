@@ -31,9 +31,6 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.Services.TryAddSingleton<IServerDispatcher<TResponse>, RabbitMqServerDispatcher<TResponse>>();
-			builder.Services.TryAddSingleton<IServerHandler<TResponse>, RabbitMqServerHandler<TResponse>>();
-
 			if (configure != null)
 			{
 				builder.Services.Configure(configure);
@@ -48,7 +45,8 @@ namespace Microsoft.Extensions.DependencyInjection
 			if (useTenantRouting)
 			{
 				builder.Services.TryAddSingleton<ITenantDispatcher<TRequest>, RabbitMqTenantDispatcher<TRequest>>();
-				builder.Services.TryAddSingleton<ITenantHandlerFactory<TRequest, TResponse>, RabbitMqTenantHandlerFactory<TRequest, TResponse>>();
+				builder.Services
+					.TryAddSingleton<ITenantHandlerFactory<TRequest, TResponse>, RabbitMqTenantHandlerFactory<TRequest, TResponse>>();
 			}
 
 			builder.Services.TryAddSingleton<IConnection>(provider =>
