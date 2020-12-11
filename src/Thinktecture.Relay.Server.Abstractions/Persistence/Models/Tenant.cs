@@ -50,5 +50,11 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// </summary>
 		[JsonIgnore]
 		public List<Connection> Connections { get; set; }
+
+		/// <summary>
+		/// The config for this tenant.
+		/// </summary>
+		[JsonIgnore]
+		public Config Config { get; set; }
 	}
 }

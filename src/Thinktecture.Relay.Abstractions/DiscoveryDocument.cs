@@ -9,6 +9,26 @@ namespace Thinktecture.Relay
 	public class DiscoveryDocument
 	{
 		/// <summary>
+		/// The default reconnect minimum delay.
+		/// </summary>
+		public static TimeSpan DefaultReconnectMinimumDelay = TimeSpan.FromSeconds(30);
+
+		/// <summary>
+		/// The default reconnect maximum delay.
+		/// </summary>
+		public static TimeSpan DefaultReconnectMaximumDelay = TimeSpan.FromMinutes(5);
+
+		/// <summary>
+		/// The default handshake timeout.
+		/// </summary>
+		public static TimeSpan DefaultHandshakeTimeout = TimeSpan.FromSeconds(15);
+
+		/// <summary>
+		/// The default keep-alive interval.
+		/// </summary>
+		public static TimeSpan DefaultKeepAliveInterval = TimeSpan.FromSeconds(15);
+
+		/// <summary>
 		/// The well-known relative path to the <see cref="DiscoveryDocument"/> endpoint.
 		/// </summary>
 		public const string WellKnownPath = ".well-known/relayserver-configuration";
@@ -53,27 +73,27 @@ namespace Thinktecture.Relay
 		/// </summary>
 		/// <seealso cref="ReconnectMaximumDelay"/>
 		[JsonConverter(typeof(TimeSpanJsonConverter))]
-		public TimeSpan ReconnectMinimumDelay { get; set; }
+		public TimeSpan ReconnectMinimumDelay { get; set; } = DefaultReconnectMinimumDelay;
 
 		/// <summary>
 		/// The maximum delay to wait for until a reconnect of a connector should be attempted again.
 		/// </summary>
 		/// <seealso cref="ReconnectMinimumDelay"/>
 		[JsonConverter(typeof(TimeSpanJsonConverter))]
-		public TimeSpan ReconnectMaximumDelay { get; set; }
+		public TimeSpan ReconnectMaximumDelay { get; set; } = DefaultReconnectMaximumDelay;
 
 		/// <summary>
 		/// The timeout of the handshake between the server and a connector.
 		/// </summary>
 		/// <remarks>The concrete use is an implementation detail of the protocols.</remarks>
 		[JsonConverter(typeof(TimeSpanJsonConverter))]
-		public TimeSpan HandshakeTimeout { get; set; }
+		public TimeSpan HandshakeTimeout { get; set; } = DefaultHandshakeTimeout;
 
 		/// <summary>
 		/// The interval used to send keep alive pings between the server and a connector.
 		/// </summary>
 		/// <remarks>The concrete use is an implementation detail of the protocols.</remarks>
 		[JsonConverter(typeof(TimeSpanJsonConverter))]
-		public TimeSpan KeepAliveInterval { get; set; }
+		public TimeSpan KeepAliveInterval { get; set; } = DefaultKeepAliveInterval;
 	}
 }

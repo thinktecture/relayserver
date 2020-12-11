@@ -19,11 +19,18 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		where TRequest : IClientRequest
 	{
 		/// <summary>
-		/// A strongly-typed method for a <see cref="Hub{T}"/>.
+		/// A strongly-typed method for a <see cref="Hub{T}"/> to request a connector's target.
 		/// </summary>
 		/// <param name="request">An <see cref="IClientRequest"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task RequestTarget(TRequest request);
+
+		/// <summary>
+		/// A strongly-typed method for a <see cref="Hub{T}"/> to update a connector's run-time config.
+		/// </summary>
+		/// <param name="config">An <see cref="ITenantConfig"/>.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task Configure(ITenantConfig config);
 	}
 
 	/// <inheritdoc cref="Hub{T}" />
@@ -38,6 +45,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 		private readonly IConnectionStatisticsWriter _connectionStatisticsWriter;
 		private readonly RelayServerContext _relayServerContext;
+		private readonly ITenantRepository _tenantRepository;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ConnectorHub{TRequest,TResponse}"/> class.
@@ -48,11 +56,11 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <param name="responseCoordinator">An <see cref="IResponseCoordinator{TResponse}"/>.</param>
 		/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
 		/// <param name="relayServerContext">An <see cref="RelayServerContext"/>.</param>
+		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
 		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
 			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
-			IResponseCoordinator<TResponse> responseCoordinator,
-			IConnectionStatisticsWriter connectionStatisticsWriter,
-			RelayServerContext relayServerContext)
+			IResponseCoordinator<TResponse> responseCoordinator, IConnectionStatisticsWriter connectionStatisticsWriter,
+			RelayServerContext relayServerContext, ITenantRepository tenantRepository)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
@@ -61,6 +69,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
 			_connectionStatisticsWriter = connectionStatisticsWriter ?? throw new ArgumentNullException(nameof(connectionStatisticsWriter));
 			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
+			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 		}
 
 		/// <inheritdoc />
@@ -72,6 +81,12 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
 			await _connectionStatisticsWriter.SetConnectionTimeAsync(Context.ConnectionId, tenant.Id, _relayServerContext.OriginId,
 				Context.GetHttpContext().Connection.RemoteIpAddress);
+
+			var config = await _tenantRepository.LoadTenantConfigAsync(tenant.Id);
+			if (config != null)
+			{
+				await Clients.Caller.Configure(config);
+			}
 
 			await base.OnConnectedAsync();
 		}
@@ -88,7 +103,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 32 * 1024; // 32kb
+		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 16 * 1024; // 16kb
 
 		/// <summary>
 		/// Hub method.

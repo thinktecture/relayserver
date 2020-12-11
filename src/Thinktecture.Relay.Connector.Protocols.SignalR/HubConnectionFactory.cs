@@ -10,21 +10,21 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 	/// <summary>
 	/// An implementation of a factory to create an instance of the <see cref="HubConnection"/> class.
 	/// </summary>
-	public class SignalRConnectionFactory
+	public class HubConnectionFactory
 	{
-		private readonly ILogger<SignalRConnectionFactory> _logger;
+		private readonly ILogger<HubConnectionFactory> _logger;
 		private readonly IAccessTokenProvider _accessTokenProvider;
 		private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 		private readonly RelayConnectorOptions _relayConnectorOptions;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SignalRConnectionFactory"/> class.
+		/// Initializes a new instance of the <see cref="HubConnectionFactory"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="accessTokenProvider">An <see cref="IAccessTokenProvider"/>.</param>
 		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="retryPolicy">The <see cref="DiscoveryDocumentRetryPolicy"/>.</param>
-		public SignalRConnectionFactory(ILogger<SignalRConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
+		public HubConnectionFactory(ILogger<HubConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
 			IOptions<RelayConnectorOptions> relayConnectorOptions, DiscoveryDocumentRetryPolicy retryPolicy)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -48,9 +48,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 				.Build();
 
 			connection.HandshakeTimeout = _relayConnectorOptions.DiscoveryDocument.HandshakeTimeout;
-			connection.KeepAliveInterval = _relayConnectorOptions.DiscoveryDocument.KeepAliveInterval;
-			// should always be twice of keep-alive
-			connection.ServerTimeout = TimeSpan.FromSeconds(_relayConnectorOptions.DiscoveryDocument.KeepAliveInterval.TotalSeconds * 2);
+			connection.SetKeepAliveInterval(_relayConnectorOptions.DiscoveryDocument.KeepAliveInterval);
 
 			return connection;
 		}

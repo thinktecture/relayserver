@@ -20,118 +20,95 @@ namespace Microsoft.EntityFrameworkCore
 				.ConfigureTenant()
 				.ConfigureClientSecret()
 				.ConfigureOrigin()
-				.ConfigureConnection();
+				.ConfigureConnection()
+				.ConfigureConfig();
 		}
 
-		/// <summary>
-		/// Configures the <see cref="Tenant"/> entity.
-		/// </summary>
-		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
-		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
-		public static ModelBuilder ConfigureTenant(this ModelBuilder modelBuilder)
+		private static ModelBuilder ConfigureTenant(this ModelBuilder modelBuilder) => modelBuilder.Entity<Tenant>(builder =>
 		{
-			return modelBuilder.Entity<Tenant>(tenant =>
-			{
-				tenant
-					.HasKey(t => t.Id);
+			builder
+				.HasKey(e => e.Id);
 
-				tenant
-					.Property(t => t.Name)
-					.HasMaxLength(100)
-					.IsRequired();
+			builder
+				.Property(e => e.Name)
+				.HasMaxLength(100)
+				.IsRequired();
 
-				tenant
-					.HasIndex(t => t.Name)
-					.IsUnique();
+			builder
+				.HasIndex(e => e.Name)
+				.IsUnique();
 
-				tenant
-					.Property(t => t.DisplayName)
-					.HasMaxLength(200);
+			builder
+				.Property(e => e.DisplayName)
+				.HasMaxLength(200);
 
-				tenant
-					.Property(t => t.Description)
-					.HasMaxLength(1000);
+			builder
+				.Property(e => e.Description)
+				.HasMaxLength(1000);
 
-				tenant.HasMany(t => t.ClientSecrets)
-					.WithOne(cs => cs.Tenant)
-					.HasForeignKey(cs => cs.TenantId)
-					.IsRequired()
-					.OnDelete(DeleteBehavior.Cascade);
+			builder
+				.HasMany(e => e.ClientSecrets)
+				.WithOne()
+				.HasForeignKey(e => e.TenantId)
+				.OnDelete(DeleteBehavior.Cascade);
 
-				tenant
-					.Property(t => t.NormalizedName)
-					.HasMaxLength(100)
-					.IsRequired();
+			builder
+				.Property(e => e.NormalizedName)
+				.HasMaxLength(100)
+				.IsRequired();
 
-				tenant
-					.HasIndex(t => t.NormalizedName)
-					.IsUnique();
-			});
-		}
+			builder
+				.HasIndex(e => e.NormalizedName)
+				.IsUnique();
 
-		/// <summary>
-		/// Configures the <see cref="ClientSecret"/> entity.
-		/// </summary>
-		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
-		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
-		public static ModelBuilder ConfigureClientSecret(this ModelBuilder modelBuilder)
+			builder
+				.HasMany(e => e.Connections)
+				.WithOne()
+				.HasForeignKey(e => e.TenantId)
+				.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		private static ModelBuilder ConfigureClientSecret(this ModelBuilder modelBuilder) => modelBuilder.Entity<ClientSecret>(builder =>
 		{
-			return modelBuilder.Entity<ClientSecret>(clientSecret =>
-			{
-				clientSecret
-					.HasKey(t => t.Id);
+			builder
+				.HasKey(e => e.Id);
 
-				clientSecret
-					.Property(t => t.Value)
-					.HasMaxLength(4000)
-					.IsRequired();
-			});
-		}
+			builder
+				.Property(e => e.Value)
+				.HasMaxLength(4000)
+				.IsRequired();
+		});
 
-		/// <summary>
-		/// Configures the <see cref="Origin"/> entity.
-		/// </summary>
-		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
-		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
-		public static ModelBuilder ConfigureOrigin(this ModelBuilder modelBuilder)
+		private static ModelBuilder ConfigureOrigin(this ModelBuilder modelBuilder) => modelBuilder.Entity<Origin>(builder =>
 		{
-			return modelBuilder.Entity<Origin>(origin =>
-			{
-				origin
-					.Property(o => o.Id)
-					.ValueGeneratedNever();
+			builder
+				.HasKey(e => e.Id);
 
-				origin
-					.HasKey(t => t.Id);
-			});
-		}
+			builder
+				.Property(e => e.Id)
+				.ValueGeneratedNever();
 
-		/// <summary>
-		/// Configures the <see cref="Connection"/> entity.
-		/// </summary>
-		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
-		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
-		public static ModelBuilder ConfigureConnection(this ModelBuilder modelBuilder)
+			builder
+				.HasMany(e => e.Connections)
+				.WithOne()
+				.HasForeignKey(e => e.OriginId)
+				.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		private static ModelBuilder ConfigureConnection(this ModelBuilder modelBuilder) => modelBuilder.Entity<Connection>(builder =>
 		{
-			return modelBuilder.Entity<Connection>(connection =>
-			{
-				connection
-					.HasKey(t => t.Id);
+			builder
+				.HasKey(e => e.Id);
 
-				connection
-					.Property(c => c.Id)
-					.HasMaxLength(100);
+			builder
+				.Property(e => e.Id)
+				.HasMaxLength(100);
+		});
 
-				connection
-					.HasOne(c => c.Origin)
-					.WithMany(o => o.Connections)
-					.HasForeignKey(c => c.OriginId);
-
-				connection
-					.HasOne(c => c.Tenant)
-					.WithMany(t => t.Connections)
-					.HasForeignKey(c => c.TenantId);
-			});
-		}
+		private static ModelBuilder ConfigureConfig(this ModelBuilder modelBuilder) => modelBuilder.Entity<Config>(builder =>
+		{
+			builder
+				.HasKey(e => e.TenantId);
+		});
 	}
 }

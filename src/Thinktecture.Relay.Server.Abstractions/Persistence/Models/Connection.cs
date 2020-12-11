@@ -1,11 +1,9 @@
 using System;
-using System.Text.Json.Serialization;
 
 namespace Thinktecture.Relay.Server.Persistence.Models
 {
-
 	/// <summary>
-	/// Represents a single connection of tenants's on-premises installation to a relay server.
+	/// Represents a single connection of tenants' on-premises installation to a relay server.
 	/// </summary>
 	public class Connection
 	{
@@ -16,7 +14,7 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		public string Id { get; set; }
 
 		/// <summary>
-		/// The unique id of the tenant this connection is made from.
+		/// The unique id of the tenant.
 		/// </summary>
 		public Guid TenantId { get; set; }
 
@@ -44,17 +42,5 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// The remote IP address of the connector.
 		/// </summary>
 		public string RemoteIpAddress { get; set; }
-
-		/// <summary>
-		/// The tenant this connection is made from.
-		/// </summary>
-		[JsonIgnore]
-		public Tenant Tenant { get; set; }
-
-		/// <summary>
-		/// The origin this connection is made to.
-		/// </summary>
-		[JsonIgnore]
-		public Origin Origin { get; set; }
 	}
 }
