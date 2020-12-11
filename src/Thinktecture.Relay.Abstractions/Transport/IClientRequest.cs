@@ -74,7 +74,7 @@ namespace Thinktecture.Relay.Transport
 		Stream BodyContent { get; set; }
 
 		/// <summary>
-		/// Enables tracing of this particular request.
+		/// Enable tracing of this particular request.
 		/// </summary>
 		bool EnableTracing { get; set; }
 	}

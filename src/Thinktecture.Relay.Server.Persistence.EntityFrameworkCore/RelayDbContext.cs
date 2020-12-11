@@ -29,6 +29,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		/// </summary>
 		public DbSet<Connection> Connections { get; set; }
 
+		/// <summary>
+		/// The tenant configs.
+		/// </summary>
+		public DbSet<Config> Configs { get; set; }
+
 		/// <inheritdoc />
 		public RelayDbContext(DbContextOptions<RelayDbContext> options)
 			: base(options)

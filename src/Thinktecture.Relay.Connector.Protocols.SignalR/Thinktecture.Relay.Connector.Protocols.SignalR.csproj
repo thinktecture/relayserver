@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer Connector SignalR Protocol</Title>
     <Description>Contains the SignalR connector transport implementation for the RelayServer.</Description>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <!-- Use shared information for NuGet packaging -->

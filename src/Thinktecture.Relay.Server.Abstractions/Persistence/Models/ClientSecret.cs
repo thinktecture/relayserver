@@ -32,10 +32,5 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// Indicates the point in time when this secret was created.
 		/// </summary>
 		public DateTime Created { get; set; }
-
-		/// <summary>
-		/// The <see cref="Tenant"/> for which this secret is valid.
-		/// </summary>
-		public Tenant Tenant { get; set; }
 	}
 }

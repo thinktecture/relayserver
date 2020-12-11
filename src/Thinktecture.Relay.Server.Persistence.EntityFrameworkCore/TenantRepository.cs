@@ -16,10 +16,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		/// Initializes a new instance of the <see cref="TenantRepository"/> class.
 		/// </summary>
 		/// <param name="dbContext">The Entity Framework Core database context.</param>
-		public TenantRepository(RelayDbContext dbContext)
-		{
-			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-		}
+		public TenantRepository(RelayDbContext dbContext) => _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
 		/// <inheritdoc />
 		public Task<Tenant> LoadTenantByNameAsync(string name)
@@ -35,53 +32,49 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		// TODO: Fix these methods, these are preliminary
 
 		/// <inheritdoc />
-		public Task<Tenant> LoadTenantByIdAsync(Guid id)
-		{
-			return _dbContext.Tenants
-				.Include(t => t.ClientSecrets)
-				.AsNoTracking()
-				.SingleOrDefaultAsync(t => t.Id == id);
-		}
+		public Task<Tenant> LoadTenantByIdAsync(Guid id) => _dbContext.Tenants
+			.Include(t => t.ClientSecrets)
+			.AsNoTracking()
+			.SingleOrDefaultAsync(t => t.Id == id);
 
 		/// <inheritdoc />
-		public IAsyncEnumerable<Tenant> LoadAllTenantsPagedAsync(int skip, int take)
-		{
-			return _dbContext.Tenants
-				.AsNoTracking()
-				.OrderBy(t => t.NormalizedName)
-				.Skip(skip)
-				.Take(take)
-				.AsAsyncEnumerable();
-		}
+		public IAsyncEnumerable<Tenant> LoadAllTenantsPagedAsync(int skip, int take) => _dbContext.Tenants
+			.OrderBy(t => t.NormalizedName)
+			.Skip(skip)
+			.Take(take)
+			.AsNoTracking()
+			.AsAsyncEnumerable();
 
 		/// <inheritdoc />
-		public async Task<Guid> CreateTenantAsync(Tenant tenantToCreate)
+		public async Task<Guid> CreateTenantAsync(Tenant tenant)
 		{
-			if (tenantToCreate.Id == Guid.Empty)
+			if (tenant.Id == Guid.Empty)
 			{
-				tenantToCreate.Id = Guid.NewGuid();
+				tenant.Id = Guid.NewGuid();
 			}
 
-			tenantToCreate.NormalizedName = tenantToCreate.Name.ToUpperInvariant();
+			tenant.NormalizedName = tenant.Name.ToUpperInvariant();
 
-			await _dbContext.Tenants.AddAsync(tenantToCreate);
+			// ReSharper disable once MethodHasAsyncOverload
+			_dbContext.Tenants.Add(tenant);
 			await _dbContext.SaveChangesAsync();
 
-			return tenantToCreate.Id;
+			return tenant.Id;
 		}
 
 		/// <inheritdoc />
 		public async Task CreateClientSecretAsync(ClientSecret clientSecret)
 		{
-			await _dbContext.ClientSecrets.AddAsync(clientSecret);
+			// ReSharper disable once MethodHasAsyncOverload
+			_dbContext.ClientSecrets.Add(clientSecret);
 			await _dbContext.SaveChangesAsync();
 		}
 
 		/// <inheritdoc />
 		public async Task<bool> DeleteTenantByIdAsync(Guid id)
 		{
-			// create stub
 			var tenant = new Tenant() { Id = id };
+
 			_dbContext.Attach(tenant);
 			_dbContext.Tenants.Remove(tenant);
 
@@ -95,5 +88,10 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 				return false;
 			}
 		}
+
+		/// <inheritdoc />
+		public Task<Config> LoadTenantConfigAsync(Guid id) => _dbContext.Configs
+			.AsNoTracking()
+			.SingleOrDefaultAsync(c => c.TenantId == id);
 	}
 }

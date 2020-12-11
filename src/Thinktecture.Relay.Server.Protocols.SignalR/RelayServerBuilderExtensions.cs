@@ -35,9 +35,8 @@ namespace Microsoft.Extensions.DependencyInjection
 				.AddTransient<IPostConfigureOptions<HubOptions<ConnectorHub<TRequest, TResponse>>>,
 					HubOptionsPostConfigureOptions<TRequest, TResponse>>();
 
-			builder.Services
-				.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, SignalRTenantConnectorAdapterFactory<TRequest, TResponse>>();
-			builder.Services.TryAddSingleton<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();
+			builder.Services.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, TenantConnectorAdapterFactory<TRequest, TResponse>>();
+			builder.Services.TryAddScoped<IConnectorTransport<TResponse>, ConnectorHub<TRequest, TResponse>>();
 			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse>>();
 
 			builder.Services.AddSignalR();

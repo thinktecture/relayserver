@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.Migrations.ConfigurationDb
 {
@@ -43,6 +44,28 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.HasIndex("TenantId");
 
                     b.ToTable("ClientSecrets");
+                });
+
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Config", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool?>("EnableTracing")
+                        .HasColumnType("boolean");
+
+                    b.Property<TimeSpan?>("KeepAliveInterval")
+                        .HasColumnType("interval");
+
+                    b.Property<TimeSpan?>("ReconnectMaximumDelay")
+                        .HasColumnType("interval");
+
+                    b.Property<TimeSpan?>("ReconnectMinimumDelay")
+                        .HasColumnType("interval");
+
+                    b.HasKey("TenantId");
+
+                    b.ToTable("Configs");
                 });
 
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Connection", b =>
@@ -134,22 +157,31 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
 
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.ClientSecret", b =>
                 {
-                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", "Tenant")
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
                         .WithMany("ClientSecrets")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Config", b =>
+                {
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
+                        .WithOne("Config")
+                        .HasForeignKey("Thinktecture.Relay.Server.Persistence.Models.Config", "TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Connection", b =>
                 {
-                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Origin", "Origin")
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Origin", null)
                         .WithMany("Connections")
                         .HasForeignKey("OriginId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", "Tenant")
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
                         .WithMany("Connections")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)

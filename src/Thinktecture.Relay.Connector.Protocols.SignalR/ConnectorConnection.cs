@@ -9,31 +9,36 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
 	/// <inheritdoc cref="IConnectorConnection" />
-	public class SignalRConnectorConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
+	public class ConnectorConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
-		private readonly ILogger<SignalRConnectorConnection<TRequest, TResponse>> _logger;
+		private readonly ILogger<ConnectorConnection<TRequest, TResponse>> _logger;
+		private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 
 		private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 		private HubConnection _connection;
 		private string _connectionId;
+		private bool? _enableTracing;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SignalRConnectorConnection{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="ConnectorConnection{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="signalRConnectionFactory">The <see cref="SignalRConnectionFactory"/>.</param>
+		/// <param name="retryPolicy">The <see cref="DiscoveryDocumentRetryPolicy"/>.</param>
+		/// <param name="hubConnectionFactory">The <see cref="HubConnectionFactory"/>.</param>
 		/// <param name="clientRequestHandler">An <see cref="IClientRequestHandler{TRequest,TResponse}"/>.</param>
-		public SignalRConnectorConnection(ILogger<SignalRConnectorConnection<TRequest, TResponse>> logger,
-			SignalRConnectionFactory signalRConnectionFactory, IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
+		public ConnectorConnection(ILogger<ConnectorConnection<TRequest, TResponse>> logger, DiscoveryDocumentRetryPolicy retryPolicy,
+			HubConnectionFactory hubConnectionFactory, IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
 
-			_connection = signalRConnectionFactory?.CreateConnection() ?? throw new ArgumentNullException(nameof(signalRConnectionFactory));
+			_connection = hubConnectionFactory?.CreateConnection() ?? throw new ArgumentNullException(nameof(hubConnectionFactory));
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
+			_connection.On<ITenantConfig>("Configure", ConfigureAsync);
 
 			_connection.Closed += ConnectionClosed;
 			_connection.Reconnecting += ConnectionReconnecting;
@@ -80,6 +85,8 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_logger.LogDebug("Handling request {RequestId} on connection {ConnectionId} from origin {OriginId}", request.RequestId,
 				_connectionId, request.RequestOriginId);
 
+			request.EnableTracing = request.EnableTracing || _enableTracing.GetValueOrDefault();
+
 			var response = await _clientRequestHandler.HandleAsync(request, BinarySizeThreshold);
 
 			_logger.LogTrace("Received response for request {RequestId} on connection {ConnectionId} {@Response}", request.RequestId,
@@ -87,6 +94,21 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_logger.LogDebug("Received response for request {RequestId}", request.RequestId);
 
 			await DeliverAsync(response);
+		}
+
+		private Task ConfigureAsync(ITenantConfig config)
+		{
+			_logger.LogTrace("Received tenant config {@Config} on connection {ConnectionId}", config, _connectionId);
+
+			_connection.SetKeepAliveInterval(config.KeepAliveInterval);
+			_retryPolicy.SetReconnectDelays(config.ReconnectMinimumDelay, config.ReconnectMaximumDelay);
+
+			if (config.EnableTracing != null)
+			{
+				_enableTracing = config.EnableTracing;
+			}
+
+			return Task.CompletedTask;
 		}
 
 		private async Task ConnectAsyncInternal(CancellationToken cancellationToken)
@@ -116,7 +138,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		public int? BinarySizeThreshold { get; } = 32 * 1024; // 32kb
+		public int? BinarySizeThreshold { get; } = 16 * 1024; // 16kb
 
 		/// <inheritdoc />
 		public event AsyncEventHandler<string> Connected;
