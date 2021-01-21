@@ -18,6 +18,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 			services.TryAddScoped<ITenantRepository, TenantRepository>();
 			services.TryAddScoped<IStatisticsRepository, StatisticsRepository>();
 			services.TryAddScoped<IConnectionRepository, ConnectionRepository>();
+			services.TryAddScoped<IRequestRepository, RequestRepository>();
+
 			services.AddHealthChecks()
 				.AddDbContextCheck<RelayDbContext>();
 
