@@ -120,6 +120,68 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                     b.ToTable("Origins");
                 });
 
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Request", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Aborted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Errored")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Expired")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Failed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("HttpMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(10)")
+                        .HasMaxLength(10);
+
+                    b.Property<int?>("HttpStatusCode")
+                        .HasColumnType("int");
+
+                    b.Property<long>("RequestBodySize")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("RequestDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long>("RequestDuration")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RequestUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)")
+                        .HasMaxLength(1000);
+
+                    b.Property<long?>("ResponseBodySize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Target")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)")
+                        .HasMaxLength(100);
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("Requests");
+                });
+
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -183,6 +245,15 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
 
                     b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
                         .WithMany("Connections")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Request", b =>
+                {
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
+                        .WithMany("Requests")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

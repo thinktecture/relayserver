@@ -34,6 +34,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		/// </summary>
 		public DbSet<Config> Configs { get; set; }
 
+		/// <summary>
+		/// The requests.
+		/// </summary>
+		public DbSet<Request> Requests { get; set; }
+
 		/// <inheritdoc />
 		public RelayDbContext(DbContextOptions<RelayDbContext> options)
 			: base(options)

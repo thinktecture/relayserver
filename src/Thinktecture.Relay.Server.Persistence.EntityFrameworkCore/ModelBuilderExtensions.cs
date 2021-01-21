@@ -21,7 +21,8 @@ namespace Microsoft.EntityFrameworkCore
 				.ConfigureClientSecret()
 				.ConfigureOrigin()
 				.ConfigureConnection()
-				.ConfigureConfig();
+				.ConfigureConfig()
+				.ConfigureRequest();
 		}
 
 		private static ModelBuilder ConfigureTenant(this ModelBuilder modelBuilder) => modelBuilder.Entity<Tenant>(builder =>
@@ -63,6 +64,12 @@ namespace Microsoft.EntityFrameworkCore
 
 			builder
 				.HasMany(e => e.Connections)
+				.WithOne()
+				.HasForeignKey(e => e.TenantId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder
+				.HasMany(e => e.Requests)
 				.WithOne()
 				.HasForeignKey(e => e.TenantId)
 				.OnDelete(DeleteBehavior.Cascade);
@@ -109,6 +116,29 @@ namespace Microsoft.EntityFrameworkCore
 		{
 			builder
 				.HasKey(e => e.TenantId);
+		});
+
+		private static ModelBuilder ConfigureRequest(this ModelBuilder modelBuilder) => modelBuilder.Entity<Request>(builder =>
+		{
+			builder
+				.Property<int>("Id")
+				.ValueGeneratedOnAdd();
+			builder.HasKey("Id");
+
+			builder
+				.Property(e => e.RequestUrl)
+				.HasMaxLength(1000)
+				.IsRequired();
+
+			builder
+				.Property(e => e.Target)
+				.HasMaxLength(100)
+				.IsRequired();
+
+			builder
+				.Property(e => e.HttpMethod)
+				.HasMaxLength(10)
+				.IsRequired();
 		});
 	}
 }
