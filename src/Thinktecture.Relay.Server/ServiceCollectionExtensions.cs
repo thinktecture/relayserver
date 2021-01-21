@@ -2,6 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
+using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Factories;
 using Thinktecture.Relay.Server.HealthChecks;
 using Thinktecture.Relay.Server.Middleware;
@@ -65,6 +66,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.TryAddScoped<IRelayContext<TRequest, TResponse>, RelayContext<TRequest, TResponse>>();
 			services.TryAddScoped<IRequestCoordinator<TRequest>, RequestCoordinator<TRequest, TResponse>>();
 			services.TryAddScoped<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
+			services.TryAddScoped<IRelayRequestLogger<TRequest, TResponse>, RelayRequestLogger<TRequest, TResponse>>();
 
 			services.AddSingleton<RelayServerContext>();
 			services.AddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();

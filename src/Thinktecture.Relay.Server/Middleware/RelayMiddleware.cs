@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Transport;
@@ -31,7 +32,8 @@ namespace Thinktecture.Relay.Server.Middleware
 		private readonly IRelayContext<TRequest, TResponse> _relayContext;
 		private readonly IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> _clientRequestInterceptors;
 		private readonly IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> _targetResponseInterceptors;
-		private readonly TimeSpan? _requestExpiration;
+		private readonly IRelayRequestLogger<TRequest, TResponse> _relayRequestLogger;
+		private readonly RelayServerOptions _relayServerOptions;
 		private readonly int _maximumBodySize;
 
 		/// <summary>
@@ -50,13 +52,15 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="clientRequestInterceptors">An enumeration of <see cref="IClientRequestInterceptor{TRequest,TResponse}"/>.</param>
 		/// <param name="targetResponseInterceptors">An enumeration of <see cref="ITargetResponseInterceptor{TRequest,TResponse}"/>.</param>
+		/// <param name="relayRequestLogger">An <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.</param>
 		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse>> logger, IRelayClientRequestFactory<TRequest> requestFactory,
 			ITenantRepository tenantRepository, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
 			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
 			IRelayContext<TRequest, TResponse> relayContext, ITenantDispatcher<TRequest> tenantDispatcher,
 			IConnectorTransport<TResponse> connectorTransport, IOptions<RelayServerOptions> relayServerOptions,
 			IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
-			IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors)
+			IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors,
+			IRelayRequestLogger<TRequest, TResponse> relayRequestLogger)
 		{
 			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 			if (tenantDispatcher == null) throw new ArgumentNullException(nameof(tenantDispatcher));
@@ -72,8 +76,9 @@ namespace Thinktecture.Relay.Server.Middleware
 			_relayContext = relayContext ?? throw new ArgumentNullException(nameof(relayContext));
 			_clientRequestInterceptors = clientRequestInterceptors ?? Array.Empty<IClientRequestInterceptor<TRequest, TResponse>>();
 			_targetResponseInterceptors = targetResponseInterceptors ?? Array.Empty<ITargetResponseInterceptor<TRequest, TResponse>>();
+			_relayRequestLogger = relayRequestLogger ?? throw new ArgumentNullException(nameof(relayRequestLogger));
 
-			_requestExpiration = relayServerOptions.Value.RequestExpiration;
+			_relayServerOptions = relayServerOptions.Value;
 			_maximumBodySize = Math.Min(tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(),
 				connectorTransport.BinarySizeThreshold.GetValueOrDefault());
 		}
@@ -98,9 +103,9 @@ namespace Thinktecture.Relay.Server.Middleware
 			}
 
 			using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
-			if (_requestExpiration != null)
+			if (_relayServerOptions.RequestExpiration != null)
 			{
-				cts.CancelAfter(_requestExpiration.Value);
+				cts.CancelAfter(_relayServerOptions.RequestExpiration.Value);
 			}
 
 			_relayContext.ResponseDisposables.Add(_responseCoordinator.RegisterRequest(_relayContext.RequestId));
@@ -129,23 +134,32 @@ namespace Thinktecture.Relay.Server.Middleware
 
 				await InterceptTargetResponseAsync(cts.Token);
 
+				await _relayRequestLogger.LogSuccessAsync(_relayContext, CancellationToken.None);
 				await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, cts.Token);
 			}
 			catch (TransportException)
 			{
+				await _relayRequestLogger.LogFailAsync(_relayContext, CancellationToken.None);
 				await WriteErrorResponse(HttpStatusCode.ServiceUnavailable, context.Response, cts.Token);
 			}
 			catch (OperationCanceledException)
 			{
 				if (context.RequestAborted.IsCancellationRequested)
 				{
+					await _relayRequestLogger.LogAbortAsync(_relayContext, CancellationToken.None);
 					_logger.LogDebug("Client aborted request {RequestId}", _relayContext.RequestId);
 				}
 				else
 				{
-					_logger.LogWarning("Request {RequestId} expired", _relayContext.RequestId);
+					await _relayRequestLogger.LogExpiredAsync(_relayContext, CancellationToken.None);
 					await WriteErrorResponse(HttpStatusCode.RequestTimeout, context.Response, cts.Token);
+					_logger.LogWarning("Request {RequestId} expired", _relayContext.RequestId);
 				}
+			}
+			catch (Exception ex)
+			{
+				await _relayRequestLogger.LogErrorAsync(_relayContext, CancellationToken.None);
+				_logger.LogError(ex, "Could not handle request {RequestId}", _relayContext.RequestId);
 			}
 		}
 
@@ -211,14 +225,18 @@ namespace Thinktecture.Relay.Server.Middleware
 				_logger.LogInformation(
 					"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
 					request.BodySize, _maximumBodySize, request.RequestId);
-				request.BodySize = await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, cancellationToken);
+
+				await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, cancellationToken);
+
 				request.BodyContent = null;
 				_logger.LogDebug("Outsourced from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
+
 				return false;
 			}
 
 			request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
 			_logger.LogDebug("Inlined from request {BodySize} bytes for request {RequestId}", request.BodySize, request.RequestId);
+
 			return true;
 		}
 
