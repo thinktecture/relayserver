@@ -1,4 +1,5 @@
 using System;
+using Thinktecture.Relay.Server.Diagnostics;
 
 namespace Thinktecture.Relay.Server
 {
@@ -50,5 +51,10 @@ namespace Thinktecture.Relay.Server
 		/// </summary>
 		/// <remarks>The concrete use is an implementation detail of the protocols.</remarks>
 		public TimeSpan KeepAliveInterval { get; set; } = DiscoveryDocument.DefaultKeepAliveInterval;
+
+		/// <summary>
+		/// The verbosity of the <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.
+		/// </summary>
+		public RelayRequestLoggerLevel RequestLoggerLevel { get; set; } = RelayRequestLoggerLevel.All;
 	}
 }
