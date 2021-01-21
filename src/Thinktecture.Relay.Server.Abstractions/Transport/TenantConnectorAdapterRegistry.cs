@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Transport
 	{
 		private readonly ILogger<TenantConnectorAdapterRegistry<TRequest, TResponse>> _logger;
 		private readonly ITenantConnectorAdapterFactory<TRequest> _tenantConnectorAdapterFactory;
-		private readonly ITenantHandlerFactory<TRequest, TResponse> _tenantHandlerFactory;
+		private readonly ITenantHandlerFactory<TRequest> _tenantHandlerFactory;
 
 		private class TenantConnectorAdapterRegistration : IAsyncDisposable
 		{
@@ -75,10 +75,10 @@ namespace Thinktecture.Relay.Server.Transport
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
 		/// <param name="tenantConnectorAdapterFactory">An <see cref="ITenantConnectorAdapterFactory{TRequest}"/>.</param>
-		/// <param name="tenantHandlerFactory">An <see cref="ITenantHandlerFactory{TRequest,TResponse}"/>.</param>
+		/// <param name="tenantHandlerFactory">An <see cref="ITenantHandlerFactory{TRequest}"/>.</param>
 		public TenantConnectorAdapterRegistry(ILogger<TenantConnectorAdapterRegistry<TRequest, TResponse>> logger,
 			ITenantConnectorAdapterFactory<TRequest> tenantConnectorAdapterFactory,
-			ITenantHandlerFactory<TRequest, TResponse> tenantHandlerFactory)
+			ITenantHandlerFactory<TRequest> tenantHandlerFactory)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_tenantConnectorAdapterFactory =

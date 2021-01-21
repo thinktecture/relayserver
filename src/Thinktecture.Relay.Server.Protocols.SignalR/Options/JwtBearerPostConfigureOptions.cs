@@ -19,7 +19,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR.Options
 			// See https://docs.microsoft.com/aspnet/core/signalr/security#access-token-logging
 			// for more information about security considerations when using
 			// the query string to transmit the access token.
-			options.Events = new JwtBearerEvents
+			options.Events = new JwtBearerEvents()
 			{
 				OnMessageReceived = context =>
 				{

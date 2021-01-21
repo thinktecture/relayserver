@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			builder.Services.AddSingleton<IServerDispatcher<TResponse>, InMemoryServerDispatcher<TResponse>>();
 			builder.Services.AddSingleton<IServerHandler<TResponse>, InMemoryServerHandler<TResponse>>();
 			builder.Services.AddSingleton<ITenantDispatcher<TRequest>, InMemoryTenantDispatcher<TRequest>>();
-			builder.Services.AddSingleton<ITenantHandlerFactory<TRequest, TResponse>, InMemoryTenantHandlerFactory<TRequest, TResponse>>();
+			builder.Services.AddSingleton<ITenantHandlerFactory<TRequest>, InMemoryTenantHandlerFactory<TRequest>>();
 
 			return builder;
 		}

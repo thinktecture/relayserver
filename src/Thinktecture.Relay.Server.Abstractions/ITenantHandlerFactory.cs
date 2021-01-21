@@ -6,9 +6,8 @@ namespace Thinktecture.Relay.Server
 	/// <summary>
 	/// An implementation of a factory to create an instance of a class implementing <see cref="ITenantHandler{TRequest}"/>.
 	/// </summary>
-	public interface ITenantHandlerFactory<out TRequest, TResponse>
+	public interface ITenantHandlerFactory<out TRequest>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
 	{
 		/// <summary>
 		/// Creates an instance of a class implementing <see cref="ITenantHandler{TRequest}"/> for the tenant.
