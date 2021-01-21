@@ -15,6 +15,11 @@ namespace Thinktecture.Relay.Server.Transport
 		where TResponse : ITargetResponse
 	{
 		/// <summary>
+		/// The date and time of the request start.
+		/// </summary>
+		DateTime RequestStart { get; }
+
+		/// <summary>
 		/// The unique id of the request.
 		/// </summary>
 		Guid RequestId { get; }
