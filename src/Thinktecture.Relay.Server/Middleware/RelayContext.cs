@@ -30,6 +30,9 @@ namespace Thinktecture.Relay.Server.Middleware
 		}
 
 		/// <inheritdoc />
+		public DateTime RequestStart { get; } = DateTime.UtcNow;
+
+		/// <inheritdoc />
 		public Guid RequestId { get; } = Guid.NewGuid();
 
 		/// <inheritdoc />
