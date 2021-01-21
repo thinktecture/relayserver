@@ -148,12 +148,10 @@ namespace Thinktecture.Relay.Connector.Targets
 					request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = new[] { url };
 				}
 
-				request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
-				request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString() };
-
-				if (request.EnableTracing)
+				if (request.EnableTracing || request.AcknowledgeMode == AcknowledgeMode.Manual)
 				{
-
+					request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
+					request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString() };
 				}
 
 				using var cts = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
