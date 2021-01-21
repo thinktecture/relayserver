@@ -107,7 +107,7 @@ namespace Thinktecture.Relay.Server.Transport
 				waitingState.TaskCompletionSource.TrySetCanceled();
 			});
 
-			var responseContext = new ResponseContext
+			var responseContext = new ResponseContext()
 			{
 				Response = await waitingState.TaskCompletionSource.Task
 			};

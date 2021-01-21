@@ -5,7 +5,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
 	/// <inheritdoc />
-	public class RabbitMqTenantHandlerFactory<TRequest, TResponse> : ITenantHandlerFactory<TRequest, TResponse>
+	public class RabbitMqTenantHandlerFactory<TRequest, TResponse> : ITenantHandlerFactory<TRequest>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{

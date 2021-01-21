@@ -46,23 +46,23 @@ namespace Microsoft.Extensions.DependencyInjection
 			{
 				builder.Services.TryAddSingleton<ITenantDispatcher<TRequest>, RabbitMqTenantDispatcher<TRequest>>();
 				builder.Services
-					.TryAddSingleton<ITenantHandlerFactory<TRequest, TResponse>, RabbitMqTenantHandlerFactory<TRequest, TResponse>>();
+					.TryAddSingleton<ITenantHandlerFactory<TRequest>, RabbitMqTenantHandlerFactory<TRequest, TResponse>>();
 			}
 
+			// ReSharper disable once RedundantTypeArgumentsOfMethod
 			builder.Services.TryAddSingleton<IConnection>(provider =>
 			{
 				var context = provider.GetRequiredService<RelayServerContext>();
 				var options = provider.GetRequiredService<IOptions<RabbitMqOptions>>();
 
-				var factory = new ConnectionFactory
+				var factory = new ConnectionFactory()
 				{
 					DispatchConsumersAsync = true,
 					EndpointResolverFactory = endpoints => new RoundRobinEndpointResolver(endpoints),
 					Uri = new Uri(options.Value.Uri),
 				};
 
-				return factory.CreateConnection(
-					AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts ?? factory.Uri.Host),
+				return factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts ?? factory.Uri.Host),
 					$"RelayServer {context.OriginId}");
 			});
 			builder.Services.AddSingleton<ModelFactory>();

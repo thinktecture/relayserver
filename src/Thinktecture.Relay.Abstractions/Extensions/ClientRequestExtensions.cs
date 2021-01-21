@@ -35,7 +35,7 @@ namespace Thinktecture.Relay.Transport
 		public static TResponse CreateResponse<TResponse>(this IClientRequest request, HttpStatusCode? failureStatusCode = null)
 			where TResponse : ITargetResponse, new()
 		{
-			var response = new TResponse
+			var response = new TResponse()
 			{
 				RequestId = request.RequestId,
 				RequestOriginId = request.RequestOriginId,

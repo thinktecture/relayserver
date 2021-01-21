@@ -6,7 +6,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport
 {
 	/// <summary>
-	/// A context containing processing information and data for one relay task.
+	/// A context containing processing information and data for one relay task (request).
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
@@ -37,14 +37,15 @@ namespace Thinktecture.Relay.Server.Transport
 		TResponse TargetResponse { get; set; }
 
 		/// <summary>
-		/// Indicates if at least one connector is available for processing the <see cref="ClientRequest"/>.
+		/// Indicates if at least one connector should be available for processing the <see cref="ClientRequest"/>.
 		/// </summary>
 		bool ConnectorAvailable { get; }
 
 		/// <summary>
-		/// Indicates that regardless of an already available <see cref="TargetResponse"/> the <see cref="ClientRequest"/> should be send
-		/// to a connector for further processing by a target (ignoring the results).
+		/// Indicates that regardless of an already available <see cref="TargetResponse"/> the <see cref="ClientRequest"/> should be send to a connector for further processing by a target.
 		/// </summary>
+		/// <remarks>The results of this further processing will be ignored if a response is already set.</remarks>
+		/// <seealso cref="TargetResponse"/>
 		bool ForceConnectorDelivery { get; set; }
 
 		/// <summary>
