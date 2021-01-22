@@ -64,9 +64,10 @@ namespace Thinktecture.Relay
 		public string ResponseEndpoint { get; set; }
 
 		/// <summary>
-		/// The connection timeout in seconds.
+		/// The timeout of a server endpoint accessed from a connector.
 		/// </summary>
-		public int ConnectionTimeout { get; set; }
+		[JsonConverter(typeof(TimeSpanJsonConverter))]
+		public TimeSpan EndpointTimeout { get; set; }
 
 		/// <summary>
 		/// The minimum delay to wait for until a reconnect of a connector should be attempted again.
