@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				{
 					var options = provider.GetRequiredService<IOptions<RelayConnectorOptions>>();
 					client.BaseAddress = options.Value.RelayServerBaseUri;
-					// TODO set timeouts
+					client.Timeout = options.Value.DiscoveryDocument.EndpointTimeout;
 				})
 				.AddClientAccessTokenHandler();
 
