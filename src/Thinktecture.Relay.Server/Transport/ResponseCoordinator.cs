@@ -103,7 +103,7 @@ namespace Thinktecture.Relay.Server.Transport
 
 			cancellationToken.Register(() =>
 			{
-				_logger.LogTrace("Cancelling response waiting for request {RequestId}", requestId);
+				_logger.LogTrace("Canceling response wait for request {RequestId}", requestId);
 				waitingState.TaskCompletionSource.TrySetCanceled();
 			});
 
