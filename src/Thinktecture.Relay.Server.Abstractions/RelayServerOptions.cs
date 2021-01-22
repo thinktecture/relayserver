@@ -24,6 +24,12 @@ namespace Thinktecture.Relay.Server
 		public bool EnableResponseShortcut { get; set; }
 
 		/// <summary>
+		/// The timeout of a server endpoint accessed from a connector.
+		/// </summary>
+		/// <remarks>The default value is 2 minutes.</remarks>
+		public TimeSpan EndpointTimeout { get; set; } = TimeSpan.FromMinutes(2);
+
+		/// <summary>
 		/// The expiration time of a request until a response must be received.
 		/// </summary>
 		public TimeSpan? RequestExpiration { get; set; } = DefaultRequestExpiration;
