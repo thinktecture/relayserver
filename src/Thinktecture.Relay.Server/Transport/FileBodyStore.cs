@@ -35,6 +35,11 @@ namespace Thinktecture.Relay.Server.Transport
 					size);
 				return size;
 			}
+			catch (OperationCanceledException)
+			{
+				await RemoveRequestBodyAsync(requestId, CancellationToken.None);
+				throw;
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}", "writing", "request",
@@ -54,6 +59,11 @@ namespace Thinktecture.Relay.Server.Transport
 				_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes", "response",
 					requestId, size);
 				return size;
+			}
+			catch (OperationCanceledException)
+			{
+				await RemoveResponseBodyAsync(requestId, CancellationToken.None);
+				throw;
 			}
 			catch (Exception ex)
 			{
