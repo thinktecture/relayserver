@@ -38,11 +38,11 @@ namespace Thinktecture.Relay.Server.Services
 			{
 				ServerVersion = GetType().GetAssemblyVersion(),
 				AuthorizationServer = GetAuthority(),
+				EndpointTimeout = _relayServerOptions.EndpointTimeout,
 				ConnectorEndpoint = new Uri(baseUri, "connector").ToString(),
 				AcknowledgeEndpoint = new Uri(baseUri, "acknowledge").ToString(),
 				RequestEndpoint = new Uri(baseUri, "body/request").ToString(),
 				ResponseEndpoint = new Uri(baseUri, "body/response").ToString(),
-				ConnectionTimeout = (int)TimeSpan.FromSeconds(30).TotalSeconds, // TODO for what is this and from where does it come
 				ReconnectMinimumDelay = _relayServerOptions.ReconnectMinimumDelay,
 				ReconnectMaximumDelay = _relayServerOptions.ReconnectMaximumDelay,
 				HandshakeTimeout = _relayServerOptions.HandshakeTimeout,
