@@ -63,17 +63,13 @@ namespace Thinktecture.Relay.Server.Transport
 
 			_enableResponseShortcut = relayServerOptions.Value.EnableResponseShortcut;
 
-			serverHandler.ResponseReceived += OnResponseReceived;
+			serverHandler.ResponseReceived += ServerHandlerResponseReceived;
 		}
 
 		/// <inheritdoc />
-		public void Dispose() => _serverHandler.ResponseReceived -= OnResponseReceived;
+		public void Dispose() => _serverHandler.ResponseReceived -= ServerHandlerResponseReceived;
 
-		private Task OnResponseReceived(object sender, TResponse response)
-		{
-			ProcessResponse(response);
-			return Task.CompletedTask;
-		}
+		private Task ServerHandlerResponseReceived(object sender, TResponse response) => ProcessResponse(response);
 
 		/// <inheritdoc />
 		public IAsyncDisposable RegisterRequest(Guid requestId)
@@ -145,15 +141,21 @@ namespace Thinktecture.Relay.Server.Transport
 				return;
 			}
 
-			ProcessResponse(response);
+			await ProcessResponse(response);
 		}
 
-		private void ProcessResponse(TResponse response)
+		private async Task ProcessResponse(TResponse response)
 		{
 			if (!_waitingStates.TryGetValue(response.RequestId, out var waitingState) ||
 				!waitingState.TaskCompletionSource.TrySetResult(response))
 			{
 				_logger.LogDebug("Response for request {RequestId} discarded", response.RequestId);
+
+				if (response.IsBodyContentOutsourced())
+				{
+					await _bodyStore.RemoveResponseBodyAsync(response.RequestId);
+				}
+
 				return;
 			}
 
