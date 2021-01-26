@@ -19,6 +19,7 @@ namespace Thinktecture.Relay.Transport
 		public DateTime? RequestStart { get; set; }
 
 		/// <inheritdoc />
+		[JsonConverter(typeof(NullableTimeSpanJsonConverter))]
 		public TimeSpan? RequestDuration { get; set; }
 
 		/// <inheritdoc />

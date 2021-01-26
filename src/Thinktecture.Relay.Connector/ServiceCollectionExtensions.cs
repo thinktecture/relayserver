@@ -71,6 +71,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
 
 			builder.Services.TryAddTransient<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
+			builder.Services.TryAddTransient<IClientRequestWorker<TRequest, TResponse>, ClientRequestWorker<TRequest, TResponse>>();
 
 			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();
 			builder.Services.AddSingleton<RelayConnector>();

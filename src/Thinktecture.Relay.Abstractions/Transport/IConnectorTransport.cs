@@ -15,6 +15,8 @@ namespace Thinktecture.Relay.Transport
 		/// </summary>
 		int? BinarySizeThreshold { get; }
 
+		// TODO move limit into IConnectorTransportLimits interface
+
 		/// <summary>
 		/// Send the target response to the server.
 		/// </summary>

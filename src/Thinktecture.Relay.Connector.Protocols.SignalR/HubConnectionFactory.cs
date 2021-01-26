@@ -22,22 +22,24 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="accessTokenProvider">An <see cref="IAccessTokenProvider"/>.</param>
-		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="retryPolicy">The <see cref="DiscoveryDocumentRetryPolicy"/>.</param>
+		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		public HubConnectionFactory(ILogger<HubConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
-			IOptions<RelayConnectorOptions> relayConnectorOptions, DiscoveryDocumentRetryPolicy retryPolicy)
+			DiscoveryDocumentRetryPolicy retryPolicy, IOptions<RelayConnectorOptions> relayConnectorOptions)
 		{
+			if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
-			_relayConnectorOptions = relayConnectorOptions?.Value ?? throw new ArgumentNullException(nameof(relayConnectorOptions));
 			_retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
+			_relayConnectorOptions = relayConnectorOptions?.Value;
 		}
 
 		/// <summary>
 		/// Creates a <see cref="HubConnection"/>.
 		/// </summary>
 		/// <returns>The <see cref="HubConnection"/>.</returns>
-		public HubConnection CreateConnection()
+		public HubConnection Create()
 		{
 			_logger.LogDebug("Creating connection to {ConnectorEndpoint}", _relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint);
 

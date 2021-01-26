@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,27 +26,29 @@ namespace Thinktecture.Relay
 		/// <param name="sender">The sender object.</param>
 		/// <param name="event">The <see cref="EventArgs"/> sent.</param>
 		/// <typeparam name="T">The type of event args.</typeparam>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public static async Task InvokeAsync<T>(this AsyncEventHandler<T> eventHandler, object sender, T @event)
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the raised exceptions during the invocation.</returns>
+		public static async Task<Exception[]> InvokeAsync<T>(this AsyncEventHandler<T> eventHandler, object sender, T @event)
 		{
-			if (eventHandler != null)
+			if (eventHandler == null) return Array.Empty<Exception>();
+
+			var exceptions = new List<Exception>();
+			foreach (var handler in eventHandler.GetInvocationList().Cast<AsyncEventHandler<T>>())
 			{
-				foreach (var handler in eventHandler.GetInvocationList().Cast<AsyncEventHandler<T>>())
+				try
 				{
-					try
-					{
-						await handler(sender, @event);
-					}
-					catch (OperationCanceledException)
-					{
-						break;
-					}
-					catch (Exception)
-					{
-						// Ignore and continue with next handler
-					}
+					await handler(sender, @event);
+				}
+				catch (OperationCanceledException)
+				{
+					break;
+				}
+				catch (Exception ex)
+				{
+					exceptions.Add(ex);
 				}
 			}
+
+			return exceptions.ToArray();
 		}
 	}
 }
