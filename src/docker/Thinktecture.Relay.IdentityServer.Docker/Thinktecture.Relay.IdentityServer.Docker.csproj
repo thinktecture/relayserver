@@ -2,16 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..\</DockerfileContext>
   </PropertyGroup>
-
-  <!-- Don't create a NuGet package for this project -->
-  <Import Project="..\..\shared\NoPackProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="IdentityServer4" Version="4.0.4" />
-    <PackageReference Include="IdentityServer4.Storage" Version="4.0.4" />
   </ItemGroup>
 
   <ItemGroup>

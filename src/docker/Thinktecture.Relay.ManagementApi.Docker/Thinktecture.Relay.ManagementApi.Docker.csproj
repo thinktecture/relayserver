@@ -2,12 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..\</DockerfileContext>
   </PropertyGroup>
-
-  <!-- Don't create a NuGet package for this project -->
-  <Import Project="..\..\shared\NoPackProperties.shared.props" />
 
   <!-- Generate documentation file for Swagger -->
   <PropertyGroup>

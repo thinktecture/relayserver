@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Thinktecture RelayServer Server RabbitMQ Protocol</Title>
     <Description>Contains the RabbitMQ server transport implementation for the RelayServer.</Description>
   </PropertyGroup>
-
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.7" />

@@ -1,5 +1,6 @@
-<Project>
-  <!-- WARNING: This file is shared between all RelayServer .NET Core projects that don't produce NuGet packages -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))"/>
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>

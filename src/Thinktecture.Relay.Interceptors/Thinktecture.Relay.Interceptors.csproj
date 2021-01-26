@@ -1,15 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Thinktecture RelayServer Interceptors</Title>
     <Description>Contains interceptors for the RelayServer server.</Description>
     <RootNamespace>Thinktecture.Relay.Interceptors</RootNamespace>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />

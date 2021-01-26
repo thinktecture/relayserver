@@ -3,12 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer Server Abstractions</Title>
-    <Description>Contains abstractions for the RelayServer server.</Description>
+    <Description>Contains abstractions for the server.</Description>
     <RootNamespace>Thinktecture.Relay.Server</RootNamespace>
   </PropertyGroup>
-
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
