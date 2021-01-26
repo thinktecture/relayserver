@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
@@ -36,7 +37,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
 
-			_connection = hubConnectionFactory?.CreateConnection() ?? throw new ArgumentNullException(nameof(hubConnectionFactory));
+			_connection = hubConnectionFactory?.Create() ?? throw new ArgumentNullException(nameof(hubConnectionFactory));
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 			_connection.On<ITenantConfig>("Configure", ConfigureAsync);
 
@@ -44,7 +45,8 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_connection.Reconnecting += ConnectionReconnecting;
 			_connection.Reconnected += ConnectionReconnected;
 
-			_clientRequestHandler.Acknowledge += ClientRequestHandlerAcknowledge;
+			_clientRequestHandler.AcknowledgeRequest += ClientRequestHandlerAcknowledgeRequest;
+			_clientRequestHandler.DeliverResponse += ClientRequestHandlerDeliverResponse;
 		}
 
 		private async Task ConnectionClosed(Exception ex)
@@ -55,7 +57,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			}
 			else
 			{
-				_logger.LogError(ex, "Connection {ConnectionId} closed", _connectionId);
+				_logger.LogWarning(ex, "Connection {ConnectionId} closed", _connectionId);
 
 				await Reconnecting.InvokeAsync(this, _connectionId);
 				await ConnectAsyncInternal(_cancellationTokenSource.Token);
@@ -65,18 +67,26 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private async Task ConnectionReconnecting(Exception ex)
 		{
-			_logger.LogInformation("Trying to reconnect after connection was lost on connection {ConnectionId}", _connectionId);
+			_logger.LogInformation("Trying to reconnect after connection {ConnectionId} was lost", _connectionId);
 			await Reconnecting.InvokeAsync(this, _connectionId);
 		}
 
 		private async Task ConnectionReconnected(string connectionId)
 		{
-			_logger.LogInformation("Reconnected on connection {ConnectionId} as {ConnectionId}", _connectionId, connectionId);
+			_logger.LogDebug("Reconnected on connection {ConnectionId}", connectionId);
+
+			if (_connectionId != connectionId)
+			{
+				_logger.LogWarning("Dropped connection {ConnectionId} in favor of new connection {ConnectionId}", _connectionId, connectionId);
+			}
+
 			_connectionId = connectionId;
 			await Reconnected.InvokeAsync(this, _connectionId);
 		}
 
-		private async Task ClientRequestHandlerAcknowledge(object sender, IAcknowledgeRequest request) => await AcknowledgeAsync(request);
+		private Task ClientRequestHandlerAcknowledgeRequest(object sender, IAcknowledgeRequest request) => AcknowledgeAsync(request);
+
+		private Task ClientRequestHandlerDeliverResponse(object sender, TResponse response) => DeliverAsync(response);
 
 		private async Task RequestTargetAsync(TRequest request)
 		{
@@ -87,13 +97,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 			request.EnableTracing = request.EnableTracing || _enableTracing.GetValueOrDefault();
 
-			var response = await _clientRequestHandler.HandleAsync(request, BinarySizeThreshold);
-
-			_logger.LogTrace("Received response for request {RequestId} on connection {ConnectionId} {@Response}", request.RequestId,
-				_connectionId, response);
-			_logger.LogDebug("Received response for request {RequestId}", request.RequestId);
-
-			await DeliverAsync(response);
+			await _clientRequestHandler.HandleAsync(request, BinarySizeThreshold, _cancellationTokenSource.Token);
 		}
 
 		private Task ConfigureAsync(ITenantConfig config)
@@ -114,8 +118,6 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private async Task ConnectAsyncInternal(CancellationToken cancellationToken)
 		{
 			if (_connection == null) return;
-
-			_logger.LogTrace("Connecting");
 
 			try
 			{
@@ -153,24 +155,47 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		public event AsyncEventHandler<string> Disconnected;
 
 		/// <inheritdoc />
-		public Task DeliverAsync(TResponse response)
+		public async Task DeliverAsync(TResponse response)
 		{
 			_logger.LogTrace("Delivering response for request {RequestId} on connection {ConnectionId}", response.RequestId, _connectionId);
-			return _connection?.InvokeAsync("Deliver", response);
+			try
+			{
+				await _connection.InvokeAsync("Deliver", response);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while delivering response for request {RequestId} on connection {ConnectionId}",
+					response.RequestId, _connectionId);
+			}
 		}
 
 		/// <inheritdoc />
-		public Task AcknowledgeAsync(IAcknowledgeRequest request)
+		public async Task AcknowledgeAsync(IAcknowledgeRequest request)
 		{
 			_logger.LogTrace("Acknowledging request {@AcknowledgeRequest} on connection {ConnectionId}", request, _connectionId);
-			return _connection?.InvokeAsync("Acknowledge", request);
+			try
+			{
+				await _connection.InvokeAsync("Acknowledge", request);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while acknowledging request {RequestId} on connection {ConnectionId}", request.RequestId,
+					_connectionId);
+			}
 		}
 
 		/// <inheritdoc />
-		public Task PongAsync()
+		public async Task PongAsync()
 		{
 			_logger.LogTrace("Pong on connection {ConnectionId}", _connectionId);
-			return _connection?.InvokeAsync("Pong");
+			try
+			{
+				await _connection.InvokeAsync("Pong");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while sending pong on connection {ConnectionId}", _connectionId);
+			}
 		}
 
 		/// <inheritdoc />
@@ -210,7 +235,8 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_cancellationTokenSource?.Dispose();
 			_cancellationTokenSource = null;
 
-			_clientRequestHandler.Acknowledge -= ClientRequestHandlerAcknowledge;
+			_clientRequestHandler.AcknowledgeRequest -= ClientRequestHandlerAcknowledgeRequest;
+			_clientRequestHandler.DeliverResponse -= ClientRequestHandlerDeliverResponse;
 		}
 	}
 }

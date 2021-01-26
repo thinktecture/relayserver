@@ -1,27 +1,20 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Thinktecture.Relay.Acknowledgement;
-using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Connector
+namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <summary>
-	/// A client request handler determining the <see cref="IRelayTarget{TRequest,TResponse}"/> handling the request.
+	/// An implementation handling a request.
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public interface IClientRequestHandler<in TRequest, TResponse>
+	public interface IClientRequestWorker<in TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
 	{
 		/// <summary>
-		/// Event fired when a request should be acknowledged.
-		/// </summary>
-		event AsyncEventHandler<IAcknowledgeRequest> Acknowledge;
-
-		/// <summary>
-		/// Called when a request was received.
+		/// Handles the request.
 		/// </summary>
 		/// <param name="request">The client request.</param>
 		/// <param name="binarySizeThreshold">The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.</param>

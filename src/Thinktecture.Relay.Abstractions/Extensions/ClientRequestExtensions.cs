@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Net;
+using Thinktecture.Relay.Acknowledgement;
 
 // ReSharper disable once CheckNamespace; (extension methods on IClientRequest namespace)
 namespace Thinktecture.Relay.Transport
@@ -51,5 +52,22 @@ namespace Thinktecture.Relay.Transport
 
 			return response;
 		}
+
+		/// <summary>
+		/// Creates an <see cref="IAcknowledgeRequest"/> for the request.
+		/// </summary>
+		/// <param name="request">The client request.</param>
+		/// <param name="removeRequestBodyContent">Indicates if the request body should be removed.</param>
+		/// <typeparam name="TRequest">The type of request.</typeparam>
+		/// <typeparam name="TAcknowledge">The type of acknowledge,</typeparam>
+		/// <returns>A instance of <see cref="IAcknowledgeRequest"/>.</returns>
+		public static TAcknowledge CreateAcknowledge<TRequest, TAcknowledge>(this TRequest request, bool removeRequestBodyContent)
+			where TRequest : IClientRequest
+			where TAcknowledge : IAcknowledgeRequest, new() => new TAcknowledge()
+		{
+			OriginId = request.RequestOriginId,
+			RequestId = request.RequestId,
+			RemoveRequestBodyContent = removeRequestBodyContent
+		};
 	}
 }

@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
-			builder.Services.AddSingleton<HubConnectionFactory>();
+			builder.Services.AddTransient<HubConnectionFactory>();
 			builder.Services.AddTransient<IConnectorConnection, ConnectorConnection<TRequest, TResponse>>();
 			builder.Services.AddSingleton<DiscoveryDocumentRetryPolicy>();
 
