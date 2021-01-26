@@ -23,7 +23,7 @@ namespace Thinktecture.Relay.Transport
 		Guid RequestOriginId { get; set; }
 
 		/// <summary>
-		/// Indicating the mode if and when the connector should acknowledge the processing of the request.
+		/// Indicates the mode if and when the connector should acknowledge the processing of the request.
 		/// </summary>
 		AcknowledgeMode AcknowledgeMode { get; set; }
 
