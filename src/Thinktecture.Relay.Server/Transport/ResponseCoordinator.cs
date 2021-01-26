@@ -112,9 +112,6 @@ namespace Thinktecture.Relay.Server.Transport
 				Response = await waitingState.TaskCompletionSource.Task
 			};
 
-			_logger.LogTrace("Response for request {RequestId} received {@Response}", responseContext.Response.RequestId,
-				responseContext.Response);
-
 			if (responseContext.Response.IsBodyContentOutsourced())
 			{
 				responseContext.Response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
@@ -157,7 +154,7 @@ namespace Thinktecture.Relay.Server.Transport
 				return;
 			}
 
-			_logger.LogDebug("Response for request {RequestId} received", response.RequestId);
+			_logger.LogTrace("Response {@Response} for request {RequestId} received", response, response.RequestId);
 		}
 	}
 }

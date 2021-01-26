@@ -9,8 +9,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 	internal static class ModelExtensions
 	{
 		/// <summary>
-		/// Convenience method to consume a queue by declaring the exchange and queue and binding them together and starting to consume
-		/// it with an <see cref="AsyncEventingBasicConsumer"/>.
+		/// Convenience method to consume a queue by declaring the exchange and queue and binding them together and starting to consume it with an <see cref="AsyncEventingBasicConsumer"/>.
 		/// </summary>
 		/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
 		/// <param name="queueName">The name of the queue.</param>
@@ -45,8 +44,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		}
 
 		/// <summary>
-		/// Convenience method to publish a payload as JSON to a queue. Ensures the existence of the queue when <paramref name="persistent"/>
-		/// is set to true.
+		/// Convenience method to publish a payload as JSON to a queue. Ensures the existence of the queue when <paramref name="persistent"/> is set to true.
 		/// </summary>
 		/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
 		/// <param name="queueName">The name of the queue.</param>

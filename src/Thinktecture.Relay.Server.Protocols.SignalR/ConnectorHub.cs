@@ -76,7 +76,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		public override async Task OnConnectedAsync()
 		{
 			var tenant = Context.User.GetTenantInfo();
-			_logger.LogDebug("Connection incoming for tenant {@Tenant}", tenant);
+			_logger.LogDebug("Connection {ConnectionId} incoming for tenant {@Tenant}", Context.ConnectionId, tenant);
 
 			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
 			await _connectionStatisticsWriter.SetConnectionTimeAsync(Context.ConnectionId, tenant.Id, _relayServerContext.OriginId,
@@ -94,7 +94,8 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <inheritdoc />
 		public override async Task OnDisconnectedAsync(Exception exception)
 		{
-			_logger.LogDebug("Connection disconnected for tenant {@Tenant}", Context.User.GetTenantInfo());
+			_logger.LogDebug("Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
+				Context.User.GetTenantInfo());
 
 			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
 			await _connectionStatisticsWriter.SetDisconnectTimeAsync(Context.ConnectionId);
@@ -114,6 +115,8 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		[HubMethodName("Deliver")]
 		public async Task DeliverAsync(TResponse response)
 		{
+			_logger.LogDebug("Connection {ConnectionId} received response for request {RequestId}", Context.ConnectionId, response.RequestId);
+
 			await _responseCoordinator.ProcessResponseAsync(response);
 			await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 		}
@@ -127,6 +130,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		[HubMethodName("Acknowledge")]
 		public async Task AcknowledgeAsync(IAcknowledgeRequest request)
 		{
+			_logger.LogDebug("Connection {ConnectionId} received acknowledgment for request {RequestId}", Context.ConnectionId,
+				request.RequestId);
+
 			await _acknowledgeCoordinator.AcknowledgeRequestAsync(request);
 			await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 		}
