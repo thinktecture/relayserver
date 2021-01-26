@@ -6,9 +6,6 @@
     <Description>Contains the server implementations for the RelayServer.</Description>
   </PropertyGroup>
 
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\shared\ProjectProperties.shared.props" />
-
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

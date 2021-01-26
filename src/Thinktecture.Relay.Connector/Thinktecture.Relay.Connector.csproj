@@ -1,14 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Thinktecture RelayServer Connector</Title>
     <Description>Contains the connector implementations for the RelayServer.</Description>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="IdentityModel.AspNetCore" Version="2.0.0" />
@@ -16,7 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Core" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.7" />
   </ItemGroup>

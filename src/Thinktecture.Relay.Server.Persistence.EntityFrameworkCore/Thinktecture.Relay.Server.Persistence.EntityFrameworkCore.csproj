@@ -1,14 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Title>Thinktecture RelayServer EntityFramework</Title>
     <Description>Contains the EF Core context for data persistence.</Description>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <!-- Use shared information for NuGet packaging -->
-  <Import Project="..\shared\ProjectProperties.shared.props" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />

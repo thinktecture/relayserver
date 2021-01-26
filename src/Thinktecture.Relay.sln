@@ -4,13 +4,6 @@ VisualStudioVersion = 16.0.30001.183
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Abstractions", "Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj", "{902E6C52-D5D0-4F66-95AC-84CA7DC5B80E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{5D35FB5F-DDE6-4BBB-AEF3-CA2E87596F26}"
-	ProjectSection(SolutionItems) = preProject
-		shared\ProjectLogo.png = shared\ProjectLogo.png
-		shared\ProjectProperties.shared.props = shared\ProjectProperties.shared.props
-		shared\NoPackProperties.shared.props = shared\NoPackProperties.shared.props
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-EA22-4F44-B60F-E82D36FCF5F7}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
@@ -18,10 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-E
 		..\global.json = ..\global.json
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
-		..\.prettierrc = ..\.prettierrc
-		..\package.json = ..\package.json
 		..\.gitignore = ..\.gitignore
-		..\.prettierignore = ..\.prettierignore
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Abstractions", "Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj", "{F76D6870-8364-4EE7-B6B1-953B7D07C63B}"
@@ -50,6 +41,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}"
 	ProjectSection(SolutionItems) = preProject
 		tools\create-migrations.ps1 = tools\create-migrations.ps1
+		tools\Directory.Build.props = tools\Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigrationCreation.SqlServer", "tools\MigrationCreation.SqlServer\MigrationCreation.SqlServer.csproj", "{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}"
@@ -69,6 +61,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA
 		docker\seed-data.ps1 = docker\seed-data.ps1
 		docker\run-environment-multiserver.ps1 = docker\run-environment-multiserver.ps1
 		build-docker-images.ps1 = build-docker-images.ps1
+		docker\Directory.Build.props = docker\Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Docker", "docker\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj", "{599D7AD9-7901-4A20-A81F-6C71E60A71DF}"
