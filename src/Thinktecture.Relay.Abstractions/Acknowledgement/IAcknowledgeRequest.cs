@@ -18,7 +18,7 @@ namespace Thinktecture.Relay.Acknowledgement
 		Guid RequestId { get; set; }
 
 		/// <summary>
-		/// The request body content should be removed.
+		/// Indicates if the request body content should be removed.
 		/// </summary>
 		bool RemoveRequestBodyContent { get; set; }
 	}

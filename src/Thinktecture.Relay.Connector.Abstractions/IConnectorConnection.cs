@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.Connector
 {
 	/// <summary>
-	/// Implement a connection to the server.
+	/// An implementation of a connection to the server.
 	/// </summary>
 	public interface IConnectorConnection
 	{

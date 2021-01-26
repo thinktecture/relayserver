@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.Connector.Authentication
 {
 	/// <summary>
-	/// Implementation that provides access tokens for server access.
+	/// An implementation that provides access tokens for server access.
 	/// </summary>
 	public interface IAccessTokenProvider
 	{

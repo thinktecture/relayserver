@@ -50,7 +50,7 @@ namespace Thinktecture.Relay.Connector.Options
 				}
 				catch (Exception ex)
 				{
-					_logger.LogError(ex, "Could not get discovery document from {DiscoverDocumentUrl}", uri);
+					_logger.LogError(ex, "An error occured while retrieving the discovery document from {DiscoverDocumentUrl}", uri);
 
 					try
 					{
