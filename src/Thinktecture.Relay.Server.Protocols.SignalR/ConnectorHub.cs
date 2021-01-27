@@ -104,7 +104,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		int? IConnectorTransport<TResponse>.BinarySizeThreshold { get; } = 16 * 1024; // 16kb
+		public int? BinarySizeThreshold { get; } = 16 * 1024; // 16kb
 
 		/// <summary>
 		/// Hub method.
@@ -128,7 +128,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		/// <seealso cref="IConnectorTransport{TResponse}.AcknowledgeAsync"/>
 		[HubMethodName("Acknowledge")]
-		public async Task AcknowledgeAsync(IAcknowledgeRequest request)
+		public async Task AcknowledgeAsync(IAcknowledgeRequest request) // TODO an interface does not work here
 		{
 			_logger.LogDebug("Connection {ConnectionId} received acknowledgment for request {RequestId}", Context.ConnectionId,
 				request.RequestId);

@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				.AddHttpClient(Constants.HttpClientNames.RelayWebTargetFollowRedirect, client => client.Timeout = Timeout.InfiniteTimeSpan)
 				.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
 
-			builder.Services.TryAddTransient<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
+			builder.Services.TryAddSingleton<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
 			builder.Services.TryAddTransient<IClientRequestWorker<TRequest, TResponse>, ClientRequestWorker<TRequest, TResponse>>();
 
 			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();

@@ -23,9 +23,9 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		public DiscoveryDocumentRetryPolicy(ILogger<DiscoveryDocumentRetryPolicy> logger,
 			IOptions<RelayConnectorOptions> relayConnectorOptions)
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
 			if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 			SetReconnectDelays(relayConnectorOptions.Value.DiscoveryDocument.ReconnectMinimumDelay,
 				relayConnectorOptions.Value.DiscoveryDocument.ReconnectMaximumDelay);
