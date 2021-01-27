@@ -38,7 +38,6 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private static void EnsureQueue(this IModel model, string queueName, bool durable = true, bool autoDelete = true)
 		{
 			model.ExchangeDeclare(Constants.ExchangeName, ExchangeType.Direct);
-			// TODO x-expires in arguments for queue expiration
 			model.QueueDeclare(queueName, autoDelete: autoDelete, durable: durable, exclusive: false);
 			model.QueueBind(queueName, Constants.ExchangeName, queueName);
 		}

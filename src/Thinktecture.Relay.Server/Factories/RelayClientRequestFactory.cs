@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
@@ -14,13 +15,20 @@ namespace Thinktecture.Relay.Server.Factories
 		where TRequest : IClientRequest, new()
 	{
 		private readonly RelayServerContext _relayServerContext;
+		private readonly RelayServerOptions _relayServerOptions;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RelayClientRequestFactory{TRequest}"/> class.
 		/// </summary>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		public RelayClientRequestFactory(RelayServerContext relayServerContext)
-			=> _relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
+		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
+		public RelayClientRequestFactory(RelayServerContext relayServerContext, IOptions<RelayServerOptions> relayServerOptions)
+		{
+			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+
+			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
+			_relayServerOptions = relayServerOptions.Value;
+		}
 
 		/// <inheritdoc />
 		public Task<TRequest> CreateAsync(Guid tenantId, Guid requestId, HttpRequest httpRequest,
@@ -39,7 +47,7 @@ namespace Thinktecture.Relay.Server.Factories
 				HttpHeaders = httpRequest.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray()),
 				BodySize = httpRequest.Body.Length,
 				BodyContent = httpRequest.Body.Length == 0 ? null : httpRequest.Body,
-				AcknowledgeMode = AcknowledgeMode.Disabled, // TODO get acknowledge mode
+				AcknowledgeMode = _relayServerOptions.AcknowledgeMode,
 				EnableTracing = httpRequest.Headers.ContainsKey(Constants.HeaderNames.EnableTracing)
 			};
 
