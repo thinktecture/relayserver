@@ -1,4 +1,5 @@
 using System;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Diagnostics;
 
 namespace Thinktecture.Relay.Server
@@ -62,5 +63,10 @@ namespace Thinktecture.Relay.Server
 		/// The verbosity of the <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.
 		/// </summary>
 		public RelayRequestLoggerLevel RequestLoggerLevel { get; set; } = RelayRequestLoggerLevel.All;
+
+		/// <summary>
+		/// The <see cref="AcknowledgeMode"/> for requests.
+		/// </summary>
+		public AcknowledgeMode AcknowledgeMode { get; set; } = AcknowledgeMode.Disabled;
 	}
 }
