@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Filters;
@@ -30,11 +31,14 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly ITraceManager _traceManager;
 		private readonly IInterceptorManager _interceptorManager;
 		private readonly IPostDataTemporaryStore _postDataTemporaryStore;
+		private readonly bool _requireLinkAvailability;
 
 		public ClientController(IBackendCommunication backendCommunication, ILogger logger, ILinkRepository linkRepository, IRequestLogger requestLogger,
-			IOnPremiseRequestBuilder onPremiseRequestBuilder, IPathSplitter pathSplitter,
+			IOnPremiseRequestBuilder onPremiseRequestBuilder, IPathSplitter pathSplitter, IConfiguration configuration,
 			ITraceManager traceManager, IInterceptorManager interceptorManager, IPostDataTemporaryStore postDataTemporaryStore)
 		{
+			if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+
 			_backendCommunication = backendCommunication ?? throw new ArgumentNullException(nameof(backendCommunication));
 			_logger = logger;
 			_linkRepository = linkRepository ?? throw new ArgumentNullException(nameof(linkRepository));
@@ -44,6 +48,8 @@ namespace Thinktecture.Relay.Server.Controller
 			_traceManager = traceManager ?? throw new ArgumentNullException(nameof(traceManager));
 			_interceptorManager = interceptorManager ?? throw new ArgumentNullException(nameof(interceptorManager));
 			_postDataTemporaryStore = postDataTemporaryStore ?? throw new ArgumentNullException(nameof(postDataTemporaryStore));
+
+			_requireLinkAvailability = configuration.RequireLinkAvailability;
 		}
 
 		[HttpOptions]
@@ -70,6 +76,12 @@ namespace Thinktecture.Relay.Server.Controller
 			{
 				_logger?.Information("Request cannot be handled");
 				return NotFound();
+			}
+
+			if (_requireLinkAvailability && !await _linkRepository.HasActiveConnectionAsync(link.Id))
+			{
+				_logger?.Debug("Request cannot be handled without an active connection");
+				return ServiceUnavailable();
 			}
 
 			var request = await _onPremiseRequestBuilder.BuildFromHttpRequest(Request, _backendCommunication.OriginId, pathInformation.PathWithoutUserName).ConfigureAwait(false);
@@ -243,6 +255,11 @@ namespace Thinktecture.Relay.Server.Controller
 		private new HttpResponseMessage NotFound()
 		{
 			return Request.CreateResponse(HttpStatusCode.NotFound);
+		}
+
+		private HttpResponseMessage ServiceUnavailable()
+		{
+			return Request.CreateResponse(HttpStatusCode.ServiceUnavailable);
 		}
 	}
 }

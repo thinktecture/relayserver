@@ -45,6 +45,7 @@ namespace Thinktecture.Relay.Server.Config
 		public bool SecureClientController { get; }
 		public TimeSpan AccessTokenLifetime { get; }
 		public bool LogSensitiveData { get; }
+		public bool RequireLinkAvailability { get; }
 
 		// Default settings for links
 		public TimeSpan LinkTokenRefreshWindow { get; }
@@ -249,6 +250,12 @@ namespace Thinktecture.Relay.Server.Config
 			if (Boolean.TryParse(GetValue(nameof(LogSensitiveData)), out tmpBool))
 			{
 				LogSensitiveData = tmpBool;
+			}
+
+			RequireLinkAvailability = false;
+			if (Boolean.TryParse(GetValue(nameof(RequireLinkAvailability)), out tmpBool))
+			{
+				RequireLinkAvailability = tmpBool;
 			}
 
 			LinkTokenRefreshWindow = TimeSpan.FromMinutes(1);
