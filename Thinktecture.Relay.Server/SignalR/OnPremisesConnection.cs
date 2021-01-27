@@ -9,6 +9,7 @@ using Serilog;
 using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.OnPremise;
+using Thinktecture.Relay.Server.Security;
 
 namespace Thinktecture.Relay.Server.SignalR
 {
@@ -34,7 +35,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		{
 			if ((request.User?.Identity.IsAuthenticated ?? false) && request.User is ClaimsPrincipal principal)
 			{
-				var linkId = principal.FindFirst("OnPremiseId")?.Value;
+				var linkId = principal.FindFirst(AuthorizationServerProvider.OnPremiseIdClaimName)?.Value;
 				return !String.IsNullOrWhiteSpace(linkId) && Guid.TryParse(linkId, out var _);
 			}
 
@@ -108,7 +109,7 @@ namespace Thinktecture.Relay.Server.SignalR
 		private static OnPremiseClaims GetOnPremiseClaims(IRequest request)
 		{
 			var claimsPrincipal = (ClaimsPrincipal)request.User;
-			var onPremiseId = claimsPrincipal.FindFirst("OnPremiseId")?.Value;
+			var onPremiseId = claimsPrincipal.FindFirst(AuthorizationServerProvider.OnPremiseIdClaimName)?.Value;
 
 			if (!Guid.TryParse(onPremiseId, out var linkId))
 				throw new ArgumentException($"The claim \"OnPremiseId\" is not valid: {onPremiseId}.");
