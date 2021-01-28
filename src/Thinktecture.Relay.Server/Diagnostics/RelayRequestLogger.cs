@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	/// <inheritdoc />
 	public class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogger<TRequest, TResponse>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		private readonly IRequestRepository _requestRepository;
 		private readonly RelayServerOptions _relayServerOptions;
@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		/// Initializes a new instance of the <see cref="RelayRequestLogger{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="requestRepository">An <see cref="IRequestRepository"/>.</param>
-		/// <param name="relayServerOptions">The <see cref="RelayServerOptions"/>.</param>
+		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		public RelayRequestLogger(IRequestRepository requestRepository, IOptions<RelayServerOptions> relayServerOptions)
 		{
 			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));

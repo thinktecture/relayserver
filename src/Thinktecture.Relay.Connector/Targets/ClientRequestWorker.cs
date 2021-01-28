@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Connector.Targets
 		private readonly Uri _requestEndpoint;
 		private readonly Uri _responseEndpoint;
 
-		private HttpClient _httpClient;
+		private HttpClient? _httpClient;
 		private HttpClient HttpClient => _httpClient ??= _httpClientFactory.CreateClient(Constants.HttpClientNames.RelayServer);
 
 		private class CountingStreamContent : StreamContent
@@ -91,11 +91,11 @@ namespace Thinktecture.Relay.Connector.Targets
 		public async Task<TResponse> HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
 		{
 			using var scope = _serviceProvider.CreateScope();
-			CancellationTokenSource timeout = null;
+			CancellationTokenSource? timeout = null;
 
 			try
 			{
-				IRelayTarget<TRequest, TResponse> target;
+				IRelayTarget<TRequest, TResponse>? target;
 
 				try
 				{
@@ -150,6 +150,8 @@ namespace Thinktecture.Relay.Connector.Targets
 					response.RequestDuration = DateTime.UtcNow - start;
 				}
 
+				if (response.BodyContent == null) return response;
+
 				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
 				{
 					if (response.BodySize == null)
@@ -194,7 +196,7 @@ namespace Thinktecture.Relay.Connector.Targets
 				}
 				else if (response.BodySize > 0)
 				{
-					using var _ = response.BodyContent;
+					await using var _ = response.BodyContent;
 					response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
 					_logger.LogDebug("Inlined from response {BodySize} bytes for request {RequestId}", response.BodySize, request.RequestId);
 				}
@@ -203,7 +205,7 @@ namespace Thinktecture.Relay.Connector.Targets
 			}
 			catch (OperationCanceledException)
 			{
-				if (!timeout.IsCancellationRequested) throw;
+				if (timeout == null || !timeout.IsCancellationRequested) throw;
 
 				_logger.LogWarning("The request {RequestId} timed out", request.RequestId);
 				return request.CreateResponse<TResponse>(HttpStatusCode.GatewayTimeout);

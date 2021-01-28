@@ -16,26 +16,26 @@ namespace Thinktecture.Relay.Connector.Options
 	{
 		private readonly ILogger<RelayConnectorPostConfigureOptions<TRequest, TResponse>> _logger;
 		private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
-		private readonly IApplicationLifetime _applicationLifetime;
+		private readonly IHostApplicationLifetime _hostApplicationLifetime;
 
 		public RelayConnectorPostConfigureOptions(ILogger<RelayConnectorPostConfigureOptions<TRequest, TResponse>> logger,
-			RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry, IApplicationLifetime applicationLifetime)
+			RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry, IHostApplicationLifetime hostApplicationLifetime)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_relayTargetRegistry = relayTargetRegistry ?? throw new ArgumentNullException(nameof(relayTargetRegistry));
-			_applicationLifetime = applicationLifetime ?? throw new ArgumentNullException(nameof(applicationLifetime));
+			_hostApplicationLifetime = hostApplicationLifetime ?? throw new ArgumentNullException(nameof(hostApplicationLifetime));
 		}
 
 		public void PostConfigure(string name, RelayConnectorOptions options)
 		{
-			if (options.Targets?.Count > 0)
+			if (options.Targets.Count > 0)
 			{
 				RegisterTargets(options.Targets);
 			}
 
 			var uri = new Uri(options.RelayServerBaseUri, DiscoveryDocument.WellKnownPath);
 
-			while (!_applicationLifetime.ApplicationStopping.IsCancellationRequested)
+			while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 			{
 				var configManager = new ConfigurationManager<DiscoveryDocument>(uri.ToString(), new RelayServerConfigurationRetriever(),
 					new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https" });
@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Connector.Options
 
 					try
 					{
-						Task.Delay(TimeSpan.FromSeconds(10), _applicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
+						Task.Delay(TimeSpan.FromSeconds(10), _hostApplicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
 					}
 					catch (OperationCanceledException)
 					{
@@ -66,13 +66,19 @@ namespace Thinktecture.Relay.Connector.Options
 
 		private void RegisterTargets(Dictionary<string, Dictionary<string, string>> targets)
 		{
-			foreach (var kvp in targets)
+			foreach (var (key, value) in targets)
 			{
-				var parameters = new Dictionary<string, string>(kvp.Value, StringComparer.OrdinalIgnoreCase);
+				var parameters = new Dictionary<string, string>(value, StringComparer.OrdinalIgnoreCase);
 
-				var type = Type.GetType(parameters[Constants.RelayConnectorOptionsTargetType]);
+				var typeName = parameters[Constants.RelayConnectorOptionsTargetType];
+				var type = Type.GetType(typeName);
+				if (type == null)
+				{
+					_logger.LogError("Could not find target type {TargetType}", typeName);
+					return;
+				}
+
 				TimeSpan? timeout = null;
-
 				if (parameters.TryGetValue(Constants.RelayConnectorOptionsTargetTimeout, out var timeoutParameter))
 				{
 					if (TimeSpan.TryParse(timeoutParameter, out var timeoutValue))
@@ -81,15 +87,15 @@ namespace Thinktecture.Relay.Connector.Options
 					}
 					else
 					{
-						_logger.LogWarning("Could not parse timeout \"{TargetTimeout}\" for target {Target}", timeoutParameter, kvp.Key);
+						_logger.LogWarning("Could not parse timeout \"{TargetTimeout}\" for target {Target}", timeoutParameter, key);
 					}
 				}
 
-				parameters.Add(Constants.RelayConnectorOptionsTargetId, kvp.Key);
+				parameters.Add(Constants.RelayConnectorOptionsTargetId, key);
 				parameters.Remove(Constants.RelayConnectorOptionsTargetType);
 				parameters.Remove(Constants.RelayConnectorOptionsTargetTimeout);
 
-				_relayTargetRegistry.Register(kvp.Key, type, timeout, parameters);
+				_relayTargetRegistry.Register(key, type, timeout, parameters);
 			}
 		}
 	}

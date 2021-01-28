@@ -15,7 +15,11 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// </summary>
 		/// <param name="endpoints">The <see cref="AmqpTcpEndpoint"/>s to use.</param>
 		public RoundRobinEndpointResolver(IEnumerable<AmqpTcpEndpoint> endpoints)
-			=> _endpoints = endpoints?.ToArray() ?? throw new ArgumentNullException(nameof(endpoints));
+		{
+			if (endpoints == null) throw new ArgumentNullException(nameof(endpoints));
+
+			_endpoints = endpoints.ToArray();
+		}
 
 		/// <inheritdoc />
 		public IEnumerable<AmqpTcpEndpoint> All() => _endpoints;

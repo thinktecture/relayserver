@@ -26,14 +26,14 @@ namespace Thinktecture.Relay.Transport
 		public HttpStatusCode HttpStatusCode { get; set; }
 
 		/// <inheritdoc />
-		public IDictionary<string, string[]> HttpHeaders { get; set; }
+		public IDictionary<string, string[]>? HttpHeaders { get; set; }
 
 		/// <inheritdoc />
 		public long? BodySize { get; set; }
 
 		/// <inheritdoc />
 		[JsonConverter(typeof(InlineMemoryStreamJsonConverter))]
-		public Stream BodyContent { get; set; }
+		public Stream? BodyContent { get; set; }
 
 		/// <inheritdoc />
 		public bool RequestFailed { get; set; }

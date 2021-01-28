@@ -7,7 +7,7 @@ namespace Thinktecture.Relay.Server.Transport
 	internal class InMemoryTenantHandler<TRequest> : ITenantHandler<TRequest>
 		where TRequest : IClientRequest
 	{
-		public event AsyncEventHandler<TRequest> RequestReceived;
+		public event AsyncEventHandler<TRequest>? RequestReceived;
 
 		public InMemoryTenantHandler(Guid tenantId, ITenantDispatcher<TRequest> tenantDispatcher)
 		{

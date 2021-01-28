@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,10 +45,10 @@ namespace Thinktecture.Relay.Connector.Targets
 		}
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<TResponse> DeliverResponse;
+		public event AsyncEventHandler<TResponse>? DeliverResponse;
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeRequest;
+		public event AsyncEventHandler<IAcknowledgeRequest>? AcknowledgeRequest;
 
 		/// <inheritdoc />
 		public int? BackgroundTaskLimit
@@ -123,6 +124,7 @@ namespace Thinktecture.Relay.Connector.Targets
 
 			if (enableTracing)
 			{
+				response.HttpHeaders ??= new Dictionary<string, string[]>();
 				response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
 				response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion };
 			}

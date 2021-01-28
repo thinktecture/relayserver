@@ -11,26 +11,26 @@ namespace Thinktecture.Relay.Connector.Options
 		/// <summary>
 		/// The base uri of the server.
 		/// </summary>
-		public Uri RelayServerBaseUri { get; set; }
+		public Uri RelayServerBaseUri { get; set; } = default!;
 
 		/// <summary>
 		/// The tenant name to use for authentication.
 		/// </summary>
-		public string TenantName { get; set; }
+		public string TenantName { get; set; } = default!;
 
 		/// <summary>
 		/// The tenant secret to use for authentication.
 		/// </summary>
-		public string TenantSecret { get; set; }
+		public string TenantSecret { get; set; } = default!;
 
 		/// <summary>
 		/// The <see cref="DiscoveryDocument"/>.
 		/// </summary>
-		public DiscoveryDocument DiscoveryDocument { get; set; }
+		public DiscoveryDocument DiscoveryDocument { get; set; } = default!;
 
 		/// <summary>
 		/// The targets keyed by id.
 		/// </summary>
-		public Dictionary<string, Dictionary<string, string>> Targets { get; set; }
+		public Dictionary<string, Dictionary<string, string>> Targets { get; set; } = default!;
 	}
 }

@@ -19,8 +19,10 @@ namespace Thinktecture.Relay.Server.Maintenance
 		/// <param name="statisticsOptions">An <see cref="IOptions{StatisticsOptions}"/>.</param>
 		public StatisticsCleanupJob(IStatisticsRepository statisticsRepository, IOptions<StatisticsOptions> statisticsOptions)
 		{
+			if (statisticsOptions == null) throw new ArgumentNullException(nameof(statisticsOptions));
+
 			_statisticsRepository = statisticsRepository ?? throw new ArgumentNullException(nameof(statisticsRepository));
-			_statisticsOptions = statisticsOptions?.Value ?? throw new ArgumentNullException(nameof(statisticsOptions));
+			_statisticsOptions = statisticsOptions.Value;
 		}
 
 		/// <inheritdoc />

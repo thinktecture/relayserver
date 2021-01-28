@@ -136,7 +136,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 					ConnectTime = DateTimeOffset.UtcNow,
 					TenantId = tenantId,
 					OriginId = originId,
-					RemoteIpAddress = remoteIpAddress.ToString(),
+					RemoteIpAddress = remoteIpAddress.ToString()
 				});
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}

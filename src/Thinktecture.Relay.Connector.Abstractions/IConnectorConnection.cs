@@ -12,25 +12,25 @@ namespace Thinktecture.Relay.Connector
 		/// Event fired when a connection was established.
 		/// </summary>
 		/// <remarks>The event includes the connection id.</remarks>
-		event AsyncEventHandler<string> Connected;
+		event AsyncEventHandler<string>? Connected;
 
 		/// <summary>
 		/// Event fired when a connection starts to reconnect.
 		/// </summary>
 		/// <remarks>The event includes the connection id.</remarks>
-		event AsyncEventHandler<string> Reconnecting;
+		event AsyncEventHandler<string>? Reconnecting;
 
 		/// <summary>
 		/// Event fired when a connection successfully reconnected.
 		/// </summary>
 		/// <remarks>The event includes the connection id.</remarks>
-		event AsyncEventHandler<string> Reconnected;
+		event AsyncEventHandler<string>? Reconnected;
 
 		/// <summary>
 		/// Event fired when a connection was disconnected.
 		/// </summary>
 		/// <remarks>The event includes the connection id.</remarks>
-		event AsyncEventHandler<string> Disconnected;
+		event AsyncEventHandler<string>? Disconnected;
 
 		/// <summary>
 		/// Opens a connection to the server.

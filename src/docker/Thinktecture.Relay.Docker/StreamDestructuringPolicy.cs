@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Serilog.Core;
 using Serilog.Events;
@@ -7,7 +8,8 @@ namespace Thinktecture.Relay.Docker
 {
 	public class StreamDestructuringPolicy : IDestructuringPolicy
 	{
-		public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue result)
+		public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory,
+			[MaybeNullWhen(false)] out LogEventPropertyValue result)
 		{
 			if (value is Stream stream)
 			{
@@ -16,7 +18,7 @@ namespace Thinktecture.Relay.Docker
 					{ new ScalarValue("CanRead"), new ScalarValue(stream.CanRead) },
 					{ new ScalarValue("CanWrite"), new ScalarValue(stream.CanWrite) },
 					{ new ScalarValue("CanSeek"), new ScalarValue(stream.CanSeek) },
-					{ new ScalarValue("CanTimeout"), new ScalarValue(stream.CanTimeout) },
+					{ new ScalarValue("CanTimeout"), new ScalarValue(stream.CanTimeout) }
 				};
 
 				if (stream.CanTimeout)

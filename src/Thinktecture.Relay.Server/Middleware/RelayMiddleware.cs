@@ -74,8 +74,8 @@ namespace Thinktecture.Relay.Server.Middleware
 			_responseWriter = responseWriter ?? throw new ArgumentNullException(nameof(responseWriter));
 			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
 			_relayContext = relayContext ?? throw new ArgumentNullException(nameof(relayContext));
-			_clientRequestInterceptors = clientRequestInterceptors ?? Array.Empty<IClientRequestInterceptor<TRequest, TResponse>>();
-			_targetResponseInterceptors = targetResponseInterceptors ?? Array.Empty<ITargetResponseInterceptor<TRequest, TResponse>>();
+			_clientRequestInterceptors = clientRequestInterceptors ?? throw new ArgumentNullException(nameof(clientRequestInterceptors));
+			_targetResponseInterceptors = targetResponseInterceptors ?? throw new ArgumentNullException(nameof(targetResponseInterceptors));
 			_relayRequestLogger = relayRequestLogger ?? throw new ArgumentNullException(nameof(relayRequestLogger));
 
 			_relayServerOptions = relayServerOptions.Value;
@@ -197,12 +197,14 @@ namespace Thinktecture.Relay.Server.Middleware
 
 		private async Task WaitForConnectorResponseAsync(CancellationToken cancellationToken)
 		{
-			var (response, disposable) = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, cancellationToken);
-			_relayContext.TargetResponse = response;
+			var context = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, cancellationToken);
+			if (context == null) return;
 
-			if (disposable != null)
+			_relayContext.TargetResponse = context.Response;
+
+			if (context.Disposable != null)
 			{
-				_relayContext.ResponseDisposables.Add(disposable);
+				_relayContext.ResponseDisposables.Add(context.Disposable);
 			}
 		}
 
@@ -220,6 +222,8 @@ namespace Thinktecture.Relay.Server.Middleware
 
 		private async Task<bool> TryInlineBodyContentAsync(TRequest request, CancellationToken cancellationToken)
 		{
+			if (request.BodyContent == null) return false;
+
 			if (request.BodySize > _maximumBodySize)
 			{
 				_logger.LogInformation(

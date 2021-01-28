@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server
 		/// <summary>
 		/// Event fired when an <see cref="IClientRequest"/> was received.
 		/// </summary>
-		event AsyncEventHandler<TRequest> RequestReceived;
+		event AsyncEventHandler<TRequest>? RequestReceived;
 
 		/// <summary>
 		/// Acknowledges an <see cref="IClientRequest"/>.

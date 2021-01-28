@@ -27,7 +27,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR.Options
 
 					// If the request is for our hub...
 					var path = context.HttpContext.Request.Path;
-					if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/connector")))
+					if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/connector"))
 					{
 						// Read the token out of the query string
 						context.Token = accessToken;

@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		public static IRelayServerBuilder<TRequest, TResponse> AddClientRequestInterceptor<TRequest, TResponse, TInterceptor>(
 			this IRelayServerBuilder<TRequest, TResponse> builder)
 			where TRequest : IClientRequest
-			where TResponse : ITargetResponse
+			where TResponse : class, ITargetResponse
 			where TInterceptor : class, IClientRequestInterceptor<TRequest, TResponse>
 		{
 			builder.Services.AddScoped<IClientRequestInterceptor<TRequest, TResponse>, TInterceptor>();
@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		public static IRelayServerBuilder<TRequest, TResponse> AddTargetResponseInterceptor<TRequest, TResponse, TInterceptor>(
 			this IRelayServerBuilder<TRequest, TResponse> builder)
 			where TRequest : IClientRequest
-			where TResponse : ITargetResponse
+			where TResponse : class, ITargetResponse
 			where TInterceptor : class, ITargetResponseInterceptor<TRequest, TResponse>
 		{
 			builder.Services.AddScoped<ITargetResponseInterceptor<TRequest, TResponse>, TInterceptor>();

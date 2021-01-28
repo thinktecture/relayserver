@@ -27,7 +27,7 @@ namespace Thinktecture.Relay
 		/// <param name="event">The <see cref="EventArgs"/> sent.</param>
 		/// <typeparam name="T">The type of event args.</typeparam>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the raised exceptions during the invocation.</returns>
-		public static async Task<Exception[]> InvokeAsync<T>(this AsyncEventHandler<T> eventHandler, object sender, T @event)
+		public static async Task<Exception[]> InvokeAsync<T>(this AsyncEventHandler<T>? eventHandler, object sender, T @event)
 		{
 			if (eventHandler == null) return Array.Empty<Exception>();
 

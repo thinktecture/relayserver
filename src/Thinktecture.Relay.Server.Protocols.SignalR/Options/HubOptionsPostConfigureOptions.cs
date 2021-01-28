@@ -12,7 +12,11 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR.Options
 		private readonly RelayServerOptions _relayServerOptions;
 
 		public HubOptionsPostConfigureOptions(IOptions<RelayServerOptions> relayServerOptions)
-			=> _relayServerOptions = relayServerOptions?.Value ?? throw new ArgumentNullException(nameof(relayServerOptions));
+		{
+			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+
+			_relayServerOptions = relayServerOptions.Value;
+		}
 
 		public void PostConfigure(string name, HubOptions<ConnectorHub<TRequest, TResponse>> options)
 		{

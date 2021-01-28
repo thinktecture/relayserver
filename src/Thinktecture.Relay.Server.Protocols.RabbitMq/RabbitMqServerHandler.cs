@@ -19,10 +19,10 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private readonly AsyncEventingBasicConsumer _acknowledgeConsumer;
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<TResponse> ResponseReceived;
+		public event AsyncEventHandler<TResponse>? ResponseReceived;
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
+		public event AsyncEventHandler<IAcknowledgeRequest>? AcknowledgeReceived;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RabbitMqServerHandler{TResponse}"/> class.
@@ -33,10 +33,11 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public RabbitMqServerHandler(ILogger<RabbitMqServerHandler<TResponse>> logger, ModelFactory modelFactory,
 			RelayServerContext relayServerContext)
 		{
+			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
 			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_model = modelFactory?.Create("server handler") ?? throw new ArgumentNullException(nameof(modelFactory));
+			_model = modelFactory.Create("server handler");
 
 			_responseConsumer = _model.ConsumeQueue($"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
 			_responseConsumer.Received += OnResponseReceived;

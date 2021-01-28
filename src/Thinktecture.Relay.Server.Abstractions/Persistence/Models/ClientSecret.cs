@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// A SHA256 or SHA512 of the actual secret string.
 		/// </summary>
 		/// <remarks>The maximum length is 4000 unicode characters.</remarks>
-		public string Value { get; set; }
+		public string Value { get; set; } = default!;
 
 		/// <summary>
 		/// Defines an optional point in time when this secret automatically will become invalid.

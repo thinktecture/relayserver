@@ -17,6 +17,6 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <summary>
 		/// Enables following redirects.
 		/// </summary>
-		FollowRedirect = 1,
+		FollowRedirect = 1
 	}
 }

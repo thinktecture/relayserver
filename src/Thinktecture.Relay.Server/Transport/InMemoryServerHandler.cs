@@ -7,8 +7,8 @@ namespace Thinktecture.Relay.Server.Transport
 	internal class InMemoryServerHandler<TResponse> : IServerHandler<TResponse>
 		where TResponse : ITargetResponse
 	{
-		public event AsyncEventHandler<TResponse> ResponseReceived;
-		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
+		public event AsyncEventHandler<TResponse>? ResponseReceived;
+		public event AsyncEventHandler<IAcknowledgeRequest>? AcknowledgeReceived;
 
 		public InMemoryServerHandler(IServerDispatcher<TResponse> serverDispatcher)
 		{

@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.Interceptors
 	// ReSharper disable once ClassNeverInstantiated.Global
 	internal class ForwardedHeaderInterceptor<TRequest, TResponse> : IClientRequestInterceptor<TRequest, TResponse>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		public Task OnRequestReceivedAsync(IRelayContext<TRequest, TResponse> context, CancellationToken cancellationToken = default)
 		{

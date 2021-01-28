@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -114,8 +115,8 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <param name="target">When this method returns, <paramref name="target"/> contains the <see cref="IRelayTarget{TRequest,TResponse}"/> or null, if the target was not found.</param>
 		/// <param name="timeout">When this method returns, <paramref name="timeout"/> contains the <see cref="CancellationTokenSource"/> or null, if the target was not found.</param>
 		/// <returns>true if the target was found; otherwise, false.</returns>
-		internal bool TryCreateRelayTarget(string id, IServiceProvider serviceProvider, out IRelayTarget<TRequest, TResponse> target,
-			out CancellationTokenSource timeout)
+		internal bool TryCreateRelayTarget(string id, IServiceProvider serviceProvider,
+			[MaybeNullWhen(false)] out IRelayTarget<TRequest, TResponse> target, [MaybeNullWhen(false)] out CancellationTokenSource timeout)
 		{
 			if (_targets.TryGetValue(id, out var registration) || _targets.TryGetValue(Constants.RelayTargetCatchAllId, out registration))
 			{

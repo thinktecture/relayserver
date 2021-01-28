@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,9 +27,11 @@ namespace Thinktecture.Relay.Server.Maintenance
 		public MaintenanceJobRunner(ILogger<MaintenanceJobRunner> logger, IServiceProvider serviceProvider,
 			IOptions<MaintenanceOptions> maintenanceOptions)
 		{
+			if (maintenanceOptions == null) throw new ArgumentNullException(nameof(maintenanceOptions));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-			_maintenanceOptions = maintenanceOptions?.Value ?? throw new ArgumentNullException(nameof(maintenanceOptions));
+			_maintenanceOptions = maintenanceOptions.Value;
 		}
 
 		/// <inheritdoc />

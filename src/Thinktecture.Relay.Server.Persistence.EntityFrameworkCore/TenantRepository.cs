@@ -19,11 +19,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		public TenantRepository(RelayDbContext dbContext) => _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
 		/// <inheritdoc />
-		public Task<Tenant> LoadTenantByNameAsync(string name)
+		public async Task<Tenant?> LoadTenantByNameAsync(string name)
 		{
 			var normalizedName = name.ToUpperInvariant();
 
-			return _dbContext.Tenants
+			return await _dbContext.Tenants
 				.Include(tenant => tenant.ClientSecrets)
 				.AsNoTracking()
 				.SingleOrDefaultAsync(tenant => tenant.NormalizedName == normalizedName);
@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		// TODO: Fix these methods, these are preliminary
 
 		/// <inheritdoc />
-		public Task<Tenant> LoadTenantByIdAsync(Guid id) => _dbContext.Tenants
+		public async Task<Tenant?> LoadTenantByIdAsync(Guid id) => await _dbContext.Tenants
 			.Include(t => t.ClientSecrets)
 			.AsNoTracking()
 			.SingleOrDefaultAsync(t => t.Id == id);
@@ -90,7 +90,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public Task<Config> LoadTenantConfigAsync(Guid id) => _dbContext.Configs
+		public async Task<Config?> LoadTenantConfigAsync(Guid id) => await _dbContext.Configs
 			.AsNoTracking()
 			.SingleOrDefaultAsync(c => c.TenantId == id);
 	}

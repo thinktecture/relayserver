@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Middleware
 	/// <inheritdoc cref="IRelayContext{TRequest,TResponse}" />
 	public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TResponse>, IAsyncDisposable
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		private readonly IConnectionRepository _connectionRepository;
 
@@ -24,9 +24,12 @@ namespace Thinktecture.Relay.Server.Middleware
 		public RelayContext(IHttpContextAccessor httpContextAccessor, RelayServerContext relayServerContext,
 			IConnectionRepository connectionRepository)
 		{
+			if (httpContextAccessor == null) throw new ArgumentNullException(nameof(httpContextAccessor));
+			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
+
 			_connectionRepository = connectionRepository ?? throw new ArgumentNullException(nameof(connectionRepository));
-			HttpContext = httpContextAccessor?.HttpContext ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-			OriginId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
+			HttpContext = httpContextAccessor.HttpContext ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+			OriginId = relayServerContext.OriginId;
 		}
 
 		/// <inheritdoc />
@@ -39,10 +42,10 @@ namespace Thinktecture.Relay.Server.Middleware
 		public Guid OriginId { get; }
 
 		/// <inheritdoc />
-		public TRequest ClientRequest { get; set; }
+		public TRequest ClientRequest { get; set; } = default!;
 
 		/// <inheritdoc />
-		public TResponse TargetResponse { get; set; }
+		public TResponse? TargetResponse { get; set; }
 
 		/// <inheritdoc />
 		public bool ConnectorAvailable => _connectionRepository.IsConnectionAvailableAsync(ClientRequest.TenantId).GetAwaiter().GetResult();

@@ -22,11 +22,18 @@ namespace Thinktecture.Relay.Server.Transport
 
 		private class AcknowledgeState
 		{
+			public AcknowledgeState(string connectionId, string acknowledgeId, bool outsourcedRequestBodyContent)
+			{
+				ConnectionId = connectionId;
+				AcknowledgeId = acknowledgeId;
+				OutsourcedRequestBodyContent = outsourcedRequestBodyContent;
+			}
+
 			public DateTime Creation { get; } = DateTime.UtcNow;
 
-			public string ConnectionId { get; set; }
-			public string AcknowledgeId { get; set; }
-			public bool OutsourcedRequestBodyContent { get; set; }
+			public string ConnectionId { get; }
+			public string AcknowledgeId { get; }
+			public bool OutsourcedRequestBodyContent { get; }
 		}
 
 		private readonly ConcurrentDictionary<Guid, AcknowledgeState> _requests = new ConcurrentDictionary<Guid, AcknowledgeState>();
@@ -44,13 +51,15 @@ namespace Thinktecture.Relay.Server.Transport
 			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, IBodyStore bodyStore,
 			RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher)
 		{
+			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			_tenantConnectorAdapterRegistry =
 				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
 			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
-			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
+			_originId = relayServerContext.OriginId;
 
 			_serverHandler.AcknowledgeReceived += OnAcknowledgeReceived;
 		}
@@ -65,8 +74,7 @@ namespace Thinktecture.Relay.Server.Transport
 		{
 			_logger.LogTrace("Registering acknowledge state of request {RequestId} from connection {ConnectionId} for id {AcknowledgeId}",
 				requestId, connectionId, acknowledgeId);
-			_requests[requestId] = new AcknowledgeState()
-				{ ConnectionId = connectionId, AcknowledgeId = acknowledgeId, OutsourcedRequestBodyContent = outsourcedRequestBodyContent };
+			_requests[requestId] = new AcknowledgeState(connectionId, acknowledgeId, outsourcedRequestBodyContent);
 		}
 
 		/// <inheritdoc />

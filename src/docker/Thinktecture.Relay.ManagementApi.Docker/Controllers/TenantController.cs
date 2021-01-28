@@ -84,12 +84,9 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		[SwaggerResponse(201, "Response with the uri of the newly created tenant.")]
 		[SwaggerResponse(409, "Tenant could not be created because a tenant with the same name or id already existed.")]
 		[SwaggerResponse(422, "Tenant could not be created because the provided data was invalid.")]
-		public async Task<IActionResult> CreateTenant([FromBody] Tenant tenant)
+		public async Task<IActionResult> CreateTenant([FromBody] Tenant? tenant)
 		{
-			if (tenant == null)
-			{
-				return UnprocessableEntity();
-			}
+			if (tenant == null) return UnprocessableEntity();
 
 			try
 			{
@@ -111,13 +108,10 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		[HttpPost("{tenantId:guid}/secret")]
 		[SwaggerResponse(200, "Secret for the Tenant with given id.", typeof(Secret))]
 		[SwaggerResponse(404, "Could not create secret because tenant with given id was not found.", typeof(Secret))]
-		public async Task<ActionResult<Secret>> CreateClientSecret([FromRoute] Guid tenantId, string secret = null)
+		public async Task<ActionResult<Secret>> CreateClientSecret([FromRoute] Guid tenantId, string? secret = null)
 		{
 			var tenant = await _tenantRepository.LoadTenantByIdAsync(tenantId);
-			if (tenant == null)
-			{
-				return NotFound();
-			}
+			if (tenant == null) return NotFound();
 
 			secret ??= KeyGenerator.GetUniqueKey(8);
 			var hash = secret.Sha512();
@@ -127,7 +121,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 				Id = Guid.NewGuid(),
 				Created = DateTime.UtcNow,
 				TenantId = tenantId,
-				Value = hash,
+				Value = hash
 			});
 
 			return Ok(new Secret(secret));
@@ -187,15 +181,13 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		/// <returns>A hash</returns>
 		public static string Sha512(this string input)
 		{
-			if (String.IsNullOrEmpty(input)) return String.Empty;
+			if (string.IsNullOrEmpty(input)) return string.Empty;
 
-			using (var sha = SHA512.Create())
-			{
-				var bytes = Encoding.UTF8.GetBytes(input);
-				var hash = sha.ComputeHash(bytes);
+			using var sha = SHA512.Create();
+			var bytes = Encoding.UTF8.GetBytes(input);
+			var hash = sha.ComputeHash(bytes);
 
-				return Convert.ToBase64String(hash);
-			}
+			return Convert.ToBase64String(hash);
 		}
 	}
 }

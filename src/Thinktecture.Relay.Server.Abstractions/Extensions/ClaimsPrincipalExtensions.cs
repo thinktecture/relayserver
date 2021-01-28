@@ -22,7 +22,7 @@ namespace System.Security.Claims
 			{
 				Id = Guid.Parse(principal.FindFirst("client_id").Value),
 				Name = principal.FindFirst("client_name").Value,
-				DisplayName = principal.FindFirst("client_display_name").Value,
+				DisplayName = principal.FindFirst("client_display_name").Value
 			};
 		}
 	}

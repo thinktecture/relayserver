@@ -27,11 +27,14 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public RabbitMqTenantDispatcher(ILogger<RabbitMqTenantDispatcher<TRequest>> logger, ModelFactory modelFactory,
 			IOptions<RabbitMqOptions> rabbitMqOptions)
 		{
+			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
+			if (rabbitMqOptions == null) throw new ArgumentNullException(nameof(rabbitMqOptions));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-			BinarySizeThreshold = rabbitMqOptions?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(rabbitMqOptions));
+			BinarySizeThreshold = rabbitMqOptions.Value.MaximumBinarySize;
 
-			_model = modelFactory?.Create("tenant dispatcher") ?? throw new ArgumentNullException(nameof(modelFactory));
+			_model = modelFactory.Create("tenant dispatcher");
 		}
 
 		/// <inheritdoc />

@@ -24,7 +24,7 @@ namespace System
 		{
 			var assembly = type.Assembly;
 			return assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ??
-				assembly.GetCustomAttribute<AssemblyVersionAttribute>()?.Version;
+				assembly.GetCustomAttribute<AssemblyVersionAttribute>()?.Version ?? "Unknown";
 		}
 	}
 }

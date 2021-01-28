@@ -22,26 +22,26 @@ namespace Thinktecture.Relay.Transport
 		public Guid? AcknowledgeOriginId { get; set; }
 
 		/// <inheritdoc />
-		public string Target { get; set; }
+		public string Target { get; set; } = default!;
 
 		/// <inheritdoc />
 		public Guid TenantId { get; set; }
 
 		/// <inheritdoc />
-		public string HttpMethod { get; set; }
+		public string HttpMethod { get; set; } = default!;
 
 		/// <inheritdoc />
-		public string Url { get; set; }
+		public string Url { get; set; } = default!;
 
 		/// <inheritdoc />
-		public IDictionary<string, string[]> HttpHeaders { get; set; }
+		public IDictionary<string, string[]> HttpHeaders { get; set; } = default!;
 
 		/// <inheritdoc />
 		public long? BodySize { get; set; }
 
 		/// <inheritdoc />
 		[JsonConverter(typeof(InlineMemoryStreamJsonConverter))]
-		public Stream BodyContent { get; set; }
+		public Stream? BodyContent { get; set; }
 
 		/// <inheritdoc />
 		public bool EnableTracing { get; set; }
