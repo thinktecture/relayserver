@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Transport
 	/// </summary>
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IRelayTargetResponseWriter<in TResponse>
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		/// <summary>
 		/// Writes the response to the <see cref="HttpResponse"/>.
@@ -19,6 +19,6 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <param name="httpResponse">The <see cref="HttpResponse"/>.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task WriteAsync(TResponse targetResponse, HttpResponse httpResponse, CancellationToken cancellationToken = default);
+		Task WriteAsync(TResponse? targetResponse, HttpResponse httpResponse, CancellationToken cancellationToken = default);
 	}
 }

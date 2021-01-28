@@ -18,9 +18,9 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 
-		private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-		private HubConnection _connection;
-		private string _connectionId;
+		private CancellationTokenSource? _cancellationTokenSource = new CancellationTokenSource();
+		private HubConnection? _connection;
+		private string _connectionId = string.Empty;
 		private bool? _enableTracing;
 
 		/// <summary>
@@ -37,7 +37,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
 
-			_connection = hubConnectionFactory?.Create() ?? throw new ArgumentNullException(nameof(hubConnectionFactory));
+			_connection = hubConnectionFactory.Create() ?? throw new ArgumentNullException(nameof(hubConnectionFactory));
 			_connection.On<TRequest>("RequestTarget", RequestTargetAsync);
 			_connection.On<ITenantConfig>("Configure", ConfigureAsync);
 
@@ -49,7 +49,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_clientRequestHandler.DeliverResponse += ClientRequestHandlerDeliverResponse;
 		}
 
-		private async Task ConnectionClosed(Exception ex)
+		private async Task ConnectionClosed(Exception? ex)
 		{
 			if (ex == null || ex is OperationCanceledException)
 			{
@@ -59,8 +59,11 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			{
 				_logger.LogWarning(ex, "Connection {ConnectionId} closed", _connectionId);
 
+				var token = _cancellationTokenSource?.Token;
+				if (token == null) return;
+
 				await Reconnecting.InvokeAsync(this, _connectionId);
-				await ConnectAsyncInternal(_cancellationTokenSource.Token);
+				await ConnectAsyncInternal(token.Value);
 				await Reconnected.InvokeAsync(this, _connectionId);
 			}
 		}
@@ -97,14 +100,17 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 			request.EnableTracing = request.EnableTracing || _enableTracing.GetValueOrDefault();
 
-			await _clientRequestHandler.HandleAsync(request, BinarySizeThreshold, _cancellationTokenSource.Token);
+			var token = _cancellationTokenSource?.Token;
+			if (token == null) return;
+
+			await _clientRequestHandler.HandleAsync(request, BinarySizeThreshold, token.Value);
 		}
 
 		private Task ConfigureAsync(ITenantConfig config)
 		{
 			_logger.LogTrace("Received tenant config {@Config} on connection {ConnectionId}", config, _connectionId);
 
-			_connection.SetKeepAliveInterval(config.KeepAliveInterval);
+			_connection?.SetKeepAliveInterval(config.KeepAliveInterval);
 			_retryPolicy.SetReconnectDelays(config.ReconnectMinimumDelay, config.ReconnectMaximumDelay);
 
 			if (config.EnableTracing != null)
@@ -143,16 +149,16 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		public int? BinarySizeThreshold { get; } = 16 * 1024; // 16kb
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<string> Connected;
+		public event AsyncEventHandler<string>? Connected;
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<string> Reconnecting;
+		public event AsyncEventHandler<string>? Reconnecting;
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<string> Reconnected;
+		public event AsyncEventHandler<string>? Reconnected;
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<string> Disconnected;
+		public event AsyncEventHandler<string>? Disconnected;
 
 		/// <inheritdoc />
 		public async Task DeliverAsync(TResponse response)
@@ -212,7 +218,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 			_logger.LogTrace("Disconnecting connection {ConnectionId}", _connectionId);
 
-			_cancellationTokenSource.Cancel();
+			_cancellationTokenSource?.Cancel();
 			await _connection.StopAsync(cancellationToken);
 			_logger.LogInformation("Disconnected on connection {ConnectionId}", _connectionId);
 
@@ -220,23 +226,37 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		public async ValueTask DisposeAsync()
+		public ValueTask DisposeAsync()
 		{
-			if (_connection != null)
+			if (_connection == null && _cancellationTokenSource == null) return new ValueTask();
+
+			lock (this)
 			{
-				await _connection.DisposeAsync();
-				_connection.Closed -= ConnectionClosed;
-				_connection.Reconnecting -= ConnectionReconnecting;
-				_connection.Reconnected -= ConnectionReconnected;
+				var connection = _connection;
 				_connection = null;
+
+				if (connection != null)
+				{
+					connection.Closed -= ConnectionClosed;
+					connection.Reconnecting -= ConnectionReconnecting;
+					connection.Reconnected -= ConnectionReconnected;
+					connection.DisposeAsync().GetAwaiter().GetResult();
+				}
+
+				var cancellationTokenSource = _cancellationTokenSource;
+				_cancellationTokenSource = null;
+
+				if (cancellationTokenSource != null)
+				{
+					cancellationTokenSource.Cancel();
+					cancellationTokenSource.Dispose();
+				}
+
+				_clientRequestHandler.AcknowledgeRequest -= ClientRequestHandlerAcknowledgeRequest;
+				_clientRequestHandler.DeliverResponse -= ClientRequestHandlerDeliverResponse;
 			}
 
-			_cancellationTokenSource?.Cancel();
-			_cancellationTokenSource?.Dispose();
-			_cancellationTokenSource = null;
-
-			_clientRequestHandler.AcknowledgeRequest -= ClientRequestHandlerAcknowledgeRequest;
-			_clientRequestHandler.DeliverResponse -= ClientRequestHandlerDeliverResponse;
+			return new ValueTask();
 		}
 	}
 }

@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
 			_retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
-			_relayConnectorOptions = relayConnectorOptions?.Value;
+			_relayConnectorOptions = relayConnectorOptions.Value;
 		}
 
 		/// <summary>

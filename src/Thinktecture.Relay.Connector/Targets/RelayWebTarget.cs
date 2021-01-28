@@ -103,24 +103,23 @@ namespace Thinktecture.Relay.Connector.Targets
 		{
 			var requestMessage = new HttpRequestMessage(new HttpMethod(request.HttpMethod), request.Url);
 
-			foreach (var header in request.HttpHeaders)
+			foreach (var (key, value) in request.HttpHeaders)
 			{
-				if (header.Key == HeaderNames.Host) continue;
+				if (key == HeaderNames.Host) continue;
 
-				requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+				requestMessage.Headers.TryAddWithoutValidation(key, value);
 			}
 
-			if (request.BodyContent != null)
+			if (request.BodyContent == null) return requestMessage;
+
+			requestMessage.Content = new StreamContent(request.BodyContent);
+
+			foreach (var (key, value) in request.HttpHeaders)
 			{
-				requestMessage.Content = new StreamContent(request.BodyContent);
-
-				foreach (var header in request.HttpHeaders)
-				{
-					requestMessage.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
-				}
-
-				requestMessage.Content.Headers.ContentLength = request.BodySize;
+				requestMessage.Content.Headers.TryAddWithoutValidation(key, value);
 			}
+
+			requestMessage.Content.Headers.ContentLength = request.BodySize;
 
 			return requestMessage;
 		}

@@ -29,10 +29,11 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 			IOptions<RabbitMqOptions> rabbitMqOptions)
 		{
 			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
+			if (rabbitMqOptions == null) throw new ArgumentNullException(nameof(rabbitMqOptions));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-			BinarySizeThreshold = rabbitMqOptions?.Value.MaximumBinarySize ?? throw new ArgumentNullException(nameof(rabbitMqOptions));
+			BinarySizeThreshold = rabbitMqOptions.Value.MaximumBinarySize;
 
 			_responseModel = modelFactory.Create("response dispatcher");
 			_acknowledgeModel = modelFactory.Create("acknowledge dispatcher");

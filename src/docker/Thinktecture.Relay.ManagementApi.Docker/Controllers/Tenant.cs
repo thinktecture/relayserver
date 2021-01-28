@@ -20,19 +20,19 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 		/// </summary>
 		/// <example>MyOnPremiseConnector</example>
 		[Required]
-		public string Name { get; set; }
+		public string Name { get; set; } = default!;
 
 		/// <summary>
 		/// The display name of the tenant. Will be used as a visual identifier on the management UI.
 		/// </summary>
 		/// <example>My on premise connector</example>
-		public string DisplayName { get; set; }
+		public string? DisplayName { get; set; }
 
 		/// <summary>
 		/// An optional, longer, textual description of this tenant.
 		/// </summary>
 		/// <example>On premise connector in the Thinktecture office in Karlsruhe</example>
-		public string Description { get; set; }
+		public string? Description { get; set; }
 	}
 
 	internal static class TenantExtensions
@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 				Id = tenant.Id,
 				Name = tenant.Name,
 				DisplayName = tenant.DisplayName,
-				Description = tenant.Description,
+				Description = tenant.Description
 			};
 		}
 
@@ -63,7 +63,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 				Id = tenant.Id,
 				Name = tenant.Name,
 				DisplayName = tenant.DisplayName,
-				Description = tenant.Description,
+				Description = tenant.Description
 			};
 		}
 	}

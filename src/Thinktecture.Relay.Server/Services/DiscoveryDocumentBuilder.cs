@@ -21,8 +21,10 @@ namespace Thinktecture.Relay.Server.Services
 		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		public DiscoveryDocumentBuilder(IServiceProvider serviceProvider, IOptions<RelayServerOptions> relayServerOptions)
 		{
+			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-			_relayServerOptions = relayServerOptions?.Value ?? throw new ArgumentNullException(nameof(relayServerOptions));
+			_relayServerOptions = relayServerOptions.Value;
 		}
 
 		/// <summary>
@@ -37,7 +39,7 @@ namespace Thinktecture.Relay.Server.Services
 			return new DiscoveryDocument()
 			{
 				ServerVersion = GetType().GetAssemblyVersion(),
-				AuthorizationServer = GetAuthority(),
+				AuthorizationServer = GetAuthority() ?? string.Empty,
 				EndpointTimeout = _relayServerOptions.EndpointTimeout,
 				ConnectorEndpoint = new Uri(baseUri, "connector").ToString(),
 				AcknowledgeEndpoint = new Uri(baseUri, "acknowledge").ToString(),
@@ -46,13 +48,13 @@ namespace Thinktecture.Relay.Server.Services
 				ReconnectMinimumDelay = _relayServerOptions.ReconnectMinimumDelay,
 				ReconnectMaximumDelay = _relayServerOptions.ReconnectMaximumDelay,
 				HandshakeTimeout = _relayServerOptions.HandshakeTimeout,
-				KeepAliveInterval = _relayServerOptions.KeepAliveInterval,
+				KeepAliveInterval = _relayServerOptions.KeepAliveInterval
 			};
 		}
 
 		private Uri BuildBaseUri(HttpRequest request) => new Uri($"{request.Scheme}://{request.Host}{request.PathBase}", UriKind.Absolute);
 
-		private string GetAuthority()
+		private string? GetAuthority()
 			=> _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()?.Get(Constants.DefaultAuthenticationScheme)?.Authority;
 	}
 }

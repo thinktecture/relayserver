@@ -1,7 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Relay Server" type="CompoundRunConfigurationType">
     <toRun name="Thinktecture.Relay.Connector.Docker" type="LaunchSettings" />
-    <toRun name="Thinktecture.Relay.ManagementApi.Docker" type="LaunchSettings" />
     <toRun name="Thinktecture.Relay.Server.Docker" type="LaunchSettings" />
     <toRun name="Thinktecture.Relay.IdentityServer.Docker" type="LaunchSettings" />
     <method v="2" />

@@ -16,14 +16,16 @@ namespace Thinktecture.Relay.Connector.Options
 	{
 		private readonly RelayConnectorOptions _relayConnectorOptions;
 		private readonly ILogger<AccessTokenManagementConfigureOptions> _logger;
-		private readonly IApplicationLifetime _applicationLifetime;
+		private readonly IHostApplicationLifetime _hostApplicationLifetime;
 
 		public AccessTokenManagementConfigureOptions(ILogger<AccessTokenManagementConfigureOptions> logger,
-			IApplicationLifetime applicationLifetime, IOptions<RelayConnectorOptions> relayConnectorOptions)
+			IHostApplicationLifetime hostApplicationLifetime, IOptions<RelayConnectorOptions> relayConnectorOptions)
 		{
+			if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_applicationLifetime = applicationLifetime ?? throw new ArgumentNullException(nameof(applicationLifetime));
-			_relayConnectorOptions = relayConnectorOptions?.Value ?? throw new ArgumentNullException(nameof(relayConnectorOptions));
+			_hostApplicationLifetime = hostApplicationLifetime ?? throw new ArgumentNullException(nameof(hostApplicationLifetime));
+			_relayConnectorOptions = relayConnectorOptions.Value;
 		}
 
 		public void Configure(AccessTokenManagementOptions options)
@@ -31,7 +33,7 @@ namespace Thinktecture.Relay.Connector.Options
 			var uri = new Uri(new Uri(_relayConnectorOptions.DiscoveryDocument.AuthorizationServer),
 				OidcConstants.Discovery.DiscoveryEndpoint);
 
-			while (!_applicationLifetime.ApplicationStopping.IsCancellationRequested)
+			while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 			{
 				var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(uri.ToString(),
 					new OpenIdConnectConfigurationRetriever(), new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https" });
@@ -46,7 +48,7 @@ namespace Thinktecture.Relay.Connector.Options
 						Address = configuration.TokenEndpoint,
 						ClientId = _relayConnectorOptions.TenantName,
 						ClientSecret = _relayConnectorOptions.TenantSecret,
-						Scope = Constants.RelayServerScopes,
+						Scope = Constants.RelayServerScopes
 					});
 					break;
 				}
@@ -56,7 +58,7 @@ namespace Thinktecture.Relay.Connector.Options
 
 					try
 					{
-						Task.Delay(TimeSpan.FromSeconds(10), _applicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
+						Task.Delay(TimeSpan.FromSeconds(10), _hostApplicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
 					}
 					catch (OperationCanceledException)
 					{

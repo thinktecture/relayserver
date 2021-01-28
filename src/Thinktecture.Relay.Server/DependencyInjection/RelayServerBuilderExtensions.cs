@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
 		/// <remarks>Use a shared location between all server instances.</remarks>
 		public static IRelayServerBuilder<TRequest, TResponse> AddFileBodyStore<TRequest, TResponse>(
-			this IRelayServerBuilder<TRequest, TResponse> builder, Action<FileBodyStoreOptions> configure = null)
+			this IRelayServerBuilder<TRequest, TResponse> builder, Action<FileBodyStoreOptions>? configure = null)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{
@@ -87,7 +87,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
 		public static IRelayServerBuilder<TRequest, TResponse> AddMaintenanceJobs<TRequest, TResponse>(
-			this IRelayServerBuilder<TRequest, TResponse> builder, Action<MaintenanceOptions> configure = null)
+			this IRelayServerBuilder<TRequest, TResponse> builder, Action<MaintenanceOptions>? configure = null)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 		{

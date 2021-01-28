@@ -28,20 +28,8 @@ namespace Thinktecture.Relay.IdentityServer.Docker
 			services.AddIdentityServer(options => options.InputLengthRestrictions.ClientSecret = 200)
 				.AddClientStore<RelayServerTenantStore>()
 				.AddDeveloperSigningCredential()
-				.AddInMemoryApiScopes(new[]
-				{
-					new ApiScope("relaying"),
-				})
-				.AddInMemoryApiResources(new[]
-				{
-					new ApiResource("relayserver")
-					{
-						Scopes = new[]
-						{
-							"relaying",
-						},
-					},
-				});
+				.AddInMemoryApiScopes(new[] { new ApiScope("relaying") })
+				.AddInMemoryApiResources(new[] { new ApiResource("relayserver") { Scopes = new[] { "relaying" } } });
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,12 +56,7 @@ namespace Thinktecture.Relay.IdentityServer.Docker
 			app.UseAuthorization();
 			app.UseAuthentication();
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllerRoute(
-					name: "default",
-					pattern: "{controller=Home}/{action=Index}/{id?}");
-			});
+			app.UseEndpoints(endpoints => endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 				{
 					Version = "v1",
 					Title = "RelayServer Management API",
-					Description = "An API to manage RelayServer configuration",
+					Description = "An API to manage RelayServer configuration"
 				});
 
 				options.EnableAnnotations();
@@ -60,7 +60,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker
 			app.UseSwagger(options => options.RouteTemplate = "/docs/{DocumentName}/openapi.json");
 			app.UseSwaggerUI(options =>
 			{
-				options.RoutePrefix = String.Empty;
+				options.RoutePrefix = string.Empty;
 				options.SwaggerEndpoint("/docs/Management/openapi.json", "RelayServer Management API");
 			});
 		}

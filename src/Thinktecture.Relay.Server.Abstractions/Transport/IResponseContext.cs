@@ -18,13 +18,6 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <summary>
 		/// An <see cref="IAsyncDisposable"/> which should be disposed when the response body content is no longer needed.
 		/// </summary>
-		IAsyncDisposable Disposable { get; set; }
-
-		/// <summary>
-		/// Deconstruction.
-		/// </summary>
-		/// <param name="response">The target response.</param>
-		/// <param name="disposable">An <see cref="IAsyncDisposable"/>.</param>
-		void Deconstruct(out TResponse response, out IAsyncDisposable disposable);
+		IAsyncDisposable? Disposable { get; set; }
 	}
 }

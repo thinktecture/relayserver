@@ -26,8 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="configure">An optional configuration action.</param>
 		/// <returns>The <see cref="IRelayServerBuilder{ClientRequest,TargetResponse}"/>.</returns>
 		public static IRelayServerBuilder<ClientRequest, TargetResponse> AddRelayServer(this IServiceCollection services,
-			Action<RelayServerOptions> configure = null)
-			=> services.AddRelayServer<ClientRequest, TargetResponse>(configure);
+			Action<RelayServerOptions>? configure = null) => services.AddRelayServer<ClientRequest, TargetResponse>(configure);
 
 		/// <summary>
 		/// Adds the server to the <see cref="IServiceCollection"/>.
@@ -38,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/>.</returns>
 		public static IRelayServerBuilder<TRequest, TResponse> AddRelayServer<TRequest, TResponse>(this IServiceCollection services,
-			Action<RelayServerOptions> configure = null)
+			Action<RelayServerOptions>? configure = null)
 			where TRequest : IClientRequest, new()
 			where TResponse : class, ITargetResponse, new()
 		{
@@ -79,7 +78,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddHostedService<ServerStatisticsWriter>();
 
 			services.AddHealthChecks()
-				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready", });
+				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });
 
 			return new RelayServerBuilder<TRequest, TResponse>(services);
 		}

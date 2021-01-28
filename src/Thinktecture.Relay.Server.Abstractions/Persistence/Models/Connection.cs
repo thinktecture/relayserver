@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// The transport-specific connection id.
 		/// </summary>
 		/// <remarks>The maximum length is 100 unicode characters.</remarks>
-		public string Id { get; set; }
+		public string Id { get; set; } = default!;
 
 		/// <summary>
 		/// The unique id of the tenant.
@@ -41,6 +41,6 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The remote IP address of the connector.
 		/// </summary>
-		public string RemoteIpAddress { get; set; }
+		public string? RemoteIpAddress { get; set; }
 	}
 }

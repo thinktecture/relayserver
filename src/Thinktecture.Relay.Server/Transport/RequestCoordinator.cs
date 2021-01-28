@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Server.Transport
 		private readonly ILogger<RequestCoordinator<TRequest, TResponse>> _logger;
 		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
-		private readonly bool _enableRequestShortcut;
+		private readonly RelayServerOptions _relayServerOptions;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RequestCoordinator{TRequest,TResponse}"/> class.
@@ -34,13 +34,14 @@ namespace Thinktecture.Relay.Server.Transport
 			_tenantConnectorAdapterRegistry =
 				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
 
-			_enableRequestShortcut = relayServerOptions.Value.EnableRequestShortcut;
+			_relayServerOptions = relayServerOptions.Value;
 		}
 
 		/// <inheritdoc />
 		public async Task DeliverRequestAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			if (!_enableRequestShortcut || !await _tenantConnectorAdapterRegistry.TryDeliverRequestAsync(request, cancellationToken))
+			if (!_relayServerOptions.EnableRequestShortcut ||
+				!await _tenantConnectorAdapterRegistry.TryDeliverRequestAsync(request, cancellationToken))
 			{
 				_logger.LogDebug("Redirecting request {RequestId} to dispatcher for tenant {TenantId}", request.RequestId, request.TenantId);
 				await _tenantDispatcher.DispatchRequestAsync(request);

@@ -43,12 +43,11 @@ namespace Thinktecture.Relay.Transport
 				HttpHeaders = new Dictionary<string, string[]>()
 			};
 
-			if (failureStatusCode != null)
-			{
-				response.BodySize = 0;
-				response.HttpStatusCode = failureStatusCode.Value;
-				response.RequestFailed = true;
-			}
+			if (failureStatusCode == null) return response;
+
+			response.BodySize = 0;
+			response.HttpStatusCode = failureStatusCode.Value;
+			response.RequestFailed = true;
 
 			return response;
 		}

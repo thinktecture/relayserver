@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql
 		/// <param name="optionsLifetime">The lifetime with which to register the DbContextOptions service in the container.</param>
 		/// <returns>The same service collection so that multiple calls can be chained.</returns>
 		public static IServiceCollection AddRelayServerDbContext(this IServiceCollection serviceCollection, string connectionString,
-			Action<NpgsqlDbContextOptionsBuilder> optionsAction = null, bool addMigrationsAssembly = true,
+			Action<NpgsqlDbContextOptionsBuilder>? optionsAction = null, bool addMigrationsAssembly = true,
 			ServiceLifetime contextLifetime = ServiceLifetime.Scoped, ServiceLifetime optionsLifetime = ServiceLifetime.Scoped)
 		{
 			return serviceCollection.AddDbContext<RelayDbContext>(contextOptionsBuilder =>

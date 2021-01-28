@@ -33,6 +33,6 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// All connections that are currently registered for this origin.
 		/// </summary>
 		[JsonIgnore]
-		public List<Connection> Connections { get; set; }
+		public List<Connection>? Connections { get; set; }
 	}
 }

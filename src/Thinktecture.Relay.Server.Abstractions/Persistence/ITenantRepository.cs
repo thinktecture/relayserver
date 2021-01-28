@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="name">The name of the <see cref="Tenant"/> to load.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if not found.</returns>
-		Task<Tenant> LoadTenantByNameAsync(string name);
+		Task<Tenant?> LoadTenantByNameAsync(string name);
 
 		// TODO: Fix these methods, these are preliminary
 
@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="id">The id of the <see cref="Tenant"/> to load.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if not found.</returns>
-		Task<Tenant> LoadTenantByIdAsync(Guid id);
+		Task<Tenant?> LoadTenantByIdAsync(Guid id);
 
 		/// <summary>
 		/// Loads all <see cref="Tenant"/> with paging.
@@ -60,6 +60,6 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// </summary>
 		/// <param name="id">The unique id of the tenant.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Config"/> or null if not found.</returns>
-		Task<Config> LoadTenantConfigAsync(Guid id);
+		Task<Config?> LoadTenantConfigAsync(Guid id);
 	}
 }

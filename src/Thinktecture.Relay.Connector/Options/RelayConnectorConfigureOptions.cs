@@ -7,13 +7,13 @@ namespace Thinktecture.Relay.Connector.Options
 	{
 		public void Configure(RelayConnectorOptions options)
 		{
-			if (options.Targets == null || options.Targets.Count == 0) return;
+			if (options.Targets.Count == 0) return;
 
-			foreach (var kvp in options.Targets)
+			foreach (var (_, value) in options.Targets)
 			{
-				if (kvp.Value.TryGetValue(Constants.RelayConnectorOptionsTargetType, out var type) && !type.Contains("."))
+				if (value.TryGetValue(Constants.RelayConnectorOptionsTargetType, out var type) && !type.Contains("."))
 				{
-					kvp.Value[Constants.RelayConnectorOptionsTargetType] = $"{typeof(RelayWebTarget).Namespace}.{type}";
+					value[Constants.RelayConnectorOptionsTargetType] = $"{typeof(RelayWebTarget).Namespace}.{type}";
 				}
 			}
 		}

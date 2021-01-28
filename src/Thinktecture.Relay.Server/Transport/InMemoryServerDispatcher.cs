@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Transport;
@@ -8,8 +7,8 @@ namespace Thinktecture.Relay.Server.Transport
 	internal class InMemoryServerDispatcher<TResponse> : IServerDispatcher<TResponse>
 		where TResponse : ITargetResponse
 	{
-		public event AsyncEventHandler<TResponse> ResponseReceived;
-		public event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeReceived;
+		public event AsyncEventHandler<TResponse>? ResponseReceived;
+		public event AsyncEventHandler<IAcknowledgeRequest>? AcknowledgeReceived;
 
 		public int? BinarySizeThreshold { get; } = null;
 

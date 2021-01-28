@@ -17,12 +17,12 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <summary>
 		/// Event fired when a response should be delivered.
 		/// </summary>
-		event AsyncEventHandler<TResponse> DeliverResponse;
+		event AsyncEventHandler<TResponse>? DeliverResponse;
 
 		/// <summary>
 		/// Event fired when a request should be acknowledged.
 		/// </summary>
-		event AsyncEventHandler<IAcknowledgeRequest> AcknowledgeRequest;
+		event AsyncEventHandler<IAcknowledgeRequest>? AcknowledgeRequest;
 
 		/// <summary>
 		/// Limits the number of background tasks running in parallel or null for system's recommended limit.

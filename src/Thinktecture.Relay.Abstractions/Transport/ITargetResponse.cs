@@ -45,7 +45,7 @@ namespace Thinktecture.Relay.Transport
 		/// The HTTP headers provided.
 		/// </summary>
 		/// <seealso cref="RequestFailed"/>
-		IDictionary<string, string[]> HttpHeaders { get; set; }
+		IDictionary<string, string[]>? HttpHeaders { get; set; }
 
 		/// <summary>
 		/// The size of the body or null if the size is unknown.
@@ -58,7 +58,7 @@ namespace Thinktecture.Relay.Transport
 		/// </summary>
 		/// <seealso cref="BodySize"/>
 		/// <remarks>Depending on the transport the stream content may be serialized inline.</remarks>
-		Stream BodyContent { get; set; }
+		Stream? BodyContent { get; set; }
 
 		/// <summary>
 		/// Indicates if the request failed or didn't reach a target.

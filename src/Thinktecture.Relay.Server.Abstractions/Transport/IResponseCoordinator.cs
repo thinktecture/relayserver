@@ -25,7 +25,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// <param name="requestId">The unique id of the request.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="IResponseContext{TResponse}"/>.</returns>
-		Task<IResponseContext<TResponse>> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default);
+		Task<IResponseContext<TResponse>?> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Processes the response.

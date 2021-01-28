@@ -8,12 +8,12 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		/// <summary>
 		/// The Uri to connect to.
 		/// </summary>
-		public string Uri { get; set; }
+		public string Uri { get; set; } = default!;
 
 		/// <summary>
 		/// The comma-separated hosts of a Rabbit MQ cluster.
 		/// </summary>
-		public string ClusterHosts { get; set; }
+		public string? ClusterHosts { get; set; }
 
 		/// <summary>
 		/// The maximum size for inline binary data in a Rabbit MQ message.

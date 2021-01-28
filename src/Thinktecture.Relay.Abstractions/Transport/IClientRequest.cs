@@ -71,7 +71,7 @@ namespace Thinktecture.Relay.Transport
 		/// </summary>
 		/// <seealso cref="BodySize"/>
 		/// <remarks>Depending on the transport the stream content may be serialized inline.</remarks>
-		Stream BodyContent { get; set; }
+		Stream? BodyContent { get; set; }
 
 		/// <summary>
 		/// Enable tracing of this particular request.

@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Interceptor
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface ITargetResponseInterceptor<TRequest, TResponse>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		/// <summary>
 		/// Called when a response was received.

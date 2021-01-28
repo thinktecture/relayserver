@@ -11,7 +11,7 @@ namespace Thinktecture.Relay.Server.Services
 {
 	/// <inheritdoc />
 	public class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<TResponse>
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		private readonly ILogger<RelayTargetResponseWriter<TResponse>> _logger;
 
@@ -23,8 +23,14 @@ namespace Thinktecture.Relay.Server.Services
 			=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 		/// <inheritdoc />
-		public async Task WriteAsync(TResponse targetResponse, HttpResponse httpResponse, CancellationToken cancellationToken = default)
+		public async Task WriteAsync(TResponse? targetResponse, HttpResponse httpResponse, CancellationToken cancellationToken = default)
 		{
+			if (targetResponse == null)
+			{
+				httpResponse.StatusCode = StatusCodes.Status204NoContent;
+				return;
+			}
+
 			if (targetResponse.RequestFailed)
 			{
 				_logger.LogWarning("The request {RequestId} failed internally with {HttpStatusCode}", targetResponse.RequestId,

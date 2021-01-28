@@ -16,12 +16,12 @@ namespace Thinktecture.Relay.Connector.Options
 			/// <summary>
 			/// The unique id of the target.
 			/// </summary>
-			public string Id { get; set; }
+			public string Id { get; set; } = default!;
 
 			/// <summary>
 			/// The <see cref="Type"/> of the target handling requests.
 			/// </summary>
-			public Type Type { get; set; }
+			public Type Type { get; set; } = default!;
 
 			/// <summary>
 			/// An optional <see cref="TimeSpan"/> when the target times out.
@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Connector.Options
 			/// <summary>
 			/// Constructor arguments not provided by the <see cref="IServiceProvider"/>.
 			/// </summary>
-			public object[] Parameters { get; set; }
+			public object[] Parameters { get; set; } = default!;
 		}
 
 		/// <summary>

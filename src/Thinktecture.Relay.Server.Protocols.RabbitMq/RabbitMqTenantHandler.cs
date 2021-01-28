@@ -24,7 +24,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		private readonly AsyncEventingBasicConsumer _consumer;
 
 		/// <inheritdoc />
-		public event AsyncEventHandler<TRequest> RequestReceived;
+		public event AsyncEventHandler<TRequest>? RequestReceived;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RabbitMqTenantHandler{TRequest,TResponse}"/> class.
@@ -38,9 +38,11 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		public RabbitMqTenantHandler(ILogger<RabbitMqTenantHandler<TRequest, TResponse>> logger, RelayServerContext relayServerContext,
 			IAcknowledgeCoordinator acknowledgeCoordinator, ModelFactory modelFactory, Guid tenantId, string connectionId)
 		{
+			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
+
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_originId = relayServerContext?.OriginId ?? throw new ArgumentNullException(nameof(relayServerContext));
 			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
+			_originId = relayServerContext.OriginId;
 			_connectionId = connectionId;
 
 			_model = modelFactory?.Create($"tenant handler for {tenantId} of connection {connectionId}") ??

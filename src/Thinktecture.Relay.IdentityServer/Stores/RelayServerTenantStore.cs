@@ -24,15 +24,10 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 			=> _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 
 		/// <inheritdoc />
-		async Task<Client> IClientStore.FindClientByIdAsync(string clientId)
+		async Task<Client?> IClientStore.FindClientByIdAsync(string clientId)
 		{
 			var tenant = await _tenantRepository.LoadTenantByNameAsync(clientId);
-			if (tenant == null)
-			{
-				return null;
-			}
-
-			return ConvertToClient(tenant);
+			return tenant == null ? null : ConvertToClient(tenant);
 		}
 
 		private Client ConvertToClient(Tenant tenant)
@@ -42,26 +37,18 @@ namespace Thinktecture.Relay.IdentityServer.Stores
 				ClientName = tenant.Name,
 				Description = tenant.Description,
 				ClientSecrets = GetClientSecrets(tenant),
-				AllowedGrantTypes = new[]
-				{
-					GrantType.ClientCredentials,
-				},
-				AllowedScopes = new[]
-				{
-					// TODO: Define correct scopes
-					"relaying",
-				},
+				AllowedGrantTypes = new[] { GrantType.ClientCredentials },
+				AllowedScopes = new[] { "relaying" }, // TODO define correct scopes
 				Claims = new[]
 				{
 					new ClientClaim("name", tenant.Name),
-					new ClientClaim("display_name", tenant.DisplayName ?? tenant.Name),
-				},
-				// TODO: Fill access token lifetime etc. from config
+					new ClientClaim("display_name", tenant.DisplayName ?? tenant.Name)
+				}
+				// TODO fill access token lifetime etc. from config
 			};
 
 		private ICollection<Secret> GetClientSecrets(Tenant tenant)
-			=> tenant
-				.ClientSecrets
+			=> tenant.ClientSecrets!
 				.Select(secret => new Secret(secret.Value, secret.Expiration))
 				.ToArray();
 	}

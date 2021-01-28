@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Transport
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IRelayContext<TRequest, TResponse>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		/// <summary>
 		/// The date and time of the request start.
@@ -39,7 +39,7 @@ namespace Thinktecture.Relay.Server.Transport
 		/// </summary>
 		/// <remarks>Setting this to an instance in an interceptor prevents requesting any target by default.</remarks>
 		/// <seealso cref="ForceConnectorDelivery"/>
-		TResponse TargetResponse { get; set; }
+		TResponse? TargetResponse { get; set; }
 
 		/// <summary>
 		/// Indicates if at least one connector should be available for processing the <see cref="ClientRequest"/>.

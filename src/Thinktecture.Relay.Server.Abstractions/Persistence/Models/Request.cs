@@ -31,17 +31,17 @@ namespace Thinktecture.Relay.Server.Persistence.Models
 		/// <summary>
 		/// The URL relative to the <see cref="Target"/>.
 		/// </summary>
-		public string RequestUrl { get; set; }
+		public string RequestUrl { get; set; } = default!;
 
 		/// <summary>
 		/// The name of the target.
 		/// </summary>
-		public string Target { get; set; }
+		public string Target { get; set; } = default!;
 
 		/// <summary>
 		/// The HTTP method.
 		/// </summary>
-		public string HttpMethod { get; set; }
+		public string HttpMethod { get; set; } = default!;
 
 		/// <summary>
 		/// The amount of bytes received by the requesting client.

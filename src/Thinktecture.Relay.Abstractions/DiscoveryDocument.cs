@@ -36,32 +36,32 @@ namespace Thinktecture.Relay
 		/// <summary>
 		/// The version of the RelayServer.
 		/// </summary>
-		public string ServerVersion { get; set; }
+		public string ServerVersion { get; set; } = default!;
 
 		/// <summary>
 		/// The url of the authorization server.
 		/// </summary>
-		public string AuthorizationServer { get; set; }
+		public string AuthorizationServer { get; set; } = default!;
 
 		/// <summary>
 		/// The endpoint where the connector needs to connect to.
 		/// </summary>
-		public string ConnectorEndpoint { get; set; }
+		public string ConnectorEndpoint { get; set; } = default!;
 
 		/// <summary>
 		/// The endpoint where requests should be acknowledged.
 		/// </summary>
-		public string AcknowledgeEndpoint { get; set; }
+		public string AcknowledgeEndpoint { get; set; } = default!;
 
 		/// <summary>
 		/// The endpoint the connector should fetch large request bodies from.
 		/// </summary>
-		public string RequestEndpoint { get; set; }
+		public string RequestEndpoint { get; set; } = default!;
 
 		/// <summary>
 		/// The endpoint the connector should send responses to.
 		/// </summary>
-		public string ResponseEndpoint { get; set; }
+		public string ResponseEndpoint { get; set; } = default!;
 
 		/// <summary>
 		/// The timeout of a server endpoint accessed from a connector.

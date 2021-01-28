@@ -26,9 +26,11 @@ namespace Thinktecture.Relay.Server.Services
 		public ServerStatisticsWriter(IOriginStatisticsWriter statisticsWriter, RelayServerContext serverContext,
 			IOptions<StatisticsOptions> statisticsOptions)
 		{
+			if (statisticsOptions == null) throw new ArgumentNullException(nameof(statisticsOptions));
+
 			_statisticsWriter = statisticsWriter ?? throw new ArgumentNullException(nameof(statisticsWriter));
 			_serverContext = serverContext ?? throw new ArgumentNullException(nameof(serverContext));
-			_statisticsOptions = statisticsOptions?.Value ?? throw new ArgumentNullException(nameof(statisticsOptions));
+			_statisticsOptions = statisticsOptions.Value;
 		}
 
 		/// <inheritdoc />

@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
 		public static IRelayServerBuilder<TRequest, TResponse> AddRabbitMqRouting<TRequest, TResponse>(
-			this IRelayServerBuilder<TRequest, TResponse> builder, Action<RabbitMqOptions> configure = null, bool useServerRouting = true,
+			this IRelayServerBuilder<TRequest, TResponse> builder, Action<RabbitMqOptions>? configure = null, bool useServerRouting = true,
 			bool useTenantRouting = true)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				{
 					DispatchConsumersAsync = true,
 					EndpointResolverFactory = endpoints => new RoundRobinEndpointResolver(endpoints),
-					Uri = new Uri(options.Value.Uri),
+					Uri = new Uri(options.Value.Uri)
 				};
 
 				return factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts ?? factory.Uri.Host),

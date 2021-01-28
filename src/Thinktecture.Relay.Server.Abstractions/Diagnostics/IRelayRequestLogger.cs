@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 	/// <typeparam name="TResponse">The type of response.</typeparam>
 	public interface IRelayRequestLogger<TRequest, TResponse>
 		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+		where TResponse : class, ITargetResponse
 	{
 		/// <summary>
 		/// Logs the request as succeeded.
