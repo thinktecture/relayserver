@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Connector.DependencyInjection;
 using Thinktecture.Relay.Transport;
 
@@ -147,25 +148,27 @@ namespace Thinktecture.Relay.Connector.Targets
 	}
 
 	/// <summary>
-	/// Extension methods for the <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.
+	/// Extension methods for the <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.
 	/// </summary>
 	public static class RelayConnectorBuilderExtensions
 	{
 		/// <summary>
 		/// Adds a <see cref="RelayWebTarget{TRequest,TResponse}"/>.
 		/// </summary>
-		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</param>
+		/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.</param>
 		/// <param name="id">The unique id of the target.</param>
 		/// <param name="baseAddress">An <see cref="Uri"/> containing the base address of the target.</param>
 		/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<TRequest, TResponse> AddWebTarget<TRequest, TResponse>(
-			this IRelayConnectorBuilder<TRequest, TResponse> builder, string id, Uri baseAddress, TimeSpan? timeout = null)
+		/// <typeparam name="TAcknowledge">The type of acknowledge.</typeparam>
+		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.</returns>
+		public static IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge> AddWebTarget<TRequest, TResponse, TAcknowledge>(
+			this IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge> builder, string id, Uri baseAddress, TimeSpan? timeout = null)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse, new()
-			=> builder.AddTarget<TRequest, TResponse, RelayWebTarget<TRequest, TResponse>>(id, timeout, baseAddress);
+			where TAcknowledge : IAcknowledgeRequest
+			=> builder.AddTarget<TRequest, TResponse, TAcknowledge, RelayWebTarget<TRequest, TResponse>>(id, timeout, baseAddress);
 	}
 
 	/// <summary>

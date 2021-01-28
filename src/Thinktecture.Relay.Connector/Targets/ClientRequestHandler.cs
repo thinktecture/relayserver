@@ -8,47 +8,50 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Connector.Options;
+using Thinktecture.Relay.Connector.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <inheritdoc />
-	public class ClientRequestHandler<TRequest, TResponse> : IClientRequestHandler<TRequest, TResponse>
+	public class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRequestHandler<TRequest, TResponse>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse, new()
+		where TAcknowledge : IAcknowledgeRequest, new()
 	{
-		private readonly ILogger<ClientRequestHandler<TRequest, TResponse>> _logger;
+		private readonly ILogger<ClientRequestHandler<TRequest, TResponse, TAcknowledge>> _logger;
 		private readonly IServiceProvider _serviceProvider;
+		private readonly IResponseTransport<TResponse> _responseTransport;
+		private readonly IAcknowledgeTransport<TAcknowledge> _acknowledgeTransport;
 		private readonly Uri _acknowledgeEndpoint;
 		private readonly int _minWorkerThreads;
 		private readonly int _maxWorkerThreads;
 		private readonly int _maxCompletionPortThreads;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ClientRequestHandler{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="ClientRequestHandler{TRequest,TResponse,TAcknowledge}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
 		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
-		public ClientRequestHandler(ILogger<ClientRequestHandler<TRequest, TResponse>> logger, IServiceProvider serviceProvider,
-			IOptions<RelayConnectorOptions> relayConnectorOptions)
+		/// <param name="responseTransport">An <see cref="IResponseTransport{T}"/>.</param>
+		/// <param name="acknowledgeTransport">An <see cref="IAcknowledgeTransport{T}"/>.</param>
+		public ClientRequestHandler(ILogger<ClientRequestHandler<TRequest, TResponse, TAcknowledge>> logger, IServiceProvider serviceProvider,
+			IOptions<RelayConnectorOptions> relayConnectorOptions, IResponseTransport<TResponse> responseTransport,
+			IAcknowledgeTransport<TAcknowledge> acknowledgeTransport)
 		{
 			if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_responseTransport = responseTransport ?? throw new ArgumentNullException(nameof(responseTransport));
+			_acknowledgeTransport = acknowledgeTransport ?? throw new ArgumentNullException(nameof(acknowledgeTransport));
 
 			_acknowledgeEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.AcknowledgeEndpoint}/");
 
 			ThreadPool.GetMinThreads(out _minWorkerThreads, out _);
 			ThreadPool.GetMaxThreads(out _maxWorkerThreads, out _maxCompletionPortThreads);
 		}
-
-		/// <inheritdoc />
-		public event AsyncEventHandler<TResponse>? DeliverResponse;
-
-		/// <inheritdoc />
-		public event AsyncEventHandler<IAcknowledgeRequest>? AcknowledgeRequest;
 
 		/// <inheritdoc />
 		public int? BackgroundTaskLimit
@@ -129,14 +132,14 @@ namespace Thinktecture.Relay.Connector.Targets
 				response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion };
 			}
 
-			await DeliverResponse.InvokeAsync(this, response);
+			await _responseTransport.TransportAsync(response);
 		}
 
 		/// <inheritdoc />
 		public async Task AcknowledgeRequestAsync(TRequest request, bool removeRequestBodyContent)
 		{
 			_logger.LogDebug("Acknowledging request {RequestId} on origin {OriginId}", request.RequestId, request.AcknowledgeOriginId);
-			await AcknowledgeRequest.InvokeAsync(this, request.CreateAcknowledge<TRequest, AcknowledgeRequest>(removeRequestBodyContent));
+			await _acknowledgeTransport.TransportAsync(request.CreateAcknowledge<TRequest, TAcknowledge>(removeRequestBodyContent));
 		}
 	}
 }

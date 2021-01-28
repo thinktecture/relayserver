@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Diagnostics;
@@ -24,9 +25,10 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
 		/// <param name="configure">An optional configuration action.</param>
-		/// <returns>The <see cref="IRelayServerBuilder{ClientRequest,TargetResponse}"/>.</returns>
-		public static IRelayServerBuilder<ClientRequest, TargetResponse> AddRelayServer(this IServiceCollection services,
-			Action<RelayServerOptions>? configure = null) => services.AddRelayServer<ClientRequest, TargetResponse>(configure);
+		/// <returns>The <see cref="IRelayServerBuilder{ClientRequest,TargetResponse,AcknowledgeRequest}"/>.</returns>
+		public static IRelayServerBuilder<ClientRequest, TargetResponse, AcknowledgeRequest> AddRelayServer(this IServiceCollection services,
+			Action<RelayServerOptions>? configure = null)
+			=> services.AddRelayServer<ClientRequest, TargetResponse, AcknowledgeRequest>(configure);
 
 		/// <summary>
 		/// Adds the server to the <see cref="IServiceCollection"/>.
@@ -35,11 +37,13 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="configure">An optional configuration action.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
-		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayServerBuilder<TRequest, TResponse> AddRelayServer<TRequest, TResponse>(this IServiceCollection services,
-			Action<RelayServerOptions>? configure = null)
+		/// <typeparam name="TAcknowledge">The type of acknowledge.</typeparam>
+		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse,TAcknowledge}"/>.</returns>
+		public static IRelayServerBuilder<TRequest, TResponse, TAcknowledge> AddRelayServer<TRequest, TResponse, TAcknowledge>(
+			this IServiceCollection services, Action<RelayServerOptions>? configure = null)
 			where TRequest : IClientRequest, new()
 			where TResponse : class, ITargetResponse, new()
+			where TAcknowledge : IAcknowledgeRequest
 		{
 			if (configure != null)
 			{
@@ -80,7 +84,7 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddHealthChecks()
 				.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });
 
-			return new RelayServerBuilder<TRequest, TResponse>(services);
+			return new RelayServerBuilder<TRequest, TResponse, TAcknowledge>(services);
 		}
 	}
 }

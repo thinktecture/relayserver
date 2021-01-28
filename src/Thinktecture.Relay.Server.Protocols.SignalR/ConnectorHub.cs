@@ -35,11 +35,12 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 
 	/// <inheritdoc cref="Hub{T}" />
 	[Authorize(Constants.DefaultAuthenticationPolicy)]
-	public class ConnectorHub<TRequest, TResponse> : Hub<IConnector<TRequest>>, IConnectorTransport<TResponse>
+	public class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConnector<TRequest>>, IConnectorTransportLimit
 		where TRequest : IClientRequest
 		where TResponse : class, ITargetResponse
+		where TAcknowledge : IAcknowledgeRequest
 	{
-		private readonly ILogger<ConnectorHub<TRequest, TResponse>> _logger;
+		private readonly ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> _logger;
 		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
 		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
 		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
@@ -48,7 +49,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		private readonly ITenantRepository _tenantRepository;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ConnectorHub{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="ConnectorHub{TRequest,TResponse,TAcknowledge}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
@@ -57,7 +58,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
 		/// <param name="relayServerContext">An <see cref="RelayServerContext"/>.</param>
 		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
-		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
+		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
 			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
 			IResponseCoordinator<TResponse> responseCoordinator, IConnectionStatisticsWriter connectionStatisticsWriter,
 			RelayServerContext relayServerContext, ITenantRepository tenantRepository)
@@ -103,16 +104,15 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			await base.OnDisconnectedAsync(exception);
 		}
 
-		/// <inheritdoc />
-		public int? BinarySizeThreshold { get; } = 16 * 1024; // 16kb
+		int? IConnectorTransportLimit.BinarySizeThreshold { get; } = 16 * 1024; // 16kb
 
 		/// <summary>
 		/// Hub method.
 		/// </summary>
 		/// <param name="response">The target response.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		/// <seealso cref="IConnectorTransport{TResponse}.DeliverAsync"/>
 		[HubMethodName("Deliver")]
+		// ReSharper disable once UnusedMember.Global
 		public async Task DeliverAsync(TResponse response)
 		{
 			_logger.LogDebug("Connection {ConnectionId} received response for request {RequestId}", Context.ConnectionId, response.RequestId);
@@ -124,11 +124,11 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <summary>
 		/// Hub method.
 		/// </summary>
-		/// <param name="request">An <see cref="IAcknowledgeRequest"/>.</param>
+		/// <param name="request">The acknowledge request.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		/// <seealso cref="IConnectorTransport{TResponse}.AcknowledgeAsync"/>
 		[HubMethodName("Acknowledge")]
-		public async Task AcknowledgeAsync(IAcknowledgeRequest request) // TODO an interface does not work here
+		// ReSharper disable once UnusedMember.Global
+		public async Task AcknowledgeAsync(TAcknowledge request)
 		{
 			_logger.LogDebug("Connection {ConnectionId} received acknowledgment for request {RequestId}", Context.ConnectionId,
 				request.RequestId);
@@ -141,8 +141,8 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// Hub method.
 		/// </summary>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		/// <seealso cref="IConnectorTransport{TResponse}.PongAsync"/>
 		[HubMethodName("Pong")]
+		// ReSharper disable once UnusedMember.Global
 		public Task PongAsync() => throw new NotImplementedException();
 	}
 }
