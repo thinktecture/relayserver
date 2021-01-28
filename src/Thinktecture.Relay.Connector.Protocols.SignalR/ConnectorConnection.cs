@@ -5,16 +5,19 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Connector.Targets;
+using Thinktecture.Relay.Connector.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR
 {
 	/// <inheritdoc cref="IConnectorConnection" />
-	public class ConnectorConnection<TRequest, TResponse> : IConnectorConnection, IConnectorTransport<TResponse>, IAsyncDisposable
+	public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnectorConnection, IConnectorTransportLimit, IAsyncDisposable,
+		IResponseTransport<TResponse>, IAcknowledgeTransport<TAcknowledge>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
+		where TAcknowledge : IAcknowledgeRequest
 	{
-		private readonly ILogger<ConnectorConnection<TRequest, TResponse>> _logger;
+		private readonly ILogger<ConnectorConnection<TRequest, TResponse, TAcknowledge>> _logger;
 		private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
 
@@ -24,14 +27,15 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		private bool? _enableTracing;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ConnectorConnection{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="ConnectorConnection{TRequest,TResponse,TAcknowledge}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="retryPolicy">The <see cref="DiscoveryDocumentRetryPolicy"/>.</param>
 		/// <param name="hubConnectionFactory">The <see cref="HubConnectionFactory"/>.</param>
 		/// <param name="clientRequestHandler">An <see cref="IClientRequestHandler{TRequest,TResponse}"/>.</param>
-		public ConnectorConnection(ILogger<ConnectorConnection<TRequest, TResponse>> logger, DiscoveryDocumentRetryPolicy retryPolicy,
-			HubConnectionFactory hubConnectionFactory, IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
+		public ConnectorConnection(ILogger<ConnectorConnection<TRequest, TResponse, TAcknowledge>> logger,
+			DiscoveryDocumentRetryPolicy retryPolicy, HubConnectionFactory hubConnectionFactory,
+			IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
@@ -44,9 +48,6 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_connection.Closed += ConnectionClosed;
 			_connection.Reconnecting += ConnectionReconnecting;
 			_connection.Reconnected += ConnectionReconnected;
-
-			_clientRequestHandler.AcknowledgeRequest += ClientRequestHandlerAcknowledgeRequest;
-			_clientRequestHandler.DeliverResponse += ClientRequestHandlerDeliverResponse;
 		}
 
 		private async Task ConnectionClosed(Exception? ex)
@@ -86,10 +87,6 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			_connectionId = connectionId;
 			await Reconnected.InvokeAsync(this, _connectionId);
 		}
-
-		private Task ClientRequestHandlerAcknowledgeRequest(object sender, IAcknowledgeRequest request) => AcknowledgeAsync(request);
-
-		private Task ClientRequestHandlerDeliverResponse(object sender, TResponse response) => DeliverAsync(response);
 
 		private async Task RequestTargetAsync(TRequest request)
 		{
@@ -160,37 +157,10 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		/// <inheritdoc />
 		public event AsyncEventHandler<string>? Disconnected;
 
-		/// <inheritdoc />
-		public async Task DeliverAsync(TResponse response)
-		{
-			_logger.LogTrace("Delivering response for request {RequestId} on connection {ConnectionId}", response.RequestId, _connectionId);
-			try
-			{
-				await _connection.InvokeAsync("Deliver", response);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occured while delivering response for request {RequestId} on connection {ConnectionId}",
-					response.RequestId, _connectionId);
-			}
-		}
-
-		/// <inheritdoc />
-		public async Task AcknowledgeAsync(IAcknowledgeRequest request)
-		{
-			_logger.LogTrace("Acknowledging request {@AcknowledgeRequest} on connection {ConnectionId}", request, _connectionId);
-			try
-			{
-				await _connection.InvokeAsync("Acknowledge", request);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occured while acknowledging request {RequestId} on connection {ConnectionId}", request.RequestId,
-					_connectionId);
-			}
-		}
-
-		/// <inheritdoc />
+		/// <summary>
+		/// TODO extract transport interface
+		/// </summary>
+		/// <returns></returns>
 		public async Task PongAsync()
 		{
 			_logger.LogTrace("Pong on connection {ConnectionId}", _connectionId);
@@ -251,12 +221,39 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 					cancellationTokenSource.Cancel();
 					cancellationTokenSource.Dispose();
 				}
-
-				_clientRequestHandler.AcknowledgeRequest -= ClientRequestHandlerAcknowledgeRequest;
-				_clientRequestHandler.DeliverResponse -= ClientRequestHandlerDeliverResponse;
 			}
 
 			return new ValueTask();
+		}
+
+		async Task IResponseTransport<TResponse>.TransportAsync(TResponse response, CancellationToken cancellationToken)
+		{
+			_logger.LogTrace("Transporting response for request {RequestId} on connection {ConnectionId}", response.RequestId, _connectionId);
+
+			try
+			{
+				await _connection.InvokeAsync("Deliver", response, cancellationToken);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while transporting response for request {RequestId} on connection {ConnectionId}",
+					response.RequestId, _connectionId);
+			}
+		}
+
+		async Task IAcknowledgeTransport<TAcknowledge>.TransportAsync(TAcknowledge request, CancellationToken cancellationToken)
+		{
+			_logger.LogTrace("Transporting acknowledge request {@AcknowledgeRequest} on connection {ConnectionId}", request, _connectionId);
+
+			try
+			{
+				await _connection.InvokeAsync("Acknowledge", request, cancellationToken);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occured while transporting acknowledge request {RequestId} on connection {ConnectionId}",
+					request.RequestId, _connectionId);
+			}
 		}
 	}
 }

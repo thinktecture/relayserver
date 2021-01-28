@@ -2,6 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.RabbitMq;
@@ -11,25 +12,28 @@ using Thinktecture.Relay.Transport;
 namespace Microsoft.Extensions.DependencyInjection
 {
 	/// <summary>
-	/// Extension methods for the <see cref="IRelayServerBuilder{TRequest,TResponse}"/>.
+	/// Extension methods for the <see cref="IRelayServerBuilder{TRequest,TResponse,TAcknowledge}"/>.
 	/// </summary>
 	public static class RelayServerBuilderExtensions
 	{
 		/// <summary>
 		/// Adds the routing based on Rabbit MQ.
 		/// </summary>
-		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</param>
+		/// <param name="builder">The <see cref="IRelayServerBuilder{TRequest,TResponse,TAcknowledge}"/> instance.</param>
 		/// <param name="configure">An optional configure callback for setting the <see cref="RabbitMqOptions"/>.</param>
 		/// <param name="useServerRouting">Enables Rabbit MQ for server-to-server communication.</param>
 		/// <param name="useTenantRouting">Enables Rabbit MQ for server-to-tenant communication.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
-		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse}"/> instance.</returns>
-		public static IRelayServerBuilder<TRequest, TResponse> AddRabbitMqRouting<TRequest, TResponse>(
-			this IRelayServerBuilder<TRequest, TResponse> builder, Action<RabbitMqOptions>? configure = null, bool useServerRouting = true,
+		/// <typeparam name="TAcknowledge">The type of acknowledge.</typeparam>
+		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse,TAcknowledge}"/> instance.</returns>
+		public static IRelayServerBuilder<TRequest, TResponse, TAcknowledge> AddRabbitMqRouting<TRequest, TResponse, TAcknowledge>(
+			this IRelayServerBuilder<TRequest, TResponse, TAcknowledge> builder, Action<RabbitMqOptions>? configure = null,
+			bool useServerRouting = true,
 			bool useTenantRouting = true)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
+			where TAcknowledge : IAcknowledgeRequest
 		{
 			if (configure != null)
 			{
@@ -49,7 +53,6 @@ namespace Microsoft.Extensions.DependencyInjection
 					.TryAddSingleton<ITenantHandlerFactory<TRequest>, RabbitMqTenantHandlerFactory<TRequest, TResponse>>();
 			}
 
-			// ReSharper disable once RedundantTypeArgumentsOfMethod
 			builder.Services.TryAddSingleton<IConnection>(provider =>
 			{
 				var context = provider.GetRequiredService<RelayServerContext>();

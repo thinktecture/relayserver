@@ -4,6 +4,7 @@ using System.Threading;
 using IdentityModel.AspNetCore.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.Authentication;
 using Thinktecture.Relay.Connector.DependencyInjection;
@@ -24,10 +25,10 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// </summary>
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
 		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions"/>.</param>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<ClientRequest, TargetResponse> AddRelayConnector(this IServiceCollection services,
+		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.</returns>
+		public static IRelayConnectorBuilder<ClientRequest, TargetResponse, AcknowledgeRequest> AddRelayConnector(this IServiceCollection services,
 			Action<RelayConnectorOptions> configure)
-			=> services.AddRelayConnector<ClientRequest, TargetResponse>(configure);
+			=> services.AddRelayConnector<ClientRequest, TargetResponse, AcknowledgeRequest>(configure);
 
 		/// <summary>
 		/// Adds the connector to the <see cref="IServiceCollection"/>.
@@ -36,13 +37,16 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions"/>.</param>
 		/// <typeparam name="TRequest">The type of request.</typeparam>
 		/// <typeparam name="TResponse">The type of response.</typeparam>
-		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse}"/>.</returns>
-		public static IRelayConnectorBuilder<TRequest, TResponse> AddRelayConnector<TRequest, TResponse>(this IServiceCollection services,
+		/// <typeparam name="TAcknowledge">The type of acknowledge.</typeparam>
+		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.</returns>
+		public static IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge> AddRelayConnector<TRequest, TResponse, TAcknowledge>(
+			this IServiceCollection services,
 			Action<RelayConnectorOptions> configure)
 			where TRequest : IClientRequest, new()
 			where TResponse : ITargetResponse, new()
+			where TAcknowledge : IAcknowledgeRequest, new()
 		{
-			var builder = new RelayConnectorBuilder<TRequest, TResponse>(services);
+			var builder = new RelayConnectorBuilder<TRequest, TResponse, TAcknowledge>(services);
 
 			builder.Services.Configure(configure);
 
@@ -70,7 +74,7 @@ namespace Microsoft.Extensions.DependencyInjection
 				.AddHttpClient(Constants.HttpClientNames.RelayWebTargetFollowRedirect, client => client.Timeout = Timeout.InfiniteTimeSpan)
 				.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
 
-			builder.Services.TryAddSingleton<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse>>();
+			builder.Services.TryAddSingleton<IClientRequestHandler<TRequest, TResponse>, ClientRequestHandler<TRequest, TResponse, TAcknowledge>>();
 			builder.Services.TryAddTransient<IClientRequestWorker<TRequest, TResponse>, ClientRequestWorker<TRequest, TResponse>>();
 
 			builder.Services.AddSingleton<RelayTargetRegistry<TRequest, TResponse>>();

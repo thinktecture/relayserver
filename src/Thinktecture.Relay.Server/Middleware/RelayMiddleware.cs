@@ -48,7 +48,7 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{TResponse}"/>.</param>
 		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
 		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
-		/// <param name="connectorTransport">An <see cref="IConnectorTransport{TResponse}"/>.</param>
+		/// <param name="connectorTransportLimit">An <see cref="IConnectorTransportLimit"/>.</param>
 		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="clientRequestInterceptors">An enumeration of <see cref="IClientRequestInterceptor{TRequest,TResponse}"/>.</param>
 		/// <param name="targetResponseInterceptors">An enumeration of <see cref="ITargetResponseInterceptor{TRequest,TResponse}"/>.</param>
@@ -57,14 +57,14 @@ namespace Thinktecture.Relay.Server.Middleware
 			ITenantRepository tenantRepository, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
 			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
 			IRelayContext<TRequest, TResponse> relayContext, ITenantDispatcher<TRequest> tenantDispatcher,
-			IConnectorTransport<TResponse> connectorTransport, IOptions<RelayServerOptions> relayServerOptions,
+			IConnectorTransportLimit connectorTransportLimit, IOptions<RelayServerOptions> relayServerOptions,
 			IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
 			IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors,
 			IRelayRequestLogger<TRequest, TResponse> relayRequestLogger)
 		{
 			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 			if (tenantDispatcher == null) throw new ArgumentNullException(nameof(tenantDispatcher));
-			if (connectorTransport == null) throw new ArgumentNullException(nameof(connectorTransport));
+			if (connectorTransportLimit == null) throw new ArgumentNullException(nameof(connectorTransportLimit));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
@@ -80,7 +80,7 @@ namespace Thinktecture.Relay.Server.Middleware
 
 			_relayServerOptions = relayServerOptions.Value;
 			_maximumBodySize = Math.Min(tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(),
-				connectorTransport.BinarySizeThreshold.GetValueOrDefault());
+				connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault());
 		}
 
 		/// <inheritdoc />
