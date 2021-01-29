@@ -28,7 +28,7 @@ namespace Thinktecture.Relay.Server.Middleware
 			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
 
 			_connectionRepository = connectionRepository ?? throw new ArgumentNullException(nameof(connectionRepository));
-			HttpContext = httpContextAccessor.HttpContext ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+			HttpContext = httpContextAccessor.HttpContext;
 			OriginId = relayServerContext.OriginId;
 		}
 

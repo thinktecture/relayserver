@@ -22,7 +22,8 @@ namespace Thinktecture.Relay.Connector.Targets
 		private readonly IHttpClientFactory _httpClientFactory;
 		private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
 		private readonly IServiceProvider _serviceProvider;
-		private readonly IClientRequestHandler<TRequest, TResponse> _clientRequestHandler;
+		private readonly IClientRequestHandler<TRequest> _clientRequestHandler;
+		private readonly IConnectorTransportLimit _connectorTransportLimit;
 		private readonly Uri _requestEndpoint;
 		private readonly Uri _responseEndpoint;
 
@@ -70,10 +71,12 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="relayTargetRegistry">The <see cref="RelayTargetRegistry{TRequest,TResponse}"/>.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
-		/// <param name="clientRequestHandler">An <see cref="IClientRequestHandler{TRequest,TResponse}"/>.</param>
+		/// <param name="clientRequestHandler">An <see cref="IClientRequestHandler{T}"/>.</param>
+		/// <param name="connectorTransportLimit">An <see cref="IConnectorTransportLimit"/>.</param>
 		public ClientRequestWorker(ILogger<ClientRequestWorker<TRequest, TResponse>> logger, IHttpClientFactory httpClientFactory,
 			IOptions<RelayConnectorOptions> relayConnectorOptions, RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry,
-			IServiceProvider serviceProvider, IClientRequestHandler<TRequest, TResponse> clientRequestHandler)
+			IServiceProvider serviceProvider, IClientRequestHandler<TRequest> clientRequestHandler,
+			IConnectorTransportLimit connectorTransportLimit)
 		{
 			if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
@@ -82,13 +85,14 @@ namespace Thinktecture.Relay.Connector.Targets
 			_relayTargetRegistry = relayTargetRegistry ?? throw new ArgumentNullException(nameof(relayTargetRegistry));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_clientRequestHandler = clientRequestHandler ?? throw new ArgumentNullException(nameof(clientRequestHandler));
+			_connectorTransportLimit = connectorTransportLimit ?? throw new ArgumentNullException(nameof(connectorTransportLimit));
 
 			_requestEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.RequestEndpoint}/");
 			_responseEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.ResponseEndpoint}/");
 		}
 
 		/// <inheritdoc />
-		public async Task<TResponse> HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
+		public async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
 			using var scope = _serviceProvider.CreateScope();
 			CancellationTokenSource? timeout = null;
@@ -152,7 +156,8 @@ namespace Thinktecture.Relay.Connector.Targets
 
 				if (response.BodyContent == null) return response;
 
-				if (response.BodySize == null || response.BodySize > binarySizeThreshold)
+				if (response.BodySize == null ||
+					response.BodySize > _connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue))
 				{
 					if (response.BodySize == null)
 					{
@@ -163,7 +168,7 @@ namespace Thinktecture.Relay.Connector.Targets
 					{
 						_logger.LogInformation(
 							"Outsourcing from response {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}",
-							response.BodySize, binarySizeThreshold, request.RequestId);
+							response.BodySize, _connectorTransportLimit.BinarySizeThreshold, request.RequestId);
 					}
 
 					using var content = new CountingStreamContent(response.BodyContent);

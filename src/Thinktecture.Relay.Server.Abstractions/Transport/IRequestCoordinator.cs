@@ -12,11 +12,11 @@ namespace Thinktecture.Relay.Server.Transport
 		where TRequest : IClientRequest
 	{
 		/// <summary>
-		/// Delivers the client request.
+		/// Processes the client request.
 		/// </summary>
 		/// <param name="request">The client request.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task DeliverRequestAsync(TRequest request, CancellationToken cancellationToken = default);
+		Task ProcessRequestAsync(TRequest request, CancellationToken cancellationToken = default);
 	}
 }

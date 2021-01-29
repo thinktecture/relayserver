@@ -21,7 +21,7 @@ namespace Thinktecture.Relay.Transport
 		/// Creates a pristine <see cref="TargetResponse"/> prefilled with <see cref="IClientRequest.RequestId"/> and <see cref="IClientRequest.RequestOriginId"/>.
 		/// </summary>
 		/// <param name="request">An <see cref="IClientRequest"/>.</param>
-		/// <param name="failureStatusCode">A <see cref="HttpStatusCode"/> which marks the response as failed.</param>
+		/// <param name="failureStatusCode">A <see cref="HttpStatusCode"/> which marks the target response as failed.</param>
 		/// <returns>The <see cref="TargetResponse"/>.</returns>
 		public static TargetResponse CreateResponse(this IClientRequest request, HttpStatusCode? failureStatusCode = null)
 			=> request.CreateResponse<TargetResponse>(failureStatusCode);
@@ -30,13 +30,13 @@ namespace Thinktecture.Relay.Transport
 		/// Creates a pristine <see cref="ITargetResponse"/> prefilled with <see cref="IClientRequest.RequestId"/> and <see cref="IClientRequest.RequestOriginId"/>.
 		/// </summary>
 		/// <param name="request">An <see cref="IClientRequest"/>.</param>
-		/// <param name="failureStatusCode">A <see cref="HttpStatusCode"/> which marks the response as failed.</param>
-		/// <typeparam name="TResponse">The type of response.</typeparam>
+		/// <param name="failureStatusCode">A <see cref="HttpStatusCode"/> which marks the target response as failed.</param>
+		/// <typeparam name="T">The type of response.</typeparam>
 		/// <returns>The <see cref="ITargetResponse"/>.</returns>
-		public static TResponse CreateResponse<TResponse>(this IClientRequest request, HttpStatusCode? failureStatusCode = null)
-			where TResponse : ITargetResponse, new()
+		public static T CreateResponse<T>(this IClientRequest request, HttpStatusCode? failureStatusCode = null)
+			where T : ITargetResponse, new()
 		{
-			var response = new TResponse()
+			var response = new T()
 			{
 				RequestId = request.RequestId,
 				RequestOriginId = request.RequestOriginId,
@@ -57,12 +57,10 @@ namespace Thinktecture.Relay.Transport
 		/// </summary>
 		/// <param name="request">The client request.</param>
 		/// <param name="removeRequestBodyContent">Indicates if the request body should be removed.</param>
-		/// <typeparam name="TRequest">The type of request.</typeparam>
-		/// <typeparam name="TAcknowledge">The type of acknowledge,</typeparam>
+		/// <typeparam name="T">The type of acknowledge.</typeparam>
 		/// <returns>A instance of <see cref="IAcknowledgeRequest"/>.</returns>
-		public static TAcknowledge CreateAcknowledge<TRequest, TAcknowledge>(this TRequest request, bool removeRequestBodyContent)
-			where TRequest : IClientRequest
-			where TAcknowledge : IAcknowledgeRequest, new() => new TAcknowledge()
+		public static T CreateAcknowledge<T>(this IClientRequest request, bool removeRequestBodyContent)
+			where T : IAcknowledgeRequest, new() => new T()
 		{
 			OriginId = request.RequestOriginId,
 			RequestId = request.RequestId,

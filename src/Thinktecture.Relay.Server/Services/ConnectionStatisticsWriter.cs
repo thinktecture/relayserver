@@ -20,7 +20,7 @@ namespace Thinktecture.Relay.Server.Services
 			=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 		/// <inheritdoc />
-		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress,
+		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress? remoteIpAddress,
 			CancellationToken cancellationToken = default)
 		{
 			using var scope = _serviceProvider.CreateScope();

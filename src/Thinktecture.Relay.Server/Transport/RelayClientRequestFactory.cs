@@ -4,20 +4,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Server.Factories
+namespace Thinktecture.Relay.Server.Transport
 {
 	/// <inheritdoc />
-	public class RelayClientRequestFactory<TRequest> : IRelayClientRequestFactory<TRequest>
-		where TRequest : IClientRequest, new()
+	public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
+		where T : IClientRequest, new()
 	{
 		private readonly RelayServerContext _relayServerContext;
 		private readonly RelayServerOptions _relayServerOptions;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RelayClientRequestFactory{TRequest}"/> class.
+		/// Initializes a new instance of the <see cref="RelayClientRequestFactory{T}"/> class.
 		/// </summary>
 		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
@@ -30,12 +29,12 @@ namespace Thinktecture.Relay.Server.Factories
 		}
 
 		/// <inheritdoc />
-		public Task<TRequest> CreateAsync(Guid tenantId, Guid requestId, HttpRequest httpRequest,
+		public Task<T> CreateAsync(Guid tenantId, Guid requestId, HttpRequest httpRequest,
 			CancellationToken cancellationToken = default)
 		{
 			var parts = httpRequest.Path.Value.Split('/').Skip(1).ToArray();
 
-			var request = new TRequest()
+			var request = new T()
 			{
 				RequestId = requestId,
 				RequestOriginId = _relayServerContext.OriginId,

@@ -24,16 +24,15 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <typeparam name="TResponse">The type of response.</typeparam>
 		/// <typeparam name="TAcknowledge">The type of acknowledge.</typeparam>
 		/// <returns>The <see cref="IRelayServerBuilder{TRequest,TResponse,TAcknowledge}"/> instance.</returns>
-		public static IRelayServerBuilder<TRequest, TResponse, TAcknowledge> AddInMemoryServerRouting<TRequest, TResponse, TAcknowledge>(
+		public static IRelayServerBuilder<TRequest, TResponse, TAcknowledge> AddInMemoryServerTransport<TRequest, TResponse, TAcknowledge>(
 			this IRelayServerBuilder<TRequest, TResponse, TAcknowledge> builder)
 			where TRequest : IClientRequest
 			where TResponse : ITargetResponse
 			where TAcknowledge : IAcknowledgeRequest
 		{
-			builder.Services.AddSingleton<IServerDispatcher<TResponse>, InMemoryServerDispatcher<TResponse>>();
-			builder.Services.AddSingleton<IServerHandler<TResponse>, InMemoryServerHandler<TResponse>>();
-			builder.Services.AddSingleton<ITenantDispatcher<TRequest>, InMemoryTenantDispatcher<TRequest>>();
-			builder.Services.AddSingleton<ITenantHandlerFactory<TRequest>, InMemoryTenantHandlerFactory<TRequest>>();
+			builder.Services.AddSingleton<IServerTransport<TResponse, TAcknowledge>, InMemoryServerTransport<TResponse, TAcknowledge>>();
+			builder.Services.AddSingleton<ITenantTransport<TRequest>, InMemoryTenantTransport<TRequest>>();
+			builder.Services.AddSingleton<ITenantHandlerFactory, InMemoryTenantHandlerFactory>();
 
 			return builder;
 		}

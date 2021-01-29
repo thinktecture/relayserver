@@ -6,7 +6,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Interceptor
 {
 	/// <summary>
-	/// An implementation of an interceptor dealing with the response of the target.
+	/// An implementation of an interceptor dealing with the target response.
 	/// </summary>
 	/// <typeparam name="TRequest">The type of request.</typeparam>
 	/// <typeparam name="TResponse">The type of response.</typeparam>

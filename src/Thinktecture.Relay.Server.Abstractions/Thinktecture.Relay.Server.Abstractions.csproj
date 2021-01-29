@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Connector" />
+  </ItemGroup>
+
 </Project>

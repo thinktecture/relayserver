@@ -23,6 +23,9 @@ namespace Thinktecture.Relay.Transport
 		public TimeSpan? RequestDuration { get; set; }
 
 		/// <inheritdoc />
+		public string? ConnectionId { get; set; }
+
+		/// <inheritdoc />
 		public HttpStatusCode HttpStatusCode { get; set; }
 
 		/// <inheritdoc />

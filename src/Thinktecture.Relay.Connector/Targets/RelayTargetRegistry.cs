@@ -71,10 +71,9 @@ namespace Thinktecture.Relay.Connector.Targets
 
 			var registration = new RelayTargetRegistration(
 				provider => (IRelayTarget<TRequest, TResponse>)ActivatorUtilities.CreateInstance(provider, type, parameters), timeout);
+
 			if (!_targets.TryAdd(id, registration))
-			{
 				throw new ArgumentException($"A registration with the same key \"{id}\" already exists", nameof(id));
-			}
 
 			_logger.LogDebug("Registered relay target {Target} as type {TargetType}", id, type.FullName);
 		}

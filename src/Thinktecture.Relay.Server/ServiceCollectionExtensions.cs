@@ -4,7 +4,6 @@ using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Diagnostics;
-using Thinktecture.Relay.Server.Factories;
 using Thinktecture.Relay.Server.HealthChecks;
 using Thinktecture.Relay.Server.Middleware;
 using Thinktecture.Relay.Server.Persistence;
@@ -63,21 +62,23 @@ namespace Microsoft.Extensions.DependencyInjection
 				});
 			});
 
-			services.TryAddScoped<DiscoveryDocumentBuilder>();
-			services.TryAddScoped<RelayMiddleware<TRequest, TResponse>>();
-			services.TryAddScoped<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
+			services.TryAddScoped<RelayMiddleware<TRequest, TResponse, TAcknowledge>>();
 			services.TryAddScoped<IRelayContext<TRequest, TResponse>, RelayContext<TRequest, TResponse>>();
-			services.TryAddScoped<IRequestCoordinator<TRequest>, RequestCoordinator<TRequest, TResponse>>();
-			services.TryAddScoped<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
 			services.TryAddScoped<IRelayRequestLogger<TRequest, TResponse>, RelayRequestLogger<TRequest, TResponse>>();
+			services.TryAddScoped<DiscoveryDocumentBuilder>();
 
-			services.AddSingleton<RelayServerContext>();
-			services.AddSingleton<TenantConnectorAdapterRegistry<TRequest, TResponse>>();
-
-			services.TryAddSingleton<IResponseCoordinator<TResponse>, ResponseCoordinator<TRequest, TResponse>>();
-			services.TryAddSingleton<IAcknowledgeCoordinator, AcknowledgeCoordinator<TRequest, TResponse>>();
+			services.TryAddSingleton<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
+			services.TryAddSingleton<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
+			services.TryAddSingleton<IRequestCoordinator<TRequest>, RequestCoordinator<TRequest>>();
+			services.TryAddSingleton<IResponseCoordinator<TResponse>, ResponseCoordinator<TResponse>>();
+			services.TryAddSingleton<IResponseDispatcher<TResponse>, ResponseDispatcher<TResponse, TAcknowledge>>();
+			services.TryAddSingleton<IAcknowledgeCoordinator<TAcknowledge>, AcknowledgeCoordinator<TRequest, TAcknowledge>>();
+			services.TryAddSingleton<IAcknowledgeDispatcher<TAcknowledge>, AcknowledgeDispatcher<TResponse, TAcknowledge>>();
 			services.TryAddSingleton<IOriginStatisticsWriter, OriginStatisticsWriter>();
 			services.TryAddSingleton<IConnectionStatisticsWriter, ConnectionStatisticsWriter>();
+
+			services.AddSingleton<RelayServerContext>();
+			services.AddSingleton<ConnectorRegistry<TRequest>>();
 
 			services.AddHostedService<ServerStatisticsWriter>();
 

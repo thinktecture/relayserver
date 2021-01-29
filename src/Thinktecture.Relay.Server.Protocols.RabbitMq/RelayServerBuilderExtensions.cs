@@ -6,6 +6,7 @@ using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.RabbitMq;
+using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 // ReSharper disable once CheckNamespace; (extension methods on IServiceCollection namespace)
@@ -42,15 +43,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			if (useServerRouting)
 			{
-				builder.Services.TryAddSingleton<IServerDispatcher<TResponse>, RabbitMqServerDispatcher<TResponse>>();
-				builder.Services.TryAddSingleton<IServerHandler<TResponse>, RabbitMqServerHandler<TResponse>>();
+				builder.Services.TryAddSingleton<IServerTransport<TResponse, TAcknowledge>, ServerTransport<TResponse, TAcknowledge>>();
 			}
 
 			if (useTenantRouting)
 			{
-				builder.Services.TryAddSingleton<ITenantDispatcher<TRequest>, RabbitMqTenantDispatcher<TRequest>>();
-				builder.Services
-					.TryAddSingleton<ITenantHandlerFactory<TRequest>, RabbitMqTenantHandlerFactory<TRequest, TResponse>>();
+				builder.Services.TryAddSingleton<ITenantTransport<TRequest>, TenantTransport<TRequest>>();
+				builder.Services.TryAddSingleton<ITenantHandlerFactory, TenantHandlerFactory<TRequest, TAcknowledge>>();
 			}
 
 			builder.Services.TryAddSingleton<IConnection>(provider =>

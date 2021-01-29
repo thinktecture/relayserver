@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Persistence;
@@ -18,12 +19,14 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Middleware
 {
 	/// <inheritdoc />
-	public class RelayMiddleware<TRequest, TResponse> : IMiddleware
+	public class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddleware
 		where TRequest : IClientRequest
 		where TResponse : class, ITargetResponse, new()
+		where TAcknowledge : IAcknowledgeRequest
 	{
-		private readonly ILogger<RelayMiddleware<TRequest, TResponse>> _logger;
+		private readonly ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> _logger;
 		private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
+		private readonly ConnectorRegistry<TRequest> _connectorRegistry;
 		private readonly ITenantRepository _tenantRepository;
 		private readonly IBodyStore _bodyStore;
 		private readonly IRequestCoordinator<TRequest> _requestCoordinator;
@@ -37,37 +40,40 @@ namespace Thinktecture.Relay.Server.Middleware
 		private readonly int _maximumBodySize;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RelayMiddleware{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="RelayMiddleware{TRequest,TResponse,TAcknowledge}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 		/// <param name="requestFactory">An <see cref="IRelayClientRequestFactory{TRequest}"/>.</param>
+		/// <param name="connectorRegistry">The <see cref="ConnectorRegistry{T}"/>.</param>
 		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 		/// <param name="requestCoordinator">An <see cref="IRequestCoordinator{TRequest}"/>.</param>
-		/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{TResponse}"/>.</param>
-		/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{TResponse}"/>.</param>
+		/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{T}"/>.</param>
+		/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{T}"/>.</param>
 		/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
-		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
+		/// <param name="tenantTransport">An <see cref="ITenantTransport{T}"/>.</param>
 		/// <param name="connectorTransportLimit">An <see cref="IConnectorTransportLimit"/>.</param>
 		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 		/// <param name="clientRequestInterceptors">An enumeration of <see cref="IClientRequestInterceptor{TRequest,TResponse}"/>.</param>
 		/// <param name="targetResponseInterceptors">An enumeration of <see cref="ITargetResponseInterceptor{TRequest,TResponse}"/>.</param>
 		/// <param name="relayRequestLogger">An <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.</param>
-		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse>> logger, IRelayClientRequestFactory<TRequest> requestFactory,
+		public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> logger,
+			IRelayClientRequestFactory<TRequest> requestFactory, ConnectorRegistry<TRequest> connectorRegistry,
 			ITenantRepository tenantRepository, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
 			IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
-			IRelayContext<TRequest, TResponse> relayContext, ITenantDispatcher<TRequest> tenantDispatcher,
+			IRelayContext<TRequest, TResponse> relayContext, ITenantTransport<TRequest> tenantTransport,
 			IConnectorTransportLimit connectorTransportLimit, IOptions<RelayServerOptions> relayServerOptions,
 			IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
 			IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors,
 			IRelayRequestLogger<TRequest, TResponse> relayRequestLogger)
 		{
 			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
-			if (tenantDispatcher == null) throw new ArgumentNullException(nameof(tenantDispatcher));
+			if (tenantTransport == null) throw new ArgumentNullException(nameof(tenantTransport));
 			if (connectorTransportLimit == null) throw new ArgumentNullException(nameof(connectorTransportLimit));
 
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
+			_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
 			_requestCoordinator = requestCoordinator ?? throw new ArgumentNullException(nameof(requestCoordinator));
@@ -79,8 +85,8 @@ namespace Thinktecture.Relay.Server.Middleware
 			_relayRequestLogger = relayRequestLogger ?? throw new ArgumentNullException(nameof(relayRequestLogger));
 
 			_relayServerOptions = relayServerOptions.Value;
-			_maximumBodySize = Math.Min(tenantDispatcher.BinarySizeThreshold.GetValueOrDefault(),
-				connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault());
+			_maximumBodySize = Math.Min(tenantTransport.BinarySizeThreshold.GetValueOrDefault(int.MaxValue),
+				connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue));
 		}
 
 		/// <inheritdoc />
@@ -192,7 +198,10 @@ namespace Thinktecture.Relay.Server.Middleware
 				_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
 			}
 
-			await _requestCoordinator.DeliverRequestAsync(_relayContext.ClientRequest, cancellationToken);
+			if (_relayServerOptions.EnableConnectorTransportShortcut &&
+				await _connectorRegistry.TryDeliverRequestAsync(_relayContext.ClientRequest, cancellationToken)) return;
+
+			await _requestCoordinator.ProcessRequestAsync(_relayContext.ClientRequest, cancellationToken);
 		}
 
 		private async Task WaitForConnectorResponseAsync(CancellationToken cancellationToken)
