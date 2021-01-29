@@ -89,6 +89,19 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		}
 
 		/// <summary>
+		/// Convenience method to remove consumers from their queue.
+		/// </summary>
+		/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
+		/// <param name="consumerTags">The consumer tags the consumer is registered as.</param>
+		public static void CancelConsumerTags(this IModel model, IEnumerable<string> consumerTags)
+		{
+			foreach (var consumerTag in consumerTags)
+			{
+				model.BasicCancel(consumerTag);
+			}
+		}
+
+		/// <summary>
 		/// Convenience method to acknowledge a message.
 		/// </summary>
 		/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>

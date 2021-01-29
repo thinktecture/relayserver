@@ -14,16 +14,16 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 	/// <summary>
 	/// A strongly-typed interface for a <see cref="Hub{T}"/>.
 	/// </summary>
-	/// <typeparam name="TRequest">The type of request.</typeparam>
-	public interface IConnector<in TRequest>
-		where TRequest : IClientRequest
+	/// <typeparam name="T">The type of request.</typeparam>
+	public interface IConnector<in T>
+		where T : IClientRequest
 	{
 		/// <summary>
 		/// A strongly-typed method for a <see cref="Hub{T}"/> to request a connector's target.
 		/// </summary>
 		/// <param name="request">An <see cref="IClientRequest"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task RequestTarget(TRequest request);
+		Task RequestTarget(T request);
 
 		/// <summary>
 		/// A strongly-typed method for a <see cref="Hub{T}"/> to update a connector's run-time config.
@@ -33,44 +33,40 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		Task Configure(ITenantConfig config);
 	}
 
-	/// <inheritdoc cref="Hub{T}" />
+	/// <inheritdoc />
 	[Authorize(Constants.DefaultAuthenticationPolicy)]
-	public class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConnector<TRequest>>, IConnectorTransportLimit
+	// ReSharper disable once ClassNeverInstantiated.Global
+	public class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConnector<TRequest>>
 		where TRequest : IClientRequest
-		where TResponse : class, ITargetResponse
+		where TResponse : ITargetResponse
 		where TAcknowledge : IAcknowledgeRequest
 	{
 		private readonly ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> _logger;
-		private readonly IAcknowledgeCoordinator _acknowledgeCoordinator;
-		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
-		private readonly IResponseCoordinator<TResponse> _responseCoordinator;
-		private readonly IConnectionStatisticsWriter _connectionStatisticsWriter;
-		private readonly RelayServerContext _relayServerContext;
 		private readonly ITenantRepository _tenantRepository;
+		private readonly IResponseDispatcher<TResponse> _responseDispatcher;
+		private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
+		private readonly ConnectorRegistry<TRequest> _connectorRegistry;
+		private readonly IConnectionStatisticsWriter _connectionStatisticsWriter;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ConnectorHub{TRequest,TResponse,TAcknowledge}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
-		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
-		/// <param name="responseCoordinator">An <see cref="IResponseCoordinator{TResponse}"/>.</param>
-		/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
-		/// <param name="relayServerContext">An <see cref="RelayServerContext"/>.</param>
 		/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
-		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> logger, IAcknowledgeCoordinator acknowledgeCoordinator,
-			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry,
-			IResponseCoordinator<TResponse> responseCoordinator, IConnectionStatisticsWriter connectionStatisticsWriter,
-			RelayServerContext relayServerContext, ITenantRepository tenantRepository)
+		/// <param name="responseDispatcher">An <see cref="IResponseDispatcher{T}"/>.</param>
+		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator{T}"/>.</param>
+		/// <param name="connectorRegistry">The <see cref="ConnectorRegistry{T}"/>.</param>
+		/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
+		public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> logger, ITenantRepository tenantRepository,
+			IResponseDispatcher<TResponse> responseDispatcher, IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator,
+			ConnectorRegistry<TRequest> connectorRegistry, IConnectionStatisticsWriter connectionStatisticsWriter)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
-			_tenantConnectorAdapterRegistry =
-				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
-			_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));
-			_connectionStatisticsWriter = connectionStatisticsWriter ?? throw new ArgumentNullException(nameof(connectionStatisticsWriter));
-			_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
 			_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+			_responseDispatcher = responseDispatcher ?? throw new ArgumentNullException(nameof(responseDispatcher));
+			_acknowledgeCoordinator = acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
+			_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
+			_connectionStatisticsWriter = connectionStatisticsWriter ?? throw new ArgumentNullException(nameof(connectionStatisticsWriter));
 		}
 
 		/// <inheritdoc />
@@ -79,9 +75,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			var tenant = Context.User.GetTenantInfo();
 			_logger.LogDebug("Connection {ConnectionId} incoming for tenant {@Tenant}", Context.ConnectionId, tenant);
 
-			await _tenantConnectorAdapterRegistry.RegisterAsync(tenant.Id, Context.ConnectionId);
-			await _connectionStatisticsWriter.SetConnectionTimeAsync(Context.ConnectionId, tenant.Id, _relayServerContext.OriginId,
-				Context.GetHttpContext().Connection.RemoteIpAddress);
+			await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id, Context.GetHttpContext().Connection.RemoteIpAddress);
 
 			var config = await _tenantRepository.LoadTenantConfigAsync(tenant.Id);
 			if (config != null)
@@ -98,13 +92,10 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 			_logger.LogDebug("Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
 				Context.User.GetTenantInfo());
 
-			await _tenantConnectorAdapterRegistry.UnregisterAsync(Context.ConnectionId);
-			await _connectionStatisticsWriter.SetDisconnectTimeAsync(Context.ConnectionId);
+			await _connectorRegistry.UnregisterAsync(Context.ConnectionId);
 
 			await base.OnDisconnectedAsync(exception);
 		}
-
-		int? IConnectorTransportLimit.BinarySizeThreshold { get; } = 16 * 1024; // 16kb
 
 		/// <summary>
 		/// Hub method.
@@ -117,7 +108,9 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		{
 			_logger.LogDebug("Connection {ConnectionId} received response for request {RequestId}", Context.ConnectionId, response.RequestId);
 
-			await _responseCoordinator.ProcessResponseAsync(response);
+			response.ConnectionId = Context.ConnectionId;
+
+			await _responseDispatcher.DispatchAsync(response);
 			await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 		}
 
@@ -130,10 +123,10 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		// ReSharper disable once UnusedMember.Global
 		public async Task AcknowledgeAsync(TAcknowledge request)
 		{
-			_logger.LogDebug("Connection {ConnectionId} received acknowledgment for request {RequestId}", Context.ConnectionId,
+			_logger.LogDebug("Connection {ConnectionId} received acknowledgement for request {RequestId}", Context.ConnectionId,
 				request.RequestId);
 
-			await _acknowledgeCoordinator.AcknowledgeRequestAsync(request);
+			await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);
 			await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 		}
 

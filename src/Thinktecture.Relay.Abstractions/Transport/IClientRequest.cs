@@ -28,14 +28,14 @@ namespace Thinktecture.Relay.Transport
 		AcknowledgeMode AcknowledgeMode { get; set; }
 
 		/// <summary>
-		/// The unique id of the origin where the acknowledgment should be send to. This will be null when <see cref="AcknowledgeMode"/> is disabled.
+		/// The unique id of the origin where the acknowledgement should be send to. This will be null when <see cref="AcknowledgeMode"/> is disabled.
 		/// </summary>
 		/// <remarks>This should not be changed.</remarks>
 		/// <seealso cref="AcknowledgeMode"/>
 		Guid? AcknowledgeOriginId { get; set; }
 
 		/// <summary>
-		/// The name of the target used to request the response from.
+		/// The name of the target used to request the target response from.
 		/// </summary>
 		string Target { get; set; }
 

@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Connector
 			/// <summary>
 			/// The url to use for acknowledging a request by issuing as POST with an empty body to it.
 			/// </summary>
-			/// <remarks>This will only be present when manual acknowledgment is needed.</remarks>
+			/// <remarks>This will only be present when manual acknowledgement is needed.</remarks>
 			public const string AcknowledgeUrl = "X-RelayServer-AcknowledgeUrl";
 
 			/// <summary>

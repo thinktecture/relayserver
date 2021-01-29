@@ -35,6 +35,12 @@ namespace Thinktecture.Relay.Transport
 		TimeSpan? RequestDuration { get; set; }
 
 		/// <summary>
+		/// The unique id of the connection.
+		/// </summary>
+		/// <remarks>This will only be set when a connection was involved.</remarks>
+		string? ConnectionId { get; set; }
+
+		/// <summary>
 		/// The <see cref="HttpStatusCode"/> received from the target.
 		/// </summary>
 		/// <remarks>This contains the result status when the request internally failed.</remarks>

@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
-using Thinktecture.Relay.Server.Connector;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Protocols.SignalR;
 using Thinktecture.Relay.Server.Protocols.SignalR.Options;
+using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 using JwtBearerPostConfigureOptions = Thinktecture.Relay.Server.Protocols.SignalR.Options.JwtBearerPostConfigureOptions;
 
@@ -18,6 +18,11 @@ namespace Microsoft.Extensions.DependencyInjection
 	/// </summary>
 	public static class RelayServerBuilderExtensions
 	{
+		private class ConnectorTransportLimit : IConnectorTransportLimit
+		{
+			public int? BinarySizeThreshold { get; } = 16 * 1024; // 16kb
+		}
+
 		/// <summary>
 		/// Adds the connector transport based on SignalR.
 		/// </summary>
@@ -38,8 +43,9 @@ namespace Microsoft.Extensions.DependencyInjection
 					HubOptionsPostConfigureOptions<TRequest, TResponse, TAcknowledge>>();
 
 			builder.Services
-				.TryAddTransient<ITenantConnectorAdapterFactory<TRequest>, TenantConnectorAdapterFactory<TRequest, TResponse, TAcknowledge>>();
-			builder.Services.TryAddScoped<IConnectorTransportLimit, ConnectorHub<TRequest, TResponse, TAcknowledge>>();
+				.AddSingleton<IConnectorTransportFactory<TRequest>, ConnectorTransportFactory<TRequest, TResponse, TAcknowledge>>();
+
+			builder.Services.AddSingleton<IConnectorTransportLimit, ConnectorTransportLimit>();
 			builder.Services.AddSingleton<IApplicationBuilderPart, ApplicationBuilderPart<TRequest, TResponse, TAcknowledge>>();
 
 			builder.Services.AddSignalR();

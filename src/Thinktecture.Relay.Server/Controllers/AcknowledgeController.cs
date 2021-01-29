@@ -7,7 +7,7 @@ using Thinktecture.Relay.Server.Transport;
 namespace Thinktecture.Relay.Server.Controllers
 {
 	/// <summary>
-	/// Controller that provides acknowledgment.
+	/// Controller that provides acknowledgement.
 	/// </summary>
 	public class AcknowledgeController : Controller
 	{
@@ -16,13 +16,13 @@ namespace Thinktecture.Relay.Server.Controllers
 		/// </summary>
 		/// <param name="originId">The unique id of the origin.</param>
 		/// <param name="requestId">The unique id of the request.</param>
-		/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator"/>.</param>
+		/// <param name="acknowledgeDispatcher">An <see cref="IAcknowledgeDispatcher{T}"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="IActionResult"/>.</returns>
 		[HttpPost, Route("acknowledge/{originId:guid}/{requestId:guid}")]
 		public async Task<IActionResult> AcknowledgeAsync([FromRoute] Guid originId, [FromRoute] Guid requestId,
-			[FromServices] IAcknowledgeCoordinator acknowledgeCoordinator)
+			[FromServices] IAcknowledgeDispatcher<AcknowledgeRequest> acknowledgeDispatcher)
 		{
-			await acknowledgeCoordinator.AcknowledgeRequestAsync(new AcknowledgeRequest()
+			await acknowledgeDispatcher.DispatchAsync(new AcknowledgeRequest()
 				{ OriginId = originId, RequestId = requestId, RemoveRequestBodyContent = true });
 
 			return NoContent();

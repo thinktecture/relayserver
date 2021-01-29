@@ -2,50 +2,33 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
 {
 	/// <inheritdoc />
-	public class RequestCoordinator<TRequest, TResponse> : IRequestCoordinator<TRequest>
-		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+	public class RequestCoordinator<T> : IRequestCoordinator<T>
+		where T : IClientRequest
 	{
-		private readonly ILogger<RequestCoordinator<TRequest, TResponse>> _logger;
-		private readonly ITenantDispatcher<TRequest> _tenantDispatcher;
-		private readonly TenantConnectorAdapterRegistry<TRequest, TResponse> _tenantConnectorAdapterRegistry;
-		private readonly RelayServerOptions _relayServerOptions;
+		private readonly ILogger<RequestCoordinator<T>> _logger;
+		private readonly ITenantTransport<T> _tenantTransport;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RequestCoordinator{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="RequestCoordinator{T}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
-		/// <param name="tenantConnectorAdapterRegistry">The <see cref="TenantConnectorAdapterRegistry{TRequest,TResponse}"/>.</param>
-		/// <param name="tenantDispatcher">An <see cref="ITenantDispatcher{TRequest}"/>.</param>
-		public RequestCoordinator(ILogger<RequestCoordinator<TRequest, TResponse>> logger, IOptions<RelayServerOptions> relayServerOptions,
-			TenantConnectorAdapterRegistry<TRequest, TResponse> tenantConnectorAdapterRegistry, ITenantDispatcher<TRequest> tenantDispatcher)
+		/// <param name="tenantTransport">An <see cref="ITenantTransport{T}"/>.</param>
+		public RequestCoordinator(ILogger<RequestCoordinator<T>> logger, ITenantTransport<T> tenantTransport)
 		{
-			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
-
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_tenantDispatcher = tenantDispatcher ?? throw new ArgumentNullException(nameof(tenantDispatcher));
-			_tenantConnectorAdapterRegistry =
-				tenantConnectorAdapterRegistry ?? throw new ArgumentNullException(nameof(tenantConnectorAdapterRegistry));
-
-			_relayServerOptions = relayServerOptions.Value;
+			_tenantTransport = tenantTransport ?? throw new ArgumentNullException(nameof(tenantTransport));
 		}
 
 		/// <inheritdoc />
-		public async Task DeliverRequestAsync(TRequest request, CancellationToken cancellationToken = default)
+		public async Task ProcessRequestAsync(T request, CancellationToken cancellationToken = default)
 		{
-			if (!_relayServerOptions.EnableRequestShortcut ||
-				!await _tenantConnectorAdapterRegistry.TryDeliverRequestAsync(request, cancellationToken))
-			{
-				_logger.LogDebug("Redirecting request {RequestId} to dispatcher for tenant {TenantId}", request.RequestId, request.TenantId);
-				await _tenantDispatcher.DispatchRequestAsync(request);
-			}
+			_logger.LogDebug("Redirecting request {RequestId} to transport for tenant {TenantId}", request.RequestId, request.TenantId);
+			await _tenantTransport.TransportAsync(request);
 		}
 	}
 }

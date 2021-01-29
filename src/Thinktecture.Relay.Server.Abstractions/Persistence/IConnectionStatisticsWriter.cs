@@ -17,10 +17,10 @@ namespace Thinktecture.Relay.Server.Persistence
 		/// <param name="connectionId">The connection id from the corresponding transport.</param>
 		/// <param name="tenantId">The unique id of the tenant.</param>
 		/// <param name="originId">The unique id of the origin.</param>
-		/// <param name="remoteIpAddress">The remote ip address of the connection.</param>
+		/// <param name="remoteIpAddress">The optional remote ip address of the connection.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress, CancellationToken cancellationToken = default);
+		Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress? remoteIpAddress, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Updates the last activity time of a connection.

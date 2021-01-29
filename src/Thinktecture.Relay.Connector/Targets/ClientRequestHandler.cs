@@ -14,7 +14,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <inheritdoc />
-	public class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRequestHandler<TRequest, TResponse>
+	public class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRequestHandler<TRequest>
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse, new()
 		where TAcknowledge : IAcknowledgeRequest, new()
@@ -72,9 +72,9 @@ namespace Thinktecture.Relay.Connector.Targets
 		}
 
 		/// <inheritdoc />
-		public async Task HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
+		public async Task HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			if (QueueWorker(request, binarySizeThreshold, cancellationToken)) return;
+			if (QueueWorker(request, cancellationToken)) return;
 
 			if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
 			{
@@ -84,10 +84,10 @@ namespace Thinktecture.Relay.Connector.Targets
 			await DeliverResponseAsync(request.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable), request.EnableTracing);
 		}
 
-		private bool QueueWorker(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
-			=> ThreadPool.QueueUserWorkItem(_ => WorkerCallAsync(request, binarySizeThreshold, cancellationToken).GetAwaiter().GetResult());
+		private bool QueueWorker(TRequest request, CancellationToken cancellationToken = default)
+			=> ThreadPool.QueueUserWorkItem(_ => WorkerCallAsync(request, cancellationToken).GetAwaiter().GetResult());
 
-		private async Task WorkerCallAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default)
+		private async Task WorkerCallAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
 			if (cancellationToken.IsCancellationRequested) return;
 
@@ -108,7 +108,7 @@ namespace Thinktecture.Relay.Connector.Targets
 
 			try
 			{
-				var response = await worker.HandleAsync(request, binarySizeThreshold, cancellationToken);
+				var response = await worker.HandleAsync(request, cancellationToken);
 				await DeliverResponseAsync(response, request.EnableTracing);
 			}
 			catch (OperationCanceledException)
@@ -139,7 +139,7 @@ namespace Thinktecture.Relay.Connector.Targets
 		public async Task AcknowledgeRequestAsync(TRequest request, bool removeRequestBodyContent)
 		{
 			_logger.LogDebug("Acknowledging request {RequestId} on origin {OriginId}", request.RequestId, request.AcknowledgeOriginId);
-			await _acknowledgeTransport.TransportAsync(request.CreateAcknowledge<TRequest, TAcknowledge>(removeRequestBodyContent));
+			await _acknowledgeTransport.TransportAsync(request.CreateAcknowledge<TAcknowledge>(removeRequestBodyContent));
 		}
 	}
 }

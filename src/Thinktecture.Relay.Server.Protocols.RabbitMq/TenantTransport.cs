@@ -4,28 +4,28 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 {
-	/// <inheritdoc cref="ITenantDispatcher{TRequest}" />
-	public class RabbitMqTenantDispatcher<TRequest> : ITenantDispatcher<TRequest>, IDisposable
-		where TRequest : IClientRequest
+	/// <inheritdoc cref="ITenantTransport{T}" />
+	public class TenantTransport<T> : ITenantTransport<T>, IDisposable
+		where T : IClientRequest
 	{
-		private readonly ILogger<RabbitMqTenantDispatcher<TRequest>> _logger;
+		private readonly ILogger<TenantTransport<T>> _logger;
 		private readonly IModel _model;
 
 		/// <inheritdoc />
 		public int? BinarySizeThreshold { get; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RabbitMqTenantDispatcher{TRequest}"/> class.
+		/// Initializes a new instance of the <see cref="TenantTransport{T}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
 		/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
 		/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
-		public RabbitMqTenantDispatcher(ILogger<RabbitMqTenantDispatcher<TRequest>> logger, ModelFactory modelFactory,
-			IOptions<RabbitMqOptions> rabbitMqOptions)
+		public TenantTransport(ILogger<TenantTransport<T>> logger, ModelFactory modelFactory, IOptions<RabbitMqOptions> rabbitMqOptions)
 		{
 			if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
 			if (rabbitMqOptions == null) throw new ArgumentNullException(nameof(rabbitMqOptions));
@@ -38,7 +38,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 		}
 
 		/// <inheritdoc />
-		public async Task DispatchRequestAsync(TRequest request)
+		public async Task TransportAsync(T request)
 		{
 			try
 			{

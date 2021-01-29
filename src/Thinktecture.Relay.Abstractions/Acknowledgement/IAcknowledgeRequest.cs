@@ -8,7 +8,7 @@ namespace Thinktecture.Relay.Acknowledgement
 	public interface IAcknowledgeRequest
 	{
 		/// <summary>
-		/// The unique id of the origin where the acknowledgment should be send to.
+		/// The unique id of the origin where the acknowledgement should be send to.
 		/// </summary>
 		Guid OriginId { get; set; }
 

@@ -122,7 +122,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 		}
 
 		/// <inheritdoc />
-		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress remoteIpAddress,
+		public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress? remoteIpAddress,
 			CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Adding new connection {ConnectionId} for statistics tracking", connectionId);
@@ -136,7 +136,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 					ConnectTime = DateTimeOffset.UtcNow,
 					TenantId = tenantId,
 					OriginId = originId,
-					RemoteIpAddress = remoteIpAddress.ToString()
+					RemoteIpAddress = remoteIpAddress?.ToString()
 				});
 				await _dbContext.SaveChangesAsync(cancellationToken);
 			}

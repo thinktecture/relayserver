@@ -3,89 +3,60 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport
 {
-	/// <inheritdoc cref="IResponseCoordinator{TResponse}" />
-	public class ResponseCoordinator<TRequest, TResponse> : IResponseCoordinator<TResponse>, IDisposable
-		where TRequest : IClientRequest
-		where TResponse : class, ITargetResponse
+	/// <inheritdoc />
+	public class ResponseCoordinator<T> : IResponseCoordinator<T>
+		where T : class, ITargetResponse
 	{
-		private readonly ILogger<ResponseCoordinator<TRequest, TResponse>> _logger;
-		private readonly IServerHandler<TResponse> _serverHandler;
+		private readonly ILogger<ResponseCoordinator<T>> _logger;
 		private readonly IBodyStore _bodyStore;
-		private readonly IServerDispatcher<TResponse> _serverDispatcher;
-		private readonly Guid _originId;
-		private readonly RelayServerOptions _relayServerOptions;
 
 		private class WaitingState
 		{
 			public DateTime Creation { get; } = DateTime.UtcNow;
-			public TaskCompletionSource<TResponse> TaskCompletionSource { get; } = new TaskCompletionSource<TResponse>();
+			public TaskCompletionSource<T> TaskCompletionSource { get; } = new TaskCompletionSource<T>();
 		}
 
 		private readonly ConcurrentDictionary<Guid, WaitingState> _waitingStates = new ConcurrentDictionary<Guid, WaitingState>();
 
-		private class ResponseContext : IResponseContext<TResponse>
+		private class ResponseContext : IResponseContext<T>
 		{
-			public ResponseContext(TResponse response) => Response = response;
+			public ResponseContext(T response) => Response = response;
 
-			public TResponse Response { get; set; }
+			public T Response { get; }
 			public IAsyncDisposable? Disposable { get; set; }
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ResponseCoordinator{TRequest,TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="ResponseCoordinator{T}"/> class.
 		/// </summary>
 		/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-		/// <param name="serverHandler">The <see cref="IServerHandler{TResponse}"/>.</param>
 		/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
-		/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-		/// <param name="serverDispatcher">An <see cref="IServerDispatcher{TResponse}"/>.</param>
-		/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
-		public ResponseCoordinator(ILogger<ResponseCoordinator<TRequest, TResponse>> logger, IServerHandler<TResponse> serverHandler,
-			IBodyStore bodyStore, RelayServerContext relayServerContext, IServerDispatcher<TResponse> serverDispatcher,
-			IOptions<RelayServerOptions> relayServerOptions)
+		public ResponseCoordinator(ILogger<ResponseCoordinator<T>> logger, IBodyStore bodyStore)
 		{
-			if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
-			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
-
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_serverHandler = serverHandler ?? throw new ArgumentNullException(nameof(serverHandler));
 			_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
-			_serverDispatcher = serverDispatcher ?? throw new ArgumentNullException(nameof(serverDispatcher));
-			_originId = relayServerContext.OriginId;
-
-			_relayServerOptions = relayServerOptions.Value;
-
-			serverHandler.ResponseReceived += ServerHandlerResponseReceived;
 		}
-
-		/// <inheritdoc />
-		public void Dispose() => _serverHandler.ResponseReceived -= ServerHandlerResponseReceived;
-
-		private Task ServerHandlerResponseReceived(object sender, TResponse response) => ProcessResponse(response);
 
 		/// <inheritdoc />
 		public IAsyncDisposable RegisterRequest(Guid requestId)
 		{
-			if (!_waitingStates.TryAdd(requestId, new WaitingState()))
-			{
-				_logger.LogError("Request {RequestId} is already registered", requestId);
-				throw new InvalidOperationException($"Duplicate request registration for {requestId}");
-			}
+			if (_waitingStates.TryAdd(requestId, new WaitingState()))
+				return new DisposeAction(() =>
+				{
+					_waitingStates.TryRemove(requestId, out _);
+					return Task.CompletedTask;
+				});
 
-			return new DisposeAction(() =>
-			{
-				_waitingStates.TryRemove(requestId, out _);
-				return Task.CompletedTask;
-			});
+			_logger.LogError("Request {RequestId} is already registered", requestId);
+			throw new InvalidOperationException($"Duplicate request registration for {requestId}");
 		}
 
 		/// <inheritdoc />
-		public async Task<IResponseContext<TResponse>?> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
+		public async Task<IResponseContext<T>?> GetResponseAsync(Guid requestId, CancellationToken cancellationToken = default)
 		{
 			_logger.LogDebug("Waiting for response for request {RequestId}", requestId);
 
@@ -105,13 +76,13 @@ namespace Thinktecture.Relay.Server.Transport
 			if (responseContext.Response.IsBodyContentOutsourced())
 			{
 				responseContext.Response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
-				_logger.LogDebug("Opened outsourced response body for {RequestId} with {BodySize} bytes", requestId,
+				_logger.LogDebug("Opened outsourced response body for request {RequestId} with {BodySize} bytes", requestId,
 					responseContext.Response.BodySize);
 				responseContext.Disposable = _bodyStore.GetResponseBodyRemoveDisposable(requestId);
 			}
 			else if (responseContext.Response.BodySize > 0)
 			{
-				_logger.LogDebug("Response with inlined response body for request {RequestId} received", requestId);
+				_logger.LogDebug("Response with inlined body for request {RequestId} received", requestId);
 			}
 			else
 			{
@@ -122,21 +93,10 @@ namespace Thinktecture.Relay.Server.Transport
 		}
 
 		/// <inheritdoc />
-		public async Task ProcessResponseAsync(TResponse response)
+		public async Task ProcessResponseAsync(T response, CancellationToken cancellationToken = default)
 		{
-			if (!_relayServerOptions.EnableResponseShortcut || response.RequestOriginId != _originId)
-			{
-				_logger.LogDebug("Redirecting response for request {RequestId} to origin {OriginId}", response.RequestId,
-					response.RequestOriginId);
-				await _serverDispatcher.DispatchResponseAsync(response);
-				return;
-			}
+			_logger.LogTrace("Response {@Response} for request {RequestId} received", response, response.RequestId);
 
-			await ProcessResponse(response);
-		}
-
-		private async Task ProcessResponse(TResponse response)
-		{
 			if (!_waitingStates.TryGetValue(response.RequestId, out var waitingState) ||
 				!waitingState.TaskCompletionSource.TrySetResult(response))
 			{
@@ -144,13 +104,9 @@ namespace Thinktecture.Relay.Server.Transport
 
 				if (response.IsBodyContentOutsourced())
 				{
-					await _bodyStore.RemoveResponseBodyAsync(response.RequestId);
+					await _bodyStore.RemoveResponseBodyAsync(response.RequestId, cancellationToken);
 				}
-
-				return;
 			}
-
-			_logger.LogTrace("Response {@Response} for request {RequestId} received", response, response.RequestId);
 		}
 	}
 }

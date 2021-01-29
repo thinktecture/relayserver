@@ -6,13 +6,12 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Targets
 {
 	/// <summary>
-	/// A client request handler determining the <see cref="IRelayTarget{TRequest,TResponse}"/> handling the request.
+	/// An implementation of a client request handler for handling the request in the first step.
 	/// </summary>
-	/// <typeparam name="TRequest">The type of request.</typeparam>
-	/// <typeparam name="TResponse">The type of response.</typeparam>
-	public interface IClientRequestHandler<in TRequest, out TResponse>
-		where TRequest : IClientRequest
-		where TResponse : ITargetResponse
+	/// <typeparam name="T">The type of request.</typeparam>
+	/// <seealso cref="IClientRequestWorker{TRequest,TResponse}"/>
+	public interface IClientRequestHandler<in T>
+		where T : IClientRequest
 	{
 		/// <summary>
 		/// Limits the number of background tasks running in parallel or null for system's recommended limit.
@@ -24,10 +23,9 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// Handles the request.
 		/// </summary>
 		/// <param name="request">The client request.</param>
-		/// <param name="binarySizeThreshold">The maximum size of binary data the protocol is capable to serialize inline, or null if there is no limit.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task HandleAsync(TRequest request, int? binarySizeThreshold, CancellationToken cancellationToken = default);
+		Task HandleAsync(T request, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Acknowledges the request.
@@ -35,6 +33,6 @@ namespace Thinktecture.Relay.Connector.Targets
 		/// <param name="request">The client request.</param>
 		/// <param name="removeRequestBodyContent">Indicates if the request body content should be removed.</param>
 		/// <returns></returns>
-		Task AcknowledgeRequestAsync(TRequest request, bool removeRequestBodyContent);
+		Task AcknowledgeRequestAsync(T request, bool removeRequestBodyContent);
 	}
 }

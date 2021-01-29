@@ -15,14 +15,14 @@ namespace Thinktecture.Relay.Server
 		public static readonly TimeSpan DefaultRequestExpiration = TimeSpan.FromSeconds(10);
 
 		/// <summary>
-		/// Enables the shortcut processing for client requests.
+		/// Enables the shortcut processing for the connector transport (e.g. client request).
 		/// </summary>
-		public bool EnableRequestShortcut { get; set; }
+		public bool EnableConnectorTransportShortcut { get; set; }
 
 		/// <summary>
-		/// Enables the shortcut processing for target responses.
+		/// Enables the shortcut processing for the server transport (e.g. target response).
 		/// </summary>
-		public bool EnableResponseShortcut { get; set; }
+		public bool EnableServerTransportShortcut { get; set; }
 
 		/// <summary>
 		/// The timeout of a server endpoint accessed from a connector.
