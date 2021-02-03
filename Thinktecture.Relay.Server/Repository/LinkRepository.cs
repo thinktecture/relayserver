@@ -463,7 +463,7 @@ namespace Thinktecture.Relay.Server.Repository
 
 		public async Task<bool> HasActiveConnectionAsync(Guid linkId)
 		{
-			_logger?.Verbose("Checking for active connections");
+			_logger?.Verbose("Checking for active connections. link-id={LinkId}", linkId);
 
 			try
 			{
