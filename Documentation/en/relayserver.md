@@ -17,6 +17,16 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.4.0
+
+* Fast abort
+
+  * With a new setting (`RequireLinkAvailability`) you can now configure that the RelayServer will immediately answer with a `Service Unavailable` when no connector currently is available for the requested link.
+
+* General improvements
+
+  * A connection loss between connector and server happening when uploading a response to the RelayServer will now be logged.
+
 ## Version 2.3.0
 
 * RabbitMQ Improvements

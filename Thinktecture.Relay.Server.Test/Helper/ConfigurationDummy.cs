@@ -41,6 +41,7 @@ namespace Thinktecture.Relay.Server.Helper
 		public bool SecureClientController { get; set; }
 		public TimeSpan AccessTokenLifetime { get; set; }
 		public bool LogSensitiveData { get; set; }
+		public Boolean RequireLinkAvailability { get; set; }
 
 		// Default settings for links
 		public TimeSpan LinkTokenRefreshWindow { get; set; }

@@ -24,5 +24,7 @@ namespace Thinktecture.Relay.Server.Repository
 		Task RemoveActiveConnectionAsync(string connectionId);
 		void DeleteAllConnectionsForOrigin(Guid originId);
 		LinkConfiguration GetLinkConfiguration(Guid linkId);
+
+		Task<bool> HasActiveConnectionAsync(Guid linkId);
 	}
 }

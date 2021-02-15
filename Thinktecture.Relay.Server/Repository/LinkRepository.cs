@@ -460,5 +460,23 @@ namespace Thinktecture.Relay.Server.Repository
 				_logger?.Error(ex, "Error during deleting of all active connections");
 			}
 		}
+
+		public async Task<bool> HasActiveConnectionAsync(Guid linkId)
+		{
+			_logger?.Verbose("Checking for active connections. link-id={LinkId}", linkId);
+
+			try
+			{
+				using (var context = new RelayContext())
+				{
+					return await context.ActiveConnections.AnyAsync(ac => ac.LinkId == linkId);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during checking for active connections");
+				return false;
+			}
+		}
 	}
 }

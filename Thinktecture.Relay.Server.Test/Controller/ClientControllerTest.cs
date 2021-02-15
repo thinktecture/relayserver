@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
 using Thinktecture.Relay.Server.Communication;
+using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Dto;
 using Thinktecture.Relay.Server.Helper;
@@ -33,6 +34,7 @@ namespace Thinktecture.Relay.Server.Controller
 		private readonly Mock<ITraceManager> _traceManagerMock;
 		private readonly Mock<IInterceptorManager> _interceptorManagerMock;
 		private readonly Mock<IPostDataTemporaryStore> _postDataTemporaryStoreMock;
+		private readonly IConfiguration _configuration;
 
 		private class FakePrincipal : IPrincipal
 		{
@@ -67,12 +69,13 @@ namespace Thinktecture.Relay.Server.Controller
 			_traceManagerMock = new Mock<ITraceManager>();
 			_interceptorManagerMock = new Mock<IInterceptorManager>();
 			_postDataTemporaryStoreMock = new Mock<IPostDataTemporaryStore>();
+			_configuration = new ConfigurationDummy();
 		}
 
 		private ClientController CreateClientController()
 		{
 			return new ClientController(_backendCommunicationMock.Object, _loggerMock.Object, _relayRepositoryMock.Object, _requestLoggerMock.Object,
-				_clientRequestBuilderMock.Object, _pathSplitterMock.Object, _traceManagerMock.Object, _interceptorManagerMock.Object,
+				_clientRequestBuilderMock.Object, _pathSplitterMock.Object, _configuration, _traceManagerMock.Object, _interceptorManagerMock.Object,
 				_postDataTemporaryStoreMock.Object);
 		}
 

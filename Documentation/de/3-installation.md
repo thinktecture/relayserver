@@ -169,6 +169,7 @@ Die Standardeinstellungen umfassen dabei:
     <add key="SecureClientController" value="false" />
     <add key="AccessTokenLifetime" value="365.00:00:00" />
     <add key="LogSensitiveData" value="true" />
+    <add key="RequireLinkAvailability" value="false" />
     <add key="LinkTokenRefreshWindow" value="00:01:00" />
     <add key="LinkReconnectMinWaitTime" value="00:00:02" />
     <add key="LinkReconnectMaxWaitTime" value="00:00:30" />
@@ -210,6 +211,7 @@ Die Standardeinstellungen umfassen dabei:
 | SecureClientController | Legt fest, ob ein Client für jeden Request an den `/relay` Endpunkt einen gültigen AccessToken eines On-Premise Connectors / Links mitsenden muss (default false) |
 | AccessTokenLifetime | Zeitspanne für die ein ausgestelltes AccesssToken für On-Premise Connectoren sowie Management Web Benutzer gültig ist (default 365 Tage) <br/> _Hinweis:_ Ein zu kleiner Wert schränkt die Benutzbarkeit des Management Webs ein |
 | LogSensitiveData | Gibt an, ob sensitive Daten der Requests wie Werte von Http-Headern und Query-Parametern gelogged werden sollen (default true) |
+| RequireLinkAvailability | Prüft beim Relayen ob eine Verbindung verfügbar ist und beendet die Anfrage mit HTTP Service Unavailable falls nicht (default false) |
 | LinkTokenRefreshWindow | Default-Zeitspanne, in der ein On-Premise Connector vor dem ungültig werden seines AccessTokens ein neues anfordert (default 1 Minute). Dieser Wert kann pro Link überschrieben werden. |
 | LinkReconnectMinWaitTime | Default-Zeitspanne, nachdem ein On-Premise Connector nach einem Verbindungsverlust die SignalR-Verbindung frühestens wieder aufzubauen versucht (default 2 Sekunden). Dieser Wert kann pro Link überschrieben werden. |
 | LinkReconnectMaxWaitTime | Default-Zeitspanne, nachdem ein On-Premise Connector nach einem Verbindungsverlust die SignalR-Verbindung spätestens wieder aufzubauen versucht (default 30 Sekunden). Dieser Wert kann pro Link überschrieben werden. |

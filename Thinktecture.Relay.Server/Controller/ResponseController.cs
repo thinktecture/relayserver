@@ -11,7 +11,9 @@ using Thinktecture.Relay.Server.Communication;
 using Thinktecture.Relay.Server.Http.Filters;
 using Thinktecture.Relay.Server.IO;
 using Thinktecture.Relay.Server.OnPremise;
-using Thinktecture.Relay.Server.SignalR;
+using Thinktecture.Relay.Server.Http;
+using System.Security.Claims;
+using Thinktecture.Relay.Server.Security;
 
 namespace Thinktecture.Relay.Server.Controller
 {
@@ -33,6 +35,10 @@ namespace Thinktecture.Relay.Server.Controller
 
 		public async Task<IHttpActionResult> Forward()
 		{
+			var claimsPrincipal = (ClaimsPrincipal)RequestContext.Principal;
+			var onPremiseId = claimsPrincipal.FindFirst(AuthorizationServerProvider.OnPremiseIdClaimName)?.Value;
+			Request.GetCallCancelled().Register(() => _logger?.Warning("Disconnect during receiving on-premise response detected. link-id={LinkId}", onPremiseId));
+
 			var requestStream = await Request.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
 			OnPremiseConnectorResponse response = null;
