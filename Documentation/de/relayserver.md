@@ -17,6 +17,10 @@
 
   * Verbindungsabbrüche die beim Hochladen einer Response zum RelayServer passieren werden jetzt geloggt.
 
+* Fehlerbehebungen
+
+  * Cookies die der Client mitschickt werden nun auch korrekt vom Connector weiter an das Web-target gesendet.
+
 ## Version 2.3.0
 
 * RabbitMQ Verbesserungen

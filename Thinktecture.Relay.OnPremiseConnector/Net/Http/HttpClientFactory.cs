@@ -9,8 +9,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.Net.Http
 		public HttpClient CreateClient(string name)
 		{
 			return (name == "FollowRedirectsWebTarget")
-				? new HttpClient()
-				: new HttpClient(new HttpClientHandler() { AllowAutoRedirect = false, });
+				? new HttpClient(new HttpClientHandler() { UseCookies = false, })
+				: new HttpClient(new HttpClientHandler() { UseCookies = false, AllowAutoRedirect = false, });
 		}
 	}
 }

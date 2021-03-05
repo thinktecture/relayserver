@@ -27,6 +27,10 @@ The goal of this list is to highlight companies who pay back to this open source
 
   * A connection loss between connector and server happening when uploading a response to the RelayServer will now be logged.
 
+* Bug fixes
+
+  * Cookies sent by the client will now be also sent correctly to the on-premise target.
+
 ## Version 2.3.0
 
 * RabbitMQ Improvements
