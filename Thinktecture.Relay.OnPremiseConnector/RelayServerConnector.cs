@@ -56,14 +56,18 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="tokenRefreshWindowInSeconds">An <see cref="Int32"/> defining the access token refresh window in seconds.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
 		/// <param name="logSensitiveData">Determines whether sensitive data will be logged.</param>
+		/// <param name="heartbeatSupportedByServer">see the doc of the overload constructor</param>
 		[Obsolete("Use the ctor without tokenRefreshWindowInSeconds instead.")]
 		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30,
-			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = true)
+			int tokenRefreshWindowInSeconds = 5, IServiceProvider serviceProvider = null, bool logSensitiveData = true,
+			bool? heartbeatSupportedByServer = null)
 		{
 			LogSensitiveData = logSensitiveData;
 
 			var factory = (serviceProvider ?? _serviceProvider).GetService(typeof(IRelayServerConnectionFactory)) as IRelayServerConnectionFactory;
-			_connection = factory.Create(versionAssembly, userName, password, relayServer, TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData);
+			_connection = factory.Create(versionAssembly, userName, password, relayServer,
+				TimeSpan.FromSeconds(requestTimeoutInSeconds), TimeSpan.FromSeconds(tokenRefreshWindowInSeconds), LogSensitiveData,
+				heartbeatSupportedByServer);
 			_connection.Connected += (s, e) => Connected?.Invoke(s, e);
 			_connection.Disconnected += (s, e) => Disconnected?.Invoke(s, e);
 		}
@@ -77,9 +81,18 @@ namespace Thinktecture.Relay.OnPremiseConnector
 		/// <param name="relayServer">An <see cref="Uri"/> containing the RelayServer's base url.</param>
 		/// <param name="requestTimeoutInSeconds">An <see cref="Int32"/> defining the timeout in seconds.</param>
 		/// <param name="serviceProvider">An <see cref="IServiceProvider"/> used for injecting services as required.</param>
-		public RelayServerConnector(Assembly versionAssembly, string userName, string password, Uri relayServer, int requestTimeoutInSeconds = 30, IServiceProvider serviceProvider = null)
+		/// <param name="heartbeatSupportedByServer">
+		/// Sometimes the server may not be able to send any message to the connector,
+		/// in this case the connector will not check the heartbeat as it thinks the server
+		/// might be a v1.x server which doesn't support heartbeat
+		/// Set this parameter to true if you know heartbeat is definitely supported by your server (i.e. v2.0)
+		/// Then the connector will check heartbeat and reconnect if no message received from server
+		/// </param>
+		public RelayServerConnector(Assembly versionAssembly, string userName, string password,
+			Uri relayServer, int requestTimeoutInSeconds = 30, IServiceProvider serviceProvider = null, bool? heartbeatSupportedByServer = null)
 #pragma warning disable CS0618 // Type or member is obsolete; Justification: Backward-compatibility with older servers that do not yet provide server-side config
-			: this (versionAssembly, userName, password, relayServer, requestTimeoutInSeconds, 5, serviceProvider)
+			: this (versionAssembly, userName, password, relayServer, requestTimeoutInSeconds, 5, serviceProvider,
+				heartbeatSupportedByServer: heartbeatSupportedByServer)
 #pragma warning restore CS0618 // Type or member is obsolete;
 		{
 		}

@@ -22,11 +22,15 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 			_onPremiseInterceptorFactory = onPremiseInterceptorFactory ?? throw new ArgumentNullException(nameof(onPremiseInterceptorFactory));
 		}
 
-		public IRelayServerConnection Create(Assembly versionAssembly, string userName, string password, Uri relayServer, TimeSpan requestTimeout, TimeSpan tokenRefreshWindow, bool logSensitiveData)
+		public IRelayServerConnection Create(Assembly versionAssembly, string userName, string password, Uri relayServer,
+			TimeSpan requestTimeout, TimeSpan tokenRefreshWindow, bool logSensitiveData,
+			bool? heartbeatSupportedByServer)
 		{
 			_logger?.Information("Creating new connection for RelayServer {RelayServerUrl} and link user {UserName}", relayServer, userName);
 			var httpConnection = new RelayServerHttpConnection(_logger, relayServer, requestTimeout);
-			var signalRConnection = new RelayServerSignalRConnection(versionAssembly, userName, password, relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, httpConnection, _logger, logSensitiveData, _onPremiseInterceptorFactory);
+			var signalRConnection = new RelayServerSignalRConnection(versionAssembly, userName, password,
+				relayServer, requestTimeout, tokenRefreshWindow, _onPremiseTargetConnectorFactory, httpConnection,
+				_logger, logSensitiveData, _onPremiseInterceptorFactory, heartbeatSupportedByServer);
 
 			// registering connection with maintenance loop
 			_maintenanceLoop.RegisterConnection(signalRConnection);

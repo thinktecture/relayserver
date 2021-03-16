@@ -16,6 +16,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		int RelayServerConnectionInstanceId { get; }
 		DateTime LastHeartbeat { get; }
 		TimeSpan HeartbeatInterval { get; }
+		bool HeartbeatSupportedByServer { get; }
 
 		DateTime? ConnectedSince { get; }
 		DateTime? LastActivity { get; }

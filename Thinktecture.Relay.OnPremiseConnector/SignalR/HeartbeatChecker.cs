@@ -22,7 +22,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				.ForContext("RelayServerConnectionInstanceId", connection.RelayServerConnectionInstanceId);
 
 			var lastHeartbeat = connection.LastHeartbeat;
-			if (lastHeartbeat != DateTime.MinValue && lastHeartbeat != DateTime.MaxValue)
+			if (connection.HeartbeatSupportedByServer && lastHeartbeat != DateTime.MinValue)
 			{
 				if (lastHeartbeat <= DateTime.UtcNow.Subtract(connection.HeartbeatInterval.Add(TimeSpan.FromSeconds(2))))
 				{
