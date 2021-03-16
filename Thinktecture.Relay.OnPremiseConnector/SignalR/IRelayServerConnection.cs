@@ -14,9 +14,6 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		TimeSpan TokenRefreshWindow { get; }
 		DateTime TokenExpiry { get; }
 		int RelayServerConnectionInstanceId { get; }
-		DateTime LastHeartbeat { get; }
-		TimeSpan HeartbeatInterval { get; }
-		bool HeartbeatSupportedByServer { get; }
 
 		DateTime? ConnectedSince { get; }
 		DateTime? LastActivity { get; }
@@ -41,5 +38,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		Task<HttpResponseMessage> GetToRelayAsync(string relativeUrl, Action<HttpRequestHeaders> setHeaders, CancellationToken cancellationToken);
 		Task<HttpResponseMessage> PostToRelayAsync(string relativeUrl, Action<HttpRequestHeaders> setHeaders, HttpContent content, CancellationToken cancellationToken);
 		Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null);
+
+		void CheckHeartbeat();
 	}
 }

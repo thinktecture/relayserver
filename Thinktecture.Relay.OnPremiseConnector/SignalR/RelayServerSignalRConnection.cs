@@ -50,9 +50,9 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public TimeSpan TokenRefreshWindow { get; private set; }
 		public DateTime TokenExpiry { get; private set; } = DateTime.MaxValue;
 		public int RelayServerConnectionInstanceId { get; }
-		public DateTime LastHeartbeat { get; private set; } = DateTime.MinValue;
-		public TimeSpan HeartbeatInterval { get; private set; }
-		public bool HeartbeatSupportedByServer { get; private set; }
+		private DateTime LastHeartbeat { get; set; } = DateTime.MinValue;
+		private TimeSpan HeartbeatInterval { get; set; }
+		private bool HeartbeatSupportedByServer { get; set; }
 		private bool FirstHeartbeatReceived { get; set; }
 		public DateTime? ConnectedSince { get; private set; }
 		public DateTime? LastActivity { get; private set; }
@@ -275,6 +275,19 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		public Task SendAcknowledgmentAsync(Guid acknowledgeOriginId, string acknowledgeId, string connectionId = null)
 		{
 			return GetToRelayAsync($"/request/acknowledge?oid={acknowledgeOriginId}&aid={acknowledgeId}&cid={connectionId ?? ConnectionId}", CancellationToken.None);
+		}
+
+		public void CheckHeartbeat()
+		{
+			if (HeartbeatSupportedByServer && LastHeartbeat != DateTime.MinValue)
+			{
+				if (LastHeartbeat <= DateTime.UtcNow.Subtract(HeartbeatInterval.Add(TimeSpan.FromSeconds(2))))
+				{
+					_logger.Warning(
+						$"Did not receive expected heartbeat. last-heartbeat={LastHeartbeat}, heartbeat-interval={HeartbeatInterval}, relay-server={Uri}, relay-server-connection-instance-id={RelayServerConnectionInstanceId}");
+					Reconnect();
+				}
+			}
 		}
 
 		private void SetBearerToken(TokenResponse tokenResponse)
