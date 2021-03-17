@@ -27,6 +27,7 @@ The goal of this list is to highlight companies who pay back to this open source
 
   * A connection loss between connector and server happening when uploading a response to the RelayServer will now be logged.
   * Improved RabbitMQ handling to improve behaviour under very high load.
+  * Reduced the amount of database writes for ACK and heartbeat responses that update the last activity of a link. 
 
 * Bug fixes
 

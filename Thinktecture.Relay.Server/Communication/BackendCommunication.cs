@@ -23,6 +23,7 @@ namespace Thinktecture.Relay.Server.Communication
 		private readonly IOnPremiseConnectorCallbackFactory _requestCallbackFactory;
 		private readonly ILogger _logger;
 		private readonly ILinkRepository _linkRepository;
+		private readonly TimeSpan _linkLastActivityUpdateDelay;
 
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectionContext> _connectionContexts;
@@ -46,6 +47,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_requestSubscriptions = new Dictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
+			_linkLastActivityUpdateDelay = new TimeSpan(_configuration.ActiveConnectionTimeout.Ticks / 5);
 			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
 
 			_logger?.Verbose("Creating backend communication. origin-id={OriginId}", OriginId);
@@ -169,15 +171,26 @@ namespace Thinktecture.Relay.Server.Communication
 		{
 			if (_connectionContexts.TryGetValue(connectionId, out var connectionContext))
 			{
-				connectionContext.LastLocalActivity = DateTime.UtcNow;
+				var now = DateTime.UtcNow;
+				// _linkLastActivityUpdateDelay is shorter than heartbeat interval, so we update at least once per heartbeat
+				var needsDbUpdate = connectionContext.LastLocalActivity + _linkLastActivityUpdateDelay < now;
+
+				connectionContext.LastLocalActivity = now;
 
 				if (!connectionContext.IsActive)
 				{
 					await RegisterOnPremiseAsync(connectionContext);
 				}
+				else if (needsDbUpdate)
+				{
+					await _linkRepository.RenewActiveConnectionAsync(connectionId);
+				}
 			}
-
-			await _linkRepository.RenewActiveConnectionAsync(connectionId);
+			else
+			{
+				// This is triggered by a manual ACK for a connection not on this instance
+				await _linkRepository.RenewActiveConnectionAsync(connectionId);
+			}
 		}
 
 		public void SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response)
