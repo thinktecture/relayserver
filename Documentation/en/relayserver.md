@@ -26,6 +26,7 @@ The goal of this list is to highlight companies who pay back to this open source
 * General improvements
 
   * A connection loss between connector and server happening when uploading a response to the RelayServer will now be logged.
+  * Improved RabbitMQ handling to improve behaviour under very high load.
 
 * Bug fixes
 
