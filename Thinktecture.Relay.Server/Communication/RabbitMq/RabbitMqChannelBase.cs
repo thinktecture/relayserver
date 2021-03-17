@@ -16,6 +16,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		where TMessage : class
 	{
 		private bool _disposed = false;
+		private bool _declaredAndBound = false;
 		private IModel _model;
 
 		private readonly string _queuePrefix;
@@ -62,6 +63,12 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		protected void DeclareAndBind()
 		{
+			if (_declaredAndBound)
+			{
+				// Nothing to do here, the model is already in a working state.
+				return;
+			}
+
 			Dictionary<string, object> arguments = null;
 			if (Configuration.QueueExpiration == TimeSpan.Zero)
 			{
@@ -77,6 +84,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			{
 				_model.QueueDeclare(QueueName, true, false, false, arguments);
 				_model.QueueBind(QueueName, Exchange, RoutingKey);
+				_declaredAndBound = true;
 			}
 			catch (Exception ex)
 			{
@@ -112,6 +120,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			Logger.Verbose("Unbinding queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 
 			_model.QueueUnbind(QueueName, Exchange, RoutingKey);
+			_declaredAndBound = false;
 		}
 
 		protected IObservable<TMessage> CreateObservable<TMessageType>(bool autoAck = true, Action<TMessageType, ulong> callback = null)

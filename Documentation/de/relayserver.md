@@ -20,6 +20,7 @@
 * Fehlerbehebungen
 
   * Cookies die der Client mitschickt werden nun auch korrekt vom Connector weiter an das Web-target gesendet.
+  * RabbitMQ handling wurde angepasst um ein besseres Verhalten unter sehr hoher Last zu erzielen.
 
 ## Version 2.3.0
 
