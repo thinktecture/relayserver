@@ -23,6 +23,7 @@ namespace Thinktecture.Relay.Server.Communication
 		private readonly IOnPremiseConnectorCallbackFactory _requestCallbackFactory;
 		private readonly ILogger _logger;
 		private readonly ILinkRepository _linkRepository;
+		private readonly TimeSpan _lastActivityDbUpdateDelay;
 
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectorCallback> _requestCompletedCallbacks;
 		private readonly ConcurrentDictionary<string, IOnPremiseConnectionContext> _connectionContexts;
@@ -46,6 +47,7 @@ namespace Thinktecture.Relay.Server.Communication
 			_requestSubscriptions = new Dictionary<string, IDisposable>(StringComparer.OrdinalIgnoreCase);
 			_cts = new CancellationTokenSource();
 			_cancellationToken = _cts.Token;
+			_lastActivityDbUpdateDelay = new TimeSpan(_configuration.ActiveConnectionTimeout.Ticks / 5);
 			OriginId = persistedSettings?.OriginId ?? throw new ArgumentNullException(nameof(persistedSettings));
 
 			_logger?.Verbose("Creating backend communication. origin-id={OriginId}", OriginId);
@@ -167,17 +169,27 @@ namespace Thinktecture.Relay.Server.Communication
 
 		public async Task RenewLastActivityAsync(string connectionId)
 		{
+			var now = DateTime.UtcNow;
+
 			if (_connectionContexts.TryGetValue(connectionId, out var connectionContext))
 			{
-				connectionContext.LastLocalActivity = DateTime.UtcNow;
+				connectionContext.LastLocalActivity = now;
 
 				if (!connectionContext.IsActive)
 				{
 					await RegisterOnPremiseAsync(connectionContext);
 				}
-			}
 
-			await _linkRepository.RenewActiveConnectionAsync(connectionId);
+				if (connectionContext.LastDbActivity + _lastActivityDbUpdateDelay < now)
+				{
+					connectionContext.LastDbActivity = now;
+					await _linkRepository.RenewActiveConnectionAsync(connectionId);
+				}
+			}
+			else
+			{
+				await _linkRepository.RenewActiveConnectionAsync(connectionId);
+			}
 		}
 
 		public void SendOnPremiseTargetResponse(Guid originId, IOnPremiseConnectorResponse response)

@@ -31,6 +31,11 @@ namespace Thinktecture.Relay.Server.Communication
 		DateTime LastLocalActivity { get; set; }
 
 		/// <summary>
+		/// The <see cref="DateTime"/> of the last activity (e.g. a receiption of a heartbeat result) stored in the database.
+		/// </summary>
+		DateTime LastDbActivity { get; set; }
+
+		/// <summary>
 		/// The request action called when the connection should handle an incoming relay request.
 		/// </summary>
 		Func<IOnPremiseConnectorRequest, CancellationToken, Task> RequestAction { get; set; }

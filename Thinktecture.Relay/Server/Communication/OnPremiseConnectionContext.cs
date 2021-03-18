@@ -21,6 +21,9 @@ namespace Thinktecture.Relay.Server.Communication
 		public DateTime LastLocalActivity { get; set; } = DateTime.UtcNow;
 
 		/// <inheritdoc/>
+		public DateTime LastDbActivity { get; set; }
+
+		/// <inheritdoc/>
 		public Func<IOnPremiseConnectorRequest, CancellationToken, Task> RequestAction { get; set; }
 
 		/// <inheritdoc/>
