@@ -16,11 +16,12 @@
 * Allgemeine Verbesserungen
 
   * Verbindungsabbrüche die beim Hochladen einer Response zum RelayServer passieren werden jetzt geloggt.
+  * Die Häufigkeit der Queue-Erstellung unter sehr hoher Last wurde reduziert.
+  * Das RabbitMQ Model wird nach einem Shutdown wiederhergestellt
 
 * Fehlerbehebungen
 
   * Cookies die der Client mitschickt werden nun auch korrekt vom Connector weiter an das Web-target gesendet.
-  * RabbitMQ handling wurde angepasst um ein besseres Verhalten unter sehr hoher Last zu erzielen.
 
 ## Version 2.3.0
 
