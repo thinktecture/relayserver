@@ -177,10 +177,10 @@ namespace Thinktecture.Relay.Server.Communication
 
 				if (!connectionContext.IsActive)
 				{
+					connectionContext.LastDbActivity = now;
 					await RegisterOnPremiseAsync(connectionContext);
 				}
-
-				if (connectionContext.LastDbActivity + _lastActivityDbUpdateDelay < now)
+				else if (connectionContext.LastDbActivity + _lastActivityDbUpdateDelay < now)
 				{
 					connectionContext.LastDbActivity = now;
 					await _linkRepository.RenewActiveConnectionAsync(connectionId);
