@@ -18,6 +18,7 @@
   * Verbindungsabbrüche die beim Hochladen einer Response zum RelayServer passieren werden jetzt geloggt.
   * Die Häufigkeit der Queue-Erstellung unter sehr hoher Last wurde reduziert.
   * Das RabbitMQ Model wird nach einem Shutdown wiederhergestellt.
+  * Die Anzahl der Datenbankzugriffe pro Request wurde reduziert.
 
 * Fehlerbehebungen
 
