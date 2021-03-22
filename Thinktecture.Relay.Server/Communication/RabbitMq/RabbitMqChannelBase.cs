@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			{
 				recreating = true;
 
-				Logger.Warning("Noticed a broken model. Trying to recover. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, shutdown-reason={ShutdownReason}", Exchange, QueueName, ChannelId, _model.CloseReason);
+				Logger.Warning("Trying to recover a broken model. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, shutdown-reason={ShutdownReason}", Exchange, QueueName, ChannelId, _model.CloseReason);
 				_model.Dispose();
 				CreateModel();
 			}
