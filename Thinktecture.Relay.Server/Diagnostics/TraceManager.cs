@@ -37,6 +37,14 @@ namespace Thinktecture.Relay.Server.Diagnostics
 			return _traceRepository.GetCurrentTraceConfigurationId(linkId);
 		}
 
+		public void Trace(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, IEnumerable<Guid> traceConfigurationIds)
+		{
+			foreach (var traceConfigurationId in traceConfigurationIds)
+			{
+				Trace(request, response, traceConfigurationId);
+			}
+		}
+
 		public void Trace(IOnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid traceConfigurationId)
 		{
 			try

@@ -7,6 +7,23 @@
 
 # Release Notes
 
+## Version 2.4.0
+
+* Schneller Abbruch
+
+  * Über eine neue Einstellung (`RequireLinkAvailability`) kann nun festgelegt werden, dass der RelayServer sofort mit einem `Service Unavailable` antwortet, wenn gerade kein Connector zu der angefragten LinkId verbunden ist.
+
+* Allgemeine Verbesserungen
+
+  * Verbindungsabbrüche die beim Hochladen einer Response zum RelayServer passieren werden jetzt geloggt.
+  * Die Häufigkeit der Queue-Erstellung unter sehr hoher Last wurde reduziert.
+  * Das RabbitMQ Model wird nach einem Shutdown wiederhergestellt.
+  * Die Anzahl der Datenbankzugriffe pro Request wurde reduziert.
+
+* Fehlerbehebungen
+
+  * Cookies die der Client mitschickt werden nun auch korrekt vom Connector weiter an das Web-target gesendet.
+
 ## Version 2.3.0
 
 * RabbitMQ Verbesserungen

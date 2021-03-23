@@ -13,6 +13,7 @@ namespace Thinktecture.Relay.Server.Repository
 		Link GetLink(Guid linkId);
 		LinkDetails GetLinkDetails(Guid linkId);
 		Link GetLink(string userName);
+		Task<LinkInformation> GetLinkInformationCachedAsync(string userName);
 		CreateLinkResult CreateLink(string symbolicName, string userName);
 		bool UpdateLink(LinkDetails link);
 		void DeleteLink(Guid linkId);
@@ -24,5 +25,7 @@ namespace Thinktecture.Relay.Server.Repository
 		Task RemoveActiveConnectionAsync(string connectionId);
 		void DeleteAllConnectionsForOrigin(Guid originId);
 		LinkConfiguration GetLinkConfiguration(Guid linkId);
+
+		Task<bool> HasActiveConnectionAsync(Guid linkId);
 	}
 }

@@ -16,9 +16,19 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		where TMessage : class
 	{
 		private bool _disposed = false;
+		private bool _declaredAndBound = false;
 		private IModel _model;
 
 		private readonly string _queuePrefix;
+		private readonly IConnection _connection;
+
+		private class Consumer
+		{
+			public Func<string> CreateConsumer { get; set; }
+			public string Tag { get; set; }
+		}
+
+		private readonly Dictionary<IObserver<TMessage>, Consumer> _observers = new Dictionary<IObserver<TMessage>, Consumer>();
 
 		protected readonly Encoding Encoding = new UTF8Encoding(false, true);
 		protected readonly ILogger Logger;
@@ -37,10 +47,17 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			Exchange = exchange ?? throw new ArgumentNullException(nameof(exchange));
 			ChannelId = channelId ?? throw new ArgumentNullException(nameof(channelId));
 			_queuePrefix = queuePrefix ?? throw new ArgumentNullException(nameof(queuePrefix));
+			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
-			if (connection == null) throw new ArgumentNullException(nameof(connection));
+			CreateModel();
+		}
 
-			_model = connection.CreateModel();
+		private void CreateModel()
+		{
+			_model = _connection.CreateModel();
+			_model.ModelShutdown += OnModelShutdown;
+			_declaredAndBound = false;
+
 			DeclareExchange();
 		}
 
@@ -62,14 +79,20 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		protected void DeclareAndBind()
 		{
+			if (_declaredAndBound)
+			{
+				// Nothing to do here, the model is already in a working state.
+				return;
+			}
+
 			Dictionary<string, object> arguments = null;
 			if (Configuration.QueueExpiration == TimeSpan.Zero)
 			{
-				Logger?.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+				Logger.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 			}
 			else
 			{
-				Logger?.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, expiration={QueueExpiration}", Exchange, QueueName, ChannelId, Configuration.QueueExpiration);
+				Logger.Verbose("Declaring queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, expiration={QueueExpiration}", Exchange, QueueName, ChannelId, Configuration.QueueExpiration);
 				arguments = new Dictionary<string, object>() { ["x-expires"] = (int)Configuration.QueueExpiration.TotalMilliseconds };
 			}
 
@@ -77,11 +100,44 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 			{
 				_model.QueueDeclare(QueueName, true, false, false, arguments);
 				_model.QueueBind(QueueName, Exchange, RoutingKey);
+				_declaredAndBound = true;
 			}
 			catch (Exception ex)
 			{
-				Logger?.Error(ex, "Declaring queue failed - possible expiration change. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+				Logger.Error(ex, "Declaring queue failed - possible expiration change. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 				throw;
+			}
+		}
+
+		protected void OnModelShutdown(object sender, ShutdownEventArgs args)
+		{
+			Logger.Warning("Model shutdown detected. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, shutdown-reason={ShutdownReason}", Exchange, QueueName, ChannelId, _model.CloseReason);
+
+			// The connection is locked in the event handler, so we can't create a new model directly in here
+			Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => RecreateModel());
+		}
+
+		protected void RecreateModel()
+		{
+			lock (this)
+			{
+				Logger.Information("Recreating model. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, shutdown-reason={ShutdownReason}", Exchange, QueueName, ChannelId, _model.CloseReason);
+
+				// cleanup old model
+				_model.ModelShutdown -= OnModelShutdown;
+				_model.Dispose();
+
+				// prepare new model
+				CreateModel();
+				DeclareAndBind();
+
+				// re-attach the consumers
+				foreach (var consumer in _observers.Values)
+				{
+					var consumerTag = consumer.Tag;
+					consumer.Tag = consumer.CreateConsumer();
+					Logger.Verbose("Recreated consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, old-consumer-tag={OldConsumerTag}", Exchange, QueueName, ChannelId, consumerTag);
+				}
 			}
 		}
 
@@ -100,18 +156,11 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			Logger.Verbose("Sending data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, data-length={DataLength}", Exchange, QueueName, ChannelId, data.Length);
 
-			lock (_model)
+			lock (this)
 			{
 				DeclareAndBind();
 				_model.BasicPublish(Exchange, RoutingKey, false, properties, data);
 			}
-		}
-
-		protected void Unbind()
-		{
-			Logger.Verbose("Unbinding queue. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
-
-			_model.QueueUnbind(QueueName, Exchange, RoutingKey);
 		}
 
 		protected IObservable<TMessage> CreateObservable<TMessageType>(bool autoAck = true, Action<TMessageType, ulong> callback = null)
@@ -119,49 +168,73 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 		{
 			return Observable.Create<TMessage>(observer =>
 			{
-				Logger?.Debug("Creating consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+				Logger.Debug("Creating consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 
-				lock (_model)
+				lock (this)
 				{
 					DeclareAndBind();
-					var consumer = new EventingBasicConsumer(_model);
-					var consumerTag = _model.BasicConsume(QueueName, autoAck, consumer);
 
-					void OnReceived(object sender, BasicDeliverEventArgs args)
+					string CreateConsumer()
 					{
-						Logger?.Verbose("Received data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, data-length={DataLength}", Exchange, QueueName, ChannelId, args.Body.Length);
-						try
-						{
-							var json = Encoding.GetString(args.Body);
-							var message = JsonConvert.DeserializeObject<TMessageType>(json);
+						var consumer = new EventingBasicConsumer(_model);
+						_model.BasicConsume(QueueName, autoAck, consumer);
 
-							callback?.Invoke(message, args.DeliveryTag);
-							observer.OnNext(message);
-						}
-						catch (Exception ex)
+						void OnReceived(object sender, BasicDeliverEventArgs args)
 						{
-							Logger?.Error(ex, "Error during receiving a message via RabbitMQ. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
-
-							if (!autoAck)
+							Logger.Verbose("Received data. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, data-length={DataLength}", Exchange, QueueName, ChannelId, args.Body.Length);
+							try
 							{
-								Acknowledge(args.DeliveryTag);
+								var json = Encoding.GetString(args.Body);
+								var message = JsonConvert.DeserializeObject<TMessageType>(json);
+
+								callback?.Invoke(message, args.DeliveryTag);
+								observer.OnNext(message);
+							}
+							catch (Exception ex)
+							{
+								Logger.Error(ex, "Error during receiving a message via RabbitMQ. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+
+								if (!autoAck)
+								{
+									Acknowledge(args.DeliveryTag);
+								}
 							}
 						}
+
+						consumer.Received += OnReceived;
+
+						Logger.Verbose("Created consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, consumer-tag={ConsumerTag}", Exchange, QueueName, ChannelId, consumer.ConsumerTag);
+
+						return consumer.ConsumerTag;
 					}
 
-					consumer.Received += OnReceived;
+					var consumerTag = CreateConsumer();
+					_observers[observer] = new Consumer() { CreateConsumer = CreateConsumer, Tag = consumerTag, };
 
 					return new DelegatingDisposable(Logger, () =>
 					{
-						Logger?.Debug("Disposing consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
-
-						consumer.Received -= OnReceived;
-
-						lock (_model)
+						lock (this)
 						{
-							_model.BasicCancel(consumerTag);
-							_model.BasicRecover(true);
-							Unbind();
+							try
+							{
+								if (_observers.TryGetValue(observer, out var consumer))
+								{
+									Logger.Debug("Disposing consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, consumer-tag={ConsumerTag}", Exchange, QueueName, ChannelId, consumer.Tag);
+
+									_observers.Remove(observer);
+
+									_model.BasicCancel(consumer.Tag);
+									_model.BasicRecover(true);
+								}
+								else
+								{
+									Logger.Warning("Could not dispose consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+								}
+							}
+							catch (Exception ex)
+							{
+								Logger.Error(ex, "Error while disposing consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+							}
 						}
 					});
 				}
@@ -170,7 +243,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		protected void Acknowledge(ulong deliveryTag, bool multiple = false)
 		{
-			lock (_model)
+			lock (this)
 			{
 				_model.BasicAck(deliveryTag, multiple);
 			}
@@ -178,18 +251,17 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 		public void Dispose()
 		{
-			Logger?.Debug("Disposing channel. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
+			Logger.Debug("Disposing channel. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 
 			if (!_disposed)
 			{
+				_disposed = true;
+
 				if (_model != null)
 				{
-					Unbind();
 					_model.Dispose();
 					_model = null;
 				}
-
-				_disposed = true;
 			}
 		}
 	}

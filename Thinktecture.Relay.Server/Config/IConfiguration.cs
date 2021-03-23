@@ -42,5 +42,6 @@ namespace Thinktecture.Relay.Server.Config
 		TimeSpan? LinkAbsoluteConnectionLifetime { get; }
 		TimeSpan? LinkSlidingConnectionLifetime { get; }
 		bool LogSensitiveData { get; }
+		bool RequireLinkAvailability { get; }
 	}
 }

@@ -10,6 +10,8 @@ namespace Thinktecture.Relay.Server.Security
 		private readonly ILinkRepository _linkRepository;
 		private readonly IUserRepository _userRepository;
 
+		public const string OnPremiseIdClaimName = "OnPremiseId";
+
 		public AuthorizationServerProvider(ILinkRepository linkRepository, IUserRepository userRepository)
 		{
 			_linkRepository = linkRepository;
@@ -42,7 +44,7 @@ namespace Thinktecture.Relay.Server.Security
 			{
 				var identity = new ClaimsIdentity(context.Options.AuthenticationType);
 				identity.AddClaim(new Claim(identity.NameClaimType, context.UserName));
-				identity.AddClaim(new Claim("OnPremiseId", linkId.ToString()));
+				identity.AddClaim(new Claim(OnPremiseIdClaimName, linkId.ToString()));
 				identity.AddClaim(new Claim(identity.RoleClaimType, "OnPremise"));
 
 				context.Validated(identity);
