@@ -7,12 +7,7 @@ namespace Thinktecture.Relay.Server.Helper
 {
 	public static class ConcurrentDictionaryExtensions
 	{
-		public static async Task<TResult> GetOrAddAsync<TKey, TResult>(
-			this ConcurrentDictionary<TKey, TResult> dictionary,
-			SemaphoreSlim lockObject,
-			TKey key,
-			Func<TKey, Task<TResult>> asyncValueFactory
-			)
+		public static async Task<TResult> GetOrAddAsync<TKey, TResult>(this ConcurrentDictionary<TKey, TResult> dictionary, SemaphoreSlim lockObject, TKey key, Func<TKey, Task<TResult>> asyncValueFactory)
 		{
 			if (dictionary.TryGetValue(key, out var result))
 			{
