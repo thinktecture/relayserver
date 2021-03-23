@@ -9,7 +9,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 {
 	internal interface IRelayServerConnection : IDisposable
 	{
-		string RelayedRequestHeader { get; set; }
+		string RelayedRequestHeader { get; }
 		Uri Uri { get; }
 		TimeSpan TokenRefreshWindow { get; }
 		DateTime TokenExpiry { get; }
@@ -25,6 +25,8 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 		event EventHandler Disposing;
 		event EventHandler Connected;
 		event EventHandler Disconnected;
+		event EventHandler Reconnecting;
+		event EventHandler Reconnected;
 
 		void RegisterOnPremiseTarget(string key, Uri baseUri, bool followRedirects);
 		void RegisterOnPremiseTarget(string key, Type handlerType);

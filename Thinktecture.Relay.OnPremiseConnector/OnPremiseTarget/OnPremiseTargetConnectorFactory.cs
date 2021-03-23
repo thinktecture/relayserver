@@ -1,6 +1,6 @@
 using System;
+using System.Net.Http;
 using Serilog;
-using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 
 namespace Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget
 {

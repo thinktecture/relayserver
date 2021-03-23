@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;

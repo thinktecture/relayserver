@@ -73,7 +73,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 						if (_automaticDisconnectChecker.DisconnectIfRequired(connection))
 							continue;
 
-						await _tokenExpiryChecker.Check(connection);
+						await _tokenExpiryChecker.Check(connection).ConfigureAwait(false);
 						_heartbeatChecker.Check(connection);
 					}
 

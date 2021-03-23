@@ -1,7 +1,10 @@
+using System.Net.Http;
 using AutofacSerilogIntegration;
+using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.OnPremiseConnector.Interceptor;
 using Thinktecture.Relay.OnPremiseConnector.Net.Http;
 using Thinktecture.Relay.OnPremiseConnector.OnPremiseTarget;
+using Thinktecture.Relay.OnPremiseConnector.ServerMigration;
 using Thinktecture.Relay.OnPremiseConnector.SignalR;
 
 // ReSharper disable once CheckNamespace
@@ -29,6 +32,10 @@ namespace Autofac
 			builder.RegisterType<AutomaticDisconnectChecker>().As<IAutomaticDisconnectChecker>();
 			builder.RegisterType<MaintenanceLoop>().As<IMaintenanceLoop>().SingleInstance().OnActivated(e => e.Instance.StartLoop());
 			builder.RegisterType<OnPremiseInterceptorFactory>().As<IOnPremiseInterceptorFactory>();
+
+			// Types for server migration
+			builder.RegisterType<RelayServerConnection>();
+			builder.RegisterType<FakeApplicationLifetime>().As<IApplicationLifetime>().SingleInstance();
 
 			return builder;
 		}
