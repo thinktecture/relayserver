@@ -204,7 +204,7 @@ namespace Thinktecture.Relay.Server.Repository
 				.Select(link => new
 				{
 					link,
-					link.ActiveConnections,
+					link.ActiveConnections
 				})
 				.ToList()
 				.Select(i => new LinkDetails()
