@@ -13,6 +13,7 @@ namespace Thinktecture.Relay.Server.Repository
 		Link GetLink(Guid linkId);
 		LinkDetails GetLinkDetails(Guid linkId);
 		Link GetLink(string userName);
+		Task<LinkInformation> GetLinkInformationCachedAsync(string userName);
 		CreateLinkResult CreateLink(string symbolicName, string userName);
 		bool UpdateLink(LinkDetails link);
 		void DeleteLink(Guid linkId);

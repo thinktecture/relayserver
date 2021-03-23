@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using Thinktecture.Relay.Server.Config;
 using Thinktecture.Relay.Server.Dto;
+using Thinktecture.Relay.Server.Helper;
 using Thinktecture.Relay.Server.Repository.DbModels;
 using Thinktecture.Relay.Server.Security;
 
@@ -14,6 +17,8 @@ namespace Thinktecture.Relay.Server.Repository
 	public class LinkRepository : ILinkRepository
 	{
 		private static readonly Dictionary<string, PasswordInformation> _successfullyValidatedUsernamesAndPasswords = new Dictionary<string, PasswordInformation>();
+		private static readonly ConcurrentDictionary<string, CachedLinkInformation> _cachedLinks = new ConcurrentDictionary<string, CachedLinkInformation>();
+		private static readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
 
 		private readonly ILogger _logger;
 		private readonly IPasswordHash _passwordHash;
@@ -93,6 +98,82 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
+		public async Task<LinkInformation> GetLinkInformationCachedAsync(string linkName)
+		{
+			CachedLinkInformation CreateCachedItem(LinkInformation linkInfo) =>
+				new CachedLinkInformation() { LinkInformation = linkInfo, CacheExpiry = DateTime.UtcNow + TimeSpan.FromSeconds(10), };
+
+			// Get LinkInformation from cache, or load it from database if it does not yet exists
+			var result = await _cachedLinks
+				.GetOrAddAsync(_cacheLock, linkName, async (name) => CreateCachedItem(await LoadLinkInformationAsync(name)));
+
+			// check if the item from the cache is expired
+			var now = DateTime.UtcNow;
+			if (result.CacheExpiry < now)
+			{
+				await _cacheLock.WaitAsync();
+				try
+				{
+					// double check if we still have the expired value, or if someone else updated it already
+					var currentValue = _cachedLinks[linkName];
+					if (currentValue.CacheExpiry > now)
+					{
+						return currentValue.LinkInformation;
+					}
+
+					result = _cachedLinks[linkName] = CreateCachedItem(await LoadLinkInformationAsync(linkName));
+				}
+				finally
+				{
+					_cacheLock.Release();
+				}
+			}
+
+			return result.LinkInformation;
+		}
+
+		private async Task<LinkInformation> LoadLinkInformationAsync(string linkName)
+		{
+			using (var context = new RelayContext())
+			{
+				var data = await context.Links
+					.Where(l => l.UserName == linkName)
+					.Select(l => new
+					{
+						Link = new
+						{
+							l.Id,
+							l.AllowLocalClientRequestsOnly,
+							l.ForwardOnPremiseTargetErrorResponse,
+							l.IsDisabled,
+							l.SymbolicName,
+						},
+						ActiveConnections = l.ActiveConnections
+							.Any(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout),
+						Traces = context.TraceConfigurations
+							.Where(tc => tc.LinkId == l.Id && tc.StartDate <= DateTime.UtcNow && tc.EndDate >= DateTime.UtcNow)
+							.Select(tc => tc.Id),
+					})
+					.FirstOrDefaultAsync();
+
+				if (data != null)
+				{
+					return new LinkInformation()
+					{
+						Id = data.Link.Id,
+						AllowLocalClientRequestsOnly = data.Link.AllowLocalClientRequestsOnly,
+						ForwardOnPremiseTargetErrorResponse = data.Link.ForwardOnPremiseTargetErrorResponse,
+						IsDisabled = data.Link.IsDisabled,
+						SymbolicName = data.Link.SymbolicName,
+						HasActiveConnection = data.ActiveConnections,
+						TraceConfigurationIds = data.Traces.ToArray(),
+					};
+				}
+
+				return null;
+			}
+		}
+
 		public LinkConfiguration GetLinkConfiguration(Guid linkId)
 		{
 			using (var context = new RelayContext())
@@ -107,20 +188,13 @@ namespace Thinktecture.Relay.Server.Repository
 		private IQueryable<Link> GetLinkFromDbLink(IQueryable<DbLink> linksQuery)
 		{
 			return linksQuery
-				.Select(l => new
+				.Select(link => new Link()
 				{
-					link = l,
-					ActiveConnections = l.ActiveConnections
-						.Where(ac => ac.ConnectorVersion == 0 || ac.LastActivity > ActiveLinkTimeout)
-						.Select(ac => ac.ConnectionId)
-				})
-				.Select(i => new Link()
-				{
-					Id = i.link.Id,
-					ForwardOnPremiseTargetErrorResponse = i.link.ForwardOnPremiseTargetErrorResponse,
-					IsDisabled = i.link.IsDisabled,
-					SymbolicName = i.link.SymbolicName,
-					AllowLocalClientRequestsOnly = i.link.AllowLocalClientRequestsOnly,
+					Id = link.Id,
+					ForwardOnPremiseTargetErrorResponse = link.ForwardOnPremiseTargetErrorResponse,
+					IsDisabled = link.IsDisabled,
+					SymbolicName = link.SymbolicName,
+					AllowLocalClientRequestsOnly = link.AllowLocalClientRequestsOnly,
 				});
 		}
 

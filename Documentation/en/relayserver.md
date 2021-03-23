@@ -28,6 +28,7 @@ The goal of this list is to highlight companies who pay back to this open source
   * A connection loss between connector and server happening when uploading a response to the RelayServer will now be logged.
   * The frequence of queue generation under very high load was reduced.
   * The RabbitMQ model will be restored after a shutdown.
+  * The amount of database queries for a request has been reduced.
 
 * Bug fixes
 

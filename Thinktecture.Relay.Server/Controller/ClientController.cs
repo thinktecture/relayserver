@@ -70,7 +70,7 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 
 			var pathInformation = _pathSplitter.Split(fullPathToOnPremiseEndpoint);
-			var link = _linkRepository.GetLink(pathInformation.UserName);
+			var link = await _linkRepository.GetLinkInformationCachedAsync(pathInformation.UserName);
 
 			if (!CanRequestBeHandled(fullPathToOnPremiseEndpoint, pathInformation, link))
 			{
@@ -78,7 +78,7 @@ namespace Thinktecture.Relay.Server.Controller
 				return NotFound();
 			}
 
-			if (_requireLinkAvailability && !await _linkRepository.HasActiveConnectionAsync(link.Id))
+			if (_requireLinkAvailability && !link.HasActiveConnection)
 			{
 				_logger?.Debug("Request cannot be handled without an active connection");
 				return ServiceUnavailable();
@@ -128,7 +128,7 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 			finally
 			{
-				FinishRequest(request as OnPremiseConnectorRequest, response, link.Id, fullPathToOnPremiseEndpoint, statusCode);
+				FinishRequest(request as OnPremiseConnectorRequest, response, link, fullPathToOnPremiseEndpoint, statusCode);
 			}
 		}
 
@@ -202,7 +202,7 @@ namespace Thinktecture.Relay.Server.Controller
 			}
 		}
 
-		private bool CanRequestBeHandled(string path, PathInformation pathInformation, Link link)
+		private bool CanRequestBeHandled(string path, PathInformation pathInformation, LinkInformation link)
 		{
 			if (link == null)
 			{
@@ -231,7 +231,7 @@ namespace Thinktecture.Relay.Server.Controller
 			return true;
 		}
 
-		private void FinishRequest(OnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, Guid linkId, string path, HttpStatusCode statusCode)
+		private void FinishRequest(OnPremiseConnectorRequest request, IOnPremiseConnectorResponse response, LinkInformation link, string path, HttpStatusCode statusCode)
 		{
 			if (request == null)
 			{
@@ -240,16 +240,10 @@ namespace Thinktecture.Relay.Server.Controller
 
 			request.RequestFinished = DateTime.UtcNow;
 
-			_logger?.Verbose("Finishing request. request-id={RequestId}, link-id={LinkId}, on-premise-duration={RemoteDuration}, global-duration={GlobalDuration}", request.RequestId, linkId, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
+			_logger?.Verbose("Finishing request. request-id={RequestId}, link-id={LinkId}, link-name={LinkName}, on-premise-duration={RemoteDuration}, global-duration={GlobalDuration}", request.RequestId, link.Id, link.SymbolicName, response?.RequestFinished - response?.RequestStarted, request.RequestFinished - request.RequestStarted);
 
-			// TODO this may be debounced for e.g. 5 minutes to skip querying on each request in future release
-			var currentTraceConfigurationId = _traceManager.GetCurrentTraceConfigurationId(linkId);
-			if (currentTraceConfigurationId != null)
-			{
-				_traceManager.Trace(request, response, currentTraceConfigurationId.Value);
-			}
-
-			_requestLogger.LogRequest(request, response, linkId, _backendCommunication.OriginId, path, statusCode);
+			_traceManager.Trace(request, response, link.TraceConfigurationIds);
+			_requestLogger.LogRequest(request, response, link.Id, _backendCommunication.OriginId, path, statusCode);
 		}
 
 		private new HttpResponseMessage NotFound()
