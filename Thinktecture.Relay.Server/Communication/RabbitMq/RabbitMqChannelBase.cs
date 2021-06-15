@@ -223,8 +223,12 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 									_observers.Remove(observer);
 
-									_model.BasicCancel(consumer.Tag);
-									_model.BasicRecover(true);
+									if (!String.IsNullOrEmpty(consumer.Tag))
+									{
+										_model.BasicCancel(consumer.Tag);
+										_declaredAndBound = false;
+										consumer.Tag = null;
+									}
 								}
 								else
 								{
