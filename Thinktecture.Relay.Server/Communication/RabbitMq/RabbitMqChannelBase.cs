@@ -134,9 +134,9 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				// re-attach the consumers
 				foreach (var consumer in _observers.Values)
 				{
-					var consumerTag = consumer.Tag;
+					var oldConsumerTag = consumer.Tag;
 					consumer.Tag = consumer.CreateConsumer();
-					Logger.Verbose("Recreated consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, old-consumer-tag={OldConsumerTag}", Exchange, QueueName, ChannelId, consumerTag);
+					Logger.Verbose("Recreated consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, consumer-tag={ConsumerTag}, old-consumer-tag={OldConsumerTag}", Exchange, QueueName, ChannelId, consumer.Tag, oldConsumerTag);
 				}
 			}
 		}
