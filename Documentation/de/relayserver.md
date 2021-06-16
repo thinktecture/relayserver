@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.4.1
+
+* Fehlerbehebungen
+
+  * Ein Connector der die Verbindung verliert sorgt nicht mehr für einen Fehler, der dazu führte, dass der Server ihn noch weiter bedienen will.
+
 ## Version 2.4.0
 
 * Schneller Abbruch
