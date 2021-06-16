@@ -134,9 +134,9 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 				// re-attach the consumers
 				foreach (var consumer in _observers.Values)
 				{
-					var consumerTag = consumer.Tag;
+					var oldConsumerTag = consumer.Tag;
 					consumer.Tag = consumer.CreateConsumer();
-					Logger.Verbose("Recreated consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, old-consumer-tag={OldConsumerTag}", Exchange, QueueName, ChannelId, consumerTag);
+					Logger.Verbose("Recreated consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, consumer-tag={ConsumerTag}, old-consumer-tag={OldConsumerTag}", Exchange, QueueName, ChannelId, consumer.Tag, oldConsumerTag);
 				}
 			}
 		}
@@ -177,7 +177,6 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 					string CreateConsumer()
 					{
 						var consumer = new EventingBasicConsumer(_model);
-						_model.BasicConsume(QueueName, autoAck, consumer);
 
 						void OnReceived(object sender, BasicDeliverEventArgs args)
 						{
@@ -202,6 +201,7 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 						}
 
 						consumer.Received += OnReceived;
+						_model.BasicConsume(QueueName, autoAck, consumer);
 
 						Logger.Verbose("Created consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, consumer-tag={ConsumerTag}", Exchange, QueueName, ChannelId, consumer.ConsumerTag);
 
@@ -223,8 +223,12 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 
 									_observers.Remove(observer);
 
-									_model.BasicCancel(consumer.Tag);
-									_model.BasicRecover(true);
+									if (!String.IsNullOrEmpty(consumer.Tag))
+									{
+										_model.BasicCancel(consumer.Tag);
+										_declaredAndBound = false;
+										consumer.Tag = null;
+									}
 								}
 								else
 								{

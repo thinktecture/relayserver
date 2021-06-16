@@ -17,6 +17,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.4.1
+
+* Bug fixes
+
+  * A disconnecting connector does not throw an error anymore, which caused the server to still try and send messages there.
+
 ## Version 2.4.0
 
 * Fast abort
