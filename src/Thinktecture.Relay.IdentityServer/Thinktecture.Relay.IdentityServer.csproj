@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Thinktecture RelayServer IdentityServer</Title>
     <Description>Contains support for RelayServer authentication.</Description>
   </PropertyGroup>
