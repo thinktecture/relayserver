@@ -22,7 +22,7 @@ RUN dotnet restore Thinktecture.Relay.ManagementApi.Docker.csproj
 FROM restore AS source
 WORKDIR /src
 
-COPY ./shared ./shared
+COPY ./Directory.Build.props ./
 COPY ./docker/Thinktecture.Relay.Docker ./docker/Thinktecture.Relay.Docker
 COPY ./Thinktecture.Relay.Abstractions ./Thinktecture.Relay.Abstractions
 COPY ./Thinktecture.Relay.Server.Abstractions ./Thinktecture.Relay.Server.Abstractions
