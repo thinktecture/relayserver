@@ -30,8 +30,13 @@ namespace Thinktecture.Relay.Connector.Options
 
 		public void Configure(AccessTokenManagementOptions options)
 		{
-			var uri = new Uri(new Uri(_relayConnectorOptions.DiscoveryDocument.AuthorizationServer),
-				OidcConstants.Discovery.DiscoveryEndpoint);
+			var urlString = _relayConnectorOptions.DiscoveryDocument.AuthorizationServer;
+			if (!urlString.EndsWith('/'))
+			{
+				urlString += '/';
+			}
+
+			var uri = new Uri(new Uri(urlString), OidcConstants.Discovery.DiscoveryEndpoint);
 
 			while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 			{
