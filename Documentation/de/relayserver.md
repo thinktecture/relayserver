@@ -9,6 +9,10 @@
 
 ## Version 2.4.2
 
+* Fehlerbehebungen
+
+  * Es wird nicht mehr versucht, auf einem non-seekable Stream die Position zu ermitteln, was zu einer Exception führte.
+
 ## Version 2.4.1
 
 * Fehlerbehebungen

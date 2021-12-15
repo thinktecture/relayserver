@@ -559,7 +559,7 @@ namespace Thinktecture.Relay.OnPremiseConnector.SignalR
 				request.Stream = Stream.Null;
 			}
 
-			if (request.Stream.Position != 0 && request.Stream.CanSeek)
+			if (request.Stream.CanSeek && request.Stream.Position != 0)
 			{
 				request.Stream.Position = 0;
 			}

@@ -19,6 +19,10 @@ The goal of this list is to highlight companies who pay back to this open source
 
 ## Version 2.4.2
 
+* Bug fixes
+
+  * The OPC won't try to determine the position of a non-seekable stream anymore, which lead to an exception.
+
 ## Version 2.4.1
 
 * Bug fixes
