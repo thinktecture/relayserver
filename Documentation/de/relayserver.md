@@ -13,6 +13,10 @@
 
   * Es wird nicht mehr versucht, auf einem non-seekable Stream die Position zu ermitteln, was zu einer Exception führte.
 
+* Allgemeine Verbesserungen
+
+  * Es werden keine Fehler mehr geloggt, wenn eine schon geschlossene Verbindung später erneut aus der Datenbank ausgetragen werden sollte.
+
 ## Version 2.4.1
 
 * Fehlerbehebungen
