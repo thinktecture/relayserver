@@ -340,7 +340,7 @@ namespace Thinktecture.Relay.Server.Repository
 			catch (DbUpdateConcurrencyException) { }
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "Error while removing a link. link-id={LinkId}", linkId);
+				_logger?.Error(ex, "Error while removing a link. link-id={LinkId}", linkId);
 			}
 		}
 
