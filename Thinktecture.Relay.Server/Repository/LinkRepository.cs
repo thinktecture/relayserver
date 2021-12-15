@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -319,17 +320,27 @@ namespace Thinktecture.Relay.Server.Repository
 
 		public void DeleteLink(Guid linkId)
 		{
-			using (var context = new RelayContext())
+			_logger?.Verbose("Removing link. link-id={LinkId}", linkId);
+
+			try
 			{
-				var itemToDelete = new DbLink
+				using (var context = new RelayContext())
 				{
-					Id = linkId,
-				};
+					var itemToDelete = new DbLink
+					{
+						Id = linkId,
+					};
 
-				context.Links.Attach(itemToDelete);
-				context.Links.Remove(itemToDelete);
+					context.Links.Attach(itemToDelete);
+					context.Links.Remove(itemToDelete);
 
-				context.SaveChanges();
+					context.SaveChanges();
+				}
+			}
+			catch (DbUpdateConcurrencyException) { }
+			catch (Exception ex)
+			{
+				_logger.Error(ex, "Error while removing a link. link-id={LinkId}", linkId);
 			}
 		}
 
@@ -509,6 +520,7 @@ namespace Thinktecture.Relay.Server.Repository
 					}
 				}
 			}
+			catch (DbUpdateConcurrencyException) { }
 			catch (Exception ex)
 			{
 				_logger?.Error(ex, "Error during removing an active connection. connection-id={ConnectionId}", connectionId);
@@ -517,7 +529,7 @@ namespace Thinktecture.Relay.Server.Repository
 
 		public void DeleteAllConnectionsForOrigin(Guid originId)
 		{
-			_logger?.Verbose("Deleting all active connections");
+			_logger?.Verbose("Deleting all active connections. origin-id={OriginId}", originId);
 
 			try
 			{
@@ -529,9 +541,10 @@ namespace Thinktecture.Relay.Server.Repository
 					context.SaveChanges();
 				}
 			}
+			catch (DbUpdateConcurrencyException) { }
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during deleting of all active connections");
+				_logger?.Error(ex, "Error during deleting of all active connections. origin-id={OriginId}", originId);
 			}
 		}
 
@@ -548,7 +561,7 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 			catch (Exception ex)
 			{
-				_logger?.Error(ex, "Error during checking for active connections");
+				_logger?.Error(ex, "Error during checking for active connections. link-id={LinkId}", linkId);
 				return false;
 			}
 		}
