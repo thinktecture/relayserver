@@ -17,6 +17,16 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.4.2
+
+* Bug fixes
+
+  * The OPC won't try to determine the position of a non-seekable stream anymore, which lead to an exception.
+
+* General improvements
+
+  * Don't log an error when an already closed connection might be removed again from the database a bit later.
+
 ## Version 2.4.1
 
 * Bug fixes
