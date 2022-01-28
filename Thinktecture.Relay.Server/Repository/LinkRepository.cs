@@ -548,6 +548,24 @@ namespace Thinktecture.Relay.Server.Repository
 			}
 		}
 
+		public void DeleteAllOldConnections()
+		{
+			_logger?.Verbose("Deleting all old inactive connections.");
+
+			try
+			{
+				using (var context = new RelayContext())
+				{
+					context.Database.ExecuteSqlCommand($"Delete from ActiveConnections Where LastActivity < {DateTime.UtcNow.AddDays(-1):yyyy-MM-dd HH:mm:ss}");
+					context.SaveChanges();
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger?.Error(ex, "Error during deleting of all old inactive connections.");
+			}
+		}
+
 		public async Task<bool> HasActiveConnectionAsync(Guid linkId)
 		{
 			_logger?.Verbose("Checking for active connections. link-id={LinkId}", linkId);

@@ -57,6 +57,7 @@ namespace Thinktecture.Relay.Server.Communication
 		public void Prepare()
 		{
 			_linkRepository.DeleteAllConnectionsForOrigin(OriginId);
+			_linkRepository.DeleteAllOldConnections();
 			_responseSubscription = StartReceivingResponses();
 			_acknowledgeSubscription = StartReceivingAcknowledges();
 		}
