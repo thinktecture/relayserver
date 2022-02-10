@@ -4,7 +4,7 @@ $mgmtWeb = "Thinktecture.Relay.ManagementWeb\dist\*";
 
 # Check for VS Command Prompt
 If(![Environment]::GetEnvironmentVariable('DevEnvDir')){
-	Write-Host "Error: Release builds must be run on a VS 2017 Developer Command Prompt"
+	Write-Host "Error: Release builds must be run on a VS 2019 Developer Command Prompt"
 	exit 1
 }
 
