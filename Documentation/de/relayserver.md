@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.4.3
+
+* Fehlerbehebungen
+
+  * Eine seltene Nebenläufigkeitsproblematik führt nicht mehr dazu, dass einzelne Rabbit-Abbonenten nicht korrekt aufgeräumt werden.
+
 ## Version 2.4.2
 
 * Fehlerbehebungen

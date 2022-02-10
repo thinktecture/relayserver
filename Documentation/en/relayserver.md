@@ -17,6 +17,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.4.3
+
+* Bug fixes
+
+  * Fixed a rare race condition that could lead to rabbit subscriptions not being removed correctly.
+
 ## Version 2.4.2
 
 * Bug fixes
