@@ -201,15 +201,15 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 						}
 
 						consumer.Received += OnReceived;
-						_model.BasicConsume(QueueName, autoAck, consumer);
+						var tag = _model.BasicConsume(QueueName, autoAck, consumer);
 
-						Logger.Verbose("Created consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, consumer-tag={ConsumerTag}", Exchange, QueueName, ChannelId, consumer.ConsumerTag);
+						Logger.Verbose("Created consumer. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}, consumer-tag={ConsumerTag}", Exchange, QueueName, ChannelId, tag);
 
-						return consumer.ConsumerTag;
+						return tag;
 					}
 
 					var consumerTag = CreateConsumer();
-					_observers[observer] = new Consumer() { CreateConsumer = CreateConsumer, Tag = consumerTag, };
+					_observers[observer] = new Consumer() { CreateConsumer = CreateConsumer, Tag = consumerTag };
 
 					return new DelegatingDisposable(Logger, () =>
 					{
@@ -228,6 +228,8 @@ namespace Thinktecture.Relay.Server.Communication.RabbitMq
 										_model.BasicCancel(consumer.Tag);
 										_declaredAndBound = false;
 										consumer.Tag = null;
+									} else {
+										Logger.Warning("Disposing of consumer skipped. exchange-name={ExchangeName}, queue-name={QueueName}, channel-id={ChannelId}", Exchange, QueueName, ChannelId);
 									}
 								}
 								else
