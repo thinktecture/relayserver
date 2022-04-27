@@ -21,6 +21,7 @@ namespace Thinktecture.Relay.Server.Diagnostics
 		/// Initializes a new instance of the <see cref="RelayRequestLogger{TRequest,TResponse}"/> class.
 		/// </summary>
 		/// <param name="requestRepository">An <see cref="IRequestRepository"/>.</param>
+		/// <param name="relayServerOptions">The <see cref="RelayServerOptions"/>.</param>
 		public RelayRequestLogger(IRequestRepository requestRepository, IOptions<RelayServerOptions> relayServerOptions)
 		{
 			if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));

@@ -4,5 +4,41 @@
         <name>Thinktecture.Relay.StatisticsApi.Docker</name>
     </assembly>
     <members>
+        <member name="T:Thinktecture.Relay.StatisticsApi.Docker.Controllers.HealthController">
+            <summary>
+            Provides health information for this API.
+            </summary>
+        </member>
+        <member name="M:Thinktecture.Relay.StatisticsApi.Docker.Controllers.HealthController.Ready">
+            <summary>
+            Returns the ready state of this api.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> representing the state of the api.</returns>
+        </member>
+        <member name="M:Thinktecture.Relay.StatisticsApi.Docker.Controllers.HealthController.Check">
+            <summary>
+            Checks the health state of this api.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> representing the state of the api.</returns>
+        </member>
+        <member name="T:Thinktecture.Relay.StatisticsApi.Docker.Program">
+            <summary>
+            The statistics api program.
+            </summary>
+        </member>
+        <member name="M:Thinktecture.Relay.StatisticsApi.Docker.Program.Main(System.String[])">
+            <summary>
+            The main entry point for the statistics api.
+            </summary>
+            <param name="args">The command line arguments.</param>
+            <returns>A return code for the OS to handle.</returns>
+        </member>
+        <member name="M:Thinktecture.Relay.StatisticsApi.Docker.Program.CreateHostBuilder(System.String[])">
+            <summary>
+            Creates a host builder.
+            </summary>
+            <param name="args">The command line args.</param>
+            <returns>An instance of an <see cref="T:Microsoft.Extensions.Hosting.IHostBuilder"/>.</returns>
+        </member>
     </members>
 </doc>
