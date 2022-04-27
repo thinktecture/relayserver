@@ -2,6 +2,8 @@ docker rm -f relay_connector_a1
 docker run `
   --name relay_connector_a1 `
   --network relay_network `
+  -e DOTNET_ENVIRONMENT=Development `
+  -e ASPNETCORE_ENVIRONMENT=Development `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_A1 `
@@ -13,6 +15,8 @@ docker rm -f relay_connector_a2
 docker run `
   --name relay_connector_a2 `
   --network relay_network `
+  -e DOTNET_ENVIRONMENT=Development `
+  -e ASPNETCORE_ENVIRONMENT=Development `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_A2 `
@@ -25,6 +29,8 @@ docker rm -f relay_connector_b1
 docker run `
   --name relay_connector_b1 `
   --network relay_network `
+  -e DOTNET_ENVIRONMENT=Development `
+  -e ASPNETCORE_ENVIRONMENT=Development `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_B1 `
@@ -37,6 +43,8 @@ docker rm -f relay_connector_b2
 docker run `
   --name relay_connector_b2 `
   --network relay_network `
+  -e DOTNET_ENVIRONMENT=Development `
+  -e ASPNETCORE_ENVIRONMENT=Development `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_B2 `

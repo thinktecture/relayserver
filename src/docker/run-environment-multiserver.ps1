@@ -16,4 +16,7 @@ Start-Sleep 3
 ./Thinktecture.Relay.StatisticsApi.Docker/run-container.ps1
 ./Thinktecture.Relay.Connector.Docker/run-container-multiserver.ps1
 
+# Seed initial data for client containers
+./seed-data.ps1
+
 Pop-Location
