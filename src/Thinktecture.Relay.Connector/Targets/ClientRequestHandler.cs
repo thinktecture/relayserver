@@ -72,42 +72,33 @@ namespace Thinktecture.Relay.Connector.Targets
 		}
 
 		/// <inheritdoc />
-		public async Task HandleAsync(TRequest request, CancellationToken cancellationToken = default)
+		public Task HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			if (QueueWorker(request, cancellationToken)) return;
-
-			if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
-			{
-				await AcknowledgeRequestAsync(request, false);
-			}
-
-			await DeliverResponseAsync(request.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable), request.EnableTracing);
+			Task.Run(() => WorkerCallAsync(request, cancellationToken), cancellationToken);
+			return Task.CompletedTask;
 		}
-
-		private bool QueueWorker(TRequest request, CancellationToken cancellationToken = default)
-			=> ThreadPool.QueueUserWorkItem(_ => WorkerCallAsync(request, cancellationToken).GetAwaiter().GetResult());
 
 		private async Task WorkerCallAsync(TRequest request, CancellationToken cancellationToken = default)
 		{
-			if (cancellationToken.IsCancellationRequested) return;
-
-			using var scope = _serviceProvider.CreateScope();
-			var worker = scope.ServiceProvider.GetRequiredService<IClientRequestWorker<TRequest, TResponse>>();
-
-			if (request.AcknowledgeMode == AcknowledgeMode.Manual)
-			{
-				var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
-				request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = new[] { url };
-			}
-
-			if (request.EnableTracing)
-			{
-				request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
-				request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString() };
-			}
-
 			try
 			{
+				if (cancellationToken.IsCancellationRequested) return;
+
+				using var scope = _serviceProvider.CreateScope();
+				var worker = scope.ServiceProvider.GetRequiredService<IClientRequestWorker<TRequest, TResponse>>();
+
+				if (request.AcknowledgeMode == AcknowledgeMode.Manual)
+				{
+					var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
+					request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = new[] { url, };
+				}
+
+				if (request.EnableTracing)
+				{
+					request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString(), };
+					request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString(), };
+				}
+
 				var response = await worker.HandleAsync(request, cancellationToken);
 				await DeliverResponseAsync(response, request.EnableTracing);
 			}
@@ -128,8 +119,8 @@ namespace Thinktecture.Relay.Connector.Targets
 			if (enableTracing)
 			{
 				response.HttpHeaders ??= new Dictionary<string, string[]>();
-				response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
-				response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion };
+				response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName, };
+				response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion, };
 			}
 
 			await _responseTransport.TransportAsync(response);
