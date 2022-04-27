@@ -13,7 +13,7 @@
     <!-- NuGet Package information -->
     <Company>Thinktecture AG</Company>
     <Product>Thinktecture RelayServer</Product>
-    <Copyright>Copyright © $(Company) 2015 - 2021. All rights reserved.</Copyright>
+    <Copyright>Copyright © $(Company) 2015 - 2022. All rights reserved.</Copyright>
     <Authors>Sebastian Gingter;Thomas Hilzendegen</Authors>
     <PackageTags>thinktecture;relayserver</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
