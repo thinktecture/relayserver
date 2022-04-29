@@ -20,10 +20,15 @@ namespace System.Security.Claims
 
 			return new TenantInfo()
 			{
-				Id = Guid.Parse(principal.FindFirst("client_id").Value),
-				Name = principal.FindFirst("client_name").Value,
-				DisplayName = principal.FindFirst("client_display_name").Value
+				Id = Guid.Parse(principal.GetClaim("client_id").Value),
+				Name = principal.GetClaim("client_name").Value,
+				DisplayName = principal.GetClaim("client_display_name").Value,
 			};
+		}
+
+		private static Claim GetClaim(this ClaimsPrincipal principal, string claimName)
+		{
+			return principal.FindFirst(claimName) ?? throw new InvalidOperationException($"Claim '{claimName}' is missing.");
 		}
 	}
 }

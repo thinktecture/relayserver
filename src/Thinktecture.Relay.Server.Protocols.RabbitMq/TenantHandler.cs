@@ -54,7 +54,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 		private async Task ConsumerReceived(object sender, BasicDeliverEventArgs @event)
 		{
-			var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span);
+			var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span) ?? throw new Exception("Could not deserialize request.");
 			_logger.LogTrace("Received request {RequestId} from queue {QueueName} by consumer {ConsumerTag}", request.RequestId,
 				@event.RoutingKey, @event.ConsumerTag);
 

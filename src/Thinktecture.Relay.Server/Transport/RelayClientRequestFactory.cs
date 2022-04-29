@@ -32,7 +32,7 @@ namespace Thinktecture.Relay.Server.Transport
 		public Task<T> CreateAsync(Guid tenantId, Guid requestId, HttpRequest httpRequest,
 			CancellationToken cancellationToken = default)
 		{
-			var parts = httpRequest.Path.Value.Split('/').Skip(1).ToArray();
+			var parts = httpRequest.Path.Value!.Split('/').Skip(1).ToArray();
 
 			var request = new T()
 			{
