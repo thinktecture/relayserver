@@ -66,24 +66,35 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			}
 		}
 
-		private async Task HubConnectionReconnecting(Exception ex)
+		private async Task HubConnectionReconnecting(Exception? ex)
 		{
-			_logger.LogInformation("Trying to reconnect after connection {ConnectionId} was lost", _connectionId);
+			if (ex != null)
+			{
+				_logger.LogWarning(ex, "Trying to reconnect after connection {ConnectionId} was lost due to an error", _connectionId);
+			}
+			else
+			{
+				_logger.LogInformation("Trying to reconnect after connection {ConnectionId} was lost", _connectionId);
+			}
 			await Reconnecting.InvokeAsync(this, _connectionId);
 		}
 
-		private async Task HubConnectionReconnected(string connectionId)
+		private async Task HubConnectionReconnected(string? connectionId)
 		{
-			if (_connectionId == connectionId)
+			if (connectionId == null)
+			{
+				_logger.LogWarning("Reconnected without a connection id");
+			}
+			else if (_connectionId == connectionId)
 			{
 				_logger.LogDebug("Reconnected on connection {ConnectionId}", _connectionId);
 			}
 			else
 			{
-				_logger.LogWarning("Dropped connection {ConnectionId} in favor of new connection {ConnectionId}", _connectionId, connectionId);
+				_logger.LogInformation("Dropped connection {ConnectionId} in favor of new connection {ConnectionId}", _connectionId, connectionId);
+				_connectionId = connectionId;
 			}
 
-			_connectionId = connectionId;
 			await Reconnected.InvokeAsync(this, _connectionId);
 		}
 
@@ -124,7 +135,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			try
 			{
 				await _hubConnection.StartAsync(cancellationToken);
-				_connectionId = _hubConnection.ConnectionId;
+				_connectionId = _hubConnection.ConnectionId!;
 
 				_logger.LogInformation("Connected on connection {ConnectionId}", _connectionId);
 			}
@@ -159,10 +170,12 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 		/// <returns></returns>
 		public async Task PongAsync()
 		{
+			if (_hubConnection == null) return;
+
 			_logger.LogTrace("Pong on connection {ConnectionId}", _connectionId);
 			try
 			{
-				await _hubConnection.InvokeAsync("Pong");
+				await _hubConnection.InvokeAsync("Pong", CancellationToken.None);
 			}
 			catch (Exception ex)
 			{

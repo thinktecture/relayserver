@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Connector.Authentication
 				clientAccessTokenManagementService ?? throw new ArgumentNullException(nameof(clientAccessTokenManagementService));
 		}
 
-		public Task<string> GetAccessTokenAsync()
+		public Task<string?> GetAccessTokenAsync()
 		{
 			_logger.LogDebug("Requesting access token");
 			return _clientAccessTokenManagementService.GetClientAccessTokenAsync();

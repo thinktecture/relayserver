@@ -84,7 +84,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 
 			_logger.LogDebug("Connection {ConnectionId} incoming for tenant {@Tenant}", Context.ConnectionId, tenant);
 
-			await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id, Context.GetHttpContext().Connection.RemoteIpAddress);
+			await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id, Context.GetHttpContext()!.Connection.RemoteIpAddress);
 
 			var config = await _tenantRepository.LoadTenantConfigAsync(tenant.Id);
 			if (config != null)

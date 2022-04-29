@@ -11,6 +11,6 @@ namespace Thinktecture.Relay.Connector.Authentication
 		/// Retrieves an access token.
 		/// </summary>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the access token.</returns>
-		Task<string> GetAccessTokenAsync();
+		Task<string?> GetAccessTokenAsync();
 	}
 }
