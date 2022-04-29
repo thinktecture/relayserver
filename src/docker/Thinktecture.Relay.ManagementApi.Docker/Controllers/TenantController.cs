@@ -153,10 +153,7 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers
 
 			public static string GetUniqueKey(int size)
 			{
-				var data = new byte[4 * size];
-
-				using var crypto = new RNGCryptoServiceProvider();
-				crypto.GetBytes(data);
+				var data = RandomNumberGenerator.GetBytes(4 * size);
 
 				var result = new StringBuilder(size);
 				for (var i = 0; i < size; i++)
