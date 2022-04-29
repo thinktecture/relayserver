@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,10 +13,12 @@ namespace Thinktecture.Relay.Connector.Options
 		{
 			var document = await retriever.GetDocumentAsync(address, cancellationToken);
 
-			return JsonSerializer.Deserialize<DiscoveryDocument>(document, new JsonSerializerOptions()
+			var result = JsonSerializer.Deserialize<DiscoveryDocument>(document, new JsonSerializerOptions()
 			{
-				PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+				PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 			});
+
+			return result ?? throw new Exception("Could not deserialize discovery document.");
 		}
 	}
 }

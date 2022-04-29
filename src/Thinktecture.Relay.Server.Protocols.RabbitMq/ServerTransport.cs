@@ -83,7 +83,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 		private async Task ResponseConsumerReceived(object sender, BasicDeliverEventArgs @event)
 		{
-			var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span);
+			var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span) ?? throw new Exception("Could not deserialize response.");
 			_logger.LogDebug("Received response for request {RequestId} from queue {QueueName} by consumer {ConsumerTag}", response.RequestId,
 				@event.RoutingKey, @event.ConsumerTag);
 			await _responseCoordinator.ProcessResponseAsync(response);
@@ -91,7 +91,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq
 
 		private async Task AcknowledgeConsumerReceived(object sender, BasicDeliverEventArgs @event)
 		{
-			var request = JsonSerializer.Deserialize<TAcknowledge>(@event.Body.Span);
+			var request = JsonSerializer.Deserialize<TAcknowledge>(@event.Body.Span) ?? throw new Exception("Could not deserialize acknowledge request.");
 			_logger.LogTrace("Received acknowledge request {@AcknowledgeRequest} from queue {QueueName} by consumer {ConsumerTag}", request,
 				@event.RoutingKey, @event.ConsumerTag);
 			await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);

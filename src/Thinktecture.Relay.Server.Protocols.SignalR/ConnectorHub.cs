@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Persistence;
+using Thinktecture.Relay.Server.Security;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
@@ -72,7 +73,15 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <inheritdoc />
 		public override async Task OnConnectedAsync()
 		{
-			var tenant = Context.User.GetTenantInfo();
+			var tenant = Context.User?.GetTenantInfo();
+
+			if (tenant == null)
+			{
+				_logger.LogError("Rejecting incoming connection {ConnectionId} because of missing tenant info", Context.ConnectionId);
+				Context.Abort();
+				return;
+			}
+
 			_logger.LogDebug("Connection {ConnectionId} incoming for tenant {@Tenant}", Context.ConnectionId, tenant);
 
 			await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id, Context.GetHttpContext().Connection.RemoteIpAddress);
@@ -87,13 +96,20 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		}
 
 		/// <inheritdoc />
-		public override async Task OnDisconnectedAsync(Exception exception)
+		public override async Task OnDisconnectedAsync(Exception? exception)
 		{
-			_logger.LogDebug("Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
-				Context.User.GetTenantInfo());
+			if (exception != null)
+			{
+				_logger.LogWarning(exception, "Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
+					Context.User?.GetTenantInfo());
+			}
+			else
+			{
+				_logger.LogDebug("Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
+					Context.User?.GetTenantInfo());
+			}
 
 			await _connectorRegistry.UnregisterAsync(Context.ConnectionId);
-
 			await base.OnDisconnectedAsync(exception);
 		}
 
