@@ -14,12 +14,6 @@ namespace Thinktecture.Relay.Connector.Targets
 		where T : IClientRequest
 	{
 		/// <summary>
-		/// Limits the number of background tasks running in parallel or null for system's recommended limit.
-		/// </summary>
-		/// <remarks>This cannot be smaller than the number of processors on the computer.</remarks>
-		int? BackgroundTaskLimit { get; set; }
-
-		/// <summary>
 		/// Handles the request.
 		/// </summary>
 		/// <param name="request">The client request.</param>

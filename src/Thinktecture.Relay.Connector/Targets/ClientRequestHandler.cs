@@ -24,9 +24,6 @@ namespace Thinktecture.Relay.Connector.Targets
 		private readonly IResponseTransport<TResponse> _responseTransport;
 		private readonly IAcknowledgeTransport<TAcknowledge> _acknowledgeTransport;
 		private readonly Uri _acknowledgeEndpoint;
-		private readonly int _minWorkerThreads;
-		private readonly int _maxWorkerThreads;
-		private readonly int _maxCompletionPortThreads;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ClientRequestHandler{TRequest,TResponse,TAcknowledge}"/> class.
@@ -48,27 +45,6 @@ namespace Thinktecture.Relay.Connector.Targets
 			_acknowledgeTransport = acknowledgeTransport ?? throw new ArgumentNullException(nameof(acknowledgeTransport));
 
 			_acknowledgeEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.AcknowledgeEndpoint}/");
-
-			ThreadPool.GetMinThreads(out _minWorkerThreads, out _);
-			ThreadPool.GetMaxThreads(out _maxWorkerThreads, out _maxCompletionPortThreads);
-		}
-
-		/// <inheritdoc />
-		public int? BackgroundTaskLimit
-		{
-			get
-			{
-				ThreadPool.GetMaxThreads(out var workerThreads, out _);
-				return workerThreads;
-			}
-			set
-			{
-				// no lower than minimum worker threads (or system's default fallback)
-				var workerThreads = Math.Max(_minWorkerThreads, value ?? _maxWorkerThreads);
-				// no lower than processor count
-				workerThreads = Math.Max(Environment.ProcessorCount, workerThreads);
-				ThreadPool.SetMaxThreads(workerThreads, _maxCompletionPortThreads);
-			}
 		}
 
 		/// <inheritdoc />
@@ -90,13 +66,13 @@ namespace Thinktecture.Relay.Connector.Targets
 				if (request.AcknowledgeMode == AcknowledgeMode.Manual)
 				{
 					var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
-					request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = new[] { url, };
+					request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = new[] { url };
 				}
 
 				if (request.EnableTracing)
 				{
-					request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString(), };
-					request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString(), };
+					request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
+					request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString() };
 				}
 
 				var response = await worker.HandleAsync(request, cancellationToken);
@@ -119,8 +95,8 @@ namespace Thinktecture.Relay.Connector.Targets
 			if (enableTracing)
 			{
 				response.HttpHeaders ??= new Dictionary<string, string[]>();
-				response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName, };
-				response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion, };
+				response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
+				response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion };
 			}
 
 			await _responseTransport.TransportAsync(response);
