@@ -18,7 +18,7 @@ All other scripts are located in the folder `src/docker`:
 __Prerequisites__:  
 In order to build and run the development environment, you need the following components on your system:
 - Docker
-- .NET Core SDK 3.1.100 or newer features within 3.1
+- .NET Core SDK 6.0.100 or newer features within .NET 6.0
 - PowerShell Core 6 or newer
 
 After you start the system for the first time, you need to execute the `seed-data.ps1` script, which will create the first initial
