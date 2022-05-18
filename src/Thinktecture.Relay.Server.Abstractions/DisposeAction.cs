@@ -1,22 +1,23 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Thinktecture.Relay.Server
+namespace Thinktecture.Relay.Server;
+
+/// <summary>
+/// An implementation of a dispose action which will be executed when this instance is disposed.
+/// </summary>
+public class DisposeAction : IAsyncDisposable
 {
+	private readonly Func<Task> _dispose;
+
 	/// <summary>
-	/// An implementation of a dispose action which will be executed when this instance is disposed.
+	/// Initializes a new instance of the <see cref="DisposeAction"/> class.
 	/// </summary>
-	public class DisposeAction : IAsyncDisposable
-	{
-		private readonly Func<Task> _dispose;
+	/// <param name="dispose">The asynchronous action to execute when disposing.</param>
+	public DisposeAction(Func<Task> dispose)
+		=> _dispose = dispose ?? throw new ArgumentNullException(nameof(dispose));
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DisposeAction"/> class.
-		/// </summary>
-		/// <param name="dispose">The asynchronous action to execute when disposing.</param>
-		public DisposeAction(Func<Task> dispose) => _dispose = dispose ?? throw new ArgumentNullException(nameof(dispose));
-
-		/// <inheritdoc />
-		public async ValueTask DisposeAsync() => await _dispose();
-	}
+	/// <inheritdoc/>
+	public async ValueTask DisposeAsync()
+		=> await _dispose();
 }

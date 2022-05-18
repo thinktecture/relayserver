@@ -2,30 +2,29 @@ using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 using Thinktecture.Relay.Server.Persistence.Models;
 
 // ReSharper disable once CheckNamespace; (extension methods on ModelBuilder namespace)
-namespace Microsoft.EntityFrameworkCore
+namespace Microsoft.EntityFrameworkCore;
+
+/// <summary>
+/// Extension methods for the <see cref="ModelBuilder"/>.
+/// </summary>
+public static class ModelBuilderExtensions
 {
 	/// <summary>
-	/// Extension methods for the <see cref="ModelBuilder"/>.
+	/// Configures the <see cref="RelayDbContext"/> entities for configuration.
 	/// </summary>
-	public static class ModelBuilderExtensions
-	{
-		/// <summary>
-		/// Configures the <see cref="RelayDbContext"/> entities for configuration.
-		/// </summary>
-		/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
-		/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
-		public static ModelBuilder ConfigureEntities(this ModelBuilder modelBuilder)
-		{
-			return modelBuilder
-				.ConfigureTenant()
-				.ConfigureClientSecret()
-				.ConfigureOrigin()
-				.ConfigureConnection()
-				.ConfigureConfig()
-				.ConfigureRequest();
-		}
+	/// <param name="modelBuilder">The <see cref="ModelBuilder"/> to configure.</param>
+	/// <returns>The configured instance of the <see cref="ModelBuilder"/>.</returns>
+	public static ModelBuilder ConfigureEntities(this ModelBuilder modelBuilder)
+		=> modelBuilder
+			.ConfigureTenant()
+			.ConfigureClientSecret()
+			.ConfigureOrigin()
+			.ConfigureConnection()
+			.ConfigureConfig()
+			.ConfigureRequest();
 
-		private static ModelBuilder ConfigureTenant(this ModelBuilder modelBuilder) => modelBuilder.Entity<Tenant>(builder =>
+	private static ModelBuilder ConfigureTenant(this ModelBuilder modelBuilder)
+		=> modelBuilder.Entity<Tenant>(builder =>
 		{
 			builder
 				.HasKey(e => e.Id);
@@ -75,7 +74,8 @@ namespace Microsoft.EntityFrameworkCore
 				.OnDelete(DeleteBehavior.Cascade);
 		});
 
-		private static ModelBuilder ConfigureClientSecret(this ModelBuilder modelBuilder) => modelBuilder.Entity<ClientSecret>(builder =>
+	private static ModelBuilder ConfigureClientSecret(this ModelBuilder modelBuilder)
+		=> modelBuilder.Entity<ClientSecret>(builder =>
 		{
 			builder
 				.HasKey(e => e.Id);
@@ -86,7 +86,8 @@ namespace Microsoft.EntityFrameworkCore
 				.IsRequired();
 		});
 
-		private static ModelBuilder ConfigureOrigin(this ModelBuilder modelBuilder) => modelBuilder.Entity<Origin>(builder =>
+	private static ModelBuilder ConfigureOrigin(this ModelBuilder modelBuilder)
+		=> modelBuilder.Entity<Origin>(builder =>
 		{
 			builder
 				.HasKey(e => e.Id);
@@ -102,7 +103,8 @@ namespace Microsoft.EntityFrameworkCore
 				.OnDelete(DeleteBehavior.Cascade);
 		});
 
-		private static ModelBuilder ConfigureConnection(this ModelBuilder modelBuilder) => modelBuilder.Entity<Connection>(builder =>
+	private static ModelBuilder ConfigureConnection(this ModelBuilder modelBuilder)
+		=> modelBuilder.Entity<Connection>(builder =>
 		{
 			builder
 				.HasKey(e => e.Id);
@@ -112,13 +114,15 @@ namespace Microsoft.EntityFrameworkCore
 				.HasMaxLength(100);
 		});
 
-		private static ModelBuilder ConfigureConfig(this ModelBuilder modelBuilder) => modelBuilder.Entity<Config>(builder =>
+	private static ModelBuilder ConfigureConfig(this ModelBuilder modelBuilder)
+		=> modelBuilder.Entity<Config>(builder =>
 		{
 			builder
 				.HasKey(e => e.TenantId);
 		});
 
-		private static ModelBuilder ConfigureRequest(this ModelBuilder modelBuilder) => modelBuilder.Entity<Request>(builder =>
+	private static ModelBuilder ConfigureRequest(this ModelBuilder modelBuilder)
+		=> modelBuilder.Entity<Request>(builder =>
 		{
 			builder
 				.Property<int>("Id")
@@ -140,5 +144,4 @@ namespace Microsoft.EntityFrameworkCore
 				.HasMaxLength(10)
 				.IsRequired();
 		});
-	}
 }

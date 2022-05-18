@@ -5,43 +5,40 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
-namespace Thinktecture.Relay.StatisticsApi.Docker
+namespace Thinktecture.Relay.StatisticsApi.Docker;
+
+internal class Startup
 {
-	internal class Startup
+	public IConfiguration Configuration { get; }
+
+	public Startup(IConfiguration configuration)
+		=> Configuration = configuration;
+
+	// This method gets called by the runtime. Use this method to add services to the container.
+	public void ConfigureServices(IServiceCollection services)
 	{
-		public Startup(IConfiguration configuration)
+		services.AddControllers();
+
+		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql"));
+	}
+
+	// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+	public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+	{
+		if (env.IsDevelopment())
 		{
-			Configuration = configuration;
+			app.UseDeveloperExceptionPage();
+		}
+		else
+		{
+			app.UseHttpsRedirection();
 		}
 
-		public IConfiguration Configuration { get; }
+		app.UseRouting();
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddControllers();
+		app.UseAuthorization();
+		app.UseAuthentication();
 
-			services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql"));
-		}
-
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
-			else
-			{
-				app.UseHttpsRedirection();
-			}
-
-			app.UseRouting();
-
-			app.UseAuthorization();
-			app.UseAuthentication();
-
-			app.UseEndpoints(endpoints => endpoints.MapControllers());
-		}
+		app.UseEndpoints(endpoints => endpoints.MapControllers());
 	}
 }

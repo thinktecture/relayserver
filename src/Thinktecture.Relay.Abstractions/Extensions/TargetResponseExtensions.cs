@@ -1,16 +1,16 @@
 // ReSharper disable once CheckNamespace; (extension methods on ITargetResponse namespace)
-namespace Thinktecture.Relay.Transport
+namespace Thinktecture.Relay.Transport;
+
+/// <summary>
+/// Extension methods for <see cref="ITargetResponse"/>.
+/// </summary>
+public static class TargetResponseExtensions
 {
 	/// <summary>
-	/// Extension methods for <see cref="ITargetResponse"/>.
+	/// Checks if the body content is currently outsourced.
 	/// </summary>
-	public static class TargetResponseExtensions
-	{
-		/// <summary>
-		/// Checks if the body content is currently outsourced.
-		/// </summary>
-		/// <param name="response">An <see cref="ITargetResponse"/>.</param>
-		/// <returns>true if the body content is outsourced; otherwise, false.</returns>
-		public static bool IsBodyContentOutsourced(this ITargetResponse response) => response.BodySize > 0 && response.BodyContent == null;
-	}
+	/// <param name="response">An <see cref="ITargetResponse"/>.</param>
+	/// <returns>true if the body content is outsourced; otherwise, false.</returns>
+	public static bool IsBodyContentOutsourced(this ITargetResponse response)
+		=> response.BodySize > 0 && response.BodyContent == null;
 }

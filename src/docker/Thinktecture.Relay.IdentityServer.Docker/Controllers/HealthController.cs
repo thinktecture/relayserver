@@ -1,22 +1,17 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Thinktecture.Relay.IdentityServer.Docker.Controllers
-{
-	[AllowAnonymous]
-	[Route("{controller}/{action}")]
-	public class HealthController : Controller
-	{
-		[HttpGet]
-		public IActionResult Ready()
-		{
-			return Ok();
-		}
+namespace Thinktecture.Relay.IdentityServer.Docker.Controllers;
 
-		[HttpGet]
-		public IActionResult Check()
-		{
-			return Ok();
-		}
-	}
+[AllowAnonymous]
+[Route("{controller}/{action}")]
+public class HealthController : Controller
+{
+	[HttpGet]
+	public IActionResult Ready()
+		=> Ok();
+
+	[HttpGet]
+	public IActionResult Check()
+		=> Ok();
 }

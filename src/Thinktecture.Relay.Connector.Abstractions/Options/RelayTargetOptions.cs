@@ -1,43 +1,42 @@
 using System;
 using System.Collections.Generic;
 
-namespace Thinktecture.Relay.Connector.Options
+namespace Thinktecture.Relay.Connector.Options;
+
+/// <summary>
+/// Options for relay target registration via dependency injection.
+/// </summary>
+public class RelayTargetOptions
 {
 	/// <summary>
-	/// Options for relay target registration via dependency injection.
+	/// The <see cref="List{T}"/> of <see cref="RelayTargetRegistration"/>.
 	/// </summary>
-	public class RelayTargetOptions
+	public List<RelayTargetRegistration> Targets { get; } = new List<RelayTargetRegistration>();
+
+	/// <summary>
+	/// A single target registration.
+	/// </summary>
+	public class RelayTargetRegistration
 	{
 		/// <summary>
-		/// A single target registration.
+		/// The unique id of the target.
 		/// </summary>
-		public class RelayTargetRegistration
-		{
-			/// <summary>
-			/// The unique id of the target.
-			/// </summary>
-			public string Id { get; set; } = default!;
-
-			/// <summary>
-			/// The <see cref="Type"/> of the target handling requests.
-			/// </summary>
-			public Type Type { get; set; } = default!;
-
-			/// <summary>
-			/// An optional <see cref="TimeSpan"/> when the target times out.
-			/// </summary>
-			/// <remarks>The default value is 100 seconds.</remarks>
-			public TimeSpan? Timeout { get; set; }
-
-			/// <summary>
-			/// Constructor arguments not provided by the <see cref="IServiceProvider"/>.
-			/// </summary>
-			public object[] Parameters { get; set; } = default!;
-		}
+		public string Id { get; set; } = default!;
 
 		/// <summary>
-		/// The <see cref="List{T}"/> of <see cref="RelayTargetRegistration"/>.
+		/// The <see cref="Type"/> of the target handling requests.
 		/// </summary>
-		public List<RelayTargetRegistration> Targets { get; } = new List<RelayTargetRegistration>();
+		public Type Type { get; set; } = default!;
+
+		/// <summary>
+		/// An optional <see cref="TimeSpan"/> when the target times out.
+		/// </summary>
+		/// <remarks>The default value is 100 seconds.</remarks>
+		public TimeSpan? Timeout { get; set; }
+
+		/// <summary>
+		/// Constructor arguments not provided by the <see cref="IServiceProvider"/>.
+		/// </summary>
+		public object[] Parameters { get; set; } = default!;
 	}
 }

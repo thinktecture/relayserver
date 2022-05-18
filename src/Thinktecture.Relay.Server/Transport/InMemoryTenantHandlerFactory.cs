@@ -1,9 +1,9 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Transport
+namespace Thinktecture.Relay.Server.Transport;
+
+internal class InMemoryTenantHandlerFactory : ITenantHandlerFactory
 {
-	internal class InMemoryTenantHandlerFactory : ITenantHandlerFactory
-	{
-		public ITenantHandler Create(Guid tenantId, string connectionId) => InMemoryTenantHandler.Noop;
-	}
+	public ITenantHandler Create(Guid tenantId, string connectionId)
+		=> InMemoryTenantHandler.Noop;
 }
