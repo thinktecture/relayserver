@@ -1,5 +1,5 @@
-# Editor configuration, see https://editorconfig.org
 root = true
+# Editor configuration, see https://editorconfig.org
 
 [*]
 charset = utf-8
@@ -8,15 +8,103 @@ indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true
 end_of_line = lf
-max_line_length = 140
+max_line_length = 120
+
+# ReSharper properties
+resharper_align_multiline_binary_expressions_chain = false
+resharper_arguments_skip_single = true
+resharper_blank_lines_after_block_statements = 0
+resharper_blank_lines_after_control_transfer_statements = 1
+resharper_blank_lines_after_start_comment = 0
+resharper_braces_for_foreach = required
+resharper_braces_for_ifelse = not_required
+resharper_braces_for_lock = not_required
+resharper_braces_redundant = false
+resharper_constructor_or_destructor_body = expression_body
+resharper_csharp_blank_lines_around_single_line_invocable = 1
+resharper_csharp_indent_size = 3
+resharper_csharp_indent_style = tab
+resharper_csharp_max_line_length = 120
+resharper_csharp_place_type_constraints_on_same_line = false
+resharper_csharp_wrap_multiple_type_parameter_constraints_style = chop_always
+resharper_enforce_line_ending_style = true
+resharper_instance_members_qualify_declared_in =
+resharper_keep_existing_expr_member_arrangement = false
+resharper_method_or_operator_body = expression_body
+resharper_object_creation_when_type_evident = explicitly_typed
+resharper_parentheses_redundancy_style = remove
+resharper_place_accessorholder_attribute_on_same_line = false
+resharper_place_constructor_initializer_on_same_line = false
+resharper_place_expr_method_on_single_line = false
+resharper_place_expr_property_on_single_line = true
+resharper_place_simple_anonymousmethod_on_single_line = false
+resharper_place_simple_embedded_statement_on_same_line = true
+resharper_place_simple_initializer_on_single_line = true
+resharper_resx_max_line_length = 120
+resharper_space_within_single_line_array_initializer_braces = true
+resharper_T4_max_line_length = 120
+resharper_trailing_comma_in_multiline_lists = true
+resharper_use_indent_from_vs = false
+resharper_wrap_array_initializer_style = chop_always
+resharper_wrap_before_arrow_with_expressions = true
+resharper_wrap_chained_binary_expressions = chop_if_long
+resharper_wrap_lines = true
+resharper_wrap_object_and_collection_initializer_style = chop_if_long
+resharper_xmldoc_attribute_indent = align_by_first_attribute
+resharper_xmldoc_attribute_style = on_single_line
+resharper_xmldoc_blank_line_after_pi = false
+resharper_xmldoc_indent_text = ZeroIndent
+resharper_xmldoc_max_line_length = 120
+resharper_xmldoc_space_after_last_pi_attribute = true
+resharper_xmldoc_space_before_self_closing = false
+resharper_xml_max_line_length = 120
+
+# Microsoft .NET properties
+csharp_new_line_before_members_in_object_initializers = false
+csharp_preferred_modifier_order = internal, public, private, protected, new, override, abstract, static, sealed, virtual, async, extern, unsafe, volatile, readonly:suggestion
+csharp_space_after_cast = false
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_style_var_elsewhere = true:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:none
+dotnet_style_parentheses_in_relational_binary_operators = never_if_unnecessary:none
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+
+# ReSharper inspection severities
+resharper_arrange_constructor_or_destructor_body_highlighting = suggestion
+resharper_arrange_redundant_parentheses_highlighting = hint
+resharper_arrange_this_qualifier_highlighting = hint
+resharper_arrange_type_member_modifiers_highlighting = hint
+resharper_arrange_type_modifiers_highlighting = hint
+resharper_built_in_type_reference_style_for_member_access_highlighting = hint
+resharper_built_in_type_reference_style_highlighting = hint
+resharper_redundant_base_qualifier_highlighting = warning
+resharper_redundant_empty_object_creation_argument_list_highlighting = none
+resharper_suggest_var_or_type_built_in_types_highlighting = hint
+resharper_suggest_var_or_type_elsewhere_highlighting = hint
+resharper_suggest_var_or_type_simple_types_highlighting = hint
+resharper_web_config_module_not_resolved_highlighting = warning
+resharper_web_config_type_not_resolved_highlighting = warning
+resharper_web_config_wrong_module_highlighting = warning
 
 [*.md]
 trim_trailing_whitespace = false
+indent_size = 3
+tab_width = 3
+ij_continuation_indent_size = 6
 
 [*.cs]
-indent_style = tab
 tab_width = 3
-indent_size=tab
+indent_style = tab
+indent_size = tab
 
 [*.ts]
 ij_typescript_spaces_within_imports = true
@@ -25,3 +113,6 @@ ij_typescript_spaces_within_object_type_braces = true
 ij_typescript_force_quote_style = true
 ij_typescript_use_double_quotes = false
 ij_typescript_enforce_trailing_comma = whenmultiline
+
+[*.svg]
+disable_formatter = true
