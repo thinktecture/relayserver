@@ -9,7 +9,7 @@ namespace System
 	public static class TypeExtensions
 	{
 		/// <summary>
-		/// <summary>Gets the simple name of the assembly. This is usually, but not necessarily, the file name of the manifest file of the assembly, minus its extension.</summary>
+		/// Gets the simple name of the assembly. This is usually, but not necessarily, the file name of the manifest file of the assembly, minus its extension.
 		/// </summary>
 		/// <param name="type">The <see cref="Type"/>.</param>
 		/// <returns>The simple name of the assembly.</returns>
