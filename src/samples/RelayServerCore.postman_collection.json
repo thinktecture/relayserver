@@ -1,384 +1,384 @@
 {
-	"info": {
-		"_postman_id": "497dc70c-d02f-4018-a1a8-f28ccab644d9",
-		"name": "RelayServer Core",
-		"description": "Requests for RelayServer Core",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Health",
-			"item": [
-				{
-					"name": "Health RelayServer",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{relayserver}}/health/check",
-							"host": [
-								"{{relayserver}}"
-							],
-							"path": [
-								"health",
-								"check"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Health identityserver",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{identityserver}}/health/check",
-							"host": [
-								"{{identityserver}}"
-							],
-							"path": [
-								"health",
-								"check"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Health managementapi",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{managementapi}}/health/check",
-							"host": [
-								"{{managementapi}}"
-							],
-							"path": [
-								"health",
-								"check"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Health statistics api",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{statisticsapi}}/health/check",
-							"host": [
-								"{{statisticsapi}}"
-							],
-							"path": [
-								"health",
-								"check"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "Load all tenants",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "6f61cac3-ebcf-4d4a-aa3b-5425ea5a08b7",
-						"exec": [
-							"var jsonData = pm.response.json();",
-							"if (jsonData.length > 0) {",
-							"  pm.environment.set(\"clientId\", jsonData[0].id);",
-							"  pm.environment.set(\"clientName\", jsonData[0].name);",
-							"} else {",
-							"  pm.environment.set(\"clientId\", undefined);",
-							"  pm.environment.set(\"clientName\", undefined);",
-							"}",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{managementapi}}/tenant",
-					"host": [
-						"{{managementapi}}"
-					],
-					"path": [
-						"tenant"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create a Tenant",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "57619a6f-98a1-40a8-96f3-bd6f0962313b",
-						"exec": [
-							"var jsonData = pm.response.json();",
-							"if (jsonData) {",
-							"    pm.environment.set(\"clientId\", jsonData.id);",
-							"}",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "edb16477-3bd1-4b40-acf4-612a6ee928a9",
-						"exec": [
-							"var name = pm.environment.get(\"clientName\");",
-							"if (!name) {",
-							"    pm.environment.set(\"clientName\", \"someTenant\");",
-							"}",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"name\": \"{{clientName}}\"\n}\n",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{managementapi}}/tenant",
-					"host": [
-						"{{managementapi}}"
-					],
-					"path": [
-						"tenant"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create a Tenant Secret",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "6238bbde-3413-493f-8a75-b5c049e6ed35",
-						"exec": [
-							"var jsonData = pm.response.json();",
-							"if (jsonData) {",
-							"    pm.environment.set(\"clientSecret\", jsonData.secret);",
-							"}",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "73afbe6a-b324-44f1-b20a-dcb6452f353b",
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "{{managementapi}}/tenant/:tenantId/secret",
-					"host": [
-						"{{managementapi}}"
-					],
-					"path": [
-						"tenant",
-						":tenantId",
-						"secret"
-					],
-					"query": [
-						{
-							"key": null,
-							"value": "",
-							"disabled": true
-						}
-					],
-					"variable": [
-						{
-							"key": "tenantId",
-							"value": "{{clientId}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get Token",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "client_id",
-							"value": "{{clientName}}",
-							"type": "text"
-						},
-						{
-							"key": "client_secret",
-							"value": "{{clientSecret}}",
-							"type": "text"
-						},
-						{
-							"key": "grant_type",
-							"value": "client_credentials",
-							"type": "text"
-						},
-						{
-							"key": "scope",
-							"value": "relaying",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{identityserver}}/connect/token",
-					"host": [
-						"{{identityserver}}"
-					],
-					"path": [
-						"connect",
-						"token"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete the Tenant",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "{{managementapi}}/tenant/:tenantId",
-					"host": [
-						"{{managementapi}}"
-					],
-					"path": [
-						"tenant",
-						":tenantId"
-					],
-					"variable": [
-						{
-							"key": "tenantId",
-							"value": "{{clientId}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Discovery Document",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{relayserver}}/.well-known/relayserver-configuration",
-					"host": [
-						"{{relayserver}}"
-					],
-					"path": [
-						".well-known",
-						"relayserver-configuration"
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"id": "d3ad90b3-5c23-4719-82aa-34f9e92f8168",
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"id": "6b1441ee-8140-4e76-9d17-91007e7b806c",
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"id": "55f2eddb-a3ad-48aa-9f67-30119d984d9f",
-			"key": "relayserver",
-			"value": "http://localhost:5000"
-		},
-		{
-			"id": "9304bceb-c861-4e42-91d3-5a0c45fc3e74",
-			"key": "identityserver",
-			"value": "http://localhost:5002"
-		},
-		{
-			"id": "ed6dc09b-2cce-40e4-8b59-d9fefdaf93bb",
-			"key": "managementapi",
-			"value": "http://localhost:5004/api"
-		},
-		{
-			"id": "e6ee4248-67ef-4e87-ac01-1a08d34acbbb",
-			"key": "statisticsapi",
-			"value": "http://localhost:5006"
-		},
-		{
-			"id": "8d75c357-0a58-49f6-99ae-9cc8c30f99a7",
-			"key": "clientName",
-			"value": "someTenant"
-		},
-		{
-			"id": "9303f3ed-f2f3-4d7f-8e43-3256bd06523f",
-			"key": "clientId",
-			"value": ""
-		},
-		{
-			"id": "470dfac7-fb7e-47f4-958e-5c451997f761",
-			"key": "clientSecret",
-			"value": ""
-		}
-	],
-	"protocolProfileBehavior": {}
+  "info": {
+    "_postman_id": "497dc70c-d02f-4018-a1a8-f28ccab644d9",
+    "name": "RelayServer Core",
+    "description": "Requests for RelayServer Core",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health RelayServer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{relayserver}}/health/check",
+              "host": [
+                "{{relayserver}}"
+              ],
+              "path": [
+                "health",
+                "check"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health identityserver",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{identityserver}}/health/check",
+              "host": [
+                "{{identityserver}}"
+              ],
+              "path": [
+                "health",
+                "check"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health managementapi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{managementapi}}/health/check",
+              "host": [
+                "{{managementapi}}"
+              ],
+              "path": [
+                "health",
+                "check"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health statistics api",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{statisticsapi}}/health/check",
+              "host": [
+                "{{statisticsapi}}"
+              ],
+              "path": [
+                "health",
+                "check"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "Load all tenants",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "6f61cac3-ebcf-4d4a-aa3b-5425ea5a08b7",
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.length > 0) {",
+              "  pm.environment.set(\"clientId\", jsonData[0].id);",
+              "  pm.environment.set(\"clientName\", jsonData[0].name);",
+              "} else {",
+              "  pm.environment.set(\"clientId\", undefined);",
+              "  pm.environment.set(\"clientName\", undefined);",
+              "}",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{managementapi}}/tenant",
+          "host": [
+            "{{managementapi}}"
+          ],
+          "path": [
+            "tenant"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create a Tenant",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "57619a6f-98a1-40a8-96f3-bd6f0962313b",
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData) {",
+              "    pm.environment.set(\"clientId\", jsonData.id);",
+              "}",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "edb16477-3bd1-4b40-acf4-612a6ee928a9",
+            "exec": [
+              "var name = pm.environment.get(\"clientName\");",
+              "if (!name) {",
+              "    pm.environment.set(\"clientName\", \"someTenant\");",
+              "}",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"name\": \"{{clientName}}\"\n}\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{managementapi}}/tenant",
+          "host": [
+            "{{managementapi}}"
+          ],
+          "path": [
+            "tenant"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create a Tenant Secret",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "6238bbde-3413-493f-8a75-b5c049e6ed35",
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData) {",
+              "    pm.environment.set(\"clientSecret\", jsonData.secret);",
+              "}",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "73afbe6a-b324-44f1-b20a-dcb6452f353b",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{managementapi}}/tenant/:tenantId/secret",
+          "host": [
+            "{{managementapi}}"
+          ],
+          "path": [
+            "tenant",
+            ":tenantId",
+            "secret"
+          ],
+          "query": [
+            {
+              "key": null,
+              "value": "",
+              "disabled": true
+            }
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{clientId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Token",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "client_id",
+              "value": "{{clientName}}",
+              "type": "text"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{clientSecret}}",
+              "type": "text"
+            },
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text"
+            },
+            {
+              "key": "scope",
+              "value": "relaying",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{identityserver}}/connect/token",
+          "host": [
+            "{{identityserver}}"
+          ],
+          "path": [
+            "connect",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete the Tenant",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{managementapi}}/tenant/:tenantId",
+          "host": [
+            "{{managementapi}}"
+          ],
+          "path": [
+            "tenant",
+            ":tenantId"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{clientId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Discovery Document",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{relayserver}}/.well-known/relayserver-configuration",
+          "host": [
+            "{{relayserver}}"
+          ],
+          "path": [
+            ".well-known",
+            "relayserver-configuration"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "d3ad90b3-5c23-4719-82aa-34f9e92f8168",
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "6b1441ee-8140-4e76-9d17-91007e7b806c",
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "id": "55f2eddb-a3ad-48aa-9f67-30119d984d9f",
+      "key": "relayserver",
+      "value": "http://localhost:5000"
+    },
+    {
+      "id": "9304bceb-c861-4e42-91d3-5a0c45fc3e74",
+      "key": "identityserver",
+      "value": "http://localhost:5002"
+    },
+    {
+      "id": "ed6dc09b-2cce-40e4-8b59-d9fefdaf93bb",
+      "key": "managementapi",
+      "value": "http://localhost:5004/api"
+    },
+    {
+      "id": "e6ee4248-67ef-4e87-ac01-1a08d34acbbb",
+      "key": "statisticsapi",
+      "value": "http://localhost:5006"
+    },
+    {
+      "id": "8d75c357-0a58-49f6-99ae-9cc8c30f99a7",
+      "key": "clientName",
+      "value": "someTenant"
+    },
+    {
+      "id": "9303f3ed-f2f3-4d7f-8e43-3256bd06523f",
+      "key": "clientId",
+      "value": ""
+    },
+    {
+      "id": "470dfac7-fb7e-47f4-958e-5c451997f761",
+      "key": "clientSecret",
+      "value": ""
+    }
+  ],
+  "protocolProfileBehavior": {}
 }

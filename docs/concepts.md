@@ -14,28 +14,30 @@ A request is processed in several stages in RelayServer.
 ### Request on the Server
 
 1. `RelayMiddleware`
-   - The relay middleware receives an incoming request from a client. The incoming url needs to be in the format
-     `https://relayserver.tld/relay/{TenantName}/{TargetName}/{Path}`.
+   - The relay middleware receives an incoming request from a client. The incoming url needs to be in the
+     format `https://relayserver.tld/relay/{TenantName}/{TargetName}/{Path}`.
    - The middleware searches for the tenant and if found it starts processing the request.
-   - If the request has a body and it is larger than the maximum size any [transport](#transports) allows, it will be persisted using the
-     configured `IBodyStore` implementation.
+   - If the request has a body and it is larger than the maximum size any [transport](#transports) allows, it will be
+     persisted using the configured `IBodyStore` implementation.
    - The middleware hands the request over to the request coordinator.
 1. `RequestCoordinator`
-   - If shortcutting is allowed by the configuration, the request coordinator will check if a connector for this tenant is currently
-     connected to the server that processes this request. If this is the case, the request will directly be sent to the connector, skipping
-     the next two steps.
+   - If shortcutting is allowed by the configuration, the request coordinator will check if a connector for this tenant
+     is currently connected to the server that processes this request. If this is the case, the request will directly be
+     sent to the connector, skipping the next two steps.
 1. `TenantDispatcher`  
-   The tenant dispatcher is part of the RabbitMQ server-to-server transport and sends messages into the queues to the tenant handlers.
-   - If shortcutting is disabled (default), or enabled but no active connection is found on this server, the request will be dispatched to
-     the [server-to-server transport](#server-to-server-transport) to another instance of the RelayServer that has an active connection.
+   The tenant dispatcher is part of the RabbitMQ server-to-server transport and sends messages into the queues to the
+   tenant handlers.
+   - If shortcutting is disabled (default), or enabled but no active connection is found on this server, the request
+     will be dispatched to the [server-to-server transport](#server-to-server-transport) to another instance of the
+     RelayServer that has an active connection.
 1. `TenantHandler`  
-   The tenant handler is the listener on the RabbitMQ server-to-server transport that is instantiated for each connector connection and
-   waits for messages targeted at a tenant.
+   The tenant handler is the listener on the RabbitMQ server-to-server transport that is instantiated for each connector
+   connection and waits for messages targeted at a tenant.
    - One tenant handler reads the request from the server-to-server transport.
    - It writes the request to the TenantConnectorAdapter.
 1. `TenantConnectionAdapter`  
-   The tenant connection adapter is part of the SignalR server-to-connector transport. It gets called by either the request coordinator
-   directly (shortcut) or by the tenant handler (which belongs to the server-to-server transport).
+   The tenant connection adapter is part of the SignalR server-to-connector transport. It gets called by either the
+   request coordinator directly (shortcut) or by the tenant handler (which belongs to the server-to-server transport).
    - The request is sent down to the connector through the configured server-to-connector transport.
 
 ### Request on the connector
@@ -45,8 +47,8 @@ A request is processed in several stages in RelayServer.
    - The server (`TenantConnectionAdapter`) calls a method on the connector connection, passing the request along.
    - The connector connection hands the request over to the client request handler.
 1. `ClientRequestHandler`
-   - The client request handler first checks, if the requested target is available. If this is not the case, it answers the request with a
-     _404 Not Found_ status code.
+   - The client request handler first checks, if the requested target is available. If this is not the case, it answers
+     the request with a _404 Not Found_ status code.
    - If the request body was too large for the transport, it is requested with a separate http call from the server.
    - The complete request is then passed to the registered `IRelayTarget` to handle the request.
 1. `RelayWebTarget`  
@@ -57,9 +59,9 @@ A request is processed in several stages in RelayServer.
 ### Response on the connector
 
 1. `ClientRequestHandler`
-   - After receiving the response from the local target, the client request handler checks if the response body is large enough for the
-     server-to-connector transport.  
-     If this is not the case, the response body will be http POSTed to the server and removed from the response.
+   - After receiving the response from the local target, the client request handler checks if the response body is large
+     enough for the server-to-connector transport. If this is not the case, the response body will be http POSTed to the
+     server and removed from the response.
    - The response is then passed back to the connector connection.
 1. `ConnectorConnection`
    - The connector connection gets the response returned from the previous call to the client request handler.
@@ -71,20 +73,23 @@ A request is processed in several stages in RelayServer.
    The connector hub is part of the SignalR server-to-connector transport.
    - The hub receives the response and hands it over to the response coordinator.
 1. `ResponseCoordinator`
-   - If shortcutting is allowed by the configuration, the response coordinator will check if the client is waiting for the response on the
-     server that received this response. If this is the case, the response will be processed directly, skipping the next two steps.
+   - If shortcutting is allowed by the configuration, the response coordinator will check if the client is waiting for
+     the response on the server that received this response. If this is the case, the response will be processed
+     directly, skipping the next two steps.
 1. `ServerDispatcher`  
    The server dispatcher is part of the RabbitMQ server-to-server transport and sends messages to other servers.
-   - If shortcutting is disabled (default) or the client waiting for the response is connected to a different server, the server dispatcher
-     puts the response in a message queue targeted to the server where the client waits for the response.
+   - If shortcutting is disabled (default) or the client waiting for the response is connected to a different server,
+     the server dispatcher puts the response in a message queue targeted to the server where the client waits for the
+     response.
 1. `ServerHandler`  
-   The server handler is part of the RabbitMQ server-to-server transport, waiting for messages directed at this relay server instance.
+   The server handler is part of the RabbitMQ server-to-server transport, waiting for messages directed at this relay
+   server instance.
    - When a response is received, an event is raised to handle this. This event is handled by the response coordinator.
 1. `ResponseCoordinator`  
    We are now on the server where the client is waiting for its response.
    - If the response body was too large for the transport, the body content is loaded from the body store.
    - The response is passed back to the relay middleware.
-1. `RelayMiddleware`
+2. `RelayMiddleware`
    - The relay middleware sends the response to the client waiting for it.
 
 ## Transports
@@ -93,64 +98,74 @@ The RelayServer has three concepts of transports, or protocols.
 
 ### Server-to-Server transport
 
-In a multi-server environment, the server that receives a request from a client can be a different server than the one to which the tenants
-connector has an active connection to. So the request needs to be sent to the Server with the active connection to the connector first. This
-is done through the server-to-server transport. Typically this is a message queue. RelayServer is built around RabbitMQ, but the server
-transport can be implemented using other components as well.
+In a multi-server environment, the server that receives a request from a client can be a different server than the one
+to which the tenants connector has an active connection to. So the request needs to be sent to the Server with the
+active connection to the connector first. This is done through the server-to-server transport. Typically this is a
+message queue. RelayServer is built around RabbitMQ, but the server transport can be implemented using other components
+as well.
 
 ### Server-to-Connector transport
 
-To make relaying possible without configuring port forwarding in a router or opening additional ports on firewalls, the connector is meant
-to use HTTP to connect to the server. To have a reliable, steady connection websockets are preferable. RelayServer is built around ASP.NET
-Core SignalR, but the server transport can also be implemented using other components.
+To make relaying possible without configuring port forwarding in a router or opening additional ports on firewalls, the
+connector is meant to use HTTP to connect to the server. To have a reliable, steady connection websockets are
+preferable. RelayServer is built around ASP.NET Core SignalR, but the server transport can also be implemented using
+other components.
 
-The connector opens up a connection to a RelayServer and waits for requests to be sent through this transport. The transport also has a
-back-channel which will be used for handshake and server-side connector configuration as well as heartbeats and acknowledgment.
+The connector opens up a connection to a RelayServer and waits for requests to be sent through this transport. The
+transport also has a back-channel which will be used for handshake and server-side connector configuration as well as
+heartbeats and acknowledgment.
 
 ### HTTP fallback
 
-Both transports, depending on the actual used underlying technologies or systems, may introduce possibly different limits on the size of
-messages sent through them. The request and/or response body contents that should be relayed might be too large to fit in a message. In
-these cases the body is separated from the actual request or response and transferred via normal HTTP GET (downloading of the request body
-from the Server to the connector) or HTTP POST (uploading the response body from the connector to the server).
+Both transports, depending on the actual used underlying technologies or systems, may introduce possibly different
+limits on the size of messages sent through them. The request and/or response body contents that should be relayed might
+be too large to fit in a message. In these cases the body is separated from the actual request or response and
+transferred via normal HTTP GET (downloading of the request body from the Server to the connector) or HTTP POST (
+uploading the response body from the connector to the server).
 
 ## Acknowledgment
 
-The concept of acknowledgement comes from the underlying assumption that the server-to-server transport is based on some type of message
-queue. As long as a message is not acknowledged, it will remain in the message queue. This results in the possibility, that a request can be
-kept in the queue until we made sure it was processed by the target, even though the client might have already aborted the originating
-request.
+The concept of acknowledgement comes from the underlying assumption that the server-to-server transport is based on some
+type of message queue. As long as a message is not acknowledged, it will remain in the message queue. This results in
+the possibility, that a request can be kept in the queue until we made sure it was processed by the target, even though
+the client might have already aborted the originating request.
 
-The default (`AcknowledgeMode.ConnectorReceived`), is sent by the connector via the connector transport back-channel when the request was
-received by the connector and the body content was downloaded from the RelayServer if it is too big for the connector transport.
+The default (`AcknowledgeMode.ConnectorReceived`), is sent by the connector via the connector transport back-channel
+when the request was received by the connector and the body content was downloaded from the RelayServer if it is too big
+for the connector transport.
 
-With the second option (`AcknowledgeMode.ConnectorFinished`), the connector will wait until the Target responded to the request before
-acknowledging the message through the connector transport back-channel.
+With the second option (`AcknowledgeMode.ConnectorFinished`), the connector will wait until the Target responded to the
+request before acknowledging the message through the connector transport back-channel.
 
-The third option (`AcknowledgeMode.Manual`) shifts the responsibility of acknowledging to the consumer. The message will not be taken out of
-the queue an explicit acknowledge HTTP POST request is sent to the RelayServer by some custom code. The url with all arguments required for
-acknowledging will be provided to the Target within the request as additional HTTP headers.
+The third option (`AcknowledgeMode.Manual`) shifts the responsibility of acknowledging to the consumer. The message will
+not be taken out of the queue an explicit acknowledge HTTP POST request is sent to the RelayServer by some custom code.
+The url with all arguments required for acknowledging will be provided to the Target within the request as additional
+HTTP headers.
 
-Acknowledgement can also be disabled (`AcknowledgeMode.Disabled`), meaning that any request will be acknowledged and thus taken completely
-out of the message queue automatically by the RelayServer, even before the request is sent to the connector.
+Acknowledgement can also be disabled (`AcknowledgeMode.Disabled`), meaning that any request will be acknowledged and
+thus taken completely out of the message queue automatically by the RelayServer, even before the request is sent to the
+connector.
 
 ## Body content handling
 
-Since transports may have limits on message sizes (i.e. RabbitMQ can send only up to 64kB), it is not possible to send any body through any
-transport. Body contents need to be persisted temporarily for processing. This is managed by an implementation of `IBodyStore`.
+Since transports may have limits on message sizes (i.e. RabbitMQ can send only up to 64kB), it is not possible to send
+any body through any transport. Body contents need to be persisted temporarily for processing. This is managed by an
+implementation of the `IBodyStore` interface.
 
 The decisions when to delete a content are as follows:
 
 ### Request body
 
-When acknowledgment is enabled, the contents of the request body will be deleted when the request is acknowledged. This means either the
-connector has completely received the request and also requested the request body from a server (`AcknowledgeMode.ConnectorReceived`), or
-the connector already got the response from the target (`AcknowledgeMode.ConnectorFinished`).
+When acknowledgment is enabled, the contents of the request body will be deleted when the request is acknowledged. This
+means either the connector has completely received the request and also requested the request body from a
+server (`AcknowledgeMode.ConnectorReceived`), or the connector already got the response from the
+target (`AcknowledgeMode.ConnectorFinished`).
 
-When in manual mode (`AcknowledgeMode.Manual`), the acknowledgment must not be sent before the request body was loaded from the server.
+When in manual mode (`AcknowledgeMode.Manual`), the acknowledgment must not be sent before the request body was loaded
+from the server.
 
-When acknowledgement is disabled (`AcknowledgeMode.Disabled`), the connector to explicitly requests automatic file deletion when loading the
-request body from the server using the request endpoint.
+When acknowledgement is disabled (`AcknowledgeMode.Disabled`), the connector to explicitly requests automatic file
+deletion when loading the request body from the server using the request endpoint.
 
 ### Response body
 
