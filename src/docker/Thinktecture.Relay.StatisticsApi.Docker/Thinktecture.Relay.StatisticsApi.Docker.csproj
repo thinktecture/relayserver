@@ -7,14 +7,7 @@
   <!-- Generate documentation file for Swagger -->
   <PropertyGroup>
     <DocumentationFile>StatisticsApiDocumentation.xml</DocumentationFile>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Update="StatisticsApiDocumentation.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />

@@ -6,8 +6,10 @@ using Serilog.Events;
 
 namespace Thinktecture.Relay.Docker
 {
+	/// <inheritdoc />
 	public class StreamDestructuringPolicy : IDestructuringPolicy
 	{
+		/// <inheritdoc />
 		public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory,
 			[MaybeNullWhen(false)] out LogEventPropertyValue result)
 		{
