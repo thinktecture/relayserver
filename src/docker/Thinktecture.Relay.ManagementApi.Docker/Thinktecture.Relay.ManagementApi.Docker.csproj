@@ -7,14 +7,7 @@
   <!-- Generate documentation file for Swagger -->
   <PropertyGroup>
     <DocumentationFile>ManagementApiDocumentation.xml</DocumentationFile>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Update="ManagementApiDocumentation.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.3.1" />

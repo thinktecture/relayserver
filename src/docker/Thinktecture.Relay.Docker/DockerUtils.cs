@@ -6,8 +6,18 @@ using Serilog;
 
 namespace Thinktecture.Relay.Docker
 {
+	/// <summary>
+	/// Provides utility functions for the Docker environment
+	/// </summary>
 	public static class DockerUtils
 	{
+		/// <summary>
+		/// Creates a holst builder preconfigured for the Docker environment.
+		/// </summary>
+		/// <param name="applicationName">The name of the application.</param>
+		/// <param name="args">The commandline arguments provided to the application.</param>
+		/// <typeparam name="TStartup">The startup class to use.</typeparam>
+		/// <returns>An instance of an <see cref="IHostBuilder"/>.</returns>
 		public static IHostBuilder CreateHostBuilder<TStartup>(string applicationName, string[] args)
 			where TStartup : class
 			=> Host
