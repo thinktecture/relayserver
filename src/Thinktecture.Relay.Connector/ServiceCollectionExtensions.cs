@@ -26,7 +26,8 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
 		/// <param name="configure">A configure callback for setting the <see cref="RelayConnectorOptions"/>.</param>
 		/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.</returns>
-		public static IRelayConnectorBuilder<ClientRequest, TargetResponse, AcknowledgeRequest> AddRelayConnector(this IServiceCollection services,
+		public static IRelayConnectorBuilder<ClientRequest, TargetResponse, AcknowledgeRequest> AddRelayConnector(
+			this IServiceCollection services,
 			Action<RelayConnectorOptions> configure)
 			=> services.AddRelayConnector<ClientRequest, TargetResponse, AcknowledgeRequest>(configure);
 
@@ -53,11 +54,19 @@ namespace Microsoft.Extensions.DependencyInjection
 			builder.Services
 				.AddTransient<IConfigureOptions<RelayConnectorOptions>, RelayConnectorConfigureOptions>()
 				.AddTransient<IPostConfigureOptions<RelayConnectorOptions>, RelayConnectorPostConfigureOptions<TRequest, TResponse>>()
-				.AddTransient<IValidateOptions<RelayConnectorOptions>, RelayConnectorValidateOptions>();
-			builder.Services.AddTransient<IConfigureOptions<AccessTokenManagementOptions>, AccessTokenManagementConfigureOptions>();
+				.AddTransient<IValidateOptions<RelayConnectorOptions>, RelayConnectorValidateOptions>()
+				.AddTransient<IConfigureOptions<AccessTokenManagementOptions>, AccessTokenManagementConfigureOptions>()
+				.TryAddTransient<IAccessTokenProvider, AccessTokenProvider>();
 
-			builder.Services.AddAccessTokenManagement();
-			builder.Services.TryAddTransient<IAccessTokenProvider, AccessTokenProvider>();
+			builder.Services.AddClientAccessTokenManagement((provider, options) =>
+				{
+					var clientOptions = provider.GetRequiredService<IOptions<AccessTokenManagementOptions>>().Value.Client;
+					options.Clients = clientOptions.Clients;
+					options.DefaultClient = clientOptions.DefaultClient;
+					options.CacheKeyPrefix = clientOptions.CacheKeyPrefix;
+					options.CacheLifetimeBuffer = clientOptions.CacheLifetimeBuffer;
+				});
+
 			builder.Services
 				.AddHttpClient(Constants.HttpClientNames.RelayServer, (provider, client) =>
 				{
