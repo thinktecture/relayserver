@@ -1,0 +1,4 @@
+docker stop relay_logging_seq
+docker stop relay_transport_rabbitmq2
+docker stop relay_transport_rabbitmq1
+docker stop relay_persistence_postgresql
