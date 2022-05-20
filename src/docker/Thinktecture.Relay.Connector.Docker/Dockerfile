@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS dependencies
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS dependencies
 WORKDIR /src
 
 # Copy only project files for restore
@@ -36,11 +36,17 @@ FROM source AS publish
 WORKDIR /src/docker/Thinktecture.Relay.Connector.Docker
 RUN dotnet publish Thinktecture.Relay.Connector.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim
+# Create final image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 
-COPY --from=publish /app .
+# Add tooling
+RUN apt-get update
+RUN apt-get install -y wget
+RUN wget -O dotnet-counters https://aka.ms/dotnet-counters/linux-x64
+RUN chmod +x dotnet-counters
 
+COPY --from=publish /app .
 EXPOSE 80
 
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.Connector.Docker.dll"]
