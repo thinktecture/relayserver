@@ -44,7 +44,7 @@ namespace Thinktecture.Relay.Connector.Targets
 				_bufferSize = bufferSize;
 			}
 
-			protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+			protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
 			{
 				var buffer = new byte[_bufferSize];
 
