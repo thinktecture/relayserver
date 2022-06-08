@@ -14,7 +14,7 @@ namespace Thinktecture.Relay.Server.Transport;
 /// A registry for connectors.
 /// </summary>
 /// <typeparam name="T">The type of request.</typeparam>
-public class ConnectorRegistry<T>
+public partial class ConnectorRegistry<T>
 	where T : IClientRequest
 {
 	private readonly IConnectionStatisticsWriter _connectionStatisticsWriter;
@@ -55,7 +55,7 @@ public class ConnectorRegistry<T>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	public async Task RegisterAsync(string connectionId, Guid tenantId, IPAddress? remoteIpAddress = null)
 	{
-		_logger.LogDebug("Registering connection {ConnectionId} for tenant {TenantId}", connectionId, tenantId);
+		_logger.LogDebug(22100, "Registering connection {ConnectionId} for tenant {TenantId}", connectionId, tenantId);
 
 		var registration =
 			ActivatorUtilities.CreateInstance<ConnectorRegistration>(_serviceProvider, tenantId, connectionId);
@@ -80,19 +80,22 @@ public class ConnectorRegistry<T>
 		if (_registrations.TryRemove(connectionId, out var registration) &&
 		    _tenants.TryGetValue(registration.TenantId, out var connectors))
 		{
-			_logger.LogDebug("Unregistering connection {ConnectionId} for tenant {TenantId}", connectionId,
+			_logger.LogDebug(22101, "Unregistering connection {ConnectionId} for tenant {TenantId}", connectionId,
 				registration.TenantId);
 			connectors.TryRemove(connectionId, out _);
 		}
 		else
 		{
-			_logger.LogWarning("Could not unregister connection {ConnectionId}", connectionId);
+			_logger.LogWarning(22102, "Could not unregister connection {ConnectionId}", connectionId);
 		}
 
 		await _connectionStatisticsWriter.SetDisconnectTimeAsync(connectionId);
 
 		registration?.Dispose();
 	}
+
+	[LoggerMessage(22103, LogLevel.Warning, "Unknown connection {ConnectionId} to transport request {RequestId} to")]
+	partial void LogUnknownRequestConnection(string connectionId, Guid requestId);
 
 	/// <summary>
 	/// Transports a client request.
@@ -109,10 +112,14 @@ public class ConnectorRegistry<T>
 		if (_registrations.TryGetValue(connectionId, out var registration))
 			return registration.ConnectorTransport.TransportAsync(request, cancellationToken);
 
-		_logger.LogWarning("Unknown connection {ConnectionId} to transport request {RequestId} received", connectionId,
-			request.RequestId);
+		LogUnknownRequestConnection(connectionId, request.RequestId);
+
 		return Task.CompletedTask;
 	}
+
+	[LoggerMessage(22104, LogLevel.Warning,
+		"Unknown connection {ConnectionId} to transport acknowledge {AcknowledgeId} to")]
+	partial void LogUnknownAcknowledgeConnection(string connectionId, string acknowledgeId);
 
 	/// <summary>
 	/// Acknowledges a client request.
@@ -130,10 +137,12 @@ public class ConnectorRegistry<T>
 		if (_registrations.TryGetValue(connectionId, out var registration))
 			return registration.TenantHandler.AcknowledgeAsync(acknowledgeId, cancellationToken);
 
-		_logger.LogWarning("Unknown connection {ConnectionId} to acknowledge {AcknowledgeId} received", connectionId,
-			acknowledgeId);
+		LogUnknownAcknowledgeConnection(connectionId, acknowledgeId);
 		return Task.CompletedTask;
 	}
+
+	[LoggerMessage(22105, LogLevel.Trace, "Delivering request {RequestId} to local connection {ConnectionId}")]
+	partial void LogDeliveringRequest(Guid requestId, string? connectionId);
 
 	/// <summary>
 	/// Tries to deliver the client request to a random connector.
@@ -153,7 +162,7 @@ public class ConnectorRegistry<T>
 
 		var kvp = snapshot[new Random().Next(snapshot.Length)];
 
-		_logger.LogDebug("Delivering request {RequestId} to local connection {ConnectionId}", request.RequestId, kvp.Key);
+		LogDeliveringRequest(request.RequestId, kvp.Key);
 		await kvp.Value.TransportAsync(request, cancellationToken);
 
 		return true;

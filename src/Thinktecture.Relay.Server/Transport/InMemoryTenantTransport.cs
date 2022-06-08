@@ -23,7 +23,7 @@ internal class InMemoryTenantTransport<T> : ITenantTransport<T>
 	{
 		if (!await _connectorRegistry.TryDeliverRequestAsync(request))
 		{
-			_logger.LogError("Could not deliver request {RequestId} to a connection", request.RequestId);
+			_logger.LogError(21200, "Could not deliver request {RequestId} to a connection", request.RequestId);
 		}
 	}
 }

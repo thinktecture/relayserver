@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Controllers;
 /// Controller that provides access to stored bodies.
 /// </summary>
 [Authorize(Constants.DefaultAuthenticationPolicy)]
-public class BodyContentController : Controller
+public partial class BodyContentController : Controller
 {
 	private readonly ILogger<BodyContentController> _logger;
 
@@ -22,6 +22,10 @@ public class BodyContentController : Controller
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	public BodyContentController(ILogger<BodyContentController> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+	[LoggerMessage(20200, LogLevel.Debug,
+		"Delivering request body content for request {RequestId}, should delete: {DeleteBody}")]
+	partial void LogDeliverBody(Guid requestId, bool deleteBody);
 
 	/// <summary>
 	/// Streams the body content of the request.
@@ -36,6 +40,8 @@ public class BodyContentController : Controller
 		[FromServices] IBodyStore bodyStore,
 		[FromQuery] bool delete = false)
 	{
+		LogDeliverBody(requestId, delete);
+
 		var stream = await bodyStore.OpenRequestBodyAsync(requestId, HttpContext.RequestAborted);
 		Response.RegisterForDisposeAsync(stream);
 
@@ -46,6 +52,9 @@ public class BodyContentController : Controller
 
 		return new FileStreamResult(stream, MediaTypeNames.Application.Octet);
 	}
+
+	[LoggerMessage(20201, LogLevel.Debug, "Storing response body content for request {RequestId}")]
+	partial void LogStoreBody(Guid requestId);
 
 	/// <summary>
 	/// Stores the body content of the response.
@@ -58,6 +67,8 @@ public class BodyContentController : Controller
 	public async Task<IActionResult> StoreResponseBodyContentAsync([FromRoute] Guid requestId,
 		[FromServices] IBodyStore bodyStore)
 	{
+		LogStoreBody(requestId);
+
 		try
 		{
 			var length = await bodyStore.StoreResponseBodyAsync(requestId, Request.Body, HttpContext.RequestAborted);
@@ -65,9 +76,8 @@ public class BodyContentController : Controller
 		}
 		catch (OperationCanceledException)
 		{
-			_logger.LogWarning("Connector for {TenantId} aborted the response body upload for request {RequestId}",
-				User.GetTenantInfo().Id,
-				requestId);
+			_logger.LogWarning(20202, "Connector for {TenantId} aborted the response body upload for request {RequestId}",
+				User.GetTenantInfo().Id, requestId);
 			return NoContent();
 		}
 	}

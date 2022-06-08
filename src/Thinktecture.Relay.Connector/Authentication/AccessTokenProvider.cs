@@ -20,7 +20,7 @@ internal class AccessTokenProvider : IAccessTokenProvider
 
 	public Task<string?> GetAccessTokenAsync()
 	{
-		_logger.LogDebug("Requesting access token");
+		_logger.LogDebug(10100, "Requesting access token");
 		return _clientAccessTokenManagementService.GetClientAccessTokenAsync(Constants.HttpClientNames.RelayServer);
 	}
 }

@@ -11,8 +11,8 @@ public class DiscoveryDocumentRetryPolicy : IRetryPolicy
 {
 	private readonly ILogger<DiscoveryDocumentRetryPolicy> _logger;
 	private readonly Random _random = new Random();
-	private TimeSpan _maximumDelay = DiscoveryDocument.DefaultReconnectMaximumDelay;
 
+	private TimeSpan _maximumDelay = DiscoveryDocument.DefaultReconnectMaximumDelay;
 	private TimeSpan _minimumDelay = DiscoveryDocument.DefaultReconnectMinimumDelay;
 
 	/// <summary>
@@ -39,7 +39,7 @@ public class DiscoveryDocumentRetryPolicy : IRetryPolicy
 
 		// add one second because it's used as an exclusive upper bound later
 		var seconds = _random.Next((int)_minimumDelay.TotalSeconds, (int)_maximumDelay.TotalSeconds + 1);
-		_logger.LogDebug(
+		_logger.LogInformation(11300,
 			"Connecting attempt {ConnectionAttempt} failed and will be tried again in {ReconnectDelay} seconds",
 			retryContext.PreviousRetryCount, seconds);
 
@@ -60,13 +60,13 @@ public class DiscoveryDocumentRetryPolicy : IRetryPolicy
 
 		if (minimumDelay > maximumDelay)
 		{
-			_logger.LogWarning(
+			_logger.LogWarning(11301,
 				"Keeping (default) reconnect delays because minimum ({ReconnectMinimumDelay}) cannot be greater than maximum ({ReconnectMaximumDelay})",
 				minimumDelay, maximumDelay);
 		}
 		else
 		{
-			_logger.LogDebug(
+			_logger.LogDebug(11302,
 				"Using a minimum of {ReconnectMinimumDelay} and a maximum of {ReconnectMaximumDelay} for reconnecting",
 				minimumDelay, maximumDelay);
 

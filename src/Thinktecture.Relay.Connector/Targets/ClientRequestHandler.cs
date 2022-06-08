@@ -14,7 +14,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Targets;
 
 /// <inheritdoc/>
-public class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRequestHandler<TRequest>
+public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRequestHandler<TRequest>
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse, new()
 	where TAcknowledge : IAcknowledgeRequest, new()
@@ -86,11 +86,13 @@ public class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRe
 			request.EnableTracing);
 	}
 
+	[LoggerMessage(10400, LogLevel.Debug, "Acknowledging request {RequestId} on origin {OriginId}")]
+	partial void LogAcknowledgeRequest(Guid requestId, Guid? originId);
+
 	/// <inheritdoc/>
 	public async Task AcknowledgeRequestAsync(TRequest request, bool removeRequestBodyContent)
 	{
-		_logger.LogDebug("Acknowledging request {RequestId} on origin {OriginId}", request.RequestId,
-			request.AcknowledgeOriginId);
+		LogAcknowledgeRequest(request.RequestId, request.AcknowledgeOriginId);
 		await _acknowledgeTransport.TransportAsync(request.CreateAcknowledge<TAcknowledge>(removeRequestBodyContent));
 	}
 
@@ -127,13 +129,16 @@ public class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRe
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured during handling of request {RequestId}", request.RequestId);
+			_logger.LogError(10401, ex, "An error occured during handling of request {RequestId}", request.RequestId);
 		}
 	}
 
+	[LoggerMessage(10402, LogLevel.Debug, "Delivering response for request {RequestId}")]
+	partial void LogDeliverResponse(Guid requestId);
+
 	private async Task DeliverResponseAsync(TResponse response, bool enableTracing)
 	{
-		_logger.LogDebug("Delivering response for request {RequestId}", response.RequestId);
+		LogDeliverResponse(response.RequestId);
 
 		if (enableTracing)
 		{

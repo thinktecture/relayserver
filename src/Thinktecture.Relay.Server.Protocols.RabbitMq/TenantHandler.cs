@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
 /// <inheritdoc cref="ITenantHandler"/>
 // ReSharper disable once ClassNeverInstantiated.Global
-public class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDisposable
+public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDisposable
 	where TRequest : IClientRequest
 	where TAcknowledge : IAcknowledgeRequest
 {
@@ -62,33 +62,42 @@ public class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDisposable
 		_model.Dispose();
 	}
 
+	[LoggerMessage(25300, LogLevel.Trace, "Acknowledging {AcknowledgeId}")]
+	partial void LogAcknowledge(string acknowledgeId);
+
+	[LoggerMessage(25301, LogLevel.Warning, "Could not parse acknowledge id {AcknowledgeId}")]
+	partial void LogCouldNotParseAcknowledge(string acknowledgeId);
+
 	/// <inheritdoc/>
 	public async Task AcknowledgeAsync(string acknowledgeId, CancellationToken cancellationToken = default)
 	{
 		if (ulong.TryParse(acknowledgeId, out var deliveryTag))
 		{
-			_logger.LogDebug("Acknowledging {AcknowledgeId}", acknowledgeId);
+			LogAcknowledge(acknowledgeId);
 			await _model.AcknowledgeAsync(deliveryTag);
 		}
 		else
 		{
-			_logger.LogWarning("Could not parse acknowledge id {AcknowledgeId}", acknowledgeId);
+			LogCouldNotParseAcknowledge(acknowledgeId);
 		}
 	}
+
+	[LoggerMessage(25302, LogLevel.Trace,
+		"Received request {RequestId} from queue {QueueName} by consumer {ConsumerTag}")]
+	partial void LogReceivedRequest(Guid requestId, string queueName, string consumerTag);
 
 	private async Task ConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{
 		var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize request.");
-		_logger.LogTrace("Received request {RequestId} from queue {QueueName} by consumer {ConsumerTag}",
-			request.RequestId,
-			@event.RoutingKey, @event.ConsumerTag);
+
+		LogReceivedRequest(request.RequestId, @event.RoutingKey, @event.ConsumerTag);
 
 		var acknowledgeId = @event.DeliveryTag.ToString();
 
 		if (request.AcknowledgeMode == AcknowledgeMode.Disabled)
 		{
-			_logger.LogTrace("Acknowledging {AcknowledgeId}", acknowledgeId);
+			LogAcknowledge(acknowledgeId);
 			await _model.AcknowledgeAsync(@event.DeliveryTag);
 		}
 		else

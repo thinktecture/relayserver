@@ -9,7 +9,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport;
 
 /// <inheritdoc/>
-public class ResponseDispatcher<TResponse, TAcknowledge> : IResponseDispatcher<TResponse>
+public partial class ResponseDispatcher<TResponse, TAcknowledge> : IResponseDispatcher<TResponse>
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
 {
@@ -41,17 +41,23 @@ public class ResponseDispatcher<TResponse, TAcknowledge> : IResponseDispatcher<T
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
+	[LoggerMessage(21500, LogLevel.Trace, "Locally dispatching response for request {RequestId}")]
+	partial void LogLocalDispatch(Guid requestId);
+
+	[LoggerMessage(21501, LogLevel.Trace, "Remotely dispatching response for request {RequestId} to origin {OriginId}")]
+	partial void LogRedirectDispatch(Guid requestId, Guid originId);
+
 	/// <inheritdoc/>
 	public async Task DispatchAsync(TResponse response, CancellationToken cancellationToken = default)
 	{
 		if (_relayServerOptions.EnableServerTransportShortcut && response.RequestOriginId == _relayServerContext.OriginId)
 		{
+			LogLocalDispatch(response.RequestId);
 			await _responseCoordinator.ProcessResponseAsync(response, cancellationToken);
 			return;
 		}
 
-		_logger.LogDebug("Redirecting response for request {RequestId} to origin {OriginId}", response.RequestId,
-			response.RequestOriginId);
+		LogRedirectDispatch(response.RequestId, response.RequestOriginId);
 		await _serverTransport.DispatchResponseAsync(response);
 	}
 }

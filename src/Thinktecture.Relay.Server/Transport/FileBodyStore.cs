@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Transport;
 /// <summary>
 /// An implementation of a store to persist the body of a request and response in files.
 /// </summary>
-internal class FileBodyStore : IBodyStore
+internal partial class FileBodyStore : IBodyStore
 {
 	private readonly string _basePath;
 	private readonly ILogger<FileBodyStore> _logger;
@@ -23,9 +23,21 @@ internal class FileBodyStore : IBodyStore
 		_basePath = fileBodyStoreOptions.Value.StoragePath ??
 			throw new ArgumentNullException(nameof(fileBodyStoreOptions));
 
-		_logger.LogDebug("Using {StorageType} with storage path {StoragePath} as body store", nameof(FileBodyStore),
+		_logger.LogDebug(21000, "Using {StorageType} with storage path {StoragePath} as body store",
+			nameof(FileBodyStore),
 			_basePath);
 	}
+
+	[LoggerMessage(21001, LogLevel.Trace, "{FileOperation} {FileBodyType} body for request {RequestId}")]
+	partial void LogOperation(string fileOperation, string fileBodyType, Guid requestId);
+
+	[LoggerMessage(21002, LogLevel.Debug,
+		"Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes")]
+	partial void LogWriting(string fileBodyType, Guid requestId, long bodySize);
+
+	[LoggerMessage(21003, LogLevel.Warning,
+		"An error occured while {FileOperation} {FileBodyType} body for request {RequestId}")]
+	partial void LogError(Exception ex, string fileOperation, string fileBodyType, Guid requestId);
 
 	/// <inheritdoc/>
 	public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream,
@@ -33,13 +45,10 @@ internal class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			_logger.LogTrace("{FileOperation} {FileBodyType} body for request {RequestId}", "Writing", "request",
-				requestId);
+			LogOperation("Writing", "request", requestId);
 			var size = await StoreBodyAsync(BuildRequestFilePath(requestId), bodyStream, cancellationToken);
 
-			_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes",
-				"request", requestId,
-				size);
+			LogWriting("request", requestId, size);
 			return size;
 		}
 		catch (OperationCanceledException)
@@ -49,9 +58,7 @@ internal class FileBodyStore : IBodyStore
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}",
-				"writing", "request",
-				requestId);
+			LogError(ex, "writing", "request", requestId);
 			throw;
 		}
 	}
@@ -62,13 +69,10 @@ internal class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			_logger.LogTrace("{FileOperation} {FileBodyType} body for request {RequestId}", "Writing", "response",
-				requestId);
+			LogOperation("Writing", "response", requestId);
 			var size = await StoreBodyAsync(BuildResponseFilePath(requestId), bodyStream, cancellationToken);
 
-			_logger.LogDebug("Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes",
-				"response",
-				requestId, size);
+			LogWriting("response", requestId, size);
 			return size;
 		}
 		catch (OperationCanceledException)
@@ -78,9 +82,7 @@ internal class FileBodyStore : IBodyStore
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}",
-				"writing",
-				"response", requestId);
+			LogError(ex, "writing", "response", requestId);
 			throw;
 		}
 	}
@@ -90,15 +92,12 @@ internal class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Reading", "request",
-				requestId);
+			LogOperation("Reading", "request", requestId);
 			return Task.FromResult(File.OpenRead(BuildRequestFilePath(requestId)) as Stream);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}",
-				"reading",
-				"request", requestId);
+			LogError(ex, "reading", "request", requestId);
 			throw;
 		}
 	}
@@ -108,15 +107,12 @@ internal class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Reading", "response",
-				requestId);
+			LogOperation("Reading", "response", requestId);
 			return Task.FromResult(File.OpenRead(BuildResponseFilePath(requestId)) as Stream);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}",
-				"reading",
-				"response", requestId);
+			LogError(ex, "reading", "response", requestId);
 			throw;
 		}
 	}
@@ -126,16 +122,13 @@ internal class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Deleting", "request",
-				requestId);
+			LogOperation("Deleting", "request", requestId);
 			File.Delete(BuildRequestFilePath(requestId));
 			return Task.CompletedTask;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}",
-				"deleting",
-				"request", requestId);
+			LogError(ex, "deleting", "request", requestId);
 			throw;
 		}
 	}
@@ -145,16 +138,13 @@ internal class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			_logger.LogDebug("{FileOperation} {FileBodyType} body for request {RequestId}", "Deleting", "response",
-				requestId);
+			LogOperation("Deleting", "response", requestId);
 			File.Delete(BuildResponseFilePath(requestId));
 			return Task.CompletedTask;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while {FileOperation} {FileBodyType} body for request {RequestId}",
-				"deleting",
-				"response", requestId);
+			LogError(ex, "deleting", "response", requestId);
 			throw;
 		}
 	}
@@ -242,7 +232,7 @@ internal class FileBodyStoreValidateOptions : IValidateOptions<FileBodyStoreOpti
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex,
+			_logger.LogError(21004, ex,
 				"An error occured while checking file creation, read and write permission on configured body store path {Path}",
 				basePath);
 			return false;

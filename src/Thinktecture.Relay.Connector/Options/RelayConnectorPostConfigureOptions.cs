@@ -45,14 +45,15 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 			try
 			{
 				options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
-				_logger.LogTrace("Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri,
+				_logger.LogTrace(10300, "Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri,
 					options.DiscoveryDocument);
 
 				break;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while retrieving the discovery document from {DiscoverDocumentUrl}",
+				_logger.LogError(10301, ex,
+					"An error occured while retrieving the discovery document from {DiscoverDocumentUrl}",
 					uri);
 
 				try
@@ -78,7 +79,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 			var type = Type.GetType(typeName);
 			if (type == null)
 			{
-				_logger.LogError("Could not find target type {TargetType}", typeName);
+				_logger.LogError(10302, "Could not find target type {TargetType}", typeName);
 				return;
 			}
 
@@ -91,7 +92,8 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 				}
 				else
 				{
-					_logger.LogWarning("Could not parse timeout \"{TargetTimeout}\" for target {Target}", timeoutParameter,
+					_logger.LogWarning(10303, "Could not parse timeout \"{TargetTimeout}\" for target {Target}",
+						timeoutParameter,
 						key);
 				}
 			}

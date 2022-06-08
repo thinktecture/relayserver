@@ -41,7 +41,7 @@ public class HubConnectionFactory
 	/// <returns>The <see cref="HubConnection"/>.</returns>
 	public HubConnection Create()
 	{
-		_logger.LogDebug("Creating connection to {ConnectorEndpoint}",
+		_logger.LogInformation(11400, "Creating connection to {ConnectorEndpoint}",
 			_relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint);
 
 		var connection = new HubConnectionBuilder()

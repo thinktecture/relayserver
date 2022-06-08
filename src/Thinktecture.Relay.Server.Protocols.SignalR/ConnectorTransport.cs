@@ -20,6 +20,10 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 	private readonly IHubContext<ConnectorHub<TRequest, TResponse, TAcknowledge>, IConnector<TRequest>> _hubContext;
 	private readonly ILogger<ConnectorTransport<TRequest, TResponse, TAcknowledge>> _logger;
 
+	private readonly Action<ILogger, IClientRequest, Guid, string, Exception?> _logTransportingRequest =
+		LoggerMessage.Define<IClientRequest, Guid, string>(LogLevel.Trace, 26200,
+			"Transporting request {@Request} for request {RequestId} on connection {ConnectionId}");
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectorTransport{TRequest,TResponse,TAcknowledge}"/> class.
 	/// </summary>
@@ -37,8 +41,8 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 	/// <inheritdoc/>
 	public async Task TransportAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
-		_logger.LogTrace("Transporting request {@Request} for request {RequestId} on connection {ConnectionId}", request,
-			request.RequestId, _connectionId);
+		if (_logger.IsEnabled(LogLevel.Trace))
+			_logTransportingRequest(_logger, request, request.RequestId, _connectionId, null);
 
 		try
 		{
@@ -46,7 +50,8 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while transporting request {RequestId} on connection {ConnectionId}",
+			_logger.LogError(26201, ex,
+				"An error occured while transporting request {RequestId} on connection {ConnectionId}",
 				request.RequestId,
 				_connectionId);
 		}

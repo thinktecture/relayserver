@@ -9,6 +9,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 /// <inheritdoc/>
 public class RequestRepository : IRequestRepository
 {
+	// Todo: Move to LoggerMessage source generator when destructuring is supported,
+	// see https://github.com/dotnet/runtime/issues/69490
+	private static readonly Action<ILogger, Request, Exception?> LogStoringRequest =
+		LoggerMessage.Define<Request>(LogLevel.Trace, 23100, "Storing request {@Request}");
+
 	private readonly RelayDbContext _dbContext;
 	private readonly ILogger<RequestRepository> _logger;
 
@@ -26,7 +31,8 @@ public class RequestRepository : IRequestRepository
 	/// <inheritdoc/>
 	public async Task StoreRequestAsync(Request request, CancellationToken cancellationToken)
 	{
-		_logger.LogTrace("Storing request {@Request}", request);
+		if (_logger.IsEnabled(LogLevel.Trace))
+			LogStoringRequest(_logger, request, null);
 
 		try
 		{
@@ -39,7 +45,7 @@ public class RequestRepository : IRequestRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while storing request {RequestId}", request.RequestId);
+			_logger.LogError(23101, ex, "An error occured while storing request {RequestId}", request.RequestId);
 		}
 	}
 }

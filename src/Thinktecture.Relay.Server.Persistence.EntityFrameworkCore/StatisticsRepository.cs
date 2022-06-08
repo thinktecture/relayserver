@@ -10,7 +10,7 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
 /// <inheritdoc/>
-public class StatisticsRepository : IStatisticsRepository
+public partial class StatisticsRepository : IStatisticsRepository
 {
 	private readonly RelayDbContext _dbContext;
 	private readonly ILogger<StatisticsRepository> _logger;
@@ -29,7 +29,7 @@ public class StatisticsRepository : IStatisticsRepository
 	/// <inheritdoc/>
 	public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Adding new origin {OriginId} to statistics tracking", originId);
+		_logger.LogDebug(23300, "Adding new origin {OriginId} to statistics tracking", originId);
 
 		var startup = DateTimeOffset.UtcNow;
 		try
@@ -49,14 +49,18 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while creating origin {OriginId} for statistics tracking", originId);
+			_logger.LogError(23301, ex, "An error occured while creating origin {OriginId} for statistics tracking",
+				originId);
 		}
 	}
+
+	[LoggerMessage(23302, LogLevel.Debug, "Updating last seen time of origin {OriginId} in statistics tracking")]
+	partial void LogUpdateLastSeen(Guid originId);
 
 	/// <inheritdoc/>
 	public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Updating last seen time of origin {OriginId} in statistics tracking", originId);
+		LogUpdateLastSeen(originId);
 
 		try
 		{
@@ -71,14 +75,15 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while updating origin {OriginId} for statistics tracking", originId);
+			_logger.LogError(23303, ex, "An error occured while updating origin {OriginId} for statistics tracking",
+				originId);
 		}
 	}
 
 	/// <inheritdoc/>
 	public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Setting shutdown time of origin {OriginId} in statistics tracking", originId);
+		_logger.LogDebug(23304, "Setting shutdown time of origin {OriginId} in statistics tracking", originId);
 
 		try
 		{
@@ -93,18 +98,20 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while updating origin {OriginId} for statistics tracking", originId);
+			_logger.LogError(23305, ex, "An error occured while updating origin {OriginId} for statistics tracking",
+				originId);
 		}
 	}
+
+	[LoggerMessage(23306, LogLevel.Debug,
+		"Cleaning up statistics storage by deleting all origins that have not been seen since {OriginLastSeen}")]
+	partial void LogCleanup(DateTimeOffset originLastSeen);
 
 	/// <inheritdoc/>
 	public async Task CleanUpOriginsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 	{
 		var lastSeen = DateTimeOffset.UtcNow - maxAge;
-
-		_logger.LogDebug(
-			"Cleaning up statistics storage by deleting all origins that have not been seen since {OriginLastSeen}.",
-			lastSeen);
+		LogCleanup(lastSeen);
 
 		try
 		{
@@ -118,7 +125,7 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while deleting old origins");
+			_logger.LogError(23307, ex, "An error occured while deleting old origins");
 		}
 	}
 
@@ -127,7 +134,7 @@ public class StatisticsRepository : IStatisticsRepository
 		IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Adding new connection {ConnectionId} for statistics tracking", connectionId);
+		_logger.LogDebug(23308, "Adding new connection {ConnectionId} for statistics tracking", connectionId);
 
 		try
 		{
@@ -148,15 +155,20 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while creating connection {ConnectionId} for statistics tracking",
+			_logger.LogError(23309, ex,
+				"An error occured while creating connection {ConnectionId} for statistics tracking",
 				originId);
 		}
 	}
 
+	[LoggerMessage(23310, LogLevel.Debug,
+		"Updating last activity time of connection {ConnectionId} in statistics tracking")]
+	partial void LogUpdateConnectionActivity(string connectionId);
+
 	/// <inheritdoc/>
 	public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Updating last activity time of connection {ConnectionId} in statistics tracking", connectionId);
+		LogUpdateConnectionActivity(connectionId);
 
 		try
 		{
@@ -171,7 +183,7 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while updating connection {ConnectionId} in statistics tracking",
+			_logger.LogError(23311, ex, "An error occured while updating connection {ConnectionId} in statistics tracking",
 				connectionId);
 		}
 	}
@@ -179,7 +191,8 @@ public class StatisticsRepository : IStatisticsRepository
 	/// <inheritdoc/>
 	public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Setting disconnect time of connection {ConnectionId} in statistics tracking", connectionId);
+		_logger.LogDebug(23312, "Setting disconnect time of connection {ConnectionId} in statistics tracking",
+			connectionId);
 
 		try
 		{
@@ -194,19 +207,20 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while updating connection {ConnectionId} in statistics tracking",
+			_logger.LogError(23313, ex, "An error occured while updating connection {ConnectionId} in statistics tracking",
 				connectionId);
 		}
 	}
+
+	[LoggerMessage(23314, LogLevel.Debug,
+		"Cleaning up statistics storage by deleting all connections that have no activity since {ConnectionLastActivity}")]
+	partial void LogConnectionCleanup(DateTimeOffset connectionLastActivity);
 
 	/// <inheritdoc/>
 	public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 	{
 		var lastActivity = DateTimeOffset.UtcNow - maxAge;
-
-		_logger.LogDebug(
-			"Cleaning up statistics storage by deleting all connections that have no activity since {ConnectionLastActivity}",
-			lastActivity);
+		LogConnectionCleanup(lastActivity);
 
 		try
 		{
@@ -221,7 +235,7 @@ public class StatisticsRepository : IStatisticsRepository
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occured while deleting old connections");
+			_logger.LogError(23315, ex, "An error occured while deleting old connections");
 		}
 	}
 }
