@@ -12,7 +12,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
 /// <inheritdoc cref="IServerTransport{TResponse,TAcknowledge}"/>
-public class ServerTransport<TResponse, TAcknowledge> : IServerTransport<TResponse, TAcknowledge>, IDisposable
+public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport<TResponse, TAcknowledge>, IDisposable
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
 {
@@ -89,8 +89,7 @@ public class ServerTransport<TResponse, TAcknowledge> : IServerTransport<TRespon
 			response,
 			durable: false,
 			persistent: false);
-		_logger.LogDebug("Dispatched response for request {RequestId} to origin {OriginId}", response.RequestId,
-			response.RequestOriginId);
+		LogDispatchedResponse(response.RequestId, response.RequestOriginId);
 	}
 
 	/// <inheritdoc/>
@@ -100,27 +99,38 @@ public class ServerTransport<TResponse, TAcknowledge> : IServerTransport<TRespon
 		await _acknowledgeDispatchModel.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix}{request.OriginId}", request,
 			durable: false,
 			persistent: false);
-		_logger.LogDebug("Dispatched acknowledgement for request {RequestId} to origin {OriginId}", request.RequestId,
-			request.OriginId);
+		LogDispatchedAcknowledge(request.RequestId, request.OriginId);
 	}
+
+	[LoggerMessage(25200, LogLevel.Trace, "Dispatched response for request {RequestId} to origin {OriginId}")]
+	partial void LogDispatchedResponse(Guid requestId, Guid originId);
+
+	[LoggerMessage(25201, LogLevel.Trace, "Dispatched acknowledgement for request {RequestId} to origin {OriginId}")]
+	partial void LogDispatchedAcknowledge(Guid requestId, Guid originId);
+
+	[LoggerMessage(25202, LogLevel.Trace,
+		"Received response for request {RequestId} from queue {QueueName} by consumer {ConsumerTag}")]
+	partial void LogResponseConsumed(Guid requestId, string queueName, string consumerTag);
 
 	private async Task ResponseConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{
 		var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize response.");
-		_logger.LogDebug("Received response for request {RequestId} from queue {QueueName} by consumer {ConsumerTag}",
-			response.RequestId,
-			@event.RoutingKey, @event.ConsumerTag);
+		LogResponseConsumed(response.RequestId, @event.RoutingKey, @event.ConsumerTag);
 		await _responseCoordinator.ProcessResponseAsync(response);
 	}
+
+
+	[LoggerMessage(25203, LogLevel.Trace,
+		"Received acknowledge for request {RequestId} from queue {QueueName} by consumer {ConsumerTag}")]
+	partial void LogAcknowledgeConsumed(Guid requestId, string queueName, string consumerTag);
 
 	private async Task AcknowledgeConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{
 		var request = JsonSerializer.Deserialize<TAcknowledge>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize acknowledge request.");
-		_logger.LogTrace(
-			"Received acknowledge request {@AcknowledgeRequest} from queue {QueueName} by consumer {ConsumerTag}", request,
-			@event.RoutingKey, @event.ConsumerTag);
+
+		LogAcknowledgeConsumed(request.RequestId, @event.RoutingKey, @event.ConsumerTag);
 		await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);
 	}
 }

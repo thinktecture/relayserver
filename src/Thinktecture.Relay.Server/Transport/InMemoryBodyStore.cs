@@ -15,7 +15,7 @@ internal class InMemoryBodyStore : IBodyStore
 	private readonly ConcurrentDictionary<Guid, byte[]> _responseStore = new ConcurrentDictionary<Guid, byte[]>();
 
 	public InMemoryBodyStore(ILogger<InMemoryBodyStore> logger)
-		=> logger.LogDebug("Using {StorageType} as body store", nameof(InMemoryBodyStore));
+		=> logger.LogDebug(21100, "Using {StorageType} as body store", nameof(InMemoryBodyStore));
 
 	/// <inheritdoc/>
 	public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream,

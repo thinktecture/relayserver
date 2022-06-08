@@ -9,7 +9,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport;
 
 /// <inheritdoc/>
-public class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowledgeDispatcher<TAcknowledge>
+public partial class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowledgeDispatcher<TAcknowledge>
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
 {
@@ -42,17 +42,24 @@ public class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowledgeDispat
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
+	[LoggerMessage(20900, LogLevel.Trace, "Locally dispatching acknowledge for request {RequestId}")]
+	partial void LogLocalAcknowledge(Guid requestId);
+
+	[LoggerMessage(20901, LogLevel.Trace,
+		"Remotely dispatching acknowledge for request {RequestId} to origin {OriginId}")]
+	partial void LogRedirectAcknowledge(Guid requestId, Guid originId);
+
 	/// <inheritdoc/>
 	public async Task DispatchAsync(TAcknowledge request, CancellationToken cancellationToken = default)
 	{
 		if (_relayServerOptions.EnableServerTransportShortcut && request.OriginId == _relayServerContext.OriginId)
 		{
+			LogLocalAcknowledge(request.RequestId);
 			await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request, cancellationToken);
 			return;
 		}
 
-		_logger.LogDebug("Redirecting acknowledge for request {RequestId} to origin {OriginId}", request.RequestId,
-			request.OriginId);
+		LogRedirectAcknowledge(request.RequestId, request.OriginId);
 		await _serverTransport.DispatchAcknowledgeAsync(request);
 	}
 }

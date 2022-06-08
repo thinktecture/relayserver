@@ -25,11 +25,11 @@ public class ModelFactory
 		if (connection is IAutorecoveringConnection autorecoveringConnection)
 		{
 			autorecoveringConnection.RecoverySucceeded += (sender, args)
-				=> _logger.LogInformation("Connection successful recovered");
+				=> _logger.LogInformation(25100, "Connection successful recovered");
 		}
 
 		connection.ConnectionShutdown += (sender, args)
-			=> _logger.LogDebug("Connection closed ({ShutdownReason}", args.ReplyText);
+			=> _logger.LogDebug(25101, "Connection closed ({ShutdownReason}", args.ReplyText);
 	}
 
 	/// <summary>
@@ -41,13 +41,18 @@ public class ModelFactory
 	{
 		// TODO model context information in logging is not yet satisfying
 		var model = _connection.CreateModel();
-		_logger.LogTrace("Model for {ModelContext} with channel {ModelChannel} created", context, model.ChannelNumber);
-		model.CallbackException += (sender, args) => _logger.LogError(args.Exception,
+
+		_logger.LogTrace(25102, "Model for {ModelContext} with channel {ModelChannel} created", context,
+			model.ChannelNumber);
+
+		model.CallbackException += (sender, args) => _logger.LogError(25103, args.Exception,
 			"An error occured in a model callback for {ModelContext} with channel {ModelChannel}", context,
 			model.ChannelNumber);
+
 		model.ModelShutdown += (sender, args)
-			=> _logger.LogTrace("Model for {ModelContext} with channel {ModelChannel} closed ({ShutdownReason})", context,
-				model.ChannelNumber, args.ReplyText);
+			=> _logger.LogTrace(25104, "Model for {ModelContext} with channel {ModelChannel} closed ({ShutdownReason})",
+				context, model.ChannelNumber, args.ReplyText);
+
 		return model;
 	}
 }

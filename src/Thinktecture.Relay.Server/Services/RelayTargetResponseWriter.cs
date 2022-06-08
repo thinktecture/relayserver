@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +11,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Services;
 
 /// <inheritdoc/>
-public class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<TResponse>
+public partial class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<TResponse>
 	where TResponse : class, ITargetResponse
 {
 	private readonly ILogger<RelayTargetResponseWriter<TResponse>> _logger;
@@ -21,6 +22,10 @@ public class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<T
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	public RelayTargetResponseWriter(ILogger<RelayTargetResponseWriter<TResponse>> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+
+	[LoggerMessage(20700, LogLevel.Warning, "The request {RequestId} failed internally with {HttpStatusCode}")]
+	partial void LogFailedRequest(Guid requestId, HttpStatusCode httpStatusCode);
 
 	/// <inheritdoc/>
 	public async Task WriteAsync(TResponse? targetResponse, HttpResponse httpResponse,
@@ -34,8 +39,7 @@ public class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<T
 
 		if (targetResponse.RequestFailed)
 		{
-			_logger.LogWarning("The request {RequestId} failed internally with {HttpStatusCode}", targetResponse.RequestId,
-				targetResponse.HttpStatusCode);
+			LogFailedRequest(targetResponse.RequestId, targetResponse.HttpStatusCode);
 		}
 
 		httpResponse.StatusCode = (int)targetResponse.HttpStatusCode;

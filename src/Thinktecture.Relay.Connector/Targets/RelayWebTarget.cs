@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Targets;
 
 /// <inheritdoc cref="IRelayTarget{TRequest,TResponse}"/>
-public class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest, TResponse>, IDisposable
+public partial class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest, TResponse>, IDisposable
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse, new()
 {
@@ -69,20 +70,22 @@ public class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest, TRespo
 	public void Dispose()
 		=> HttpClient.Dispose();
 
+	[LoggerMessage(10700, LogLevel.Trace, "Requesting target for request {RequestId} at {BaseAddress} for {Url}")]
+	partial void LogRequestingTarget(Guid requestId, Uri? baseAddress, string url);
+
+	[LoggerMessage(10701, LogLevel.Debug, "Requested target for request {RequestId} returned {HttpStatusCode}")]
+	partial void LogRequestedTarget(Guid requestId, HttpStatusCode httpStatusCode);
+
 	/// <inheritdoc/>
 	public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
-		_logger.LogTrace("Requesting target for request {RequestId} at {BaseAddress} for {Url}", request.RequestId,
-			HttpClient.BaseAddress,
-			request.Url);
+		LogRequestingTarget(request.RequestId, HttpClient.BaseAddress, request.Url);
 
 		var requestMessage = CreateHttpRequestMessage(request);
 		var responseMessage =
 			await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-		_logger.LogDebug("Requested target for request {RequestId} returned {HttpStatusCode}", request.RequestId,
-			responseMessage.StatusCode);
-
+		LogRequestedTarget(request.RequestId, responseMessage.StatusCode);
 		return await responseMessage.CreateResponseAsync<TResponse>(request, cancellationToken);
 	}
 
@@ -139,7 +142,7 @@ public class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest, TRespo
 public class RelayWebTarget : RelayWebTarget<ClientRequest, TargetResponse>
 {
 	/// <inheritdoc/>
-	public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger,
+	public RelayWebTarget(ILogger<RelayWebTarget> logger,
 		IHttpClientFactory httpClientFactory,
 		Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
 		: base(logger, httpClientFactory, baseAddress, options)
@@ -147,7 +150,7 @@ public class RelayWebTarget : RelayWebTarget<ClientRequest, TargetResponse>
 	}
 
 	/// <inheritdoc/>
-	public RelayWebTarget(ILogger<RelayWebTarget<ClientRequest, TargetResponse>> logger,
+	public RelayWebTarget(ILogger<RelayWebTarget> logger,
 		IHttpClientFactory httpClientFactory,
 		Dictionary<string, string> parameters)
 		: base(logger, httpClientFactory, parameters)
@@ -245,7 +248,7 @@ public static class HttpResponseMessageExtensions
 		response.HttpHeaders = message.Headers.Concat(message.Content.Headers)
 			.ToDictionary(h => h.Key, h => h.Value.ToArray());
 		response.BodySize = hasBody ? message.Content.Headers.ContentLength : 0;
-		response.BodyContent = hasBody ? await message.Content.ReadAsStreamAsync() : null;
+		response.BodyContent = hasBody ? await message.Content.ReadAsStreamAsync(CancellationToken.None) : null;
 
 		return response;
 	}

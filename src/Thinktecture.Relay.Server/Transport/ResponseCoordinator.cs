@@ -8,11 +8,15 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport;
 
 /// <inheritdoc/>
-public class ResponseCoordinator<T> : IResponseCoordinator<T>
+public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 	where T : class, ITargetResponse
 {
 	private readonly IBodyStore _bodyStore;
 	private readonly ILogger<ResponseCoordinator<T>> _logger;
+
+	private readonly Action<ILogger, ITargetResponse, Guid, Exception?> _logResponseReceived =
+		LoggerMessage.Define<ITargetResponse, Guid>(LogLevel.Trace, 21407,
+			"Response {@Response} for request {RequestId} received");
 
 	private readonly ConcurrentDictionary<Guid, WaitingState> _waitingStates =
 		new ConcurrentDictionary<Guid, WaitingState>();
@@ -38,25 +42,38 @@ public class ResponseCoordinator<T> : IResponseCoordinator<T>
 				return Task.CompletedTask;
 			});
 
-		_logger.LogError("Request {RequestId} is already registered", requestId);
+		_logger.LogError(21400, "Request {RequestId} is already registered", requestId);
 		throw new InvalidOperationException($"Duplicate request registration for {requestId}");
 	}
+
+	[LoggerMessage(21401, LogLevel.Debug, "Waiting for response for request {RequestId}")]
+	partial void LogWaitingForResponse(Guid requestId);
+
+	[LoggerMessage(21404, LogLevel.Debug,
+		"Opened outsourced response body for request {RequestId} with {BodySize} bytes")]
+	partial void LogBodyOpened(Guid requestId, long? bodySize);
+
+	[LoggerMessage(21405, LogLevel.Debug, "Response with inlined body for request {RequestId} received")]
+	partial void LogInlinedReceived(Guid requestId);
+
+	[LoggerMessage(21406, LogLevel.Debug, "Response for request {RequestId} without body received")]
+	partial void LogNoBodyReceived(Guid requestId);
 
 	/// <inheritdoc/>
 	public async Task<IResponseContext<T>?> GetResponseAsync(Guid requestId,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Waiting for response for request {RequestId}", requestId);
+		LogWaitingForResponse(requestId);
 
 		if (!_waitingStates.TryGetValue(requestId, out var waitingState))
 		{
-			_logger.LogWarning("No waiting state for request {RequestId} found", requestId);
+			_logger.LogWarning(21402, "No waiting state for request {RequestId} found", requestId);
 			return null;
 		}
 
 		cancellationToken.Register(() =>
 		{
-			_logger.LogTrace("Canceling response wait for request {RequestId}", requestId);
+			_logger.LogTrace(21403, "Canceling response wait for request {RequestId}", requestId);
 			waitingState.TaskCompletionSource.TrySetCanceled();
 		});
 
@@ -64,31 +81,34 @@ public class ResponseCoordinator<T> : IResponseCoordinator<T>
 		if (responseContext.Response.IsBodyContentOutsourced())
 		{
 			responseContext.Response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
-			_logger.LogDebug("Opened outsourced response body for request {RequestId} with {BodySize} bytes", requestId,
-				responseContext.Response.BodySize);
+			LogBodyOpened(requestId, responseContext.Response.BodySize);
 			responseContext.Disposable = _bodyStore.GetResponseBodyRemoveDisposable(requestId);
 		}
 		else if (responseContext.Response.BodySize > 0)
 		{
-			_logger.LogDebug("Response with inlined body for request {RequestId} received", requestId);
+			LogInlinedReceived(requestId);
 		}
 		else
 		{
-			_logger.LogDebug("Response for request {RequestId} without body received", requestId);
+			LogNoBodyReceived(requestId);
 		}
 
 		return responseContext;
 	}
 
+	[LoggerMessage(21408, LogLevel.Debug, "Response for request {RequestId} discarded")]
+	partial void LogResponseDiscarded(Guid requestId);
+
 	/// <inheritdoc/>
 	public async Task ProcessResponseAsync(T response, CancellationToken cancellationToken = default)
 	{
-		_logger.LogTrace("Response {@Response} for request {RequestId} received", response, response.RequestId);
+		if (_logger.IsEnabled(LogLevel.Trace))
+			_logResponseReceived(_logger, response, response.RequestId, null);
 
 		if (!_waitingStates.TryGetValue(response.RequestId, out var waitingState) ||
 		    !waitingState.TaskCompletionSource.TrySetResult(response))
 		{
-			_logger.LogDebug("Response for request {RequestId} discarded", response.RequestId);
+			LogResponseDiscarded(response.RequestId);
 
 			if (response.IsBodyContentOutsourced())
 			{

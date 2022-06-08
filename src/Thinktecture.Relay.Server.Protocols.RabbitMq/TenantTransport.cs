@@ -10,7 +10,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
 /// <inheritdoc cref="ITenantTransport{T}"/>
-public class TenantTransport<T> : ITenantTransport<T>, IDisposable
+public partial class TenantTransport<T> : ITenantTransport<T>, IDisposable
 	where T : IClientRequest
 {
 	private readonly ILogger<TenantTransport<T>> _logger;
@@ -38,9 +38,8 @@ public class TenantTransport<T> : ITenantTransport<T>, IDisposable
 		_model = modelFactory.Create("tenant dispatcher");
 	}
 
-	/// <inheritdoc/>
-	public void Dispose()
-		=> _model.Dispose();
+	[LoggerMessage(25400, LogLevel.Trace, "Published request {RequestId} to tenant {TenantId}")]
+	partial void LogPublishedRequest(Guid requestId, Guid tenantId);
 
 	/// <inheritdoc/>
 	public async Task TransportAsync(T request)
@@ -48,14 +47,18 @@ public class TenantTransport<T> : ITenantTransport<T>, IDisposable
 		try
 		{
 			await _model.PublishJsonAsync($"{Constants.RequestQueuePrefix}{request.TenantId}", request, autoDelete: false);
-			_logger.LogDebug("Published request {RequestId} to tenant {TenantId}", request.RequestId, request.TenantId);
+			LogPublishedRequest(request.RequestId, request.TenantId);
 		}
 		catch (RabbitMQClientException ex)
 		{
-			_logger.LogError(ex, "An error occured while dispatching request {RequestId} to tenant {TenantId} queue",
-				request.RequestId,
-				request.TenantId);
+			_logger.LogError(25401, ex,
+				"An error occured while dispatching request {RequestId} to tenant {TenantId} queue",
+				request.RequestId, request.TenantId);
 			throw new TransportException(ex);
 		}
 	}
+
+	/// <inheritdoc/>
+	public void Dispose()
+		=> _model.Dispose();
 }

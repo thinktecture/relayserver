@@ -48,7 +48,7 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 			try
 			{
 				var configuration = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
-				_logger.LogTrace("Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri,
+				_logger.LogTrace(10200, "Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri,
 					configuration);
 
 				options.Client.Clients.Add(Constants.HttpClientNames.RelayServer, new ClientCredentialsTokenRequest()
@@ -62,7 +62,8 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while retrieving the discovery document from {DiscoverDocumentUrl}",
+				_logger.LogError(10201, ex,
+					"An error occured while retrieving the discovery document from {DiscoverDocumentUrl}",
 					uri);
 
 				try

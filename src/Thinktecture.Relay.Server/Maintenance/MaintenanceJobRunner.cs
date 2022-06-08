@@ -64,7 +64,7 @@ public class MaintenanceJobRunner : BackgroundService
 
 			try
 			{
-				_logger.LogTrace("Running maintenance job {MaintenanceJob}.", job.GetType().FullName);
+				_logger.LogTrace(20500, "Running maintenance job {MaintenanceJob}", job.GetType().FullName);
 				await job.DoMaintenanceAsync(cancellationToken);
 			}
 			catch (OperationCanceledException)
@@ -73,7 +73,7 @@ public class MaintenanceJobRunner : BackgroundService
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "An error occured while running maintenance job {MaintenanceJob}",
+				_logger.LogError(20501, ex, "An error occured while running maintenance job {MaintenanceJob}",
 					job.GetType().FullName);
 			}
 		}

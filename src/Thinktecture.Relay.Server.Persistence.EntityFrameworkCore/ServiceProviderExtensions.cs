@@ -33,14 +33,12 @@ public static class ServiceProviderExtensions
 		var pending = (await context.Database.GetPendingMigrationsAsync(cancellationToken)).ToArray();
 		if (pending.Length > 0)
 		{
-			logger.LogWarning(
-				$"Applying {{MigrationCount}} pending migration{(pending.Length == 1 ? string.Empty : "s")} (\"{{Migrations}}\")",
-				pending.Length, string.Join("\", \"", pending));
+			logger.LogInformation(23200, "Applying {MigrationCount} pending migration(s)", pending.Length);
 			await context.Database.MigrateAsync(cancellationToken);
 		}
 		else
 		{
-			logger.LogInformation("No migrations pending");
+			logger.LogDebug(23201, "No migrations pending");
 		}
 	}
 
@@ -66,18 +64,18 @@ public static class ServiceProviderExtensions
 		{
 			if (applied.Length == 0)
 			{
-				logger.LogError("Cannot rollback any migrations on a non-migrated database");
+				logger.LogError(23202, "Cannot rollback any migrations on a non-migrated database");
 			}
 			else
 			{
-				logger.LogWarning(
+				logger.LogWarning(23203,
 					"The provided target migration \"{TargetMigration}\" was not found in the already applied migrations (\"{Migrations}\")",
 					targetMigration, string.Join("\", \"", applied));
 			}
 		}
 		else
 		{
-			logger.LogWarning("Rolling back to migration {TargetMigration}", migration);
+			logger.LogWarning(203204, "Rolling back to migration {TargetMigration}", migration);
 			await context.GetService<IMigrator>().MigrateAsync(migration, cancellationToken);
 		}
 	}

@@ -15,6 +15,12 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 	private readonly HubConnection _hubConnection;
 	private readonly ILogger<AcknowledgeTransport<T>> _logger;
 
+	// Todo: Move to LoggerMessage source generator when destructuring is supported,
+	// see https://github.com/dotnet/runtime/issues/69490
+	private readonly Action<ILogger, IAcknowledgeRequest, Guid, string?, Exception?> _logTransportingAck =
+		LoggerMessage.Define<IAcknowledgeRequest, Guid, string?>(LogLevel.Trace, 11100,
+			"Transporting acknowledge request {@AcknowledgeRequest} for request {RequestId} on connection {ConnectionId}");
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="AcknowledgeTransport{T}"/> class.
 	/// </summary>
@@ -29,9 +35,8 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 	/// <inheritdoc/>
 	public async Task TransportAsync(T request, CancellationToken cancellationToken = default)
 	{
-		_logger.LogTrace(
-			"Transporting acknowledge request {@AcknowledgeRequest} for request {RequestId} on connection {ConnectionId}",
-			request, request.RequestId, _hubConnection.ConnectionId);
+		if (_logger.IsEnabled(LogLevel.Trace))
+			_logTransportingAck(_logger, request, request.RequestId, _hubConnection.ConnectionId, null);
 
 		try
 		{
@@ -39,7 +44,7 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex,
+			_logger.LogError(11101, ex,
 				"An error occured while transporting acknowledge for request {RequestId} on connection {ConnectionId}",
 				request.RequestId, _hubConnection.ConnectionId);
 		}

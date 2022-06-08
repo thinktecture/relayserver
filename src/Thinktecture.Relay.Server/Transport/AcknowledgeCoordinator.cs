@@ -9,7 +9,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Transport;
 
 /// <inheritdoc cref="IAcknowledgeCoordinator{T}"/>
-public class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowledgeCoordinator<TAcknowledge>
+public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowledgeCoordinator<TAcknowledge>
 	where TRequest : IClientRequest
 	where TAcknowledge : IAcknowledgeRequest
 {
@@ -34,22 +34,27 @@ public class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowledgeCoordi
 		_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
 	}
 
+	[LoggerMessage(20800, LogLevel.Trace,
+		"Registering acknowledge state of request {RequestId} from connection {ConnectionId} for id {AcknowledgeId}")]
+	partial void LogRegisterAcknowledgeState(Guid requestId, string connectionId, string acknowledgeId);
+
 	/// <inheritdoc/>
 	public void RegisterRequest(Guid requestId, string connectionId, string acknowledgeId,
 		bool outsourcedRequestBodyContent)
 	{
-		_logger.LogTrace(
-			"Registering acknowledge state of request {RequestId} from connection {ConnectionId} for id {AcknowledgeId}",
-			requestId, connectionId, acknowledgeId);
+		LogRegisterAcknowledgeState(requestId, connectionId, acknowledgeId);
 		_requests[requestId] = new AcknowledgeState(connectionId, acknowledgeId, outsourcedRequestBodyContent);
 	}
+
+	[LoggerMessage(20801, LogLevel.Warning, "Unknown request {RequestId} to acknowledge received")]
+	partial void LogUnknownRequest(Guid requestId);
 
 	/// <inheritdoc/>
 	public async Task ProcessAcknowledgeAsync(TAcknowledge request, CancellationToken cancellationToken = default)
 	{
 		if (!_requests.TryRemove(request.RequestId, out var acknowledgeState))
 		{
-			_logger.LogWarning("Unknown request {RequestId} to acknowledge received", request.RequestId);
+			LogUnknownRequest(request.RequestId);
 			return;
 		}
 

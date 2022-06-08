@@ -64,7 +64,7 @@ public class RelayTargetRegistry<TRequest, TResponse>
 		if (!_targets.TryAdd(id, registration))
 			throw new ArgumentException($"A registration with the same key \"{id}\" already exists", nameof(id));
 
-		_logger.LogDebug("Registered relay target {Target} as type {TargetType}", id, type.FullName);
+		_logger.LogDebug(10600, "Registered relay target {Target} as type {TargetType}", id, type.FullName);
 	}
 
 	/// <summary>
@@ -87,11 +87,11 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	{
 		if (_targets.TryRemove(id, out _))
 		{
-			_logger.LogDebug("Unregistered relay target {Target}", id);
+			_logger.LogDebug(10601, "Unregistered relay target {Target}", id);
 		}
 		else
 		{
-			_logger.LogWarning("Could not unregister relay target {Target}", id);
+			_logger.LogWarning(10602, "Could not unregister relay target {Target}", id);
 		}
 	}
 
