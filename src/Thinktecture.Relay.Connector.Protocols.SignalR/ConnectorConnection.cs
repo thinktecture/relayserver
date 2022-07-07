@@ -135,7 +135,7 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 			try
 			{
 				await _hubConnection.StartAsync(cancellationToken);
-				_connectionId = _hubConnection.ConnectionId!;
+				_connectionId = _hubConnection.ConnectionId ?? string.Empty;
 
 				_logger.LogInformation("Connected on connection {ConnectionId}", _connectionId);
 			}
