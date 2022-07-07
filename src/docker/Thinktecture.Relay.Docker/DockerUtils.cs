@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Docker
 	public static class DockerUtils
 	{
 		/// <summary>
-		/// Creates a holst builder preconfigured for the Docker environment.
+		/// Creates a host builder preconfigured for the Docker environment.
 		/// </summary>
 		/// <param name="applicationName">The name of the application.</param>
 		/// <param name="args">The commandline arguments provided to the application.</param>
