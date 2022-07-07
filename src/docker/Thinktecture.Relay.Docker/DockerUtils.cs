@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Docker
 		/// Creates a host builder preconfigured for the Docker environment.
 		/// </summary>
 		/// <param name="applicationName">The name of the application.</param>
-		/// <param name="args">The commandline arguments provided to the application.</param>
+		/// <param name="args">The command-line arguments provided to the application.</param>
 		/// <typeparam name="TStartup">The startup class to use.</typeparam>
 		/// <returns>An instance of an <see cref="IHostBuilder"/>.</returns>
 		public static IHostBuilder CreateHostBuilder<TStartup>(string applicationName, string[] args)
