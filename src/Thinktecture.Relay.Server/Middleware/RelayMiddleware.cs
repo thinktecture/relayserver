@@ -92,7 +92,7 @@ namespace Thinktecture.Relay.Server.Middleware
 		/// <inheritdoc />
 		public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 		{
-			var tenantName = context.Request.Path.Value!.Split('/').Skip(1).FirstOrDefault();
+			var tenantName = context.Request.Path.Value?.Split('/').Skip(1).FirstOrDefault();
 			if (string.IsNullOrEmpty(tenantName))
 			{
 				_logger.LogWarning("Invalid request received {Path}{Query}", context.Request.Path, context.Request.QueryString);
