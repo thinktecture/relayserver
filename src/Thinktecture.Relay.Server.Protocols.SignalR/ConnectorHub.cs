@@ -98,14 +98,14 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR
 		/// <inheritdoc />
 		public override async Task OnDisconnectedAsync(Exception? exception)
 		{
-			if (exception != null)
+			if (exception == null)
 			{
-				_logger.LogWarning(exception, "Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
+				_logger.LogDebug("Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
 					Context.User?.GetTenantInfo());
 			}
 			else
 			{
-				_logger.LogDebug("Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
+				_logger.LogWarning(exception, "Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
 					Context.User?.GetTenantInfo());
 			}
 
