@@ -68,14 +68,15 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR
 
 		private async Task HubConnectionReconnecting(Exception? ex)
 		{
-			if (ex != null)
-			{
-				_logger.LogWarning(ex, "Trying to reconnect after connection {ConnectionId} was lost due to an error", _connectionId);
-			}
-			else
+			if (ex == null)
 			{
 				_logger.LogInformation("Trying to reconnect after connection {ConnectionId} was lost", _connectionId);
 			}
+			else
+			{
+				_logger.LogWarning(ex, "Trying to reconnect after connection {ConnectionId} was lost due to an error", _connectionId);
+			}
+
 			await Reconnecting.InvokeAsync(this, _connectionId);
 		}
 
