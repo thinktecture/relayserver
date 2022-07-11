@@ -63,7 +63,7 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 			catch (Exception ex)
 			{
 				_logger.LogError(10201, ex,
-					"An error occured while retrieving the discovery document from {DiscoverDocumentUrl}",
+					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}",
 					uri);
 
 				try

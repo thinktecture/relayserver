@@ -53,7 +53,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 			catch (Exception ex)
 			{
 				_logger.LogError(10301, ex,
-					"An error occured while retrieving the discovery document from {DiscoverDocumentUrl}",
+					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}",
 					uri);
 
 				try
