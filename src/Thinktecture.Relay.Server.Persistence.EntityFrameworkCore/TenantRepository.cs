@@ -30,7 +30,7 @@ public class TenantRepository : ITenantRepository
 			.SingleOrDefaultAsync(tenant => tenant.NormalizedName == normalizedName);
 	}
 
-	// TODO: Fix these methods, these are preliminary
+	// TODO fix these methods, these are preliminary
 
 	/// <inheritdoc/>
 	public async Task<Tenant?> LoadTenantByIdAsync(Guid id)

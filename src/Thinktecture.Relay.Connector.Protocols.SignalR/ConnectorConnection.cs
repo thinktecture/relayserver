@@ -18,15 +18,14 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	private readonly IClientRequestHandler<TRequest> _clientRequestHandler;
 	private readonly ILogger<ConnectorConnection<TRequest, TResponse, TAcknowledge>> _logger;
 
-	// Todo: Move to LoggerMessage source generator when destructuring is supported,
-	// see https://github.com/dotnet/runtime/issues/69490
-	private readonly Action<ILogger, Guid, string, IClientRequest, Exception?> _logHandlingRequest1 =
+	// TODO move to LoggerMessage source generator when destructuring is supported
+	// (see https://github.com/dotnet/runtime/issues/69490)
 		LoggerMessage.Define<Guid, string, IClientRequest>(LogLevel.Trace, 11200,
 			"Handling request {RequestId} on connection {ConnectionId} {@Request}");
 
-	// Todo: Move to LoggerMessage source generator when destructuring is supported,
-	// see https://github.com/dotnet/runtime/issues/69490
 	private readonly Action<ILogger, Guid, string, Guid, Exception?> _logHandlingRequest2 =
+	// TODO move to LoggerMessage source generator when destructuring is supported
+	// (see https://github.com/dotnet/runtime/issues/69490)
 		LoggerMessage.Define<Guid, string, Guid>(LogLevel.Debug, 11201,
 			"Handling request {RequestId} on connection {ConnectionId} from origin {OriginId}");
 

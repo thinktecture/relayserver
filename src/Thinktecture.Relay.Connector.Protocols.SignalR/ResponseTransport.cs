@@ -15,8 +15,8 @@ public class ResponseTransport<T> : IResponseTransport<T>
 	private readonly HubConnection _hubConnection;
 	private readonly ILogger<ResponseTransport<T>> _logger;
 
-	// Todo: Move to LoggerMessage source generator when destructuring is supported,
-	// see https://github.com/dotnet/runtime/issues/69490
+	// TODO move to LoggerMessage source generator when destructuring is supported
+	// (see https://github.com/dotnet/runtime/issues/69490)
 	private readonly Action<ILogger, ITargetResponse, Guid, string?, Exception?> _logTransportingResponse =
 		LoggerMessage.Define<ITargetResponse, Guid, string?>(LogLevel.Trace, 11500,
 			"Transporting response {@Response} for request {RequestId} on connection {ConnectionId}");

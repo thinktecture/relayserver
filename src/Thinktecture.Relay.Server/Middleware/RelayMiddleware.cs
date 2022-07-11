@@ -29,8 +29,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
 	private readonly ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> _logger;
 
-	// Todo: Move to LoggerMessage source generator when destructuring is supported,
-	// see https://github.com/dotnet/runtime/issues/69490
+	// TODO move to LoggerMessage source generator when destructuring is supported
+	// (see https://github.com/dotnet/runtime/issues/69490)
 	private readonly Action<ILogger, IClientRequest, Exception?> _logRequestParsed =
 		LoggerMessage.Define<IClientRequest>(LogLevel.Trace, 20602, "Parsed request {@Request}");
 
