@@ -145,7 +145,7 @@ public class TenantController : Controller
 		return NotFound();
 	}
 
-	// TODO: Re-do that properly
+	// TODO re-do that properly
 	// ReSharper disable once ClassNeverInstantiated.Local
 	private class KeyGenerator
 	{

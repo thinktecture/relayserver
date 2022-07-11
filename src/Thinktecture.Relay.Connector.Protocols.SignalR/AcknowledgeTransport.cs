@@ -15,8 +15,8 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 	private readonly HubConnection _hubConnection;
 	private readonly ILogger<AcknowledgeTransport<T>> _logger;
 
-	// Todo: Move to LoggerMessage source generator when destructuring is supported,
-	// see https://github.com/dotnet/runtime/issues/69490
+	// TODO move to LoggerMessage source generator when destructuring is supported
+	// (see https://github.com/dotnet/runtime/issues/69490)
 	private readonly Action<ILogger, IAcknowledgeRequest, Guid, string?, Exception?> _logTransportingAck =
 		LoggerMessage.Define<IAcknowledgeRequest, Guid, string?>(LogLevel.Trace, 11100,
 			"Transporting acknowledge request {@AcknowledgeRequest} for request {RequestId} on connection {ConnectionId}");

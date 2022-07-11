@@ -20,7 +20,7 @@ public interface ITenantRepository
 	/// </returns>
 	Task<Tenant?> LoadTenantByNameAsync(string name);
 
-	// TODO: Fix these methods, these are preliminary
+	// TODO fix these methods, these are preliminary
 
 	/// <summary>
 	/// Loads a <see cref="Tenant"/> by its id.

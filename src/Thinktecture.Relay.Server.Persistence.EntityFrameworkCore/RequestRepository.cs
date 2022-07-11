@@ -9,8 +9,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 /// <inheritdoc/>
 public class RequestRepository : IRequestRepository
 {
-	// Todo: Move to LoggerMessage source generator when destructuring is supported,
-	// see https://github.com/dotnet/runtime/issues/69490
+	// TODO move to LoggerMessage source generator when destructuring is supported
+	// (see https://github.com/dotnet/runtime/issues/69490)
 	private static readonly Action<ILogger, Request, Exception?> LogStoringRequest =
 		LoggerMessage.Define<Request>(LogLevel.Trace, 23100, "Storing request {@Request}");
 
