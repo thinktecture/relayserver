@@ -20,12 +20,13 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	// TODO move to LoggerMessage source generator when destructuring is supported
 	// (see https://github.com/dotnet/runtime/issues/69490)
+	private readonly Action<ILogger, Guid, string, IClientRequest, Exception?> _logHandlingRequestDetailed =
 		LoggerMessage.Define<Guid, string, IClientRequest>(LogLevel.Trace, 11200,
 			"Handling request {RequestId} on connection {ConnectionId} {@Request}");
 
-	private readonly Action<ILogger, Guid, string, Guid, Exception?> _logHandlingRequest2 =
 	// TODO move to LoggerMessage source generator when destructuring is supported
 	// (see https://github.com/dotnet/runtime/issues/69490)
+	private readonly Action<ILogger, Guid, string, Guid, Exception?> _logHandlingRequestSimple =
 		LoggerMessage.Define<Guid, string, Guid>(LogLevel.Debug, 11201,
 			"Handling request {RequestId} on connection {ConnectionId} from origin {OriginId}");
 
@@ -114,17 +115,14 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 			var cancellationTokenSource = _cancellationTokenSource;
 			_cancellationTokenSource = null;
 
-			if (cancellationTokenSource != null)
-			{
-				cancellationTokenSource.Cancel();
-				cancellationTokenSource.Dispose();
-			}
+			cancellationTokenSource?.Cancel();
+			cancellationTokenSource?.Dispose();
 		}
 	}
 
 	private async Task HubConnectionClosed(Exception? ex)
 	{
-		if (ex == null || ex is OperationCanceledException)
+		if (ex is null or OperationCanceledException)
 		{
 			_logger.LogDebug(11202, "Connection {ConnectionId} gracefully closed", _connectionId);
 		}
@@ -143,14 +141,14 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	private async Task HubConnectionReconnecting(Exception? ex)
 	{
-		if (ex != null)
+		if (ex == null)
 		{
-			_logger.LogWarning(11204, ex, "Trying to reconnect after connection {ConnectionId} was lost due to an error",
-				_connectionId);
+			_logger.LogInformation(11205, "Trying to reconnect after connection {ConnectionId} was lost", _connectionId);
 		}
 		else
 		{
-			_logger.LogInformation(11205, "Trying to reconnect after connection {ConnectionId} was lost", _connectionId);
+			_logger.LogWarning(11204, ex, "Trying to reconnect after connection {ConnectionId} was lost due to an error",
+				_connectionId);
 		}
 		await Reconnecting.InvokeAsync(this, _connectionId);
 	}
@@ -178,9 +176,9 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	private async Task RequestTargetAsync(TRequest request)
 	{
 		if (_logger.IsEnabled(LogLevel.Trace))
-			_logHandlingRequest1(_logger, request.RequestId, _connectionId, request, null);
+			_logHandlingRequestDetailed(_logger, request.RequestId, _connectionId, request, null);
 		if (_logger.IsEnabled(LogLevel.Debug))
-			_logHandlingRequest2(_logger, request.RequestId, _connectionId, request.RequestOriginId, null);
+			_logHandlingRequestSimple(_logger, request.RequestId, _connectionId, request.RequestOriginId, null);
 
 		request.EnableTracing = request.EnableTracing || _enableTracing.GetValueOrDefault();
 
@@ -218,7 +216,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		}
 		catch (OperationCanceledException)
 		{
-			// Ignore this, as this will be thrown when the service shuts down gracefully
+			// ignore this, as this will be thrown when the service shuts down gracefully
 		}
 		catch (Exception ex)
 		{
