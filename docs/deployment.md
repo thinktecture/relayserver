@@ -2,90 +2,93 @@
 
 RelayServer v3 is designed for containerized deployments using Docker.
 
-Scripts to help building and running the system are provided
-as [PowerShell Core](https://github.com/powershell/powershell) scripts, to be able to run cross platform on Windows,
-macOS and Linux.
+_Note:_ The containers in this repository are intended for **demo and example** purposes only. It is strongly
+encouraged to create your own host applications tailored and configured to your specific needs and to build and use
+your own container images.
 
-First, a script is provided to build all the docker images (`src/build-docker-images.ps1`).
+While at least the server-side components are intended to be deployed in containers, it is of course still possible
+to build a custom host executable for each  and run it as a Windows service or linux daemon.
 
-All other scripts are located in the folder `src/docker`:
+## Introduction
 
-* The external components (database, message queue, details see below) can be started with the `run-dependencies.ps1`
-  script.
-* Then the environment with one relay server (`run-environment.ps1`)
-* or a multi-server environment (`run-environment-multiserver.ps1`) can be started.
+RelayServer deployments consists of multiple instances (pods) of different containers which handle specific tasks.
 
-## First time Development & Test-Setup
+## Prerequisites
 
-__Prerequisites__:  
-In order to build and run the development environment, you need the following components on your system:
+* RabbitMQ  
+  The default server-to-server transport channels are based on the RabbitMQ message queue service. RelayServer needs
+  at least a single functional RabbitMQ node to connect to. However, it is strongly suggested that you provide a
+  multi-node RabbitMQ cluster so that the system can continue to work in case of any failure (i.e. hardware problem)
+  that might cause a RabbitMQ node to be not available for a certain amount of time.
 
-- Docker
-- .NET Core SDK 6.0.100 or newer features within .NET 6.0
-- PowerShell Core 6 or newer
+  **DO** set up and operate a reliable, highly available (HA) and performant RabbitMQ cluster.  
+  **Do NOT** use the example / development RabbitMQ containers from this repository in production.
+* Database  
+  RelayServer by default supports both PostgreSQL and MS SQL Server for configuration and statistics storage. As with
+  the message queue, you need a reliable HA database cluster when the RelayServer setup should be resilient to
+  failures.
 
-After you start the system for the first time, you need to execute the `seed-data.ps1` script, which will create the
-first initial configuration for the tenants, so that the connectors can connect with their default development
-credentials. After that you can run the environment or the multi-server environment.
+  **DO** set up and operate a reliable, highly available (HA) and performant PostgreSQL or MS SQL Server cluster.  
+  **Do NOT** use the example / development database containers from this repository in production.
 
-The _development_ environment also comes with a [Seq](https://datalust.co/seq) logging server in a local docker
-container (using the local, free single-user license). For production the RelayServer components log to stdout and
-stderr as this is default in docker environments, but you can also slightly modify the images to use other logging
-targets or acquire a commercial Seq license.
+## RelayServer Components
 
-## Components
+* Thinktecture.Relay.IdentityServer  
+  The purpose of this component is to provide a default way how a connector can authenticate. A connector uses the
+  OAuth client credential flow with the IdentityServer component to receive an access token for authenticated
+  communication with the RelayServer. The service needs to request a single new token in regular intervals. This
+  component does not need to handle a lot of load, and the load is expected to increase in a linear way with the
+  amount of installed and concurrently running connectors.  
+  
+  **DO** run at least 2 instances of this container on different machines in order to provide a reliable system.
 
-The relay server environment consists of several parts.
+  Configuration:
+  * Provide a shared volume to all instances of Thinktecture.Relay.IdentityServer on /var/creds
+  * Provide a connection string to the RelayServer database 
 
-- Configuration database  
-  The current implementation supports PostgreSQL as a database. SQL Server support is on the roadmap.
+* Thinktecture.Relay.Server
+  This is the main component of the RelayServer. It provides all endpoints required for the connectors and it also
+  provides the endpoints for any client to send a request to a target. The load of this component is highly dynamic.
+  It increases and decreases based on how many clients send how many requests against the relayed targets.
+  
+  **DO** run at least 2 instances of this container on different machines in order to provide a reliable system.  
+  Consider providing automatic scaling functionality of this component based on load.
 
-   - Only needs to be accessible from specifically listed components.
-   - The PostgreSql database server can be accessed through its default port (5432) on localhost.
+  Configuration:
+  * Provide a shared volume to all instances of Thinktecture.Relay.IdentityServer i.e. on /var/bodystore and add a
+    configuration property for the storage path to this directory
+  * Provide a connection string to the RelayServer database 
+  * Provide a connection string to the RabbitMQ
 
-- Message queue  
-  Currently only RabbitMQ is supported. The dev environment launches 2 Rabbit nodes in a cluster configuration.
+* Thinktecture.Relay.ManagementApi  
+  This component is used to manage entries in the RelayServer database, i.e. add a configuration for a new connector.
+  These actions usually are not performed too often and load is expected to be idle for most of the time.  
+  If not absolutley required we suggested not exposing this container to the public internet. Only have it available
+  for your internal administrative usages. Unless you have higher load and reliability requirements and/or perform a
+  lot of automatic provisioning of connectors it should be fine to run only a single instance.
 
-   - Only needs to be accessible from specifically listed components.
-   - Node 1 management UI can be accessed at http://localhost:15672 login with guest/guest.
-   - Node 2 management UI can be accessed at http://localhost:15673 login with guest/guest.
+  Configuration:
+  * Provide a connection string to the RelayServer database 
 
-- IdentityServer  
-  The IdentityServer provides an authentication service for the other components.
+* Thinktecture.Relay.StatisticsApi  
+  This component provides endpoints to retrieve usage data about the system from the database. For example you could
+  fetch this data in intervals and feed it into your monitoring or billing systems. Load on this component is based
+  on your internal usage only and should be fairly constant.
+  If not absolutley required we suggested not exposing this container to the public internet. Only have it available
+  for your internal administrative usages. Unless you have higher load or higher reliability requirements
+  (i.e. for monitoring) it should be fine to run only a single instance.
 
-   - Needs to be accessible from outside the system.
-   - Needs access to the configuration database.
-   - Currently NOT YET capable of running more than one node.
-   - The identity server can be accessed at http://localhost:5002 as authority.
+  Configuration:
+  * Provide a connection string to the RelayServer database 
 
-- ManagementApi  
-  The Management API is used to manage the data in the configuration database.
+## Connector
 
-   - Needs access to the configuration database.
-   - Currently NOT YET secured with the identity server. DO NOT YET expose this to the public.
-   - Management API swagger UI can be accessed at http://localhost:5004 to see the api docs.
+* Thinktecture.Relay.Connector  
+  This component is the connector part and needs to be installed at every on-premises location (_Tenant_). The
+  connector can be run as docker container and also be scaled up. Multiple concurrent connectors for the same tenant
+  will automatically load-balance requests between them and also keep a tenant connected when one connector fails.
+  You can, however, also install the connector as a Windows service or linux daemon.
 
-- RelayServer  
-  The main server component. Can be started as single node or multi-server.
-
-   - Needs to be accessible from outside the system.
-   - Needs access to the configuration database.
-   - Needs access to the message queue.
-   - Needs access to the identity server.
-   - If this container is started more than once, all relay server instances need to share one storage volume (shared
-     file storage). See the `src/docker/Thinktecture.Relay.Server.Docker/run-container-multiserver.ps1` for required
-     links and mounts.
-   - RelayServer can be accessed at http://localhost:5000 in single-node mode.
-   - RelayServer node A can be accessed at http://localhost:5010 in multi-server mode.
-   - RelayServer node B can be accessed at http://localhost:5011 in multi-server mode.
-
-- Connector  
-  This component will be installed on-premises at tenants.
-   - Needs access to identity server through public url.
-   - Needs access to relay server through public url.
-
-- Seq  
-  The logging server for local development.
-
-   - Do not make this accessible, as this is single user mode and everyone is admin without authentication.
-   - The Seq server can be accessed at http://localhost:5341 to analyse the logs.
+  Configuration:
+  * Provide the URL to the RelayServer
+  * Provide tenant name and secret for authentication

@@ -79,7 +79,7 @@ The interfaces to implement are:
 * `IConnectorTransport`  
   Used to receive responses and acknowledgement messages from a connected tenant.
 
-RelayServer comes with a single implementation based on the SignalR Core protocol.
+RelayServer comes with a single implementation based on the ASP.NET Core SignalR protocol.
 
 ## Connector Modules
 
@@ -99,4 +99,4 @@ The interfaces to implement are:
 When the connector part receives a request from the server it has to call the `IClientRequestHandler.HandleAsync` method
 and send the response back to the server using the connector transport.
 
-RelayServer comes with a single implementation based on the SignalR Core protocol.
+RelayServer comes with a single implementation based on the ASP.NET Core SignalR protocol.

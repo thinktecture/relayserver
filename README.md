@@ -19,23 +19,31 @@ permitted data.
 
 ![en-architecture-overview.png](./docs/assets/en-architecture-overview.png)
 
-See the [glossary](./docs/glossary.md) for a further description of terms used in the context of RelayServer.
+## Library concept
 
-See [concepts](./docs/concepts.md) for an explanation of concepts used in RelayServer.
+Thinktecture RelayServer v3 is more of a collection of libraries than a few ready-to run executables. We looked at
+how RelayServer v2 was used previously and learned that in most cases a lot of customization and extension was
+performed. This is now much easier to achieve in RelayServer v3, by providing all components and modules in an
+exchangeable way for you to build your own product and services with RelayServer as a library.
 
-See [deployment options](./docs/deployment.md) for an overview of deployment options.
+## Contents of the documentation
 
-See [modules](./docs/modules.md) for an overview of the new modular design of RelayServer 3 and modules supported out of
-the box.
+- See the [glossary](./docs/glossary.md) for a further description of terms used in the context of RelayServer.
+- See [concepts](./docs/concepts.md) for an explanation of concepts used in RelayServer.
+- See [getting started](./docs/getting-started.md) for an overview of how to setup a development environment for
+  RelayServer.
+- See [deployment options](./docs/deployment.md) for an overview of deployment options.
+- See [modules](./docs/modules.md) for an overview of the new modular design of RelayServer 3 and modules supported out
+  of the box.
+- See [migration](./docs/migration.md) for some ideas how to migrate from RelayServer 2 to version 3.
 
 ## Features
 
 - Open Source under BSD-3-Clause license
 - Full data sovereignty without the need to tunnel data over public relays operated by third parties
-- No special client-side library needed - it's technically only an distributed HTTP reverse proxy
+- No special client-side library needed - it's technically only an distributed HTTPS reverse proxy
 - Supports multiple tenants with provisioning - you would usually connect thousands of on-premises installation via one
   RelayServer instance
-- Management web included (status monitoring, provisioning, debugging)
 - Firewall, NAT & Proxy-friendly
 - No static ip address needed for on-premise applications
 - No hardware for on-premises side needed
@@ -45,10 +53,6 @@ the box.
 ## Sponsors
 
 We would like to thank our sponsors that helped to make RelayServer possible.
-
-### Germany
-
-[<img width="120px" src="./docs/assets/logo_sponsor_kwp.svg" />](https://www.kwpsoftware.de)
 
 ### Switzerland
 
