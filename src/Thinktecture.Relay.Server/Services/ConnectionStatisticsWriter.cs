@@ -32,6 +32,10 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 	/// <inheritdoc/>
 	public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
+		// TODO debounce writing to DB; keep connectionId and UtcNow in dictionary
+		// write to DB every {configurable duration} (default: 1 minute)
+		// additionally add this as a background service just like server statistics writer
+
 		using var scope = _serviceProvider.CreateScope();
 		await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>()
 			.UpdateLastActivityTimeAsync(connectionId, cancellationToken);

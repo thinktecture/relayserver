@@ -126,6 +126,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			return;
 		}
 
+		// TODO cache tenant name to id lookup using IMemoryCache to prevent too many db hits
 		var tenant = await _tenantRepository.LoadTenantByNameAsync(tenantName);
 		if (tenant == null)
 		{
