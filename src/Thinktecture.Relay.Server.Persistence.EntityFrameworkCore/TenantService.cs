@@ -8,15 +8,15 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
 /// <inheritdoc/>
-public class TenantRepository : ITenantRepository
+public class TenantService : ITenantService
 {
 	private readonly RelayDbContext _dbContext;
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="TenantRepository"/> class.
+	/// Initializes a new instance of the <see cref="TenantService"/> class.
 	/// </summary>
 	/// <param name="dbContext">The Entity Framework Core database context.</param>
-	public TenantRepository(RelayDbContext dbContext)
+	public TenantService(RelayDbContext dbContext)
 		=> _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
 	/// <inheritdoc/>

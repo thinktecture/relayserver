@@ -7,7 +7,7 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
 /// <inheritdoc/>
-public class RequestRepository : IRequestRepository
+public class RequestService : IRequestService
 {
 	// TODO move to LoggerMessage source generator when destructuring is supported
 	// (see https://github.com/dotnet/runtime/issues/69490)
@@ -15,14 +15,14 @@ public class RequestRepository : IRequestRepository
 		LoggerMessage.Define<Request>(LogLevel.Trace, 23100, "Storing request {@Request}");
 
 	private readonly RelayDbContext _dbContext;
-	private readonly ILogger<RequestRepository> _logger;
+	private readonly ILogger<RequestService> _logger;
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="RequestRepository"/> class.
+	/// Initializes a new instance of the <see cref="RequestService"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="dbContext">The Entity Framework Core database context.</param>
-	public RequestRepository(ILogger<RequestRepository> logger, RelayDbContext dbContext)
+	public RequestService(ILogger<RequestService> logger, RelayDbContext dbContext)
 	{
 		_logger = logger;
 		_dbContext = dbContext;

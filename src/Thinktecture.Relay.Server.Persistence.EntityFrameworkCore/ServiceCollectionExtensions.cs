@@ -15,10 +15,10 @@ public static class ServiceCollectionExtensions
 	/// <returns>The <see cref="IServiceCollection"/>.</returns>
 	public static IServiceCollection AddRelayServerEntityFrameworkCoreRepositories(this IServiceCollection services)
 	{
-		services.TryAddScoped<ITenantRepository, TenantRepository>();
-		services.TryAddScoped<IStatisticsRepository, StatisticsRepository>();
-		services.TryAddScoped<IConnectionRepository, ConnectionRepository>();
-		services.TryAddScoped<IRequestRepository, RequestRepository>();
+		services.TryAddScoped<ITenantService, TenantService>();
+		services.TryAddScoped<IStatisticsService, StatisticsService>();
+		services.TryAddScoped<IConnectionService, ConnectionService>();
+		services.TryAddScoped<IRequestService, RequestService>();
 
 		services.AddHealthChecks()
 			.AddDbContextCheck<RelayDbContext>();

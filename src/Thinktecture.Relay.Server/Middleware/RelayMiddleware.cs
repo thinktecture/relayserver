@@ -43,7 +43,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 	private readonly IRelayTargetResponseWriter<TResponse> _responseWriter;
 	private readonly IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> _targetResponseInterceptors;
-	private readonly ITenantRepository _tenantRepository;
+	private readonly ITenantService _tenantService;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RelayMiddleware{TRequest,TResponse,TAcknowledge}"/> class.
@@ -51,7 +51,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="requestFactory">An <see cref="IRelayClientRequestFactory{TRequest}"/>.</param>
 	/// <param name="connectorRegistry">The <see cref="ConnectorRegistry{T}"/>.</param>
-	/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
+	/// <param name="tenantService">An <see cref="ITenantService"/>.</param>
 	/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 	/// <param name="requestCoordinator">An <see cref="IRequestCoordinator{TRequest}"/>.</param>
 	/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{T}"/>.</param>
@@ -68,7 +68,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// <param name="relayRequestLogger">An <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.</param>
 	public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> logger,
 		IRelayClientRequestFactory<TRequest> requestFactory, ConnectorRegistry<TRequest> connectorRegistry,
-		ITenantRepository tenantRepository, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
+		ITenantService tenantService, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
 		IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
 		IRelayContext<TRequest, TResponse> relayContext, ITenantTransport<TRequest> tenantTransport,
 		IConnectorTransportLimit connectorTransportLimit, IOptions<RelayServerOptions> relayServerOptions,
@@ -83,7 +83,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
 		_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
-		_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+		_tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
 		_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
 		_requestCoordinator = requestCoordinator ?? throw new ArgumentNullException(nameof(requestCoordinator));
 		_responseWriter = responseWriter ?? throw new ArgumentNullException(nameof(responseWriter));
@@ -127,7 +127,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		}
 
 		// TODO cache tenant name to id lookup using IMemoryCache to prevent too many db hits
-		var tenant = await _tenantRepository.LoadTenantByNameAsync(tenantName);
+		var tenant = await _tenantService.LoadTenantByNameAsync(tenantName);
 		if (tenant == null)
 		{
 			LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);

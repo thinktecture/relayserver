@@ -15,18 +15,18 @@ namespace Thinktecture.Relay.IdentityServer.Stores;
 // ReSharper disable once ClassNeverInstantiated.Global
 public class RelayServerTenantStore : IClientStore
 {
-	private readonly ITenantRepository _tenantRepository;
+	private readonly ITenantService _tenantService;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RelayServerTenantStore"/> class.
 	/// </summary>
-	public RelayServerTenantStore(ITenantRepository tenantRepository)
-		=> _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+	public RelayServerTenantStore(ITenantService tenantService)
+		=> _tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
 
 	/// <inheritdoc/>
 	async Task<Client?> IClientStore.FindClientByIdAsync(string clientId)
 	{
-		var tenant = await _tenantRepository.LoadTenantByNameAsync(clientId);
+		var tenant = await _tenantService.LoadTenantByNameAsync(clientId);
 		return tenant == null ? null : ConvertToClient(tenant);
 	}
 

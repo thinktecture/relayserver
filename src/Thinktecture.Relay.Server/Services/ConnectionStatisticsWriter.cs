@@ -25,7 +25,7 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 		CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>()
+		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
 			.SetConnectionTimeAsync(connectionId, tenantId, originId, remoteIpAddress, cancellationToken);
 	}
 
@@ -37,7 +37,7 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 		// additionally add this as a background service just like server statistics writer
 
 		using var scope = _serviceProvider.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>()
+		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
 			.UpdateLastActivityTimeAsync(connectionId, cancellationToken);
 	}
 
@@ -45,7 +45,7 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 	public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>()
+		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
 			.SetDisconnectTimeAsync(connectionId, cancellationToken);
 	}
 }

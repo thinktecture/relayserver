@@ -18,14 +18,14 @@ namespace Thinktecture.Relay.ManagementApi.Docker.Controllers;
 [Route("api/[controller]")]
 public class TenantController : Controller
 {
-	private readonly ITenantRepository _tenantRepository;
+	private readonly ITenantService _tenantService;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="TenantController"/> class.
 	/// </summary>
-	/// <param name="tenantRepository">An instance of an <see cref="ITenantRepository"/>.</param>
-	public TenantController(ITenantRepository tenantRepository)
-		=> _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+	/// <param name="tenantService">An instance of an <see cref="ITenantService"/>.</param>
+	public TenantController(ITenantService tenantService)
+		=> _tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
 
 	/// <summary>
 	/// Returns tenants in a pageable way.
@@ -35,7 +35,7 @@ public class TenantController : Controller
 	/// <returns>A page that contains <paramref name="take"/> tenants, starting at the <paramref name="skip"/> tenant.</returns>
 	[HttpGet]
 	public IAsyncEnumerable<Tenant> GetAllTenants(int skip = 0, int take = 10)
-		=> _tenantRepository.LoadAllTenantsPagedAsync(skip, take).ToModels();
+		=> _tenantService.LoadAllTenantsPagedAsync(skip, take).ToModels();
 
 	/// <summary>
 	/// Finds a tenant by its id.
@@ -47,7 +47,7 @@ public class TenantController : Controller
 	[SwaggerResponse(404, "Tenant with given id was not found.")]
 	public async Task<ActionResult<Tenant>> GetTenantById([FromRoute] Guid tenantId)
 	{
-		var tenant = await _tenantRepository.LoadTenantByIdAsync(tenantId);
+		var tenant = await _tenantService.LoadTenantByIdAsync(tenantId);
 		if (tenant == null)
 		{
 			return NotFound();
@@ -66,7 +66,7 @@ public class TenantController : Controller
 	[SwaggerResponse(404, "Tenant with given name was not found.")]
 	public async Task<ActionResult<Tenant>> GetTenantByName([FromRoute] string tenantName)
 	{
-		var tenant = await _tenantRepository.LoadTenantByNameAsync(tenantName);
+		var tenant = await _tenantService.LoadTenantByNameAsync(tenantName);
 		if (tenant == null)
 		{
 			return NotFound();
@@ -90,7 +90,7 @@ public class TenantController : Controller
 
 		try
 		{
-			var id = await _tenantRepository.CreateTenantAsync(tenant.ToTenant());
+			var id = await _tenantService.CreateTenantAsync(tenant.ToTenant());
 			return CreatedAtAction(nameof(GetTenantById), new { TenantId = id }, id);
 		}
 		catch
@@ -110,13 +110,13 @@ public class TenantController : Controller
 	[SwaggerResponse(404, "Could not create secret because tenant with given id was not found.", typeof(Secret))]
 	public async Task<ActionResult<Secret>> CreateClientSecret([FromRoute] Guid tenantId, string? secret = null)
 	{
-		var tenant = await _tenantRepository.LoadTenantByIdAsync(tenantId);
+		var tenant = await _tenantService.LoadTenantByIdAsync(tenantId);
 		if (tenant == null) return NotFound();
 
 		secret ??= KeyGenerator.GetUniqueKey(8);
 		var hash = secret.Sha512();
 
-		await _tenantRepository.CreateClientSecretAsync(new ClientSecret()
+		await _tenantService.CreateClientSecretAsync(new ClientSecret()
 		{
 			Id = Guid.NewGuid(),
 			Created = DateTime.UtcNow,
@@ -137,7 +137,7 @@ public class TenantController : Controller
 	[SwaggerResponse(404, "Tenant with given id was not found.")]
 	public async Task<IActionResult> DeleteTenantById([FromRoute] Guid tenantId)
 	{
-		if (await _tenantRepository.DeleteTenantByIdAsync(tenantId))
+		if (await _tenantService.DeleteTenantByIdAsync(tenantId))
 		{
 			return Ok();
 		}

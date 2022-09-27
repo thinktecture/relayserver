@@ -22,7 +22,7 @@ public class OriginStatisticsWriter : IOriginStatisticsWriter
 	public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>()
+		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
 			.SetStartupTimeAsync(originId, cancellationToken);
 	}
 
@@ -30,7 +30,7 @@ public class OriginStatisticsWriter : IOriginStatisticsWriter
 	public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>()
+		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
 			.UpdateLastSeenTimeAsync(originId, cancellationToken);
 	}
 
@@ -38,7 +38,7 @@ public class OriginStatisticsWriter : IOriginStatisticsWriter
 	public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IStatisticsRepository>()
+		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
 			.SetShutdownTimeAsync(originId, cancellationToken);
 	}
 }

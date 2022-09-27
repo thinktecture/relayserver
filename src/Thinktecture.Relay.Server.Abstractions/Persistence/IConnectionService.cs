@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.Server.Persistence;
 
 /// <summary>
-/// Repository that allows access to connections.
+/// Represents a way to access connection data in the persistence layer.
 /// </summary>
-public interface IConnectionRepository
+public interface IConnectionService
 {
 	/// <summary>
 	/// Returns true when a connection for the tenant is available; otherwise, false.
