@@ -6,9 +6,9 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.Server.Persistence;
 
 /// <summary>
-/// Repository that allows access to persisted tenants.
+/// Represents a way to access tenant data in the persistence layer.
 /// </summary>
-public interface ITenantRepository
+public interface ITenantService
 {
 	/// <summary>
 	/// Loads a <see cref="Tenant"/> by its name.

@@ -17,21 +17,21 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 {
 	private readonly ILogger<RelayRequestLogger<TRequest, TResponse>> _logger;
 	private readonly RelayServerOptions _relayServerOptions;
-	private readonly IRequestRepository _requestRepository;
+	private readonly IRequestService _requestService;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RelayRequestLogger{TRequest,TResponse}"/> class.
 	/// </summary>
 	/// <param name="logger">An instance of an <see cref="ILogger{TCategoryName}"/>.</param>
-	/// <param name="requestRepository">An <see cref="IRequestRepository"/>.</param>
+	/// <param name="requestService">An <see cref="IRequestService"/>.</param>
 	/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	public RelayRequestLogger(ILogger<RelayRequestLogger<TRequest, TResponse>> logger,
-		IRequestRepository requestRepository, IOptions<RelayServerOptions> relayServerOptions)
+		IRequestService requestService, IOptions<RelayServerOptions> relayServerOptions)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 
-		_requestRepository = requestRepository ?? throw new ArgumentNullException(nameof(requestRepository));
+		_requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
@@ -49,7 +49,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		var request = CreateRequest(relayContext);
 		request.HttpStatusCode = relayContext.TargetResponse?.HttpStatusCode;
 		request.ResponseBodySize = relayContext.TargetResponse?.BodySize;
-		await _requestRepository.StoreRequestAsync(request, cancellationToken);
+		await _requestService.StoreRequestAsync(request, cancellationToken);
 	}
 
 	[LoggerMessage(20401, LogLevel.Trace, "Writing request log for aborted request {RequestId}")]
@@ -65,7 +65,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 
 		var request = CreateRequest(relayContext);
 		request.Aborted = true;
-		await _requestRepository.StoreRequestAsync(request, cancellationToken);
+		await _requestService.StoreRequestAsync(request, cancellationToken);
 	}
 
 	[LoggerMessage(20402, LogLevel.Trace, "Writing request log for failed request {RequestId}")]
@@ -81,7 +81,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 
 		var request = CreateRequest(relayContext);
 		request.Failed = true;
-		await _requestRepository.StoreRequestAsync(request, cancellationToken);
+		await _requestService.StoreRequestAsync(request, cancellationToken);
 	}
 
 	[LoggerMessage(20403, LogLevel.Trace, "Writing request log for expired request {RequestId}")]
@@ -97,7 +97,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 
 		var request = CreateRequest(relayContext);
 		request.Expired = true;
-		await _requestRepository.StoreRequestAsync(request, cancellationToken);
+		await _requestService.StoreRequestAsync(request, cancellationToken);
 	}
 
 	[LoggerMessage(20404, LogLevel.Trace, "Writing request log for error on request {RequestId}")]
@@ -113,7 +113,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 
 		var request = CreateRequest(relayContext);
 		request.Errored = true;
-		await _requestRepository.StoreRequestAsync(request, cancellationToken);
+		await _requestService.StoreRequestAsync(request, cancellationToken);
 	}
 
 	private Request CreateRequest(IRelayContext<TRequest, TResponse> relayContext)

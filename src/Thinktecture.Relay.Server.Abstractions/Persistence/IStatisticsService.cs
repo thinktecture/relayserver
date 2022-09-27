@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 namespace Thinktecture.Relay.Server.Persistence;
 
 /// <summary>
-/// Repository that allows access to statistical data.
+/// Represents a way to access statistics data in the persistence layer.
 /// </summary>
-public interface IStatisticsRepository
+public interface IStatisticsService
 {
 	/// <summary>
 	/// Sets the startup time of an origin.

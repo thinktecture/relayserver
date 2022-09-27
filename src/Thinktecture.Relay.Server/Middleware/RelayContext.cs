@@ -13,7 +13,7 @@ public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TRespon
 	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse
 {
-	private readonly IConnectionRepository _connectionRepository;
+	private readonly IConnectionService _connectionService;
 
 	/// <inheritdoc/>
 	public DateTime RequestStart { get; } = DateTime.UtcNow;
@@ -31,7 +31,7 @@ public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TRespon
 	public TResponse? TargetResponse { get; set; }
 
 	/// <inheritdoc/>
-	public bool ConnectorAvailable => _connectionRepository.IsConnectionAvailableAsync(ClientRequest.TenantId)
+	public bool ConnectorAvailable => _connectionService.IsConnectionAvailableAsync(ClientRequest.TenantId)
 		.GetAwaiter().GetResult();
 
 	/// <inheritdoc/>
@@ -48,14 +48,14 @@ public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TRespon
 	/// </summary>
 	/// <param name="httpContextAccessor">An <see cref="IHttpContextAccessor"/>.</param>
 	/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
-	/// <param name="connectionRepository">An <see cref="IConnectionRepository"/>.</param>
+	/// <param name="connectionService">An <see cref="IConnectionService"/>.</param>
 	public RelayContext(IHttpContextAccessor httpContextAccessor, RelayServerContext relayServerContext,
-		IConnectionRepository connectionRepository)
+		IConnectionService connectionService)
 	{
 		if (httpContextAccessor == null) throw new ArgumentNullException(nameof(httpContextAccessor));
 		if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
 
-		_connectionRepository = connectionRepository ?? throw new ArgumentNullException(nameof(connectionRepository));
+		_connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
 		HttpContext = httpContextAccessor.HttpContext ?? throw new Exception("No HttpContext available.");
 		OriginId = relayServerContext.OriginId;
 	}

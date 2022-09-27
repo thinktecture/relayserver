@@ -46,24 +46,24 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
 	private readonly ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> _logger;
 	private readonly IResponseDispatcher<TResponse> _responseDispatcher;
-	private readonly ITenantRepository _tenantRepository;
+	private readonly ITenantService _tenantService;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectorHub{TRequest,TResponse,TAcknowledge}"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-	/// <param name="tenantRepository">An <see cref="ITenantRepository"/>.</param>
+	/// <param name="tenantService">An <see cref="ITenantService"/>.</param>
 	/// <param name="responseDispatcher">An <see cref="IResponseDispatcher{T}"/>.</param>
 	/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator{T}"/>.</param>
 	/// <param name="connectorRegistry">The <see cref="ConnectorRegistry{T}"/>.</param>
 	/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
 	public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> logger,
-		ITenantRepository tenantRepository,
+		ITenantService tenantService,
 		IResponseDispatcher<TResponse> responseDispatcher, IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator,
 		ConnectorRegistry<TRequest> connectorRegistry, IConnectionStatisticsWriter connectionStatisticsWriter)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		_tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+		_tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
 		_responseDispatcher = responseDispatcher ?? throw new ArgumentNullException(nameof(responseDispatcher));
 		_acknowledgeCoordinator =
 			acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
@@ -90,7 +90,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id,
 			Context.GetHttpContext()?.Connection.RemoteIpAddress);
 
-		var config = await _tenantRepository.LoadTenantConfigAsync(tenant.Id);
+		var config = await _tenantService.LoadTenantConfigAsync(tenant.Id);
 		if (config != null)
 		{
 			await Clients.Caller.Configure(config);

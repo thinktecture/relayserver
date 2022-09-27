@@ -5,9 +5,9 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.Server.Persistence;
 
 /// <summary>
-/// Repository that allows access to fulfilled requests.
+/// Represents a way to access request data in the persistence layer.
 /// </summary>
-public interface IRequestRepository
+public interface IRequestService
 {
 	/// <summary>
 	/// Stores the request.

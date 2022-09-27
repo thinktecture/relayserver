@@ -9,18 +9,22 @@ assembly or, for the connector side, in the `Thinktecture.Relay.Connector.Abstra
 
 ### Persistence
 
-The persistence module is used by RelayServer and the corresponding APIs to store and access information for Tenants as
+The persistence module is used by RelayServer and the corresponding APIs to store and access information for tenants as
 well as statistics.
 
-Currently two interfaces are to be implemented for the persistence module:
+Currently, four interfaces are to be implemented for the persistence module:
 
-* `ITenantRepository`  
+* `ITenantService`  
   Used to access and modify tenant data in the store.
-* `IStatisticsRepository`  
+* `IStatisticsService`  
   Used to access and modify statistics data in the store.
+* `IRequestService`  
+  Used to access and modify request data in the store.
+* `IConnectionService`  
+  Used to access and modify connection data in the store.
 
-RelayServer comes with a single implementation based on Entity Framework Core. In addition to the repository
-implementations that use the `RelayDbContext` we also provide two assemblies prepared with EF Core migrations for
+RelayServer comes with a single implementation based on Entity Framework Core. In addition to the service class
+implementations that use the `RelayDbContext`, we also provide two assemblies prepared with EF Core migrations for
 Microsoft SQL Server as well as PostgreSQL.
 
 ### BodyStore

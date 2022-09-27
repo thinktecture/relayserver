@@ -10,17 +10,17 @@ using Thinktecture.Relay.Server.Persistence.Models;
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
 /// <inheritdoc/>
-public partial class StatisticsRepository : IStatisticsRepository
+public partial class StatisticsService : IStatisticsService
 {
 	private readonly RelayDbContext _dbContext;
-	private readonly ILogger<StatisticsRepository> _logger;
+	private readonly ILogger<StatisticsService> _logger;
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="StatisticsRepository"/> class.
+	/// Initializes a new instance of the <see cref="StatisticsService"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="dbContext">The Entity Framework Core database context.</param>
-	public StatisticsRepository(ILogger<StatisticsRepository> logger, RelayDbContext dbContext)
+	public StatisticsService(ILogger<StatisticsService> logger, RelayDbContext dbContext)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
