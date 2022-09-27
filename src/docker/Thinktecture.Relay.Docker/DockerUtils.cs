@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Docker;
 /// Provides utility functions for the Docker environment
 /// </summary>
 public static class DockerUtils
-{    
+{
 	/// <summary>
 	/// Creates a holst builder preconfigured for the Docker environment.
 	/// </summary>
