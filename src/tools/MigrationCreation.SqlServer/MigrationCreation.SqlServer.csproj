@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Title>Creates EF Core migrations for MS SQL Server</Title>
+    <Title>Creates EF Core migrations for Microsoft SQL Server</Title>
   </PropertyGroup>
 
   <ItemGroup>

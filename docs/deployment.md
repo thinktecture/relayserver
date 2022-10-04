@@ -7,28 +7,29 @@ encouraged to create your own host applications tailored and configured to your 
 your own container images.
 
 While at least the server-side components are intended to be deployed in containers, it is of course still possible
-to build a custom host executable for each  and run it as a Windows service or linux daemon.
+to build a custom host executable for each service and run it as a Windows service or Linux daemon.
 
 ## Introduction
 
-RelayServer deployments consists of multiple instances (pods) of different containers which handle specific tasks.
+RelayServer deployments consist of multiple instances (pods) of different containers which handle specific tasks.
 
 ## Prerequisites
 
 * RabbitMQ  
   The default server-to-server transport channels are based on the RabbitMQ message queue service. RelayServer needs
-  at least a single functional RabbitMQ node to connect to. However, it is strongly suggested that you provide a
+  at least one single functional RabbitMQ node to connect to. However, it is strongly suggested that you provide a
   multi-node RabbitMQ cluster so that the system can continue to work in case of any failure (i.e. hardware problem)
-  that might cause a RabbitMQ node to be not available for a certain amount of time.
+  that might cause a RabbitMQ node to be unavailable for a certain amount of time.
 
   **DO** set up and operate a reliable, highly available (HA) and performant RabbitMQ cluster.  
   **Do NOT** use the example / development RabbitMQ containers from this repository in production.
 * Database  
-  RelayServer by default supports both PostgreSQL and MS SQL Server for configuration and statistics storage. As with
-  the message queue, you need a reliable HA database cluster when the RelayServer setup should be resilient to
-  failures.
+  RelayServer by default supports both PostgreSQL and Microsoft SQL Server for configuration and statistics storage.
+  As with the message queue, you need a reliable HA database cluster when the RelayServer setup should be resilient
+  to failures.
 
-  **DO** set up and operate a reliable, highly available (HA) and performant PostgreSQL or MS SQL Server cluster.  
+  **DO** set up and operate a reliable, highly available (HA) and performant PostgreSQL or Microsoft SQL Server
+  cluster.  
   **Do NOT** use the example / development database containers from this repository in production.
 
 ## RelayServer Components
@@ -38,9 +39,9 @@ RelayServer deployments consists of multiple instances (pods) of different conta
   OAuth client credential flow with the IdentityServer component to receive an access token for authenticated
   communication with the RelayServer. The service needs to request a single new token in regular intervals. This
   component does not need to handle a lot of load, and the load is expected to increase in a linear way with the
-  amount of installed and concurrently running connectors.  
+  amount of concurrently running connectors.  
   
-  **DO** run at least 2 instances of this container on different machines in order to provide a reliable system.
+  **DO** run at least two instances of this container on different machines in order to provide a reliable system.
 
   Configuration:
   * Provide a shared volume to all instances of Thinktecture.Relay.IdentityServer on /var/creds
@@ -63,10 +64,10 @@ RelayServer deployments consists of multiple instances (pods) of different conta
 * Thinktecture.Relay.ManagementApi  
   This component is used to manage entries in the RelayServer database, i.e. add a configuration for a new connector.
   These actions usually are not performed too often and load is expected to be idle for most of the time.  
-  If not absolutley required we suggested not exposing this container to the public internet. Only have it available
+  If not absoluteley required we suggested not exposing this container to the public internet. Have it available only
   for your internal administrative usages. Unless you have higher load and reliability requirements and/or perform a
-  lot of automatic provisioning of connectors it should be fine to run only a single instance.
-
+  lot of automatic provisioning of connectors, it should be fine to run only a single instance.
+  
   Configuration:
   * Provide a connection string to the RelayServer database 
 
@@ -87,7 +88,7 @@ RelayServer deployments consists of multiple instances (pods) of different conta
   This component is the connector part and needs to be installed at every on-premises location (_Tenant_). The
   connector can be run as docker container and also be scaled up. Multiple concurrent connectors for the same tenant
   will automatically load-balance requests between them and also keep a tenant connected when one connector fails.
-  You can, however, also install the connector as a Windows service or linux daemon.
+  You can, however, also install the connector as a Windows service or Linux daemon.
 
   Configuration:
   * Provide the URL to the RelayServer

@@ -24,6 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{EEE512D2-C
 		..\docs\glossary.md = ..\docs\glossary.md
 		..\docs\concepts.md = ..\docs\concepts.md
 		..\docs\deployment.md = ..\docs\deployment.md
+		..\docs\getting-started.md = ..\docs\getting-started.md
+		..\docs\migration.md = ..\docs\migration.md
+		..\docs\modules.md = ..\docs\modules.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{AD756171-B728-4FD3-9BC6-20C2E32141C6}"
@@ -31,7 +34,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{AD7561
 		..\docs\assets\en-architecture-overview.png = ..\docs\assets\en-architecture-overview.png
 		..\docs\assets\logo_sponsor_abraxas.png = ..\docs\assets\logo_sponsor_abraxas.png
 		..\docs\assets\logo_sponsor_cmi.svg = ..\docs\assets\logo_sponsor_cmi.svg
-		..\docs\assets\logo_sponsor_kwp.svg = ..\docs\assets\logo_sponsor_kwp.svg
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj", "{0E17E737-E4B5-4198-A784-D543187F15D0}"
