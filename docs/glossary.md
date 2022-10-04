@@ -15,6 +15,7 @@ by default, use OAuth 2 client credential authentication to be able to securely 
 
 When you want to use the [Management API](#management-api) or the [Statistics API](#statistics-api), we suggest
 that you use your own existing OIDC-based Identity Provider and configure your clients and the APIs to use this.
+The demo service uses API keys authentication as an example.
 
 ## B
 

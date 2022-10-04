@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Title>Thinktecture RelayServer Server Management</Title>
+    <Description>Contains management support for the Thinktecture Relay Server.</Description>
+    <RootNamespace>Thinktecture.Relay.Server.Management</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

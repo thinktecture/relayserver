@@ -68,7 +68,8 @@ The relay server environment consists of several parts.
   The Management API is used to manage the data in the configuration database.
 
    - Needs access to the configuration database.
-   - Currently NOT YET secured with the identity server. DO NOT YET expose this to the public.
+   - The example service uses API keys for authentication.
+   - You should not expose this to the public.
    - Management API swagger UI can be accessed at http://localhost:5004/ to see the api docs.
 
 - RelayServer  

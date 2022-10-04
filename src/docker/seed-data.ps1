@@ -1,8 +1,9 @@
 # Helper script that seeds tenants
 
-function Create-Tenant {
+Function Create-Tenant {
+    Param($id, $name, $secret)
     $resultCode
-    $result = Invoke-RestMethod -Method Post -Uri http://localhost:5004/api/tenant -Body (@{ "name" = $tenantName } | ConvertTo-Json) -Headers @{ 'Content-Type' = 'application/json' } -SkipHttpErrorCheck -StatusCodeVariable "resultCode"
+    $result = Invoke-RestMethod -Method Post -Uri http://localhost:5004/api/management/tenants -Body (@{ id = $id; name = $name; credentials = @(@{ plainTextValue = $secret }) } | ConvertTo-Json) -Headers @{ 'Content-Type' = 'application/json'; 'tt-apikey' = 'write-key' } -SkipHttpErrorCheck -StatusCodeVariable "resultCode"
 
     if ($resultCode -eq 201) {
         Write-Output "Tenant $tenantName was created $result"
@@ -10,22 +11,10 @@ function Create-Tenant {
         Write-Output "Tenant $tenantName already exists $result"
     } else {
         Write-Output "Unexpected result while creating tenant: StatusCode: $resultCode Content: $result"
-    }    
-}
-
-function Create-Secret {
-    $resultCode
-    $result = Invoke-RestMethod -Method Get -Uri http://localhost:5004/api/tenant/$tenantName -contenttype 'application/json' -StatusCodeVariable "resultCode"
-    $result = Invoke-RestMethod -Method Post -Uri "http://localhost:5004/api/tenant/$($result.id)/secret" -Form @{ secret = "$tenantSecret" } -contenttype 'application/json' -StatusCodeVariable "resultCode"
-    Write-Host "Added secret $($result.secret) to tenant $tenantName"
+    }
 }
 
 $tenantSecret = "<Strong!Passw0rd>";
 
-$tenantName = "TestTenant1";
-Create-Tenant
-Create-Secret
-
-$tenantName = "TestTenant2";
-Create-Tenant
-Create-Secret
+Create-Tenant -id "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" -name "TestTenant1" -secret $tenantSecret
+Create-Tenant -id "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" -name "TestTenant2" -secret $tenantSecret

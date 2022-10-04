@@ -64,7 +64,7 @@ RelayServer deployments consist of multiple instances (pods) of different contai
 * Thinktecture.Relay.ManagementApi  
   This component is used to manage entries in the RelayServer database, i.e. add a configuration for a new connector.
   These actions usually are not performed too often and load is expected to be idle for most of the time.  
-  If not absoluteley required we suggested not exposing this container to the public internet. Have it available only
+  If not absolutely required, we suggested not exposing this container to the public internet. Have it available only
   for your internal administrative usages. Unless you have higher load and reliability requirements and/or perform a
   lot of automatic provisioning of connectors, it should be fine to run only a single instance.
   
@@ -75,7 +75,7 @@ RelayServer deployments consist of multiple instances (pods) of different contai
   This component provides endpoints to retrieve usage data about the system from the database. For example you could
   fetch this data in intervals and feed it into your monitoring or billing systems. Load on this component is based
   on your internal usage only and should be fairly constant.
-  If not absolutley required we suggested not exposing this container to the public internet. Only have it available
+  If not absolutely required, we suggested not exposing this container to the public internet. Only have it available
   for your internal administrative usages. Unless you have higher load or higher reliability requirements
   (i.e. for monitoring) it should be fine to run only a single instance.
 
