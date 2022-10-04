@@ -70,4 +70,11 @@ public interface ITenantService
 	/// not found.
 	/// </returns>
 	Task<Config?> LoadTenantConfigAsync(Guid id);
+
+	/// <summary>
+	/// Normalizes the name of the tenant.
+	/// </summary>
+	/// <param name="name">The name of the tenant.</param>
+	/// <returns>A <see cref="String"/> representing the normalized name of the tenant.</returns>
+	string NormalizeName(string name);
 }

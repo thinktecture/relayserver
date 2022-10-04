@@ -87,6 +87,8 @@ public static class ServiceCollectionExtensions
 		services.AddHealthChecks()
 			.AddCheck<TransportHealthCheck>("Transport", tags: new[] { "ready" });
 
+		services.AddDistributedMemoryCache();
+
 		return new RelayServerBuilder<TRequest, TResponse, TAcknowledge>(services);
 	}
 }
