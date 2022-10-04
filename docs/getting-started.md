@@ -26,7 +26,7 @@ __Prerequisites__:
 In order to build and run the development environment, you need the following components on your system:
 
 - [Docker](https://www.docker.com/products/docker-desktop/)
-- [.NET Core SDK 6.0.100](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [.NET SDK 6.0.100](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
   or newer features within .NET 6.0
 - [PowerShell Core 6](https://github.com/PowerShell/PowerShell/releases) or newer
 
