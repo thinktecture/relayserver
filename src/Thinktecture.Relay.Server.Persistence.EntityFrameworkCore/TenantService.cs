@@ -22,7 +22,7 @@ public class TenantService : ITenantService
 	/// <inheritdoc/>
 	public async Task<Tenant?> LoadTenantByNameAsync(string name)
 	{
-		var normalizedName = name.ToUpperInvariant();
+		var normalizedName = NormalizeName(name);
 
 		return await _dbContext.Tenants
 			.Include(tenant => tenant.ClientSecrets)
@@ -56,7 +56,7 @@ public class TenantService : ITenantService
 			tenant.Id = Guid.NewGuid();
 		}
 
-		tenant.NormalizedName = tenant.Name.ToUpperInvariant();
+		tenant.NormalizedName = NormalizeName(tenant.Name);
 
 		// ReSharper disable once MethodHasAsyncOverload
 		_dbContext.Tenants.Add(tenant);
@@ -97,4 +97,8 @@ public class TenantService : ITenantService
 		=> await _dbContext.Configs
 			.AsNoTracking()
 			.SingleOrDefaultAsync(c => c.TenantId == id);
+
+	/// <inheritdoc/>
+	public string NormalizeName(string name)
+		=> name.ToUpperInvariant();
 }

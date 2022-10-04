@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
@@ -37,6 +38,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private readonly int _maximumBodySize;
 	private readonly IRelayContext<TRequest, TResponse> _relayContext;
 	private readonly IRelayRequestLogger<TRequest, TResponse> _relayRequestLogger;
+	private readonly IDistributedCache _cache;
+	private readonly RelayServerOptions _options;
 	private readonly RelayServerOptions _relayServerOptions;
 	private readonly IRequestCoordinator<TRequest> _requestCoordinator;
 	private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
@@ -66,6 +69,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// .
 	/// </param>
 	/// <param name="relayRequestLogger">An <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.</param>
+	/// <param name="cache">An implementation of <see cref="IDistributedCache"/></param>
+	/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
 	public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> logger,
 		IRelayClientRequestFactory<TRequest> requestFactory, ConnectorRegistry<TRequest> connectorRegistry,
 		ITenantService tenantService, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
@@ -74,7 +79,9 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		IConnectorTransportLimit connectorTransportLimit, IOptions<RelayServerOptions> relayServerOptions,
 		IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
 		IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors,
-		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger)
+		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger,
+		IDistributedCache cache,
+		IOptions<RelayServerOptions> options)
 	{
 		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 		if (tenantTransport == null) throw new ArgumentNullException(nameof(tenantTransport));
@@ -94,6 +101,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		_targetResponseInterceptors = targetResponseInterceptors ??
 			throw new ArgumentNullException(nameof(targetResponseInterceptors));
 		_relayRequestLogger = relayRequestLogger ?? throw new ArgumentNullException(nameof(relayRequestLogger));
+		_cache = cache ?? throw new ArgumentNullException(nameof(cache));
+		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
 		_relayServerOptions = relayServerOptions.Value;
 		_maximumBodySize = Math.Min(tenantTransport.BinarySizeThreshold.GetValueOrDefault(int.MaxValue),
@@ -118,6 +127,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// <inheritdoc/>
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
+
 		var tenantName = context.Request.Path.Value?.Split('/').Skip(1).FirstOrDefault();
 		if (string.IsNullOrEmpty(tenantName))
 		{
@@ -126,9 +136,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			return;
 		}
 
-		// TODO cache tenant name to id lookup using IMemoryCache to prevent too many db hits
-		var tenant = await _tenantService.LoadTenantByNameAsync(tenantName);
-		if (tenant == null)
+		var tenantId = await LoadTenantByIdAsync(tenantName);
+		if (tenantId == null)
 		{
 			LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
 			await next.Invoke(context);
@@ -149,7 +158,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			await context.Request.Body.DrainAsync(cts.Token);
 
 			_relayContext.ClientRequest =
-				await _requestFactory.CreateAsync(tenant.Id, _relayContext.RequestId, context.Request, cts.Token);
+				await _requestFactory.CreateAsync(tenantId.Value, _relayContext.RequestId, context.Request, cts.Token);
 
 			if (_logger.IsEnabled(LogLevel.Trace))
 				_logRequestParsed(_logger, _relayContext.ClientRequest, null);
@@ -314,4 +323,31 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		CancellationToken cancellationToken)
 		=> _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(httpStatusCode), response,
 			cancellationToken);
+
+	private async Task<Guid?> LoadTenantByIdAsync(string name, CancellationToken cancellationToken = default)
+	{
+		var normalizedName = _tenantService.NormalizeName(name);
+		var cacheKey = $"{normalizedName}_id";
+
+		var cachedId = await _cache.GetAsync(cacheKey, cancellationToken);
+		if (cachedId != null)
+		{
+			return new Guid(cachedId);
+		}
+
+		var tenant = await _tenantService.LoadTenantByNameAsync(name);
+		if (tenant == null)
+		{
+			return null;
+		}
+
+		var tenantId = tenant.Id;
+		cachedId = tenantId.ToByteArray();
+		await _cache.SetAsync(cacheKey,
+			cachedId,
+			new DistributedCacheEntryOptions().SetAbsoluteExpiration(_options.TenantIdCacheTimeout),
+			cancellationToken);
+
+		return tenantId;
+	}
 }

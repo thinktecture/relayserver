@@ -68,4 +68,9 @@ public class RelayServerOptions
 	/// The <see cref="AcknowledgeMode"/> for requests.
 	/// </summary>
 	public AcknowledgeMode AcknowledgeMode { get; set; } = AcknowledgeMode.Disabled;
+
+	/// <summary>
+	/// Determines how long the tenant id should be cached.
+	/// </summary>
+	public TimeSpan TenantIdCacheTimeout { get; set; } = TimeSpan.FromSeconds(10);
 }
