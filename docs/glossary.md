@@ -49,7 +49,7 @@ The _Connector_ was formerly called _OnPremisesConnector_ (short _OPC_) in Relay
 
 ### Interceptor
 
-An _Interceptor_ is a piece of code that you can provide via dependency injection and that is able to intercept
+An _Interceptor_ is a piece of code that you can provide via dependency injection which is able to intercept
 
 - a [Request](#request), after it was received by the [RelayServer](#relayserver) and before it is passed along to
   the [Connector](#connector) or
@@ -92,9 +92,9 @@ Connector-Side _Interceptors_, you now can implement your own _RelayTarget_ and 
 
 ### Request
 
-The _Request_ represents an external Http(s) request from a [Client](#client). It can be intercepted and modified while
-being processed by the [RelayServer](#relayserver). It will be passed on to a [Target](#target) via
-the [Connector](#connector).
+The _Request_ represents an external request from a [Client](#client). It can be intercepted and modified while being
+processed by the [RelayServer](#relayserver). It will be passed on to a [Target](#target) via the
+[Connector](#connector).
 
 ### Response
 

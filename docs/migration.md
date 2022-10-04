@@ -52,14 +52,14 @@ We will provide an intermediate connector "v2.9" that is able to work with the o
 RelayServer v2 but is also capable of connecting to the new RelayServer v3.
 Since the SignalR transport had to be incompatible between v2 where we use SignalR 2
 and v3 where we use ASP.NET Core SignalR, we also did introduce some changes in the
-wire protocol. This means that your intermediate connector will need to provide have
-both implementations for the old and the new version in a single project. We suggest
-using different assemblies for your new code, so that you can easily get rid of the
-old v2 parts after the migration is completed.
+wire protocol. This means that your intermediate connector will need to provide both
+implementations for the old and the new version in a single project. We suggest using
+different assemblies for your new code, so that you can easily get rid of the old v2
+parts after the migration is completed.
 
 The v3 connector does not provide connector-side interceptor support in the way v2 did.
 Instead, you can chose to implement an `IRelayTarget` or extend the `RelayWebTarget` type.
-We suggest to  try extending the `RelayWebTarget` class and overriding the `HandleAsync`
+We suggest to try extending the `RelayWebTarget` class and overriding the `HandleAsync`
 method first.
 
 The logic that was done on the request interceptor should be done before calling the base

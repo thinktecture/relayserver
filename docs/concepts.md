@@ -28,15 +28,17 @@ A request is processed in several stages in RelayServer.
    The tenant dispatcher is part of the RabbitMQ [server-to-server transport](#server-to-server-transport) and sends
    messages via the queue to the corresponding tenant handler.
    - If shortcutting is disabled (default), or enabled but no active connection is found on this server, the request
-     will be dispatched via the server-to-server transport to another instance of the RelayServer that holds an active connection for the tenant.
+     will be dispatched via the server-to-server transport to another instance of the RelayServer that holds an active
+     connection for the tenant.
 1. `TenantHandler`  
-   The tenant handler is the listener on the RabbitMQ [server-to-server transport](#server-to-server-transport) that
+   The tenant handler is the consumer on the RabbitMQ [server-to-server transport](#server-to-server-transport) that
    is instantiated for each connector connection and waits for messages targeted at a tenant.
    - One tenant handler reads the request from the server-to-server transport.
    - It writes the request to the TenantConnectorAdapter.
 1. `TenantConnectionAdapter`  
    The tenant connection adapter is part of the SignalR [server-to-connector transport](#server-to-connector-transport).
-   It gets called by either the request coordinator directly (shortcut) or by the tenant handler (which belongs to the server-to-server transport).
+   It gets called by either the request coordinator directly (shortcut) or by the tenant handler (which belongs to the
+   server-to-server transport).
    - The request is sent down to the connector through the configured server-to-connector transport.
 
 ### Request on the connector
@@ -46,7 +48,7 @@ A request is processed in several stages in RelayServer.
    - The server (`TenantConnectionAdapter`) calls a method on the connector connection, passing the request along.
    - The connector connection hands the request over to the client request handler.
 1. `ClientRequestHandler`
-   - The client request handler first checks if the requested target is available. If this is not the case, it answers
+   - The client request handler first checks if the requested target is configured. If this is not the case, it answers
      the request with a _404 Not Found_ status code.
    - If the request body was too large for the transport, it is requested with a separate http call from the server.
    - The complete request is then passed to the registered `IRelayTarget` to handle the request.
@@ -71,25 +73,29 @@ A request is processed in several stages in RelayServer.
 1. `ConnectorHub`  
    The connector hub is part of the SignalR [server-to-connector transport](#server-to-connector-transport).
    - The hub receives the response and hands it over to the response coordinator.
-1. `ResponseCoordinator`
-   - If shortcutting is allowed by the configuration, the response coordinator will check if the client is waiting for
-     the response on the server that received this response. If this is the case, the response will be processed
-     directly, skipping the next two steps.
-1. `ServerDispatcher`  
+1. `ResponseDispatcher`  
    The server dispatcher is part of the RabbitMQ [server-to-server transport](#server-to-server-transport) and sends
    messages to other servers.
    - If shortcutting is disabled (default), or the client waiting for the response is connected to a different server,
      the server dispatcher puts the response in a message queue targeted to the server where the client waits for the
-     response.
-1. `ServerHandler`  
-   The server handler is part of the RabbitMQ [server-to-server transport](#server-to-server-transport), waiting for
-   messages directed at this relay server instance.
-   - When a response is received, an event is raised to handle this. This event is handled by the response coordinator.
+     response via the `ServerTransport`.
+   - Otherwise (shortcutting is enabled and is possible) the response is directly passed on to the `ResponseCoordinator`.
+1. `ResponseCoordinator`  
+   - If shortcutting is allowed by the configuration, the response coordinator will check if the client is waiting for
+     the response on the server that received this response. If this is the case, the response will be processed
+     directly, skipping the next two steps.
+1. `ServerTransport`  
+   The server transport is part of the RabbitMQ [server-to-server transport](#server-to-server-transport). It is
+   responsible for both sending as well as receiving messages.
+   - When the `ResponseDispatcher` hands a response to the server transport, it will put a message into the queue
+     for the corresponding origin server. 
+   - When a response message is received, an event is raised by RabbitMQ to handle this. This event is handled by
+     `ServerTransport` and the response is passed along to the `ResponseCoordinator` for further processing.
 1. `ResponseCoordinator`  
    We are now on the server where the client is waiting for its response.
    - If the response body was too large for the transport, the body content is loaded from the body store.
    - The response is passed back to the relay middleware.
-2. `RelayMiddleware`
+2. `RelayMiddleware`  
    - The relay middleware sends the response to the client waiting for it.
 
 ## Transports
@@ -150,7 +156,7 @@ connector.
 
 ## Body content handling
 
-As metioned above, transports may have limits on message sizes. So it is not possible to send arbitrary bodies
+As mentioned above, transports may have limits on message sizes. So it is not possible to send arbitrary bodies
 through any transport. Larger body contents need to be persisted temporarily for processing. This is managed by an
 implementation of the `IBodyStore` interface.
 
