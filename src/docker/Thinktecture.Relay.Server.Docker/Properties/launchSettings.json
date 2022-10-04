@@ -5,6 +5,7 @@
       "commandName": "Project",
       "launchBrowser": false,
       "launchUrl": "",
+      "commandLineArgs": "migrate=true",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

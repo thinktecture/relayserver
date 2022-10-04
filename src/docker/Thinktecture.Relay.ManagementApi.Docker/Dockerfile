@@ -6,6 +6,7 @@ WORKDIR /src
 COPY ./docker/Thinktecture.Relay.Docker/Thinktecture.Relay.Docker.csproj ./docker/Thinktecture.Relay.Docker/
 COPY ./Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj ./Thinktecture.Relay.Abstractions/
 COPY ./Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstractions.csproj ./Thinktecture.Relay.Server.Abstractions/
+COPY ./Thinktecture.Relay.Server.Management/Thinktecture.Relay.Server.Management.csproj ./Thinktecture.Relay.Server.Management/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/
 COPY ./docker/Thinktecture.Relay.ManagementApi.Docker/Thinktecture.Relay.ManagementApi.Docker.csproj ./docker/Thinktecture.Relay.ManagementApi.Docker/
@@ -18,6 +19,7 @@ COPY ./Directory.Build.props ./
 COPY ./docker/Thinktecture.Relay.Docker ./docker/Thinktecture.Relay.Docker
 COPY ./Thinktecture.Relay.Abstractions ./Thinktecture.Relay.Abstractions
 COPY ./Thinktecture.Relay.Server.Abstractions ./Thinktecture.Relay.Server.Abstractions
+COPY ./Thinktecture.Relay.Server.Management ./Thinktecture.Relay.Server.Management
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql
 COPY ./docker/Thinktecture.Relay.ManagementApi.Docker ./docker/Thinktecture.Relay.ManagementApi.Docker
