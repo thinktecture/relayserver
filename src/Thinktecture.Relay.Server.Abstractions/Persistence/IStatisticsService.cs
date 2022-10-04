@@ -90,15 +90,4 @@ public interface IStatisticsService
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default);
-
-	/// <summary>
-	/// Cleans up stale connections older than the specified timespan.
-	/// </summary>
-	/// <param name="maxAge">The time span in which to still keep old entries.</param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is
-	/// <see cref="CancellationToken.None"/>.
-	/// </param>
-	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default);
 }

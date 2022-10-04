@@ -215,27 +215,4 @@ public partial class StatisticsService : IStatisticsService
 	[LoggerMessage(23314, LogLevel.Debug,
 		"Cleaning up statistics storage by deleting all connections that have no activity since {ConnectionLastActivity}")]
 	partial void LogConnectionCleanup(DateTimeOffset connectionLastActivity);
-
-	/// <inheritdoc/>
-	public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
-	{
-		var lastActivity = DateTimeOffset.UtcNow - maxAge;
-		LogConnectionCleanup(lastActivity);
-
-		try
-		{
-			var connections = await _dbContext.Connections.Where(c => c.LastActivityTime < lastActivity)
-				.ToArrayAsync(cancellationToken);
-			_dbContext.Connections.RemoveRange(connections);
-			await _dbContext.SaveChangesAsync(cancellationToken);
-		}
-		catch (OperationCanceledException)
-		{
-			// Ignore this, as this will be thrown when the service shuts down gracefully
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(23315, ex, "An error occured while deleting old connections");
-		}
-	}
 }
