@@ -30,6 +30,10 @@ public class StatisticsCleanupJob : IMaintenanceJob
 	public async Task DoMaintenanceAsync(CancellationToken cancellationToken = default)
 	{
 		await _statisticsService.CleanUpOriginsAsync(_statisticsOptions.EntryMaxAge, cancellationToken);
-		await _statisticsService.CleanUpConnectionsAsync(_statisticsOptions.EntryMaxAge, cancellationToken);
+
+		if (_statisticsOptions.EnableConnectionCleanup)
+		{
+			await _statisticsService.CleanUpConnectionsAsync(_statisticsOptions.EntryMaxAge, cancellationToken);
+		}
 	}
 }
