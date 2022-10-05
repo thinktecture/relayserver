@@ -39,7 +39,6 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private readonly IRelayContext<TRequest, TResponse> _relayContext;
 	private readonly IRelayRequestLogger<TRequest, TResponse> _relayRequestLogger;
 	private readonly IDistributedCache _cache;
-	private readonly RelayServerOptions _options;
 	private readonly RelayServerOptions _relayServerOptions;
 	private readonly IRequestCoordinator<TRequest> _requestCoordinator;
 	private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
@@ -70,7 +69,6 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// </param>
 	/// <param name="relayRequestLogger">An <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.</param>
 	/// <param name="cache">An implementation of <see cref="IDistributedCache"/></param>
-	/// <param name="options">An <see cref="IOptions{TOptions}"/>.</param>
 	public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> logger,
 		IRelayClientRequestFactory<TRequest> requestFactory, ConnectorRegistry<TRequest> connectorRegistry,
 		ITenantService tenantService, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
@@ -79,9 +77,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		IConnectorTransportLimit connectorTransportLimit, IOptions<RelayServerOptions> relayServerOptions,
 		IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
 		IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors,
-		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger,
-		IDistributedCache cache,
-		IOptions<RelayServerOptions> options)
+		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger, IDistributedCache cache)
 	{
 		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 		if (tenantTransport == null) throw new ArgumentNullException(nameof(tenantTransport));
@@ -102,7 +98,6 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			throw new ArgumentNullException(nameof(targetResponseInterceptors));
 		_relayRequestLogger = relayRequestLogger ?? throw new ArgumentNullException(nameof(relayRequestLogger));
 		_cache = cache ?? throw new ArgumentNullException(nameof(cache));
-		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
 		_relayServerOptions = relayServerOptions.Value;
 		_maximumBodySize = Math.Min(tenantTransport.BinarySizeThreshold.GetValueOrDefault(int.MaxValue),
@@ -327,27 +322,29 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private async Task<Guid?> LoadTenantByIdAsync(string name, CancellationToken cancellationToken = default)
 	{
 		var normalizedName = _tenantService.NormalizeName(name);
-		var cacheKey = $"{normalizedName}_id";
+		var cacheKey = $"tenant_{normalizedName}_id";
+
+		var result = Guid.Empty;
 
 		var cachedId = await _cache.GetAsync(cacheKey, cancellationToken);
 		if (cachedId != null)
 		{
-			return new Guid(cachedId);
+			result = new Guid(cachedId);
+			return result == Guid.Empty ? null : result;
 		}
 
 		var tenant = await _tenantService.LoadTenantByNameAsync(name);
-		if (tenant == null)
+		if (tenant != null)
 		{
-			return null;
+			result = tenant.Id;
 		}
 
-		var tenantId = tenant.Id;
-		cachedId = tenantId.ToByteArray();
-		await _cache.SetAsync(cacheKey,
-			cachedId,
-			new DistributedCacheEntryOptions().SetAbsoluteExpiration(_options.TenantIdCacheTimeout),
-			cancellationToken);
+		var cacheEntryOptions = new DistributedCacheEntryOptions()
+			.SetAbsoluteExpiration(_relayServerOptions.TenantIdCacheTimeout);
 
-		return tenantId;
+		cachedId = result.ToByteArray();
+		await _cache.SetAsync(cacheKey, cachedId, cacheEntryOptions, cancellationToken);
+
+		return result == Guid.Empty ? null : result;
 	}
 }
