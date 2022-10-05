@@ -16,4 +16,9 @@ public class StatisticsOptions
 	/// The time interval in which the origin's last activity will be updated.
 	/// </summary>
 	public TimeSpan LastActivityUpdateInterval { get; set; } = TimeSpan.FromMinutes(5);
+
+	/// <summary>
+	/// Indicates whether to clean up stale or closed connections or not.
+	/// </summary>
+	public bool EnableConnectionCleanup { get; set; } = false;
 }
