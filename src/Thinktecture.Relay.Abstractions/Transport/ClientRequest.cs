@@ -37,6 +37,9 @@ public class ClientRequest : IClientRequest
 	public IDictionary<string, string[]> HttpHeaders { get; set; } = default!;
 
 	/// <inheritdoc/>
+	public long? OriginalBodySize { get; set; }
+
+	/// <inheritdoc/>
 	public long? BodySize { get; set; }
 
 	/// <inheritdoc/>

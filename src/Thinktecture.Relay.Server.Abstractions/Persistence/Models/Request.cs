@@ -44,7 +44,13 @@ public class Request
 	public string HttpMethod { get; set; } = default!;
 
 	/// <summary>
-	/// The amount of bytes received by the requesting client.
+	/// The amount of bytes received by the requesting client, before any interceptor ran,
+	/// of the body or null if there was no body.
+	/// </summary>
+	public long RequestOriginalBodySize { get; set; }
+
+	/// <summary>
+	/// The size of the request body after all interceptors ran, or null if there was no body.
 	/// </summary>
 	public long RequestBodySize { get; set; }
 

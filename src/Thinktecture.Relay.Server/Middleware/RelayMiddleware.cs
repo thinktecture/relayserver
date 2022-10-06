@@ -294,14 +294,14 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	}
 
 	[LoggerMessage(20613, LogLevel.Debug,
-		"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RelayRequestId}")]
-	partial void LogOutsourcingRequestBody(long? bodySize, int binarySizeThreshold, Guid relayRequestId);
+		"Outsourcing from request {BodySize} bytes (original {OriginalBodySize} bytes) because of a maximum of {BinarySizeThreshold} for request {RelayRequestId}")]
+	partial void LogOutsourcingRequestBody(long? bodySize, long? originalBodySize, int binarySizeThreshold, Guid relayRequestId);
 
-	[LoggerMessage(20614, LogLevel.Trace, "Outsourced from request {BodySize} bytes for request {RelayRequestId}")]
-	partial void LogOutsourcedRequestBody(long? bodySize, Guid relayRequestId);
+	[LoggerMessage(20614, LogLevel.Trace, "Outsourced from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
+	partial void LogOutsourcedRequestBody(long? bodySize, long? originalBodySize, Guid relayRequestId);
 
-	[LoggerMessage(20615, LogLevel.Debug, "Inlined from request {BodySize} bytes for request {RelayRequestId}")]
-	partial void LogInlinedRequestBody(long? bodySize, Guid relayRequestId);
+	[LoggerMessage(20615, LogLevel.Debug, "Inlined from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
+	partial void LogInlinedRequestBody(long? bodySize, long? originalBodySize, Guid relayRequestId);
 
 	private async Task<bool> TryInlineBodyContentAsync(TRequest request, CancellationToken cancellationToken)
 	{
@@ -309,17 +309,17 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 		if (request.BodySize > _maximumBodySize)
 		{
-			LogOutsourcingRequestBody(request.BodySize, _maximumBodySize, request.RequestId);
+			LogOutsourcingRequestBody(request.BodySize, request.OriginalBodySize, _maximumBodySize, request.RequestId);
 			await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, cancellationToken);
 
 			request.BodyContent = null;
-			LogOutsourcedRequestBody(request.BodySize, request.RequestId);
+			LogOutsourcedRequestBody(request.BodySize, request.OriginalBodySize, request.RequestId);
 
 			return false;
 		}
 
 		request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
-		LogInlinedRequestBody(request.BodySize, request.RequestId);
+		LogInlinedRequestBody(request.BodySize, request.OriginalBodySize, request.RequestId);
 
 		return true;
 	}

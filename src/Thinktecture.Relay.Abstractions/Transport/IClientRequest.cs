@@ -61,7 +61,12 @@ public interface IClientRequest
 	IDictionary<string, string[]> HttpHeaders { get; set; }
 
 	/// <summary>
-	/// The size of the body or null if there is no body.
+	/// The original size, before any interceptor ran, of the body or null if there was no body.
+	/// </summary>
+	long? OriginalBodySize { get; set; }
+
+	/// <summary>
+	/// The size of the body after all interceptors ran or null if there is no body.
 	/// </summary>
 	/// <seealso cref="BodyContent"/>
 	long? BodySize { get; set; }
