@@ -117,6 +117,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 			RequestId = relayContext.RequestId,
 			RequestDate = relayContext.RequestStart,
 			RequestDuration = (long)(DateTime.UtcNow - relayContext.RequestStart).TotalMilliseconds,
+			RequestOriginalBodySize = relayContext.ClientRequest.OriginalBodySize.GetValueOrDefault(),
 			RequestBodySize = relayContext.ClientRequest.BodySize.GetValueOrDefault(),
 			Target = relayContext.ClientRequest.Target,
 			HttpMethod = relayContext.ClientRequest.HttpMethod,

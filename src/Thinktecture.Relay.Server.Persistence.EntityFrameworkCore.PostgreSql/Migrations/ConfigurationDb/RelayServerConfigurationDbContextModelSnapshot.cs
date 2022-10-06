@@ -163,6 +163,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid");
 
+                    b.Property<long>("RequestOriginalBodySize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("RequestUrl")
                         .IsRequired()
                         .HasMaxLength(1000)
