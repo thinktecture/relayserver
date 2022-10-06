@@ -16,15 +16,15 @@ public class MaintenanceJobRunner : BackgroundService
 {
 	private readonly ILogger<MaintenanceJobRunner> _logger;
 	private readonly MaintenanceOptions _maintenanceOptions;
-	private readonly IServiceProvider _serviceProvider;
+	private readonly IServiceScopeFactory _serviceProvider;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="MaintenanceJobRunner"/> class.
 	/// </summary>
 	/// <param name="logger">An instance of an <see cref="ILogger{MaintenanceJobRunner}"/>.</param>
-	/// <param name="serviceProvider">An instance of an <see cref="IServiceProvider"/>.</param>
+	/// <param name="serviceProvider">An instance of an <see cref="IServiceScopeFactory"/>.</param>
 	/// <param name="maintenanceOptions">An instance of an <see cref="IOptions{MaintenanceOptions}"/>.</param>
-	public MaintenanceJobRunner(ILogger<MaintenanceJobRunner> logger, IServiceProvider serviceProvider,
+	public MaintenanceJobRunner(ILogger<MaintenanceJobRunner> logger, IServiceScopeFactory serviceProvider,
 		IOptions<MaintenanceOptions> maintenanceOptions)
 	{
 		if (maintenanceOptions == null) throw new ArgumentNullException(nameof(maintenanceOptions));

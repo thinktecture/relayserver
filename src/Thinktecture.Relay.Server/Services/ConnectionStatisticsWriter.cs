@@ -10,13 +10,13 @@ namespace Thinktecture.Relay.Server.Services;
 /// <inheritdoc/>
 public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 {
-	private readonly IServiceProvider _serviceProvider;
+	private readonly IServiceScopeFactory _serviceProvider;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectionStatisticsWriter"/> class.
 	/// </summary>
-	/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
-	public ConnectionStatisticsWriter(IServiceProvider serviceProvider)
+	/// <param name="serviceProvider">An <see cref="IServiceScopeFactory"/>.</param>
+	public ConnectionStatisticsWriter(IServiceScopeFactory serviceProvider)
 		=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 	/// <inheritdoc/>
