@@ -122,7 +122,6 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// <inheritdoc/>
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
-
 		var tenantName = context.Request.Path.Value?.Split('/').Skip(1).FirstOrDefault();
 		if (string.IsNullOrEmpty(tenantName))
 		{
