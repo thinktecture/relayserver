@@ -88,6 +88,7 @@ The following is the list of supported scopes:
 - **management**
 - **statistics**
 - **interceptor**
+- **protocols**
 - _TBD_
 
 There are currently a few exceptions to the "use package name" rule:
