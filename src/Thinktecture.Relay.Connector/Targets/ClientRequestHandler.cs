@@ -26,7 +26,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	private readonly int _maxWorkerThreads;
 	private readonly int _minWorkerThreads;
 	private readonly IResponseTransport<TResponse> _responseTransport;
-	private readonly IServiceProvider _serviceProvider;
+	private readonly IServiceScopeFactory _serviceProvider;
 
 	/// <inheritdoc/>
 	public int? BackgroundTaskLimit
@@ -50,12 +50,12 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	/// Initializes a new instance of the <see cref="ClientRequestHandler{TRequest,TResponse,TAcknowledge}"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-	/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
+	/// <param name="serviceProvider">An <see cref="IServiceScopeFactory"/>.</param>
 	/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	/// <param name="responseTransport">An <see cref="IResponseTransport{T}"/>.</param>
 	/// <param name="acknowledgeTransport">An <see cref="IAcknowledgeTransport{T}"/>.</param>
 	public ClientRequestHandler(ILogger<ClientRequestHandler<TRequest, TResponse, TAcknowledge>> logger,
-		IServiceProvider serviceProvider,
+		IServiceScopeFactory serviceProvider,
 		IOptions<RelayConnectorOptions> relayConnectorOptions, IResponseTransport<TResponse> responseTransport,
 		IAcknowledgeTransport<TAcknowledge> acknowledgeTransport)
 	{

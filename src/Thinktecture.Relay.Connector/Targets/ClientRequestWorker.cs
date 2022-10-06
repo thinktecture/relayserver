@@ -25,7 +25,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 	private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
 	private readonly Uri _requestEndpoint;
 	private readonly Uri _responseEndpoint;
-	private readonly IServiceProvider _serviceProvider;
+	private readonly IServiceScopeFactory _serviceProvider;
 
 	private HttpClient? _httpClient;
 
@@ -39,14 +39,14 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 	/// <param name="httpClientFactory">An <see cref="IHttpClientFactory"/>.</param>
 	/// <param name="relayConnectorOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	/// <param name="relayTargetRegistry">The <see cref="RelayTargetRegistry{TRequest,TResponse}"/>.</param>
-	/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
+	/// <param name="serviceProvider">An <see cref="IServiceScopeFactory"/>.</param>
 	/// <param name="clientRequestHandler">An <see cref="IClientRequestHandler{T}"/>.</param>
 	/// <param name="connectorTransportLimit">An <see cref="IConnectorTransportLimit"/>.</param>
 	public ClientRequestWorker(ILogger<ClientRequestWorker<TRequest, TResponse>> logger,
 		IHttpClientFactory httpClientFactory,
 		IOptions<RelayConnectorOptions> relayConnectorOptions,
 		RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry,
-		IServiceProvider serviceProvider, IClientRequestHandler<TRequest> clientRequestHandler,
+		IServiceScopeFactory serviceProvider, IClientRequestHandler<TRequest> clientRequestHandler,
 		IConnectorTransportLimit connectorTransportLimit)
 	{
 		if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
