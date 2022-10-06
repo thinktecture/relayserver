@@ -29,7 +29,7 @@ public class RequestService : IRequestService
 	}
 
 	/// <inheritdoc/>
-	public async Task StoreRequestAsync(Request request, CancellationToken cancellationToken)
+	public async Task StoreRequestAsync(Request request)
 	{
 		if (_logger.IsEnabled(LogLevel.Trace))
 			LogStoringRequest(_logger, request, null);
@@ -37,7 +37,7 @@ public class RequestService : IRequestService
 		try
 		{
 			_dbContext.Add(request);
-			await _dbContext.SaveChangesAsync(cancellationToken);
+			await _dbContext.SaveChangesAsync();
 		}
 		catch (OperationCanceledException)
 		{

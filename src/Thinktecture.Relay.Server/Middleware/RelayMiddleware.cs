@@ -172,31 +172,31 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			LogResponseReceived(_relayContext.RequestId);
 			await InterceptTargetResponseAsync(cts.Token);
 
-			await _relayRequestLogger.LogSuccessAsync(_relayContext, CancellationToken.None);
+			await _relayRequestLogger.LogSuccessAsync(_relayContext);
 			await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, cts.Token);
 		}
 		catch (TransportException)
 		{
-			await _relayRequestLogger.LogFailAsync(_relayContext, CancellationToken.None);
+			await _relayRequestLogger.LogFailAsync(_relayContext);
 			await WriteErrorResponse(HttpStatusCode.ServiceUnavailable, context.Response, cts.Token);
 		}
 		catch (OperationCanceledException)
 		{
 			if (context.RequestAborted.IsCancellationRequested)
 			{
-				await _relayRequestLogger.LogAbortAsync(_relayContext, CancellationToken.None);
+				await _relayRequestLogger.LogAbortAsync(_relayContext);
 				LogClientAborted(_relayContext.RequestId);
 			}
 			else
 			{
-				await _relayRequestLogger.LogExpiredAsync(_relayContext, CancellationToken.None);
+				await _relayRequestLogger.LogExpiredAsync(_relayContext);
 				await WriteErrorResponse(HttpStatusCode.RequestTimeout, context.Response, cts.Token);
 				LogRequestExpired(_relayContext.RequestId);
 			}
 		}
 		catch (Exception ex)
 		{
-			await _relayRequestLogger.LogErrorAsync(_relayContext, CancellationToken.None);
+			await _relayRequestLogger.LogErrorAsync(_relayContext);
 			_logger.LogError(20606, ex, "Could not handle request {RequestId}", _relayContext.RequestId);
 		}
 	}
