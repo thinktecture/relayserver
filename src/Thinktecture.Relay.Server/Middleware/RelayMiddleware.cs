@@ -130,11 +130,17 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			return;
 		}
 
-		var tenantId = await LoadTenantByIdAsync(tenantName);
-		if (tenantId == null)
+		var tenant = await LoadTenantInfoByNameAsync(tenantName);
+		if (!tenant.Id.HasValue)
 		{
 			LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
 			await next.Invoke(context);
+			return;
+		}
+
+		if (_relayServerOptions.RequireActiveConnection && !tenant.HasActiveConnections)
+		{
+			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
 			return;
 		}
 
@@ -152,7 +158,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			await context.Request.Body.DrainAsync(cts.Token);
 
 			_relayContext.ClientRequest =
-				await _requestFactory.CreateAsync(tenantId.Value, _relayContext.RequestId, context.Request, cts.Token);
+				await _requestFactory.CreateAsync(tenant.Id.Value, _relayContext.RequestId, context.Request, cts.Token);
 
 			if (_logger.IsEnabled(LogLevel.Trace))
 				_logRequestParsed(_logger, _relayContext.ClientRequest, null);
@@ -319,32 +325,65 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		=> _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(httpStatusCode), response,
 			cancellationToken);
 
-	private async Task<Guid?> LoadTenantByIdAsync(string name, CancellationToken cancellationToken = default)
+	private async Task<TenantInfo> LoadTenantInfoByNameAsync(string name, CancellationToken cancellationToken = default)
 	{
 		var normalizedName = _tenantService.NormalizeName(name);
 		var cacheKey = $"tenant_{normalizedName}_id";
 
-		var result = Guid.Empty;
+		var result = new TenantInfo();
 
-		var cachedId = await _cache.GetAsync(cacheKey, cancellationToken);
-		if (cachedId != null)
+		var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
+		if (cachedData != null)
 		{
-			result = new Guid(cachedId);
-			return result == Guid.Empty ? null : result;
+			return TenantInfo.FromByteArray(cachedData);
 		}
 
 		var tenant = await _tenantService.LoadTenantByNameAsync(name);
 		if (tenant != null)
 		{
-			result = tenant.Id;
+			result = new TenantInfo(tenant.Id, tenant.Connections?.Any(c => c.DisconnectTime == null) == true);
 		}
 
 		var cacheEntryOptions = new DistributedCacheEntryOptions()
 			.SetAbsoluteExpiration(_relayServerOptions.TenantIdCacheTimeout);
 
-		cachedId = result.ToByteArray();
-		await _cache.SetAsync(cacheKey, cachedId, cacheEntryOptions, cancellationToken);
+		cachedData = result.ToByteArray();
+		await _cache.SetAsync(cacheKey, cachedData, cacheEntryOptions, cancellationToken);
 
-		return result == Guid.Empty ? null : result;
+		return result;
+	}
+
+	private readonly struct TenantInfo
+	{
+		public Guid? Id { get; }
+		public bool HasActiveConnections { get; }
+
+		public TenantInfo()
+		{
+			Id = null;
+			HasActiveConnections = false;
+		}
+
+		public TenantInfo(Guid id, bool hasActiveConnections)
+		{
+			Id = id;
+			HasActiveConnections = hasActiveConnections;
+		}
+
+		public static TenantInfo FromByteArray(byte[] data)
+		{
+			return new TenantInfo(new Guid(new Span<byte>(data, 0, 16)), data[16] == Byte.MaxValue);
+		}
+
+		public byte[] ToByteArray()
+		{
+			// bytes 0-16 are guid, 17 is HasActiveConnections
+			var data = new byte[17];
+
+			Id?.TryWriteBytes(new Span<byte>(data, 0, 16));
+			data[16] = HasActiveConnections ? Byte.MaxValue : Byte.MinValue;
+
+			return data;
+		}
 	}
 }
