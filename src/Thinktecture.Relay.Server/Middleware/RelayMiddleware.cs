@@ -119,6 +119,9 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	[LoggerMessage(20605, LogLevel.Information, "Request {RelayRequestId} expired")]
 	partial void LogRequestExpired(Guid relayRequestId);
 
+	[LoggerMessage(20616, LogLevel.Debug, "Request to tenant {Tenant} was rejected due to no active connection")]
+	partial void LogNoActiveConnection(string tenant);
+
 	/// <inheritdoc/>
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
@@ -140,6 +143,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 		if (_relayServerOptions.RequireActiveConnection && !tenant.HasActiveConnections)
 		{
+			LogNoActiveConnection(tenantName);
 			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
 			return;
 		}
