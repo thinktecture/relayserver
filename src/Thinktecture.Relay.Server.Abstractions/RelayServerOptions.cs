@@ -73,4 +73,10 @@ public class RelayServerOptions
 	/// Determines how long the tenant id should be cached.
 	/// </summary>
 	public TimeSpan TenantIdCacheTimeout { get; set; } = TimeSpan.FromSeconds(10);
+
+	/// <summary>
+	/// Defines if a request should be immediately rejected if there is no active connection available for the
+	/// requested tenant.
+	/// </summary>
+	public bool RequireActiveConnection { get; set; } = false;
 }
