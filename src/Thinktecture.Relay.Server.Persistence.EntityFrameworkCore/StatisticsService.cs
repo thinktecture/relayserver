@@ -217,7 +217,7 @@ public partial class StatisticsService : IStatisticsService
 	}
 
 	[LoggerMessage(23314, LogLevel.Debug,
-		"Cleaning up statistics storage by deleting all connections that have no activity since {ConnectionLastActivity}")]
+		"Cleaning up statistics storage by deleting all connections that have no activity or are disconnected since {ConnectionLastActivity}")]
 	partial void LogConnectionCleanup(DateTimeOffset connectionLastActivity);
 
 	/// <inheritdoc/>
@@ -228,8 +228,10 @@ public partial class StatisticsService : IStatisticsService
 
 		try
 		{
-			var connections = await _dbContext.Connections.Where(c => c.LastActivityTime < lastActivity)
+			var connections = await _dbContext.Connections
+				.Where(c => c.LastActivityTime < lastActivity || c.DisconnectTime < lastActivity)
 				.ToArrayAsync(cancellationToken);
+
 			_dbContext.Connections.RemoveRange(connections);
 			await _dbContext.SaveChangesAsync(cancellationToken);
 		}
