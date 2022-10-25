@@ -26,6 +26,7 @@ public class TenantService : ITenantService
 
 		return await _dbContext.Tenants
 			.Include(tenant => tenant.ClientSecrets)
+			.Include(tenant => tenant.Connections)
 			.AsNoTracking()
 			.SingleOrDefaultAsync(tenant => tenant.NormalizedName == normalizedName);
 	}
