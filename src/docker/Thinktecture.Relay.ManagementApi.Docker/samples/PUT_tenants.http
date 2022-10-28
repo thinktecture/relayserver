@@ -1,0 +1,9 @@
+PUT http://localhost:5004/api/management/tenants/ffffffff-ffff-ffff-ffff-ffffffffffff HTTP/1.1
+Accept: application/json
+tt-apikey: write-key
+Content-Type: application/json
+
+{
+    "displayName": "Test tenant X",
+    "description": "A tenant for testing",
+}
