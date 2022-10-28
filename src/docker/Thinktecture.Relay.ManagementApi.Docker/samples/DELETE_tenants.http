@@ -1,0 +1,3 @@
+DELETE http://localhost:5004/api/management/tenants/ffffffff-ffff-ffff-ffff-ffffffffffff HTTP/1.1
+Accept: application/json
+tt-apikey: write-key

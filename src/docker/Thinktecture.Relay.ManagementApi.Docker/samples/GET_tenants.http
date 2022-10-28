@@ -1,0 +1,15 @@
+GET http://localhost:5004/api/management/tenants HTTP/1.1
+Accept: application/json
+tt-apikey: read-key
+
+###
+
+GET http://localhost:5004/api/management/tenants/TestTenant2 HTTP/1.1
+Accept: application/json
+tt-apikey: read-key
+
+###
+
+GET http://localhost:5004/api/management/tenants/ffffffff-ffff-ffff-ffff-ffffffffffff HTTP/1.1
+Accept: application/json
+tt-apikey: read-key
