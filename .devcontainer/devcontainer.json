@@ -20,22 +20,22 @@
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"ms-dotnettools.csharp",
-        "adrianwilczynski.user-secrets",
-        "ms-azuretools.vscode-docker",
-        "EditorConfig.EditorConfig",
-        "esbenp.prettier-vscode",
-        "ms-vscode.PowerShell"
+				"adrianwilczynski.user-secrets",
+				"ms-azuretools.vscode-docker",
+				"EditorConfig.EditorConfig",
+				"esbenp.prettier-vscode",
+				"ms-vscode.PowerShell"
 			]
 		}
 	},
-  // RelayServer                -> Port 5000
-  // RelayServer Management API -> Port 5004
-  // RelayServer Statistics API -> Port 5006
-  // IdentityServer             -> Port 5002
-  // Seq                        -> Port 5341
-  // PostgreSQL                 -> Port 5432
-  "forwardPorts": [5000, 5002, 5004, 5006, 5341, 5432],
-  "postCreateCommand": "npm install",
+	// RelayServer                -> Port 5000
+	// RelayServer Management API -> Port 5004
+	// RelayServer Statistics API -> Port 5006
+	// IdentityServer             -> Port 5002
+	// Seq                        -> Port 5341
+	// PostgreSQL                 -> Port 5432
+	"forwardPorts": [5000, 5002, 5004, 5006, 5341, 5432],
+	"postCreateCommand": "npm install",
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [5000, 5001],
 
@@ -68,9 +68,17 @@
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"features": {
-		"docker-in-docker": "latest",
-		"git": "latest",
-		"github-cli": "latest",
-		"powershell": "latest"
+		"ghcr.io/devcontainers/features/docker-in-docker:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/git:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/powershell:1": {
+			"version": "latest"
+		}
 	}
 }
