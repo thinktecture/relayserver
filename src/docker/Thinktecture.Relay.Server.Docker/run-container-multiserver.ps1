@@ -13,7 +13,7 @@ docker run `
   -e Serilog__Properties__System=RelayServerA `
   -e RabbitMq__ClusterHosts=relay_transport_rabbitmq1,relay_transport_rabbitmq2 `
   -e BodyStore__StoragePath=/var/bodystore `
-  -p 5010:80 `
+  -p 5010:5000 `
   -d `
   relay_server
 
@@ -31,6 +31,6 @@ docker run `
   -e RabbitMq__Uri=amqp://relayserver:<Strong!Passw0rd>@relay_transport_rabbitmq2 `
   -e RabbitMq__ClusterHosts=relay_transport_rabbitmq2,relay_transport_rabbitmq1 `
   -e BodyStore__StoragePath=/var/bodystore `
-  -p 5011:80 `
+  -p 5011:5000 `
   -d `
   relay_server
