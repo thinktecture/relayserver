@@ -45,6 +45,9 @@ RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists && \
 RUN chmod u-s /usr/bin/gpasswd /usr/bin/chsh /bin/umount /bin/mount /sbin/unix_chkpwd /usr/bin/expiry /usr/bin/newgrp /usr/bin/chage /usr/bin/chfn /usr/bin/wall /usr/bin/passwd /bin/su && \
     chmod g-s /usr/bin/gpasswd /usr/bin/chsh /bin/umount /bin/mount /sbin/unix_chkpwd /usr/bin/expiry /usr/bin/newgrp /usr/bin/chage /usr/bin/chfn /usr/bin/wall /usr/bin/passwd /bin/su
 
+RUN mkdir -p /var/bodystore
+RUN chown -R relay /var/bodystore
+
 USER relay
 
 COPY --chown=relay --from=build /app .
