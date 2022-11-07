@@ -9,6 +9,6 @@ docker run `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=IdentityServer `
-  -p 5002:80 `
+  -p 5002:5000 `
   -d `
   relay_identityserver

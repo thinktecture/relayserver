@@ -7,7 +7,7 @@ docker run `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_A1 `
-  -e RelayConnector__RelayServerBaseUri=http://relay_server_a `
+  -e RelayConnector__RelayServerBaseUri=http://relay_server_a:5000 `
   -d `
   relay_connector
 
@@ -20,7 +20,7 @@ docker run `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_A2 `
-  -e RelayConnector__RelayServerBaseUri=http://relay_server_a `
+  -e RelayConnector__RelayServerBaseUri=http://relay_server_a:5000 `
   -d `
   relay_connector
 
@@ -34,7 +34,7 @@ docker run `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_B1 `
-  -e RelayConnector__RelayServerBaseUri=http://relay_server_b `
+  -e RelayConnector__RelayServerBaseUri=http://relay_server_b:5000 `
   -e RelayConnector__TenantName=TestTenant2 `
   -d `
   relay_connector
@@ -48,7 +48,7 @@ docker run `
   -e Serilog__WriteTo__0__Name=Seq `
   -e Serilog__WriteTo__0__Args__ServerUrl=http://relay_logging_seq `
   -e Serilog__Properties__System=Connector_B2 `
-  -e RelayConnector__RelayServerBaseUri=http://relay_server_b `
+  -e RelayConnector__RelayServerBaseUri=http://relay_server_b:5000 `
   -e RelayConnector__TenantName=TestTenant2 `
   -d `
   relay_connector
