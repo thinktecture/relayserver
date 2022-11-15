@@ -97,9 +97,9 @@ These are the available settings:
       // statistics store.
       "EntryMaxAge": "00:15:00",
       
-      // Last activity update interval, TimeSpan, defaults to 5 minutes
-      // The time interval in which the origin's last activity will be updated.
-      "LastActivityUpdateInterval": "00:05:00",
+      // Origin last seen update interval, TimeSpan, defaults to 5 minutes
+      // The time interval in which the origin's last seen timestamp will be updated.
+      "OriginLastSeenUpdateInterval": "00:05:00",
       
       // Enable connection cleanup, boolean, defaults to false
       // Indicates whether to clean up stale or closed connections or not.
@@ -168,5 +168,5 @@ We suggest that you run the maintenance job more often by reducing the `RunInter
 maintenance option, and to not keep old origins / RelayServer instances with their
 connections as long in the database by also reducing the `EntryMaxAge` statistics
 option. The last activity of an origin should be updated at least twice within this
-range, so you might also want to reduce the `LastActivityUpdateInterval` statistics
+range, so you might also want to reduce the `OriginLastSeenUpdateInterval` statistics
 option. 

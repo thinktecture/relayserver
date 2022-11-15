@@ -17,7 +17,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("ProductVersion", "6.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -83,7 +83,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                     b.Property<DateTimeOffset?>("DisconnectTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTimeOffset?>("LastActivityTime")
+                    b.Property<DateTimeOffset?>("LastSeenTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("OriginId")

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -163,19 +164,33 @@ public partial class StatisticsService : IStatisticsService
 	}
 
 	[LoggerMessage(23310, LogLevel.Debug,
-		"Updating last activity time of connection {TransportConnectionId} in statistics tracking")]
-	partial void LogUpdateConnectionActivity(string transportConnectionId);
+		"Updating last seen time of connection {TransportConnectionId} to {LastSeenTime} within batch {UpdateBatchId} in statistics tracking")]
+	partial void LogUpdateConnectionLastSeenTime(string transportConnectionId, DateTimeOffset lastSeenTime, Guid updateBatchId);
 
 	/// <inheritdoc/>
-	public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default)
+	public async Task UpdateLastSeenTimeAsync(IDictionary<string, DateTimeOffset> data, CancellationToken cancellationToken = default)
 	{
-		LogUpdateConnectionActivity(connectionId);
+		var batchId = Guid.NewGuid();
+
+		_logger.LogDebug(23319,
+			"Starting batch {UpdateBatchId} to update the last seen time of {UpdateAmount} connections",
+			batchId, data.Count);
 
 		try
 		{
-			var entity = new Connection() { Id = connectionId };
-			_dbContext.Attach(entity);
-			entity.LastActivityTime = DateTimeOffset.UtcNow;
+			foreach (var entry in data)
+			{
+				var connectionId = entry.Key;
+				var lastSeenTime = entry.Value;
+
+				LogUpdateConnectionLastSeenTime(connectionId, lastSeenTime, batchId);
+
+				var entity = new Connection() { Id = connectionId, };
+				_dbContext.Attach(entity);
+
+				entity.LastSeenTime = lastSeenTime;
+			}
+
 			await _dbContext.SaveChangesAsync(cancellationToken);
 		}
 		catch (OperationCanceledException)
@@ -185,8 +200,8 @@ public partial class StatisticsService : IStatisticsService
 		catch (Exception ex)
 		{
 			_logger.LogError(23311, ex,
-				"An error occured while updating connection {TransportConnectionId} in statistics tracking",
-				connectionId);
+				"An error occured while updating last seen time of multiple connections in batch {UpdateBatchId} in statistics tracking",
+				batchId);
 		}
 	}
 
@@ -223,13 +238,13 @@ public partial class StatisticsService : IStatisticsService
 	/// <inheritdoc/>
 	public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 	{
-		var lastActivity = DateTimeOffset.UtcNow - maxAge;
-		LogConnectionCleanup(lastActivity);
+		var lastSeen = DateTimeOffset.UtcNow - maxAge;
+		LogConnectionCleanup(lastSeen);
 
 		try
 		{
 			var connections = await _dbContext.Connections
-				.Where(c => c.LastActivityTime < lastActivity || c.DisconnectTime < lastActivity)
+				.Where(c => c.LastSeenTime < lastSeen || c.DisconnectTime < lastSeen)
 				.ToArrayAsync(cancellationToken);
 
 			_dbContext.Connections.RemoveRange(connections);
