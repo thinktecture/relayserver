@@ -174,6 +174,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                     b.Property<long?>("ResponseBodySize")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("ResponseOriginalBodySize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Target")
                         .IsRequired()
                         .HasMaxLength(100)

@@ -61,6 +61,12 @@ public class Request
 	public HttpStatusCode? HttpStatusCode { get; set; }
 
 	/// <summary>
+	/// The amount of bytes received from the connector.
+	/// </summary>
+	/// <remarks>This is only available when the request succeeded.</remarks>
+	public long? ResponseOriginalBodySize { get; set; }
+
+	/// <summary>
 	/// The amount of bytes sent to the requesting client.
 	/// </summary>
 	/// <remarks>This is only available when the request succeeded.</remarks>
