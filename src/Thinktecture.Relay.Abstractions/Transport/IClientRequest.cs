@@ -73,7 +73,7 @@ public interface IClientRequest
 
 	/// <summary>
 	/// The body as a <see cref="Stream"/> or null if there is no body.
-	/// GET, HEAD, CONNECT, OPTIONS, DELETE must not have a body, other methods have a body.
+	/// GET, HEAD, CONNECT, OPTIONS, DELETE must not have a body, other methods may have a body.
 	/// </summary>
 	/// <seealso cref="BodySize"/>
 	/// <remarks>Depending on the transport the stream content may be serialized inline.</remarks>
