@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,17 +71,6 @@ public interface IStatisticsService
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
-	/// Updates the last activity time of a connection.
-	/// </summary>
-	/// <param name="connectionId">The unique id of the connection.</param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is
-	/// <see cref="CancellationToken.None"/>.
-	/// </param>
-	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default);
-
-	/// <summary>
 	/// Sets the disconnect time of a connection.
 	/// </summary>
 	/// <param name="connectionId">The unique id of the connection.</param>
@@ -101,4 +91,15 @@ public interface IStatisticsService
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Updates the last seen time of several connections.
+	/// </summary>
+	/// <param name="data">A list of connection ids and their corresponding last seen time to update.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
+	/// </param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+	Task UpdateLastSeenTimeAsync(IDictionary<string, DateTimeOffset> data, CancellationToken cancellationToken = default);
 }

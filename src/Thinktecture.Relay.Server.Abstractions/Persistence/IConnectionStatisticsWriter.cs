@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Persistence;
 /// </summary>
 /// <remarks>
 /// This class should always be registered as a singleton, because it is creating an own scope during the
-/// execution of any method.
+/// execution of any method. It also buffers data for batched and delayed writing.
 /// </remarks>
 public interface IConnectionStatisticsWriter
 {
@@ -30,7 +30,8 @@ public interface IConnectionStatisticsWriter
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
-	/// Updates the last activity time of a connection.
+	/// Updates the last seen time of a connection. This may cache or buffer the updates and does not need
+	/// to immediately write these to the persistence layer.
 	/// </summary>
 	/// <param name="connectionId">The unique id of the connection.</param>
 	/// <param name="cancellationToken">
@@ -38,7 +39,17 @@ public interface IConnectionStatisticsWriter
 	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default);
+	Task UpdateLastSeenTimeAsync(string connectionId, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// This method is called regularly and writes / flushes all last seen values to the persistence layer.
+	/// </summary>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
+	/// </param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+	Task WriteLastSeenEntriesAsync(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Sets the disconnect time of a connection.

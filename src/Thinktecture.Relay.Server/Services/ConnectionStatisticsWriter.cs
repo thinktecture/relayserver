@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,10 +9,12 @@ using Thinktecture.Relay.Server.Persistence;
 
 namespace Thinktecture.Relay.Server.Services;
 
-/// <inheritdoc/>
+/// <inheritdoc cref="IConnectionStatisticsWriter"/>
 public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 {
 	private readonly IServiceScopeFactory _serviceProvider;
+
+	private ConcurrentDictionary<string, DateTimeOffset> _buffer = new ConcurrentDictionary<string, DateTimeOffset>();
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectionStatisticsWriter"/> class.
@@ -30,15 +34,24 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 	}
 
 	/// <inheritdoc/>
-	public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default)
+	public Task UpdateLastSeenTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
-		// TODO debounce writing to DB; keep connectionId and UtcNow in dictionary
-		// write to DB every {configurable duration} (default: 1 minute)
-		// additionally add this as a background service just like server statistics writer
+		_buffer[connectionId] = DateTimeOffset.UtcNow;
+		return Task.CompletedTask;
+	}
+
+	/// <inheritdoc/>
+	public async Task WriteLastSeenEntriesAsync(CancellationToken stoppingToken)
+	{
+		var buffer = _buffer;
+		_buffer = new ConcurrentDictionary<string, DateTimeOffset>();
+
+		await Task.Yield();
 
 		using var scope = _serviceProvider.CreateScope();
-		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
-			.UpdateLastActivityTimeAsync(connectionId, cancellationToken);
+		var statisticsService = scope.ServiceProvider.GetRequiredService<IStatisticsService>();
+
+		await statisticsService.UpdateLastSeenTimeAsync(buffer, stoppingToken);
 	}
 
 	/// <inheritdoc/>

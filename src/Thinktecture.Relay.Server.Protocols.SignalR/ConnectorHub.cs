@@ -140,7 +140,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		response.ConnectionId = Context.ConnectionId;
 
 		await _responseDispatcher.DispatchAsync(response);
-		await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
+		await _connectionStatisticsWriter.UpdateLastSeenTimeAsync(Context.ConnectionId);
 	}
 
 	[LoggerMessage(26105, LogLevel.Debug, "Connection {TransportConnectionId} received acknowledgement for request {RelayRequestId}")]
@@ -157,7 +157,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	{
 		LogReceivedAcknowledge(Context.ConnectionId, request.RequestId);
 		await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);
-		await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
+		await _connectionStatisticsWriter.UpdateLastSeenTimeAsync(Context.ConnectionId);
 	}
 
 	/// <summary>

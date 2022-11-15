@@ -34,9 +34,9 @@ public class Connection
 	public DateTimeOffset? DisconnectTime { get; set; }
 
 	/// <summary>
-	/// The time when the last message was sent or received through this connection.
+	/// The last time when the last message through this connection was recorded.
 	/// </summary>
-	public DateTimeOffset? LastActivityTime { get; set; }
+	public DateTimeOffset? LastSeenTime { get; set; }
 
 	/// <summary>
 	/// The remote IP address of the connector.
