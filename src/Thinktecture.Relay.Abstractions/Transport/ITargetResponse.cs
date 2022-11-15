@@ -54,7 +54,13 @@ public interface ITargetResponse
 	IDictionary<string, string[]>? HttpHeaders { get; set; }
 
 	/// <summary>
-	/// The size of the body or null if the size is unknown.
+	/// The size of the body as received from the connector or null if the size is unknown.
+	/// </summary>
+	/// <seealso cref="BodyContent"/>
+	long? OriginalBodySize { get; set; }
+
+	/// <summary>
+	/// The size of the body after interceptors ran or null if the size is unknown.
 	/// </summary>
 	/// <seealso cref="BodyContent"/>
 	long? BodySize { get; set; }

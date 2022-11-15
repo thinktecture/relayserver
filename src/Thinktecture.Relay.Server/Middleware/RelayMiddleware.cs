@@ -286,10 +286,29 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	{
 		LogExecutingResponseInterceptors(_relayContext.RequestId);
 
+		var targetResponse = _relayContext.TargetResponse!;
+		var bodyContent = targetResponse.BodyContent;
+		var bodyChanged = false;
+
 		foreach (var interceptor in _targetResponseInterceptors)
 		{
 			LogExecutingResponseInterceptor(interceptor.GetType().FullName, _relayContext.RequestId);
 			await interceptor.OnResponseReceivedAsync(_relayContext, cancellationToken);
+
+			if (targetResponse.BodyContent != null && bodyContent != targetResponse.BodyContent)
+			{
+				bodyChanged = true;
+
+				// an interceptor changed the body content - need to dispose it properly
+				_relayContext.ResponseDisposables.Add(targetResponse.BodyContent);
+				bodyContent = targetResponse.BodyContent;
+			}
+		}
+
+		// if possible, try to update body size (interceptor should have done that already, just to be sure)
+		if (bodyChanged && bodyContent!.CanSeek)
+		{
+			targetResponse.BodySize = bodyContent.Length;
 		}
 	}
 
