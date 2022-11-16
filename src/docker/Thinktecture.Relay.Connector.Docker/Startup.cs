@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -31,13 +32,44 @@ public static class Startup
 
 internal class InProcTarget : IRelayTarget<ClientRequest, TargetResponse>
 {
-	public Task<TargetResponse> HandleAsync(ClientRequest request, CancellationToken cancellationToken = default)
+	private ILogger _logger;
+
+	public InProcTarget(ILogger<InProcTarget> logger)
+		=> _logger = logger;
+
+	public async Task<TargetResponse> HandleAsync(ClientRequest request, CancellationToken cancellationToken = default)
 	{
+		_logger.LogInformation(1, "Executing demo in proc target for request {RequestId}",
+			request.RequestId);
+
+		var responseData = new MemoryStream(Encoding.UTF8.GetBytes("{ \"Hello\" : \"World 👋\" }"));
+
+		if (request.BodyContent != null)
+		{
+			_logger.LogInformation(2, "Request {RequestId} provided {BodySize} bytes in body",
+				request.RequestId, request.BodySize);
+
+			// if echo is requested, return the received content
+			if (request.HttpHeaders.TryGetValue("tt-demo-target-echo", out var value) && value.Contains("enabled"))
+			{
+				_logger.LogInformation(3, "Demo in proc target is ECHOING received request body");
+
+				request.BodyContent.TryRewind();
+
+				responseData = new MemoryStream();
+				await request.BodyContent.CopyToAsync(responseData, cancellationToken);
+				responseData.TryRewind();
+			}
+		}
+
 		var response = request.CreateResponse();
+
 		response.HttpStatusCode = HttpStatusCode.OK;
-		response.BodyContent = new MemoryStream(Encoding.UTF8.GetBytes("👋"));
-		response.BodySize = response.BodyContent.Length;
-		return Task.FromResult(response);
+		response.OriginalBodySize = responseData.Length;
+		response.BodySize = response.OriginalBodySize;
+		response.BodyContent = responseData;
+
+		return response;
 	}
 }
 
