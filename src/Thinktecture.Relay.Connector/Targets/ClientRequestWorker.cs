@@ -158,6 +158,8 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 
 			if (response.BodyContent == null) return response;
 
+			response.BodyContent.TryRewind();
+
 			if (response.BodySize == null ||
 				response.BodySize > _connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue))
 			{
