@@ -165,7 +165,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		}
 		else
 		{
-			_logger.LogInformation(11208, "Dropped connection {ConnectionId} in favor of new connection {ConnectionId}",
+			_logger.LogInformation(11208, "Dropped connection {ConnectionId} in favor of new connection {NewConnectionId}",
 				_connectionId, connectionId);
 			_connectionId = connectionId;
 		}
