@@ -172,6 +172,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 					LogOutsourcingBody(response.BodySize, _connectorTransportLimit.BinarySizeThreshold, request.RequestId);
 				}
 
+				response.BodyContent.TryRewind();
 				using var content = new CountingStreamContent(response.BodyContent);
 				try
 				{
