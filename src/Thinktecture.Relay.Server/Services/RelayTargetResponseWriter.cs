@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,6 +59,7 @@ public partial class RelayTargetResponseWriter<TResponse> : IRelayTargetResponse
 
 		if (targetResponse.BodyContent?.CanRead == true)
 		{
+			targetResponse.BodyContent.TryRewind();
 			await targetResponse.BodyContent.CopyToAsync(httpResponse.Body, cancellationToken);
 		}
 	}
