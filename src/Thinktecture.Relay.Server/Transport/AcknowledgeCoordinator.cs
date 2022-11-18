@@ -35,8 +35,8 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 	}
 
 	[LoggerMessage(20800, LogLevel.Trace,
-		"Registering acknowledge state of request {RequestId} from connection {ConnectionId} for id {AcknowledgeId}")]
-	partial void LogRegisterAcknowledgeState(Guid requestId, string connectionId, string acknowledgeId);
+		"Registering acknowledge state of request {RelayRequestId} from connection {ConnectionId} for id {AcknowledgeId}")]
+	partial void LogRegisterAcknowledgeState(Guid relayRequestId, string connectionId, string acknowledgeId);
 
 	/// <inheritdoc/>
 	public void RegisterRequest(Guid requestId, string connectionId, string acknowledgeId,
@@ -46,8 +46,8 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		_requests[requestId] = new AcknowledgeState(connectionId, acknowledgeId, outsourcedRequestBodyContent);
 	}
 
-	[LoggerMessage(20801, LogLevel.Warning, "Unknown request {RequestId} to acknowledge received")]
-	partial void LogUnknownRequest(Guid requestId);
+	[LoggerMessage(20801, LogLevel.Warning, "Unknown request {RelayRequestId} to acknowledge received")]
+	partial void LogUnknownRequest(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task ProcessAcknowledgeAsync(TAcknowledge request, CancellationToken cancellationToken = default)

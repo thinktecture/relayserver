@@ -110,14 +110,14 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	[LoggerMessage(20601, LogLevel.Information, "Unknown tenant {Tenant} in request received {Path}{Query}")]
 	partial void LogUnknownTenant(string tenant, string path, QueryString query);
 
-	[LoggerMessage(20603, LogLevel.Trace, "Received response for request {RequestId}")]
-	partial void LogResponseReceived(Guid requestId);
+	[LoggerMessage(20603, LogLevel.Trace, "Received response for request {RelayRequestId}")]
+	partial void LogResponseReceived(Guid relayRequestId);
 
-	[LoggerMessage(20604, LogLevel.Debug, "Client aborted request {RequestId}")]
-	partial void LogClientAborted(Guid requestId);
+	[LoggerMessage(20604, LogLevel.Debug, "Client aborted request {RelayRequestId}")]
+	partial void LogClientAborted(Guid relayRequestId);
 
-	[LoggerMessage(20605, LogLevel.Information, "Request {RequestId} expired")]
-	partial void LogRequestExpired(Guid requestId);
+	[LoggerMessage(20605, LogLevel.Information, "Request {RelayRequestId} expired")]
+	partial void LogRequestExpired(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -197,15 +197,15 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		catch (Exception ex)
 		{
 			await _relayRequestLogger.LogErrorAsync(_relayContext);
-			_logger.LogError(20606, ex, "Could not handle request {RequestId}", _relayContext.RequestId);
+			_logger.LogError(20606, ex, "Could not handle request {RelayRequestId}", _relayContext.RequestId);
 		}
 	}
 
-	[LoggerMessage(20607, LogLevel.Debug, "Executing client request interceptors for request {RequestId}")]
-	partial void LogExecutingRequestInterceptors(Guid requestId);
+	[LoggerMessage(20607, LogLevel.Debug, "Executing client request interceptors for request {RelayRequestId}")]
+	partial void LogExecutingRequestInterceptors(Guid relayRequestId);
 
-	[LoggerMessage(20608, LogLevel.Trace, "Executing interceptor {Interceptor} for request {RequestId}")]
-	partial void LogExecutingRequestInterceptor(string? interceptor, Guid requestId);
+	[LoggerMessage(20608, LogLevel.Trace, "Executing interceptor {Interceptor} for request {RelayRequestId}")]
+	partial void LogExecutingRequestInterceptor(string? interceptor, Guid relayRequestId);
 
 	private async Task InterceptClientRequestAsync(CancellationToken cancellationToken)
 	{
@@ -227,8 +227,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		}
 	}
 
-	[LoggerMessage(20609, LogLevel.Trace, "Delivering request {RequestId} to connector")]
-	partial void LogDeliveringRequest(Guid requestId);
+	[LoggerMessage(20609, LogLevel.Trace, "Delivering request {RelayRequestId} to connector")]
+	partial void LogDeliveringRequest(Guid relayRequestId);
 
 	private async Task DeliverToConnectorAsync(CancellationToken cancellationToken)
 	{
@@ -246,8 +246,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		await _requestCoordinator.ProcessRequestAsync(_relayContext.ClientRequest, cancellationToken);
 	}
 
-	[LoggerMessage(20610, LogLevel.Trace, "Waiting for connector response for request {RequestId}")]
-	partial void LogWaitForResponse(Guid requestId);
+	[LoggerMessage(20610, LogLevel.Trace, "Waiting for connector response for request {RelayRequestId}")]
+	partial void LogWaitForResponse(Guid relayRequestId);
 
 	private async Task WaitForConnectorResponseAsync(CancellationToken cancellationToken)
 	{
@@ -265,11 +265,11 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	}
 
 
-	[LoggerMessage(20611, LogLevel.Debug, "Executing target response interceptors for request {RequestId}")]
-	partial void LogExecutingResponseInterceptors(Guid requestId);
+	[LoggerMessage(20611, LogLevel.Debug, "Executing target response interceptors for request {RelayRequestId}")]
+	partial void LogExecutingResponseInterceptors(Guid relayRequestId);
 
-	[LoggerMessage(20612, LogLevel.Trace, "Executing interceptor {Interceptor} for request {RequestId}")]
-	partial void LogExecutingResponseInterceptor(string? interceptor, Guid? requestId);
+	[LoggerMessage(20612, LogLevel.Trace, "Executing interceptor {Interceptor} for request {RelayRequestId}")]
+	partial void LogExecutingResponseInterceptor(string? interceptor, Guid? relayRequestId);
 
 	private async Task InterceptTargetResponseAsync(CancellationToken cancellationToken)
 	{
@@ -283,14 +283,14 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	}
 
 	[LoggerMessage(20613, LogLevel.Debug,
-		"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RequestId}")]
-	partial void LogOutsourcingRequestBody(long? bodySize, int binarySizeThreshold, Guid requestId);
+		"Outsourcing from request {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RelayRequestId}")]
+	partial void LogOutsourcingRequestBody(long? bodySize, int binarySizeThreshold, Guid relayRequestId);
 
-	[LoggerMessage(20614, LogLevel.Trace, "Outsourced from request {BodySize} bytes for request {RequestId}")]
-	partial void LogOutsourcedRequestBody(long? bodySize, Guid requestId);
+	[LoggerMessage(20614, LogLevel.Trace, "Outsourced from request {BodySize} bytes for request {RelayRequestId}")]
+	partial void LogOutsourcedRequestBody(long? bodySize, Guid relayRequestId);
 
-	[LoggerMessage(20615, LogLevel.Debug, "Inlined from request {BodySize} bytes for request {RequestId}")]
-	partial void LogInlinedRequestBody(long? bodySize, Guid requestId);
+	[LoggerMessage(20615, LogLevel.Debug, "Inlined from request {BodySize} bytes for request {RelayRequestId}")]
+	partial void LogInlinedRequestBody(long? bodySize, Guid relayRequestId);
 
 	private async Task<bool> TryInlineBodyContentAsync(TRequest request, CancellationToken cancellationToken)
 	{

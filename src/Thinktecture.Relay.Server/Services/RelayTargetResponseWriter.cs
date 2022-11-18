@@ -24,8 +24,8 @@ public partial class RelayTargetResponseWriter<TResponse> : IRelayTargetResponse
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 
-	[LoggerMessage(20700, LogLevel.Warning, "The request {RequestId} failed internally with {HttpStatusCode}")]
-	partial void LogFailedRequest(Guid requestId, HttpStatusCode httpStatusCode);
+	[LoggerMessage(20700, LogLevel.Warning, "The request {RelayRequestId} failed internally with {HttpStatusCode}")]
+	partial void LogFailedRequest(Guid relayRequestId, HttpStatusCode httpStatusCode);
 
 	/// <inheritdoc/>
 	public async Task WriteAsync(TResponse? targetResponse, HttpResponse httpResponse,

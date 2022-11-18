@@ -45,7 +45,9 @@ public class RequestService : IRequestService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23101, ex, "An error occured while storing request {RequestId}", request.RequestId);
+			_logger.LogError(23101, ex,
+				"An error occured while storing request {RelayRequestId}",
+				request.RequestId);
 		}
 	}
 }

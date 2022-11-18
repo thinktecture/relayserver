@@ -21,8 +21,8 @@ public partial class AcknowledgeController : Controller
 	public AcknowledgeController(ILogger<AcknowledgeController> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-	[LoggerMessage(20100, LogLevel.Debug, "Received acknowledgement for request {RequestId} on origin {OriginId}")]
-	partial void LogAcknowledgementReceived(Guid originId, Guid requestId);
+	[LoggerMessage(20100, LogLevel.Debug, "Received acknowledgement for request {RelayRequestId} on origin {OriginId}")]
+	partial void LogAcknowledgementReceived(Guid originId, Guid relayRequestId);
 
 	/// <summary>
 	/// </summary>

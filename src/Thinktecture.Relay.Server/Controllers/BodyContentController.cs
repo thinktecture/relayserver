@@ -24,8 +24,8 @@ public partial class BodyContentController : Controller
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	[LoggerMessage(20200, LogLevel.Debug,
-		"Delivering request body content for request {RequestId}, should delete: {DeleteBody}")]
-	partial void LogDeliverBody(Guid requestId, bool deleteBody);
+		"Delivering request body content for request {RelayRequestId}, should delete: {DeleteBody}")]
+	partial void LogDeliverBody(Guid relayRequestId, bool deleteBody);
 
 	/// <summary>
 	/// Streams the body content of the request.
@@ -53,8 +53,8 @@ public partial class BodyContentController : Controller
 		return new FileStreamResult(stream, MediaTypeNames.Application.Octet);
 	}
 
-	[LoggerMessage(20201, LogLevel.Debug, "Storing response body content for request {RequestId}")]
-	partial void LogStoreBody(Guid requestId);
+	[LoggerMessage(20201, LogLevel.Debug, "Storing response body content for request {RelayRequestId}")]
+	partial void LogStoreBody(Guid relayRequestId);
 
 	/// <summary>
 	/// Stores the body content of the response.
@@ -76,7 +76,7 @@ public partial class BodyContentController : Controller
 		}
 		catch (OperationCanceledException)
 		{
-			_logger.LogWarning(20202, "Connector for {TenantId} aborted the response body upload for request {RequestId}",
+			_logger.LogWarning(20202, "Connector for {TenantId} aborted the response body upload for request {RelayRequestId}",
 				User.GetTenantInfo().Id, requestId);
 			return NoContent();
 		}

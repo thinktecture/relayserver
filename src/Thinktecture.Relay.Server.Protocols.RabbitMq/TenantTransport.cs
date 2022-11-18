@@ -38,8 +38,8 @@ public partial class TenantTransport<T> : ITenantTransport<T>, IDisposable
 		_model = modelFactory.Create("tenant dispatcher");
 	}
 
-	[LoggerMessage(25400, LogLevel.Trace, "Published request {RequestId} to tenant {TenantId}")]
-	partial void LogPublishedRequest(Guid requestId, Guid tenantId);
+	[LoggerMessage(25400, LogLevel.Trace, "Published request {RelayRequestId} to tenant {TenantId}")]
+	partial void LogPublishedRequest(Guid relayRequestId, Guid tenantId);
 
 	/// <inheritdoc/>
 	public async Task TransportAsync(T request)
@@ -52,7 +52,7 @@ public partial class TenantTransport<T> : ITenantTransport<T>, IDisposable
 		catch (RabbitMQClientException ex)
 		{
 			_logger.LogError(25401, ex,
-				"An error occured while dispatching request {RequestId} to tenant {TenantId} queue",
+				"An error occured while dispatching request {RelayRequestId} to tenant {TenantId} queue",
 				request.RequestId, request.TenantId);
 			throw new TransportException(ex);
 		}
