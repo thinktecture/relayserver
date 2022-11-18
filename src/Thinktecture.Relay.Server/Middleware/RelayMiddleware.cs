@@ -172,8 +172,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			LogResponseReceived(_relayContext.RequestId);
 			await InterceptTargetResponseAsync(cts.Token);
 
-			await _relayRequestLogger.LogSuccessAsync(_relayContext);
 			await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, cts.Token);
+			await _relayRequestLogger.LogSuccessAsync(_relayContext);
 		}
 		catch (TransportException)
 		{
