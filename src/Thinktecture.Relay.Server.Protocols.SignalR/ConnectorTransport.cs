@@ -22,7 +22,7 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 
 	private readonly Action<ILogger, IClientRequest, Guid, string, Exception?> _logTransportingRequest =
 		LoggerMessage.Define<IClientRequest, Guid, string>(LogLevel.Trace, 26200,
-			"Transporting request {@Request} for request {RelayRequestId} on connection {ConnectionId}");
+			"Transporting request {@Request} for request {RelayRequestId} on connection {TransportConnectionId}");
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectorTransport{TRequest,TResponse,TAcknowledge}"/> class.
@@ -51,7 +51,7 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 		catch (Exception ex)
 		{
 			_logger.LogError(26201, ex,
-				"An error occured while transporting request {RelayRequestId} on connection {ConnectionId}",
+				"An error occured while transporting request {RelayRequestId} on connection {TransportConnectionId}",
 				request.RequestId,
 				_connectionId);
 		}

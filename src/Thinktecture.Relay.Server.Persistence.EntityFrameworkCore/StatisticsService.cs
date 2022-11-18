@@ -134,7 +134,8 @@ public partial class StatisticsService : IStatisticsService
 		IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug(23308, "Adding new connection {ConnectionId} for statistics tracking", connectionId);
+		_logger.LogDebug(23308, "Adding new connection {TransportConnectionId} for statistics tracking",
+			connectionId);
 
 		try
 		{
@@ -156,14 +157,14 @@ public partial class StatisticsService : IStatisticsService
 		catch (Exception ex)
 		{
 			_logger.LogError(23309, ex,
-				"An error occured while creating connection {ConnectionId} for statistics tracking",
-				originId);
+				"An error occured while creating connection {TransportConnectionId} for statistics tracking",
+				connectionId);
 		}
 	}
 
 	[LoggerMessage(23310, LogLevel.Debug,
-		"Updating last activity time of connection {ConnectionId} in statistics tracking")]
-	partial void LogUpdateConnectionActivity(string connectionId);
+		"Updating last activity time of connection {TransportConnectionId} in statistics tracking")]
+	partial void LogUpdateConnectionActivity(string transportConnectionId);
 
 	/// <inheritdoc/>
 	public async Task UpdateLastActivityTimeAsync(string connectionId, CancellationToken cancellationToken = default)
@@ -183,7 +184,8 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23311, ex, "An error occured while updating connection {ConnectionId} in statistics tracking",
+			_logger.LogError(23311, ex,
+				"An error occured while updating connection {TransportConnectionId} in statistics tracking",
 				connectionId);
 		}
 	}
@@ -191,7 +193,8 @@ public partial class StatisticsService : IStatisticsService
 	/// <inheritdoc/>
 	public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug(23312, "Setting disconnect time of connection {ConnectionId} in statistics tracking",
+		_logger.LogDebug(23312,
+			"Setting disconnect time of connection {TransportConnectionId} in statistics tracking",
 			connectionId);
 
 		try
@@ -207,7 +210,8 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23313, ex, "An error occured while updating connection {ConnectionId} in statistics tracking",
+			_logger.LogError(23313, ex,
+				"An error occured while updating connection {TransportConnectionId} in statistics tracking",
 				connectionId);
 		}
 	}

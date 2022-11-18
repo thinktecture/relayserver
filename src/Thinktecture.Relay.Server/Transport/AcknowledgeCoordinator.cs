@@ -35,8 +35,8 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 	}
 
 	[LoggerMessage(20800, LogLevel.Trace,
-		"Registering acknowledge state of request {RelayRequestId} from connection {ConnectionId} for id {AcknowledgeId}")]
-	partial void LogRegisterAcknowledgeState(Guid relayRequestId, string connectionId, string acknowledgeId);
+		"Registering acknowledge state of request {RelayRequestId} from connection {TransportConnectionId} for id {AcknowledgeId}")]
+	partial void LogRegisterAcknowledgeState(Guid relayRequestId, string transportConnectionId, string acknowledgeId);
 
 	/// <inheritdoc/>
 	public void RegisterRequest(Guid requestId, string connectionId, string acknowledgeId,

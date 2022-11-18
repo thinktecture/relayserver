@@ -55,7 +55,9 @@ public partial class ConnectorRegistry<T>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	public async Task RegisterAsync(string connectionId, Guid tenantId, IPAddress? remoteIpAddress = null)
 	{
-		_logger.LogDebug(22100, "Registering connection {ConnectionId} for tenant {TenantId}", connectionId, tenantId);
+		_logger.LogDebug(22100,
+			"Registering connection {TransportConnectionId} for tenant {TenantId}",
+			connectionId, tenantId);
 
 		var registration =
 			ActivatorUtilities.CreateInstance<ConnectorRegistration>(_serviceProvider, tenantId, connectionId);
@@ -80,13 +82,13 @@ public partial class ConnectorRegistry<T>
 		if (_registrations.TryRemove(connectionId, out var registration) &&
 		    _tenants.TryGetValue(registration.TenantId, out var connectors))
 		{
-			_logger.LogDebug(22101, "Unregistering connection {ConnectionId} for tenant {TenantId}", connectionId,
-				registration.TenantId);
+			_logger.LogDebug(22101, "Unregistering connection {TransportConnectionId} for tenant {TenantId}",
+				connectionId, registration.TenantId);
 			connectors.TryRemove(connectionId, out _);
 		}
 		else
 		{
-			_logger.LogWarning(22102, "Could not unregister connection {ConnectionId}", connectionId);
+			_logger.LogWarning(22102, "Could not unregister connection {TransportConnectionId}", connectionId);
 		}
 
 		await _connectionStatisticsWriter.SetDisconnectTimeAsync(connectionId);
@@ -94,8 +96,8 @@ public partial class ConnectorRegistry<T>
 		registration?.Dispose();
 	}
 
-	[LoggerMessage(22103, LogLevel.Warning, "Unknown connection {ConnectionId} to transport request {RelayRequestId} to")]
-	partial void LogUnknownRequestConnection(string connectionId, Guid relayRequestId);
+	[LoggerMessage(22103, LogLevel.Warning, "Unknown connection {TransportConnectionId} to transport request {RelayRequestId} to")]
+	partial void LogUnknownRequestConnection(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Transports a client request.
@@ -118,8 +120,8 @@ public partial class ConnectorRegistry<T>
 	}
 
 	[LoggerMessage(22104, LogLevel.Warning,
-		"Unknown connection {ConnectionId} to transport acknowledge {AcknowledgeId} to")]
-	partial void LogUnknownAcknowledgeConnection(string connectionId, string acknowledgeId);
+		"Unknown connection {TransportConnectionId} to transport acknowledge {AcknowledgeId} to")]
+	partial void LogUnknownAcknowledgeConnection(string transportConnectionId, string acknowledgeId);
 
 	/// <summary>
 	/// Acknowledges a client request.
@@ -141,8 +143,8 @@ public partial class ConnectorRegistry<T>
 		return Task.CompletedTask;
 	}
 
-	[LoggerMessage(22105, LogLevel.Trace, "Delivering request {RelayRequestId} to local connection {ConnectionId}")]
-	partial void LogDeliveringRequest(Guid relayRequestId, string? connectionId);
+	[LoggerMessage(22105, LogLevel.Trace, "Delivering request {RelayRequestId} to local connection {TransportConnectionId}")]
+	partial void LogDeliveringRequest(Guid relayRequestId, string? transportConnectionId);
 
 	/// <summary>
 	/// Tries to deliver the client request to a random connector.

@@ -79,13 +79,16 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 
 		if (tenant == null)
 		{
-			_logger.LogError(26100, "Rejecting incoming connection {ConnectionId} because of missing tenant info",
+			_logger.LogError(26100,
+				"Rejecting incoming connection {TransportConnectionId} because of missing tenant info",
 				Context.ConnectionId);
 			Context.Abort();
 			return;
 		}
 
-		_logger.LogDebug(26101, "Connection {ConnectionId} incoming for tenant {@Tenant}", Context.ConnectionId, tenant);
+		_logger.LogDebug(26101,
+			"Connection {TransportConnectionId} incoming for tenant {@Tenant}",
+			Context.ConnectionId, tenant);
 
 		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id,
 			Context.GetHttpContext()?.Connection.RemoteIpAddress);
@@ -104,13 +107,16 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	{
 		if (exception == null)
 		{
-			_logger.LogWarning(26102, exception, "Connection {ConnectionId} disconnected for tenant {@Tenant}",
+			_logger.LogWarning(26102, exception,
+				"Connection {TransportConnectionId} disconnected for tenant {@Tenant}",
 				Context.ConnectionId,
 				Context.User?.GetTenantInfo());
 		}
 		else
 		{
-			_logger.LogDebug(26103, "Connection {ConnectionId} disconnected for tenant {@Tenant}", Context.ConnectionId,
+			_logger.LogDebug(26103,
+				"Connection {TransportConnectionId} disconnected for tenant {@Tenant}",
+				Context.ConnectionId,
 				Context.User?.GetTenantInfo());
 		}
 
@@ -118,8 +124,8 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await base.OnDisconnectedAsync(exception);
 	}
 
-	[LoggerMessage(26104, LogLevel.Debug, "Connection {ConnectionId} received response for request {RelayRequestId}")]
-	partial void LogReceivedResponse(string connectionId, Guid relayRequestId);
+	[LoggerMessage(26104, LogLevel.Debug, "Connection {TransportConnectionId} received response for request {RelayRequestId}")]
+	partial void LogReceivedResponse(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Hub method.
@@ -137,8 +143,8 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 	}
 
-	[LoggerMessage(26105, LogLevel.Debug, "Connection {ConnectionId} received acknowledgement for request {RelayRequestId}")]
-	partial void LogReceivedAcknowledge(string connectionId, Guid relayRequestId);
+	[LoggerMessage(26105, LogLevel.Debug, "Connection {TransportConnectionId} received acknowledgement for request {RelayRequestId}")]
+	partial void LogReceivedAcknowledge(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Hub method.
