@@ -72,11 +72,11 @@ public partial class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest
 	public void Dispose()
 		=> HttpClient.Dispose();
 
-	[LoggerMessage(10700, LogLevel.Trace, "Requesting target for request {RequestId} at {BaseAddress} for {Url}")]
-	partial void LogRequestingTarget(Guid requestId, Uri? baseAddress, string url);
+	[LoggerMessage(10700, LogLevel.Trace, "Requesting target for request {RelayRequestId} at {BaseAddress} for {Url}")]
+	partial void LogRequestingTarget(Guid relayRequestId, Uri? baseAddress, string url);
 
-	[LoggerMessage(10701, LogLevel.Debug, "Requested target for request {RequestId} returned {HttpStatusCode}")]
-	partial void LogRequestedTarget(Guid requestId, HttpStatusCode httpStatusCode);
+	[LoggerMessage(10701, LogLevel.Debug, "Requested target for request {RelayRequestId} returned {HttpStatusCode}")]
+	partial void LogRequestedTarget(Guid relayRequestId, HttpStatusCode httpStatusCode);
 
 	/// <inheritdoc/>
 	public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)

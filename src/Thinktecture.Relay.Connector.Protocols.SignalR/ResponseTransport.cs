@@ -19,7 +19,7 @@ public class ResponseTransport<T> : IResponseTransport<T>
 	// (see https://github.com/dotnet/runtime/issues/69490)
 	private readonly Action<ILogger, ITargetResponse, Guid, string?, Exception?> _logTransportingResponse =
 		LoggerMessage.Define<ITargetResponse, Guid, string?>(LogLevel.Trace, 11500,
-			"Transporting response {@Response} for request {RequestId} on connection {ConnectionId}");
+			"Transporting response {@Response} for request {RelayRequestId} on connection {ConnectionId}");
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ResponseTransport{T}"/> class.
@@ -44,7 +44,7 @@ public class ResponseTransport<T> : IResponseTransport<T>
 		catch (Exception ex)
 		{
 			_logger.LogError(11501, ex,
-				"An error occured while transporting response for request {RequestId} on connection {ConnectionId}",
+				"An error occured while transporting response for request {RelayRequestId} on connection {ConnectionId}",
 				response.RequestId, _hubConnection.ConnectionId);
 		}
 	}
