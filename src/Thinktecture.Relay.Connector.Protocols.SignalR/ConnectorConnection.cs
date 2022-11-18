@@ -22,13 +22,13 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	// (see https://github.com/dotnet/runtime/issues/69490)
 	private readonly Action<ILogger, Guid, string, IClientRequest, Exception?> _logHandlingRequestDetailed =
 		LoggerMessage.Define<Guid, string, IClientRequest>(LogLevel.Trace, 11200,
-			"Handling request {RelayRequestId} on connection {ConnectionId} {@Request}");
+			"Handling request {RelayRequestId} on connection {TransportConnectionId} {@Request}");
 
 	// TODO move to LoggerMessage source generator when destructuring is supported
 	// (see https://github.com/dotnet/runtime/issues/69490)
 	private readonly Action<ILogger, Guid, string, Guid, Exception?> _logHandlingRequestSimple =
 		LoggerMessage.Define<Guid, string, Guid>(LogLevel.Debug, 11201,
-			"Handling request {RelayRequestId} on connection {ConnectionId} from origin {OriginId}");
+			"Handling request {RelayRequestId} on connection {TransportConnectionId} from origin {OriginId}");
 
 	private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 
@@ -85,11 +85,11 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (_hubConnection == null) return;
 
-		_logger.LogTrace("Disconnecting connection {ConnectionId}", _connectionId);
+		_logger.LogTrace("Disconnecting connection {TransportConnectionId}", _connectionId);
 
 		_cancellationTokenSource?.Cancel();
 		await _hubConnection.StopAsync(cancellationToken);
-		_logger.LogInformation("Disconnected on connection {ConnectionId}", _connectionId);
+		_logger.LogInformation("Disconnected on connection {TransportConnectionId}", _connectionId);
 
 		await Disconnected.InvokeAsync(this, _connectionId);
 	}
@@ -124,11 +124,11 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (ex is null or OperationCanceledException)
 		{
-			_logger.LogDebug(11202, "Connection {ConnectionId} gracefully closed", _connectionId);
+			_logger.LogDebug(11202, "Connection {TransportConnectionId} gracefully closed", _connectionId);
 		}
 		else
 		{
-			_logger.LogWarning(11203, ex, "Connection {ConnectionId} closed", _connectionId);
+			_logger.LogWarning(11203, ex, "Connection {TransportConnectionId} closed", _connectionId);
 
 			var token = _cancellationTokenSource?.Token;
 			if (token == null) return;
@@ -143,11 +143,13 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (ex == null)
 		{
-			_logger.LogInformation(11205, "Trying to reconnect after connection {ConnectionId} was lost", _connectionId);
+			_logger.LogInformation(11205,
+				"Trying to reconnect after connection {TransportConnectionId} was lost", _connectionId);
 		}
 		else
 		{
-			_logger.LogWarning(11204, ex, "Trying to reconnect after connection {ConnectionId} was lost due to an error",
+			_logger.LogWarning(11204, ex,
+				"Trying to reconnect after connection {TransportConnectionId} was lost due to an error",
 				_connectionId);
 		}
 		await Reconnecting.InvokeAsync(this, _connectionId);
@@ -161,11 +163,12 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		}
 		else if (_connectionId == connectionId)
 		{
-			_logger.LogDebug(11207, "Reconnected on connection {ConnectionId}", _connectionId);
+			_logger.LogDebug(11207, "Reconnected on connection {TransportConnectionId}", _connectionId);
 		}
 		else
 		{
-			_logger.LogInformation(11208, "Dropped connection {ConnectionId} in favor of new connection {NewConnectionId}",
+			_logger.LogInformation(11208,
+				"Dropped connection {TransportConnectionId} in favor of new connection {NewTransportConnectionId}",
 				_connectionId, connectionId);
 			_connectionId = connectionId;
 		}
@@ -190,7 +193,8 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	private Task ConfigureAsync(ITenantConfig config)
 	{
-		_logger.LogTrace(11209, "Received tenant config {@Config} on connection {ConnectionId}", config, _connectionId);
+		_logger.LogTrace(11209, "Received tenant config {@Config} on connection {TransportConnectionId}",
+			config, _connectionId);
 
 		_hubConnection?.SetKeepAliveInterval(config.KeepAliveInterval);
 		_retryPolicy.SetReconnectDelays(config.ReconnectMinimumDelay, config.ReconnectMaximumDelay);
@@ -212,7 +216,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 			await _hubConnection.StartAsync(cancellationToken);
 			_connectionId = _hubConnection.ConnectionId!;
 
-			_logger.LogInformation(11210, "Connected on connection {ConnectionId}", _connectionId);
+			_logger.LogInformation(11210, "Connected on connection {TransportConnectionId}", _connectionId);
 		}
 		catch (OperationCanceledException)
 		{
@@ -235,14 +239,15 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (_hubConnection == null) return;
 
-		_logger.LogTrace(11212, "Pong on connection {ConnectionId}", _connectionId);
+		_logger.LogTrace(11212, "Pong on connection {TransportConnectionId}", _connectionId);
 		try
 		{
 			await _hubConnection.InvokeAsync("Pong", CancellationToken.None);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(11213, ex, "An error occured while sending pong on connection {ConnectionId}", _connectionId);
+			_logger.LogError(11213, ex,
+				"An error occured while sending pong on connection {TransportConnectionId}", _connectionId);
 		}
 	}
 }
