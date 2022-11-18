@@ -19,7 +19,7 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 	// (see https://github.com/dotnet/runtime/issues/69490)
 	private readonly Action<ILogger, IAcknowledgeRequest, Guid, string?, Exception?> _logTransportingAck =
 		LoggerMessage.Define<IAcknowledgeRequest, Guid, string?>(LogLevel.Trace, 11100,
-			"Transporting acknowledge request {@AcknowledgeRequest} for request {RelayRequestId} on connection {ConnectionId}");
+			"Transporting acknowledge request {@AcknowledgeRequest} for request {RelayRequestId} on connection {TransportConnectionId}");
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="AcknowledgeTransport{T}"/> class.
@@ -45,7 +45,7 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 		catch (Exception ex)
 		{
 			_logger.LogError(11101, ex,
-				"An error occured while transporting acknowledge for request {RelayRequestId} on connection {ConnectionId}",
+				"An error occured while transporting acknowledge for request {RelayRequestId} on connection {TransportConnectionId}",
 				request.RequestId, _hubConnection.ConnectionId);
 		}
 	}
