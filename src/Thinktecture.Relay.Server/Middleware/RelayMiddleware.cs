@@ -196,6 +196,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		}
 		catch (Exception ex)
 		{
+			await WriteErrorResponse(HttpStatusCode.InternalServerError, context.Response, cts.Token);
 			await _relayRequestLogger.LogErrorAsync(_relayContext);
 			_logger.LogError(20606, ex, "Could not handle request {RequestId}", _relayContext.RequestId);
 		}
