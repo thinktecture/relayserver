@@ -83,8 +83,8 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	}
 
 	[LoggerMessage(25302, LogLevel.Trace,
-		"Received request {RequestId} from queue {QueueName} by consumer {ConsumerTag}")]
-	partial void LogReceivedRequest(Guid requestId, string queueName, string consumerTag);
+		"Received request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
+	partial void LogReceivedRequest(Guid relayRequestId, string queueName, string consumerTag);
 
 	private async Task ConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{

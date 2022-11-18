@@ -41,11 +41,11 @@ public partial class ResponseDispatcher<TResponse, TAcknowledge> : IResponseDisp
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	[LoggerMessage(21500, LogLevel.Trace, "Locally dispatching response for request {RequestId}")]
-	partial void LogLocalDispatch(Guid requestId);
+	[LoggerMessage(21500, LogLevel.Trace, "Locally dispatching response for request {RelayRequestId}")]
+	partial void LogLocalDispatch(Guid relayRequestId);
 
-	[LoggerMessage(21501, LogLevel.Trace, "Remotely dispatching response for request {RequestId} to origin {OriginId}")]
-	partial void LogRedirectDispatch(Guid requestId, Guid originId);
+	[LoggerMessage(21501, LogLevel.Trace, "Remotely dispatching response for request {RelayRequestId} to origin {OriginId}")]
+	partial void LogRedirectDispatch(Guid relayRequestId, Guid originId);
 
 	/// <inheritdoc/>
 	public async Task DispatchAsync(TResponse response, CancellationToken cancellationToken = default)

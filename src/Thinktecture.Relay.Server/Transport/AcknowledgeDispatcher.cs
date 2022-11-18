@@ -42,12 +42,12 @@ public partial class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowled
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	[LoggerMessage(20900, LogLevel.Trace, "Locally dispatching acknowledge for request {RequestId}")]
-	partial void LogLocalAcknowledge(Guid requestId);
+	[LoggerMessage(20900, LogLevel.Trace, "Locally dispatching acknowledge for request {RelayRequestId}")]
+	partial void LogLocalAcknowledge(Guid relayRequestId);
 
 	[LoggerMessage(20901, LogLevel.Trace,
-		"Remotely dispatching acknowledge for request {RequestId} to origin {OriginId}")]
-	partial void LogRedirectAcknowledge(Guid requestId, Guid originId);
+		"Remotely dispatching acknowledge for request {RelayRequestId} to origin {OriginId}")]
+	partial void LogRedirectAcknowledge(Guid relayRequestId, Guid originId);
 
 	/// <inheritdoc/>
 	public async Task DispatchAsync(TAcknowledge request, CancellationToken cancellationToken = default)

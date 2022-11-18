@@ -24,8 +24,8 @@ public partial class RequestCoordinator<T> : IRequestCoordinator<T>
 		_tenantTransport = tenantTransport ?? throw new ArgumentNullException(nameof(tenantTransport));
 	}
 
-	[LoggerMessage(21300, LogLevel.Debug, "Redirecting request {RequestId} to transport for tenant {TenantId}")]
-	partial void LogRedirect(Guid requestId, Guid tenantId);
+	[LoggerMessage(21300, LogLevel.Debug, "Redirecting request {RelayRequestId} to transport for tenant {TenantId}")]
+	partial void LogRedirect(Guid relayRequestId, Guid tenantId);
 
 	/// <inheritdoc/>
 	public async Task ProcessRequestAsync(T request, CancellationToken cancellationToken = default)

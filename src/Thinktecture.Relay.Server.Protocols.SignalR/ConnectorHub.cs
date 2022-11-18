@@ -118,8 +118,8 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await base.OnDisconnectedAsync(exception);
 	}
 
-	[LoggerMessage(26104, LogLevel.Debug, "Connection {ConnectionId} received response for request {RequestId}")]
-	partial void LogReceivedResponse(string connectionId, Guid requestId);
+	[LoggerMessage(26104, LogLevel.Debug, "Connection {ConnectionId} received response for request {RelayRequestId}")]
+	partial void LogReceivedResponse(string connectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Hub method.
@@ -137,8 +137,8 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await _connectionStatisticsWriter.UpdateLastActivityTimeAsync(Context.ConnectionId);
 	}
 
-	[LoggerMessage(26105, LogLevel.Debug, "Connection {ConnectionId} received acknowledgement for request {RequestId}")]
-	partial void LogReceivedAcknowledge(string connectionId, Guid requestId);
+	[LoggerMessage(26105, LogLevel.Debug, "Connection {ConnectionId} received acknowledgement for request {RelayRequestId}")]
+	partial void LogReceivedAcknowledge(string connectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Hub method.

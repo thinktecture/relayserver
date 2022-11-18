@@ -28,16 +28,16 @@ internal partial class FileBodyStore : IBodyStore
 			_basePath);
 	}
 
-	[LoggerMessage(21001, LogLevel.Trace, "{FileOperation} {FileBodyType} body for request {RequestId}")]
-	partial void LogOperation(string fileOperation, string fileBodyType, Guid requestId);
+	[LoggerMessage(21001, LogLevel.Trace, "{FileOperation} {FileBodyType} body for request {RelayRequestId}")]
+	partial void LogOperation(string fileOperation, string fileBodyType, Guid relayRequestId);
 
 	[LoggerMessage(21002, LogLevel.Debug,
-		"Writing of {FileBodyType} body for request {RequestId} completed with {BodySize} bytes")]
-	partial void LogWriting(string fileBodyType, Guid requestId, long bodySize);
+		"Writing of {FileBodyType} body for request {RelayRequestId} completed with {BodySize} bytes")]
+	partial void LogWriting(string fileBodyType, Guid relayRequestId, long bodySize);
 
 	[LoggerMessage(21003, LogLevel.Warning,
-		"An error occured while {FileOperation} {FileBodyType} body for request {RequestId}")]
-	partial void LogError(Exception ex, string fileOperation, string fileBodyType, Guid requestId);
+		"An error occured while {FileOperation} {FileBodyType} body for request {RelayRequestId}")]
+	partial void LogError(Exception ex, string fileOperation, string fileBodyType, Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream,

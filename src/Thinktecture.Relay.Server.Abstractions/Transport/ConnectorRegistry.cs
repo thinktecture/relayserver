@@ -94,8 +94,8 @@ public partial class ConnectorRegistry<T>
 		registration?.Dispose();
 	}
 
-	[LoggerMessage(22103, LogLevel.Warning, "Unknown connection {ConnectionId} to transport request {RequestId} to")]
-	partial void LogUnknownRequestConnection(string connectionId, Guid requestId);
+	[LoggerMessage(22103, LogLevel.Warning, "Unknown connection {ConnectionId} to transport request {RelayRequestId} to")]
+	partial void LogUnknownRequestConnection(string connectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Transports a client request.
@@ -141,8 +141,8 @@ public partial class ConnectorRegistry<T>
 		return Task.CompletedTask;
 	}
 
-	[LoggerMessage(22105, LogLevel.Trace, "Delivering request {RequestId} to local connection {ConnectionId}")]
-	partial void LogDeliveringRequest(Guid requestId, string? connectionId);
+	[LoggerMessage(22105, LogLevel.Trace, "Delivering request {RelayRequestId} to local connection {ConnectionId}")]
+	partial void LogDeliveringRequest(Guid relayRequestId, string? connectionId);
 
 	/// <summary>
 	/// Tries to deliver the client request to a random connector.

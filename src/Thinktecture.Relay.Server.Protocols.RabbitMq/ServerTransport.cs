@@ -102,15 +102,15 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		LogDispatchedAcknowledge(request.RequestId, request.OriginId);
 	}
 
-	[LoggerMessage(25200, LogLevel.Trace, "Dispatched response for request {RequestId} to origin {OriginId}")]
-	partial void LogDispatchedResponse(Guid requestId, Guid originId);
+	[LoggerMessage(25200, LogLevel.Trace, "Dispatched response for request {RelayRequestId} to origin {OriginId}")]
+	partial void LogDispatchedResponse(Guid relayRequestId, Guid originId);
 
-	[LoggerMessage(25201, LogLevel.Trace, "Dispatched acknowledgement for request {RequestId} to origin {OriginId}")]
-	partial void LogDispatchedAcknowledge(Guid requestId, Guid originId);
+	[LoggerMessage(25201, LogLevel.Trace, "Dispatched acknowledgement for request {RelayRequestId} to origin {OriginId}")]
+	partial void LogDispatchedAcknowledge(Guid relayRequestId, Guid originId);
 
 	[LoggerMessage(25202, LogLevel.Trace,
-		"Received response for request {RequestId} from queue {QueueName} by consumer {ConsumerTag}")]
-	partial void LogResponseConsumed(Guid requestId, string queueName, string consumerTag);
+		"Received response for request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
+	partial void LogResponseConsumed(Guid relayRequestId, string queueName, string consumerTag);
 
 	private async Task ResponseConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{
@@ -122,8 +122,8 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 
 
 	[LoggerMessage(25203, LogLevel.Trace,
-		"Received acknowledge for request {RequestId} from queue {QueueName} by consumer {ConsumerTag}")]
-	partial void LogAcknowledgeConsumed(Guid requestId, string queueName, string consumerTag);
+		"Received acknowledge for request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
+	partial void LogAcknowledgeConsumed(Guid relayRequestId, string queueName, string consumerTag);
 
 	private async Task AcknowledgeConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{

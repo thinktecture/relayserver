@@ -34,8 +34,8 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	[LoggerMessage(20400, LogLevel.Trace, "Writing request log for successful request {RequestId}")]
-	partial void LogSuccess(Guid requestId);
+	[LoggerMessage(20400, LogLevel.Trace, "Writing request log for successful request {RelayRequestId}")]
+	partial void LogSuccess(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task LogSuccessAsync(IRelayContext<TRequest, TResponse> relayContext)
@@ -50,8 +50,8 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	[LoggerMessage(20401, LogLevel.Trace, "Writing request log for aborted request {RequestId}")]
-	partial void LogAbort(Guid requestId);
+	[LoggerMessage(20401, LogLevel.Trace, "Writing request log for aborted request {RelayRequestId}")]
+	partial void LogAbort(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task LogAbortAsync(IRelayContext<TRequest, TResponse> relayContext)
@@ -65,8 +65,8 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	[LoggerMessage(20402, LogLevel.Trace, "Writing request log for failed request {RequestId}")]
-	partial void LogFail(Guid requestId);
+	[LoggerMessage(20402, LogLevel.Trace, "Writing request log for failed request {RelayRequestId}")]
+	partial void LogFail(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task LogFailAsync(IRelayContext<TRequest, TResponse> relayContext)
@@ -80,8 +80,8 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	[LoggerMessage(20403, LogLevel.Trace, "Writing request log for expired request {RequestId}")]
-	partial void LogExpired(Guid requestId);
+	[LoggerMessage(20403, LogLevel.Trace, "Writing request log for expired request {RelayRequestId}")]
+	partial void LogExpired(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task LogExpiredAsync(IRelayContext<TRequest, TResponse> relayContext)
@@ -95,8 +95,8 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	[LoggerMessage(20404, LogLevel.Trace, "Writing request log for error on request {RequestId}")]
-	partial void LogError(Guid requestId);
+	[LoggerMessage(20404, LogLevel.Trace, "Writing request log for error on request {RelayRequestId}")]
+	partial void LogError(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task LogErrorAsync(IRelayContext<TRequest, TResponse> relayContext)
