@@ -30,8 +30,8 @@ exchangeable way for you to build your own product and services with RelayServer
 
 - See the [glossary](./docs/glossary.md) for a further description of terms used in the context of RelayServer.
 - See [concepts](./docs/concepts.md) for an explanation of concepts used in RelayServer.
-- See [getting started](./docs/getting-started.md) for an overview of how to setup a development environment for
-  RelayServer.
+- See [getting started with development](./docs/development-getting-started.md) for an overview of how to setup a
+  development environment for RelayServer.
 - See [deployment options](./docs/deployment.md) for an overview of deployment options.
 - See [modules](./docs/modules.md) for an overview of the new modular design of RelayServer 3 and modules supported out
   of the box.

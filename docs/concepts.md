@@ -14,10 +14,10 @@ A request is processed in several stages in RelayServer.
 ### Request on the Server
 
 1. `RelayMiddleware`
-   - The relay middleware receives an incoming request from a client. The incoming url needs to be in the
-     format `https://relayserver.tld/relay/{TenantName}/{TargetName}/{Path}`.
+   - The relay middleware receives an incoming request from a client. The incoming url needs to be in the format
+     `https://relayserver.tld/relay/{TenantName}/{TargetName}/{Path}`.
    - The middleware searches for the tenant and, if found, it starts processing the request.
-   - If the request has a body and it is larger than the maximum size any [transport](#transports) allows, it will be
+   - If the request has a body, and it is larger than the maximum size any [transport](#transports) allows, it will be
      persisted using the configured `IBodyStore` implementation.
    - The middleware hands the request over to the request coordinator.
 1. `RequestCoordinator`
@@ -79,7 +79,8 @@ A request is processed in several stages in RelayServer.
    - If shortcutting is disabled (default), or the client waiting for the response is connected to a different server,
      the server dispatcher puts the response in a message queue targeted to the server where the client waits for the
      response via the `ServerTransport`.
-   - Otherwise (shortcutting is enabled and is possible) the response is directly passed on to the `ResponseCoordinator`.
+   - Otherwise (shortcutting is enabled and is possible) the response is directly passed on to the
+     `ResponseCoordinator`.
 1. `ResponseCoordinator`  
    - If shortcutting is allowed by the configuration, the response coordinator will check if the client is waiting for
      the response on the server that received this response. If this is the case, the response will be processed
@@ -87,8 +88,8 @@ A request is processed in several stages in RelayServer.
 1. `ServerTransport`  
    The server transport is part of the RabbitMQ [server-to-server transport](#server-to-server-transport). It is
    responsible for both sending as well as receiving messages.
-   - When the `ResponseDispatcher` hands a response to the server transport, it will put a message into the queue
-     for the corresponding origin server. 
+   - When the `ResponseDispatcher` hands a response to the server transport, it will put a message into the queue for
+     the corresponding origin server. 
    - When a response message is received, an event is raised by RabbitMQ to handle this. This event is handled by
      `ServerTransport` and the response is passed along to the `ResponseCoordinator` for further processing.
 1. `ResponseCoordinator`  
@@ -156,8 +157,8 @@ connector.
 
 ## Body content handling
 
-As mentioned above, transports may have limits on message sizes. So it is not possible to send arbitrary bodies
-through any transport. Larger body contents need to be persisted temporarily for processing. This is managed by an
+As mentioned above, transports may have limits on message sizes. So it is not possible to send arbitrary bodies through
+any transport. Larger body contents need to be persisted temporarily for processing. This is managed by an
 implementation of the `IBodyStore` interface.
 
 The decisions when to delete content are as follows:
@@ -165,8 +166,8 @@ The decisions when to delete content are as follows:
 ### Request body
 
 When acknowledgment is enabled, the contents of the request body will be deleted when the request is acknowledged. This
-means either the connector has completely received the request and also requested the request body from a
-server (`AcknowledgeMode.ConnectorReceived`), or the connector already got the response from the target
+means either the connector has completely received the request and also requested the request body from a server
+(`AcknowledgeMode.ConnectorReceived`), or the connector already got the response from the target
 (`AcknowledgeMode.ConnectorFinished`).
 
 When in manual mode (`AcknowledgeMode.Manual`), the acknowledgment must not be sent before the request body was loaded
