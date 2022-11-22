@@ -8,8 +8,8 @@ encouraged to create your own host applications tailored and configured to your 
 your own container images.
 
 Scripts to help building and running the system are provided as
-[PowerShell Core](https://github.com/powershell/powershell) scripts, to be able to run cross platform on Windows,
-macOS and Linux.
+[PowerShell Core](https://github.com/powershell/powershell) scripts, to be able to run cross platform on Windows, macOS
+and Linux.
 
 First, a script is provided to build all the docker images (`src/build-docker-images.ps1`).
 
@@ -44,13 +44,14 @@ to use other logging targets or acquire a commercial Seq license.
 The relay server environment consists of several parts.
 
 - Configuration database  
-  The current implementation supports PostgreSQL as a database. Microsoft SQL Server support is on the roadmap.
+  The current implementation supports PostgreSQL and Microsoft SQL Server. The development environment is built for
+  PostgreSQL only.
 
    - Only needs to be accessible from specifically listed components.
    - The PostgreSQL database server can be accessed through its default port (5432) on localhost.
 
 - Message queue  
-  Currently only RabbitMQ is supported. The dev environment launches 2 Rabbit nodes in a cluster configuration.
+  Currently only RabbitMQ is supported. The development environment launches 2 Rabbit nodes in a cluster configuration.
 
    - Only needs to be accessible from specifically listed components.
    - Node 1 management UI can be accessed at http://localhost:15672/, login with guest/guest.
@@ -88,7 +89,7 @@ The relay server environment consists of several parts.
 
 - Connector  
   This component will be installed on-premises at tenants.
-   
+
    - Needs access to identity server through public url.
    - Needs access to relay server through public url.
 
@@ -107,4 +108,3 @@ so far and does not mean that this is the only way to deploy and use RelayServer
 It might be the case that your specific use case demands or favours a different component layout, i.e. combining the
 management- and statistics API together with the IdentityServer part into a single host project, or even putting all
 server components together.
-
