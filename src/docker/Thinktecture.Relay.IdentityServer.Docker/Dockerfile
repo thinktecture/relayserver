@@ -42,10 +42,14 @@ RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists && \
 RUN chmod u-s /usr/bin/gpasswd /usr/bin/chsh /bin/umount /bin/mount /sbin/unix_chkpwd /usr/bin/expiry /usr/bin/newgrp /usr/bin/chage /usr/bin/chfn /usr/bin/wall /usr/bin/passwd /bin/su && \
     chmod g-s /usr/bin/gpasswd /usr/bin/chsh /bin/umount /bin/mount /sbin/unix_chkpwd /usr/bin/expiry /usr/bin/newgrp /usr/bin/chage /usr/bin/chfn /usr/bin/wall /usr/bin/passwd /bin/su
 
+RUN mkdir -p /var/signingkeys
+RUN chown -R idsrv /var/signingkeys
+
 USER idsrv
 COPY --chown=idsrv --from=build /app .
 
 EXPOSE 5000
 ENV ASPNETCORE_URLS=http://+:5000
+ENV CertificateStore__Path=/var/signingkeys
 
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.IdentityServer.Docker.dll"]

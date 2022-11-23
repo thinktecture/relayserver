@@ -25,9 +25,9 @@ public class Startup
 
 		services.AddIdentityServer(options => options.InputLengthRestrictions.ClientSecret = 200)
 			.AddClientStore<RelayServerTenantStore>()
-			.AddDeveloperSigningCredential()
 			.AddInMemoryApiScopes(new[] { new ApiScope("relaying") })
-			.AddInMemoryApiResources(new[] { new ApiResource("relayserver") { Scopes = new[] { "relaying" } } });
+			.AddInMemoryApiResources(new[] { new ApiResource("relayserver") { Scopes = new[] { "relaying" } } })
+			.AddRotatingFileStore(Configuration.GetSection("CertificateStore"));
 	}
 
 	// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
