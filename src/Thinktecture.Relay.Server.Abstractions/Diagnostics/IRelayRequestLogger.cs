@@ -1,4 +1,3 @@
-using System.Threading;
 using System.Threading.Tasks;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
