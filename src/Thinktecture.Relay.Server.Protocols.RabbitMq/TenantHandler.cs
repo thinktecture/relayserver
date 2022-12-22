@@ -46,8 +46,8 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 			acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
 		_connectionId = connectionId;
 
-		_model = modelFactory?.Create($"tenant handler for {tenantId} of connection {connectionId}") ??
-			throw new ArgumentNullException(nameof(modelFactory));
+		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
+		_model = modelFactory.Create($"tenant handler for {tenantId} of connection {connectionId}");
 
 		_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
 		_consumer.Received += ConsumerReceived;
