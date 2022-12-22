@@ -17,8 +17,10 @@ namespace Thinktecture.Relay.Connector.Targets;
 
 /// <inheritdoc cref="IRelayTarget{TRequest,TResponse}"/>
 public partial class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest, TResponse>, IDisposable
-	where TRequest : IClientRequest
-	where TResponse : ITargetResponse, new()
+// ReSharper disable RedundantNameQualifier; (this is needed in 6.0, see https://github.com/dotnet/runtime/issues/58550)
+	where TRequest : Thinktecture.Relay.Transport.IClientRequest
+	where TResponse : Thinktecture.Relay.Transport.ITargetResponse, new()
+// ReSharper restore RedundantNameQualifier
 {
 	private readonly ILogger<RelayWebTarget<TRequest, TResponse>> _logger;
 

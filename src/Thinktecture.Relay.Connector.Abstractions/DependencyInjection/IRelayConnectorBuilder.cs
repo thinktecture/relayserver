@@ -7,7 +7,9 @@ namespace Thinktecture.Relay.Connector.DependencyInjection;
 /// <summary>
 /// Connector builder interface.
 /// </summary>
+// ReSharper disable UnusedTypeParameter; (this makes method call signatures cleaner)
 public interface IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge>
+// ReSharper restore UnusedTypeParameter
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
