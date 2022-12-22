@@ -8,7 +8,7 @@ namespace Thinktecture.Relay;
 internal class InlineMemoryStreamJsonConverter : JsonConverter<Stream>
 {
 	public override Stream Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		=> new MemoryStream(Convert.FromBase64String(reader.GetString()));
+		=> new MemoryStream(Convert.FromBase64String(reader.GetString() ?? string.Empty));
 
 	public override void Write(Utf8JsonWriter writer, Stream value, JsonSerializerOptions options)
 	{
