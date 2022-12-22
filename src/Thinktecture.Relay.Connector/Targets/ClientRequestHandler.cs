@@ -15,9 +15,11 @@ namespace Thinktecture.Relay.Connector.Targets;
 
 /// <inheritdoc/>
 public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRequestHandler<TRequest>
-	where TRequest : IClientRequest
-	where TResponse : ITargetResponse, new()
-	where TAcknowledge : IAcknowledgeRequest, new()
+// ReSharper disable RedundantNameQualifier; (this is needed in 6.0, see https://github.com/dotnet/runtime/issues/58550)
+	where TRequest : Thinktecture.Relay.Transport.IClientRequest
+	where TResponse : Thinktecture.Relay.Transport.ITargetResponse, new()
+	where TAcknowledge : Thinktecture.Relay.Acknowledgement.IAcknowledgeRequest, new()
+// ReSharper restore RedundantNameQualifier
 {
 	private readonly Uri _acknowledgeEndpoint;
 	private readonly IAcknowledgeTransport<TAcknowledge> _acknowledgeTransport;
