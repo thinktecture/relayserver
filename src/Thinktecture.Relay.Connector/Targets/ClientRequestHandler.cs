@@ -24,29 +24,8 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	private readonly Uri _acknowledgeEndpoint;
 	private readonly IAcknowledgeTransport<TAcknowledge> _acknowledgeTransport;
 	private readonly ILogger<ClientRequestHandler<TRequest, TResponse, TAcknowledge>> _logger;
-	private readonly int _maxCompletionPortThreads;
-	private readonly int _maxWorkerThreads;
-	private readonly int _minWorkerThreads;
 	private readonly IResponseTransport<TResponse> _responseTransport;
 	private readonly IServiceScopeFactory _serviceProvider;
-
-	/// <inheritdoc/>
-	public int? BackgroundTaskLimit
-	{
-		get
-		{
-			ThreadPool.GetMaxThreads(out var workerThreads, out _);
-			return workerThreads;
-		}
-		set
-		{
-			// no lower than minimum worker threads (or system's default fallback)
-			var workerThreads = Math.Max(_minWorkerThreads, value ?? _maxWorkerThreads);
-			// no lower than processor count
-			workerThreads = Math.Max(Environment.ProcessorCount, workerThreads);
-			ThreadPool.SetMaxThreads(workerThreads, _maxCompletionPortThreads);
-		}
-	}
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ClientRequestHandler{TRequest,TResponse,TAcknowledge}"/> class.
@@ -69,9 +48,6 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		_acknowledgeTransport = acknowledgeTransport ?? throw new ArgumentNullException(nameof(acknowledgeTransport));
 
 		_acknowledgeEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.AcknowledgeEndpoint}/");
-
-		ThreadPool.GetMinThreads(out _minWorkerThreads, out _);
-		ThreadPool.GetMaxThreads(out _maxWorkerThreads, out _maxCompletionPortThreads);
 	}
 
 	/// <inheritdoc/>
