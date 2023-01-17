@@ -1,6 +1,6 @@
 POST http://localhost:5004/api/management/tenants HTTP/1.1
 Accept: application/json
-tt-apikey: write-key
+TT-Api-Key: write-key
 Content-Type: application/json
 
 {

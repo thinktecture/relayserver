@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Thinktecture.Relay.Server.Persistence.Models;
@@ -63,57 +62,4 @@ public class Tenant
 	/// </summary>
 	[JsonIgnore]
 	public Config? Config { get; set; }
-
-	/// <summary>
-	/// If both tenants have the same id, update this instance with all values from the other instance.
-	/// </summary>
-	/// <param name="other">The source to copy the data over from to this instance.</param>
-	public void UpdateFrom(Tenant other)
-	{
-		if (Id != other.Id)
-		{
-			throw new InvalidOperationException(
-				$"Id of other tenant: {other.Id} is not the same as this: {Id}. Cannot update from other instance.");
-		}
-
-		Name = other.Name;
-		NormalizedName = other.NormalizedName;
-
-		DisplayName = other.DisplayName;
-		Description = other.Description;
-
-		// Copy over config if available
-		if (other.Config != null)
-		{
-			Config ??= new Config();
-			Config.UpdateFrom(other.Config);
-		}
-
-		// Copy over secrets when they are complete with values
-		if (other.ClientSecrets != null)
-		{
-			ClientSecrets ??= new List<ClientSecret>();
-			ClientSecrets.RemoveAll(cs => !other.ClientSecrets.Any(os => os.Id == cs.Id));
-
-			// only consider secrets that actually have a value
-			foreach (var secret in other.ClientSecrets.Where(o => !String.IsNullOrWhiteSpace(o.Value)))
-			{
-				var existingSecret = ClientSecrets.SingleOrDefault(cs => cs.Id == secret.Id);
-				if (existingSecret == null)
-				{
-					// create new secret, either with given id or with a new one
-					if (secret.Id == Guid.Empty)
-					{
-						secret.Id = Guid.NewGuid();
-					}
-
-					secret.Created = DateTime.UtcNow;
-
-					ClientSecrets.Add(existingSecret = new ClientSecret() { Id = secret.Id, });
-				}
-
-				existingSecret.UpdateFrom(secret);
-			}
-		}
-	}
 }

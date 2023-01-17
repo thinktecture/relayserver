@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Thinktecture.Relay.Server.Management.Models;
+namespace Thinktecture.Relay.Server.Management.DataTransferObjects;
 
 /// <summary>
 /// Represents a tenant. A tenant can have multiple connectors on one physical on-premises

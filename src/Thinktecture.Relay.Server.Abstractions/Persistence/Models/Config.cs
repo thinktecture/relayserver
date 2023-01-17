@@ -24,16 +24,4 @@ public class Config : ITenantConfig
 
 	/// <inheritdoc/>
 	public TimeSpan? ReconnectMaximumDelay { get; set; }
-
-	/// <summary>
-	/// Update this instance with all values from the other instance.
-	/// </summary>
-	/// <param name="other">The source to copy the data over from to this instance.</param>
-	public void UpdateFrom(Config other)
-	{
-		KeepAliveInterval = other.KeepAliveInterval;
-		EnableTracing = other.EnableTracing;
-		ReconnectMinimumDelay = other.ReconnectMinimumDelay;
-		ReconnectMaximumDelay = other.ReconnectMaximumDelay;
-	}
 }

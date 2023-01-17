@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Thinktecture.Relay.Server.Management.Models;
+using Thinktecture.Relay.Server.Management.DataTransferObjects;
+using Thinktecture.Relay.Server.Persistence.DataTransferObjects;
 using Thinktecture.Relay.Server.Persistence.Models;
-using TenantModel = Thinktecture.Relay.Server.Management.Models.Tenant;
+using TenantModel = Thinktecture.Relay.Server.Management.DataTransferObjects.Tenant;
 using TenantEntity = Thinktecture.Relay.Server.Persistence.Models.Tenant;
 using ConfigEntity = Thinktecture.Relay.Server.Persistence.Models.Config;
 
@@ -14,14 +15,14 @@ namespace Thinktecture.Relay.Server.Management.Extensions;
 /// <summary>
 /// Provides extension methods to the persistence model types.
 /// </summary>
-public static class PersistenceModelsExtensions
+internal static class PersistenceModelsExtensions
 {
 	/// <summary>
 	/// Converts a <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/> to an corresponding
-	/// <see cref="Thinktecture.Relay.Server.Management.Models.Tenant"/>.
+	/// <see cref="DataTransferObjects.Tenant"/>.
 	/// </summary>
 	/// <param name="tenant">The tenant instance to convert.</param>
-	/// <returns>A new instance of an <see cref="Thinktecture.Relay.Server.Management.Models.Tenant"/>.</returns>
+	/// <returns>A new instance of an <see cref="DataTransferObjects.Tenant"/>.</returns>
 	public static TenantModel ToModel(this TenantEntity tenant)
 		=> new TenantModel()
 		{
@@ -47,7 +48,7 @@ public static class PersistenceModelsExtensions
 		};
 
 	/// <summary>
-	/// Converts a <see cref="Thinktecture.Relay.Server.Management.Models.Tenant"/> to an corresponding
+	/// Converts a <see cref="DataTransferObjects.Tenant"/> to an corresponding
 	/// <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/>.
 	/// </summary>
 	/// <param name="tenant">The tenant instance to convert.</param>
@@ -79,7 +80,7 @@ public static class PersistenceModelsExtensions
 
 	/// <summary>
 	/// Converts an enumerable of <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/> to an
-	/// enumerable of <see cref="Thinktecture.Relay.Server.Management.Models.Tenant"/> by converting each
+	/// enumerable of <see cref="DataTransferObjects.Tenant"/> by converting each
 	/// entry individually.
 	/// </summary>
 	/// <param name="tenants">The tenants to convert.</param>
@@ -90,14 +91,14 @@ public static class PersistenceModelsExtensions
 
 	/// <summary>
 	/// Converts a paged result of <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/> to
-	/// an paged result of <see cref="Thinktecture.Relay.Server.Management.Models.Tenant"/>.
+	/// an paged result of <see cref="DataTransferObjects.Tenant"/>.
 	/// </summary>
 	/// <param name="page">The page to convert.</param>
 	/// <returns>The converted page.</returns>
 	public static Page<TenantModel> ToModel(this Page<TenantEntity> page)
 		=> new Page<TenantModel>()
 		{
-			TotalAmount = page.TotalAmount,
+			TotalCount = page.TotalCount,
 			Offset = page.Offset,
 			PageSize = page.PageSize,
 			Results = page.Results.ToModels().ToArray(),

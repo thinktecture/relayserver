@@ -15,7 +15,7 @@ namespace Thinktecture.Relay.Docker.Authentication;
 /// </summary>
 public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
 {
-	/// <inheritdoc cref="AuthenticationHandler<ApiKeyAuthenticationOptions>"/>
+	/// <inheritdoc cref="AuthenticationHandler{ApiKeyAuthenticationOptions}"/>
 	public ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options,
 		ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
 		: base(options, logger, encoder, clock)

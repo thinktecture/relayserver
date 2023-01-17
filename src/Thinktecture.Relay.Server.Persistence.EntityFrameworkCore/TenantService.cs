@@ -1,9 +1,9 @@
 using System;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Thinktecture.Relay.Server.Persistence.DataTransferObjects;
 using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;

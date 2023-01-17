@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Thinktecture.Relay.Server.Persistence.DataTransferObjects;
 using Thinktecture.Relay.Server.Persistence.Models;
 
 // ReSharper disable once CheckNamespace; (extension methods on OrderedQueryables namespace)
@@ -26,7 +27,7 @@ public static class OrderedQueryableExtensions
 		CancellationToken cancellationToken = default)
 		=> new Page<T>()
 			{
-				TotalAmount = await source.CountAsync(cancellationToken),
+				TotalCount = await source.CountAsync(cancellationToken),
 				Results = await source.Skip(skip).Take(take).ToArrayAsync(cancellationToken),
 				Offset = skip,
 				PageSize = take,

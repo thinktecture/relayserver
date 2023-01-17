@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Thinktecture.Relay.Server.Management.DataTransferObjects;
 using Thinktecture.Relay.Server.Management.Extensions;
-using Thinktecture.Relay.Server.Management.Models;
 using Thinktecture.Relay.Server.Persistence;
+using Thinktecture.Relay.Server.Persistence.DataTransferObjects;
 
 namespace Thinktecture.Relay.Server.Management.Endpoints;
 
@@ -29,7 +30,7 @@ public static partial class EndpointRouteBuilderExtensions
 			.MapGet(pattern, GetTenantsPagedEndpoint.HandleRequestAsync)
 			.WithName("GetTenantsPaged")
 			.WithDisplayName("Get tenants paged")
-			.Produces<Persistence.Models.Page<Tenant>>()
+			.Produces<Page<Tenant>>()
 		;
 
 		if (!String.IsNullOrWhiteSpace(policy))
@@ -59,7 +60,7 @@ public static class GetTenantsPagedEndpoint
 	/// <see cref="P:System.Threading.CancellationToken.None"/>.
 	/// </param>
 	/// <returns>A page containing the requested tenants.</returns>
-	public static async Task<Persistence.Models.Page<Tenant>> HandleRequestAsync(
+	public static async Task<Page<Tenant>> HandleRequestAsync(
 		[FromServices] ITenantService service,
 		[FromQuery] int skip = 0,
 		[FromQuery] int take = 10,
