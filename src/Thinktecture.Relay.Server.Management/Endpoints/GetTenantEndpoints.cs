@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Thinktecture.Relay.Server.Management.DataTransferObjects;
 using Thinktecture.Relay.Server.Management.Extensions;
-using Thinktecture.Relay.Server.Management.Models;
 using Thinktecture.Relay.Server.Persistence;
 
 namespace Thinktecture.Relay.Server.Management.Endpoints;

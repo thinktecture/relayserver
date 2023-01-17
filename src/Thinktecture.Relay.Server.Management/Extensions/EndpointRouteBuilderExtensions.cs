@@ -15,15 +15,15 @@ public static class EndpointRouteBuilderExtensions
 	/// <param name="basePath">The base path under which the endpoints should be mapped.
 	/// Defaults to /api/management</param>
 	public static void UseRelayServerManagementEndpoints(this IEndpointRouteBuilder app,
-		string basePath = ManagementApiConstants.DefaultBasePath)
+		string basePath = "/api/management")
 	{
-		var endpointPath = $"{basePath}{ManagementApiConstants.DefaultTenantsPath}";
+		var endpointPath = $"{basePath}/tenants";
 
-		app.MapGetTenantsPaged(endpointPath, ManagementApiConstants.DefaultReadPolicyName);
-		app.MapGetTenantById(endpointPath, ManagementApiConstants.DefaultReadPolicyName);
-		app.MapGetTenantByName(endpointPath, ManagementApiConstants.DefaultReadPolicyName);
-		app.MapPostTenant(endpointPath, ManagementApiConstants.DefaultWritePolicyName);
-		app.MapPutTenant(endpointPath, ManagementApiConstants.DefaultWritePolicyName);
-		app.MapDeleteTenant(endpointPath, ManagementApiConstants.DefaultWritePolicyName);
+		app.MapGetTenantsPaged(endpointPath, ManagementApiPolicyNames.Read);
+		app.MapGetTenantById(endpointPath, ManagementApiPolicyNames.Read);
+		app.MapGetTenantByName(endpointPath, ManagementApiPolicyNames.Read);
+		app.MapPostTenant(endpointPath, ManagementApiPolicyNames.Write);
+		app.MapPutTenant(endpointPath, ManagementApiPolicyNames.Write);
+		app.MapDeleteTenant(endpointPath, ManagementApiPolicyNames.Write);
 	}
 }

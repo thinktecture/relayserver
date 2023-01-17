@@ -3,7 +3,7 @@
 Function Create-Tenant {
     Param($id, $name, $secret)
     $resultCode
-    $result = Invoke-RestMethod -Method Post -Uri http://localhost:5004/api/management/tenants -Body (@{ id = $id; name = $name; credentials = @(@{ plainTextValue = $secret }) } | ConvertTo-Json) -Headers @{ 'Content-Type' = 'application/json'; 'tt-apikey' = 'write-key' } -SkipHttpErrorCheck -StatusCodeVariable "resultCode"
+    $result = Invoke-RestMethod -Method Post -Uri http://localhost:5004/api/management/tenants -Body (@{ id = $id; name = $name; credentials = @(@{ plainTextValue = $secret }) } | ConvertTo-Json) -Headers @{ 'Content-Type' = 'application/json'; 'TT-Api-Key' = 'write-key' } -SkipHttpErrorCheck -StatusCodeVariable "resultCode"
 
     if ($resultCode -eq 201) {
         Write-Output "Tenant $tenantName was created $result"

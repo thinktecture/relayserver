@@ -44,10 +44,10 @@ try
 	// Here we use the default policy names
 	builder.Services.AddAuthorization(o =>
 	{
-		o.AddPolicy(ManagementApiConstants.DefaultReadPolicyName, c =>
+		o.AddPolicy(ManagementApiPolicyNames.Read, c =>
 			c.RequireClaim("managementapi", new[] { "read", "readwrite", }));
 
-		o.AddPolicy(ManagementApiConstants.DefaultWritePolicyName, c =>
+		o.AddPolicy(ManagementApiPolicyNames.Write, c =>
 			c.RequireClaim("managementapi", new[] { "write", "readwrite", }));
 	});
 

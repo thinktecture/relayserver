@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Persistence.Models;
+namespace Thinktecture.Relay.Server.Persistence.DataTransferObjects;
 
 /// <summary>
 /// An object that represents a single page of a paginated result.
@@ -16,7 +16,7 @@ public class Page<T>
 	/// <summary>
 	/// Gets or sets the total amount of data entries available.
 	/// </summary>
-	public int TotalAmount { get; set; } = 0;
+	public int TotalCount { get; set; } = 0;
 
 	/// <summary>
 	/// Gets or sets the starting index of the <see cref="Results"/> array within all available entries.

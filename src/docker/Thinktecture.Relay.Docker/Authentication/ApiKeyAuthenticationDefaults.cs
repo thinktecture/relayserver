@@ -13,5 +13,5 @@ public static class ApiKeyAuthenticationDefaults
 	/// <summary>
 	/// The default header name used for the api key authentication.
 	/// </summary>
-	public const string HeaderName = "apikey";
+	public const string HeaderName = "Api-Key";
 }

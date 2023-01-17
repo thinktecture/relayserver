@@ -1,6 +1,6 @@
 using System;
 
-namespace Thinktecture.Relay.Server.Management.Models;
+namespace Thinktecture.Relay.Server.Management.DataTransferObjects;
 
 /// <summary>
 /// Represents a result that carries an Id.
