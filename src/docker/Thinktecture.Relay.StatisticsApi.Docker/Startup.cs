@@ -29,10 +29,6 @@ internal class Startup
 		{
 			app.UseDeveloperExceptionPage();
 		}
-		else
-		{
-			app.UseHttpsRedirection();
-		}
 
 		app.UseRouting();
 
