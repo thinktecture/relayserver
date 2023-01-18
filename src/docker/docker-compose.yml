@@ -29,6 +29,21 @@ services:
       - relay_transport_rabbitmq1
     networks:
       - relayserver
+  relay_logging_seq:
+    image: datalust/seq:latest
+    container_name: relay_logging_seq
+    hostname: relay_logging_seq
+    ports:
+      - "5341:80"
+    env_file:
+      - relay_logging_seq.env
+    volumes:
+      - seq-data:/data
+    networks:
+      - relayserver
+volumes:
+  seq-data:
+    driver: local
 networks:
   relayserver:
     driver: bridge
