@@ -42,19 +42,17 @@ public class Startup
 		else
 		{
 			app.UseExceptionHandler("/Home/Error");
-			// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-			app.UseHsts();
-			app.UseHttpsRedirection();
 		}
 
+		app.UseForwardedHeaders();
 		app.UseStaticFiles();
-
-		app.UseIdentityServer();
 
 		app.UseRouting();
 
 		app.UseAuthorization();
 		app.UseAuthentication();
+
+		app.UseIdentityServer();
 
 		app.UseEndpoints(endpoints => endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
 	}
