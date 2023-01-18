@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  relay_transport_rabbitmq1:
+    image: tt-relay-rabbit
+    build:
+      context: ./rabbitmq/
+    container_name: relay_transport_rabbitmq1
+    hostname: relay_transport_rabbitmq1
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - relay_transport_rabbitmq.env
+    networks:
+      - relayserver
+  relay_transport_rabbitmq2:
+    image: tt-relay-rabbit
+    container_name: relay_transport_rabbitmq2
+    hostname: relay_transport_rabbitmq2
+    links:
+      - relay_transport_rabbitmq1
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    env_file:
+      - relay_transport_rabbitmq.env
+      - relay_transport_rabbitmq2.env
+    depends_on:
+      - relay_transport_rabbitmq1
+    networks:
+      - relayserver
+networks:
+  relayserver:
+    driver: bridge
+    name: relayserver
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
