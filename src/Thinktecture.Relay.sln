@@ -71,6 +71,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA
 		docker\relay_transport_rabbitmq.env = docker\relay_transport_rabbitmq.env
 		docker\relay_transport_rabbitmq2.env = docker\relay_transport_rabbitmq2.env
 		docker\relay_logging_seq.env = docker\relay_logging_seq.env
+		docker\relay_persistence_postgresql.env = docker\relay_persistence_postgresql.env
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Docker", "docker\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj", "{599D7AD9-7901-4A20-A81F-6C71E60A71DF}"
