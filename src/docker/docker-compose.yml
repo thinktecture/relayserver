@@ -41,8 +41,22 @@ services:
       - seq-data:/data
     networks:
       - relayserver
+  relay_persistence_postgresql:
+    image: postgres:15-alpine
+    container_name: relay_persistence_postgresql
+    hostname: relay_persistence_postgresql
+    ports:
+      - "5432:5432"
+    env_file:
+      - relay_persistence_postgresql.env
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    networks:
+      - relayserver
 volumes:
   seq-data:
+    driver: local
+  postgresql-data:
     driver: local
 networks:
   relayserver:
