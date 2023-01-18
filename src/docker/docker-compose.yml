@@ -53,6 +53,20 @@ services:
       - postgresql-data:/var/lib/postgresql/data
     networks:
       - relayserver
+  relay_server_migrations:
+    image: relay_server
+    build:
+      context: ..
+      dockerfile: ./docker/Thinktecture.Relay.Server.Docker/Dockerfile
+    container_name: relay_server_migrations
+    hostname: relay_server_migrations
+    depends_on:
+      - relay_transport_rabbitmq1
+      - relay_transport_rabbitmq2
+      - relay_persistence_postgresql
+    networks:
+      - relayserver
+    entrypoint: ["dotnet", "Thinktecture.Relay.Server.Docker.dll", "migrate-only=true"]
 volumes:
   seq-data:
     driver: local
