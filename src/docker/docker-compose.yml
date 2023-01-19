@@ -96,6 +96,25 @@ services:
     command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{\"id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\", \"name\": \"TestTenant1\", \"credentials\": [{ \"id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\", \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/api/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{\"id\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb\", \"name\": \"TestTenant2\", \"credentials\": [{ \"id\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1\", \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/api/management/tenants" ]
     networks:
       - relayserver
+  relay_identityserver:
+    image: relay_identityserver
+    build:
+      context: ..
+      dockerfile: ./docker/Thinktecture.Relay.IdentityServer.Docker/Dockerfile
+    container_name: relay_identityserver
+    hostname: relay_identityserver
+    privileged: false
+    ports:
+      - "5002:5000"
+    env_file:
+      - relay_identityserver.env
+    depends_on:
+      - relay_logging_seq
+      - relay_persistence_postgresql
+      - relay_server_migrations
+      - relay_tenant_seed
+    networks:
+      - relayserver
 volumes:
   seq-data:
     driver: local
