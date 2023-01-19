@@ -115,10 +115,52 @@ services:
       - relay_tenant_seed
     networks:
       - relayserver
+  relay_server_a:
+    image: relay_server
+    container_name: relay_server_a
+    hostname: relay_server_a
+    privileged: false
+    ports:
+      - "5010:5000"
+    env_file:
+      - relay_server.env
+      - relay_server_a.env
+    volumes:
+      - relay_persistence_bodystore:/var/bodystore
+    depends_on:
+      - relay_logging_seq
+      - relay_persistence_postgresql
+      - relay_server_migrations
+      - relay_tenant_seed
+      - relay_identityserver
+    networks:
+      - relayserver
+  relay_server_b:
+    image: relay_server
+    container_name: relay_server_b
+    hostname: relay_server_b
+    privileged: false
+    ports:
+      - "5011:5000"
+    env_file:
+      - relay_server.env
+      - relay_server_b.env
+    volumes:
+      - relay_persistence_bodystore:/var/bodystore
+    depends_on:
+      - relay_logging_seq
+      - relay_persistence_postgresql
+      - relay_server_migrations
+      - relay_tenant_seed
+      - relay_identityserver
+    networks:
+      - relayserver
 volumes:
   seq-data:
     driver: local
   postgresql-data:
+    driver: local
+  relay_persistence_bodystore:
     driver: local
 networks:
   relayserver:
