@@ -155,6 +155,65 @@ services:
       - relay_identityserver
     networks:
       - relayserver
+  relay_connector_a1:
+    image: relay_connector
+    build:
+      context: ..
+      dockerfile: ./docker/Thinktecture.Relay.Connector.Docker/Dockerfile
+    container_name: relay_connector_a1
+    hostname: relay_connector_a1
+    privileged: false
+    env_file:
+      - relay_connector.env
+      - relay_connector_a1.env
+    depends_on:
+      - relay_logging_seq
+      - relay_identityserver
+      - relay_server_a
+    networks:
+      - relayserver
+  relay_connector_a2:
+    image: relay_connector
+    container_name: relay_connector_a2
+    hostname: relay_connector_a2
+    privileged: false
+    env_file:
+      - relay_connector.env
+      - relay_connector_a2.env
+    depends_on:
+      - relay_logging_seq
+      - relay_identityserver
+      - relay_server_a
+    networks:
+      - relayserver
+  relay_connector_b1:
+    image: relay_connector
+    container_name: relay_connector_b1
+    hostname: relay_connector_b1
+    privileged: false
+    env_file:
+      - relay_connector.env
+      - relay_connector_b1.env
+    depends_on:
+      - relay_logging_seq
+      - relay_identityserver
+      - relay_server_b
+    networks:
+      - relayserver
+  relay_connector_b2:
+    image: relay_connector
+    container_name: relay_connector_b2
+    hostname: relay_connector_b2
+    privileged: false
+    env_file:
+      - relay_connector.env
+      - relay_connector_b2.env
+    depends_on:
+      - relay_logging_seq
+      - relay_identityserver
+      - relay_server_b
+    networks:
+      - relayserver
 volumes:
   seq-data:
     driver: local
