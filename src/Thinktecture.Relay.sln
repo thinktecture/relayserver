@@ -68,20 +68,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA
 		docker\remove-all.ps1 = docker\remove-all.ps1
 		docker\stop-dependencies.ps1 = docker\stop-dependencies.ps1
 		docker\docker-compose.yml = docker\docker-compose.yml
-		docker\relay_transport_rabbitmq.env = docker\relay_transport_rabbitmq.env
-		docker\relay_transport_rabbitmq2.env = docker\relay_transport_rabbitmq2.env
-		docker\relay_logging_seq.env = docker\relay_logging_seq.env
-		docker\relay_persistence_postgresql.env = docker\relay_persistence_postgresql.env
-		docker\relay_management.env = docker\relay_management.env
-		docker\relay_identityserver.env = docker\relay_identityserver.env
-		docker\relay_server.env = docker\relay_server.env
-		docker\relay_server_a.env = docker\relay_server_a.env
-		docker\relay_server_b.env = docker\relay_server_b.env
-		docker\relay_connector.env = docker\relay_connector.env
-		docker\relay_connector_a1.env = docker\relay_connector_a1.env
-		docker\relay_connector_a2.env = docker\relay_connector_a2.env
-		docker\relay_connector_b1.env = docker\relay_connector_b1.env
-		docker\relay_connector_b2.env = docker\relay_connector_b2.env
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Docker", "docker\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj", "{599D7AD9-7901-4A20-A81F-6C71E60A71DF}"
@@ -117,6 +103,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rabbitmq", "rabbitmq", "{59
 		docker\rabbitmq\.erlang.cookie = docker\rabbitmq\.erlang.cookie
 		docker\rabbitmq\Dockerfile = docker\rabbitmq\Dockerfile
 		docker\rabbitmq\startrabbit.sh = docker\rabbitmq\startrabbit.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "environments", "environments", "{0A0F0537-6270-4D1C-AFF7-F998AECCF938}"
+	ProjectSection(SolutionItems) = preProject
+		docker\environments\relay_connector.env = docker\environments\relay_connector.env
+		docker\environments\relay_connector_a1.env = docker\environments\relay_connector_a1.env
+		docker\environments\relay_connector_a2.env = docker\environments\relay_connector_a2.env
+		docker\environments\relay_connector_b1.env = docker\environments\relay_connector_b1.env
+		docker\environments\relay_connector_b2.env = docker\environments\relay_connector_b2.env
+		docker\environments\relay_identityserver.env = docker\environments\relay_identityserver.env
+		docker\environments\relay_logging_seq.env = docker\environments\relay_logging_seq.env
+		docker\environments\relay_management.env = docker\environments\relay_management.env
+		docker\environments\relay_persistence_postgresql.env = docker\environments\relay_persistence_postgresql.env
+		docker\environments\relay_server.env = docker\environments\relay_server.env
+		docker\environments\relay_server_a.env = docker\environments\relay_server_a.env
+		docker\environments\relay_server_b.env = docker\environments\relay_server_b.env
+		docker\environments\relay_transport_rabbitmq.env = docker\environments\relay_transport_rabbitmq.env
+		docker\environments\relay_transport_rabbitmq2.env = docker\environments\relay_transport_rabbitmq2.env
 	EndProjectSection
 EndProject
 Global
@@ -240,6 +244,7 @@ Global
 		{CD190E32-1B0F-48D4-BFF1-43BD388A7C4A} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{4EF4176E-34E3-477A-8CB1-982A318C3C30} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{59F4013A-610D-40D2-A6AD-894FBB5A28B4} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
+		{0A0F0537-6270-4D1C-AFF7-F998AECCF938} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CE554FF-A10B-4F63-B480-ED9455F16873}
