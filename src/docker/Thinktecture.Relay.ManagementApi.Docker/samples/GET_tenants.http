@@ -4,7 +4,13 @@ TT-Api-Key: read-key
 
 ###
 
-GET http://localhost:5004/api/management/tenants/TestTenant2 HTTP/1.1
+GET http://localhost:5004/api/management/tenants/TestTenant1 HTTP/1.1
+Accept: application/json
+TT-Api-Key: read-key
+
+###
+
+GET http://localhost:5004/api/management/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa HTTP/1.1
 Accept: application/json
 TT-Api-Key: read-key
 
