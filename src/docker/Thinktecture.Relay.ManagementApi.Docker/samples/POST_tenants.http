@@ -8,10 +8,12 @@ Content-Type: application/json
     "name": "TestTenantX",
     "credentials": [
         {
-            "plainTextValue": "<Strong!Pasw0rd>"
+            "id": "ffffffff-ffff-ffff-ffff-fffffffffff1",
+            "plainTextValue": "<Strong!Passw0rd>"
         },
         {
-            "plainTextValue": "<Strong!Pasw0rd1>"
+            "id": "ffffffff-ffff-ffff-ffff-fffffffffff2",
+            "plainTextValue": "<Strong!Passw0rd1>"
         }
     ]
 }
