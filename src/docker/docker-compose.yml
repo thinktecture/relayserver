@@ -85,6 +85,17 @@ services:
       - relay_server_migrations
     networks:
       - relayserver
+  relay_tenant_seed:
+    image: curlimages/curl
+    container_name: relay_tenant_seed
+    hostname: relay_tenant_seed
+    depends_on:
+      - relay_persistence_postgresql
+      - relay_server_migrations
+      - relay_management
+    command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{\"id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\", \"name\": \"TestTenant1\", \"credentials\": [{ \"id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\", \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/api/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{\"id\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb\", \"name\": \"TestTenant2\", \"credentials\": [{ \"id\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1\", \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/api/management/tenants" ]
+    networks:
+      - relayserver
 volumes:
   seq-data:
     driver: local
