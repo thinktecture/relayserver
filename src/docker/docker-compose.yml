@@ -67,6 +67,24 @@ services:
     networks:
       - relayserver
     entrypoint: ["dotnet", "Thinktecture.Relay.Server.Docker.dll", "migrate-only=true"]
+  relay_management:
+    image: relay_management
+    build:
+      context: ..
+      dockerfile: ./docker/Thinktecture.Relay.ManagementApi.Docker/Dockerfile
+    container_name: relay_management
+    hostname: relay_management
+    privileged: false
+    ports:
+      - "5004:5000"
+    env_file:
+      - relay_management.env
+    depends_on:
+      - relay_logging_seq
+      - relay_persistence_postgresql
+      - relay_server_migrations
+    networks:
+      - relayserver
 volumes:
   seq-data:
     driver: local
