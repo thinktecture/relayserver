@@ -7,6 +7,12 @@
 
 # Release Notes
 
+## Version 2.4.4
+
+* Fehlerbehebungen
+
+  * Ein vom On-Premise Connector gelieferter `WWW-Authenticate` Header wird nun unverändert weitergegeben.
+
 ## Version 2.4.3
 
 * Fehlerbehebungen

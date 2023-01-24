@@ -18,6 +18,7 @@ using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.FileSystems;
+using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.DataHandler;
 using Microsoft.Owin.Security.Jwt;
 using Microsoft.Owin.Security.OAuth;
@@ -140,23 +141,8 @@ namespace Thinktecture.Relay.Server
 
 				serverOptions.AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(cert));
 
-				var authOptions = new OAuthBearerAuthenticationOptions
-				{
-					AccessTokenFormat = new TicketDataFormat(new RsaDataProtector(cert)),
-					Provider = new OAuthBearerAuthenticationProvider()
-					{
-						OnApplyChallenge = context =>
-						{
-							// Workaround: Keep an already set WWW-Authenticate header (otherwise OWIN would add its challenge). 
-							if (!context.Response.Headers.ContainsKey("WWW-Authenticate"))
-							{
-								context.OwinContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
-							}
-
-							return Task.CompletedTask;
-						}
-					}
-				};
+				var accessTokenFormat = new TicketDataFormat(new RsaDataProtector(cert));
+				var authOptions = CreateOAuthBearerAuthenticationOptions(accessTokenFormat);
 
 				app.UseOAuthBearerAuthentication(authOptions);
 			}
@@ -172,11 +158,12 @@ namespace Thinktecture.Relay.Server
 
 					serverOptions.AccessTokenFormat = new CustomJwtFormat(serverOptions.AccessTokenExpireTimeSpan, key, issuer, audience);
 
-					app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions()
-					{
-						AllowedAudiences = new[] { audience },
-						IssuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) },
-					});
+					var allowedAudiences = new[] { audience };
+					var issuerSecurityTokenProviders = new[] { new SymmetricKeyIssuerSecurityTokenProvider(issuer, key) };
+					var jwtFormat = new JwtFormat(allowedAudiences, issuerSecurityTokenProviders);
+					var authOptions = CreateOAuthBearerAuthenticationOptions(jwtFormat);
+
+					app.UseOAuthBearerAuthentication(authOptions);
 				}
 			}
 
@@ -301,6 +288,27 @@ namespace Thinktecture.Relay.Server
 				// no admin web deployed - catch silently, but display info for the user
 				_logger?.Information("The configured directory for the ManagementWeb was not found. ManagementWeb will be disabled.");
 			}
+		}
+
+		private static OAuthBearerAuthenticationOptions CreateOAuthBearerAuthenticationOptions(ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
+		{
+			return new OAuthBearerAuthenticationOptions
+			{
+				AccessTokenFormat = accessTokenFormat,
+				Provider = new OAuthBearerAuthenticationProvider
+				{
+					OnApplyChallenge = context =>
+					{
+						// Workaround: Keep an already set WWW-Authenticate header (otherwise OWIN would add its challenge).
+						if (!context.Response.Headers.ContainsKey("WWW-Authenticate"))
+						{
+							context.OwinContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
+						}
+
+						return Task.CompletedTask;
+					}
+				}
+			};
 		}
 	}
 }

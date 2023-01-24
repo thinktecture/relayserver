@@ -17,6 +17,12 @@ The goal of this list is to highlight companies who pay back to this open source
 
 # Version history
 
+## Version 2.4.4
+
+* Bug fixes
+
+  * Fixed a bug where a `WWW-Authenticate` header from the OPC was modified before sending out.
+
 ## Version 2.4.3
 
 * Bug fixes
