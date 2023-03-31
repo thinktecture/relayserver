@@ -1,0 +1,194 @@
+[
+  {
+    "Title": "gRPC Code-First mit ASP.NET Core 7 und Blazor WebAssembly",
+    "Url": "https://www.thinktecture.com/blazor/grpc-blazor-kommunikation/",
+    "Tags": ["ASP.NET Core", "Blazor", "gRPC"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2023-03-30",
+    "Language": "DE"
+  },
+  {
+    "Title": "Blazor WebAssembly in .NET 7: UI-Performance-Optimierung auf Komponentenebene",
+    "Url": "https://www.thinktecture.com/blazor/blazor-webassembly-component-performance/",
+    "Tags": ["ASP.NET Core", "Blazor", "SPA"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2023-03-29",
+    "Language": "DE"
+  },
+  {
+    "Title": "Understanding and Controlling the Blazor WebAssembly Startup Process",
+    "Url": "https://www.thinktecture.com/blazor/understanding-and-controlling-the-blazor-webassembly-startup-process/",
+    "Tags": [".NET", ".NET CORE", "ASP.NET Core", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Sebastian Gingter"],
+    "Date": "2023-03-07",
+    "Language": "EN"
+  },
+  {
+    "Title": "Adding Superpowers to your Blazor WebAssembly App with Project Fugu APIs",
+    "Url": "https://www.thinktecture.com/net/adding-superpowers-to-your-blazor-webassembly-app-with-project-fugu-apis/",
+    "Tags": [".NET", ".NET CORE", "ASP.NET Core", "Blazor", "PWA", "SPA", "WebAssembly"],
+    "Authors": ["Christian Liebel"],
+    "Date": "2023-02-28",
+    "Language": "EN"
+  },
+  {
+    "Title": "Blazor WebAssembly in Practice: Maturity, Success Factors, Showstoppers",
+    "Url": "https://www.thinktecture.com/blazor/blazor-webassembly-in-practice-success-factors-showstoppers/",
+    "Tags": [".NET", ".NET CORE", "ASP.NET Core", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Christian Liebel"],
+    "Date": "2022-11-24",
+    "Language": "EN"
+  },
+  {
+    "Title": "Blazor WebAssembly: Debugging gRPC-Web with Custom Chrome Developer Tools",
+    "Url": "https://www.thinktecture.com/blazor/blazor-wasm-debugging-grpc-web/",
+    "Tags": [".NET", ".NET CORE", "ASP.NET", "ASP.NET Core", "Blazor", "gRPC", "SPA", "WebAssembly"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2022-11-17",
+    "Language": "EN"
+  },
+  {
+    "Title": "Dependency Injection Scopes in Blazor",
+    "Url": "https://www.thinktecture.com/blazor/dependency-injection-scopes-in-blazor/",
+    "Tags": [".NET", ".NET CORE", "ASP.NET Core", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Sebastian Gingter"],
+    "Date": "2022-05-31",
+    "Language": "EN"
+  },
+  {
+    "Title": "Asynchrone Operationen: Blazor WebAssembly für Angular-Entwickler – Teil 5 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/asynchrone-operationen-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-26",
+    "Language": "DE"
+  },
+  {
+    "Title": "Typings: Blazor WebAssembly für Angular-Entwickler – Teil 4 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/typings-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-19",
+    "Language": "DE"
+  },
+  {
+    "Title": "Bindings: Blazor WebAssembly für Angular-Entwickler – Teil 3 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/bindings-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-12",
+    "Language": "DE"
+  },
+  {
+    "Title": "Komponenten: Blazor WebAssembly für Angular-Entwickler – Teil 2 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/komponenten-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-05",
+    "Language": "DE"
+  },
+  {
+    "Title": "Intro: Blazor WebAssembly für Angular-Entwickler – Teil 1 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/intro-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", ".NET CORE", "Angular", "Blazor", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-05",
+    "Language": "DE"
+  },
+  {
+    "Title": "[Sneak Preview] Blazor WebAssembly: The Power Of EF Core And SQLite In The Browser – In-Depth",
+    "Url": "https://www.thinktecture.com/blazor/ef-core-and-sqlite-in-browser/",
+    "Tags": ["Blazor", "Entity Framework Core", "WebAssembly"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2022-04-12",
+    "Language": "EN"
+  },
+  {
+    "Title": "Blazor WebAssembly vs. Blazor Server – Welche Unterschiede gibt es und wann wähle ich was?",
+    "Url": "https://www.thinktecture.com/blazor/unterschiede-blazor-webassembly-blazor-server/",
+    "Tags": [".NET", ".NET CORE", "ASP.NET", "ASP.NET Core", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Sebastian Gingter"],
+    "Date": "2022-01-30",
+    "Language": "DE"
+  },
+  {
+    "Title": "ASP.NET Core Blazor WebAssembly: Authentifizierung und Autorisierung mit Keycloak in Aktion",
+    "Url": "https://www.thinktecture.com/blazor/keycloak-authentifizierung-und-autorisierung/",
+    "Tags": ["ASP.NET Core", "Blazor", "Keycloak", "SPA", "WebAssembly"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2021-12-07",
+    "Language": "DE"
+  },
+  {
+    "Title": "Architects Briefing: Die 9 wichtigsten Blazor WebAssembly-Neuerungen in .NET 5",
+    "Url": "https://www.thinktecture.com/blazor/webassembly-neu-in-dotnet5/",
+    "Tags": ["ASP.NET Core", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Christian Weyer"],
+    "Date": "2021-08-20",
+    "Language": "DE"
+  },
+  {
+    "Title": "Global Exception Handling in ASP.NET Core Blazor WebAssembly mit .NET 5",
+    "Url": "https://www.thinktecture.com/blazor/global-exception-handling/",
+    "Tags": ["Blazor", "WebAssembly"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2021-06-02",
+    "Language": "DE"
+  },
+  {
+    "Title": "Recommended Reading: Blazor-Inhalte empfohlen von Christian Weyer",
+    "Url": "https://www.thinktecture.com/blazor/empfohlene-blazor-inhalte-von-christian-weyer/",
+    "Tags": ["ASP.NET Core", "Blazor"],
+    "Authors": ["Christian Weyer"],
+    "Date": "2021-01-28",
+    "Language": "DE"
+  },
+  {
+    "Title": "Blazor WebAssembly – Unleash The Power Of Dynamic Template-Based UIs With Razor Engine",
+    "Url": "https://www.thinktecture.com/blazor/webassembly-dynamic-template-engine-with-razor/",
+    "Tags": ["ASP.NET Core", "Blazor", "WebAssembly"],
+    "Authors": ["Pawel Gerr"],
+    "Date": "2020-11-17",
+    "Language": "EN"
+  },
+  {
+    "Title": "ASP.NET Core Blazor WebAssembly: Authentifizierung und Autorisierung mit IdentityServer in Aktion",
+    "Url": "https://www.thinktecture.com/blazor/authentifizierung-und-autorisierung/",
+    "Tags": ["ASP.NET Core", "Blazor"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2020-11-05",
+    "Language": "DE"
+  },
+  {
+    "Title": "Blazor WebAssembly – Changing The Log Level At Runtime",
+    "Url": "https://www.thinktecture.com/blazor/webassembly-changing-log-level-at-runtime/",
+    "Tags": ["ASP.NET Core", "Blazor", "WebAssembly"],
+    "Authors": ["Pawel Gerr"],
+    "Date": "2020-08-20",
+    "Language": "EN"
+  },
+  {
+    "Title": "Blazor Components Deep Dive – Lifecycle Is Not Always Straightforward",
+    "Url": "https://www.thinktecture.com/blazor/blazor-components-lifecycle-is-not-always-straightforward/",
+    "Tags": ["ASP.NET Core", "Blazor"],
+    "Authors": ["Pawel Gerr"],
+    "Date": "2020-08-05",
+    "Language": "EN"
+  },
+  {
+    "Title": "Running Your ASP.NET Core Blazor WebAssembly Application As A Progressive Web App (PWA)",
+    "Url": "https://www.thinktecture.com/blazor/progressive-web-apps-pwa/",
+    "Tags": ["Blazor", "PWA"],
+    "Authors": ["Christian Weyer"],
+    "Date": "2020-02-18",
+    "Language": "EN"
+  },
+  {
+    "Title": "Re-Using Angular components in a Blazor WebAssembly application using Angular Elements – Web Components custom elements, FTW!",
+    "Url": "https://www.thinktecture.com/blazor/integration-angular-elements-web-components/",
+    "Tags": ["Angular", "ASP.NET Core", "Blazor", "SPA", "Web Components", "WebAssembly"],
+    "Authors": ["Christian Weyer"],
+    "Date": "2020-02-01",
+    "Language": "EN"
+  }
+]

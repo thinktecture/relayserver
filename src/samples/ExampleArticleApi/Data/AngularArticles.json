@@ -1,0 +1,354 @@
+[
+  {
+    "Title": "Using EntityAdapter with ComponentStore: @ngrx/entity Series – Part 3",
+    "Url": "https://www.thinktecture.com/angular/ngrx-entity-using-entityadapter-with-componentstore/",
+    "Tags": ["Angular", "NgRx"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2023-02-14",
+    "Language": "EN"
+  },
+  {
+    "Title": "Multiple Entity Collections in the Same Feature State: @ngrx/entity-Series – Part 2",
+    "Url": "https://www.thinktecture.com/angular/ngrx-entity-multiple-entity-collections-in-the-same-feature-state/",
+    "Tags": ["Angular", "NgRx"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2023-02-07",
+    "Language": "EN"
+  },
+  {
+    "Title": "Managing Your Collections With the EntityAdapter: @ngrx/entity-Series – Part 1",
+    "Url": "https://www.thinktecture.com/angular/ngrx-entity-managing-your-collections-with-the-entityadapter/",
+    "Tags": ["Angular", "NgRx"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2023-01-31",
+    "Language": "EN"
+  },
+  {
+    "Title": "Implementing Smart and Presentational Components with Angular: Condensed Angular Experiences – Part 4",
+    "Url": "https://www.thinktecture.com/angular/smart-and-presentational-components-with-angular/",
+    "Tags": ["Angular", "JavaScript", "Web Components"],
+    "Authors": ["Max Marschall"],
+    "Date": "2023-01-23",
+    "Language": "EN"
+  },
+  {
+    "Title": "Angular OnPush – A Change Detection Strategy Revealing Mistakes in Your Code",
+    "Url": "https://www.thinktecture.com/angular/onpush-change-detection-strategy-revealing-mistakes/",
+    "Tags": ["Angular"],
+    "Authors": ["Sascha Lehmann"],
+    "Date": "2022-10-24",
+    "Language": "EN"
+  },
+  {
+    "Title": "Configuring Lazy Loaded Angular Modules",
+    "Url": "https://www.thinktecture.com/angular/configuring-lazy-loaded-angular-modules/",
+    "Tags": ["Angular"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2022-06-16",
+    "Language": "EN"
+  },
+  {
+    "Title": "Master Web Component Forms Integration – with Lit and Angular",
+    "Url": "https://www.thinktecture.com/web-components/web-component-forms-integration-with-lit-and-angular/",
+    "Tags": ["Angular", "Web Components"],
+    "Authors": ["Sascha Lehmann"],
+    "Date": "2022-06-09",
+    "Language": "EN"
+  },
+  {
+    "Title": "Asynchrone Operationen: Blazor WebAssembly für Angular-Entwickler – Teil 5 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/asynchrone-operationen-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-26",
+    "Language": "DE"
+  },
+  {
+    "Title": "Typings: Blazor WebAssembly für Angular-Entwickler – Teil 4 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/typings-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-19",
+    "Language": "DE"
+  },
+  {
+    "Title": "Bindings: Blazor WebAssembly für Angular-Entwickler – Teil 3 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/bindings-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-12",
+    "Language": "DE"
+  },
+  {
+    "Title": "Komponenten: Blazor WebAssembly für Angular-Entwickler – Teil 2 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/komponenten-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", "Angular", "ASP.NET", "Blazor", "SPA", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-05",
+    "Language": "DE"
+  },
+  {
+    "Title": "Intro: Blazor WebAssembly für Angular-Entwickler – Teil 1 [Screencast]",
+    "Url": "https://www.thinktecture.com/blazor/intro-blazor-webassembly-fuer-angular-entwickler/",
+    "Tags": [".NET", ".NET CORE", "Angular", "Blazor", "WebAssembly"],
+    "Authors": ["Thinktecture Team"],
+    "Date": "2022-05-05",
+    "Language": "DE"
+  },
+  {
+    "Title": "About Smart and Presentational Components, Architecture Overview & Concepts: Condensed Angular Experiences – Part 3",
+    "Url": "https://www.thinktecture.com/angular/about-smart-and-presentational-components/",
+    "Tags": ["Angular", "JavaScript", "Web Components"],
+    "Authors": ["Max Marschall"],
+    "Date": "2022-04-08",
+    "Language": "EN"
+  },
+  {
+    "Title": "Angular Experiences: Promises Vs. Observables – Choose Your Destiny",
+    "Url": "https://www.thinktecture.com/angular/promises-vs-observables/",
+    "Tags": ["Angular", "RxJS"],
+    "Authors": ["Thomas Hilzendegen"],
+    "Date": "2021-09-30",
+    "Language": "EN"
+  },
+  {
+    "Title": "What’s The Hype With Angular’s OnPush Change Detection? Condensed Angular Experiences – Part 2",
+    "Url": "https://www.thinktecture.com/angular/whats-the-hype-onpush/",
+    "Tags": ["Angular"],
+    "Authors": ["Max Marschall"],
+    "Date": "2021-08-13",
+    "Language": "EN"
+  },
+  {
+    "Title": "Understanding Angular’s Async Pipe: Condensed Angular Experiences – Part 1",
+    "Url": "https://www.thinktecture.com/angular/understanding-the-async-pipe/",
+    "Tags": ["Angular", "RxJS"],
+    "Authors": ["Max Marschall"],
+    "Date": "2021-07-14",
+    "Language": "EN"
+  },
+  {
+    "Title": "NgRx – An Angular Architect’s First Experiences",
+    "Url": "https://www.thinktecture.com/angular/should-i-use-ngrx-an-angular-achitects-experiences/",
+    "Tags": ["Angular", "NgRx", "RxJS"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2021-05-10",
+    "Language": "EN"
+  },
+  {
+    "Title": "ASP.NET Core SignalR: Mehr Sicherheit bei Tokens – Teil 3",
+    "Url": "https://www.thinktecture.com/signalr/authentifizierung-deep-dive/",
+    "Tags": ["Angular", "ASP.NET Core", "SignalR"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2021-04-13",
+    "Language": "DE"
+  },
+  {
+    "Title": "From an Angular Web App to a Hybrid App with Capacitor and Ionic Framework",
+    "Url": "https://www.thinktecture.com/ionic/add-angular-and-capacitor-to-your-existing-project/",
+    "Tags": ["Angular", "Ionic", "PWA"],
+    "Authors": ["Max Marschall"],
+    "Date": "2021-03-10",
+    "Language": "EN"
+  },
+  {
+    "Title": "End-To-End Testing of Angular Components with Cypress",
+    "Url": "https://www.thinktecture.com/angular/e2e-tests-with-cypress-and-angular/",
+    "Tags": ["Angular", "Cypress", "UX / UI"],
+    "Authors": ["Konstantin Denerz"],
+    "Date": "2021-01-14",
+    "Language": "EN"
+  },
+  {
+    "Title": "Visual Testing Of Angular Components With Storybook & Chromatic",
+    "Url": "https://www.thinktecture.com/angular/angular-component-visual-testing-with-storybook-and-chromatic/",
+    "Tags": ["Angular", "UX / UI"],
+    "Authors": ["Konstantin Denerz"],
+    "Date": "2020-12-16",
+    "Language": "EN"
+  },
+  {
+    "Title": "Additional Approaches: Advanced Progressive Web Apps – Push Notifications Under Control – Part 4",
+    "Url": "https://www.thinktecture.com/pwa/additional-push-notification-approaches/",
+    "Tags": ["Angular", "SPA", "PWA"],
+    "Authors": ["Christian Liebel"],
+    "Date": "2020-10-15",
+    "Language": "EN"
+  },
+  {
+    "Title": "Eine Angular-Anwendung offline nehmen: Herausforderung von „online“ zu „offline",
+    "Url": "https://www.thinktecture.com/pwa/anwendung-offline-nehmen/",
+    "Tags": ["Angular", "PWA"],
+    "Authors": ["Christian Liebel"],
+    "Date": "2020-09-23",
+    "Language": "DE"
+  },
+  {
+    "Title": "ASP.NET Core SignalR: Absicherung der Echtzeitkommunikation – Teil 2",
+    "Url": "https://www.thinktecture.com/signalr/absicherung-der-echtzeitkommunikation/",
+    "Tags": ["Angular", "ASP.NET Core", "SignalR"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2020-09-01",
+    "Language": "DE"
+  },
+  {
+    "Title": "ASP.NET Core SignalR: Echtzeitkommunikation in Action – Teil 1",
+    "Url": "https://www.thinktecture.com/signalr/echtzeitkommunikation/",
+    "Tags": ["Angular", "ASP.NET Core", "SignalR", "SPA"],
+    "Authors": ["Patrick Jahr"],
+    "Date": "2020-08-20",
+    "Language": "DE"
+  },
+  {
+    "Title": "HTTP Web Push: Advanced Progressive Web Apps – Push Notifications Under Control – Part 3",
+    "Url": "https://www.thinktecture.com/pwa/http-web-push/",
+    "Tags": ["Angular", "PWA", "SPA"],
+    "Authors": ["Christian Liebel"],
+    "Date": "2020-08-11",
+    "Language": "EN"
+  },
+  {
+    "Title": "Creating Web Components With Modern SPA Frameworks – Angular, React, And Vue.Js",
+    "Url": "https://www.thinktecture.com/web-components/creating-web-components-with-angular-react-vuejs/",
+    "Tags": ["Angular", "Web Components"],
+    "Authors": ["Manuel Rauber"],
+    "Date": "2020-07-30",
+    "Language": "EN"
+  },
+  {
+    "Title": "Adobe XD, Storybook & Angular In Action – From Paper Sketch To A Running Application",
+    "Url": "https://www.thinktecture.com/angular/paper-sketch-to-angular-application-with-adobe-xd-storybook/",
+    "Tags": ["Angular", "UX / UI"],
+    "Authors": ["Konstantin Denerz"],
+    "Date": "2020-07-22",
+    "Language": "EN"
+  },
+  {
+    "Title": "Data Sharing & Framework Integration: Perks & Flaws Series – Part 4",
+    "Url": "https://www.thinktecture.com/web-components/data-sharing-and-frameworks/",
+    "Tags": ["Angular", "Web Components"],
+    "Authors": ["Manuel Rauber"],
+    "Date": "2020-06-17",
+    "Language": "EN"
+  },
+  {
+    "Title": "The Flaws Of Web Components (And Possible Solutions): Perks & Flaws Series – Part 3",
+    "Url": "https://www.thinktecture.com/web-components/web-components-flaws/",
+    "Tags": ["Angular", "Web Components"],
+    "Authors": ["Manuel Rauber"],
+    "Date": "2020-05-13",
+    "Language": "EN"
+  },
+  {
+    "Title": "Creating Expressive Toast Components With Angular Animations",
+    "Url": "https://www.thinktecture.com/angular/toast-animations/",
+    "Tags": ["Angular", "UX / UI"],
+    "Authors": ["Konstantin Denerz"],
+    "Date": "2020-05-07",
+    "Language": "EN"
+  },
+  {
+    "Title": "The Motivation For Using Web Components, An Introduction: Perks & Flaws Series – Part 1",
+    "Url": "https://www.thinktecture.com/web-components/introduction-and-motivation/",
+    "Tags": ["Angular", "ASP.NET Core", "Blazor", "SPA", "Web Components", "WebAssembly"],
+    "Tags": ["Angular", "Web Components"],
+    "Date": "2020-04-17",
+    "Language": "EN"
+  },
+  {
+    "Title": "Nachladen von Angular-Modulen: Eigene Lösung mit Web Components Custom Elements – Teil 3",
+    "Url": "https://www.thinktecture.com/angular/lazy-loading-modules-web-components/",
+    "Tags": ["Angular", "Web Components"],
+    "Authors": ["Konstantin Denerz"],
+    "Date": "2020-04-07",
+    "Language": "DE"
+  },
+  {
+    "Title": "Architekturlösung für die Integration von Angular und BayblonJS – Demo und Integrationsbeispiele",
+    "Url": "https://www.thinktecture.com/babylonjs/babylon-angular-architecture/",
+    "Tags": ["Angular", "BabylonJS"],
+    "Authors": ["Max Marschall"],
+    "Date": "2020-03-17",
+    "Language": "DE"
+  },
+  {
+    "Title": "Nachladen von Angular-Modulen: Lazy Modules und Routen – Teil 2",
+    "Url": "https://www.thinktecture.com/angular/lazy-loading-modules-routen/",
+    "Tags": ["Angular", "Web Components"],
+    "Authors": ["Konstantin Denerz"],
+    "Date": "2020-03-13",
+    "Language": "DE"
+  },
+  {
+    "Title": "Nachladen von Angular-Modulen: Einführung & Use Cases – Teil 1",
+    "Url": "https://www.thinktecture.com/angular/lazy-loading-modules-intro/",
+    "Tags": ["Angular", "Web Components"],
+    "Authors": ["Konstantin Denerz"],
+    "Date": "2020-03-12",
+    "Language": "DE"
+  },
+  {
+    "Title": "Push API: Advanced Progressive Web Apps – Push Notifications Under Control – Part 2",
+    "Url": "https://www.thinktecture.com/pwa/push-api/",
+    "Tags": ["Angular", "PWA", "SPA"],
+    "Authors": ["Christian Liebel"],
+    "Date": "2020-03-10",
+    "Language": "EN"
+  },
+  {
+    "Title": "Performance Optimization: Integrating BabylonJS 3D Engine into an Angular Business Application – Part 2",
+    "Url": "https://www.thinktecture.com/babylonjs/babylon-angular-performance-optimization/",
+    "Tags": ["Angular", "BabylonJS"],
+    "Authors": ["Max Marschall"],
+    "Date": "2020-02-07",
+    "Language": "EN"
+  },
+  {
+    "Title": "Re-Using Angular components in a Blazor WebAssembly application using Angular Elements – Web Components custom elements, FTW!",
+    "Url": "https://www.thinktecture.com/blazor/integration-angular-elements-web-components/",
+    "Tags": ["Angular", "ASP.NET Core", "Blazor", "SPA", "Web Components", "WebAssembly"],
+    "Authors": ["Christian Weyer"],
+    "Date": "2020-02-01",
+    "Language": "EN"
+  },
+  {
+    "Title": "Integration Basics: Integrating BabylonJS 3D Engine Into An Angular Business Application – Part 1",
+    "Url": "https://www.thinktecture.com/babylonjs/babylon-angular-basic-integration/",
+    "Tags": ["Angular", "BabylonJS"],
+    "Authors": ["Max Marschall"],
+    "Date": "2020-01-23",
+    "Language": "EN"
+  },
+  {
+    "Title": "RxJS in Angular – Single Result Data Streams and Async Pipe",
+    "Url": "https://www.thinktecture.com/angular/rxjs-antipattern-3-async-pipe/",
+    "Tags": ["Angular", "RxJs"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2019-12-09",
+    "Language": "EN"
+  },
+  {
+    "Title": "RxJS in Angular – Antipattern 2 – Stateful Streams",
+    "Url": "https://www.thinktecture.com/angular/rxjs-antipattern-2-state/",
+    "Tags": ["Angular", "RxJs"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2019-12-09",
+    "Language": "EN"
+  },
+  {
+    "Title": "RxJS in Angular – Antipattern 1 – Nested subscriptions",
+    "Url": "https://www.thinktecture.com/angular/rxjs-antipattern-1-nested-subs/",
+    "Tags": ["Angular", "RxJs"],
+    "Authors": ["Yannick Baron"],
+    "Date": "2019-11-01",
+    "Language": "EN"
+  },
+  {
+    "Title": "AngularJS – Dynamic Directives",
+    "Url": "https://www.thinktecture.com/angularjs/dynamic-directives/",
+    "Tags": ["Angular", "AngularJS"],
+    "Authors": ["Pawel Gerr"],
+    "Date": "2014-07-18",
+    "Language": "EN"
+  }
+]
