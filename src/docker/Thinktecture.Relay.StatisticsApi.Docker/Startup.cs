@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,8 @@ internal class Startup
 	{
 		services.AddControllers();
 
-		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql"));
+		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql")
+			?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
 	}
 
 	// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

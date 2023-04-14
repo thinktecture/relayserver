@@ -31,7 +31,8 @@ public class Startup
 				options.RequireHttpsMetadata = authorityUri.Scheme == "https";
 			});
 
-		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql"));
+		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql")
+			?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
 		services.AddRelayServer(options => Configuration.GetSection("RelayServer").Bind(options))
 			.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 			.AddSignalRConnectorTransport()

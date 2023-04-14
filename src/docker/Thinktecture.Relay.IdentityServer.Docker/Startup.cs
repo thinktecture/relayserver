@@ -1,3 +1,4 @@
+using System;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,7 +22,8 @@ public class Startup
 	{
 		services.AddControllersWithViews();
 
-		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql"));
+		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql")
+			?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
 
 		services.AddIdentityServer(options => options.InputLengthRestrictions.ClientSecret = 200)
 			.AddClientStore<RelayServerTenantStore>()
