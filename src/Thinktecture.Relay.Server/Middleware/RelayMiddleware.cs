@@ -342,7 +342,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			return TenantInfo.FromByteArray(cachedData);
 		}
 
-		var tenant = await _tenantService.LoadTenantByNameAsync(name);
+		var tenant = await _tenantService.LoadTenantByNameAsync(name, cancellationToken);
 		if (tenant != null)
 		{
 			result = new TenantInfo(tenant.Id, tenant.Connections?.Any(c => c.DisconnectTime == null) == true);
