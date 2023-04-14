@@ -46,10 +46,10 @@ try
 	builder.Services.AddAuthorization(o =>
 	{
 		o.AddPolicy(ManagementApiPolicyNames.Read, c =>
-			c.RequireClaim("managementapi", new[] { "read", "readwrite", }));
+			c.RequireClaim("managementapi", "read", "readwrite"));
 
 		o.AddPolicy(ManagementApiPolicyNames.Write, c =>
-			c.RequireClaim("managementapi", new[] { "write", "readwrite", }));
+			c.RequireClaim("managementapi", "write", "readwrite"));
 	});
 
 	// Example: Add health checks support
