@@ -133,7 +133,7 @@ public class TenantService : ITenantService
 	{
 		if (String.IsNullOrWhiteSpace(clientSecret.Value))
 		{
-			throw new InvalidOperationException($"Client secret needs a value.");
+			throw new InvalidOperationException("Client secret needs a value.");
 		}
 
 		if (_dbContext.ClientSecrets.Any(cs => cs.Id == clientSecret.Id))
