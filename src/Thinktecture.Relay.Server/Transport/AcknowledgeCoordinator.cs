@@ -69,8 +69,6 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 
 	private class AcknowledgeState
 	{
-		public DateTime Creation { get; } = DateTime.UtcNow;
-
 		public string ConnectionId { get; }
 		public string AcknowledgeId { get; }
 		public bool OutsourcedRequestBodyContent { get; }
