@@ -102,12 +102,15 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		LogDispatchedAcknowledge(request.RequestId, request.OriginId);
 	}
 
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25200, LogLevel.Trace, "Dispatched response for request {RelayRequestId} to origin {OriginId}")]
 	partial void LogDispatchedResponse(Guid relayRequestId, Guid originId);
 
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25201, LogLevel.Trace, "Dispatched acknowledgement for request {RelayRequestId} to origin {OriginId}")]
 	partial void LogDispatchedAcknowledge(Guid relayRequestId, Guid originId);
 
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25202, LogLevel.Trace,
 		"Received response for request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
 	partial void LogResponseConsumed(Guid relayRequestId, string queueName, string consumerTag);
@@ -120,7 +123,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		await _responseCoordinator.ProcessResponseAsync(response);
 	}
 
-
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25203, LogLevel.Trace,
 		"Received acknowledge for request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
 	partial void LogAcknowledgeConsumed(Guid relayRequestId, string queueName, string consumerTag);

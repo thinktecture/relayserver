@@ -17,11 +17,12 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	where TRequest : IClientRequest
 	where TAcknowledge : IAcknowledgeRequest
 {
+	// ReSharper disable once NotAccessedField.Local; Justification: Used by LoggerMessage source generator
+	private readonly ILogger<TenantHandler<TRequest, TAcknowledge>> _logger;
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
 	private readonly string _connectionId;
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
 	private readonly AsyncEventingBasicConsumer _consumer;
-	private readonly ILogger<TenantHandler<TRequest, TAcknowledge>> _logger;
 	private readonly IModel _model;
 	private readonly RelayServerContext _relayServerContext;
 
@@ -62,9 +63,11 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		_model.Dispose();
 	}
 
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25300, LogLevel.Trace, "Acknowledging {AcknowledgeId}")]
 	partial void LogAcknowledge(string acknowledgeId);
 
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25301, LogLevel.Warning, "Could not parse acknowledge id {AcknowledgeId}")]
 	partial void LogCouldNotParseAcknowledge(string acknowledgeId);
 
@@ -82,6 +85,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		}
 	}
 
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25302, LogLevel.Trace,
 		"Received request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
 	partial void LogReceivedRequest(Guid relayRequestId, string queueName, string consumerTag);

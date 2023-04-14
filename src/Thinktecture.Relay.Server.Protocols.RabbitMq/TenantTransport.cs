@@ -38,6 +38,7 @@ public partial class TenantTransport<T> : ITenantTransport<T>, IDisposable
 		_model = modelFactory.Create("tenant dispatcher");
 	}
 
+	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
 	[LoggerMessage(25400, LogLevel.Trace, "Published request {RelayRequestId} to tenant {TenantId}")]
 	partial void LogPublishedRequest(Guid relayRequestId, Guid tenantId);
 
