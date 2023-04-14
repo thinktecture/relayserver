@@ -33,7 +33,8 @@ try
 		);
 
 	// Register the db context, which in turn also registers the persistence services
-	builder.Services.AddRelayServerDbContext(builder.Configuration.GetConnectionString("PostgreSql"));
+	builder.Services.AddRelayServerDbContext(builder.Configuration.GetConnectionString("PostgreSql")
+		?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
 
 	// Example: Add some authentication system, in this example we use api keys defined in the config file
 	builder.Services.AddAuthentication(ApiKeyAuthenticationDefaults.AuthenticationScheme)
