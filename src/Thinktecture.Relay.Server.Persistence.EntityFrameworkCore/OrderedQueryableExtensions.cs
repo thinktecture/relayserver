@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Thinktecture.Relay.Server.Persistence.DataTransferObjects;
-using Thinktecture.Relay.Server.Persistence.Models;
 
 // ReSharper disable once CheckNamespace; (extension methods on OrderedQueryables namespace)
 namespace System.Linq;
