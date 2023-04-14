@@ -1,18 +1,18 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30001.183
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33606.364
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Abstractions", "Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj", "{902E6C52-D5D0-4F66-95AC-84CA7DC5B80E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{804D3383-EA22-4F44-B60F-E82D36FCF5F7}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
+		..\.gitignore = ..\.gitignore
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
+		Directory.Build.props = Directory.Build.props
 		..\global.json = ..\global.json
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
-		..\.gitignore = ..\.gitignore
-		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Abstractions", "Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj", "{F76D6870-8364-4EE7-B6B1-953B7D07C63B}"
@@ -21,13 +21,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Connecto
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{EEE512D2-CB20-484F-8314-16300733942F}"
 	ProjectSection(SolutionItems) = preProject
-		..\docs\glossary.md = ..\docs\glossary.md
 		..\docs\concepts.md = ..\docs\concepts.md
+		..\docs\configuration.md = ..\docs\configuration.md
 		..\docs\deployment.md = ..\docs\deployment.md
 		..\docs\development-getting-started.md = ..\docs\development-getting-started.md
+		..\docs\glossary.md = ..\docs\glossary.md
 		..\docs\migration.md = ..\docs\migration.md
 		..\docs\modules.md = ..\docs\modules.md
-		..\docs\configuration.md = ..\docs\configuration.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{AD756171-B728-4FD3-9BC6-20C2E32141C6}"
@@ -59,13 +59,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Identity
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA1D-9755-4842-BDE0-34F7EADF9969}"
 	ProjectSection(SolutionItems) = preProject
-		docker\run-dependencies.ps1 = docker\run-dependencies.ps1
-		docker\run-environment.ps1 = docker\run-environment.ps1
-		docker\seed-data.ps1 = docker\seed-data.ps1
-		docker\run-environment-multiserver.ps1 = docker\run-environment-multiserver.ps1
 		build-docker-images.ps1 = build-docker-images.ps1
 		docker\Directory.Build.props = docker\Directory.Build.props
 		docker\remove-all.ps1 = docker\remove-all.ps1
+		docker\run-dependencies.ps1 = docker\run-dependencies.ps1
+		docker\run-environment-multiserver.ps1 = docker\run-environment-multiserver.ps1
+		docker\run-environment.ps1 = docker\run-environment.ps1
+		docker\seed-data.ps1 = docker\seed-data.ps1
 		docker\stop-dependencies.ps1 = docker\stop-dependencies.ps1
 	EndProjectSection
 EndProject
@@ -87,22 +87,24 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Connector.Docker", "docker\Thinktecture.Relay.Connector.Docker\Thinktecture.Relay.Connector.Docker.csproj", "{4884F96C-5129-424F-9DDB-8DD91229D4B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Connector.Protocols.SignalR", "Thinktecture.Relay.Connector.Protocols.SignalR\Thinktecture.Relay.Connector.Protocols.SignalR.csproj", "{84437CA2-F563-4D08-A1CF-A07ECB154884}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Connector.Protocols.SignalR", "Thinktecture.Relay.Connector.Protocols.SignalR\Thinktecture.Relay.Connector.Protocols.SignalR.csproj", "{84437CA2-F563-4D08-A1CF-A07ECB154884}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{D8D76BB9-1D64-43C5-9B7E-710CF4A35374}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "connector", "connector", "{EACF91C8-8B43-4E87-8859-4902B3CC7F63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Interceptors", "Thinktecture.Relay.Interceptors\Thinktecture.Relay.Interceptors.csproj", "{CD190E32-1B0F-48D4-BFF1-43BD388A7C4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Interceptors", "Thinktecture.Relay.Interceptors\Thinktecture.Relay.Interceptors.csproj", "{CD190E32-1B0F-48D4-BFF1-43BD388A7C4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Management", "Thinktecture.Relay.Server.Management\Thinktecture.Relay.Server.Management.csproj", "{4EF4176E-34E3-477A-8CB1-982A318C3C30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Management", "Thinktecture.Relay.Server.Management\Thinktecture.Relay.Server.Management.csproj", "{4EF4176E-34E3-477A-8CB1-982A318C3C30}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{804EE1FA-511F-448B-8229-018DF09A35E0}"
 	ProjectSection(SolutionItems) = preProject
 		samples\RelayServerCore.postman_collection.json = samples\RelayServerCore.postman_collection.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleArticleApi", "samples\ExampleArticleApi\ExampleArticleApi.csproj", "{18756AD7-64BA-4F8C-8FE5-8B27EC54A37E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleArticleApi", "samples\ExampleArticleApi\ExampleArticleApi.csproj", "{18756AD7-64BA-4F8C-8FE5-8B27EC54A37E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleArticleClient", "samples\ExampleArticleClient\ExampleArticleClient.csproj", "{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -202,33 +204,38 @@ Global
 		{18756AD7-64BA-4F8C-8FE5-8B27EC54A37E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18756AD7-64BA-4F8C-8FE5-8B27EC54A37E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18756AD7-64BA-4F8C-8FE5-8B27EC54A37E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{F76D6870-8364-4EE7-B6B1-953B7D07C63B} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
+		{29415635-781F-416B-BEE7-C1444E7D28AC} = {EACF91C8-8B43-4E87-8859-4902B3CC7F63}
 		{AD756171-B728-4FD3-9BC6-20C2E32141C6} = {EEE512D2-CB20-484F-8314-16300733942F}
+		{0E17E737-E4B5-4198-A784-D543187F15D0} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
+		{DB91F41F-B977-4F2E-987B-38B4969EEF4F} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C} = {AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}
 		{329E6E2B-FEB6-4FA9-A893-0435300A122D} = {AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}
+		{734C4AFA-41C3-49AE-A39F-51DD5FAAF462} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
+		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{A22125AE-D673-4B9C-908F-DE0270380DAE} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{D1866E02-8665-4166-8F6D-ECED1BAAEF7E} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{29B6CBFA-43A8-447E-90AB-6B22CD0EA413} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{055B9A9E-9A45-4100-BA64-378443F6AB73} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
-		{4884F96C-5129-424F-9DDB-8DD91229D4B3} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
-		{0E17E737-E4B5-4198-A784-D543187F15D0} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
-		{1878FC63-129B-405E-B63B-386AB7CF0590} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
-		{734C4AFA-41C3-49AE-A39F-51DD5FAAF462} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
-		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
-		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
-		{DB91F41F-B977-4F2E-987B-38B4969EEF4F} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
-		{F76D6870-8364-4EE7-B6B1-953B7D07C63B} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{FF37E5FF-65D3-4EFD-B87F-8D456075402E} = {EACF91C8-8B43-4E87-8859-4902B3CC7F63}
-		{29415635-781F-416B-BEE7-C1444E7D28AC} = {EACF91C8-8B43-4E87-8859-4902B3CC7F63}
+		{1878FC63-129B-405E-B63B-386AB7CF0590} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
+		{C3E57FA8-379B-4F7C-A76A-5EB51A37B792} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
+		{4884F96C-5129-424F-9DDB-8DD91229D4B3} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{84437CA2-F563-4D08-A1CF-A07ECB154884} = {EACF91C8-8B43-4E87-8859-4902B3CC7F63}
 		{CD190E32-1B0F-48D4-BFF1-43BD388A7C4A} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{4EF4176E-34E3-477A-8CB1-982A318C3C30} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{18756AD7-64BA-4F8C-8FE5-8B27EC54A37E} = {804EE1FA-511F-448B-8229-018DF09A35E0}
+		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7} = {804EE1FA-511F-448B-8229-018DF09A35E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CE554FF-A10B-4F63-B480-ED9455F16873}

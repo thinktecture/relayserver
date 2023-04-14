@@ -1,0 +1,35 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+  <MudAppBar>
+
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="ToggleNavigation" />
+    <MudText>Thinktecture Articles</MudText>
+
+  </MudAppBar>
+
+  <MudDrawer @bind-open="_navigationOpen" ClipMode="DrawerClipMode.Always" Variant="@DrawerVariant.Mini" OpenMiniOnHover="false">
+
+    <MudNavMenu>
+      <MudNavLink Href="/articles" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Article">Articles</MudNavLink>
+      <MudNavLink Href="/settings" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>
+    </MudNavMenu>
+
+  </MudDrawer>
+
+  <MudMainContent>
+    <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Style="height: 100%; padding-top: 3rem; padding-bottom: 3rem;">
+      @Body
+    </MudContainer>
+  </MudMainContent>
+
+</MudLayout>
+
+@code {
+  private bool _navigationOpen = false;
+  private void ToggleNavigation() => _navigationOpen = !_navigationOpen;
+}
