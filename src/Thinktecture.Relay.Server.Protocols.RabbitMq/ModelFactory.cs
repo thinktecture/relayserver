@@ -24,11 +24,11 @@ public class ModelFactory
 
 		if (connection is IAutorecoveringConnection autorecoveringConnection)
 		{
-			autorecoveringConnection.RecoverySucceeded += (sender, args)
+			autorecoveringConnection.RecoverySucceeded += (_, _)
 				=> _logger.LogInformation(25100, "Connection successful recovered");
 		}
 
-		connection.ConnectionShutdown += (sender, args)
+		connection.ConnectionShutdown += (_, args)
 			=> _logger.LogDebug(25101, "Connection closed ({ShutdownReason}", args.ReplyText);
 	}
 
@@ -45,11 +45,11 @@ public class ModelFactory
 		_logger.LogTrace(25102, "Model for {ModelContext} with channel {ModelChannel} created", context,
 			model.ChannelNumber);
 
-		model.CallbackException += (sender, args) => _logger.LogError(25103, args.Exception,
+		model.CallbackException += (_, args) => _logger.LogError(25103, args.Exception,
 			"An error occured in a model callback for {ModelContext} with channel {ModelChannel}", context,
 			model.ChannelNumber);
 
-		model.ModelShutdown += (sender, args)
+		model.ModelShutdown += (_, args)
 			=> _logger.LogTrace(25104, "Model for {ModelContext} with channel {ModelChannel} closed ({ShutdownReason})",
 				context, model.ChannelNumber, args.ReplyText);
 
