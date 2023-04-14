@@ -9,7 +9,7 @@ namespace ExampleArticleApi.Controllers;
 /// Handles http requests related to articles.
 /// </summary>
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class ArticlesController : ControllerBase
 {
 	private readonly RequestInfoService _requestInfoService;

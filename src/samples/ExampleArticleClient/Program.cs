@@ -23,11 +23,9 @@ builder.Services.AddScoped<IStoreHandler, JsonStoreHandler>();
 builder.Services.AddFluxor(o =>
 {
 	o.ScanAssemblies(typeof(Program).Assembly);
-	o.UsePersist();
+	o.UsePersist(po => po.UseInclusionApproach());
 
 	o.UseReduxDevTools();
 });
-
-
 
 await builder.Build().RunAsync();

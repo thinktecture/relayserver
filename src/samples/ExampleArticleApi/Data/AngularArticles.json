@@ -250,8 +250,8 @@
   {
     "Title": "The Motivation For Using Web Components, An Introduction: Perks & Flaws Series – Part 1",
     "Url": "https://www.thinktecture.com/web-components/introduction-and-motivation/",
-    "Tags": ["Angular", "ASP.NET Core", "Blazor", "SPA", "Web Components", "WebAssembly"],
     "Tags": ["Angular", "Web Components"],
+    "Authors": ["Thinktecture Team"],
     "Date": "2020-04-17",
     "Language": "EN"
   },

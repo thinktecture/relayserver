@@ -1,0 +1,29 @@
+<MudForm Model="FormModel">
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+
+            <MudPaper Class="pa-5">
+                <MudText Align="Align.Start" Class="mt-4 mb-2" Typo="Typo.h5">Addresses</MudText>
+                <MudTextField Label="Local API Base Url" @bind-Value="FormModel.LocalApiBaseUri" Required="true" RequiredError="Field is required!" />
+                <MudTextField Label="API base path" @bind-Value="FormModel.ApiBasePath" Required="true" RequiredError="Field is required!" />
+                <MudTextField Label="RelayServer Base Url" @bind-Value="FormModel.RelayServerBaseUri" Required="true" RequiredError="Field is required!" />
+                <MudTextField Label="RelayServer path" @bind-Value="FormModel.RelayServerPath" Required="true" RequiredError="Field is required!" />
+
+                <MudText Align="Align.Start" Class="mt-4 mb-2" Typo="Typo.h5">Tenants</MudText>
+                @for (var i = 1; i - 1 < FormModel.Tenants.Count; i++)
+                {
+                    var index = i - 1;
+                    <MudTextField Label="@($"Tenant {i}")" @bind-Value="FormModel.Tenants[index]" Required="true" RequiredError="Field is required!" AdornmentIcon="@Icons.Material.Filled.Delete" Adornment="Adornment.End" OnAdornmentClick="@(() => FormModel.Tenants.RemoveAt(index))" />
+                }
+                <MudButton Class="mt-4 mb-2" Variant="Variant.Outlined" Color="Color.Secondary" DisableElevation="true" OnClick="@(() => FormModel.Tenants.Add(String.Empty))">Add Tenant</MudButton>
+                <MudTextField Label="Target" @bind-Value="FormModel.Target" Required="true" RequiredError="Field is required!" />
+
+            </MudPaper>
+
+            <MudPaper Class="pa-4 mt-4">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="Save">Save</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" DisableElevation="true" OnClick="Reset" Class="mx-2">Reset</MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudForm>

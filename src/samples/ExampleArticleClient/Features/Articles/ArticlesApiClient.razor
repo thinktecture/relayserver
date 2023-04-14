@@ -1,0 +1,92 @@
+@using ExampleArticleClient.Services;
+@inherits FluxorComponent
+
+<MudGrid>
+    <MudItem xs="12" sm="9">
+        <MudPaper Class="pa-4 mt-4">
+            <MudText Typo="Typo.h4" Class="mb-4">Data</MudText>
+
+            @if (State.IsLoading)
+            {
+                <MudText>Loading...</MudText>
+            }
+            else if (!String.IsNullOrEmpty(State.ErrorMessage))
+            {
+                <MudText Typo="Typo.body1" Color="Color.Warning">@State.ErrorMessage</MudText>
+            }
+            else if (State.Articles.Any() || State.Requests.Any())
+            {
+                <MudTabs>
+                    <MudTabPanel Text="Articles">
+                        <MudDataGrid Items="@State.Articles">
+                            <Columns>
+                                <PropertyColumn Property="x => x.Title" />
+                                <PropertyColumn Property="x => x.Date" Format="d" />
+                                <TemplateColumn Title="Url">
+                                    <CellTemplate>
+                                        <MudLink Href="@context.Item.Url.ToString()" Target="_new">@context.Item.Url</MudLink>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Authors">
+                                    <CellTemplate>
+                                        <MudText>@String.Join(", ", context.Item.Authors ?? Array.Empty<string>())</MudText>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Tags">
+                                    <CellTemplate>
+                                        @foreach (var tag in context.Item.Tags)
+                                        {
+                                            <MudChip>@tag</MudChip>
+                                        }
+                                    </CellTemplate>
+                                </TemplateColumn>
+
+                                <PropertyColumn Property="x => x.Language" />
+                            </Columns>
+                        </MudDataGrid>
+                    </MudTabPanel>
+                    <MudTabPanel Text="Requests">
+                        <MudDataGrid Items="@State.Requests">
+                            <Columns>
+                                <PropertyColumn Property="x => x.Time" Format="s" />
+                                <PropertyColumn Property="x => x.Method" />
+                                <PropertyColumn Property="x => x.Path" />
+                                <PropertyColumn Property="x => x.Query" />
+                                <PropertyColumn Property="x => x.IpAddress" />
+                            </Columns>
+                        </MudDataGrid>
+                    </MudTabPanel>
+                </MudTabs>
+            }
+            else
+            {
+                <MudText>Please load some data...</MudText>
+            }
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="3">
+        <MudPaper Class="pa-4 mt-4">
+
+            <MudText Typo="Typo.h4" Class="mb-4">Parameters</MudText>
+            <MudStack Row="true" Class="mb-2">
+                <MudText>Local API</MudText>
+                <MudSwitch Class="ml-4 mt-n2" @bind-Checked="UseRelayServer"></MudSwitch>
+                <MudText>RelayServer</MudText>
+            </MudStack>
+
+            <MudSelect Label="Tenant" @bind-Value="SelectedTenant" Disabled="@(!UseRelayServer)">
+                @foreach (var tenant in SettingsState.Value.Tenants)
+                {
+                    <MudSelectItem Value="tenant" />
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.body2" Class="mb-4 mt-4">Base url to request: @UrlToRequest</MudText>
+            <MudTextField @bind-Value="AdditionalParameters" Label="Additional Query" Variant="Variant.Text" />
+
+            <MudButton Class="mt-4" Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="Load" Disabled="State.IsLoading">Load</MudButton>
+            <MudButton Class="mt-4 mx-2" Variant="Variant.Filled" Color="Color.Secondary" DisableElevation="true" OnClick="Cancel" Disabled="!State.IsLoading">Cancel</MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
