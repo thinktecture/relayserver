@@ -128,7 +128,6 @@ public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 
 	private class WaitingState
 	{
-		public DateTime Creation { get; } = DateTime.UtcNow;
 		public TaskCompletionSource<T> TaskCompletionSource { get; } = new TaskCompletionSource<T>();
 	}
 }
