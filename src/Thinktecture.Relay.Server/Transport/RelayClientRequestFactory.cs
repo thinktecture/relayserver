@@ -43,7 +43,7 @@ public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 			TenantId = tenantId,
 			HttpMethod = httpRequest.Method,
 			Url = $"{string.Join("/", parts.Skip(2))}{httpRequest.QueryString}",
-			HttpHeaders = httpRequest.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray()),
+			HttpHeaders = httpRequest.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray(), StringComparer.OrdinalIgnoreCase),
 			BodySize = httpRequest.Body.Length,
 			BodyContent = httpRequest.Body.Length == 0 ? null : httpRequest.Body,
 			AcknowledgeMode = _relayServerOptions.AcknowledgeMode,

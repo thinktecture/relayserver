@@ -34,7 +34,7 @@ public class ClientRequest : IClientRequest
 	public string Url { get; set; } = default!;
 
 	/// <inheritdoc/>
-	public IDictionary<string, string[]> HttpHeaders { get; set; } = default!;
+	public IDictionary<string, string[]> HttpHeaders { get; set; } = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
 	/// <inheritdoc/>
 	public long? BodySize { get; set; }

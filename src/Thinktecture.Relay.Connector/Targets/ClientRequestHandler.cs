@@ -120,7 +120,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 
 		if (enableTracing)
 		{
-			response.HttpHeaders ??= new Dictionary<string, string[]>();
+			response.HttpHeaders ??= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 			response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
 			response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion };
 		}
