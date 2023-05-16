@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using Thinktecture.Relay.Acknowledgement;
@@ -43,7 +44,7 @@ public static class ClientRequestExtensions
 		{
 			RequestId = request.RequestId,
 			RequestOriginId = request.RequestOriginId,
-			HttpHeaders = new Dictionary<string, string[]>(),
+			HttpHeaders = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase),
 		};
 
 		if (failureStatusCode == null) return response;
