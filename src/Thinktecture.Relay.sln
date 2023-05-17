@@ -106,6 +106,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleArticleApi", "sample
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleArticleClient", "samples\ExampleArticleClient\ExampleArticleClient.csproj", "{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleRelayServer", "samples\ExampleRelayServer\ExampleRelayServer.csproj", "{7AA7A1E4-D0A8-4F62-8089-5E0CA7556C53}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -208,6 +210,10 @@ Global
 		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AA7A1E4-D0A8-4F62-8089-5E0CA7556C53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AA7A1E4-D0A8-4F62-8089-5E0CA7556C53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AA7A1E4-D0A8-4F62-8089-5E0CA7556C53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AA7A1E4-D0A8-4F62-8089-5E0CA7556C53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -236,6 +242,7 @@ Global
 		{4EF4176E-34E3-477A-8CB1-982A318C3C30} = {D8D76BB9-1D64-43C5-9B7E-710CF4A35374}
 		{18756AD7-64BA-4F8C-8FE5-8B27EC54A37E} = {804EE1FA-511F-448B-8229-018DF09A35E0}
 		{3FA1C42B-9F21-49C1-BC68-39391C3DD8F7} = {804EE1FA-511F-448B-8229-018DF09A35E0}
+		{7AA7A1E4-D0A8-4F62-8089-5E0CA7556C53} = {804EE1FA-511F-448B-8229-018DF09A35E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CE554FF-A10B-4F63-B480-ED9455F16873}

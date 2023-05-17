@@ -2,7 +2,7 @@
 @inherits FluxorComponent
 
 <MudGrid>
-    <MudItem xs="12" sm="9">
+    <MudItem xs="12" sm="8">
         <MudPaper Class="pa-4 mt-4">
             <MudText Typo="Typo.h4" Class="mb-4">Data</MudText>
 
@@ -20,13 +20,12 @@
                     <MudTabPanel Text="Articles">
                         <MudDataGrid Items="@State.Articles">
                             <Columns>
-                                <PropertyColumn Property="x => x.Title" />
-                                <PropertyColumn Property="x => x.Date" Format="d" />
-                                <TemplateColumn Title="Url">
+                                <TemplateColumn Title="Article">
                                     <CellTemplate>
-                                        <MudLink Href="@context.Item.Url.ToString()" Target="_new">@context.Item.Url</MudLink>
+                                        <MudLink Href="@context.Item.Url.ToString()" Target="_new">@context.Item.Title</MudLink>
                                     </CellTemplate>
                                 </TemplateColumn>
+                                <PropertyColumn Property="x => x.Date" Format="d" />
                                 <TemplateColumn Title="Authors">
                                     <CellTemplate>
                                         <MudText>@String.Join(", ", context.Item.Authors ?? Array.Empty<string>())</MudText>
@@ -40,7 +39,6 @@
                                         }
                                     </CellTemplate>
                                 </TemplateColumn>
-
                                 <PropertyColumn Property="x => x.Language" />
                             </Columns>
                         </MudDataGrid>
@@ -65,25 +63,35 @@
         </MudPaper>
     </MudItem>
 
-    <MudItem xs="12" sm="3">
+    <MudItem xs="12" sm="4">
         <MudPaper Class="pa-4 mt-4">
 
             <MudText Typo="Typo.h4" Class="mb-4">Parameters</MudText>
-            <MudStack Row="true" Class="mb-2">
-                <MudText>Local API</MudText>
-                <MudSwitch Class="ml-4 mt-n2" @bind-Checked="UseRelayServer"></MudSwitch>
-                <MudText>RelayServer</MudText>
-            </MudStack>
+            <MudTabs>
+                <MudTabPanel Text="Request">
 
-            <MudSelect Label="Tenant" @bind-Value="SelectedTenant" Disabled="@(!UseRelayServer)">
-                @foreach (var tenant in SettingsState.Value.Tenants)
-                {
-                    <MudSelectItem Value="tenant" />
-                }
-            </MudSelect>
+                    <MudStack Row="true" Class="mb-2 mt-4">
+                        <MudText>Local API</MudText>
+                        <MudSwitch Class="ml-4 mt-n2" @bind-Checked="UseRelayServer"></MudSwitch>
+                        <MudText>RelayServer</MudText>
+                    </MudStack>
 
-            <MudText Typo="Typo.body2" Class="mb-4 mt-4">Base url to request: @UrlToRequest</MudText>
-            <MudTextField @bind-Value="AdditionalParameters" Label="Additional Query" Variant="Variant.Text" />
+                    <MudSelect Label="Tenant" @bind-Value="SelectedTenant" Disabled="!UseRelayServer">
+                        @foreach (var tenant in SettingsState.Value.Tenants)
+                        {
+                            <MudSelectItem Value="tenant" />
+                        }
+                    </MudSelect>
+
+                    <MudText Typo="Typo.body2" Class="mb-4 mt-4">Base url to request: @UrlToRequest</MudText>
+                    <MudTextField @bind-Value="AdditionalParameters" Label="Additional Query" Variant="Variant.Text" />
+                </MudTabPanel>
+                <MudTabPanel Text="Headers">
+                    <MudCheckBox @bind-Checked="SendHeader" Label="Send Header"></MudCheckBox>
+                    <MudTextField @bind-Value="HeaderName" Label="Header Name" Variant="Variant.Text" Disabled="!SendHeader" />
+                    <MudTextField @bind-Value="HeaderValue" Label="Header Value" Variant="Variant.Outlined" Lines="17" Disabled="!SendHeader" />
+                </MudTabPanel>
+            </MudTabs>
 
             <MudButton Class="mt-4" Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="Load" Disabled="State.IsLoading">Load</MudButton>
             <MudButton Class="mt-4 mx-2" Variant="Variant.Filled" Color="Color.Secondary" DisableElevation="true" OnClick="Cancel" Disabled="!State.IsLoading">Cancel</MudButton>

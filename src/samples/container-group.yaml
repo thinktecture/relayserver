@@ -1,0 +1,52 @@
+name: relayserver-demo-group
+apiVersion: '2021-10-01'
+location: westeurope
+properties:
+  containers:
+  - name: rabbitmq
+    properties:
+      image: rabbitmq:3-management
+      environmentVariables:
+      - name: RABBITMQ_DEFAULT_USER
+        value: 'relayserver'
+      - name: RABBITMQ_DEFAULT_PASS
+        value: '<Strong!Passw0rd>'
+      ports:
+      - port: 5672
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGb: 1.0
+  - name: relayserver
+    properties:
+      image: relaydemoacr.azurecr.io/relayserver:v1
+      environmentVariables:
+      - name: ASPNETCORE_URLS
+        value: 'http://*:80;https://*:443'
+      - name: Authentication__Authority
+        value: 'https://DNSNAMELABEL.westeurope.azurecontainer.io'
+      - name: RabbitMq__Uri
+        value: 'amqp://relayserver:<Strong!Passw0rd>@localhost'
+      - name: LettuceEncrypt__EmailAddress
+        value: 'EMAIL@TEST.COM'
+      - name: LettuceEncrypt__DomainNames__0
+        value: 'DNSNAMELABEL.westeurope.azurecontainer.io'
+      ports:
+      - port: 80
+      - port: 443
+      resources:
+        requests:
+          cpu: 2.0
+          memoryInGb: 2.0
+  osType: Linux
+  restartPolicy: OnFailure
+  ipAddress:
+    ports:
+    - protocol: tcp
+      port: '80'
+    - protocol: tcp
+      port: '443'
+    type: Public
+    dnsNameLabel: DNSNAMELABEL
+tags: null
+type: Microsoft.ContainerInstance/containerGroups

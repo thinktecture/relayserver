@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Fluxor;
 using ExampleArticleClient.Features.Settings;
+using System.Text;
 
 namespace ExampleArticleClient.Features.Articles;
 
@@ -21,21 +22,62 @@ public partial class ArticlesApiClient
 			: Settings.UrlForLocalApi())
 		+ AdditionalParameters;
 
+	private bool SendHeader = false;
+	private string HeaderName = "tt-relay-metadata";
+	private string HeaderValue;
+
 	private string AdditionalParameters = String.Empty;
 
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
 		SelectedTenant = Settings.Tenants.FirstOrDefault() ?? String.Empty;
+		HeaderValue = GetNewHeaderValue();
 	}
 
 	private void Load()
 	{
-		Dispatcher.Dispatch(new LoadAction(UseRelayServer ? SelectedTenant : null, AdditionalParameters));
+		Dispatcher.Dispatch(new LoadAction(UseRelayServer ? SelectedTenant : null, AdditionalParameters, BuildHeaders()));
+		HeaderValue = GetNewHeaderValue();
 	}
 
 	private void Cancel()
 	{
 		Dispatcher.Dispatch(new CancelLoadAction());
+	}
+
+	private Header[]? BuildHeaders()
+	{
+		if (!SendHeader)
+			return null;
+
+		var result = new[]
+		{
+			new Header(HeaderName, Convert.ToBase64String(Encoding.UTF8.GetBytes(HeaderValue))),
+		};
+
+		return result;
+	}
+
+	private string GetNewHeaderValue()
+	{
+		return $$"""
+		{
+			"traceId": "{{Guid.NewGuid()}}",
+			"connection": "WEG - Elog",
+			"timestamp": "{{DateTimeOffset.Now:O}}",
+
+			"sourceConnector": "elog-002",
+			"sourceFolder": "C:\\TransferWEG\\Out\\EDM\\Andwil",
+			"sourceTenant": "Andwil",
+			"sourceApplication": "Loganto",
+			"sourceMessageType": "1710768",
+
+			"sync": false,
+			"files": [
+				{ "fileName": "antrag.xml", "fileSize": 1304 }
+			]
+		}
+		""";
 	}
 }

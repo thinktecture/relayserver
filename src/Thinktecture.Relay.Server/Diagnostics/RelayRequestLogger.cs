@@ -14,7 +14,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse
 {
-	private readonly ILogger<RelayRequestLogger<TRequest, TResponse>> _logger;
+	protected readonly ILogger<RelayRequestLogger<TRequest, TResponse>> Logger;
 	private readonly RelayServerOptions _relayServerOptions;
 	private readonly IRequestService _requestService;
 
@@ -27,7 +27,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	public RelayRequestLogger(ILogger<RelayRequestLogger<TRequest, TResponse>> logger,
 		IRequestService requestService, IOptions<RelayServerOptions> relayServerOptions)
 	{
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 		_requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
@@ -38,7 +38,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogSuccess(Guid relayRequestId);
 
 	/// <inheritdoc/>
-	public async Task LogSuccessAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public virtual async Task LogSuccessAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogSucceeded()) return;
 
@@ -55,7 +55,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogAbort(Guid relayRequestId);
 
 	/// <inheritdoc/>
-	public async Task LogAbortAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public virtual async Task LogAbortAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogAborted()) return;
 
@@ -70,7 +70,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogFail(Guid relayRequestId);
 
 	/// <inheritdoc/>
-	public async Task LogFailAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public virtual async Task LogFailAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogFailed()) return;
 
@@ -85,7 +85,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogExpired(Guid relayRequestId);
 
 	/// <inheritdoc/>
-	public async Task LogExpiredAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public virtual async Task LogExpiredAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogExpired()) return;
 
@@ -100,7 +100,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogError(Guid relayRequestId);
 
 	/// <inheritdoc/>
-	public async Task LogErrorAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public virtual async Task LogErrorAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogErrored()) return;
 
