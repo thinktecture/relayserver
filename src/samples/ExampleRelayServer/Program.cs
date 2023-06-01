@@ -1,4 +1,5 @@
-﻿
+
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using ExampleRelayServer.Samples;
@@ -79,7 +80,8 @@ builder.Services
 	.AddRabbitMqRouting(options => builder.Configuration.GetSection("RabbitMq").Bind(options))
 	.AddSignalRConnectorTransport()
 	.AddFileBodyStore(options => builder.Configuration.GetSection("BodyStore").Bind(options))
-	.AddMaintenanceJobs(options => builder.Configuration.GetSection("Maintenance").Bind(options));
+	.AddMaintenanceJobs(options => builder.Configuration.GetSection("Maintenance").Bind(options))
+	.AddForwardedHeaderInterceptor();
 
 builder.Services
 	.Configure<StatisticsOptions>(options => builder.Configuration.GetSection("Statistics").Bind(options));
@@ -87,7 +89,6 @@ builder.Services
 // Custom Samples, optionally override default services from RelayServer
 builder.Services
 	.AddScoped<IRelayRequestLogger<ClientRequest, TargetResponse>, SampleMetadataRequestLogger<ClientRequest, TargetResponse>>();
-
 
 var app = builder.Build();
 
@@ -130,9 +131,11 @@ try
 	app.MapControllers();
 	app.UseRelayServer();
 
-	// Let's give the Azure platform some time to route here
-	Log.Information("Waiting 30 seconds before starting RelayServer...");
-	await Task.Delay(TimeSpan.FromSeconds(30));
+	var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+	// Let's give the Azure platform some time to route here,
+	// as we will need working DNS for LettuceEncrypt to work
+	await WaitForDnsEntryAsync(logger, app.Configuration.GetValue<string>("LettuceEncrypt:DomainNames:0"));
 
 	await app.RunAsync();
 	return 0;
@@ -157,4 +160,31 @@ static string? Sha512(string? input)
 	var hash = sha.ComputeHash(bytes);
 
 	return Convert.ToBase64String(hash);
+}
+
+static async Task WaitForDnsEntryAsync(Microsoft.Extensions.Logging.ILogger logger, string dnsName)
+{
+	logger.LogInformation("Waiting for DNS entry {DnsName} to resolve...", dnsName);
+
+	var waitTime = TimeSpan.FromSeconds(5);
+
+	while (true)
+	{
+		try
+		{
+			var ipResult = await Dns.GetHostAddressesAsync(dnsName);
+			if (ipResult.Length > 0)
+			{
+				logger.LogInformation("Successfully resolved {DsnName} to IP addresses {IpAddresses}", dnsName, ipResult);
+				return;
+			}
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error while resolving DNS entry {DnsName}", dnsName);
+		}
+
+		logger.LogDebug("Waiting {TimeSpan} for next retry", waitTime);
+		await Task.Delay(waitTime);
+	}
 }
