@@ -80,16 +80,14 @@ public class SampleMetadataRequestLogger<TRequest, TResponse> : RelayRequestLogg
 	private class Metadata
 	{
 		public Guid TraceId { get; set; }
-		public string Connection { get; set; }
+		public string Client { get; set; }
 		public DateTimeOffset Timestamp { get; set; }
 
-		public string SourceConnector { get; set; }
-		public string SourceFolder { get; set; }
 		public string SourceTenant { get; set; }
 		public string SourceApplication { get; set; }
+		public string SourceFolder { get; set; }
 		public string SourceMessageType { get; set; }
 
-		public bool Sync { get; set; }
 		public File[] Files { get; set; }
 	}
 }

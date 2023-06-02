@@ -108,6 +108,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleArticleClient", "sam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleRelayServer", "samples\ExampleRelayServer\ExampleRelayServer.csproj", "{7AA7A1E4-D0A8-4F62-8089-5E0CA7556C53}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleConnector", "samples\ExampleConnector\ExampleConnector.csproj", "{73DC1563-9E5C-4F37-A88D-BCB2BAC6B7CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -4,7 +4,11 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
-# Coopy project file
+# Copy required files
+COPY ["*.props", "."]
+COPY ["nuget.config", "."]
+
+# Copy project file
 COPY ["samples/ExampleRelayServer/ExampleRelayServer.csproj", "samples/ExampleRelayServer/"]
 
 # Copy direct dependency project files for restore

@@ -11,6 +11,9 @@ public partial class ArticlesApiClient
 	[Inject] protected IDispatcher Dispatcher { get; set; }
 	[Inject] protected IState<ArticleState> ArticleState { get; set; }
 
+	private bool requestExpanded = true;
+	private bool responseExpanded = true;
+
 	private ArticleState State => ArticleState.Value;
 	private SettingsState Settings => SettingsState.Value;
 
@@ -25,7 +28,6 @@ public partial class ArticlesApiClient
 	private bool SendHeader = false;
 	private string HeaderName = "tt-relay-metadata";
 	private string HeaderValue;
-
 	private string AdditionalParameters = String.Empty;
 
 	protected override void OnInitialized()
@@ -64,18 +66,17 @@ public partial class ArticlesApiClient
 		return $$"""
 		{
 			"traceId": "{{Guid.NewGuid()}}",
-			"connection": "WEG - Elog",
+			"client": "Article - API - Client",
 			"timestamp": "{{DateTimeOffset.Now:O}}",
 
-			"sourceConnector": "elog-002",
-			"sourceFolder": "C:\\TransferWEG\\Out\\EDM\\Andwil",
-			"sourceTenant": "Andwil",
-			"sourceApplication": "Loganto",
-			"sourceMessageType": "1710768",
+			"sourceTenant": "Tenant 1",
+			"sourceApplication": "App1",
+			"sourceFolder": "C:\\app1\\outgoing\\",
+			"sourceMessageType": "4711",
 
-			"sync": false,
 			"files": [
-				{ "fileName": "antrag.xml", "fileSize": 1304 }
+				{ "fileName": "some-data.json", "fileSize": 104304 },
+				{ "fileName": "some-metadata.json", "fileSize": 350 }
 			]
 		}
 		""";

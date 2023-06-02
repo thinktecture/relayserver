@@ -1,11 +1,8 @@
-
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
-using ExampleRelayServer.Samples;
-using IdentityServer4.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using IdentityServer4.Models;
 using Serilog;
 using Thinktecture.Relay.IdentityServer.Stores;
 using Thinktecture.Relay.Server;
@@ -15,6 +12,7 @@ using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 using Thinktecture.Relay.Server.Persistence.Models;
 using Thinktecture.Relay.Transport;
+using ExampleRelayServer.Samples;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,15 +25,7 @@ builder.Host
 			.ReadFrom.Configuration(hostContext.Configuration);
 	});
 
-
-// Enable Auto-TLS
-if (!String.IsNullOrEmpty(builder.Configuration.GetValue<string>("LettuceEncrypt:DomainNames:0")))
-{
-	Log.Information("Enabling Auto-HTTPS via LettuceEncrypt...");
-	builder.Services.AddLettuceEncrypt(options =>
-		builder.Configuration.GetSection("LettuceEncrypt").Bind(options));
-}
-
+// Infrastructure
 // Accept forwarded headers for IdSrv
 builder.Services
 	.Configure<ForwardedHeadersOptions>(options =>
@@ -45,6 +35,8 @@ builder.Services
 		options.KnownNetworks.Clear();
 		options.KnownProxies.Clear();
 	});
+
+builder.Services.AddHealthChecks();
 
 // Db Context
 builder.Services
@@ -90,6 +82,14 @@ builder.Services
 builder.Services
 	.AddScoped<IRelayRequestLogger<ClientRequest, TargetResponse>, SampleMetadataRequestLogger<ClientRequest, TargetResponse>>();
 
+// Enable Auto-TLS
+if (!String.IsNullOrEmpty(builder.Configuration.GetValue<string>("LettuceEncrypt:DomainNames:0")))
+{
+	Log.Information("Enabling Auto-HTTPS via LettuceEncrypt...");
+	builder.Services.AddLettuceEncrypt(options =>
+		builder.Configuration.GetSection("LettuceEncrypt").Bind(options));
+}
+
 var app = builder.Build();
 
 try
@@ -119,6 +119,9 @@ try
 		}
 	}
 
+	app.UseHealthChecks("/_ready");
+	app.UseHealthChecks("/_healthy");
+
 	app.UseForwardedHeaders();
 	app.UseRouting();
 
@@ -130,12 +133,6 @@ try
 
 	app.MapControllers();
 	app.UseRelayServer();
-
-	var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
-	// Let's give the Azure platform some time to route here,
-	// as we will need working DNS for LettuceEncrypt to work
-	await WaitForDnsEntryAsync(logger, app.Configuration.GetValue<string>("LettuceEncrypt:DomainNames:0"));
 
 	await app.RunAsync();
 	return 0;
@@ -160,31 +157,4 @@ static string? Sha512(string? input)
 	var hash = sha.ComputeHash(bytes);
 
 	return Convert.ToBase64String(hash);
-}
-
-static async Task WaitForDnsEntryAsync(Microsoft.Extensions.Logging.ILogger logger, string dnsName)
-{
-	logger.LogInformation("Waiting for DNS entry {DnsName} to resolve...", dnsName);
-
-	var waitTime = TimeSpan.FromSeconds(5);
-
-	while (true)
-	{
-		try
-		{
-			var ipResult = await Dns.GetHostAddressesAsync(dnsName);
-			if (ipResult.Length > 0)
-			{
-				logger.LogInformation("Successfully resolved {DsnName} to IP addresses {IpAddresses}", dnsName, ipResult);
-				return;
-			}
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "Error while resolving DNS entry {DnsName}", dnsName);
-		}
-
-		logger.LogDebug("Waiting {TimeSpan} for next retry", waitTime);
-		await Task.Delay(waitTime);
-	}
 }
