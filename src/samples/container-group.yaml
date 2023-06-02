@@ -1,6 +1,6 @@
 name: relayserver-demo-group
 apiVersion: '2021-10-01'
-location: westeurope
+location: '%location%'
 properties:
   containers:
   - name: rabbitmq
@@ -15,22 +15,22 @@ properties:
       - port: 5672
       resources:
         requests:
-          cpu: 1.0
+          cpu: 2.0
           memoryInGb: 1.0
   - name: relayserver
     properties:
-      image: relaydemoacr.azurecr.io/relayserver:v1
+      image: '%acrName%.azurecr.io/relayserver:v1'
       environmentVariables:
       - name: ASPNETCORE_URLS
         value: 'http://*:80;https://*:443'
-      - name: Authentication__Authority
-        value: 'https://DNSNAMELABEL.westeurope.azurecontainer.io'
       - name: RabbitMq__Uri
         value: 'amqp://relayserver:<Strong!Passw0rd>@localhost'
-      - name: LettuceEncrypt__EmailAddress
-        value: 'EMAIL@TEST.COM'
+      - name: Authentication__Authority
+        value: 'https://%dnsNameLabel%.westeurope.azurecontainer.io'
       - name: LettuceEncrypt__DomainNames__0
-        value: 'DNSNAMELABEL.westeurope.azurecontainer.io'
+        value: '%dnsNameLabel%.westeurope.azurecontainer.io'
+      - name: LettuceEncrypt__EmailAddress
+        value: '%email%'
       ports:
       - port: 80
       - port: 443
@@ -38,6 +38,21 @@ properties:
         requests:
           cpu: 2.0
           memoryInGb: 2.0
+      readinessProbe:
+        httpGet:
+          path: /_ready
+          port: 80
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+      livenessProbe:
+        httpGet:
+          path: /_healthy
+          port: 80
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
   osType: Linux
   restartPolicy: OnFailure
   ipAddress:
@@ -47,6 +62,6 @@ properties:
     - protocol: tcp
       port: '443'
     type: Public
-    dnsNameLabel: DNSNAMELABEL
+    dnsNameLabel: '%dnsNameLabel%'
 tags: null
 type: Microsoft.ContainerInstance/containerGroups
