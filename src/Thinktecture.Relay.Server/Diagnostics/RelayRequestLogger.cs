@@ -46,6 +46,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 
 		var request = CreateRequest(relayContext);
 		request.HttpStatusCode = relayContext.TargetResponse?.HttpStatusCode;
+		request.ResponseOriginalBodySize = relayContext.TargetResponse?.OriginalBodySize;
 		request.ResponseBodySize = relayContext.TargetResponse?.BodySize;
 		await _requestService.StoreRequestAsync(request);
 	}

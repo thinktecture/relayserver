@@ -249,7 +249,8 @@ public static class HttpResponseMessageExtensions
 		response.HttpStatusCode = message.StatusCode;
 		response.HttpHeaders = message.Headers.Concat(message.Content.Headers)
 			.ToDictionary(h => h.Key, h => h.Value.ToArray(), StringComparer.OrdinalIgnoreCase);
-		response.BodySize = hasBody ? message.Content.Headers.ContentLength : 0;
+		response.OriginalBodySize = hasBody ? message.Content.Headers.ContentLength : 0;
+		response.BodySize = response.OriginalBodySize;
 		response.BodyContent = hasBody ? await message.Content.ReadAsStreamAsync(CancellationToken.None) : null;
 
 		return response;
