@@ -52,11 +52,6 @@ try
 			c.RequireClaim("managementapi", "write", "readwrite"));
 	});
 
-	// Example: Add health checks support
-	builder.Services.AddHealthChecks()
-		.AddCheck("Ready check", () => HealthCheckResult.Healthy(), new[] { "Ready", })
-		.AddDbContextCheck<RelayDbContext>("Db Context", tags: new[] { "Healthy", });
-
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGen(options =>
 	{
@@ -79,10 +74,6 @@ try
 	// This adds the default management api endpoints at the default paths ( /api/management/... )
 	// with the default authorization policies
 	app.UseRelayServerManagementEndpoints();
-
-	// Add health check endpoints for readyness and healthyness
-	app.UseHealthChecks("/ready", new HealthCheckOptions() { Predicate = check => check.Tags.Contains("Ready") });
-	app.UseHealthChecks("/healthy", new HealthCheckOptions() { Predicate = check => check.Tags.Contains("Healthy") });
 
 	app.UseSwagger(options => options.RouteTemplate = "/docs/{DocumentName}/openapi.json");
 	app.UseSwaggerUI(options =>
