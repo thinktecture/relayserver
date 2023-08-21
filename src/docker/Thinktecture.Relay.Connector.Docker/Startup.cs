@@ -5,10 +5,13 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
@@ -60,6 +63,13 @@ internal class InProcTarget : IRelayTarget<ClientRequest, TargetResponse>
 				await request.BodyContent.CopyToAsync(responseData, cancellationToken);
 				responseData.TryRewind();
 			}
+		}
+
+		// Test: If we wait with ack for a completed target request, delay a bit to be able to restart rabbit
+		var url = $"http://localhorst/{request.Url}";
+		if (TimeSpan.TryParse(HttpUtility.ParseQueryString(new Uri(url).Query).Get("delay"), out var delay))
+		{
+			await Task.Delay(delay, cancellationToken);
 		}
 
 		var response = request.CreateResponse();
