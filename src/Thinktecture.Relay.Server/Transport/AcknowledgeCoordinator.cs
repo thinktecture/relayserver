@@ -38,16 +38,31 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		"Registering acknowledge state of request {RelayRequestId} from connection {TransportConnectionId} for id {AcknowledgeId}")]
 	partial void LogRegisterAcknowledgeState(Guid relayRequestId, string transportConnectionId, string acknowledgeId);
 
+	[LoggerMessage(20802, LogLevel.Warning,
+		"Re-registering an already existing request {RelayRequestId} from connection {TransportConnectionId} for id {AcknowledgeId} – this can happen when a request got queued again and will lead to a re-execution of the request but only the first result be acknowledged and the others will be discarded")]
+	partial void LogReRegisterAcknowledgeState(Guid relayRequestId, string transportConnectionId, string acknowledgeId);
+
 	/// <inheritdoc/>
 	public void RegisterRequest(Guid requestId, string connectionId, string acknowledgeId,
 		bool outsourcedRequestBodyContent)
 	{
-		LogRegisterAcknowledgeState(requestId, connectionId, acknowledgeId);
+		if (_requests.ContainsKey(requestId))
+		{
+			LogReRegisterAcknowledgeState(requestId, connectionId, acknowledgeId);
+		}
+		else
+		{
+			LogRegisterAcknowledgeState(requestId, connectionId, acknowledgeId);
+		}
+
 		_requests[requestId] = new AcknowledgeState(connectionId, acknowledgeId, outsourcedRequestBodyContent);
 	}
 
 	[LoggerMessage(20801, LogLevel.Warning, "Unknown request {RelayRequestId} to acknowledge received")]
 	partial void LogUnknownRequest(Guid relayRequestId);
+
+	[LoggerMessage(20803, LogLevel.Debug, "Request {RelayRequestId} was already pruned and will not be acknowledged – this happens after an auto-recovery of the message queue transport")]
+	partial void LogPrunedRequest(Guid relayRequestId);
 
 	/// <inheritdoc/>
 	public async Task ProcessAcknowledgeAsync(TAcknowledge request, CancellationToken cancellationToken = default)
@@ -62,6 +77,10 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		{
 			await _connectorRegistry.AcknowledgeRequestAsync(acknowledgeState.ConnectionId, acknowledgeState.AcknowledgeId,
 				cancellationToken);
+		}
+		else
+		{
+			LogPrunedRequest(request.RequestId);
 		}
 
 		if (acknowledgeState.OutsourcedRequestBodyContent && request.RemoveRequestBodyContent)
