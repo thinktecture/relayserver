@@ -203,7 +203,9 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 					return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 				}
 
-				response.BodySize = content.BytesWritten;
+				// This is the original body size, as this is what went to the relay server
+				response.OriginalBodySize = content.BytesWritten;
+				response.BodySize = response.OriginalBodySize;
 				response.BodyContent = null;
 
 				LogOutsourcedBody(content.BytesWritten, request.RequestId);

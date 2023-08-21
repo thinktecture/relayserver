@@ -231,20 +231,27 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			LogExecutingRequestInterceptor(interceptor.GetType().FullName, _relayContext.RequestId);
 			await interceptor.OnRequestReceivedAsync(_relayContext, cancellationToken);
 
-			if (clientRequest.BodyContent != null && bodyContent != clientRequest.BodyContent)
+			if (clientRequest.BodyContent != bodyContent)
 			{
 				bodyChanged = true;
 
 				// an interceptor changed the body content - need to dispose it properly
-				_relayContext.ResponseDisposables.Add(clientRequest.BodyContent);
+				if (bodyContent != null) _relayContext.ResponseDisposables.Add(bodyContent);
 				bodyContent = clientRequest.BodyContent;
 			}
 		}
 
+		// try to rewind, in order to start sending from the start
+		bodyContent?.TryRewind();
+
 		// if possible, try to update body size (interceptor should have done that already, just to be sure)
-		if (bodyChanged && bodyContent.CanSeek)
+		if (bodyChanged && bodyContent?.CanSeek == true)
 		{
 			clientRequest.BodySize = bodyContent.Length;
+		}
+		else if (bodyChanged & bodyContent == null)
+		{
+			clientRequest.BodySize = 0;
 		}
 	}
 
@@ -305,20 +312,27 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			LogExecutingResponseInterceptor(interceptor.GetType().FullName, _relayContext.RequestId);
 			await interceptor.OnResponseReceivedAsync(_relayContext, cancellationToken);
 
-			if (targetResponse.BodyContent != null && bodyContent != targetResponse.BodyContent)
+			if (targetResponse.BodyContent != bodyContent)
 			{
 				bodyChanged = true;
 
 				// an interceptor changed the body content - need to dispose it properly
-				_relayContext.ResponseDisposables.Add(targetResponse.BodyContent);
+				if (bodyContent != null) _relayContext.ResponseDisposables.Add(bodyContent);
 				bodyContent = targetResponse.BodyContent;
 			}
 		}
 
+		// try to rewind, in order to start sending from the start
+		bodyContent?.TryRewind();
+
 		// if possible, try to update body size (interceptor should have done that already, just to be sure)
-		if (bodyChanged && bodyContent!.CanSeek)
+		if (bodyChanged && bodyContent?.CanSeek == true)
 		{
 			targetResponse.BodySize = bodyContent.Length;
+		}
+		else if (bodyChanged & bodyContent == null)
+		{
+			targetResponse.BodySize = 0;
 		}
 	}
 

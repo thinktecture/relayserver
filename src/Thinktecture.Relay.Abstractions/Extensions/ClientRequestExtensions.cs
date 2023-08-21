@@ -49,6 +49,7 @@ public static class ClientRequestExtensions
 
 		if (failureStatusCode == null) return response;
 
+		response.OriginalBodySize = 0;
 		response.BodySize = 0;
 		response.HttpStatusCode = failureStatusCode.Value;
 		response.RequestFailed = true;
