@@ -20,9 +20,6 @@ public static class ServiceCollectionExtensions
 		services.TryAddScoped<IConnectionService, ConnectionService>();
 		services.TryAddScoped<IRequestService, RequestService>();
 
-		services.AddHealthChecks()
-			.AddDbContextCheck<RelayDbContext>();
-
 		return services;
 	}
 }
