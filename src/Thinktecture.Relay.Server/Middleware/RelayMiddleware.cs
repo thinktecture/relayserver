@@ -386,7 +386,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		}
 
 		var cacheEntryOptions = new DistributedCacheEntryOptions()
-			.SetAbsoluteExpiration(_relayServerOptions.TenantInfoCacheTimeout);
+			.SetAbsoluteExpiration(_relayServerOptions.TenantInfoCacheDuration);
 
 		cachedData = result.ToByteArray();
 		await _cache.SetAsync(cacheKey, cachedData, cacheEntryOptions, cancellationToken);

@@ -22,7 +22,7 @@ internal class RotateSigningCredentialFileStore : ISigningCredentialStore
 		_fileStore = fileStore ?? throw new ArgumentNullException(nameof(fileStore));
 	}
 
-	/// <inheritdoc />
+	/// <inheritdoc/>
 	public Task<SigningCredentials> GetSigningCredentialsAsync()
 	{
 		try

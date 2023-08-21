@@ -56,10 +56,10 @@ the available settings:
       // Values: 0 = Disabled, 1 = ConnectorReceived, 2 = ConnectorFinished, 3 = Manual
       "AcknowledgeMode": "Disabled",
 
-      // Tenant info cache timeout, Timespan, defaults to 10 seconds
+      // Tenant info cache duration, Timespan, defaults to 10 seconds
       // Defines how long the tenant info will be cached before the database is queried
       // again.
-      "TenantInfoCacheTimeout": "00:00:10",
+      "TenantInfoCacheDuration": "00:00:10",
 
       // Require active connection, boolean, defaults to false
       // When enabled, a request is immediately rejected with a 503 Service unavailable

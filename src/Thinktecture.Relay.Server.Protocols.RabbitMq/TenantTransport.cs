@@ -4,28 +4,30 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
 /// <inheritdoc cref="ITenantTransport{T}"/>
-public partial class TenantTransport<T> : ITenantTransport<T>, IDisposable
-	where T : IClientRequest
+public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<TRequest>, IDisposable
+	where TRequest : IClientRequest
+	where TAcknowledge : IAcknowledgeRequest
 {
-	private readonly ILogger<TenantTransport<T>> _logger;
+	private readonly ILogger<TenantTransport<TRequest, TAcknowledge>> _logger;
 	private readonly IModel _model;
 
 	/// <inheritdoc/>
 	public int? BinarySizeThreshold { get; }
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="TenantTransport{T}"/> class.
+	/// Initializes a new instance of the <see cref="TenantTransport{TRequest,TAcknowledge}"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
-	/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
+	/// <param name="modelFactory">The <see cref="ModelFactory{TAcknowledge}"/>.</param>
 	/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
-	public TenantTransport(ILogger<TenantTransport<T>> logger, ModelFactory modelFactory,
+	public TenantTransport(ILogger<TenantTransport<TRequest, TAcknowledge>> logger, ModelFactory<TAcknowledge> modelFactory,
 		IOptions<RabbitMqOptions> rabbitMqOptions)
 	{
 		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
@@ -43,7 +45,7 @@ public partial class TenantTransport<T> : ITenantTransport<T>, IDisposable
 	partial void LogPublishedRequest(Guid relayRequestId, Guid tenantId);
 
 	/// <inheritdoc/>
-	public async Task TransportAsync(T request)
+	public async Task TransportAsync(TRequest request)
 	{
 		try
 		{

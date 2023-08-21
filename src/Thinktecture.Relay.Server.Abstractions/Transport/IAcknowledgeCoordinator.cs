@@ -31,4 +31,9 @@ public interface IAcknowledgeCoordinator<in T>
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	Task ProcessAcknowledgeAsync(T request, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Prunes all outstanding acknowledge ids.
+	/// </summary>
+	void PruneOutstandingAcknowledgeIds();
 }
