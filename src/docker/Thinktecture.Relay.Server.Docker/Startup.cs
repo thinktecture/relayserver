@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Thinktecture.Relay.Server.Docker.Interceptors;
 using Thinktecture.Relay.Server.Maintenance;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
@@ -37,7 +38,9 @@ public class Startup
 			.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 			.AddSignalRConnectorTransport()
 			.AddFileBodyStore(options => Configuration.GetSection("BodyStore").Bind(options))
-			.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options));
+			.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options))
+			.AddClientRequestInterceptor<DemoRequestInterceptor>()
+			.AddTargetResponseInterceptor<DemoResponseInterceptor>();
 
 		services.Configure<StatisticsOptions>(options => Configuration.GetSection("Statistics").Bind(options));
 	}
