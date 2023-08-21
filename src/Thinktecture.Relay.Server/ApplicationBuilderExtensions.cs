@@ -35,11 +35,6 @@ public static class ApplicationBuilderExtensions
 		where TAcknowledge : IAcknowledgeRequest
 	{
 		builder.Map("/relay", app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse, TAcknowledge>>());
-		builder.Map("/health", app =>
-		{
-			app.UseHealthChecks("/ready", new HealthCheckOptions() { Predicate = check => check.Tags.Contains("ready") });
-			app.UseHealthChecks("/live", new HealthCheckOptions() { Predicate = _ => false });
-		});
 
 		foreach (var part in builder.ApplicationServices.GetServices<IApplicationBuilderPart>())
 		{
