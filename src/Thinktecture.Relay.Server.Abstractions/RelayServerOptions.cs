@@ -10,11 +10,6 @@ namespace Thinktecture.Relay.Server;
 public class RelayServerOptions
 {
 	/// <summary>
-	/// The default request expiration.
-	/// </summary>
-	public static readonly TimeSpan DefaultRequestExpiration = TimeSpan.FromSeconds(10);
-
-	/// <summary>
 	/// Enables the shortcut processing for the connector transport (e.g. client request).
 	/// </summary>
 	public bool EnableConnectorTransportShortcut { get; set; }
@@ -33,7 +28,7 @@ public class RelayServerOptions
 	/// <summary>
 	/// The expiration time of a request until a response must be received.
 	/// </summary>
-	public TimeSpan? RequestExpiration { get; set; } = DefaultRequestExpiration;
+	public TimeSpan? RequestExpiration { get; set; } = TimeSpan.FromMinutes(2);
 
 	/// <summary>
 	/// The minimum delay to wait for until a reconnect of a connector should be attempted again.

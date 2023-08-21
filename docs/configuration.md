@@ -8,10 +8,6 @@ the available settings:
 ```
 {
     "RelayServer": {
-      // Default request expiration, Timespan, defaults to 10 seconds
-      // Defines how long a request is kept in the system without expiring.
-      "DefaultRequestExpiration": "00:00:10",
-      
       // Enable connector transport shortcut, Boolean, defaults to false
       // When enabled, a request can be send directly to a connector
       "EnableConnectorTransportShortcut": false,
@@ -21,12 +17,13 @@ the available settings:
       "EnableServerTransportShortcut": false,
       
       // Enpoint timeout, Timespan, defaults to 2 minutes
-      // A connector will wait this long for a on-premises target to respond.
+      // A connector will wait this long for any endpoint on the relay server,
+      // i.e. loading an outsourced body, sending an acknowledgment or the response.
       "EndpointTimeout": "00:02:00",
       
-      // Request expiration, Timespan, defaults to DefaultRequestExpiration
-      // The expiration time of a request until a response must be received.
-      "RequestExpiration": "00:00:10",
+      // Request expiration, Timespan, defaults to 2 minutes
+      // The expiration time of a request until a response must be received from the connector.
+      "RequestExpiration": "00:02:00",
       
       // Reconnect minimum delay, Timespan, defaults to 30 seconds
       // When a connector gets disconnected, it will wait at least this time before
