@@ -50,7 +50,7 @@ public static class RelayServerBuilderExtensions
 
 		if (useTenantRouting)
 		{
-			builder.Services.TryAddSingleton<ITenantTransport<TRequest>, TenantTransport<TRequest>>();
+			builder.Services.TryAddSingleton<ITenantTransport<TRequest>, TenantTransport<TRequest, TAcknowledge>>();
 			builder.Services.TryAddSingleton<ITenantHandlerFactory, TenantHandlerFactory<TRequest, TAcknowledge>>();
 		}
 
@@ -69,7 +69,7 @@ public static class RelayServerBuilderExtensions
 			return factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts ?? factory.Uri.Host),
 				$"RelayServer {context.OriginId}");
 		});
-		builder.Services.AddSingleton<ModelFactory>();
+		builder.Services.AddSingleton<ModelFactory<TAcknowledge>>();
 
 		return builder;
 	}

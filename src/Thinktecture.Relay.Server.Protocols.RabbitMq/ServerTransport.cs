@@ -33,14 +33,15 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	/// Initializes a new instance of the <see cref="ServerTransport{TResponse,TAcknowledge}"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCatgegory}"/>.</param>
-	/// <param name="modelFactory">The <see cref="ModelFactory"/>.</param>
+	/// <param name="modelFactory">The <see cref="ModelFactory{TAcknowledge}"/>.</param>
 	/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 	/// <param name="responseCoordinator">An <see cref="IResponseCoordinator{T}"/>.</param>
 	/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator{T}"/>.</param>
-	public ServerTransport(ILogger<ServerTransport<TResponse, TAcknowledge>> logger, ModelFactory modelFactory,
-		IOptions<RabbitMqOptions> rabbitMqOptions, RelayServerContext relayServerContext,
-		IResponseCoordinator<TResponse> responseCoordinator, IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator)
+	public ServerTransport(ILogger<ServerTransport<TResponse, TAcknowledge>> logger,
+		ModelFactory<TAcknowledge> modelFactory, IOptions<RabbitMqOptions> rabbitMqOptions,
+		RelayServerContext relayServerContext, IResponseCoordinator<TResponse> responseCoordinator,
+		IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator)
 	{
 		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
 		if (rabbitMqOptions == null) throw new ArgumentNullException(nameof(rabbitMqOptions));
@@ -107,7 +108,8 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	partial void LogDispatchedResponse(Guid relayRequestId, Guid originId);
 
 	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25201, LogLevel.Trace, "Dispatched acknowledgement for request {RelayRequestId} to origin {OriginId}")]
+	[LoggerMessage(25201, LogLevel.Trace,
+		"Dispatched acknowledgement for request {RelayRequestId} to origin {OriginId}")]
 	partial void LogDispatchedAcknowledge(Guid relayRequestId, Guid originId);
 
 	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator

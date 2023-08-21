@@ -58,8 +58,11 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 			return;
 		}
 
-		await _connectorRegistry.AcknowledgeRequestAsync(acknowledgeState.ConnectionId, acknowledgeState.AcknowledgeId,
-			cancellationToken);
+		if (acknowledgeState.AcknowledgeId != null)
+		{
+			await _connectorRegistry.AcknowledgeRequestAsync(acknowledgeState.ConnectionId, acknowledgeState.AcknowledgeId,
+				cancellationToken);
+		}
 
 		if (acknowledgeState.OutsourcedRequestBodyContent && request.RemoveRequestBodyContent)
 		{
@@ -67,10 +70,21 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		}
 	}
 
+	/// <inheritdoc/>
+	public void PruneOutstandingAcknowledgeIds()
+	{
+		foreach (var acknowledgeState in _requests.Values)
+		{
+			acknowledgeState.AcknowledgeId = null;
+		}
+	}
+
 	private class AcknowledgeState
 	{
 		public string ConnectionId { get; }
-		public string AcknowledgeId { get; }
+
+		public string? AcknowledgeId { get; set; }
+
 		public bool OutsourcedRequestBodyContent { get; }
 
 		public AcknowledgeState(string connectionId, string acknowledgeId, bool outsourcedRequestBodyContent)

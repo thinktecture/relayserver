@@ -65,9 +65,9 @@ public class RelayServerOptions
 	public AcknowledgeMode AcknowledgeMode { get; set; } = AcknowledgeMode.Disabled;
 
 	/// <summary>
-	/// Determines how long the tenant info should be cached.
+	/// The duration how long the tenant info will be cached.
 	/// </summary>
-	public TimeSpan TenantInfoCacheTimeout { get; set; } = TimeSpan.FromSeconds(10);
+	public TimeSpan TenantInfoCacheDuration { get; set; } = TimeSpan.FromSeconds(10);
 
 	/// <summary>
 	/// Defines if a request should be immediately rejected if there is no active connection available for the
