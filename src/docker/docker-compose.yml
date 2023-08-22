@@ -171,11 +171,8 @@ services:
 
 volumes:
   seq-data:
-    driver: local
   postgresql-data:
-    driver: local
   relay_persistence_bodystore:
-    driver: local
 
 networks:
   relayserver:
