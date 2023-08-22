@@ -106,14 +106,6 @@ tab_width = 3
 indent_style = tab
 indent_size = tab
 
-[*.ts]
-ij_typescript_spaces_within_imports = true
-ij_typescript_spaces_within_object_literal_braces = true
-ij_typescript_spaces_within_object_type_braces = true
-ij_typescript_force_quote_style = true
-ij_typescript_use_double_quotes = false
-ij_typescript_enforce_trailing_comma = whenmultiline
-
 [*.svg]
 disable_formatter = true
 
