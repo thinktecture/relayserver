@@ -55,6 +55,10 @@ public class DiscoveryDocumentBuilder
 	private Uri BuildBaseUri(HttpRequest request)
 		=> new Uri($"{request.Scheme}://{request.Host}{request.PathBase}", UriKind.Absolute);
 
+	/// <summary>
+	/// Gets the authority from the configured <see cref="JwtBearerOptions"/>.
+	/// </summary>
+	/// <returns>The base url of the Identity Provider</returns>
 	protected virtual string? GetAuthority()
 		=> _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()?.Get(Constants.DefaultAuthenticationScheme)
 			?.Authority;
