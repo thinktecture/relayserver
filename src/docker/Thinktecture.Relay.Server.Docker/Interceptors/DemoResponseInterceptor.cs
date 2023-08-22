@@ -35,30 +35,33 @@ public class DemoResponseInterceptor : ITargetResponseInterceptor<ClientRequest,
 				return;
 			}
 
-			int size = (int)context.TargetResponse.BodySize * 2;
+			var size = (int)context.TargetResponse.BodySize * 2;
 
 			_logger.LogInformation(1,
 				"Response stream interceptor enabled for request {RequestId}, input was {OriginalResponseSize}, output will be {ResponseSize} bytes",
 				context.RequestId, context.TargetResponse.BodySize, size);
 
-			// Reverse the original content
-			var buffer = new byte[size];
-			context.TargetResponse.BodyContent.TryRewind();
-			context.TargetResponse.BodyContent.Read(buffer, 0, (int)context.TargetResponse.BodySize);
-			Array.Reverse(buffer, 0, (int)context.TargetResponse.BodySize);
-
-			// Double the original reversed content by appending it a second time
-			for (var i = 0; i < context.TargetResponse.BodySize; i++)
+			if (context.TargetResponse.BodyContent != null)
 			{
-				buffer[(int)context.TargetResponse.BodySize + i] = buffer[i];
+				// Reverse the original content
+				var buffer = new byte[size];
+				context.TargetResponse.BodyContent.TryRewind();
+				var length = await context.TargetResponse.BodyContent.ReadAsync(buffer.AsMemory(0, (int)context.TargetResponse.BodySize), cancellationToken);
+				Array.Reverse(buffer, 0, length);
+
+				// Double the original reversed content by appending it a second time
+				for (var i = 0; i < length; i++)
+				{
+					buffer[length + i] = buffer[i];
+				}
+
+				var newStream = new MemoryStream(buffer);
+				newStream.TryRewind();
+
+				// set new data to response and (on purpose) forget to set the new length
+				context.TargetResponse.BodyContent = newStream;
+				// context.TargetResponse.BodySize = newStream.Length;
 			}
-
-			var newStream = new MemoryStream(buffer);
-			newStream.TryRewind();
-
-			// set new data to response and (on purpose) forget to set the new length
-			context.TargetResponse.BodyContent = newStream;
-			// context.TargetResponse.BodySize = newStream.Length;
 		}
 	}
 }
