@@ -10,6 +10,31 @@ namespace Thinktecture.Relay.Server;
 public class RelayServerOptions
 {
 	/// <summary>
+	/// The default request expiration.
+	/// </summary>
+	public static readonly TimeSpan DefaultRequestExpiration = TimeSpan.FromMinutes(2);
+
+	/// <summary>
+	/// The default endpoint timeout.
+	/// </summary>
+	public static readonly TimeSpan DefaultEndpointTimeout = TimeSpan.FromMinutes(2);
+
+	/// <summary>
+	///  The default request logger level.
+	/// </summary>
+	public static readonly RelayRequestLoggerLevel DefaultRequestLoggerLevel = RelayRequestLoggerLevel.All;
+
+	/// <summary>
+	///  The default acknowledge mode.
+	/// </summary>
+	public static readonly AcknowledgeMode DefaultAcknowledgeMode = AcknowledgeMode.Disabled;
+
+	/// <summary>
+	/// The default tenant info cache duration.
+	/// </summary>
+	public static readonly TimeSpan DefaultTenantInfoCacheDuration = TimeSpan.FromSeconds(10);
+
+	/// <summary>
 	/// Enables the shortcut processing for the connector transport (e.g. client request).
 	/// </summary>
 	public bool EnableConnectorTransportShortcut { get; set; }
@@ -23,12 +48,12 @@ public class RelayServerOptions
 	/// The timeout of a server endpoint accessed from a connector.
 	/// </summary>
 	/// <remarks>The default value is 2 minutes.</remarks>
-	public TimeSpan EndpointTimeout { get; set; } = TimeSpan.FromMinutes(2);
+	public TimeSpan EndpointTimeout { get; set; } = DefaultEndpointTimeout;
 
 	/// <summary>
 	/// The expiration time of a request until a response must be received.
 	/// </summary>
-	public TimeSpan? RequestExpiration { get; set; } = TimeSpan.FromMinutes(2);
+	public TimeSpan? RequestExpiration { get; set; } = DefaultRequestExpiration;
 
 	/// <summary>
 	/// The minimum delay to wait for until a reconnect of a connector should be attempted again.
@@ -57,21 +82,20 @@ public class RelayServerOptions
 	/// <summary>
 	/// The verbosity of the <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.
 	/// </summary>
-	public RelayRequestLoggerLevel RequestLoggerLevel { get; set; } = RelayRequestLoggerLevel.All;
+	public RelayRequestLoggerLevel RequestLoggerLevel { get; set; } = DefaultRequestLoggerLevel;
 
 	/// <summary>
 	/// The <see cref="AcknowledgeMode"/> for requests.
 	/// </summary>
-	public AcknowledgeMode AcknowledgeMode { get; set; } = AcknowledgeMode.Disabled;
+	public AcknowledgeMode AcknowledgeMode { get; set; } = DefaultAcknowledgeMode;
 
 	/// <summary>
 	/// The duration how long the tenant info will be cached.
 	/// </summary>
-	public TimeSpan TenantInfoCacheDuration { get; set; } = TimeSpan.FromSeconds(10);
+	public TimeSpan TenantInfoCacheDuration { get; set; } = DefaultTenantInfoCacheDuration;
 
 	/// <summary>
-	/// Defines if a request should be immediately rejected if there is no active connection available for the
-	/// requested tenant.
+	/// Immediately reject a request if there is no active connection available for the requested tenant.
 	/// </summary>
-	public bool RequireActiveConnection { get; set; } = false;
+	public bool RequireActiveConnection { get; set; }
 }
