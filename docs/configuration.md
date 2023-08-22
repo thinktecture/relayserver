@@ -167,3 +167,68 @@ connections as long in the database by also reducing the `EntryMaxAge` statistic
 option. The last activity of an origin should be updated at least twice within this
 range, so you might also want to reduce the `OriginLastSeenUpdateInterval` statistics
 option. 
+
+## Connector
+
+The `RelayConnectorOptions` type provides the main configuration for the connector. These
+are the available settings:
+
+```
+{
+    "RelayConnector": {
+      // The url pointing to where the RelayServer is deployed
+      "RelayServerBaseUri": "",
+
+      // The tenant name of the connector
+      // Used as client_id for authentication with the Identity Provider.
+      "TenantName": "",
+
+      // The tenant secret of the connector
+      // Used as client_secret for authentication with the Identity Provider.
+      "TenantSecret": "",
+
+      // The local targets that this connector can request
+      "Targets": {},
+
+      // Use the Http KeepAlive feature when communication with the RelayServer
+      // This can be disabled when certain network conditions cause issues.
+      "UseHttpKeepAlive": true
+   }
+}
+
+### Targets
+
+Targets are local web api's that can be accessed through the RelayServer and Connector.
+
+Targets are configured with a name, an internal url and additional settings. The `Type` is a type name
+of a class that implements the `IRelayTarget` interface. The `Url` is the internal url of the target.
+
+You can implement other in-process targets that are not web api's, and configure them here by specifying
+the type name. The Connector will then instantiate your type and call the `HandleAsync` method whenever
+a request is received for that target.
+
+Examples:
+```JSON
+"Targets": {
+
+   "swapi": {
+      // Allows access to the Star Wars API
+      "Type": "RelayWebTarget",
+      "Url": "https://swapi.dev/",
+      "Options": "FollowRedirect"
+   },
+
+   "tt": {
+      // Allows access to the Thinktecture website
+      "Type": "RelayWebTarget",
+      "Url": "https://thinktecture.com",
+      "Options": "FollowRedirect"
+   },
+
+   "exampleInProcTarget": {
+      // Allows handling requests by code
+      "Type": "MyCustomInprocTarget"
+   }
+
+}
+```
