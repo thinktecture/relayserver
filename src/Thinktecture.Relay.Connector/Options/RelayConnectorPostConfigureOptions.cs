@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,14 +18,17 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 	private readonly IHostApplicationLifetime _hostApplicationLifetime;
 	private readonly ILogger<RelayConnectorPostConfigureOptions<TRequest, TResponse>> _logger;
 	private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
+	private readonly IHttpClientFactory _httpClientFactory;
 
 	public RelayConnectorPostConfigureOptions(ILogger<RelayConnectorPostConfigureOptions<TRequest, TResponse>> logger,
-		RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry, IHostApplicationLifetime hostApplicationLifetime)
+		RelayTargetRegistry<TRequest, TResponse> relayTargetRegistry, IHostApplicationLifetime hostApplicationLifetime,
+		IHttpClientFactory httpClientFactory)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_relayTargetRegistry = relayTargetRegistry ?? throw new ArgumentNullException(nameof(relayTargetRegistry));
 		_hostApplicationLifetime =
 			hostApplicationLifetime ?? throw new ArgumentNullException(nameof(hostApplicationLifetime));
+		_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 	}
 
 	public void PostConfigure(string name, RelayConnectorOptions options)
@@ -34,13 +38,16 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 			RegisterTargets(options.Targets);
 		}
 
-		var uri = new Uri(options.RelayServerBaseUri, DiscoveryDocument.WellKnownPath);
+		var httpClient = _httpClientFactory.CreateClient(Constants.HttpClientNames.ConnectionClose);
+		httpClient.BaseAddress = options.RelayServerBaseUri;
+
+		var uri = httpClient.BaseAddress + DiscoveryDocument.WellKnownPath;
 
 		while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 		{
-			var configManager = new ConfigurationManager<DiscoveryDocument>(uri.ToString(),
+			var configManager = new ConfigurationManager<DiscoveryDocument>(DiscoveryDocument.WellKnownPath,
 				new RelayServerConfigurationRetriever(),
-				new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https" });
+				new HttpDocumentRetriever(httpClient) { RequireHttps = httpClient.BaseAddress?.Scheme == "https" });
 
 			try
 			{
@@ -53,8 +60,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 			catch (Exception ex)
 			{
 				_logger.LogError(10301, ex,
-					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}",
-					uri);
+					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}", uri);
 
 				try
 				{

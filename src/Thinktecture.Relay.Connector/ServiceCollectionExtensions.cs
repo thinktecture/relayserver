@@ -61,13 +61,13 @@ public static class ServiceCollectionExtensions
 			.TryAddTransient<IAccessTokenProvider, AccessTokenProvider>();
 
 		builder.Services.AddClientAccessTokenManagement((provider, options) =>
-			{
-				var clientOptions = provider.GetRequiredService<IOptions<AccessTokenManagementOptions>>().Value.Client;
-				options.Clients = clientOptions.Clients;
-				options.DefaultClient = clientOptions.DefaultClient;
-				options.CacheKeyPrefix = clientOptions.CacheKeyPrefix;
-				options.CacheLifetimeBuffer = clientOptions.CacheLifetimeBuffer;
-			});
+		{
+			var clientOptions = provider.GetRequiredService<IOptions<AccessTokenManagementOptions>>().Value.Client;
+			options.Clients = clientOptions.Clients;
+			options.DefaultClient = clientOptions.DefaultClient;
+			options.CacheKeyPrefix = clientOptions.CacheKeyPrefix;
+			options.CacheLifetimeBuffer = clientOptions.CacheLifetimeBuffer;
+		});
 
 		builder.Services
 			.AddHttpClient(Constants.HttpClientNames.RelayServer, (provider, client) =>
@@ -75,6 +75,7 @@ public static class ServiceCollectionExtensions
 				var options = provider.GetRequiredService<IOptions<RelayConnectorOptions>>();
 				client.BaseAddress = options.Value.RelayServerBaseUri;
 				client.Timeout = options.Value.DiscoveryDocument.EndpointTimeout;
+				client.DefaultRequestHeaders.ConnectionClose = !options.Value.UseHttpKeepAlive;
 			})
 			.AddClientAccessTokenHandler();
 
@@ -87,6 +88,9 @@ public static class ServiceCollectionExtensions
 			.AddHttpClient(Constants.HttpClientNames.RelayWebTargetFollowRedirect,
 				client => client.Timeout = Timeout.InfiniteTimeSpan)
 			.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
+		builder.Services
+			.AddHttpClient(Constants.HttpClientNames.ConnectionClose,
+				client => client.DefaultRequestHeaders.ConnectionClose = true);
 
 		builder.Services
 			.TryAddSingleton<IClientRequestHandler<TRequest>, ClientRequestHandler<TRequest, TResponse, TAcknowledge>>();

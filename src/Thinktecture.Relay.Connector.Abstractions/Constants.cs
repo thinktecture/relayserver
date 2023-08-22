@@ -86,5 +86,11 @@ public static class Constants
 		/// </summary>
 		public static readonly string RelayWebTargetFollowRedirect =
 			$"{typeof(Constants).Namespace}.{nameof(RelayWebTargetFollowRedirect)}";
+
+		/// <summary>
+		/// The name of the <see cref="HttpClient"/> with connection close header set.
+		/// </summary>
+		public static readonly string ConnectionClose =
+			$"{typeof(Constants).Namespace}.{nameof(ConnectionClose)}";
 	}
 }
