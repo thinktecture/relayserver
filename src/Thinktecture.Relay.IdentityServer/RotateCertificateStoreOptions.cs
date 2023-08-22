@@ -1,12 +1,17 @@
 using System;
 
-namespace Thinktecture.Relay.IdentityServer.Stores;
+namespace Thinktecture.Relay.IdentityServer;
 
 /// <summary>
 /// The configuration options for the file-based rotating certificate store.
 /// </summary>
-internal class RotateCertificateStoreOptions
+public class RotateCertificateStoreOptions
 {
+	/// <summary>
+	/// The default rotate interval.
+	/// </summary>
+	public static readonly TimeSpan DefaultRotateInterval = TimeSpan.FromDays(90);
+
 	/// <summary>
 	/// Gets or sets the path where certificates should be located.
 	/// </summary>
@@ -20,7 +25,7 @@ internal class RotateCertificateStoreOptions
 	/// <summary>
 	/// Gets or sets the interval in which certificates will be rotated.
 	/// </summary>
-	public TimeSpan RotateInterval { get; set; } = TimeSpan.FromDays(90);
+	public TimeSpan RotateInterval { get; set; } = DefaultRotateInterval;
 
 	private TimeSpan? _announcementPeriod;
 
