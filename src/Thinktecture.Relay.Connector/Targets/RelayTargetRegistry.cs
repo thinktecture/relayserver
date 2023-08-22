@@ -136,7 +136,7 @@ public class RelayTargetRegistry<TRequest, TResponse>
 			TimeSpan? timeout = null)
 		{
 			Factory = factory ?? throw new ArgumentNullException(nameof(factory));
-			Timeout = timeout ?? TimeSpan.FromSeconds(100);
+			Timeout = timeout ?? RelayTargetOptions.DefaultTargetTimeout;
 		}
 	}
 }

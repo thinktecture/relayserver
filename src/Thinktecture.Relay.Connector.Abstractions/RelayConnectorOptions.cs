@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Thinktecture.Relay.Connector.Options;
+namespace Thinktecture.Relay.Connector;
 
 /// <summary>
 /// Options for the connector.

@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
 
-namespace Thinktecture.Relay.Connector.Options;
+namespace Thinktecture.Relay.Connector;
 
 /// <summary>
 /// Options for relay target registration via dependency injection.
 /// </summary>
 public class RelayTargetOptions
 {
+	/// <summary>
+	/// The default target timeout.
+	/// </summary>
+	public static readonly TimeSpan DefaultTargetTimeout = TimeSpan.FromSeconds(100);
+
 	/// <summary>
 	/// The <see cref="List{T}"/> of <see cref="RelayTargetRegistration"/>.
 	/// </summary>
@@ -31,7 +36,6 @@ public class RelayTargetOptions
 		/// <summary>
 		/// An optional <see cref="TimeSpan"/> when the target times out.
 		/// </summary>
-		/// <remarks>The default value is 100 seconds.</remarks>
 		public TimeSpan? Timeout { get; set; }
 
 		/// <summary>
