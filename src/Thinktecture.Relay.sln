@@ -45,6 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{AAA28426
 	ProjectSection(SolutionItems) = preProject
 		tools\create-migrations.ps1 = tools\create-migrations.ps1
 		tools\Directory.Build.props = tools\Directory.Build.props
+		tools\create-migrations.sh = tools\create-migrations.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigrationCreation.SqlServer", "tools\MigrationCreation.SqlServer\MigrationCreation.SqlServer.csproj", "{0E3FCC70-66BC-43DE-A498-A04085F1BF0C}"
@@ -59,14 +60,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Identity
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA1D-9755-4842-BDE0-34F7EADF9969}"
 	ProjectSection(SolutionItems) = preProject
-		docker\run-dependencies.ps1 = docker\run-dependencies.ps1
-		docker\run-environment.ps1 = docker\run-environment.ps1
-		docker\seed-data.ps1 = docker\seed-data.ps1
-		docker\run-environment-multiserver.ps1 = docker\run-environment-multiserver.ps1
-		build-docker-images.ps1 = build-docker-images.ps1
 		docker\Directory.Build.props = docker\Directory.Build.props
-		docker\remove-all.ps1 = docker\remove-all.ps1
-		docker\stop-dependencies.ps1 = docker\stop-dependencies.ps1
 		docker\docker-compose.yml = docker\docker-compose.yml
 	EndProjectSection
 EndProject
@@ -101,8 +95,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rabbitmq", "rabbitmq", "{59F4013A-610D-40D2-A6AD-894FBB5A28B4}"
 	ProjectSection(SolutionItems) = preProject
 		docker\rabbitmq\.erlang.cookie = docker\rabbitmq\.erlang.cookie
-		docker\rabbitmq\Dockerfile = docker\rabbitmq\Dockerfile
-		docker\rabbitmq\startrabbit.sh = docker\rabbitmq\startrabbit.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "environments", "environments", "{0A0F0537-6270-4D1C-AFF7-F998AECCF938}"

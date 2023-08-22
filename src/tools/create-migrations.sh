@@ -14,4 +14,3 @@ fi
 for d in */ ; do
   (cd "$d" && ./create-migration.sh "$MIGRATION_NAME")
 done
-
