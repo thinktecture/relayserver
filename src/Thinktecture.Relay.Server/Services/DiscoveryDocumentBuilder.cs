@@ -55,7 +55,7 @@ public class DiscoveryDocumentBuilder
 	private Uri BuildBaseUri(HttpRequest request)
 		=> new Uri($"{request.Scheme}://{request.Host}{request.PathBase}", UriKind.Absolute);
 
-	private string? GetAuthority()
+	protected virtual string? GetAuthority()
 		=> _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()?.Get(Constants.DefaultAuthenticationScheme)
 			?.Authority;
 }
