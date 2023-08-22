@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using IdentityModel;
@@ -15,35 +16,41 @@ namespace Thinktecture.Relay.Connector.Options;
 internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessTokenManagementOptions>
 {
 	private readonly IHostApplicationLifetime _hostApplicationLifetime;
+	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly ILogger<AccessTokenManagementConfigureOptions> _logger;
 	private readonly RelayConnectorOptions _relayConnectorOptions;
 
 	public AccessTokenManagementConfigureOptions(ILogger<AccessTokenManagementConfigureOptions> logger,
-		IHostApplicationLifetime hostApplicationLifetime, IOptions<RelayConnectorOptions> relayConnectorOptions)
+		IHostApplicationLifetime hostApplicationLifetime, IOptions<RelayConnectorOptions> relayConnectorOptions,
+		IHttpClientFactory httpClientFactory)
 	{
 		if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_hostApplicationLifetime =
 			hostApplicationLifetime ?? throw new ArgumentNullException(nameof(hostApplicationLifetime));
+		_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 		_relayConnectorOptions = relayConnectorOptions.Value;
 	}
 
 	public void Configure(AccessTokenManagementOptions options)
 	{
-		var urlString = _relayConnectorOptions.DiscoveryDocument.AuthorizationServer;
-		if (!urlString.EndsWith('/'))
+		var baseAddress = _relayConnectorOptions.DiscoveryDocument.AuthorizationServer;
+		if (!baseAddress.EndsWith('/'))
 		{
-			urlString += '/';
+			baseAddress += '/';
 		}
 
-		var uri = new Uri(new Uri(urlString), OidcConstants.Discovery.DiscoveryEndpoint);
+		var httpClient = _httpClientFactory.CreateClient(Constants.HttpClientNames.ConnectionClose);
+		httpClient.BaseAddress = new Uri(baseAddress);
+
+		var uri = httpClient.BaseAddress + OidcConstants.Discovery.DiscoveryEndpoint;
 
 		while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 		{
-			var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(uri.ToString(),
-				new OpenIdConnectConfigurationRetriever(),
-				new HttpDocumentRetriever() { RequireHttps = uri.Scheme == "https" });
+			var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+				OidcConstants.Discovery.DiscoveryEndpoint, new OpenIdConnectConfigurationRetriever(),
+				new HttpDocumentRetriever(httpClient) { RequireHttps = httpClient.BaseAddress?.Scheme == "https" });
 
 			try
 			{
@@ -63,8 +70,7 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 			catch (Exception ex)
 			{
 				_logger.LogError(10201, ex,
-					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}",
-					uri);
+					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}", uri);
 
 				try
 				{

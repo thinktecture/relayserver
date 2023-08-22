@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Thinktecture.Relay.Connector;
 
@@ -27,6 +28,11 @@ public class RelayConnectorOptions
 	/// The <see cref="DiscoveryDocument"/>.
 	/// </summary>
 	public DiscoveryDocument DiscoveryDocument { get; set; } = default!;
+
+	/// <summary>
+	/// Indicates that the <see cref="HttpClient"/> used to communicate with the server uses the HTTP keep-alive feature.
+	/// </summary>
+	public bool UseHttpKeepAlive { get; set; } = true;
 
 	/// <summary>
 	/// The targets keyed by id.
