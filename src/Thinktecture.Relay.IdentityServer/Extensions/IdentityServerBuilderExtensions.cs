@@ -1,5 +1,6 @@
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Configuration;
+using Thinktecture.Relay.IdentityServer;
 using Thinktecture.Relay.IdentityServer.Stores;
 
 // ReSharper disable once CheckNamespace
