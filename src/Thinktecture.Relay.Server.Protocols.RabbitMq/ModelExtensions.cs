@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -13,19 +13,41 @@ internal static class ModelExtensions
 	/// consume it with an <see cref="AsyncEventingBasicConsumer"/>.
 	/// </summary>
 	/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
+	/// <param name="logger">An <see cref="ILogger"/>.</param>
 	/// <param name="queueName">The name of the queue.</param>
 	/// <param name="autoAck">The consumer should automatically acknowledge the message.</param>
 	/// <param name="durable">The queue should survive a broker restart.</param>
 	/// <param name="autoDelete">The queue should be deleted when the last consumer goes away.</param>
 	/// <returns>An <see cref="AsyncEventingBasicConsumer"/> consuming the queue.</returns>
-	public static AsyncEventingBasicConsumer ConsumeQueue(this IModel model, string queueName, bool autoAck = true,
-		bool durable = true,
-		bool autoDelete = true)
+	public static AsyncEventingBasicConsumer ConsumeQueue(this IModel model, ILogger logger, string queueName,
+		bool autoAck = true, bool durable = true, bool autoDelete = true)
 	{
 		model.EnsureQueue(queueName, durable, autoDelete);
 
 		var consumer = new AsyncEventingBasicConsumer(model);
-		model.BasicConsume(queueName, autoAck, consumer);
+		var consumerTag = model.BasicConsume(queueName, autoAck, consumer);
+
+		logger.LogTrace("Consuming {QueueName} with consumer {ConsumerTag}", queueName, consumerTag);
+
+		consumer.ConsumerCancelled += (sender, _) =>
+		{
+			if (((AsyncDefaultBasicConsumer)sender).ShutdownReason == null)
+			{
+				logger.LogWarning("Lost consumer {ConsumerTag} on queue {QueueName}", consumerTag, queueName);
+
+				var oldConsumerTag = consumerTag;
+
+				lock (model)
+				{
+					model.EnsureQueue(queueName, durable, autoDelete);
+					consumerTag = model.BasicConsume(queueName, autoAck, consumer);
+				}
+
+				logger.LogInformation("Restored consumer {ConsumerTag} on queue {QueueName} (was {OldConsumerTag})", consumerTag, queueName, oldConsumerTag);
+			}
+
+			return Task.CompletedTask;
+		};
 
 		return consumer;
 	}
@@ -56,8 +78,7 @@ internal static class ModelExtensions
 	/// <param name="autoDelete">The queue should be deleted when the last consumer goes away.</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	public static Task PublishJsonAsync(this IModel model, string queueName, object payload, bool persistent = true,
-		bool durable = true,
-		bool autoDelete = true)
+		bool durable = true, bool autoDelete = true)
 	{
 		var properties = model.CreateBasicProperties();
 		properties.Persistent = persistent;
@@ -75,35 +96,6 @@ internal static class ModelExtensions
 		}
 
 		return Task.CompletedTask;
-	}
-
-	/// <summary>
-	/// Convenience method to remove consumers from their queue.
-	/// </summary>
-	/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
-	/// <param name="consumerTags">The consumer tags the consumer is registered as.</param>
-	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	public static Task CancelConsumerTagsAsync(this IModel model, IEnumerable<string> consumerTags)
-	{
-		foreach (var consumerTag in consumerTags)
-		{
-			model.BasicCancel(consumerTag);
-		}
-
-		return Task.CompletedTask;
-	}
-
-	/// <summary>
-	/// Convenience method to remove consumers from their queue.
-	/// </summary>
-	/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
-	/// <param name="consumerTags">The consumer tags the consumer is registered as.</param>
-	public static void CancelConsumerTags(this IModel model, IEnumerable<string> consumerTags)
-	{
-		foreach (var consumerTag in consumerTags)
-		{
-			model.BasicCancel(consumerTag);
-		}
 	}
 
 	/// <summary>

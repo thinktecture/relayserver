@@ -50,7 +50,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
 		_model = modelFactory.Create($"tenant handler for {tenantId} of connection {connectionId}", true);
 
-		_consumer = _model.ConsumeQueue($"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
+		_consumer = _model.ConsumeQueue(_logger, $"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
 		_consumer.Received += ConsumerReceived;
 	}
 
@@ -59,7 +59,6 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	{
 		_consumer.Received -= ConsumerReceived;
 
-		_model.CancelConsumerTags(_consumer.ConsumerTags);
 		_model.Dispose();
 	}
 

@@ -58,12 +58,12 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 
 		_responseConsumeModel = modelFactory.Create("response handler");
 		_responseConsumer =
-			_responseConsumeModel.ConsumeQueue($"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
+			_responseConsumeModel.ConsumeQueue(_logger, $"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
 		_responseConsumer.Received += ResponseConsumerReceived;
 
 		_acknowledgeConsumeModel = modelFactory.Create("acknowledge handler");
 		_acknowledgeConsumer =
-			_acknowledgeConsumeModel.ConsumeQueue($"{Constants.AcknowledgeQueuePrefix}{relayServerContext.OriginId}");
+			_acknowledgeConsumeModel.ConsumeQueue(_logger, $"{Constants.AcknowledgeQueuePrefix}{relayServerContext.OriginId}");
 		_acknowledgeConsumer.Received += AcknowledgeConsumerReceived;
 	}
 
@@ -75,9 +75,6 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 
 		_responseConsumer.Received -= ResponseConsumerReceived;
 		_acknowledgeConsumer.Received -= AcknowledgeConsumerReceived;
-
-		_responseConsumeModel.CancelConsumerTags(_responseConsumer.ConsumerTags);
-		_acknowledgeConsumeModel.CancelConsumerTags(_acknowledgeConsumer.ConsumerTags);
 
 		_responseConsumeModel.Dispose();
 		_acknowledgeConsumeModel.Dispose();
