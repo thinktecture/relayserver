@@ -116,3 +116,6 @@ ij_typescript_enforce_trailing_comma = whenmultiline
 
 [*.svg]
 disable_formatter = true
+
+[.erlang.cookie]
+insert_final_newline = false

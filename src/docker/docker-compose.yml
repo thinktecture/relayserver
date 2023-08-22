@@ -1,125 +1,104 @@
-version: "3.9"
+x-defaults: &defaults
+  networks:
+    - relayserver
+
+x-rabbit-defaults: &rabbit-defaults
+  <<: *defaults
+  image: rabbitmq:management-alpine
+  volumes:
+    - ./rabbitmq/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+  command: ["bash", "-c", "chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
+
 services:
   relay_transport_rabbitmq1:
-    image: tt-relay-rabbit
-    build:
-      context: ./rabbitmq/
+    <<: *rabbit-defaults
     container_name: relay_transport_rabbitmq1
-    hostname: relay_transport_rabbitmq1
     ports:
       - "5672:5672"
       - "15672:15672"
     env_file:
       - environments/relay_transport_rabbitmq.env
-    networks:
-      - relayserver
+      - environments/relay_transport_rabbitmq1.env
   relay_transport_rabbitmq2:
-    image: tt-relay-rabbit
+    <<: *rabbit-defaults
     container_name: relay_transport_rabbitmq2
-    hostname: relay_transport_rabbitmq2
-    links:
-      - relay_transport_rabbitmq1
     ports:
       - "5673:5672"
       - "15673:15672"
     env_file:
       - environments/relay_transport_rabbitmq.env
       - environments/relay_transport_rabbitmq2.env
-    depends_on:
-      - relay_transport_rabbitmq1
-    networks:
-      - relayserver
   relay_logging_seq:
+    <<: *defaults
     image: datalust/seq:latest
     container_name: relay_logging_seq
-    hostname: relay_logging_seq
     ports:
       - "5341:80"
     env_file:
       - environments/relay_logging_seq.env
     volumes:
       - seq-data:/data
-    networks:
-      - relayserver
   relay_persistence_postgresql:
+    <<: *defaults
     image: postgres:15-alpine
     container_name: relay_persistence_postgresql
-    hostname: relay_persistence_postgresql
     ports:
       - "5432:5432"
     env_file:
       - environments/relay_persistence_postgresql.env
     volumes:
       - postgresql-data:/var/lib/postgresql/data
-    networks:
-      - relayserver
   relay_server_migrations:
+    <<: *defaults
     image: relay_server
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Server.Docker/Dockerfile
+    pull_policy: build
     container_name: relay_server_migrations
-    hostname: relay_server_migrations
     depends_on:
-      - relay_transport_rabbitmq1
-      - relay_transport_rabbitmq2
       - relay_persistence_postgresql
-    networks:
-      - relayserver
     entrypoint: ["dotnet", "Thinktecture.Relay.Server.Docker.dll", "migrate-only=true"]
   relay_management:
+    <<: *defaults
     image: relay_management
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.ManagementApi.Docker/Dockerfile
+    pull_policy: build
     container_name: relay_management
-    hostname: relay_management
-    privileged: false
     ports:
       - "5004:5000"
     env_file:
       - environments/relay_management.env
     depends_on:
-      - relay_logging_seq
-      - relay_persistence_postgresql
       - relay_server_migrations
-    networks:
-      - relayserver
   relay_tenant_seed:
+    <<: *defaults
     image: curlimages/curl
     container_name: relay_tenant_seed
-    hostname: relay_tenant_seed
     depends_on:
-      - relay_persistence_postgresql
       - relay_server_migrations
       - relay_management
     command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{\"id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\", \"name\": \"TestTenant1\", \"credentials\": [{ \"id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\", \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/api/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{\"id\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb\", \"name\": \"TestTenant2\", \"credentials\": [{ \"id\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1\", \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/api/management/tenants" ]
-    networks:
-      - relayserver
   relay_identityserver:
+    <<: *defaults
     image: relay_identityserver
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.IdentityServer.Docker/Dockerfile
+    pull_policy: build
     container_name: relay_identityserver
-    hostname: relay_identityserver
-    privileged: false
     ports:
       - "5002:5000"
     env_file:
       - environments/relay_identityserver.env
     depends_on:
-      - relay_logging_seq
-      - relay_persistence_postgresql
       - relay_server_migrations
-      - relay_tenant_seed
-    networks:
-      - relayserver
   relay_server_a:
+    <<: *defaults
     image: relay_server
     container_name: relay_server_a
-    hostname: relay_server_a
-    privileged: false
     ports:
       - "5010:5000"
     env_file:
@@ -128,18 +107,12 @@ services:
     volumes:
       - relay_persistence_bodystore:/var/bodystore
     depends_on:
-      - relay_logging_seq
-      - relay_persistence_postgresql
       - relay_server_migrations
-      - relay_tenant_seed
       - relay_identityserver
-    networks:
-      - relayserver
   relay_server_b:
+    <<: *defaults
     image: relay_server
     container_name: relay_server_b
-    hostname: relay_server_b
-    privileged: false
     ports:
       - "5011:5000"
     env_file:
@@ -148,21 +121,16 @@ services:
     volumes:
       - relay_persistence_bodystore:/var/bodystore
     depends_on:
-      - relay_logging_seq
-      - relay_persistence_postgresql
       - relay_server_migrations
-      - relay_tenant_seed
       - relay_identityserver
-    networks:
-      - relayserver
   relay_connector_a1:
+    <<: *defaults
     image: relay_connector
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Connector.Docker/Dockerfile
+    pull_policy: build
     container_name: relay_connector_a1
-    hostname: relay_connector_a1
-    privileged: false
     env_file:
       - environments/relay_connector.env
       - environments/relay_connector_a1.env
@@ -170,50 +138,37 @@ services:
       - relay_logging_seq
       - relay_identityserver
       - relay_server_a
-    networks:
-      - relayserver
   relay_connector_a2:
+    <<: *defaults
     image: relay_connector
     container_name: relay_connector_a2
-    hostname: relay_connector_a2
-    privileged: false
     env_file:
       - environments/relay_connector.env
       - environments/relay_connector_a2.env
     depends_on:
-      - relay_logging_seq
+      - relay_connector_a1
       - relay_identityserver
-      - relay_server_a
-    networks:
-      - relayserver
   relay_connector_b1:
+    <<: *defaults
     image: relay_connector
     container_name: relay_connector_b1
-    hostname: relay_connector_b1
-    privileged: false
     env_file:
       - environments/relay_connector.env
       - environments/relay_connector_b1.env
     depends_on:
-      - relay_logging_seq
+      - relay_connector_a1
       - relay_identityserver
-      - relay_server_b
-    networks:
-      - relayserver
   relay_connector_b2:
+    <<: *defaults
     image: relay_connector
     container_name: relay_connector_b2
-    hostname: relay_connector_b2
-    privileged: false
     env_file:
       - environments/relay_connector.env
       - environments/relay_connector_b2.env
     depends_on:
-      - relay_logging_seq
+      - relay_connector_a1
       - relay_identityserver
-      - relay_server_b
-    networks:
-      - relayserver
+
 volumes:
   seq-data:
     driver: local
@@ -221,11 +176,8 @@ volumes:
     driver: local
   relay_persistence_bodystore:
     driver: local
+
 networks:
   relayserver:
     driver: bridge
     name: relayserver
-    ipam:
-      config:
-        - subnet: 10.5.0.0/16
-          gateway: 10.5.0.1
