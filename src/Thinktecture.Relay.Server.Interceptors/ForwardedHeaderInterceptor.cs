@@ -4,7 +4,7 @@ using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
-namespace Thinktecture.Relay.Interceptors;
+namespace Thinktecture.Relay.Server.Interceptors;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class ForwardedHeaderInterceptor<TRequest, TResponse> : IClientRequestInterceptor<TRequest, TResponse>

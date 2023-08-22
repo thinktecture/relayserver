@@ -1,5 +1,5 @@
 using Thinktecture.Relay.Acknowledgement;
-using Thinktecture.Relay.Interceptors;
+using Thinktecture.Relay.Server.Interceptors;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Transport;
 
