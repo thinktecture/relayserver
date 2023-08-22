@@ -94,7 +94,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{D8D76B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "connector", "connector", "{EACF91C8-8B43-4E87-8859-4902B3CC7F63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Interceptors", "Thinktecture.Relay.Interceptors\Thinktecture.Relay.Interceptors.csproj", "{CD190E32-1B0F-48D4-BFF1-43BD388A7C4A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Interceptors", "Thinktecture.Relay.Server.Interceptors\Thinktecture.Relay.Server.Interceptors.csproj", "{CD190E32-1B0F-48D4-BFF1-43BD388A7C4A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thinktecture.Relay.Server.Management", "Thinktecture.Relay.Server.Management\Thinktecture.Relay.Server.Management.csproj", "{4EF4176E-34E3-477A-8CB1-982A318C3C30}"
 EndProject
