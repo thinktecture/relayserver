@@ -16,22 +16,22 @@ public class DiscoveryDocument
 	/// <summary>
 	/// The default reconnect minimum delay.
 	/// </summary>
-	public static TimeSpan DefaultReconnectMinimumDelay = TimeSpan.FromSeconds(30);
+	public static readonly TimeSpan DefaultReconnectMinimumDelay = TimeSpan.FromSeconds(30);
 
 	/// <summary>
 	/// The default reconnect maximum delay.
 	/// </summary>
-	public static TimeSpan DefaultReconnectMaximumDelay = TimeSpan.FromMinutes(5);
+	public static readonly TimeSpan DefaultReconnectMaximumDelay = TimeSpan.FromMinutes(5);
 
 	/// <summary>
 	/// The default handshake timeout.
 	/// </summary>
-	public static TimeSpan DefaultHandshakeTimeout = TimeSpan.FromSeconds(15);
+	public static readonly TimeSpan DefaultHandshakeTimeout = TimeSpan.FromSeconds(15);
 
 	/// <summary>
 	/// The default keep-alive interval.
 	/// </summary>
-	public static TimeSpan DefaultKeepAliveInterval = TimeSpan.FromSeconds(15);
+	public static readonly TimeSpan DefaultKeepAliveInterval = TimeSpan.FromSeconds(15);
 
 	/// <summary>
 	/// The version of the RelayServer.

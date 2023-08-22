@@ -1,7 +1,7 @@
 using System;
 using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Connector;
 using Thinktecture.Relay.Connector.DependencyInjection;
-using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Connector.Targets;
 using Thinktecture.Relay.Transport;
 
