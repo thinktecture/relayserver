@@ -2,7 +2,6 @@ using System;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Thinktecture.Relay.Connector.Options;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
