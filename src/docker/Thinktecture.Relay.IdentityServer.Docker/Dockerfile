@@ -49,6 +49,7 @@ USER idsrv
 COPY --chown=idsrv --from=build /app .
 
 EXPOSE 5000
+
 ENV ASPNETCORE_URLS=http://+:5000
 ENV CertificateStore__Path=/var/signingkeys
 

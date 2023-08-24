@@ -40,7 +40,6 @@ RUN chmod u-s /usr/bin/gpasswd /usr/bin/chsh /bin/umount /bin/mount /sbin/unix_c
     chmod g-s /usr/bin/gpasswd /usr/bin/chsh /bin/umount /bin/mount /sbin/unix_chkpwd /usr/bin/expiry /usr/bin/newgrp /usr/bin/chage /usr/bin/chfn /usr/bin/wall /usr/bin/passwd /bin/su
 
 USER relay
-
 COPY --chown=relay --from=build /app .
 
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.Connector.Docker.dll"]

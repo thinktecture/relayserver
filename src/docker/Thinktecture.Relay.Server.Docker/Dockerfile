@@ -51,9 +51,10 @@ RUN mkdir -p /var/bodystore
 RUN chown -R relay /var/bodystore
 
 USER relay
-
 COPY --chown=relay --from=build /app .
+
 EXPOSE 5000
+
 ENV ASPNETCORE_URLS=http://+:5000
 
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.Server.Docker.dll"]
