@@ -5,9 +5,7 @@ x-defaults: &defaults
 x-rabbit-defaults: &rabbit-defaults
   <<: *defaults
   image: rabbitmq:management-alpine
-  volumes:
-    - ./rabbitmq/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
-  command: ["bash", "-c", "chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
+  command: ["bash", "-c", "echo -n 'V2VsY29tZSB0byBUaGlua3RlY3R1cmUgUmVsYXlTZXJ2ZXIgMyDigJMgWW91IHN1Y2Nlc3NmdWxseSBkZWNvZGVkIG91ciBmYWtlIEVSTEFORyBjb29raWUgY29udGFpbmluZyB0aGlzIG1lc3NhZ2Uu' > /var/lib/rabbitmq/.erlang.cookie; chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
 
 services:
   relay_transport_rabbitmq1:
@@ -30,7 +28,7 @@ services:
       - environments/relay_transport_rabbitmq2.env
   relay_logging_seq:
     <<: *defaults
-    image: datalust/seq:latest
+    image: datalust/seq
     container_name: relay_logging_seq
     ports:
       - "5341:80"
@@ -54,7 +52,6 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Server.Docker/Dockerfile
-    pull_policy: build
     container_name: relay_server_migrations
     depends_on:
       - relay_persistence_postgresql
@@ -65,7 +62,6 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.ManagementApi.Docker/Dockerfile
-    pull_policy: build
     container_name: relay_management
     ports:
       - "5004:5000"
@@ -87,7 +83,6 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.IdentityServer.Docker/Dockerfile
-    pull_policy: build
     container_name: relay_identityserver
     ports:
       - "5002:5000"
@@ -105,7 +100,7 @@ services:
       - environments/relay_server.env
       - environments/relay_server_a.env
     volumes:
-      - relay_persistence_bodystore:/var/bodystore
+      - relay-bodystore:/var/bodystore
     depends_on:
       - relay_server_migrations
       - relay_identityserver
@@ -119,7 +114,7 @@ services:
       - environments/relay_server.env
       - environments/relay_server_b.env
     volumes:
-      - relay_persistence_bodystore:/var/bodystore
+      - relay-bodystore:/var/bodystore
     depends_on:
       - relay_server_migrations
       - relay_identityserver
@@ -129,14 +124,11 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Connector.Docker/Dockerfile
-    pull_policy: build
     container_name: relay_connector_a1
     env_file:
       - environments/relay_connector.env
       - environments/relay_connector_a1.env
     depends_on:
-      - relay_logging_seq
-      - relay_identityserver
       - relay_server_a
   relay_connector_a2:
     <<: *defaults
@@ -147,7 +139,6 @@ services:
       - environments/relay_connector_a2.env
     depends_on:
       - relay_connector_a1
-      - relay_identityserver
   relay_connector_b1:
     <<: *defaults
     image: relay_connector
@@ -156,8 +147,7 @@ services:
       - environments/relay_connector.env
       - environments/relay_connector_b1.env
     depends_on:
-      - relay_connector_a1
-      - relay_identityserver
+      - relay_server_b
   relay_connector_b2:
     <<: *defaults
     image: relay_connector
@@ -166,13 +156,12 @@ services:
       - environments/relay_connector.env
       - environments/relay_connector_b2.env
     depends_on:
-      - relay_connector_a1
-      - relay_identityserver
+      - relay_connector_b1
 
 volumes:
   seq-data:
   postgresql-data:
-  relay_persistence_bodystore:
+  relay-bodystore:
 
 networks:
   relayserver:

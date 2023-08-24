@@ -11,14 +11,8 @@ Scripts to help building and running the system are provided as
 [PowerShell Core](https://github.com/powershell/powershell) scripts, to be able to run cross platform on Windows, macOS
 and Linux.
 
-First, a script is provided to build all the docker images (`src/build-docker-images.ps1`).
-
-All other scripts are located in the folder `src/docker`:
-
-* The external components (database, message queue, details see below) can be started with the `run-dependencies.ps1`
-  script.
-* Then the environment with one relay server (`run-environment.ps1`)
-* or a multi-server environment (`run-environment-multiserver.ps1`) can be started.
+A compose file is provided to build all the docker images (`src/docker/docker-compose.yml`). You can build the images
+with the `docker compose build` command.
 
 ## First time Development & Test-Setup
 
@@ -29,10 +23,6 @@ In order to build and run the development environment, you need the following co
 - [.NET SDK 6.0.100](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
   or newer features within .NET 6.0
 - [PowerShell Core 6](https://github.com/PowerShell/PowerShell/releases) or newer
-
-After you start the system for the first time, you need to execute the `seed-data.ps1` script, which will create the
-first initial configuration for the tenants, so that the connectors can connect with their default development
-credentials. After that you can run the environment or the multi-server environment.
 
 The _development_ environment also comes with a [Seq](https://datalust.co/seq) logging server in a local docker
 container (using the local, free single-user license). For production, the RelayServer components log to stdout and
@@ -80,9 +70,7 @@ The relay server environment consists of several parts.
    - Needs access to the configuration database.
    - Needs access to the message queue.
    - Needs access to the identity server.
-   - If this container is started more than once, all relay server instances need to share one storage volume (shared
-     file storage). See the `src/docker/Thinktecture.Relay.Server.Docker/run-container-multiserver.ps1` for required
-     links and mounts.
+   - If this component is started more than once, all instances need to share one storage volume (shared file storage).
    - RelayServer can be accessed at http://localhost:5000/ in single-node mode.
    - RelayServer node A can be accessed at http://localhost:5010/ in multi-server mode.
    - RelayServer node B can be accessed at http://localhost:5011/ in multi-server mode.
