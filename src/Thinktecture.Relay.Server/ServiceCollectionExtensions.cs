@@ -1,10 +1,10 @@
 using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Diagnostics;
-using Thinktecture.Relay.Server.HealthChecks;
 using Thinktecture.Relay.Server.Middleware;
 using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Services;
@@ -60,7 +60,12 @@ public static class ServiceCollectionExtensions
 				configurePolicy
 					.RequireAuthenticatedUser()
 					.RequireClaim("client_id")
-					.RequireClaim("scope", Constants.DefaultAuthenticationScope);
+					.RequireAssertion(context =>
+					{
+						// this is needed because some IDP send multiple scopes in one claim (instead of an array)
+						var scopes = context.User.Claims.Where(c => c.Type == "scope");
+						return scopes.Any(c => c.Value.Split(' ').Any(v => v == Constants.DefaultAuthenticationScope));
+					});
 			});
 		});
 
