@@ -36,21 +36,20 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 	public void Configure(AccessTokenManagementOptions options)
 	{
 		var baseAddress = _relayConnectorOptions.DiscoveryDocument.AuthorizationServer;
-		if (!baseAddress.EndsWith('/'))
+		if (!baseAddress.EndsWith("/"))
 		{
-			baseAddress += '/';
+			baseAddress += "/";
 		}
 
 		var httpClient = _httpClientFactory.CreateClient(Constants.HttpClientNames.ConnectionClose);
-		httpClient.BaseAddress = new Uri(baseAddress);
 
-		var uri = httpClient.BaseAddress + OidcConstants.Discovery.DiscoveryEndpoint;
+		var uri = baseAddress + OidcConstants.Discovery.DiscoveryEndpoint;
 
 		while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 		{
-			var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-				OidcConstants.Discovery.DiscoveryEndpoint, new OpenIdConnectConfigurationRetriever(),
-				new HttpDocumentRetriever(httpClient) { RequireHttps = httpClient.BaseAddress?.Scheme == "https" });
+			var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(uri,
+				new OpenIdConnectConfigurationRetriever(),
+				new HttpDocumentRetriever(httpClient) { RequireHttps = baseAddress.StartsWith("https:") });
 
 			try
 			{
