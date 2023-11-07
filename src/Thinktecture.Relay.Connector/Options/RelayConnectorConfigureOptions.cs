@@ -7,7 +7,7 @@ internal class RelayConnectorConfigureOptions : IConfigureOptions<RelayConnector
 {
 	public void Configure(RelayConnectorOptions options)
 	{
-		if (options.Targets.Count == 0) return;
+		if (options.Targets == null || options.Targets.Count == 0) return;
 
 		foreach (var (_, value) in options.Targets)
 		{

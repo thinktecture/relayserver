@@ -8,7 +8,7 @@ internal class RelayConnectorValidateOptions : IValidateOptions<RelayConnectorOp
 {
 	public ValidateOptionsResult Validate(string name, RelayConnectorOptions options)
 	{
-		if (options.Targets.Count == 0) return ValidateOptionsResult.Success;
+		if (options.Targets == null || options.Targets.Count == 0) return ValidateOptionsResult.Success;
 
 		var missingType = options.Targets.Where(kvp => !kvp.Value.ContainsKey(Constants.RelayConnectorOptionsTargetType))
 			.Select(kvp => kvp.Key).ToArray();
