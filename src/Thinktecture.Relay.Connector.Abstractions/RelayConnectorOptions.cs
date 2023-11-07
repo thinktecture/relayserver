@@ -37,5 +37,5 @@ public class RelayConnectorOptions
 	/// <summary>
 	/// The targets keyed by id.
 	/// </summary>
-	public Dictionary<string, Dictionary<string, string>> Targets { get; set; } = default!;
+	public Dictionary<string, Dictionary<string, string>>? Targets { get; set; }
 }

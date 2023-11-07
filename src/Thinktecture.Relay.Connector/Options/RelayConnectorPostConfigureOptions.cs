@@ -33,7 +33,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 
 	public void PostConfigure(string name, RelayConnectorOptions options)
 	{
-		if (options.Targets.Count > 0)
+		if (options.Targets != null)
 		{
 			RegisterTargets(options.Targets);
 		}
