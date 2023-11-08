@@ -53,11 +53,11 @@ public static class ServiceCollectionExtensions
 
 		services.AddHttpContextAccessor();
 
-		services.AddAuthorization(configureAuthorization =>
+		services.AddAuthorization(authorizationOptions =>
 		{
-			configureAuthorization.AddPolicy(Constants.DefaultAuthenticationPolicy, configurePolicy =>
+			authorizationOptions.AddPolicy(Constants.DefaultAuthenticationPolicy, policyBuilder =>
 			{
-				configurePolicy
+				policyBuilder
 					.RequireAuthenticatedUser()
 					.RequireClaim("client_id")
 					.RequireAssertion(context =>
