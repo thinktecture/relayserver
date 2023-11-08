@@ -46,8 +46,8 @@ public class RelayServerTenantStore : IClientStore
 
 		return new Client()
 		{
-			ClientId = tenant.Id.ToString(),
-			ClientName = tenant.Name,
+			ClientId = tenant.Name,
+			ClientName = tenant.DisplayName,
 			Description = tenant.Description,
 			ClientSecrets = GetClientSecrets(tenant),
 			AllowedGrantTypes = new[] { GrantType.ClientCredentials },
