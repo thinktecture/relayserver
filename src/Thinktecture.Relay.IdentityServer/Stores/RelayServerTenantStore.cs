@@ -31,21 +31,31 @@ public class RelayServerTenantStore : IClientStore
 	}
 
 	private Client ConvertToClient(Tenant tenant)
-		=> new Client()
+	{
+		var claims = new HashSet<ClientClaim>();
+
+		if (tenant.DisplayName != null)
+		{
+			claims.Add(new ClientClaim("name", tenant.DisplayName));
+		}
+
+		if (tenant.Description != null)
+		{
+			claims.Add(new ClientClaim("description", tenant.Description));
+		}
+
+		return new Client()
 		{
 			ClientId = tenant.Id.ToString(),
 			ClientName = tenant.Name,
 			Description = tenant.Description,
 			ClientSecrets = GetClientSecrets(tenant),
 			AllowedGrantTypes = new[] { GrantType.ClientCredentials },
-			AllowedScopes = new[] { "relaying" }, // TODO define correct scopes
-			Claims = new[]
-			{
-				new ClientClaim("name", tenant.Name),
-				new ClientClaim("display_name", tenant.DisplayName ?? tenant.Name),
-			},
+			AllowedScopes = new[] { "connector" },
+			Claims = claims,
 			// TODO fill access token lifetime etc. from config
 		};
+	}
 
 	private ICollection<Secret> GetClientSecrets(Tenant tenant)
 		=> tenant.ClientSecrets!

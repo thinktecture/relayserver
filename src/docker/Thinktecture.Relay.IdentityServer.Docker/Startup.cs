@@ -27,8 +27,8 @@ public class Startup
 
 		services.AddIdentityServer(options => options.InputLengthRestrictions.ClientSecret = 200)
 			.AddClientStore<RelayServerTenantStore>()
-			.AddInMemoryApiScopes(new[] { new ApiScope("relaying") })
-			.AddInMemoryApiResources(new[] { new ApiResource("relayserver") { Scopes = new[] { "relaying" } } })
+			.AddInMemoryApiScopes(new[] { new ApiScope("connector") })
+			.AddInMemoryApiResources(new[] { new ApiResource("relayserver") { Scopes = new[] { "connector" } } })
 			.AddRotatingFileStore(Configuration.GetSection("CertificateStore"));
 	}
 
