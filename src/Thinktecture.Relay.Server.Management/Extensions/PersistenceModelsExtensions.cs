@@ -54,19 +54,30 @@ internal static class PersistenceModelsExtensions
 	/// <param name="tenant">The tenant instance to convert.</param>
 	/// <returns>A new instance of an <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/>.</returns>
 	public static TenantEntity ToEntity(this TenantModel tenant)
-		=> new TenantEntity()
+	{
+		var config = (ConfigEntity?)null;
+
+		if (tenant.KeepAliveInterval != null ||
+			tenant.EnableTracing != null ||
+			tenant.ReconnectMinimumDelay != null ||
+			tenant.ReconnectMaximumDelay != null)
 		{
-			Id = tenant.Id,
-			Name = tenant.Name,
-			DisplayName = tenant.DisplayName,
-			Description = tenant.Description,
-			Config = new ConfigEntity()
+			config = new ConfigEntity()
 			{
 				KeepAliveInterval = tenant.KeepAliveInterval,
 				EnableTracing = tenant.EnableTracing,
 				ReconnectMinimumDelay = tenant.ReconnectMinimumDelay,
 				ReconnectMaximumDelay = tenant.ReconnectMaximumDelay,
-			},
+			};
+		}
+
+		return new TenantEntity()
+		{
+			Id = tenant.Id,
+			Name = tenant.Name,
+			DisplayName = tenant.DisplayName,
+			Description = tenant.Description,
+			Config = config,
 			ClientSecrets = tenant.Credentials.Select(s =>
 				new ClientSecret()
 				{
@@ -75,8 +86,9 @@ internal static class PersistenceModelsExtensions
 					Value = s.Value ?? Sha512(s.PlainTextValue)!,
 					Expiration = s.Expiration,
 				}
-				).ToList(),
+			).ToList(),
 		};
+	}
 
 	/// <summary>
 	/// Converts an enumerable of <see cref="Thinktecture.Relay.Server.Persistence.Models.Tenant"/> to an
