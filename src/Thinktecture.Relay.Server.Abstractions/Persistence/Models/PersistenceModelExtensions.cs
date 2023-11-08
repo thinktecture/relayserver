@@ -70,7 +70,7 @@ public static class PersistenceModelsExtensions
 		if (other.ClientSecrets != null)
 		{
 			instance.ClientSecrets ??= new List<ClientSecret>();
-			instance.ClientSecrets.RemoveAll(cs => !other.ClientSecrets.Any(os => os.Id == cs.Id));
+			instance.ClientSecrets.RemoveAll(cs => other.ClientSecrets.All(os => os.Id != cs.Id));
 
 			// only consider secrets that actually have a value
 			foreach (var secret in other.ClientSecrets.Where(o => !String.IsNullOrWhiteSpace(o.Value)))

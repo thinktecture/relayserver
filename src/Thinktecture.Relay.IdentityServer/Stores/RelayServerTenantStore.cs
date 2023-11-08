@@ -26,7 +26,7 @@ public class RelayServerTenantStore : IClientStore
 	/// <inheritdoc/>
 	async Task<Client?> IClientStore.FindClientByIdAsync(string clientId)
 	{
-		var tenant = await _tenantService.LoadTenantByNameAsync(clientId);
+		var tenant = await _tenantService.LoadTenantCompleteByNameAsync(clientId);
 		return tenant == null ? null : ConvertToClient(tenant);
 	}
 

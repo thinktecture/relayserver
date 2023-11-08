@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Persistence;
 public interface ITenantService
 {
 	/// <summary>
-	/// Loads a <see cref="Tenant"/> by its name.
+	/// Loads a <see cref="Tenant"/> by its name with all depending entities (connections, secrets, config).
 	/// </summary>
 	/// <param name="name">The name of the <see cref="Tenant"/> to load.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
@@ -22,7 +22,33 @@ public interface ITenantService
 	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
 	/// not found.
 	/// </returns>
-	Task<Tenant?> LoadTenantByNameAsync(string name, CancellationToken cancellationToken = default);
+	Task<Tenant?> LoadTenantCompleteByNameAsync(string name, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Loads a <see cref="Tenant"/> by its name together with its connections.
+	/// </summary>
+	/// <param name="name">The name of the <see cref="Tenant"/> to load.</param>
+	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
+	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// </param>
+	/// <returns>
+	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
+	/// not found.
+	/// </returns>
+	Task<Tenant?> LoadTenantWithConnectionsByNameAsync(string name, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Loads a <see cref="Tenant"/> by its name together with its config.
+	/// </summary>
+	/// <param name="name">The name of the <see cref="Tenant"/> to load.</param>
+	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
+	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// </param>
+	/// <returns>
+	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
+	/// not found.
+	/// </returns>
+	Task<Tenant?> LoadTenantWithConfigByNameAsync(string name, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Loads a <see cref="Tenant"/> by its id.
@@ -35,7 +61,7 @@ public interface ITenantService
 	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
 	/// not found.
 	/// </returns>
-	Task<Tenant?> LoadTenantByIdAsync(Guid id, CancellationToken cancellationToken = default);
+	Task<Tenant?> LoadTenantCompleteByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Loads all <see cref="Tenant"/> with paging.

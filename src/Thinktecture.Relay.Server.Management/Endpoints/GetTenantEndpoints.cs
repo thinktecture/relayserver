@@ -89,7 +89,7 @@ public static class GetTenantEndpoints
 		[FromServices] ITenantService service,
 		CancellationToken cancellationToken = default
 	)
-		=> await service.LoadTenantByIdAsync(tenantId, cancellationToken)
+		=> await service.LoadTenantCompleteByIdAsync(tenantId, cancellationToken)
 			is { } tenant
 			? Results.Ok(tenant.ToModel())
 			: Results.NotFound();
@@ -108,7 +108,7 @@ public static class GetTenantEndpoints
 		[FromServices] ITenantService service,
 		CancellationToken cancellationToken = default
 	)
-		=> await service.LoadTenantByNameAsync(tenantName, cancellationToken)
+		=> await service.LoadTenantCompleteByNameAsync(tenantName, cancellationToken)
 			is { } tenant
 			? Results.Ok(tenant.ToModel())
 			: Results.NotFound();
