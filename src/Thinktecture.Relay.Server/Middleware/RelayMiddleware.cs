@@ -133,15 +133,15 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			return;
 		}
 
-		var tenant = await LoadTenantInfoByNameAsync(tenantName);
-		if (!tenant.Id.HasValue)
+		var tenant = await LoadTenantStateByNameAsync(tenantName);
+		if (tenant == null)
 		{
 			LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
 			await next.Invoke(context);
 			return;
 		}
 
-		if (_relayServerOptions.RequireActiveConnection && !tenant.HasActiveConnections)
+		if (_relayServerOptions.RequireActiveConnection && !tenant.Value.HasActiveConnections)
 		{
 			LogNoActiveConnection(tenantName);
 			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
@@ -162,7 +162,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			await context.Request.Body.DrainAsync(cts.Token);
 
 			_relayContext.ClientRequest =
-				await _requestFactory.CreateAsync(tenant.Id.Value, _relayContext.RequestId, context.Request, cts.Token);
+				await _requestFactory.CreateAsync(tenant.Value.Id, _relayContext.RequestId, context.Request, cts.Token);
 
 			if (_logger.IsEnabled(LogLevel.Trace))
 				_logRequestParsed(_logger, _relayContext.ClientRequest, null);
@@ -260,13 +260,13 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		LogDeliveringRequest(_relayContext.RequestId);
 
 		if (_relayContext.ClientRequest.BodyContent != null &&
-		    await TryInlineBodyContentAsync(_relayContext.ClientRequest, cancellationToken))
+			await TryInlineBodyContentAsync(_relayContext.ClientRequest, cancellationToken))
 		{
 			_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
 		}
 
 		if (_relayServerOptions.EnableConnectorTransportShortcut &&
-		    await _connectorRegistry.TryDeliverRequestAsync(_relayContext.ClientRequest, cancellationToken)) return;
+			await _connectorRegistry.TryDeliverRequestAsync(_relayContext.ClientRequest, cancellationToken)) return;
 
 		await _requestCoordinator.ProcessRequestAsync(_relayContext.ClientRequest, cancellationToken);
 	}
@@ -288,7 +288,6 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			_relayContext.ResponseDisposables.Add(context.Disposable);
 		}
 	}
-
 
 	[LoggerMessage(20611, LogLevel.Debug, "Executing target response interceptors for request {RelayRequestId}")]
 	partial void LogExecutingResponseInterceptors(Guid relayRequestId);
@@ -332,12 +331,15 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 	[LoggerMessage(20613, LogLevel.Debug,
 		"Outsourcing from request {BodySize} bytes (original {OriginalBodySize} bytes) because of a maximum of {BinarySizeThreshold} for request {RelayRequestId}")]
-	partial void LogOutsourcingRequestBody(long? bodySize, long? originalBodySize, int binarySizeThreshold, Guid relayRequestId);
+	partial void LogOutsourcingRequestBody(long? bodySize, long? originalBodySize, int binarySizeThreshold,
+		Guid relayRequestId);
 
-	[LoggerMessage(20614, LogLevel.Trace, "Outsourced from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
+	[LoggerMessage(20614, LogLevel.Trace,
+		"Outsourced from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
 	partial void LogOutsourcedRequestBody(long? bodySize, long? originalBodySize, Guid relayRequestId);
 
-	[LoggerMessage(20615, LogLevel.Debug, "Inlined from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
+	[LoggerMessage(20615, LogLevel.Debug,
+		"Inlined from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
 	partial void LogInlinedRequestBody(long? bodySize, long? originalBodySize, Guid relayRequestId);
 
 	private async Task<bool> TryInlineBodyContentAsync(TRequest request, CancellationToken cancellationToken)
@@ -366,65 +368,58 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		=> _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(httpStatusCode), response,
 			cancellationToken);
 
-	private async Task<TenantInfo> LoadTenantInfoByNameAsync(string name, CancellationToken cancellationToken = default)
+	private async Task<TenantState?> LoadTenantStateByNameAsync(string name, CancellationToken cancellationToken = default)
 	{
-		var normalizedName = _tenantService.NormalizeName(name);
-		var cacheKey = $"tenant_{normalizedName}_id";
-
-		var result = new TenantInfo();
-
+		var cacheKey = $"tenant_state_{_tenantService.NormalizeName(name)}";
 		var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
-		if (cachedData != null)
-		{
-			return TenantInfo.FromByteArray(cachedData);
-		}
+		if (cachedData != null) return TenantState.FromByteArray(cachedData);
 
 		var tenant = await _tenantService.LoadTenantByNameAsync(name, cancellationToken);
-		if (tenant != null)
-		{
-			result = new TenantInfo(tenant.Id, tenant.Connections?.Any(c => c.DisconnectTime == null) == true);
-		}
+		var result = tenant == null
+			? (TenantState?)null
+			: new TenantState(tenant.Id, tenant.Connections?.Any(c => c.DisconnectTime == null) == true);
 
 		var cacheEntryOptions = new DistributedCacheEntryOptions()
 			.SetAbsoluteExpiration(_relayServerOptions.TenantInfoCacheDuration);
 
-		cachedData = result.ToByteArray();
+		cachedData = TenantState.ToByteArray(result);
 		await _cache.SetAsync(cacheKey, cachedData, cacheEntryOptions, cancellationToken);
 
 		return result;
 	}
 
-	private readonly struct TenantInfo
+	private readonly struct TenantState
 	{
-		public Guid? Id { get; }
+		public Guid Id { get; }
+
 		public bool HasActiveConnections { get; }
 
-		public TenantInfo()
-		{
-			Id = null;
-			HasActiveConnections = false;
-		}
-
-		public TenantInfo(Guid id, bool hasActiveConnections)
+		public TenantState(Guid id, bool hasActiveConnections)
 		{
 			Id = id;
 			HasActiveConnections = hasActiveConnections;
 		}
 
-		public static TenantInfo FromByteArray(byte[] data)
+		public static TenantState? FromByteArray(byte[] buffer)
 		{
-			return new TenantInfo(new Guid(new Span<byte>(data, 0, 16)), data[16] == Byte.MaxValue);
+			// bytes 0 is null marker, 1-17 are guid, 18 is HasActiveConnections
+			if (buffer[0] == byte.MinValue) return null;
+
+			return new TenantState(new Guid(new Span<byte>(buffer, 1, 16)), buffer[17] == byte.MaxValue);
 		}
 
-		public byte[] ToByteArray()
+		public static byte[] ToByteArray(TenantState? tenantInfo)
 		{
-			// bytes 0-16 are guid, 17 is HasActiveConnections
-			var data = new byte[17];
+			// bytes 0 is null marker, 1-17 are guid, 18 is HasActiveConnections
+			var buffer = new byte[18];
 
-			Id?.TryWriteBytes(new Span<byte>(data, 0, 16));
-			data[16] = HasActiveConnections ? Byte.MaxValue : Byte.MinValue;
+			if (tenantInfo == null) return buffer;
 
-			return data;
+			buffer[0] = byte.MaxValue;
+			tenantInfo.Value.Id.TryWriteBytes(new Span<byte>(buffer, 1, 16));
+			buffer[17] = tenantInfo.Value.HasActiveConnections ? byte.MaxValue : byte.MinValue;
+
+			return buffer;
 		}
 	}
 }
