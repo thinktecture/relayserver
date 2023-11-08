@@ -11,9 +11,9 @@ public static class Constants
 	public const string DefaultAuthenticationScheme = "relayserver";
 
 	/// <summary>
-	/// The authentication audience to use.
+	/// The default authentication audience to use.
 	/// </summary>
-	public const string AuthenticationAudience = "relayserver";
+	public const string DefaultAuthenticationAudience = "relayserver";
 
 	/// <summary>
 	/// The default policy to use.
