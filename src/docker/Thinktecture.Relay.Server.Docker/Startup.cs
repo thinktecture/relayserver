@@ -28,7 +28,7 @@ public class Startup
 			{
 				var authorityUri = new Uri(Configuration.GetValue<string>("Authentication:Authority"));
 				options.Authority = authorityUri.AbsoluteUri;
-				options.Audience = Constants.AuthenticationAudience;
+				options.Audience = Constants.DefaultAuthenticationAudience;
 				options.RequireHttpsMetadata = authorityUri.Scheme == "https";
 
 				// This is a demo environment, we should try to recover fast if we can't access our Identity Provider
