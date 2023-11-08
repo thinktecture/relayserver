@@ -87,7 +87,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 
 		// TODO support auto-provisioning here (create tenant implicit)
 
-		var tenant = await _tenantService.LoadTenantByNameAsync(tenantName);
+		var tenant = await _tenantService.LoadTenantWithConfigByNameAsync(tenantName);
 		if (tenant == null)
 		{
 			_logger.LogError(26106,
@@ -103,10 +103,9 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id,
 			Context.GetHttpContext()?.Connection.RemoteIpAddress);
 
-		var config = await _tenantService.LoadTenantConfigAsync(tenant.Id);
-		if (config != null)
+		if (tenant.Config != null)
 		{
-			await Clients.Caller.Configure(config);
+			await Clients.Caller.Configure(tenant.Config);
 		}
 
 		await base.OnConnectedAsync();

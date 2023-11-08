@@ -21,15 +21,40 @@ public class TenantService : ITenantService
 		=> _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
 	/// <inheritdoc/>
-	public async Task<Tenant?> LoadTenantByNameAsync(string name, CancellationToken cancellationToken)
+	public async Task<Tenant?> LoadTenantCompleteByNameAsync(string name, CancellationToken cancellationToken)
 	{
 		var normalizedName = NormalizeName(name);
 
 		return await _dbContext.Tenants
-			.Include(tenant => tenant.ClientSecrets)
-			.Include(tenant => tenant.Connections)
+			.Include(t => t.ClientSecrets)
+			.Include(t => t.Connections)
+			.Include(t => t.Config)
 			.AsNoTracking()
-			.SingleOrDefaultAsync(tenant => tenant.NormalizedName == normalizedName, cancellationToken: cancellationToken);
+			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
+	}
+
+	/// <inheritdoc/>
+	public async Task<Tenant?> LoadTenantWithConnectionsByNameAsync(string name,
+		CancellationToken cancellationToken = default)
+	{
+		var normalizedName = NormalizeName(name);
+
+		return await _dbContext.Tenants
+			.Include(t => t.Connections)
+			.AsNoTracking()
+			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
+	}
+
+	/// <inheritdoc/>
+	public async Task<Tenant?> LoadTenantWithConfigByNameAsync(string name,
+		CancellationToken cancellationToken = default)
+	{
+		var normalizedName = NormalizeName(name);
+
+		return await _dbContext.Tenants
+			.Include(t => t.Config)
+			.AsNoTracking()
+			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
 	}
 
 	/// <inheritdoc/>
@@ -42,10 +67,11 @@ public class TenantService : ITenantService
 			.ToPagedResultAsync(skip, take, cancellationToken);
 
 	/// <inheritdoc/>
-	public async Task<Tenant?> LoadTenantByIdAsync(Guid id, CancellationToken cancellationToken)
+	public async Task<Tenant?> LoadTenantCompleteByIdAsync(Guid id, CancellationToken cancellationToken)
 		=> await _dbContext.Tenants
-			.Include(t => t.Config)
 			.Include(t => t.ClientSecrets)
+			.Include(t => t.Connections)
+			.Include(t => t.Config)
 			.AsNoTracking()
 			.SingleOrDefaultAsync(t => t.Id == id, cancellationToken: cancellationToken);
 

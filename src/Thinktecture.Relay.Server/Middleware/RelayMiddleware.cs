@@ -374,7 +374,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
 		if (cachedData != null) return TenantState.FromByteArray(cachedData);
 
-		var tenant = await _tenantService.LoadTenantByNameAsync(name, cancellationToken);
+		var tenant = await _tenantService.LoadTenantWithConnectionsByNameAsync(name, cancellationToken);
 		var result = tenant == null
 			? (TenantState?)null
 			: new TenantState(tenant.Id, tenant.Connections?.Any(c => c.DisconnectTime == null) == true);
