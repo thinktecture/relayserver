@@ -66,6 +66,11 @@ the available settings:
       // when there is no connector connected for the requested tenant. Otherwise the
       // request will time out a bit later.
       "RequireActiveConnection": false,
+
+      // Enable automatic tenant creation, Boolean, defaults to false
+      // When enabled, a tenant will be automatically created if a connector connects
+      // for the first time and the tenant was not found, yet.
+      "EnableAutomaticTenantCreation": false,
   }
 }
 ```
@@ -167,6 +172,18 @@ connections as long in the database by also reducing the `EntryMaxAge` statistic
 option. The last activity of an origin should be updated at least twice within this
 range, so you might also want to reduce the `OriginLastSeenUpdateInterval` statistics
 option. 
+
+### Automatic tenant creation
+
+When this feature is switched on, a tenant will be automatically added to the database
+the first time it connects to the RelayServer. The name of the tenant is retrieved from
+the claim `client_id`. Optionally the display name will be used from the claim
+`client_name` and the description from `client_description`.
+
+__Caution__: As long as the token is valid, the tenant will be created. This means, adding
+a valid login to your IDP creates the tenant on the RelayServer. No cleanup mechanism is
+available, thus automatically created tenants need to be manually deleted when they are
+not needed/wanted anymore.
 
 ## Connector
 

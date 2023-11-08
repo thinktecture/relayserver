@@ -98,4 +98,9 @@ public class RelayServerOptions
 	/// Immediately reject a request if there is no active connection available for the requested tenant.
 	/// </summary>
 	public bool RequireActiveConnection { get; set; }
+
+	/// <summary>
+	/// Enables automatic tenant creation on first connect.
+	/// </summary>
+	public bool EnableAutomaticTenantCreation { get; set; }
 }
