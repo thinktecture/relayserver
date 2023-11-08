@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Persistence;
+using Thinktecture.Relay.Server.Persistence.Models;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
@@ -47,18 +49,20 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	private readonly ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> _logger;
 	private readonly IResponseDispatcher<TResponse> _responseDispatcher;
 	private readonly ITenantService _tenantService;
+	private readonly RelayServerOptions _relayServerOptions;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectorHub{TRequest,TResponse,TAcknowledge}"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="tenantService">An <see cref="ITenantService"/>.</param>
+	/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	/// <param name="responseDispatcher">An <see cref="IResponseDispatcher{T}"/>.</param>
 	/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator{T}"/>.</param>
 	/// <param name="connectorRegistry">The <see cref="ConnectorRegistry{T}"/>.</param>
 	/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
 	public ConnectorHub(ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> logger,
-		ITenantService tenantService,
+		ITenantService tenantService, IOptions<RelayServerOptions> relayServerOptions,
 		IResponseDispatcher<TResponse> responseDispatcher, IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator,
 		ConnectorRegistry<TRequest> connectorRegistry, IConnectionStatisticsWriter connectionStatisticsWriter)
 	{
@@ -70,6 +74,10 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
 		_connectionStatisticsWriter = connectionStatisticsWriter ??
 			throw new ArgumentNullException(nameof(connectionStatisticsWriter));
+
+		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+
+		_relayServerOptions = relayServerOptions.Value;
 	}
 
 	/// <inheritdoc/>
@@ -85,19 +93,35 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 			return;
 		}
 
-		// TODO support auto-provisioning here (create tenant implicit)
-
 		var tenant = await _tenantService.LoadTenantWithConfigByNameAsync(tenantName);
 		if (tenant == null)
 		{
-			_logger.LogError(26106,
-				"Rejecting incoming connection {TransportConnectionId} because of unknown tenant {TenantName}",
-				Context.ConnectionId, tenantName);
-			Context.Abort();
-			return;
+			if (_relayServerOptions.EnableAutomaticTenantCreation)
+			{
+				tenant = new Tenant()
+				{
+					Name = tenantName,
+					DisplayName = Context.User.GetTenantDisplayName(),
+					Description = Context.User.GetTenantDescription(),
+				};
+
+				await _tenantService.CreateTenantAsync(tenant);
+
+				_logger.LogInformation(26107,
+					"Incoming connection {TransportConnectionId} created tenant {TenantName}",
+					Context.ConnectionId, tenantName);
+			}
+			else
+			{
+				_logger.LogError(26106,
+					"Rejecting incoming connection {TransportConnectionId} because of unknown tenant {TenantName}",
+					Context.ConnectionId, tenantName);
+				Context.Abort();
+				return;
+			}
 		}
 
-		_logger.LogDebug(26101, "Connection {TransportConnectionId} incoming for tenant {@Tenant}",
+		_logger.LogDebug(26101, "Incoming connection {TransportConnectionId} for tenant {@Tenant}",
 			Context.ConnectionId, tenant);
 
 		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id,
