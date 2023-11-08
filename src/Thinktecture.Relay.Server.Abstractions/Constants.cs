@@ -23,7 +23,7 @@ public static class Constants
 	/// <summary>
 	/// The default authentication scope to use.
 	/// </summary>
-	public const string DefaultAuthenticationScope = "relaying";
+	public const string DefaultAuthenticationScope = "connector";
 
 	/// <summary>
 	/// Constants for HTTP headers.

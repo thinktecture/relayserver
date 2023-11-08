@@ -11,7 +11,7 @@ public static class Constants
 	/// <summary>
 	/// The identity scopes.
 	/// </summary>
-	public const string RelayServerScopes = "relaying";
+	public const string RelayServerScopes = "connector";
 
 	/// <summary>
 	/// The id for the catch-all <see cref="IRelayTarget{TRequest,TResponse}"/>.
