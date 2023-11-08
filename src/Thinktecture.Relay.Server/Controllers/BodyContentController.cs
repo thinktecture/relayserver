@@ -76,8 +76,9 @@ public partial class BodyContentController : Controller
 		}
 		catch (OperationCanceledException)
 		{
-			_logger.LogWarning(20202, "Connector for {TenantId} aborted the response body upload for request {RelayRequestId}",
-				User.GetTenantInfo().Id, requestId);
+			_logger.LogWarning(20202,
+				"Connector for {TenantName} aborted the response body upload for request {RelayRequestId}",
+				User.GetTenantName(), requestId);
 			return NoContent();
 		}
 	}

@@ -75,19 +75,29 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	/// <inheritdoc/>
 	public override async Task OnConnectedAsync()
 	{
-		var tenant = Context.User?.GetTenantInfo();
-
-		if (tenant == null)
+		var tenantName = Context.User.GetTenantName();
+		if (tenantName == string.Empty)
 		{
 			_logger.LogError(26100,
-				"Rejecting incoming connection {TransportConnectionId} because of missing tenant info",
+				"Rejecting incoming connection {TransportConnectionId} because of missing tenant name",
 				Context.ConnectionId);
 			Context.Abort();
 			return;
 		}
 
-		_logger.LogDebug(26101,
-			"Connection {TransportConnectionId} incoming for tenant {@Tenant}",
+		// TODO support auto-provisioning here (create tenant implicit)
+
+		var tenant = await _tenantService.LoadTenantByNameAsync(tenantName);
+		if (tenant == null)
+		{
+			_logger.LogError(26106,
+				"Rejecting incoming connection {TransportConnectionId} because of unknown tenant {TenantName}",
+				Context.ConnectionId, tenantName);
+			Context.Abort();
+			return;
+		}
+
+		_logger.LogDebug(26101, "Connection {TransportConnectionId} incoming for tenant {@Tenant}",
 			Context.ConnectionId, tenant);
 
 		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id,
@@ -108,23 +118,21 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		if (exception == null)
 		{
 			_logger.LogWarning(26102, exception,
-				"Connection {TransportConnectionId} disconnected for tenant {@Tenant}",
-				Context.ConnectionId,
-				Context.User?.GetTenantInfo());
+				"Connection {TransportConnectionId} disconnected for tenant {TenantName}", Context.ConnectionId,
+				Context.User.GetTenantName());
 		}
 		else
 		{
-			_logger.LogDebug(26103,
-				"Connection {TransportConnectionId} disconnected for tenant {@Tenant}",
-				Context.ConnectionId,
-				Context.User?.GetTenantInfo());
+			_logger.LogDebug(26103, "Connection {TransportConnectionId} disconnected for tenant {TenantName}",
+				Context.ConnectionId, Context.User.GetTenantName());
 		}
 
 		await _connectorRegistry.UnregisterAsync(Context.ConnectionId);
 		await base.OnDisconnectedAsync(exception);
 	}
 
-	[LoggerMessage(26104, LogLevel.Debug, "Connection {TransportConnectionId} received response for request {RelayRequestId}")]
+	[LoggerMessage(26104, LogLevel.Debug,
+		"Connection {TransportConnectionId} received response for request {RelayRequestId}")]
 	partial void LogReceivedResponse(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
@@ -143,7 +151,8 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await _connectionStatisticsWriter.UpdateLastSeenTimeAsync(Context.ConnectionId);
 	}
 
-	[LoggerMessage(26105, LogLevel.Debug, "Connection {TransportConnectionId} received acknowledgement for request {RelayRequestId}")]
+	[LoggerMessage(26105, LogLevel.Debug,
+		"Connection {TransportConnectionId} received acknowledgement for request {RelayRequestId}")]
 	partial void LogReceivedAcknowledge(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
