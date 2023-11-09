@@ -51,16 +51,19 @@ public partial class ConnectorRegistry<T>
 	/// </summary>
 	/// <param name="connectionId">The unique id of the connection.</param>
 	/// <param name="tenantName">The unique name of the tenant.</param>
+	/// <param name="maximumConcurrentRequests">The amount of maximum concurrent requests.</param>
 	/// <param name="remoteIpAddress">The optional remote ip address of the connection.</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	public async Task RegisterAsync(string connectionId, string tenantName, IPAddress? remoteIpAddress = null)
+	public async Task RegisterAsync(string connectionId, string tenantName, int maximumConcurrentRequests,
+		IPAddress? remoteIpAddress = null)
 	{
 		_logger.LogDebug(22100,
 			"Registering connection {TransportConnectionId} for tenant {TenantName}",
 			connectionId, tenantName);
 
 		var registration =
-			ActivatorUtilities.CreateInstance<ConnectorRegistration>(_serviceProvider, tenantName, connectionId);
+			ActivatorUtilities.CreateInstance<ConnectorRegistration>(_serviceProvider, tenantName, connectionId,
+				maximumConcurrentRequests);
 
 		var transports = _tenants.GetOrAdd(tenantName, _ => new ConcurrentDictionary<string, IConnectorTransport<T>>());
 		transports[connectionId] = registration.ConnectorTransport;
@@ -80,7 +83,7 @@ public partial class ConnectorRegistry<T>
 	public async Task UnregisterAsync(string connectionId)
 	{
 		if (_registrations.TryRemove(connectionId, out var registration) &&
-		    _tenants.TryGetValue(registration.TenantName, out var connectors))
+			_tenants.TryGetValue(registration.TenantName, out var connectors))
 		{
 			_logger.LogDebug(22101, "Unregistering connection {TransportConnectionId} for tenant {TenantName}",
 				connectionId, registration.TenantName);
@@ -96,7 +99,8 @@ public partial class ConnectorRegistry<T>
 		registration?.Dispose();
 	}
 
-	[LoggerMessage(22103, LogLevel.Warning, "Unknown connection {TransportConnectionId} to transport request {RelayRequestId} to")]
+	[LoggerMessage(22103, LogLevel.Warning,
+		"Unknown connection {TransportConnectionId} to transport request {RelayRequestId} to")]
 	partial void LogUnknownRequestConnection(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
@@ -143,7 +147,8 @@ public partial class ConnectorRegistry<T>
 		return Task.CompletedTask;
 	}
 
-	[LoggerMessage(22105, LogLevel.Trace, "Delivering request {RelayRequestId} to local connection {TransportConnectionId}")]
+	[LoggerMessage(22105, LogLevel.Trace,
+		"Delivering request {RelayRequestId} to local connection {TransportConnectionId}")]
 	partial void LogDeliveringRequest(Guid relayRequestId, string? transportConnectionId);
 
 	/// <summary>
@@ -174,12 +179,13 @@ public partial class ConnectorRegistry<T>
 	private class ConnectorRegistration : IDisposable
 	{
 		public string TenantName { get; }
+
 		public IConnectorTransport<T> ConnectorTransport { get; }
+
 		public ITenantHandler TenantHandler { get; }
 
-		public ConnectorRegistration(string tenantName, string connectionId,
-			IConnectorTransportFactory<T> connectorTransportFactory,
-			ITenantHandlerFactory tenantHandlerFactory)
+		public ConnectorRegistration(string tenantName, string connectionId, int maximumConcurrentRequests,
+			IConnectorTransportFactory<T> connectorTransportFactory, ITenantHandlerFactory tenantHandlerFactory)
 		{
 			if (connectionId == null) throw new ArgumentNullException(nameof(connectionId));
 			if (connectorTransportFactory == null) throw new ArgumentNullException(nameof(connectorTransportFactory));
@@ -187,7 +193,7 @@ public partial class ConnectorRegistry<T>
 
 			TenantName = tenantName;
 			ConnectorTransport = connectorTransportFactory.Create(connectionId);
-			TenantHandler = tenantHandlerFactory.Create(tenantName, connectionId);
+			TenantHandler = tenantHandlerFactory.Create(tenantName, connectionId, maximumConcurrentRequests);
 		}
 
 		public void Dispose()

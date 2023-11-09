@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
 	public static IRelayServerBuilder<TRequest, TResponse, TAcknowledge> AddRelayServer<TRequest, TResponse,
 		TAcknowledge>(
 		this IServiceCollection services, Action<RelayServerOptions>? configure = null)
-		where TRequest : IClientRequest, new()
+		where TRequest : class, IClientRequest, new()
 		where TResponse : class, ITargetResponse, new()
 		where TAcknowledge : IAcknowledgeRequest
 	{

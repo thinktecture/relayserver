@@ -30,7 +30,7 @@ public static class ApplicationBuilderExtensions
 	/// <typeparam name="TAcknowledge">The type of acknowledge.</typeparam>
 	/// <returns>The <see cref="IApplicationBuilder"/> instance.</returns>
 	public static IApplicationBuilder UseRelayServer<TRequest, TResponse, TAcknowledge>(this IApplicationBuilder builder)
-		where TRequest : IClientRequest
+		where TRequest : class, IClientRequest
 		where TResponse : class, ITargetResponse, new()
 		where TAcknowledge : IAcknowledgeRequest
 	{

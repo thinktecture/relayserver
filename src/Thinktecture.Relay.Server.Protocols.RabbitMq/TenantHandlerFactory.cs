@@ -21,7 +21,7 @@ public class TenantHandlerFactory<TRequest, TAcknowledge> : ITenantHandlerFactor
 		=> _serviceProvider = serviceProvider;
 
 	/// <inheritdoc />
-	public ITenantHandler Create(string tenantName, string connectionId)
+	public ITenantHandler Create(string tenantName, string connectionId, int maximumConcurrentRequests)
 		=> ActivatorUtilities.CreateInstance<TenantHandler<TRequest, TAcknowledge>>(_serviceProvider, tenantName,
-			connectionId);
+			connectionId, maximumConcurrentRequests);
 }

@@ -28,6 +28,16 @@ public class Tenant
 	public string? Description { get; set; }
 
 	/// <summary>
+	/// Gets or sets whether authentication is required for relaying a request to this tenant.
+	/// </summary>
+	public bool? RequireAuthentication { get; set; }
+
+	/// <summary>
+	/// Gets or sets the maximum concurrent connector requests.
+	/// </summary>
+	public int? MaximumConcurrentConnectorRequests { get; set; }
+
+	/// <summary>
 	/// Gets or sets the interval used to send keep alive pings between the server and a connector.
 	/// </summary>
 	public TimeSpan? KeepAliveInterval { get; set; }

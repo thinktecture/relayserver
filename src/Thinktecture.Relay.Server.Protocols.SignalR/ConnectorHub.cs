@@ -149,7 +149,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		_logger.LogDebug(26101, "Incoming connection {TransportConnectionId} for tenant {@Tenant}",
 			Context.ConnectionId, tenant);
 
-		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Name,
+		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Name, tenant.MaximumConcurrentConnectorRequests,
 			Context.GetHttpContext()?.Connection.RemoteIpAddress);
 
 		if (tenant.Config != null)

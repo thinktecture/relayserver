@@ -191,6 +191,17 @@ If a tenant has `RequireAuthentication` enabled in the database, the RelayServer
 when the request contains an access token from it's own issuer and audience (e.g., it comes
 from a connector). In any other case it returns 401.
 
+### Maximum concurrent connector requests
+
+Setting `MaximumConcurrentConnectorRequests` to a positive value greater than 0 and less than
+65.536 limits the amount of requests which will be send to a connector while other requests
+are still pending.
+
+__Caution__: If the limit is activated, all requests for that tenant need to be switched to an
+acknowledge mode `ConnectorFinished` when they are not set to `Manual`. This means, compared
+to the `Disabled` mode, the request will be re-queued if an error raises during processing by the
+connector and the acknowledgment isn't send.
+
 ## Connector
 
 The `RelayConnectorOptions` type provides the main configuration for the connector. These

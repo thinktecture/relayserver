@@ -26,7 +26,7 @@ namespace Thinktecture.Relay.Server.Middleware;
 
 /// <inheritdoc />
 public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddleware
-	where TRequest : IClientRequest
+	where TRequest : class, IClientRequest
 	where TResponse : class, ITargetResponse, new()
 	where TAcknowledge : IAcknowledgeRequest
 {
@@ -132,6 +132,10 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	[LoggerMessage(20616, LogLevel.Debug, "Request to tenant {Tenant} was rejected due to no active connection")]
 	partial void LogNoActiveConnection(string tenant);
 
+	[LoggerMessage(20617, LogLevel.Debug,
+		$"Acknowledge mode of request {{RelayRequestId}} was changed to {nameof(AcknowledgeMode.ConnectorFinished)}")]
+	partial void LogAcknowledgeModeChange(Guid relayRequestId);
+
 	/// <inheritdoc />
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
@@ -190,6 +194,12 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 			if (_relayContext.TargetResponse == null || _relayContext.ForceConnectorDelivery)
 			{
+				if (tenantState.HasRequestsLimit && _relayContext.ClientRequest.AcknowledgeMode != AcknowledgeMode.Manual)
+				{
+					_relayContext.ClientRequest.AcknowledgeMode = AcknowledgeMode.ConnectorFinished;
+					LogAcknowledgeModeChange(_relayContext.RequestId);
+				}
+
 				await DeliverToConnectorAsync(cts.Token);
 
 				if (_relayContext.TargetResponse == null)
@@ -422,6 +432,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 		public bool RequireAuthentication { get; private init; }
 
+		public bool HasRequestsLimit { get; private init; }
+
 		public string TenantName { get; private init; } = string.Empty;
 
 		public static TenantState FromTenant(Tenant? tenant)
@@ -433,6 +445,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				TenantName = tenant.Name,
 				HasActiveConnections = tenant.Connections?.Any(c => c.DisconnectTime == null) ?? false,
 				RequireAuthentication = tenant.RequireAuthentication,
+				HasRequestsLimit = tenant.MaximumConcurrentConnectorRequests > 0,
 			};
 		}
 
@@ -442,18 +455,20 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				Unknown = span[0] == byte.MaxValue,
 				HasActiveConnections = span[1] == byte.MaxValue,
 				RequireAuthentication = span[2] == byte.MaxValue,
-				TenantName = Encoding.Unicode.GetString(span[3..]),
+				HasRequestsLimit = span[3] == byte.MaxValue,
+				TenantName = Encoding.Unicode.GetString(span[4..]),
 			};
 
 		public static Span<byte> AsSpan(TenantState tenantState)
 		{
 			var tenantName = Encoding.Unicode.GetBytes(tenantState.TenantName);
 
-			var buffer = new byte[3 + tenantName.Length];
+			var buffer = new byte[4 + tenantName.Length];
 			buffer[0] = tenantState.Unknown ? byte.MaxValue : byte.MinValue;
 			buffer[1] = tenantState.HasActiveConnections ? byte.MaxValue : byte.MinValue;
 			buffer[2] = tenantState.RequireAuthentication ? byte.MaxValue : byte.MinValue;
-			tenantName.CopyTo(buffer, 3);
+			buffer[3] = tenantState.HasRequestsLimit ? byte.MaxValue : byte.MinValue;
+			tenantName.CopyTo(buffer, 4);
 
 			return buffer;
 		}

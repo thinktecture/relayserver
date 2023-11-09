@@ -28,6 +28,12 @@ public class Tenant
 	public string? Description { get; set; }
 
 	/// <summary>
+	/// The maximum amount of concurrent requests a connector should receive.
+	/// <remarks>Defaults to 0 (unlimited).</remarks>
+	/// </summary>
+	public int MaximumConcurrentConnectorRequests { get; set; }
+
+	/// <summary>
 	/// Enable the requirement that only an authenticated request can use this tenant to relay requests.
 	/// </summary>
 	public bool RequireAuthentication { get; set; }

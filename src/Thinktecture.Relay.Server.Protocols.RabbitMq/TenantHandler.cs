@@ -32,25 +32,34 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
 	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="connectionId">The unique id of the connection.</param>
+	/// <param name="maximumConcurrentRequests">The amount of maximum concurrent requests.</param>
 	/// <param name="connectorRegistry">The <see cref="ConnectorRegistry{T}"/>.</param>
 	/// <param name="modelFactory">The <see cref="ModelFactory{TAcknowledge}"/>.</param>
 	/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 	/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator{T}"/>.</param>
 	public TenantHandler(ILogger<TenantHandler<TRequest, TAcknowledge>> logger, string tenantName, string connectionId,
-		ConnectorRegistry<TRequest> connectorRegistry, ModelFactory<TAcknowledge> modelFactory,
-		RelayServerContext relayServerContext, IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator)
+		int maximumConcurrentRequests, ConnectorRegistry<TRequest> connectorRegistry,
+		ModelFactory<TAcknowledge> modelFactory, RelayServerContext relayServerContext,
+		IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator)
 	{
+		_connectionId = connectionId;
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
 		_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
 		_acknowledgeCoordinator =
 			acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
-		_connectionId = connectionId;
 
 		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
+
 		_model = modelFactory.Create($"tenant handler for {tenantName} of connection {connectionId}", true);
 
-		_consumer = _model.ConsumeQueue(_logger, $"{Constants.RequestQueuePrefix} {tenantName}", autoDelete: false, autoAck: false);
+		if (maximumConcurrentRequests > ushort.MinValue && maximumConcurrentRequests <= ushort.MaxValue)
+		{
+			_model.BasicQos(0, (ushort)maximumConcurrentRequests, false);
+		}
+
+		_consumer = _model.ConsumeQueue(_logger, $"{Constants.RequestQueuePrefix} {tenantName}", autoDelete: false,
+			autoAck: false);
 		_consumer.Received += ConsumerReceived;
 	}
 
