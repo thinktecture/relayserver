@@ -9,10 +9,10 @@ namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 /// <summary>
 /// An implementation of a factory to create an instance of the <see cref="HubConnection"/> class.
 /// </summary>
-public class HubConnectionFactory
+public partial class HubConnectionFactory
 {
 	private readonly IAccessTokenProvider _accessTokenProvider;
-	private readonly ILogger<HubConnectionFactory> _logger;
+	private readonly ILogger _logger;
 	private readonly RelayConnectorOptions _relayConnectorOptions;
 	private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 
@@ -40,8 +40,7 @@ public class HubConnectionFactory
 	/// <returns>The <see cref="HubConnection"/>.</returns>
 	public HubConnection Create()
 	{
-		_logger.LogInformation(11400, "Creating connection to {ConnectorEndpoint}",
-			_relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint);
+		Log.CreatingConnection(_logger, _relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint);
 
 		var connection = new HubConnectionBuilder()
 			.WithUrl(new Uri(_relayConnectorOptions.DiscoveryDocument.ConnectorEndpoint),

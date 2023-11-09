@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Thinktecture.Relay.Connector.Authentication;
 
-internal class AccessTokenProvider : IAccessTokenProvider
+internal partial class AccessTokenProvider : IAccessTokenProvider
 {
 	private readonly IClientAccessTokenManagementService _clientAccessTokenManagementService;
-	private readonly ILogger<AccessTokenProvider> _logger;
+	private readonly ILogger _logger;
 
 	public AccessTokenProvider(ILogger<AccessTokenProvider> logger,
 		IClientAccessTokenManagementService clientAccessTokenManagementService)
@@ -20,7 +20,7 @@ internal class AccessTokenProvider : IAccessTokenProvider
 
 	public Task<string?> GetAccessTokenAsync()
 	{
-		_logger.LogDebug(10100, "Requesting access token");
+		Log.RequestingAccessToken(_logger);
 		return _clientAccessTokenManagementService.GetClientAccessTokenAsync(Constants.HttpClientNames.RelayServer);
 	}
 }

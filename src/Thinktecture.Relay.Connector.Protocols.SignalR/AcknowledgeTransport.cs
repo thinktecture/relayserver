@@ -9,17 +9,11 @@ using Thinktecture.Relay.Connector.Transport;
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
 /// <inheritdoc />
-public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
+public partial class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 	where T : IAcknowledgeRequest
 {
 	private readonly HubConnection _hubConnection;
-	private readonly ILogger<AcknowledgeTransport<T>> _logger;
-
-	// TODO move to LoggerMessage source generator when destructuring is supported
-	// (see https://github.com/dotnet/runtime/issues/69490)
-	private readonly Action<ILogger, IAcknowledgeRequest, Guid, string?, Exception?> _logTransportingAck =
-		LoggerMessage.Define<IAcknowledgeRequest, Guid, string?>(LogLevel.Trace, 11100,
-			"Transporting acknowledge request {@AcknowledgeRequest} for request {RelayRequestId} on connection {TransportConnectionId}");
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="AcknowledgeTransport{T}"/> class.
@@ -35,18 +29,14 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 	/// <inheritdoc />
 	public async Task TransportAsync(T request, CancellationToken cancellationToken = default)
 	{
-		if (_logger.IsEnabled(LogLevel.Trace))
-			_logTransportingAck(_logger, request, request.RequestId, _hubConnection.ConnectionId, null);
-
 		try
 		{
+			Log.TransportingAck(_logger, request, request.RequestId, _hubConnection.ConnectionId);
 			await _hubConnection.InvokeAsync("Acknowledge", request, cancellationToken);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(11101, ex,
-				"An error occured while transporting acknowledge for request {RelayRequestId} on connection {TransportConnectionId}",
-				request.RequestId, _hubConnection.ConnectionId);
+			Log.ErrorTransportingAck(_logger, ex, request.RequestId, _hubConnection.ConnectionId);
 		}
 	}
 }
