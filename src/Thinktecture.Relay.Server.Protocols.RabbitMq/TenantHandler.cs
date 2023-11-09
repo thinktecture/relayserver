@@ -30,13 +30,13 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	/// Initializes a new instance of the <see cref="TenantHandler{TRequest,TAcknowledge}"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
-	/// <param name="tenantId">The unique id of the tenant.</param>
+	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="connectionId">The unique id of the connection.</param>
 	/// <param name="connectorRegistry">The <see cref="ConnectorRegistry{T}"/>.</param>
 	/// <param name="modelFactory">The <see cref="ModelFactory{TAcknowledge}"/>.</param>
 	/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>
 	/// <param name="acknowledgeCoordinator">An <see cref="IAcknowledgeCoordinator{T}"/>.</param>
-	public TenantHandler(ILogger<TenantHandler<TRequest, TAcknowledge>> logger, Guid tenantId, string connectionId,
+	public TenantHandler(ILogger<TenantHandler<TRequest, TAcknowledge>> logger, string tenantName, string connectionId,
 		ConnectorRegistry<TRequest> connectorRegistry, ModelFactory<TAcknowledge> modelFactory,
 		RelayServerContext relayServerContext, IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator)
 	{
@@ -48,9 +48,9 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		_connectionId = connectionId;
 
 		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
-		_model = modelFactory.Create($"tenant handler for {tenantId} of connection {connectionId}", true);
+		_model = modelFactory.Create($"tenant handler for {tenantName} of connection {connectionId}", true);
 
-		_consumer = _model.ConsumeQueue(_logger, $"{Constants.RequestQueuePrefix}{tenantId}", autoDelete: false, autoAck: false);
+		_consumer = _model.ConsumeQueue(_logger, $"{Constants.RequestQueuePrefix} {tenantName}", autoDelete: false, autoAck: false);
 		_consumer.Received += ConsumerReceived;
 	}
 

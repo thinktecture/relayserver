@@ -27,16 +27,17 @@ public static class ModelBuilderExtensions
 		=> modelBuilder.Entity<Tenant>(builder =>
 		{
 			builder
-				.HasKey(e => e.Id);
+				.HasKey(e => e.NormalizedName);
+
+			builder
+				.Property(e => e.NormalizedName)
+				.HasMaxLength(100)
+				.IsRequired();
 
 			builder
 				.Property(e => e.Name)
 				.HasMaxLength(100)
 				.IsRequired();
-
-			builder
-				.HasIndex(e => e.Name)
-				.IsUnique();
 
 			builder
 				.Property(e => e.DisplayName)
@@ -49,28 +50,23 @@ public static class ModelBuilderExtensions
 			builder
 				.HasMany(e => e.ClientSecrets)
 				.WithOne()
-				.HasForeignKey(e => e.TenantId)
+				.HasForeignKey(e => e.TenantName)
 				.OnDelete(DeleteBehavior.Cascade);
 
 			builder
-				.Property(e => e.NormalizedName)
-				.HasMaxLength(100)
-				.IsRequired();
-
-			builder
-				.HasIndex(e => e.NormalizedName)
+				.HasIndex(e => e.Name)
 				.IsUnique();
 
 			builder
 				.HasMany(e => e.Connections)
 				.WithOne()
-				.HasForeignKey(e => e.TenantId)
+				.HasForeignKey(e => e.TenantName)
 				.OnDelete(DeleteBehavior.Cascade);
 
 			builder
 				.HasMany(e => e.Requests)
 				.WithOne()
-				.HasForeignKey(e => e.TenantId)
+				.HasForeignKey(e => e.TenantName)
 				.OnDelete(DeleteBehavior.Cascade);
 		});
 
@@ -118,7 +114,7 @@ public static class ModelBuilderExtensions
 		=> modelBuilder.Entity<Config>(builder =>
 		{
 			builder
-				.HasKey(e => e.TenantId);
+				.HasKey(e => e.TenantName);
 		});
 
 	private static ModelBuilder ConfigureRequest(this ModelBuilder modelBuilder)

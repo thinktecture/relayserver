@@ -14,6 +14,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 public partial class StatisticsService : IStatisticsService
 {
 	private readonly RelayDbContext _dbContext;
+	private readonly ITenantService _tenantService;
 	private readonly ILogger<StatisticsService> _logger;
 
 	/// <summary>
@@ -21,10 +22,12 @@ public partial class StatisticsService : IStatisticsService
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="dbContext">The Entity Framework Core database context.</param>
-	public StatisticsService(ILogger<StatisticsService> logger, RelayDbContext dbContext)
+	/// <param name="tenantService">An <see cref="ITenantService"/>.</param>
+	public StatisticsService(ILogger<StatisticsService> logger, RelayDbContext dbContext, ITenantService tenantService)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+		_tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
 	}
 
 	/// <inheritdoc />
@@ -131,7 +134,7 @@ public partial class StatisticsService : IStatisticsService
 	}
 
 	/// <inheritdoc />
-	public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId,
+	public async Task SetConnectionTimeAsync(string connectionId, string tenantName, Guid originId,
 		IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default)
 	{
@@ -145,7 +148,7 @@ public partial class StatisticsService : IStatisticsService
 			{
 				Id = connectionId,
 				ConnectTime = DateTimeOffset.UtcNow,
-				TenantId = tenantId,
+				TenantName = _tenantService.NormalizeName(tenantName),
 				OriginId = originId,
 				RemoteIpAddress = remoteIpAddress?.ToString(),
 			});

@@ -17,6 +17,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	private readonly ILogger<RelayRequestLogger<TRequest, TResponse>> _logger;
 	private readonly RelayServerOptions _relayServerOptions;
 	private readonly IRequestService _requestService;
+	private readonly ITenantService _tenantService;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RelayRequestLogger{TRequest,TResponse}"/> class.
@@ -24,13 +25,16 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	/// <param name="logger">An instance of an <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="requestService">An <see cref="IRequestService"/>.</param>
 	/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
-	public RelayRequestLogger(ILogger<RelayRequestLogger<TRequest, TResponse>> logger,
-		IRequestService requestService, IOptions<RelayServerOptions> relayServerOptions)
+	/// <param name="tenantService">An <see cref="ITenantService"/>.</param>
+	public RelayRequestLogger(ILogger<RelayRequestLogger<TRequest, TResponse>> logger, IRequestService requestService,
+		IOptions<RelayServerOptions> relayServerOptions, ITenantService tenantService)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		_requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
+		_tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
+
 		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 
-		_requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
@@ -114,7 +118,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	private Request CreateRequest(IRelayContext<TRequest, TResponse> relayContext)
 		=> new Request()
 		{
-			TenantId = relayContext.ClientRequest.TenantId,
+			TenantName = _tenantService.NormalizeName(relayContext.ClientRequest.TenantName),
 			RequestId = relayContext.RequestId,
 			RequestDate = relayContext.RequestStart,
 			RequestDuration = (long)(DateTime.UtcNow - relayContext.RequestStart).TotalMilliseconds,

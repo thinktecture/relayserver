@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

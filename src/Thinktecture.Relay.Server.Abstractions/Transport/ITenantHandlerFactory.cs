@@ -10,8 +10,8 @@ public interface ITenantHandlerFactory
 	/// <summary>
 	/// Creates an instance of a class implementing <see cref="ITenantHandler"/>.
 	/// </summary>
-	/// <param name="tenantId">The unique id of the tenant.</param>
+	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="connectionId">The unique id of the connection.</param>
 	/// <returns>An <see cref="ITenantHandler"/>.</returns>
-	ITenantHandler Create(Guid tenantId, string connectionId);
+	ITenantHandler Create(string tenantName, string connectionId);
 }

@@ -9,9 +9,9 @@ namespace Thinktecture.Relay.Server.Persistence.Models;
 public class Config : ITenantConfig
 {
 	/// <summary>
-	/// The unique id of the tenant.
+	/// The unique name of the tenant.
 	/// </summary>
-	public Guid TenantId { get; set; }
+	public string TenantName { get; set; } = default!;
 
 	/// <inheritdoc />
 	public TimeSpan? KeepAliveInterval { get; set; }

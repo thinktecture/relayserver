@@ -31,7 +31,7 @@ public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TRespon
 	public TResponse? TargetResponse { get; set; }
 
 	/// <inheritdoc />
-	public bool ConnectorAvailable => _connectionService.IsConnectionAvailableAsync(ClientRequest.TenantId)
+	public bool ConnectorAvailable => _connectionService.IsConnectionAvailableAsync(ClientRequest.TenantName)
 		.GetAwaiter().GetResult();
 
 	/// <inheritdoc />

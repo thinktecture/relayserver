@@ -10,12 +10,7 @@ namespace Thinktecture.Relay.Server.Persistence.Models;
 public class Tenant
 {
 	/// <summary>
-	/// The unique id of the tenant.
-	/// </summary>
-	public Guid Id { get; set; }
-
-	/// <summary>
-	/// The name of the tenant. Also used as ClientId for connector authentication.
+	/// The unique name of the tenant.
 	/// </summary>
 	/// <remarks>The maximum length is 100 unicode characters.</remarks>
 	public string Name { get; set; } = default!;

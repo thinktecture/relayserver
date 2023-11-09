@@ -4,6 +4,6 @@ namespace Thinktecture.Relay.Server.Transport;
 
 internal class InMemoryTenantHandlerFactory : ITenantHandlerFactory
 {
-	public ITenantHandler Create(Guid tenantId, string connectionId)
+	public ITenantHandler Create(string tenantName, string connectionId)
 		=> InMemoryTenantHandler.Noop;
 }

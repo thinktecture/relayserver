@@ -27,7 +27,6 @@ internal static class PersistenceModelsExtensions
 		=> new TenantModel()
 		{
 			// main tenant properties
-			Id = tenant.Id,
 			Name = tenant.Name,
 			DisplayName = tenant.DisplayName,
 			Description = tenant.Description,
@@ -40,11 +39,12 @@ internal static class PersistenceModelsExtensions
 
 			// credential property
 			Credentials = tenant.ClientSecrets?.Select(s => new TenantCredential()
-			{
-				Id = s.Id,
-				Created = s.Created,
-				Expiration = s.Expiration,
-			}).ToArray() ?? Array.Empty<TenantCredential>(),
+				{
+					Id = s.Id,
+					Created = s.Created,
+					Expiration = s.Expiration,
+				}).ToArray() ??
+				Array.Empty<TenantCredential>(),
 		};
 
 	/// <summary>
@@ -73,7 +73,6 @@ internal static class PersistenceModelsExtensions
 
 		return new TenantEntity()
 		{
-			Id = tenant.Id,
 			Name = tenant.Name,
 			DisplayName = tenant.DisplayName,
 			Description = tenant.Description,
@@ -97,8 +96,7 @@ internal static class PersistenceModelsExtensions
 	/// </summary>
 	/// <param name="tenants">The tenants to convert.</param>
 	/// <returns>The converted tenants.</returns>
-	public static IEnumerable<TenantModel> ToModels(
-		this IEnumerable<TenantEntity> tenants)
+	public static IEnumerable<TenantModel> ToModels(this IEnumerable<TenantEntity> tenants)
 		=> tenants.Select(ToModel);
 
 	/// <summary>

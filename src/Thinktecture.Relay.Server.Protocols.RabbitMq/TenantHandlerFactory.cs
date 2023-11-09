@@ -21,7 +21,7 @@ public class TenantHandlerFactory<TRequest, TAcknowledge> : ITenantHandlerFactor
 		=> _serviceProvider = serviceProvider;
 
 	/// <inheritdoc />
-	public ITenantHandler Create(Guid tenantId, string connectionId)
-		=> ActivatorUtilities.CreateInstance<TenantHandler<TRequest, TAcknowledge>>(_serviceProvider, tenantId,
+	public ITenantHandler Create(string tenantName, string connectionId)
+		=> ActivatorUtilities.CreateInstance<TenantHandler<TRequest, TAcknowledge>>(_serviceProvider, tenantName,
 			connectionId);
 }

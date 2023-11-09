@@ -15,7 +15,7 @@ public interface IRelayClientRequestFactory<TRequest>
 	/// <summary>
 	/// Creates an instance of a class implementing <see cref="IClientRequest"/>.
 	/// </summary>
-	/// <param name="tenantId">The unique id of the tenant.</param>
+	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="requestId">The unique id of the request.</param>
 	/// <param name="httpRequest">The <see cref="HttpRequest"/>.</param>
 	/// <param name="cancellationToken">
@@ -26,6 +26,6 @@ public interface IRelayClientRequestFactory<TRequest>
 	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the creation of an instance
 	/// implementing <see cref="IClientRequest"/>.
 	/// </returns>
-	Task<TRequest> CreateAsync(Guid tenantId, Guid requestId, HttpRequest httpRequest,
+	Task<TRequest> CreateAsync(string tenantName, Guid requestId, HttpRequest httpRequest,
 		CancellationToken cancellationToken = default);
 }

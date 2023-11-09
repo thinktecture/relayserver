@@ -5,20 +5,20 @@ internal static class Constants
 	public const string ExchangeName = "RelayServer";
 
 	/// <summary>
-	/// The prefix (including trailing white-space) for request queues.
+	/// The prefix for request queues.
 	/// </summary>
-	/// <remarks>Should be followed by a tenant id.</remarks>
-	public const string RequestQueuePrefix = "Requests ";
+	/// <remarks>Should be followed by a space and the tenant name.</remarks>
+	public const string RequestQueuePrefix = "Requests";
 
 	/// <summary>
-	/// The prefix (including trailing white-space) for response queues.
+	/// The prefix for response queues.
 	/// </summary>
-	/// <remarks>Should be followed by an origin id.</remarks>
-	public const string ResponseQueuePrefix = "Responses ";
+	/// <remarks>Should be followed by a space and the origin id.</remarks>
+	public const string ResponseQueuePrefix = "Responses";
 
 	/// <summary>
-	/// The prefix (including trailing white-space) for acknowledge queues.
+	/// The prefix for acknowledge queues.
 	/// </summary>
-	/// <remarks>Should be followed by an origin id.</remarks>
-	public const string AcknowledgeQueuePrefix = "Acknowledges ";
+	/// <remarks>Should be followed by a space and the origin id.</remarks>
+	public const string AcknowledgeQueuePrefix = "Acknowledges";
 }

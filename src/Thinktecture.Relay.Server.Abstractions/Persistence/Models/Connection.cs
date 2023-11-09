@@ -14,9 +14,9 @@ public class Connection
 	public string Id { get; set; } = default!;
 
 	/// <summary>
-	/// The unique id of the tenant.
+	/// The unique name of the tenant.
 	/// </summary>
-	public Guid TenantId { get; set; }
+	public string TenantName { get; set; } = default!;
 
 	/// <summary>
 	/// The unique id of the relay server instance this connection is held to.

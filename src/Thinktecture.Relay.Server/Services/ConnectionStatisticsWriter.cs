@@ -23,13 +23,13 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 		=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 	/// <inheritdoc />
-	public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId,
+	public async Task SetConnectionTimeAsync(string connectionId, string tenantName, Guid originId,
 		IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
 		await scope.ServiceProvider.GetRequiredService<IStatisticsService>()
-			.SetConnectionTimeAsync(connectionId, tenantId, originId, remoteIpAddress, cancellationToken);
+			.SetConnectionTimeAsync(connectionId, tenantName, originId, remoteIpAddress, cancellationToken);
 	}
 
 	/// <inheritdoc />

@@ -23,7 +23,7 @@ public static partial class EndpointRouteBuilderExtensions
 	public static RouteHandlerBuilder MapPutTenant(this IEndpointRouteBuilder app, string pattern, string? policy)
 	{
 		var builder = app
-				.MapPut($"{pattern}/{{tenantId:guid}}", PutTenantEndpoint.HandleRequestAsync)
+				.MapPut($"{pattern}/{{tenantName}}", PutTenantEndpoint.HandleRequestAsync)
 				.WithName("PutTenant")
 				.WithDisplayName("Put tenant")
 				.Produces(StatusCodes.Status202Accepted)
@@ -48,22 +48,22 @@ public static partial class EndpointRouteBuilderExtensions
 public static class PutTenantEndpoint
 {
 	/// <summary>
-	/// Stores a tenant to the persistence layer.
+	/// Updates a tenant in the persistence layer.
 	/// </summary>
-	/// <param name="tenantId">The Id of the tenant to update.</param>
-	/// <param name="tenant">The tenant data to store.</param>
+	/// <param name="tenantName">The name of the tenant to update.</param>
+	/// <param name="tenant">The tenant data to update.</param>
 	/// <param name="service">An instance of an <see cref="ITenantService"/> to access the persistence.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
 	/// <see cref="P:System.Threading.CancellationToken.None"/>.
 	/// </param>
-	/// <returns>Accepted, if found; otherwise, 404.</returns>
+	/// <returns>202, if updated; otherwise, 404.</returns>
 	public static async Task<IResult> HandleRequestAsync(
-		[FromRoute] Guid tenantId,
+		[FromRoute] string tenantName,
 		[FromBody] Tenant tenant,
 		[FromServices] ITenantService service,
 		CancellationToken cancellationToken = default
 	)
-		=> await service.UpdateTenantAsync(tenantId, tenant.ToEntity(), cancellationToken)
+		=> await service.UpdateTenantAsync(tenantName, tenant.ToEntity(), cancellationToken)
 			? Results.Accepted()
 			: Results.NotFound();
 }

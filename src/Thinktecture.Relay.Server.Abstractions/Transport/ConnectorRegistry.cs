@@ -26,8 +26,8 @@ public partial class ConnectorRegistry<T>
 	private readonly RelayServerContext _relayServerContext;
 	private readonly IServiceProvider _serviceProvider;
 
-	private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<string, IConnectorTransport<T>>> _tenants =
-		new ConcurrentDictionary<Guid, ConcurrentDictionary<string, IConnectorTransport<T>>>();
+	private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, IConnectorTransport<T>>> _tenants =
+		new ConcurrentDictionary<string, ConcurrentDictionary<string, IConnectorTransport<T>>>();
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectorRegistry{T}"/> class.
@@ -50,24 +50,24 @@ public partial class ConnectorRegistry<T>
 	/// Registers the connection.
 	/// </summary>
 	/// <param name="connectionId">The unique id of the connection.</param>
-	/// <param name="tenantId">The unique id of the tenant.</param>
+	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="remoteIpAddress">The optional remote ip address of the connection.</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	public async Task RegisterAsync(string connectionId, Guid tenantId, IPAddress? remoteIpAddress = null)
+	public async Task RegisterAsync(string connectionId, string tenantName, IPAddress? remoteIpAddress = null)
 	{
 		_logger.LogDebug(22100,
-			"Registering connection {TransportConnectionId} for tenant {TenantId}",
-			connectionId, tenantId);
+			"Registering connection {TransportConnectionId} for tenant {TenantName}",
+			connectionId, tenantName);
 
 		var registration =
-			ActivatorUtilities.CreateInstance<ConnectorRegistration>(_serviceProvider, tenantId, connectionId);
+			ActivatorUtilities.CreateInstance<ConnectorRegistration>(_serviceProvider, tenantName, connectionId);
 
-		var transports = _tenants.GetOrAdd(tenantId, _ => new ConcurrentDictionary<string, IConnectorTransport<T>>());
+		var transports = _tenants.GetOrAdd(tenantName, _ => new ConcurrentDictionary<string, IConnectorTransport<T>>());
 		transports[connectionId] = registration.ConnectorTransport;
 
 		_registrations[connectionId] = registration;
 
-		await _connectionStatisticsWriter.SetConnectionTimeAsync(connectionId, tenantId, _relayServerContext.OriginId,
+		await _connectionStatisticsWriter.SetConnectionTimeAsync(connectionId, tenantName, _relayServerContext.OriginId,
 			remoteIpAddress);
 	}
 
@@ -80,10 +80,10 @@ public partial class ConnectorRegistry<T>
 	public async Task UnregisterAsync(string connectionId)
 	{
 		if (_registrations.TryRemove(connectionId, out var registration) &&
-		    _tenants.TryGetValue(registration.TenantId, out var connectors))
+		    _tenants.TryGetValue(registration.TenantName, out var connectors))
 		{
-			_logger.LogDebug(22101, "Unregistering connection {TransportConnectionId} for tenant {TenantId}",
-				connectionId, registration.TenantId);
+			_logger.LogDebug(22101, "Unregistering connection {TransportConnectionId} for tenant {TenantName}",
+				connectionId, registration.TenantName);
 			connectors.TryRemove(connectionId, out _);
 		}
 		else
@@ -157,7 +157,7 @@ public partial class ConnectorRegistry<T>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the result.</returns>
 	public async Task<bool> TryDeliverRequestAsync(T request, CancellationToken cancellationToken = default)
 	{
-		if (!_tenants.TryGetValue(request.TenantId, out var transports)) return false;
+		if (!_tenants.TryGetValue(request.TenantName, out var transports)) return false;
 
 		var snapshot = transports.ToArray();
 		if (snapshot.Length == 0) return false;
@@ -173,11 +173,11 @@ public partial class ConnectorRegistry<T>
 	// ReSharper disable once ClassNeverInstantiated.Local
 	private class ConnectorRegistration : IDisposable
 	{
-		public Guid TenantId { get; }
+		public string TenantName { get; }
 		public IConnectorTransport<T> ConnectorTransport { get; }
 		public ITenantHandler TenantHandler { get; }
 
-		public ConnectorRegistration(Guid tenantId, string connectionId,
+		public ConnectorRegistration(string tenantName, string connectionId,
 			IConnectorTransportFactory<T> connectorTransportFactory,
 			ITenantHandlerFactory tenantHandlerFactory)
 		{
@@ -185,9 +185,9 @@ public partial class ConnectorRegistry<T>
 			if (connectorTransportFactory == null) throw new ArgumentNullException(nameof(connectorTransportFactory));
 			if (tenantHandlerFactory == null) throw new ArgumentNullException(nameof(tenantHandlerFactory));
 
-			TenantId = tenantId;
+			TenantName = tenantName;
 			ConnectorTransport = connectorTransportFactory.Create(connectionId);
-			TenantHandler = tenantHandlerFactory.Create(tenantId, connectionId);
+			TenantHandler = tenantHandlerFactory.Create(tenantName, connectionId);
 		}
 
 		public void Dispose()
