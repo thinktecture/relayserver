@@ -22,7 +22,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 	private readonly IClientRequestHandler<TRequest> _clientRequestHandler;
 	private readonly IConnectorTransportLimit _connectorTransportLimit;
 	private readonly IHttpClientFactory _httpClientFactory;
-	private readonly ILogger<ClientRequestWorker<TRequest, TResponse>> _logger;
+	private readonly ILogger _logger;
 	private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
 	private readonly Uri _requestEndpoint;
 	private readonly Uri _responseEndpoint;
@@ -64,30 +64,6 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 		_responseEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.ResponseEndpoint}/");
 	}
 
-	[LoggerMessage(10500, LogLevel.Trace, "Found target {Target} for request {RelayRequestId}")]
-	partial void LogFoundTarget(string target, Guid relayRequestId);
-
-	[LoggerMessage(10501, LogLevel.Debug,
-		"Requesting outsourced request body for request {RelayRequestId} with {BodySize} bytes")]
-	partial void LogRequestingBody(Guid relayRequestId, long? bodySize);
-
-	[LoggerMessage(10502, LogLevel.Debug, "Requesting target {Target} for request {RelayRequestId}")]
-	partial void LogRequestingTarget(string target, Guid relayRequestId);
-
-	[LoggerMessage(10503, LogLevel.Debug,
-		"Unknown response body size triggered mandatory outsourcing for request {RelayRequestId}")]
-	partial void LogOutsourcingUnknownBody(Guid relayRequestId);
-
-	[LoggerMessage(10504, LogLevel.Debug,
-		"Outsourcing from response {BodySize} bytes because of a maximum of {BinarySizeThreshold} for request {RelayRequestId}")]
-	partial void LogOutsourcingBody(long? bodySize, int? binarySizeThreshold, Guid relayRequestId);
-
-	[LoggerMessage(10505, LogLevel.Debug, "Outsourced from response {BodySize} bytes for request {RelayRequestId}")]
-	partial void LogOutsourcedBody(long bodySize, Guid relayRequestId);
-
-	[LoggerMessage(10506, LogLevel.Debug, "Inlined from response {BodySize} bytes for request {RelayRequestId}")]
-	partial void LogInlinedBody(long? bodySize, Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
@@ -101,20 +77,17 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 			try
 			{
 				if (!_relayTargetRegistry.TryCreateRelayTarget(request.Target, scope.ServiceProvider, out target,
-						out timeout))
+					    out timeout))
 				{
-					_logger.LogInformation(10507,
-						"Could not find any target for request {RelayRequestId} named {Target}",
-						request.RequestId,
-						request.Target);
+					Log.NoTargetFound(_logger, request.RequestId, request.Target);
 					return request.CreateResponse<TResponse>(HttpStatusCode.NotFound);
 				}
 
-				LogFoundTarget(request.Target, request.RequestId);
+				Log.FoundTarget(_logger, request.Target, request.RequestId);
 
 				if (request.IsBodyContentOutsourced())
 				{
-					LogRequestingBody(request.RequestId, request.BodySize);
+					Log.RequestingBody(_logger, request.RequestId, request.BodySize);
 
 					try
 					{
@@ -129,9 +102,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 					}
 					catch (Exception ex)
 					{
-						_logger.LogError(10508, ex,
-							"An error occured while downloading the body of request {RelayRequestId}",
-							request.RequestId);
+						Log.ErrorDownloadingBody(_logger, ex, request.RequestId);
 						return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 					}
 				}
@@ -144,7 +115,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 				}
 			}
 
-			LogRequestingTarget(request.Target, request.RequestId);
+			Log.RequestingTarget(_logger, request.Target, request.RequestId);
 
 			using var cts = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
 
@@ -158,13 +129,13 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 		{
 			if (timeout is null || !timeout.IsCancellationRequested) throw;
 
-			_logger.LogWarning(10511, "The request {RelayRequestId} timed out", request.RequestId);
+			Log.RequestTimedOut(_logger, request.RequestId);
+
 			return request.CreateResponse<TResponse>(HttpStatusCode.GatewayTimeout);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(10512, ex, "An error occured while processing request {RelayRequestId} {@Request}",
-				request.RequestId, request);
+			Log.ErrorProcessingRequest(_logger, ex, request.RequestId, request);
 			return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 		}
 		finally
@@ -200,11 +171,11 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 		{
 			if (response.BodySize is null)
 			{
-				LogOutsourcingUnknownBody(request.RequestId);
+				Log.OutsourcingUnknownBody(_logger, request.RequestId);
 			}
 			else
 			{
-				LogOutsourcingBody(response.BodySize, _connectorTransportLimit.BinarySizeThreshold, request.RequestId);
+				Log.OutsourcingBody(_logger, response.BodySize, _connectorTransportLimit.BinarySizeThreshold, request.RequestId);
 			}
 
 			response.BodyContent.TryRewind();
@@ -217,10 +188,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 
 				if (!responseMessage.IsSuccessStatusCode)
 				{
-					_logger.LogError(10509,
-						"Uploading body of request {RelayRequestId} failed with http status {HttpStatusCode}",
-						request.RequestId,
-						responseMessage.StatusCode);
+					Log.UploadingBodyFailed(_logger, request.RequestId, responseMessage.StatusCode);
 					return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 				}
 			}
@@ -230,9 +198,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(10510, ex,
-					"An error occured while uploading the body of request {RelayRequestId}",
-					request.RequestId);
+				Log.ErrorUploadingBody(_logger, ex, request.RequestId);
 				return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 			}
 
@@ -241,13 +207,13 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 			response.BodySize = response.OriginalBodySize;
 			response.BodyContent = null;
 
-			LogOutsourcedBody(content.BytesWritten, request.RequestId);
+			Log.OutsourcedBody(_logger, content.BytesWritten, request.RequestId);
 		}
 		else if (response.BodySize > 0)
 		{
 			await using var _ = response.BodyContent;
 			response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
-			LogInlinedBody(response.BodySize, request.RequestId);
+			Log.InlinedBody(_logger, response.BodySize, request.RequestId);
 		}
 
 		return response;

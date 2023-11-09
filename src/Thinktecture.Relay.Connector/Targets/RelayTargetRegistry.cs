@@ -14,11 +14,11 @@ namespace Thinktecture.Relay.Connector.Targets;
 /// </summary>
 /// <typeparam name="TRequest">The type of request.</typeparam>
 /// <typeparam name="TResponse">The type of response.</typeparam>
-public class RelayTargetRegistry<TRequest, TResponse>
+public partial class RelayTargetRegistry<TRequest, TResponse>
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse
 {
-	private readonly ILogger<RelayTargetRegistry<TRequest, TResponse>> _logger;
+	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<string, RelayTargetRegistration> _targets =
 		new ConcurrentDictionary<string, RelayTargetRegistration>(StringComparer.OrdinalIgnoreCase);
@@ -58,7 +58,7 @@ public class RelayTargetRegistry<TRequest, TResponse>
 		if (!_targets.TryAdd(id, registration))
 			throw new ArgumentException($"A registration with the same key \"{id}\" already exists", nameof(id));
 
-		_logger.LogDebug(10600, "Registered relay target {Target} as type {TargetType}", id, type.FullName);
+		Log.RegisteredTarget(_logger, id, type.FullName);
 	}
 
 	/// <summary>
@@ -81,11 +81,11 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	{
 		if (_targets.TryRemove(id, out _))
 		{
-			_logger.LogDebug(10601, "Unregistered relay target {Target}", id);
+			Log.UnregisteredTarget(_logger, id);
 		}
 		else
 		{
-			_logger.LogWarning(10602, "Could not unregister relay target {Target}", id);
+			Log.CouldNotUnregisterTarget(_logger, id);
 		}
 	}
 

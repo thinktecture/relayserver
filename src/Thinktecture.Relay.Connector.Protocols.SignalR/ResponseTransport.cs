@@ -9,17 +9,11 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
 /// <inheritdoc />
-public class ResponseTransport<T> : IResponseTransport<T>
+public partial class ResponseTransport<T> : IResponseTransport<T>
 	where T : ITargetResponse
 {
 	private readonly HubConnection _hubConnection;
-	private readonly ILogger<ResponseTransport<T>> _logger;
-
-	// TODO move to LoggerMessage source generator when destructuring is supported
-	// (see https://github.com/dotnet/runtime/issues/69490)
-	private readonly Action<ILogger, ITargetResponse, Guid, string?, Exception?> _logTransportingResponse =
-		LoggerMessage.Define<ITargetResponse, Guid, string?>(LogLevel.Trace, 11500,
-			"Transporting response {@Response} for request {RelayRequestId} on connection {TransportConnectionId}");
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ResponseTransport{T}"/> class.
@@ -35,7 +29,7 @@ public class ResponseTransport<T> : IResponseTransport<T>
 	/// <inheritdoc />
 	public async Task TransportAsync(T response, CancellationToken cancellationToken = default)
 	{
-		_logTransportingResponse(_logger, response, response.RequestId, _hubConnection.ConnectionId, null);
+		Log.TransportingResponse(_logger, response, response.RequestId, _hubConnection.ConnectionId);
 
 		try
 		{
@@ -43,9 +37,7 @@ public class ResponseTransport<T> : IResponseTransport<T>
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(11501, ex,
-				"An error occured while transporting response for request {RelayRequestId} on connection {TransportConnectionId}",
-				response.RequestId, _hubConnection.ConnectionId);
+			Log.ErrorTransportingResponse(_logger, ex, response.RequestId, _hubConnection.ConnectionId);
 		}
 	}
 }

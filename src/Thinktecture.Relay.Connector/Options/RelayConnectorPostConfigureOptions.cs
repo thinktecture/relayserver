@@ -11,12 +11,13 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Options;
 
-internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostConfigureOptions<RelayConnectorOptions>
+internal partial class
+	RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostConfigureOptions<RelayConnectorOptions>
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse
 {
 	private readonly IHostApplicationLifetime _hostApplicationLifetime;
-	private readonly ILogger<RelayConnectorPostConfigureOptions<TRequest, TResponse>> _logger;
+	private readonly ILogger _logger;
 	private readonly RelayTargetRegistry<TRequest, TResponse> _relayTargetRegistry;
 	private readonly IHttpClientFactory _httpClientFactory;
 
@@ -50,16 +51,13 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 			try
 			{
 				options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
-				_logger.LogTrace(10300, "Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})",
-					fullUri.AbsoluteUri, options.DiscoveryDocument);
+				Log.GotDiscoveryDocument(_logger, fullUri, options.DiscoveryDocument);
 
 				break;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(10301, ex,
-					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}",
-					fullUri.AbsoluteUri);
+				Log.ErrorRetrievingDiscoveryDocument(_logger, ex, fullUri.AbsoluteUri);
 
 				try
 				{
@@ -84,7 +82,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 			var type = Type.GetType(typeName);
 			if (type is null)
 			{
-				_logger.LogError(10302, "Could not find target type {TargetType}", typeName);
+				Log.ErrorTargetTypeNotFound(_logger, typeName, key);
 				return;
 			}
 
@@ -97,9 +95,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 				}
 				else
 				{
-					_logger.LogWarning(10303, "Could not parse timeout \"{TargetTimeout}\" for target {Target}",
-						timeoutParameter,
-						key);
+					Log.CouldNotParseTimeout(_logger, timeoutParameter, key);
 				}
 			}
 

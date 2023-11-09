@@ -13,11 +13,11 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Thinktecture.Relay.Connector.Options;
 
-internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessTokenManagementOptions>
+internal partial class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessTokenManagementOptions>
 {
 	private readonly IHostApplicationLifetime _hostApplicationLifetime;
 	private readonly IHttpClientFactory _httpClientFactory;
-	private readonly ILogger<AccessTokenManagementConfigureOptions> _logger;
+	private readonly ILogger _logger;
 	private readonly RelayConnectorOptions _relayConnectorOptions;
 
 	public AccessTokenManagementConfigureOptions(ILogger<AccessTokenManagementConfigureOptions> logger,
@@ -48,9 +48,7 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 			try
 			{
 				var configuration = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
-				_logger.LogTrace(10200, "Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})",
-					fullUri,
-					configuration);
+				Log.GotDiscoveryDocument(_logger, fullUri, configuration);
 
 				options.Client.Clients.Add(Constants.HttpClientNames.RelayServer, new ClientCredentialsTokenRequest()
 				{
@@ -63,9 +61,7 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(10201, ex,
-					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}",
-					fullUri.AbsoluteUri);
+				Log.ErrorRetrievingDiscoveryDocument(_logger, ex, fullUri);
 
 				try
 				{

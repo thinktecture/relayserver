@@ -22,7 +22,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 {
 	private readonly Uri _acknowledgeEndpoint;
 	private readonly IAcknowledgeTransport<TAcknowledge> _acknowledgeTransport;
-	private readonly ILogger<ClientRequestHandler<TRequest, TResponse, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 	private readonly IResponseTransport<TResponse> _responseTransport;
 	private readonly IServiceScopeFactory _serviceProvider;
 
@@ -64,16 +64,10 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		await DeliverResponseAsync(request, request.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable));
 	}
 
-	[LoggerMessage(10400, LogLevel.Debug, "Acknowledging request {RelayRequestId} on origin {OriginId}")]
-	partial void LogAcknowledgeRequest(Guid relayRequestId, Guid? originId);
-
-	[LoggerMessage(10403, LogLevel.Debug, "Discarding response for request {RelayRequestId}")]
-	partial void LogDiscardResponse(Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task AcknowledgeRequestAsync(TRequest request, bool removeRequestBodyContent)
 	{
-		LogAcknowledgeRequest(request.RequestId, request.AcknowledgeOriginId);
+		Log.AcknowledgeRequest(_logger, request.RequestId, request.AcknowledgeOriginId);
 		await _acknowledgeTransport.TransportAsync(request.CreateAcknowledge<TAcknowledge>(removeRequestBodyContent));
 	}
 
@@ -104,7 +98,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 			var response = await worker.HandleAsync(request, cancellationToken);
 			if (request.DiscardConnectorResponse)
 			{
-				LogDiscardResponse(request.RequestId);
+				Log.DiscardResponse(_logger, request.RequestId);
 				return;
 			}
 
@@ -116,16 +110,13 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(10401, ex, "An error occured during handling of request {RelayRequestId}", request.RequestId);
+			Log.ErrorHandlingRequest(_logger, ex, request.RequestId);
 		}
 	}
 
-	[LoggerMessage(10402, LogLevel.Debug, "Delivering response for request {RelayRequestId}")]
-	partial void LogDeliverResponse(Guid relayRequestId);
-
 	private async Task DeliverResponseAsync(TRequest request, TResponse response)
 	{
-		LogDeliverResponse(response.RequestId);
+		Log.DeliverResponse(_logger, response.RequestId);
 
 		if (request.EnableTracing)
 		{

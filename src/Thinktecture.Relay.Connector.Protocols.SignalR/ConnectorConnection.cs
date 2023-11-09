@@ -10,25 +10,13 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
 /// <inheritdoc cref="IConnectorConnection"/>
-public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnectorConnection, IDisposable
+public partial class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnectorConnection, IDisposable
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
 {
 	private readonly IClientRequestHandler<TRequest> _clientRequestHandler;
-	private readonly ILogger<ConnectorConnection<TRequest, TResponse, TAcknowledge>> _logger;
-
-	// TODO move to LoggerMessage source generator when destructuring is supported
-	// (see https://github.com/dotnet/runtime/issues/69490)
-	private readonly Action<ILogger, Guid, string, IClientRequest, Exception?> _logHandlingRequestDetailed =
-		LoggerMessage.Define<Guid, string, IClientRequest>(LogLevel.Trace, 11200,
-			"Handling request {RelayRequestId} on connection {TransportConnectionId} {@Request}");
-
-	// TODO move to LoggerMessage source generator when destructuring is supported
-	// (see https://github.com/dotnet/runtime/issues/69490)
-	private readonly Action<ILogger, Guid, string, Guid, Exception?> _logHandlingRequestSimple =
-		LoggerMessage.Define<Guid, string, Guid>(LogLevel.Debug, 11201,
-			"Handling request {RelayRequestId} on connection {TransportConnectionId} from origin {OriginId}");
+	private readonly ILogger _logger;
 
 	private readonly DiscoveryDocumentRetryPolicy _retryPolicy;
 
@@ -85,15 +73,15 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (_hubConnection is null) return;
 
-		_logger.LogTrace("Disconnecting connection {TransportConnectionId}", _connectionId);
+		Log.Disconnecting(_logger, _connectionId);
 
 		if (_cancellationTokenSource is not null)
 		{
 			await _cancellationTokenSource.CancelAsync();
 		}
 		await _hubConnection.StopAsync(cancellationToken);
-		_logger.LogInformation("Disconnected on connection {TransportConnectionId}", _connectionId);
 
+		Log.Disconnected(_logger, _connectionId);
 		await Disconnected.InvokeAsync(this, _connectionId);
 	}
 
@@ -127,11 +115,11 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (ex is null or OperationCanceledException)
 		{
-			_logger.LogDebug(11202, "Connection {TransportConnectionId} gracefully closed", _connectionId);
+			Log.ConnectionClosedGracefully(_logger, _connectionId);
 		}
 		else
 		{
-			_logger.LogWarning(11203, ex, "Connection {TransportConnectionId} closed", _connectionId);
+			Log.ConnectionClosed(_logger, _connectionId);
 
 			var token = _cancellationTokenSource?.Token;
 			if (token is null) return;
@@ -146,14 +134,11 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (ex is null)
 		{
-			_logger.LogInformation(11205,
-				"Trying to reconnect after connection {TransportConnectionId} was lost", _connectionId);
+			Log.ReconnectingAfterLoss(_logger, _connectionId);
 		}
 		else
 		{
-			_logger.LogWarning(11204, ex,
-				"Trying to reconnect after connection {TransportConnectionId} was lost due to an error",
-				_connectionId);
+			Log.ReconnectingAfterError(_logger, ex, _connectionId);
 		}
 		await Reconnecting.InvokeAsync(this, _connectionId);
 	}
@@ -162,17 +147,15 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	{
 		if (connectionId is null)
 		{
-			_logger.LogWarning(11206, "Reconnected without a connection id");
+			Log.ReconnectedWithoutId(_logger);
 		}
 		else if (_connectionId == connectionId)
 		{
-			_logger.LogDebug(11207, "Reconnected on connection {TransportConnectionId}", _connectionId);
+			Log.Reconnected(_logger, _connectionId);
 		}
 		else
 		{
-			_logger.LogInformation(11208,
-				"Dropped connection {TransportConnectionId} in favor of new connection {NewTransportConnectionId}",
-				_connectionId, connectionId);
+			Log.ReconnectedWithNewId(_logger, _connectionId, connectionId);
 			_connectionId = connectionId;
 		}
 
@@ -181,10 +164,8 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	private async Task RequestTargetAsync(TRequest request)
 	{
-		if (_logger.IsEnabled(LogLevel.Trace))
-			_logHandlingRequestDetailed(_logger, request.RequestId, _connectionId, request, null);
-		if (_logger.IsEnabled(LogLevel.Debug))
-			_logHandlingRequestSimple(_logger, request.RequestId, _connectionId, request.RequestOriginId, null);
+		Log.HandlingRequestDetailed(_logger, request.RequestId, _connectionId, request);
+		Log.HandlingRequestSimple(_logger, request.RequestId, _connectionId, request.RequestOriginId);
 
 		request.EnableTracing = request.EnableTracing || _enableTracing.GetValueOrDefault();
 
@@ -196,8 +177,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	private Task ConfigureAsync(ITenantConfig config)
 	{
-		_logger.LogTrace(11209, "Received tenant config {@Config} on connection {TransportConnectionId}",
-			config, _connectionId);
+		Log.ReceivedTenantConfig(_logger, config, _connectionId);
 
 		_hubConnection?.SetKeepAliveInterval(config.KeepAliveInterval);
 		_retryPolicy.SetReconnectDelays(config.ReconnectMinimumDelay, config.ReconnectMaximumDelay);
@@ -219,7 +199,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 			await _hubConnection.StartAsync(cancellationToken);
 			_connectionId = _hubConnection.ConnectionId!;
 
-			_logger.LogInformation(11210, "Connected on connection {TransportConnectionId}", _connectionId);
+			Log.LogConnected(_logger, _connectionId);
 		}
 		catch (OperationCanceledException)
 		{
@@ -228,7 +208,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		catch (Exception ex)
 		{
 			// due to the retry policy this should never be caught
-			_logger.LogError(11211, ex, "An error occured while trying to connect");
+			Log.ConnectError(_logger, ex);
 			await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 			await ConnectAsyncInternal(cancellationToken);
 		}
