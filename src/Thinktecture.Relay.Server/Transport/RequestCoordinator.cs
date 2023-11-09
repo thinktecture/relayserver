@@ -6,7 +6,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class RequestCoordinator<T> : IRequestCoordinator<T>
 	where T : IClientRequest
 {
@@ -27,7 +27,7 @@ public partial class RequestCoordinator<T> : IRequestCoordinator<T>
 	[LoggerMessage(21300, LogLevel.Debug, "Redirecting request {RelayRequestId} to transport for tenant {TenantId}")]
 	partial void LogRedirect(Guid relayRequestId, Guid tenantId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task ProcessRequestAsync(T request, CancellationToken cancellationToken = default)
 	{
 		LogRedirect(request.RequestId, request.TenantId);

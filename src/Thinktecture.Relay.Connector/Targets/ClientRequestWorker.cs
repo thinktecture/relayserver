@@ -89,7 +89,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 	[LoggerMessage(10506, LogLevel.Debug, "Inlined from response {BodySize} bytes for request {RelayRequestId}")]
 	partial void LogInlinedBody(long? bodySize, Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
@@ -246,7 +246,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void Dispose()
 		=> _httpClient?.Dispose();
 

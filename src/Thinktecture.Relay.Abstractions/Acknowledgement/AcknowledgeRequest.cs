@@ -2,15 +2,15 @@ using System;
 
 namespace Thinktecture.Relay.Acknowledgement;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class AcknowledgeRequest : IAcknowledgeRequest
 {
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid OriginId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid RequestId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public bool RemoveRequestBodyContent { get; set; }
 }

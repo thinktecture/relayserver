@@ -8,7 +8,7 @@ using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class TenantService : ITenantService
 {
 	private readonly RelayDbContext _dbContext;
@@ -20,7 +20,7 @@ public class TenantService : ITenantService
 	public TenantService(RelayDbContext dbContext)
 		=> _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Tenant?> LoadTenantCompleteByNameAsync(string name, CancellationToken cancellationToken)
 	{
 		var normalizedName = NormalizeName(name);
@@ -33,7 +33,7 @@ public class TenantService : ITenantService
 			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Tenant?> LoadTenantWithConnectionsByNameAsync(string name,
 		CancellationToken cancellationToken = default)
 	{
@@ -45,7 +45,7 @@ public class TenantService : ITenantService
 			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Tenant?> LoadTenantWithConfigByNameAsync(string name,
 		CancellationToken cancellationToken = default)
 	{
@@ -57,7 +57,7 @@ public class TenantService : ITenantService
 			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Page<Tenant>> LoadAllTenantsPagedAsync(int skip, int take, CancellationToken cancellationToken)
 		=> await _dbContext.Tenants
 			.Include(t => t.Config)
@@ -66,7 +66,7 @@ public class TenantService : ITenantService
 			.OrderBy(t => t.NormalizedName)
 			.ToPagedResultAsync(skip, take, cancellationToken);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Tenant?> LoadTenantCompleteByIdAsync(Guid id, CancellationToken cancellationToken)
 		=> await _dbContext.Tenants
 			.Include(t => t.ClientSecrets)
@@ -75,7 +75,7 @@ public class TenantService : ITenantService
 			.AsNoTracking()
 			.SingleOrDefaultAsync(t => t.Id == id, cancellationToken: cancellationToken);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Guid> CreateTenantAsync(Tenant tenant, CancellationToken cancellationToken)
 	{
 		if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenant.Id, cancellationToken))
@@ -104,7 +104,7 @@ public class TenantService : ITenantService
 		return newTenant.Id;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<bool> UpdateTenantAsync(Guid tenantId, Tenant tenant, CancellationToken cancellationToken)
 	{
 		var existingTenant = await _dbContext.Tenants
@@ -129,7 +129,7 @@ public class TenantService : ITenantService
 		return true;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<bool> DeleteTenantByIdAsync(Guid id, CancellationToken cancellationToken)
 	{
 		var tenant = new Tenant() { Id = id, };
@@ -148,13 +148,13 @@ public class TenantService : ITenantService
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Config?> LoadTenantConfigAsync(Guid id, CancellationToken cancellationToken)
 		=> await _dbContext.Configs
 			.AsNoTracking()
 			.SingleOrDefaultAsync(c => c.TenantId == id, cancellationToken: cancellationToken);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task CreateClientSecretAsync(ClientSecret clientSecret, CancellationToken cancellationToken)
 	{
 		if (String.IsNullOrWhiteSpace(clientSecret.Value))
@@ -186,7 +186,7 @@ public class TenantService : ITenantService
 		await _dbContext.SaveChangesAsync(cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public string NormalizeName(string name)
 		=> name.ToUpperInvariant();
 }

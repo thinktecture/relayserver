@@ -6,7 +6,7 @@ using Thinktecture.Relay.Server.Persistence;
 
 namespace Thinktecture.Relay.Server.Maintenance;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class StatisticsCleanupJob : IMaintenanceJob
 {
 	private readonly StatisticsOptions _statisticsOptions;
@@ -26,7 +26,7 @@ public class StatisticsCleanupJob : IMaintenanceJob
 		_statisticsOptions = statisticsOptions.Value;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task DoMaintenanceAsync(CancellationToken cancellationToken = default)
 	{
 		await _statisticsService.CleanUpOriginsAsync(_statisticsOptions.EntryMaxAge, cancellationToken);

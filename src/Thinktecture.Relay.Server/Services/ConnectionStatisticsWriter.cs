@@ -22,7 +22,7 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 	public ConnectionStatisticsWriter(IServiceScopeFactory serviceProvider)
 		=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId,
 		IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default)
@@ -32,14 +32,14 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 			.SetConnectionTimeAsync(connectionId, tenantId, originId, remoteIpAddress, cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task UpdateLastSeenTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
 		_buffer[connectionId] = DateTimeOffset.UtcNow;
 		return Task.CompletedTask;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task WriteLastSeenEntriesAsync(CancellationToken stoppingToken)
 	{
 		var buffer = _buffer;
@@ -53,7 +53,7 @@ public class ConnectionStatisticsWriter : IConnectionStatisticsWriter
 		await statisticsService.UpdateLastSeenTimeAsync(buffer, stoppingToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();

@@ -6,46 +6,46 @@ using Thinktecture.Relay.Acknowledgement;
 
 namespace Thinktecture.Relay.Transport;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class ClientRequest : IClientRequest
 {
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid RequestId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid RequestOriginId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public AcknowledgeMode AcknowledgeMode { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid? AcknowledgeOriginId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public string Target { get; set; } = default!;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid TenantId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public string HttpMethod { get; set; } = default!;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public string Url { get; set; } = default!;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IDictionary<string, string[]> HttpHeaders { get; set; } = default!;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public long? OriginalBodySize { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public long? BodySize { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	[JsonConverter(typeof(InlineMemoryStreamJsonConverter))]
 	public Stream? BodyContent { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public bool EnableTracing { get; set; }
 }

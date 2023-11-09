@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class DiscoveryDocumentRetryPolicy : IRetryPolicy
 {
 	private readonly ILogger<DiscoveryDocumentRetryPolicy> _logger;
@@ -30,7 +30,7 @@ public class DiscoveryDocumentRetryPolicy : IRetryPolicy
 			relayConnectorOptions.Value.DiscoveryDocument.ReconnectMaximumDelay);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public TimeSpan? NextRetryDelay(RetryContext retryContext)
 	{
 		// try an instant reconnect first

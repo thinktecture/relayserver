@@ -39,14 +39,14 @@ public class ServerStatisticsWriter : BackgroundService
 		_statisticsOptions = statisticsOptions.Value;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public override async Task StartAsync(CancellationToken cancellationToken)
 	{
 		await _originWriter.SetStartupTimeAsync(_serverContext.OriginId, cancellationToken);
 		await base.StartAsync(cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		try
@@ -63,7 +63,7 @@ public class ServerStatisticsWriter : BackgroundService
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public override async Task StopAsync(CancellationToken cancellationToken)
 	{
 		await _originWriter.SetShutdownTimeAsync(_serverContext.OriginId, cancellationToken);

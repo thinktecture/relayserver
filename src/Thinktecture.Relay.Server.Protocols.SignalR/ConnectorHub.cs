@@ -35,7 +35,7 @@ public interface IConnector<in T>
 	Task Configure(ITenantConfig config);
 }
 
-/// <inheritdoc/>
+/// <inheritdoc />
 [Authorize(Constants.DefaultAuthenticationPolicy)]
 // ReSharper disable once ClassNeverInstantiated.Global
 public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConnector<TRequest>>
@@ -80,7 +80,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public override async Task OnConnectedAsync()
 	{
 		var tenantName = Context.User.GetTenantName();
@@ -135,7 +135,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await base.OnConnectedAsync();
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public override async Task OnDisconnectedAsync(Exception? exception)
 	{
 		if (exception == null)

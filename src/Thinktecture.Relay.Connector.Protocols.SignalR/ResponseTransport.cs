@@ -8,7 +8,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class ResponseTransport<T> : IResponseTransport<T>
 	where T : ITargetResponse
 {
@@ -32,7 +32,7 @@ public class ResponseTransport<T> : IResponseTransport<T>
 		_hubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task TransportAsync(T response, CancellationToken cancellationToken = default)
 	{
 		_logTransportingResponse(_logger, response, response.RequestId, _hubConnection.ConnectionId, null);

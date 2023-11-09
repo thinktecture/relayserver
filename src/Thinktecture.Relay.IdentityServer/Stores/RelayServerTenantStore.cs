@@ -23,7 +23,7 @@ public class RelayServerTenantStore : IClientStore
 	public RelayServerTenantStore(ITenantService tenantService)
 		=> _tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	async Task<Client?> IClientStore.FindClientByIdAsync(string clientId)
 	{
 		var tenant = await _tenantService.LoadTenantCompleteByNameAsync(clientId);

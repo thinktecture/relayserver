@@ -8,7 +8,7 @@ using Thinktecture.Relay.Connector.Transport;
 
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 	where T : IAcknowledgeRequest
 {
@@ -32,7 +32,7 @@ public class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 		_hubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task TransportAsync(T request, CancellationToken cancellationToken = default)
 	{
 		if (_logger.IsEnabled(LogLevel.Trace))

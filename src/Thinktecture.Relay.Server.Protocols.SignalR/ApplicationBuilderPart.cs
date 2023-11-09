@@ -5,13 +5,13 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.SignalR;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class ApplicationBuilderPart<TRequest, TResponse, TAcknowledge> : IApplicationBuilderPart
 	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
 {
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void Use(IApplicationBuilder builder)
 		=> builder.UseEndpoints(endpoints
 			=> endpoints.MapHub<ConnectorHub<TRequest, TResponse, TAcknowledge>>("/connector"));

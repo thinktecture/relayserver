@@ -42,7 +42,7 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		"Re-registering an already existing request {RelayRequestId} from connection {TransportConnectionId} for id {AcknowledgeId} – this can happen when a request got queued again and will lead to a re-execution of the request but only the first result be acknowledged and the others will be discarded")]
 	partial void LogReRegisterAcknowledgeState(Guid relayRequestId, string transportConnectionId, string acknowledgeId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void RegisterRequest(Guid requestId, string connectionId, string acknowledgeId,
 		bool outsourcedRequestBodyContent)
 	{
@@ -64,7 +64,7 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 	[LoggerMessage(20803, LogLevel.Debug, "Request {RelayRequestId} was already pruned and will not be acknowledged – this happens after an auto-recovery of the message queue transport")]
 	partial void LogPrunedRequest(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task ProcessAcknowledgeAsync(TAcknowledge request, CancellationToken cancellationToken = default)
 	{
 		if (!_requests.TryRemove(request.RequestId, out var acknowledgeState))
@@ -89,7 +89,7 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void PruneOutstandingAcknowledgeIds()
 	{
 		foreach (var acknowledgeState in _requests.Values)

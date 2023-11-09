@@ -13,7 +13,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Targets;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : IClientRequestHandler<TRequest>
 // ReSharper disable RedundantNameQualifier; (this is needed in 6.0, see https://github.com/dotnet/runtime/issues/58550)
 	where TRequest : Thinktecture.Relay.Transport.IClientRequest
@@ -50,7 +50,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		_acknowledgeEndpoint = new Uri($"{relayConnectorOptions.Value.DiscoveryDocument.AcknowledgeEndpoint}/");
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
 		if (QueueWorker(request, cancellationToken)) return;
@@ -67,7 +67,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	[LoggerMessage(10400, LogLevel.Debug, "Acknowledging request {RelayRequestId} on origin {OriginId}")]
 	partial void LogAcknowledgeRequest(Guid relayRequestId, Guid? originId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task AcknowledgeRequestAsync(TRequest request, bool removeRequestBodyContent)
 	{
 		LogAcknowledgeRequest(request.RequestId, request.AcknowledgeOriginId);

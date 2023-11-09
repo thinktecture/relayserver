@@ -8,7 +8,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 	where T : IClientRequest, new()
 {
@@ -29,7 +29,7 @@ public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task<T> CreateAsync(Guid tenantId, Guid requestId, HttpRequest httpRequest,
 		CancellationToken cancellationToken = default)
 	{

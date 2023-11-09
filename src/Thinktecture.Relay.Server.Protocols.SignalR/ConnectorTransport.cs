@@ -9,7 +9,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.SignalR;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 // ReSharper disable once ClassNeverInstantiated.Global
 public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorTransport<TRequest>
 	where TRequest : IClientRequest
@@ -38,7 +38,7 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 		_hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task TransportAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
 		if (_logger.IsEnabled(LogLevel.Trace))

@@ -15,32 +15,32 @@ public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TRespon
 {
 	private readonly IConnectionService _connectionService;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public DateTime RequestStart { get; } = DateTime.UtcNow;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid RequestId { get; } = Guid.NewGuid();
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid OriginId { get; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public TRequest ClientRequest { get; set; } = default!;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public TResponse? TargetResponse { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public bool ConnectorAvailable => _connectionService.IsConnectionAvailableAsync(ClientRequest.TenantId)
 		.GetAwaiter().GetResult();
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public bool ForceConnectorDelivery { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IList<IAsyncDisposable> ResponseDisposables { get; } = new List<IAsyncDisposable>();
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public HttpContext HttpContext { get; }
 
 	/// <summary>
@@ -60,7 +60,7 @@ public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TRespon
 		OriginId = relayServerContext.OriginId;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async ValueTask DisposeAsync()
 	{
 		foreach (var responseDisposable in ResponseDisposables)

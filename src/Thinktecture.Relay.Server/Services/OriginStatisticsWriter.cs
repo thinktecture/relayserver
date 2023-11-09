@@ -6,7 +6,7 @@ using Thinktecture.Relay.Server.Persistence;
 
 namespace Thinktecture.Relay.Server.Services;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class OriginStatisticsWriter : IOriginStatisticsWriter
 {
 	private readonly IServiceScopeFactory _serviceProvider;
@@ -18,7 +18,7 @@ public class OriginStatisticsWriter : IOriginStatisticsWriter
 	public OriginStatisticsWriter(IServiceScopeFactory serviceProvider)
 		=> _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
@@ -26,7 +26,7 @@ public class OriginStatisticsWriter : IOriginStatisticsWriter
 			.SetStartupTimeAsync(originId, cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();
@@ -34,7 +34,7 @@ public class OriginStatisticsWriter : IOriginStatisticsWriter
 			.UpdateLastSeenTimeAsync(originId, cancellationToken);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		using var scope = _serviceProvider.CreateScope();

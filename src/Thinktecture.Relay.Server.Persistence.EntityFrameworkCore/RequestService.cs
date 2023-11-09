@@ -5,7 +5,7 @@ using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class RequestService : IRequestService
 {
 	// TODO move to LoggerMessage source generator when destructuring is supported
@@ -27,7 +27,7 @@ public class RequestService : IRequestService
 		_dbContext = dbContext;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task StoreRequestAsync(Request request)
 	{
 		if (_logger.IsEnabled(LogLevel.Trace))
