@@ -16,15 +16,15 @@ public class Page<T>
 	/// <summary>
 	/// Gets or sets the total amount of data entries available.
 	/// </summary>
-	public int TotalCount { get; set; } = 0;
+	public int TotalCount { get; set; }
 
 	/// <summary>
 	/// Gets or sets the starting index of the <see cref="Results"/> array within all available entries.
 	/// </summary>
-	public int Offset { get; set; } = 0;
+	public int Offset { get; set; }
 
 	/// <summary>
 	/// Gets or sets the requested maximum size of the <see cref="Results"/> array.
 	/// </summary>
-	public int PageSize { get; set; } = 0;
+	public int PageSize { get; set; }
 }

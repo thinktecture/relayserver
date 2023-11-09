@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Thinktecture.Relay.Server.Maintenance;
 using Thinktecture.Relay.Server.Persistence;
 
 namespace Thinktecture.Relay.Server.Services;
