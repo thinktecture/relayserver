@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
 
     <VersionPrefix>3.0.0</VersionPrefix>
-    <VersionSuffix>alpha.6</VersionSuffix>
+    <VersionSuffix>alpha.8</VersionSuffix>
     <Version Condition="'$(BuildNumber)' != ''">$(VersionPrefix)-$(VersionSuffix)-$(BuildNumber)</Version>
 
     <!-- NuGet Package information -->
