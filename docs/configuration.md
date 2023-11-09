@@ -185,6 +185,12 @@ a valid login to your IDP creates the tenant on the RelayServer. No cleanup mech
 available, thus automatically created tenants need to be manually deleted when they are
 not needed/wanted anymore.
 
+### Require authentication
+
+If a tenant has `RequireAuthentication` enabled in the database, the RelayServer only relays
+when the request contains an access token from it's own issuer and audience (e.g., it comes
+from a connector). In any other case it returns 401.
+
 ## Connector
 
 The `RelayConnectorOptions` type provides the main configuration for the connector. These

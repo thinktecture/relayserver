@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Thinktecture.Relay.Server.Services;
 
+// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
 /// <summary>
 /// An implementation that creates a discovery document.
 /// </summary>
@@ -32,7 +33,7 @@ public class DiscoveryDocumentBuilder
 	/// </summary>
 	/// <param name="request">A <see cref="HttpRequest"/>.</param>
 	/// <returns>A new instance of the discovery document.</returns>
-	public DiscoveryDocument BuildDiscoveryDocument(HttpRequest request)
+	public DiscoveryDocument Build(HttpRequest request)
 	{
 		var baseUri = BuildBaseUri(request);
 
