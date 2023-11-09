@@ -68,7 +68,7 @@ public partial class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest
 		HttpClient = CreateHttpClient(httpClientFactory, options, new Uri(url));
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void Dispose()
 		=> HttpClient.Dispose();
 
@@ -78,7 +78,7 @@ public partial class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest
 	[LoggerMessage(10701, LogLevel.Debug, "Requested target for request {RelayRequestId} returned {HttpStatusCode}")]
 	partial void LogRequestedTarget(Guid relayRequestId, HttpStatusCode httpStatusCode);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public virtual async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
 		LogRequestingTarget(request.RequestId, HttpClient.BaseAddress, request.Url);
@@ -140,10 +140,10 @@ public partial class RelayWebTarget<TRequest, TResponse> : IRelayTarget<TRequest
 	}
 }
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class RelayWebTarget : RelayWebTarget<ClientRequest, TargetResponse>
 {
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public RelayWebTarget(ILogger<RelayWebTarget> logger,
 		IHttpClientFactory httpClientFactory,
 		Uri baseAddress, RelayWebTargetOptions options = RelayWebTargetOptions.None)
@@ -151,7 +151,7 @@ public class RelayWebTarget : RelayWebTarget<ClientRequest, TargetResponse>
 	{
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public RelayWebTarget(ILogger<RelayWebTarget> logger,
 		IHttpClientFactory httpClientFactory,
 		Dictionary<string, string> parameters)

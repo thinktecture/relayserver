@@ -6,7 +6,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.SignalR;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class ConnectorTransportFactory<TRequest, TResponse, TAcknowledge> : IConnectorTransportFactory<TRequest>
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse
@@ -21,7 +21,7 @@ public class ConnectorTransportFactory<TRequest, TResponse, TAcknowledge> : ICon
 	public ConnectorTransportFactory(IServiceProvider serviceProvider)
 		=> _serviceProvider = serviceProvider;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IConnectorTransport<TRequest> Create(string connectionId)
 		=> ActivatorUtilities.CreateInstance<ConnectorTransport<TRequest, TResponse, TAcknowledge>>(_serviceProvider,
 			connectionId);

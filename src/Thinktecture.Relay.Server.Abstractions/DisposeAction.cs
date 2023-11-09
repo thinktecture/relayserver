@@ -17,7 +17,7 @@ public class DisposeAction : IAsyncDisposable
 	public DisposeAction(Func<Task> dispose)
 		=> _dispose = dispose ?? throw new ArgumentNullException(nameof(dispose));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async ValueTask DisposeAsync()
 		=> await _dispose();
 }

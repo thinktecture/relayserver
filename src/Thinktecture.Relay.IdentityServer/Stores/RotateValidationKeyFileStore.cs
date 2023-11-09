@@ -24,7 +24,7 @@ internal class RotateValidationKeysFileStore : IValidationKeysStore
 		_fileStore = fileStore ?? throw new ArgumentNullException(nameof(fileStore));
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
 	{
 		try

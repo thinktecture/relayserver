@@ -39,13 +39,13 @@ public class RelayDbContext : DbContext
 	/// </summary>
 	public DbSet<Request> Requests { get; set; } = default!;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public RelayDbContext(DbContextOptions<RelayDbContext> options)
 		: base(options)
 	{
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);

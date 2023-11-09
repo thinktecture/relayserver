@@ -6,41 +6,41 @@ using System.Text.Json.Serialization;
 
 namespace Thinktecture.Relay.Transport;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class TargetResponse : ITargetResponse
 {
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid RequestId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Guid RequestOriginId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public DateTime? RequestStart { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	[JsonConverter(typeof(NullableTimeSpanJsonConverter))]
 	public TimeSpan? RequestDuration { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public string? ConnectionId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public HttpStatusCode HttpStatusCode { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IDictionary<string, string[]>? HttpHeaders { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public long? OriginalBodySize { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public long? BodySize { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	[JsonConverter(typeof(InlineMemoryStreamJsonConverter))]
 	public Stream? BodyContent { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public bool RequestFailed { get; set; }
 }

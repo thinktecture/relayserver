@@ -7,7 +7,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 	where T : class, ITargetResponse
 {
@@ -32,7 +32,7 @@ public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 		_bodyStore = bodyStore ?? throw new ArgumentNullException(nameof(bodyStore));
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IAsyncDisposable RegisterRequest(Guid requestId)
 	{
 		if (_waitingStates.TryAdd(requestId, new WaitingState()))
@@ -59,7 +59,7 @@ public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 	[LoggerMessage(21406, LogLevel.Debug, "Response for request {RelayRequestId} without body received")]
 	partial void LogNoBodyReceived(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<IResponseContext<T>?> GetResponseAsync(Guid requestId,
 		CancellationToken cancellationToken = default)
 	{
@@ -99,7 +99,7 @@ public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 	[LoggerMessage(21408, LogLevel.Debug, "Response for request {RelayRequestId} discarded")]
 	partial void LogResponseDiscarded(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task ProcessResponseAsync(T response, CancellationToken cancellationToken = default)
 	{
 		if (_logger.IsEnabled(LogLevel.Trace))

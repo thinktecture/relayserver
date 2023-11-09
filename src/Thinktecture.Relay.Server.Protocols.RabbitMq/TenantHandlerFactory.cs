@@ -6,7 +6,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class TenantHandlerFactory<TRequest, TAcknowledge> : ITenantHandlerFactory
 	where TRequest : IClientRequest
 	where TAcknowledge : IAcknowledgeRequest
@@ -20,7 +20,7 @@ public class TenantHandlerFactory<TRequest, TAcknowledge> : ITenantHandlerFactor
 	public TenantHandlerFactory(IServiceProvider serviceProvider)
 		=> _serviceProvider = serviceProvider;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public ITenantHandler Create(Guid tenantId, string connectionId)
 		=> ActivatorUtilities.CreateInstance<TenantHandler<TRequest, TAcknowledge>>(_serviceProvider, tenantId,
 			connectionId);

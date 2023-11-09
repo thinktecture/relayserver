@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class RoundRobinEndpointResolver : IEndpointResolver
 {
 	private readonly AmqpTcpEndpoint[] _endpoints;
@@ -21,7 +21,7 @@ public class RoundRobinEndpointResolver : IEndpointResolver
 		_endpoints = endpoints.ToArray();
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IEnumerable<AmqpTcpEndpoint> All()
 		=> _endpoints;
 }

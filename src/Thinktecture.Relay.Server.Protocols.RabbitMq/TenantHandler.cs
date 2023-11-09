@@ -54,7 +54,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		_consumer.Received += ConsumerReceived;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		_consumer.Received -= ConsumerReceived;
@@ -70,7 +70,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	[LoggerMessage(25301, LogLevel.Warning, "Could not parse acknowledge id {AcknowledgeId}")]
 	partial void LogCouldNotParseAcknowledge(string acknowledgeId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task AcknowledgeAsync(string acknowledgeId, CancellationToken cancellationToken = default)
 	{
 		if (ulong.TryParse(acknowledgeId, out var deliveryTag))

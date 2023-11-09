@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public class ConnectionService : IConnectionService
 {
 	private readonly RelayDbContext _dbContext;
@@ -16,7 +16,7 @@ public class ConnectionService : IConnectionService
 	public ConnectionService(RelayDbContext dbContext)
 		=> _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task<bool> IsConnectionAvailableAsync(Guid tenantId)
 		=> _dbContext.Connections.AnyAsync(c => c.TenantId == tenantId);
 }

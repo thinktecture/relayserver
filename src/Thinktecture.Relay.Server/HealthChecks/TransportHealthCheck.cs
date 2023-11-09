@@ -4,11 +4,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Thinktecture.Relay.Server.HealthChecks;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 // ReSharper disable once ClassNeverInstantiated.Global
 public class TransportHealthCheck : IHealthCheck
 {
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
 		CancellationToken cancellationToken = default)
 		=> Task.FromResult(HealthCheckResult.Healthy());

@@ -18,7 +18,7 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 	private readonly ILogger<TenantTransport<TRequest, TAcknowledge>> _logger;
 	private readonly IModel _model;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public int? BinarySizeThreshold { get; }
 
 	/// <summary>
@@ -44,7 +44,7 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 	[LoggerMessage(25400, LogLevel.Trace, "Published request {RelayRequestId} to tenant {TenantId}")]
 	partial void LogPublishedRequest(Guid relayRequestId, Guid tenantId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task TransportAsync(TRequest request)
 	{
 		try
@@ -61,7 +61,7 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void Dispose()
 		=> _model.Dispose();
 }

@@ -34,7 +34,7 @@ public class MaintenanceJobRunner : BackgroundService
 		_maintenanceOptions = maintenanceOptions.Value;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		try

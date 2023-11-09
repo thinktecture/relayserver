@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Thinktecture.Relay.Server.Transport;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 internal class InMemoryBodyStore : IBodyStore
 {
 	private readonly ConcurrentDictionary<Guid, byte[]> _requestStore = new ConcurrentDictionary<Guid, byte[]>();
@@ -17,43 +17,43 @@ internal class InMemoryBodyStore : IBodyStore
 	public InMemoryBodyStore(ILogger<InMemoryBodyStore> logger)
 		=> logger.LogDebug(21100, "Using {StorageType} as body store", nameof(InMemoryBodyStore));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream,
 		CancellationToken cancellationToken = default)
 		=> await StoreDataAsync(requestId, bodyStream, _requestStore, cancellationToken);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<long> StoreResponseBodyAsync(Guid requestId, Stream bodyStream,
 		CancellationToken cancellationToken = default)
 		=> await StoreDataAsync(requestId, bodyStream, _responseStore, cancellationToken);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Stream> OpenRequestBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 		=> await GetStreamAsync(requestId, _requestStore);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<Stream> OpenResponseBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 		=> await GetStreamAsync(requestId, _responseStore);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task RemoveRequestBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 	{
 		_requestStore.Remove(requestId, out _);
 		return Task.CompletedTask;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task RemoveResponseBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 	{
 		_responseStore.Remove(requestId, out _);
 		return Task.CompletedTask;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId)
 		=> new DisposeAction(() => RemoveRequestBodyAsync(requestId));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId)
 		=> new DisposeAction(() => RemoveResponseBodyAsync(requestId));
 

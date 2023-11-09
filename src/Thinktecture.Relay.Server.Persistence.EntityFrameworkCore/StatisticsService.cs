@@ -10,7 +10,7 @@ using Thinktecture.Relay.Server.Persistence.Models;
 
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class StatisticsService : IStatisticsService
 {
 	private readonly RelayDbContext _dbContext;
@@ -27,7 +27,7 @@ public partial class StatisticsService : IStatisticsService
 		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		_logger.LogDebug(23300, "Adding new origin {OriginId} to statistics tracking", originId);
@@ -58,7 +58,7 @@ public partial class StatisticsService : IStatisticsService
 	[LoggerMessage(23302, LogLevel.Debug, "Updating last seen time of origin {OriginId} in statistics tracking")]
 	partial void LogUpdateLastSeen(Guid originId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		LogUpdateLastSeen(originId);
@@ -81,7 +81,7 @@ public partial class StatisticsService : IStatisticsService
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
 		_logger.LogDebug(23304, "Setting shutdown time of origin {OriginId} in statistics tracking", originId);
@@ -108,7 +108,7 @@ public partial class StatisticsService : IStatisticsService
 		"Cleaning up statistics storage by deleting all origins that have not been seen since {OriginLastSeen}")]
 	partial void LogCleanup(DateTimeOffset originLastSeen);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task CleanUpOriginsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 	{
 		var lastSeen = DateTimeOffset.UtcNow - maxAge;
@@ -130,7 +130,7 @@ public partial class StatisticsService : IStatisticsService
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId,
 		IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default)
@@ -167,7 +167,7 @@ public partial class StatisticsService : IStatisticsService
 		"Updating last seen time of connection {TransportConnectionId} to {LastSeenTime} within batch {UpdateBatchId} in statistics tracking")]
 	partial void LogUpdateConnectionLastSeenTime(string transportConnectionId, DateTimeOffset lastSeenTime, Guid updateBatchId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task UpdateLastSeenTimeAsync(IDictionary<string, DateTimeOffset> data, CancellationToken cancellationToken = default)
 	{
 		var batchId = Guid.NewGuid();
@@ -205,7 +205,7 @@ public partial class StatisticsService : IStatisticsService
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
 		_logger.LogDebug(23312,
@@ -235,7 +235,7 @@ public partial class StatisticsService : IStatisticsService
 		"Cleaning up statistics storage by deleting all connections that have no activity or are disconnected since {ConnectionLastActivity}")]
 	partial void LogConnectionCleanup(DateTimeOffset connectionLastActivity);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 	{
 		var lastSeen = DateTimeOffset.UtcNow - maxAge;

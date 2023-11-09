@@ -9,7 +9,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Diagnostics;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogger<TRequest, TResponse>
 	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse
@@ -37,7 +37,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	[LoggerMessage(20400, LogLevel.Trace, "Writing request log for successful request {RelayRequestId}")]
 	partial void LogSuccess(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task LogSuccessAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogSucceeded()) return;
@@ -54,7 +54,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	[LoggerMessage(20401, LogLevel.Trace, "Writing request log for aborted request {RelayRequestId}")]
 	partial void LogAbort(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task LogAbortAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogAborted()) return;
@@ -69,7 +69,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	[LoggerMessage(20402, LogLevel.Trace, "Writing request log for failed request {RelayRequestId}")]
 	partial void LogFail(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task LogFailAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogFailed()) return;
@@ -84,7 +84,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	[LoggerMessage(20403, LogLevel.Trace, "Writing request log for expired request {RelayRequestId}")]
 	partial void LogExpired(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task LogExpiredAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogExpired()) return;
@@ -99,7 +99,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	[LoggerMessage(20404, LogLevel.Trace, "Writing request log for error on request {RelayRequestId}")]
 	partial void LogError(Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task LogErrorAsync(IRelayContext<TRequest, TResponse> relayContext)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogErrored()) return;

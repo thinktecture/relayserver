@@ -8,7 +8,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowledgeDispatcher<TAcknowledge>
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
@@ -49,7 +49,7 @@ public partial class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowled
 		"Remotely dispatching acknowledge for request {RelayRequestId} to origin {OriginId}")]
 	partial void LogRedirectAcknowledge(Guid relayRequestId, Guid originId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task DispatchAsync(TAcknowledge request, CancellationToken cancellationToken = default)
 	{
 		if (_relayServerOptions.EnableServerTransportShortcut && request.OriginId == _relayServerContext.OriginId)

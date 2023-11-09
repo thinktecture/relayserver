@@ -11,7 +11,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Services;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<TResponse>
 	where TResponse : class, ITargetResponse
 {
@@ -28,7 +28,7 @@ public partial class RelayTargetResponseWriter<TResponse> : IRelayTargetResponse
 	[LoggerMessage(20700, LogLevel.Warning, "The request {RelayRequestId} failed internally with {HttpStatusCode}")]
 	partial void LogFailedRequest(Guid relayRequestId, HttpStatusCode httpStatusCode);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task WriteAsync(TResponse? targetResponse, HttpResponse httpResponse,
 		CancellationToken cancellationToken = default)
 	{

@@ -39,7 +39,7 @@ internal partial class FileBodyStore : IBodyStore
 		"An error occured while {FileOperation} {FileBodyType} body for request {RelayRequestId}")]
 	partial void LogError(Exception ex, string fileOperation, string fileBodyType, Guid relayRequestId);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream,
 		CancellationToken cancellationToken = default)
 	{
@@ -63,7 +63,7 @@ internal partial class FileBodyStore : IBodyStore
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task<long> StoreResponseBodyAsync(Guid requestId, Stream bodyStream,
 		CancellationToken cancellationToken = default)
 	{
@@ -87,7 +87,7 @@ internal partial class FileBodyStore : IBodyStore
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task<Stream> OpenRequestBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 	{
 		try
@@ -102,7 +102,7 @@ internal partial class FileBodyStore : IBodyStore
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task<Stream> OpenResponseBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 	{
 		try
@@ -117,7 +117,7 @@ internal partial class FileBodyStore : IBodyStore
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task RemoveRequestBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 	{
 		try
@@ -133,7 +133,7 @@ internal partial class FileBodyStore : IBodyStore
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public Task RemoveResponseBodyAsync(Guid requestId, CancellationToken cancellationToken = default)
 	{
 		try
@@ -149,11 +149,11 @@ internal partial class FileBodyStore : IBodyStore
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId)
 		=> new DisposeAction(() => RemoveRequestBodyAsync(requestId));
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId)
 		=> new DisposeAction(() => RemoveResponseBodyAsync(requestId));
 

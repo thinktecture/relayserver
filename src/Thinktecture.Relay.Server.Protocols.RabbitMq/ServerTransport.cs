@@ -26,7 +26,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 	private readonly IModel _responseDispatchModel;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public int? BinarySizeThreshold { get; }
 
 	/// <summary>
@@ -67,7 +67,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		_acknowledgeConsumer.Received += AcknowledgeConsumerReceived;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		_responseDispatchModel.Dispose();
@@ -80,7 +80,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		_acknowledgeConsumeModel.Dispose();
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task DispatchResponseAsync(TResponse response)
 	{
 		await _responseDispatchModel.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}",
@@ -90,7 +90,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		LogDispatchedResponse(response.RequestId, response.RequestOriginId);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task DispatchAcknowledgeAsync(TAcknowledge request)
 	{
 		_logger.LogTrace("Dispatching acknowledge {@AcknowledgeRequest}", request);

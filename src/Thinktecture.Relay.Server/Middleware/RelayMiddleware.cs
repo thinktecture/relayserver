@@ -19,7 +19,7 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Middleware;
 
-/// <inheritdoc/>
+/// <inheritdoc />
 public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddleware
 	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse, new()
@@ -122,7 +122,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	[LoggerMessage(20616, LogLevel.Debug, "Request to tenant {Tenant} was rejected due to no active connection")]
 	partial void LogNoActiveConnection(string tenant);
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
 		var tenantName = context.Request.Path.Value?.Split('/').Skip(1).FirstOrDefault();

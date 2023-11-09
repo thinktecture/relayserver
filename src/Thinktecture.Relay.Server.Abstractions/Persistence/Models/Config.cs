@@ -13,15 +13,15 @@ public class Config : ITenantConfig
 	/// </summary>
 	public Guid TenantId { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public TimeSpan? KeepAliveInterval { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public bool? EnableTracing { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public TimeSpan? ReconnectMinimumDelay { get; set; }
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public TimeSpan? ReconnectMaximumDelay { get; set; }
 }

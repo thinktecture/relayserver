@@ -61,26 +61,26 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		_hubConnection.Reconnected += HubConnectionReconnected;
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public event AsyncEventHandler<string>? Connected;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public event AsyncEventHandler<string>? Reconnecting;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public event AsyncEventHandler<string>? Reconnected;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public event AsyncEventHandler<string>? Disconnected;
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task ConnectAsync(CancellationToken cancellationToken)
 	{
 		await ConnectAsyncInternal(cancellationToken);
 		await Connected.InvokeAsync(this, _connectionId);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public async Task DisconnectAsync(CancellationToken cancellationToken)
 	{
 		if (_hubConnection == null) return;
@@ -94,7 +94,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		await Disconnected.InvokeAsync(this, _connectionId);
 	}
 
-	/// <inheritdoc/>
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		if (_hubConnection == null && _cancellationTokenSource == null) return;
