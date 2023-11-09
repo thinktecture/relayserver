@@ -34,6 +34,6 @@ public partial class DiscoveryDocumentController : Controller
 	public IActionResult GetDiscoveryDocument([FromServices] DiscoveryDocumentBuilder documentBuilder)
 	{
 		LogReturnDiscoveryDocument();
-		return Ok(documentBuilder.BuildDiscoveryDocument(Request));
+		return Ok(documentBuilder.Build(Request));
 	}
 }

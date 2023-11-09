@@ -217,6 +217,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("RequireAuthentication")
+                        .HasColumnType("boolean");
+
                     b.HasKey("NormalizedName");
 
                     b.HasIndex("ConfigTenantName");

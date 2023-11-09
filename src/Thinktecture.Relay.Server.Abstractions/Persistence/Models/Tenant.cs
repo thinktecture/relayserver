@@ -28,6 +28,11 @@ public class Tenant
 	public string? Description { get; set; }
 
 	/// <summary>
+	/// Enable the requirement that only an authenticated request can use this tenant to relay requests.
+	/// </summary>
+	public bool RequireAuthentication { get; set; }
+
+	/// <summary>
 	/// The normalized (e.g. ToUpperInvariant()) name of the tenant. Use this for case-insensitive comparison in the database.
 	/// </summary>
 	/// <remarks>The maximum length is 100 unicode characters.</remarks>

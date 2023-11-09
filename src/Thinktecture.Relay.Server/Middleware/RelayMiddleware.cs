@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Interceptor;
@@ -42,6 +45,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private readonly IRelayRequestLogger<TRequest, TResponse> _relayRequestLogger;
 	private readonly IDistributedCache _cache;
 	private readonly RelayServerOptions _relayServerOptions;
+	private readonly JwtBearerOptions? _jwtBearerOptions;
 	private readonly IRequestCoordinator<TRequest> _requestCoordinator;
 	private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
 	private readonly IResponseCoordinator<TResponse> _responseCoordinator;
@@ -71,6 +75,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// </param>
 	/// <param name="relayRequestLogger">An <see cref="IRelayRequestLogger{TRequest,TResponse}"/>.</param>
 	/// <param name="cache">An implementation of <see cref="IDistributedCache"/></param>
+	/// <param name="jwtBearerOptions">An <see cref="IOptionsSnapshot{TOptions}"/>.</param>
 	public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> logger,
 		IRelayClientRequestFactory<TRequest> requestFactory, ConnectorRegistry<TRequest> connectorRegistry,
 		ITenantService tenantService, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
@@ -79,7 +84,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		IConnectorTransportLimit connectorTransportLimit, IOptions<RelayServerOptions> relayServerOptions,
 		IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
 		IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors,
-		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger, IDistributedCache cache)
+		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger, IDistributedCache cache,
+		IOptionsSnapshot<JwtBearerOptions>? jwtBearerOptions)
 	{
 		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
 		if (tenantTransport == null) throw new ArgumentNullException(nameof(tenantTransport));
@@ -102,6 +108,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		_cache = cache ?? throw new ArgumentNullException(nameof(cache));
 
 		_relayServerOptions = relayServerOptions.Value;
+		_jwtBearerOptions = jwtBearerOptions?.Get(Constants.DefaultAuthenticationScheme);
+
 		_maximumBodySize = Math.Min(tenantTransport.BinarySizeThreshold.GetValueOrDefault(int.MaxValue),
 			connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue));
 	}
@@ -140,6 +148,12 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		{
 			LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
 			await next.Invoke(context);
+			return;
+		}
+
+		if (tenantState.RequireAuthentication && !IsAuthenticated(context))
+		{
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 			return;
 		}
 
@@ -215,6 +229,16 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			await _relayRequestLogger.LogErrorAsync(_relayContext);
 			_logger.LogError(20606, ex, "Could not handle request {RelayRequestId}", _relayContext.RequestId);
 		}
+	}
+
+	private bool IsAuthenticated(HttpContext context)
+	{
+		if (_jwtBearerOptions?.Authority == null || _jwtBearerOptions?.Audience == null) return false;
+
+		if (context.User.Identity is not ClaimsIdentity { IsAuthenticated: true } identity) return false;
+
+		return identity.HasClaim(JwtRegisteredClaimNames.Iss, _jwtBearerOptions.Authority) &&
+			identity.HasClaim(JwtRegisteredClaimNames.Aud, _jwtBearerOptions.Audience);
 	}
 
 	[LoggerMessage(20607, LogLevel.Debug, "Executing client request interceptors for request {RelayRequestId}")]
@@ -396,6 +420,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 		public bool HasActiveConnections { get; private init; }
 
+		public bool RequireAuthentication { get; private init; }
+
 		public string TenantName { get; private init; } = string.Empty;
 
 		public static TenantState FromTenant(Tenant? tenant)
@@ -405,7 +431,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			return new TenantState
 			{
 				TenantName = tenant.Name,
-				HasActiveConnections = tenant.Connections?.Any(c => c.DisconnectTime == null) ?? false
+				HasActiveConnections = tenant.Connections?.Any(c => c.DisconnectTime == null) ?? false,
+				RequireAuthentication = tenant.RequireAuthentication,
 			};
 		}
 
@@ -414,17 +441,19 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			{
 				Unknown = span[0] == byte.MaxValue,
 				HasActiveConnections = span[1] == byte.MaxValue,
-				TenantName = Encoding.Unicode.GetString(span[2..]),
+				RequireAuthentication = span[2] == byte.MaxValue,
+				TenantName = Encoding.Unicode.GetString(span[3..]),
 			};
 
 		public static Span<byte> AsSpan(TenantState tenantState)
 		{
 			var tenantName = Encoding.Unicode.GetBytes(tenantState.TenantName);
 
-			var buffer = new byte[2 + tenantName.Length];
+			var buffer = new byte[3 + tenantName.Length];
 			buffer[0] = tenantState.Unknown ? byte.MaxValue : byte.MinValue;
 			buffer[1] = tenantState.HasActiveConnections ? byte.MaxValue : byte.MinValue;
-			tenantName.CopyTo(buffer, 2);
+			buffer[2] = tenantState.RequireAuthentication ? byte.MaxValue : byte.MinValue;
+			tenantName.CopyTo(buffer, 3);
 
 			return buffer;
 		}
