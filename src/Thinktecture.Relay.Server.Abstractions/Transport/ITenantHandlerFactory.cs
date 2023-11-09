@@ -1,5 +1,3 @@
-using System;
-
 namespace Thinktecture.Relay.Server.Transport;
 
 /// <summary>
@@ -12,6 +10,7 @@ public interface ITenantHandlerFactory
 	/// </summary>
 	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="connectionId">The unique id of the connection.</param>
+	/// <param name="maximumConcurrentRequests">The amount of maximum concurrent requests.</param>
 	/// <returns>An <see cref="ITenantHandler"/>.</returns>
-	ITenantHandler Create(string tenantName, string connectionId);
+	ITenantHandler Create(string tenantName, string connectionId, int maximumConcurrentRequests);
 }

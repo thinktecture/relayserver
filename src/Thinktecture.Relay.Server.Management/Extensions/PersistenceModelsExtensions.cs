@@ -30,6 +30,8 @@ internal static class PersistenceModelsExtensions
 			Name = tenant.Name,
 			DisplayName = tenant.DisplayName,
 			Description = tenant.Description,
+			RequireAuthentication = tenant.RequireAuthentication,
+			MaximumConcurrentConnectorRequests = tenant.MaximumConcurrentConnectorRequests,
 
 			// config properties
 			KeepAliveInterval = tenant.Config?.KeepAliveInterval,
@@ -71,7 +73,7 @@ internal static class PersistenceModelsExtensions
 			};
 		}
 
-		return new TenantEntity()
+		var entity = new TenantEntity()
 		{
 			Name = tenant.Name,
 			DisplayName = tenant.DisplayName,
@@ -87,6 +89,18 @@ internal static class PersistenceModelsExtensions
 				}
 			).ToList(),
 		};
+
+		if (tenant.RequireAuthentication.HasValue)
+		{
+			entity.RequireAuthentication = tenant.RequireAuthentication.Value;
+		}
+
+		if (tenant.MaximumConcurrentConnectorRequests.HasValue)
+		{
+			entity.MaximumConcurrentConnectorRequests = tenant.MaximumConcurrentConnectorRequests.Value;
+		}
+
+		return entity;
 	}
 
 	/// <summary>
