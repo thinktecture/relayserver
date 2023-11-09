@@ -39,28 +39,27 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 		}
 
 		var httpClient = _httpClientFactory.CreateClient(Constants.HttpClientNames.ConnectionClose);
-		httpClient.BaseAddress = options.RelayServerBaseUri;
 
-		var uri = httpClient.BaseAddress + DiscoveryDocument.WellKnownPath;
-
+		var fullUri = new Uri(options.RelayServerBaseUri, DiscoveryDocument.WellKnownPath);
 		while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 		{
-			var configManager = new ConfigurationManager<DiscoveryDocument>(DiscoveryDocument.WellKnownPath,
+			var configManager = new ConfigurationManager<DiscoveryDocument>(fullUri.AbsoluteUri,
 				new RelayServerConfigurationRetriever(),
-				new HttpDocumentRetriever(httpClient) { RequireHttps = httpClient.BaseAddress?.Scheme == "https" });
+				new HttpDocumentRetriever(httpClient) { RequireHttps = fullUri.Scheme == "https" });
 
 			try
 			{
 				options.DiscoveryDocument = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
-				_logger.LogTrace(10300, "Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})", uri,
-					options.DiscoveryDocument);
+				_logger.LogTrace(10300, "Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})",
+					fullUri.AbsoluteUri, options.DiscoveryDocument);
 
 				break;
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(10301, ex,
-					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}", uri);
+					"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}",
+					fullUri.AbsoluteUri);
 
 				try
 				{
