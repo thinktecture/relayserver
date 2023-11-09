@@ -41,9 +41,9 @@ public interface IClientRequest
 	string Target { get; set; }
 
 	/// <summary>
-	/// The unique id of the tenant.
+	/// The unique name of the tenant.
 	/// </summary>
-	Guid TenantId { get; set; }
+	string TenantName { get; set; }
 
 	/// <summary>
 	/// The HTTP method used by the requesting client.

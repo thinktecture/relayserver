@@ -21,7 +21,7 @@ public static partial class EndpointRouteBuilderExtensions
 	public static RouteHandlerBuilder MapDeleteTenant(this IEndpointRouteBuilder app, string pattern, string? policy)
 	{
 		var builder = app
-				.MapDelete($"{pattern}/{{tenantId:guid}}", DeleteTenantEndpoint.HandleRequestAsync)
+				.MapDelete($"{pattern}/{{tenantName}}", DeleteTenantEndpoint.HandleRequestAsync)
 				.WithName("DeleteTenant")
 				.WithDisplayName("Delete tenant")
 				.Produces(StatusCodes.Status204NoContent)
@@ -48,18 +48,14 @@ public static class DeleteTenantEndpoint
 	/// <summary>
 	/// Deletes a tenant from the persistence layer.
 	/// </summary>
-	/// <param name="tenantId">The Id of the tenant to delete.</param>
+	/// <param name="tenantName">The name of the tenant to delete.</param>
 	/// <param name="service">An instance of an <see cref="ITenantService"/> to access the persistence.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
 	/// <see cref="P:System.Threading.CancellationToken.None"/>.
 	/// </param>
 	/// <returns>204, if deleted; otherwise, 404.</returns>
-	public static async Task<IResult> HandleRequestAsync(
-		[FromRoute] Guid tenantId,
-		[FromServices] ITenantService service,
-		CancellationToken cancellationToken = default
+	public static async Task<IResult> HandleRequestAsync([FromRoute] string tenantName,
+		[FromServices] ITenantService service, CancellationToken cancellationToken = default
 	)
-		=> await service.DeleteTenantByIdAsync(tenantId, cancellationToken)
-			? Results.NoContent()
-			: Results.NotFound();
+		=> await service.DeleteTenantAsync(tenantName, cancellationToken) ? Results.NoContent() : Results.NotFound();
 }

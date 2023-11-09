@@ -22,7 +22,7 @@ public partial class AcknowledgeController : Controller
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	[LoggerMessage(20100, LogLevel.Debug, "Received acknowledgement for request {RelayRequestId} on origin {OriginId}")]
-	partial void LogAcknowledgementReceived(Guid originId, Guid relayRequestId);
+	partial void LogAcknowledgementReceived(Guid relayRequestId, Guid originId);
 
 	/// <summary>
 	/// </summary>
@@ -35,7 +35,7 @@ public partial class AcknowledgeController : Controller
 	public async Task<IActionResult> AcknowledgeAsync([FromRoute] Guid originId, [FromRoute] Guid requestId,
 		[FromServices] IAcknowledgeDispatcher<AcknowledgeRequest> acknowledgeDispatcher)
 	{
-		LogAcknowledgementReceived(originId, requestId);
+		LogAcknowledgementReceived(requestId, originId);
 
 		await acknowledgeDispatcher.DispatchAsync(new AcknowledgeRequest()
 			{ OriginId = originId, RequestId = requestId, RemoveRequestBodyContent = true });

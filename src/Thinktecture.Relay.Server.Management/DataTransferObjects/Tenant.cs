@@ -9,12 +9,6 @@ namespace Thinktecture.Relay.Server.Management.DataTransferObjects;
 public class Tenant
 {
 	/// <summary>
-	/// Gets or sets the unique id of the tenant.
-	/// </summary>
-	/// <example>a8cda2aa-4e8b-4506-ba87-f150906cddbe</example>
-	public Guid Id { get; set; }
-
-	/// <summary>
 	/// Gets or sets name of the tenant. Also used as ClientId for connector authentication.
 	/// </summary>
 	/// <example>MyOnPremiseConnector</example>

@@ -18,7 +18,7 @@ public interface IConnectionStatisticsWriter
 	/// Sets the connection time of a connection.
 	/// </summary>
 	/// <param name="connectionId">The connection id from the corresponding transport.</param>
-	/// <param name="tenantId">The unique id of the tenant.</param>
+	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="originId">The unique id of the origin.</param>
 	/// <param name="remoteIpAddress">The optional remote ip address of the connection.</param>
 	/// <param name="cancellationToken">
@@ -26,7 +26,7 @@ public interface IConnectionStatisticsWriter
 	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	Task SetConnectionTimeAsync(string connectionId, Guid tenantId, Guid originId, IPAddress? remoteIpAddress,
+	Task SetConnectionTimeAsync(string connectionId, string tenantName, Guid originId, IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>

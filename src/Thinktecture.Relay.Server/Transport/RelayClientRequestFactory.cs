@@ -30,7 +30,7 @@ public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 	}
 
 	/// <inheritdoc />
-	public Task<T> CreateAsync(Guid tenantId, Guid requestId, HttpRequest httpRequest,
+	public Task<T> CreateAsync(string tenantName, Guid requestId, HttpRequest httpRequest,
 		CancellationToken cancellationToken = default)
 	{
 		var parts = httpRequest.Path.Value?.Split('/').Skip(1).ToArray() ?? Array.Empty<string>();
@@ -40,7 +40,7 @@ public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 			RequestId = requestId,
 			RequestOriginId = _relayServerContext.OriginId,
 			Target = parts.Length > 1 ? parts[1] : string.Empty,
-			TenantId = tenantId,
+			TenantName = tenantName,
 			HttpMethod = httpRequest.Method,
 			Url = $"{string.Join("/", parts.Skip(2))}{httpRequest.QueryString}",
 			HttpHeaders = httpRequest.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray(), StringComparer.OrdinalIgnoreCase),

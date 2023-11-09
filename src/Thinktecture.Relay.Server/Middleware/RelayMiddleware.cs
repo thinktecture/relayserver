@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +15,7 @@ using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Diagnostics;
 using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Persistence;
+using Thinktecture.Relay.Server.Persistence.Models;
 using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
@@ -133,15 +135,18 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			return;
 		}
 
-		var tenant = await LoadTenantStateByNameAsync(tenantName);
-		if (tenant == null)
+		var tenantState = await LoadTenantStateByNameAsync(tenantName);
+		if (tenantState.Unknown)
 		{
 			LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
 			await next.Invoke(context);
 			return;
 		}
 
-		if (_relayServerOptions.RequireActiveConnection && !tenant.Value.HasActiveConnections)
+		// ensure the correct casing (ignore it from url starting from here)
+		tenantName = tenantState.TenantName;
+
+		if (_relayServerOptions.RequireActiveConnection && !tenantState.HasActiveConnections)
 		{
 			LogNoActiveConnection(tenantName);
 			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
@@ -162,7 +167,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			await context.Request.Body.DrainAsync(cts.Token);
 
 			_relayContext.ClientRequest =
-				await _requestFactory.CreateAsync(tenant.Value.Id, _relayContext.RequestId, context.Request, cts.Token);
+				await _requestFactory.CreateAsync(tenantName, _relayContext.RequestId, context.Request, cts.Token);
 
 			if (_logger.IsEnabled(LogLevel.Trace))
 				_logRequestParsed(_logger, _relayContext.ClientRequest, null);
@@ -293,7 +298,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	partial void LogExecutingResponseInterceptors(Guid relayRequestId);
 
 	[LoggerMessage(20612, LogLevel.Trace, "Executing interceptor {Interceptor} for request {RelayRequestId}")]
-	partial void LogExecutingResponseInterceptor(string? interceptor, Guid? relayRequestId);
+	partial void LogExecutingResponseInterceptor(string? interceptor, Guid relayRequestId);
 
 	private async Task InterceptTargetResponseAsync(CancellationToken cancellationToken)
 	{
@@ -368,56 +373,58 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		=> _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(httpStatusCode), response,
 			cancellationToken);
 
-	private async Task<TenantState?> LoadTenantStateByNameAsync(string name, CancellationToken cancellationToken = default)
+	private async Task<TenantState> LoadTenantStateByNameAsync(string name,
+		CancellationToken cancellationToken = default)
 	{
 		var cacheKey = $"tenant_state_{_tenantService.NormalizeName(name)}";
 		var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
-		if (cachedData != null) return TenantState.FromByteArray(cachedData);
+		if (cachedData != null) return TenantState.FromSpan(cachedData);
 
-		var tenant = await _tenantService.LoadTenantWithConnectionsByNameAsync(name, cancellationToken);
-		var result = tenant == null
-			? (TenantState?)null
-			: new TenantState(tenant.Id, tenant.Connections?.Any(c => c.DisconnectTime == null) == true);
+		var tenant = await _tenantService.LoadTenantWithConnectionsAsync(name, cancellationToken);
+		var state = TenantState.FromTenant(tenant);
 
 		var cacheEntryOptions = new DistributedCacheEntryOptions()
 			.SetAbsoluteExpiration(_relayServerOptions.TenantInfoCacheDuration);
+		await _cache.SetAsync(cacheKey, TenantState.AsSpan(state).ToArray(), cacheEntryOptions, cancellationToken);
 
-		cachedData = TenantState.ToByteArray(result);
-		await _cache.SetAsync(cacheKey, cachedData, cacheEntryOptions, cancellationToken);
-
-		return result;
+		return state;
 	}
 
-	private readonly struct TenantState
+	private record TenantState
 	{
-		public Guid Id { get; }
+		public bool Unknown { get; private init; }
 
-		public bool HasActiveConnections { get; }
+		public bool HasActiveConnections { get; private init; }
 
-		public TenantState(Guid id, bool hasActiveConnections)
+		public string TenantName { get; private init; } = string.Empty;
+
+		public static TenantState FromTenant(Tenant? tenant)
 		{
-			Id = id;
-			HasActiveConnections = hasActiveConnections;
+			if (tenant == null) return new TenantState() { Unknown = true };
+
+			return new TenantState
+			{
+				TenantName = tenant.Name,
+				HasActiveConnections = tenant.Connections?.Any(c => c.DisconnectTime == null) ?? false
+			};
 		}
 
-		public static TenantState? FromByteArray(byte[] buffer)
+		public static TenantState FromSpan(Span<byte> span)
+			=> new TenantState()
+			{
+				Unknown = span[0] == byte.MaxValue,
+				HasActiveConnections = span[1] == byte.MaxValue,
+				TenantName = Encoding.Unicode.GetString(span[2..]),
+			};
+
+		public static Span<byte> AsSpan(TenantState tenantState)
 		{
-			// bytes 0 is null marker, 1-17 are guid, 18 is HasActiveConnections
-			if (buffer[0] == byte.MinValue) return null;
+			var tenantName = Encoding.Unicode.GetBytes(tenantState.TenantName);
 
-			return new TenantState(new Guid(new Span<byte>(buffer, 1, 16)), buffer[17] == byte.MaxValue);
-		}
-
-		public static byte[] ToByteArray(TenantState? tenantInfo)
-		{
-			// bytes 0 is null marker, 1-17 are guid, 18 is HasActiveConnections
-			var buffer = new byte[18];
-
-			if (tenantInfo == null) return buffer;
-
-			buffer[0] = byte.MaxValue;
-			tenantInfo.Value.Id.TryWriteBytes(new Span<byte>(buffer, 1, 16));
-			buffer[17] = tenantInfo.Value.HasActiveConnections ? byte.MaxValue : byte.MinValue;
+			var buffer = new byte[2 + tenantName.Length];
+			buffer[0] = tenantState.Unknown ? byte.MaxValue : byte.MinValue;
+			buffer[1] = tenantState.HasActiveConnections ? byte.MaxValue : byte.MinValue;
+			tenantName.CopyTo(buffer, 2);
 
 			return buffer;
 		}

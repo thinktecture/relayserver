@@ -41,22 +41,22 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 	}
 
 	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25400, LogLevel.Trace, "Published request {RelayRequestId} to tenant {TenantId}")]
-	partial void LogPublishedRequest(Guid relayRequestId, Guid tenantId);
+	[LoggerMessage(25400, LogLevel.Trace, "Published request {RelayRequestId} to tenant {TenantName}")]
+	partial void LogPublishedRequest(Guid relayRequestId, string tenantName);
 
 	/// <inheritdoc />
 	public async Task TransportAsync(TRequest request)
 	{
 		try
 		{
-			await _model.PublishJsonAsync($"{Constants.RequestQueuePrefix}{request.TenantId}", request, autoDelete: false);
-			LogPublishedRequest(request.RequestId, request.TenantId);
+			await _model.PublishJsonAsync($"{Constants.RequestQueuePrefix} {request.TenantName}", request, autoDelete: false);
+			LogPublishedRequest(request.RequestId, request.TenantName);
 		}
 		catch (RabbitMQClientException ex)
 		{
 			_logger.LogError(25401, ex,
-				"An error occured while dispatching request {RelayRequestId} to tenant {TenantId} queue",
-				request.RequestId, request.TenantId);
+				"An error occured while dispatching request {RelayRequestId} to tenant {TenantName} queue",
+				request.RequestId, request.TenantName);
 			throw new TransportException(ex);
 		}
 	}

@@ -58,12 +58,12 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 
 		_responseConsumeModel = modelFactory.Create("response handler");
 		_responseConsumer =
-			_responseConsumeModel.ConsumeQueue(_logger, $"{Constants.ResponseQueuePrefix}{relayServerContext.OriginId}");
+			_responseConsumeModel.ConsumeQueue(_logger, $"{Constants.ResponseQueuePrefix} {relayServerContext.OriginId}");
 		_responseConsumer.Received += ResponseConsumerReceived;
 
 		_acknowledgeConsumeModel = modelFactory.Create("acknowledge handler");
 		_acknowledgeConsumer =
-			_acknowledgeConsumeModel.ConsumeQueue(_logger, $"{Constants.AcknowledgeQueuePrefix}{relayServerContext.OriginId}");
+			_acknowledgeConsumeModel.ConsumeQueue(_logger, $"{Constants.AcknowledgeQueuePrefix} {relayServerContext.OriginId}");
 		_acknowledgeConsumer.Received += AcknowledgeConsumerReceived;
 	}
 
@@ -83,7 +83,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	/// <inheritdoc />
 	public async Task DispatchResponseAsync(TResponse response)
 	{
-		await _responseDispatchModel.PublishJsonAsync($"{Constants.ResponseQueuePrefix}{response.RequestOriginId}",
+		await _responseDispatchModel.PublishJsonAsync($"{Constants.ResponseQueuePrefix} {response.RequestOriginId}",
 			response,
 			durable: false,
 			persistent: false);
@@ -94,7 +94,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	public async Task DispatchAcknowledgeAsync(TAcknowledge request)
 	{
 		_logger.LogTrace("Dispatching acknowledge {@AcknowledgeRequest}", request);
-		await _acknowledgeDispatchModel.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix}{request.OriginId}", request,
+		await _acknowledgeDispatchModel.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix} {request.OriginId}", request,
 			durable: false,
 			persistent: false);
 		LogDispatchedAcknowledge(request.RequestId, request.OriginId);

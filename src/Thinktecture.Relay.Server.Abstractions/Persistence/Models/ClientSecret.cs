@@ -13,9 +13,9 @@ public class ClientSecret
 	public Guid Id { get; set; }
 
 	/// <summary>
-	/// The unique id of the <see cref="Tenant"/> this secret is for.
+	/// The unique name of the tenant.
 	/// </summary>
-	public Guid TenantId { get; set; }
+	public string TenantName { get; set; } = default!;
 
 	/// <summary>
 	/// A SHA256 or SHA512 of the actual secret string.

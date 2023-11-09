@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
@@ -12,14 +11,13 @@ using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.Migrations.ConfigurationDb
 {
     [DbContext(typeof(RelayDbContext))]
-    [Migration("20221006081453_UpgradeEfCore_6_0_4")]
-    partial class UpgradeEfCore_6_0_4
+    partial class RelayDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("ProductVersion", "6.0.21")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -36,8 +34,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<DateTime?>("Expiration")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TenantName")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Value")
                         .IsRequired()
@@ -46,15 +45,15 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantName");
 
                     b.ToTable("ClientSecrets");
                 });
 
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Config", b =>
                 {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TenantName")
+                        .HasColumnType("text");
 
                     b.Property<bool?>("EnableTracing")
                         .HasColumnType("boolean");
@@ -68,7 +67,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<TimeSpan?>("ReconnectMinimumDelay")
                         .HasColumnType("interval");
 
-                    b.HasKey("TenantId");
+                    b.HasKey("TenantName");
 
                     b.ToTable("Configs");
                 });
@@ -85,7 +84,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<DateTimeOffset?>("DisconnectTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset?>("LastActivityTime")
+                    b.Property<DateTimeOffset?>("LastSeenTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("OriginId")
@@ -94,14 +93,15 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<string>("RemoteIpAddress")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TenantName")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OriginId");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantName");
 
                     b.ToTable("Connections");
                 });
@@ -165,6 +165,9 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid");
 
+                    b.Property<long>("RequestOriginalBodySize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("RequestUrl")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -173,26 +176,33 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                     b.Property<long?>("ResponseBodySize")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("ResponseOriginalBodySize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Target")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TenantName")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantName");
 
                     b.ToTable("Requests");
                 });
 
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ConfigTenantName")
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -207,17 +217,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("NormalizedName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.HasKey("NormalizedName");
 
-                    b.HasKey("Id");
+                    b.HasIndex("ConfigTenantName");
 
                     b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.HasIndex("NormalizedName")
                         .IsUnique();
 
                     b.ToTable("Tenants");
@@ -227,16 +231,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                 {
                     b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
                         .WithMany("ClientSecrets")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Config", b =>
-                {
-                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
-                        .WithOne("Config")
-                        .HasForeignKey("Thinktecture.Relay.Server.Persistence.Models.Config", "TenantId")
+                        .HasForeignKey("TenantName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -251,7 +246,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
 
                     b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
                         .WithMany("Connections")
-                        .HasForeignKey("TenantId")
+                        .HasForeignKey("TenantName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -260,9 +255,18 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
                 {
                     b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
                         .WithMany("Requests")
-                        .HasForeignKey("TenantId")
+                        .HasForeignKey("TenantName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
+                {
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Config", "Config")
+                        .WithMany()
+                        .HasForeignKey("ConfigTenantName");
+
+                    b.Navigation("Config");
                 });
 
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Origin", b =>
@@ -273,8 +277,6 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.M
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
                 {
                     b.Navigation("ClientSecrets");
-
-                    b.Navigation("Config");
 
                     b.Navigation("Connections");
 

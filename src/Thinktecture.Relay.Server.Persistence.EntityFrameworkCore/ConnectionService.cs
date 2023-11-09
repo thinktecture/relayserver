@@ -17,6 +17,6 @@ public class ConnectionService : IConnectionService
 		=> _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
 	/// <inheritdoc />
-	public Task<bool> IsConnectionAvailableAsync(Guid tenantId)
-		=> _dbContext.Connections.AnyAsync(c => c.TenantId == tenantId);
+	public Task<bool> IsConnectionAvailableAsync(string tenantName)
+		=> _dbContext.Connections.AnyAsync(c => c.TenantName == tenantName);
 }

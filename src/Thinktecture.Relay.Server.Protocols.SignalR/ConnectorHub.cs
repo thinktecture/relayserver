@@ -93,7 +93,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 			return;
 		}
 
-		var tenant = await _tenantService.LoadTenantWithConfigByNameAsync(tenantName);
+		var tenant = await _tenantService.LoadTenantWithConfigAsync(tenantName);
 		if (tenant == null)
 		{
 			if (_relayServerOptions.EnableAutomaticTenantCreation)
@@ -107,8 +107,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 
 				await _tenantService.CreateTenantAsync(tenant);
 
-				_logger.LogInformation(26107,
-					"Incoming connection {TransportConnectionId} created tenant {TenantName}",
+				_logger.LogInformation(26107, "Incoming connection {TransportConnectionId} created tenant {TenantName}",
 					Context.ConnectionId, tenantName);
 			}
 			else
@@ -120,11 +119,37 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 				return;
 			}
 		}
+		else if (_relayServerOptions.EnableAutomaticTenantCreation)
+		{
+			var displayName = Context.User.GetTenantDisplayName();
+			var description = Context.User.GetTenantDescription();
+
+			var needsUpdate = false;
+
+			if (displayName != null && tenant.DisplayName != displayName)
+			{
+				tenant.DisplayName = displayName;
+				needsUpdate = true;
+			}
+
+			if (description != null && tenant.Description != description)
+			{
+				tenant.Description = description;
+				needsUpdate = true;
+			}
+
+			if (needsUpdate)
+			{
+				_logger.LogInformation(26107, "Incoming connection {TransportConnectionId} updated tenant {TenantName}",
+					Context.ConnectionId, tenantName);
+				await _tenantService.UpdateTenantAsync(tenantName, tenant);
+			}
+		}
 
 		_logger.LogDebug(26101, "Incoming connection {TransportConnectionId} for tenant {@Tenant}",
 			Context.ConnectionId, tenant);
 
-		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Id,
+		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Name,
 			Context.GetHttpContext()?.Connection.RemoteIpAddress);
 
 		if (tenant.Config != null)

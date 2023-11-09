@@ -25,7 +25,7 @@ public class ClientRequest : IClientRequest
 	public string Target { get; set; } = default!;
 
 	/// <inheritdoc />
-	public Guid TenantId { get; set; }
+	public string TenantName { get; set; } = default!;
 
 	/// <inheritdoc />
 	public string HttpMethod { get; set; } = default!;

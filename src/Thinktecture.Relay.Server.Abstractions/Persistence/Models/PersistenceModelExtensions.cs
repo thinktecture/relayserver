@@ -17,10 +17,8 @@ public static class PersistenceModelsExtensions
 	public static void UpdateFrom(this ClientSecret instance, ClientSecret other)
 	{
 		if (instance.Id != other.Id)
-		{
 			throw new InvalidOperationException(
-				$"Id of other secret: {other.Id} is not the same as this: {instance.Id}. Cannot update from other instance.");
-		}
+				$"Id of other secret ({other.Id}) is not the same as this ({instance.Id}). Cannot update from other instance.");
 
 		instance.Created = other.Created;
 		instance.Value = other.Value;
@@ -47,26 +45,21 @@ public static class PersistenceModelsExtensions
 	/// <param name="other">The source to copy the data over from to this instance.</param>
 	public static void UpdateFrom(this Tenant instance, Tenant other)
 	{
-		if (instance.Id != other.Id)
-		{
+		if (instance.NormalizedName != other.NormalizedName)
 			throw new InvalidOperationException(
-				$"Id of other tenant: {other.Id} is not the same as this: {instance.Id}. Cannot update from other instance.");
-		}
-
-		instance.Name = other.Name;
-		instance.NormalizedName = other.NormalizedName;
+				$"Name of other tenant ({other.Name}) is not the same as this ({instance.Name}). Cannot update from other instance.");
 
 		instance.DisplayName = other.DisplayName;
 		instance.Description = other.Description;
 
-		// Copy over config if available
+		// copy over config if available
 		if (other.Config != null)
 		{
 			instance.Config ??= new Config();
 			instance.Config.UpdateFrom(other.Config);
 		}
 
-		// Copy over secrets when they are complete with values
+		// copy over secrets when they are complete with values
 		if (other.ClientSecrets != null)
 		{
 			instance.ClientSecrets ??= new List<ClientSecret>();

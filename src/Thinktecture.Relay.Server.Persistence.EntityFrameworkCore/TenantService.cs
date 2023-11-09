@@ -21,9 +21,9 @@ public class TenantService : ITenantService
 		=> _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
 	/// <inheritdoc />
-	public async Task<Tenant?> LoadTenantCompleteByNameAsync(string name, CancellationToken cancellationToken)
+	public async Task<Tenant?> LoadTenantCompleteAsync(string tenantName, CancellationToken cancellationToken)
 	{
-		var normalizedName = NormalizeName(name);
+		var normalizedName = NormalizeName(tenantName);
 
 		return await _dbContext.Tenants
 			.Include(t => t.ClientSecrets)
@@ -34,10 +34,22 @@ public class TenantService : ITenantService
 	}
 
 	/// <inheritdoc />
-	public async Task<Tenant?> LoadTenantWithConnectionsByNameAsync(string name,
+	public async Task<Tenant?> LoadTenantAsync(string tenantName, CancellationToken cancellationToken)
+	{
+		var normalizedName = NormalizeName(tenantName);
+
+		return await _dbContext.Tenants
+			.Include(t => t.ClientSecrets)
+			.Include(t => t.Config)
+			.AsNoTracking()
+			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
+	}
+
+	/// <inheritdoc />
+	public async Task<Tenant?> LoadTenantWithConnectionsAsync(string tenantName,
 		CancellationToken cancellationToken = default)
 	{
-		var normalizedName = NormalizeName(name);
+		var normalizedName = NormalizeName(tenantName);
 
 		return await _dbContext.Tenants
 			.Include(t => t.Connections)
@@ -46,10 +58,10 @@ public class TenantService : ITenantService
 	}
 
 	/// <inheritdoc />
-	public async Task<Tenant?> LoadTenantWithConfigByNameAsync(string name,
+	public async Task<Tenant?> LoadTenantWithConfigAsync(string tenantName,
 		CancellationToken cancellationToken = default)
 	{
-		var normalizedName = NormalizeName(name);
+		var normalizedName = NormalizeName(tenantName);
 
 		return await _dbContext.Tenants
 			.Include(t => t.Config)
@@ -67,62 +79,38 @@ public class TenantService : ITenantService
 			.ToPagedResultAsync(skip, take, cancellationToken);
 
 	/// <inheritdoc />
-	public async Task<Tenant?> LoadTenantCompleteByIdAsync(Guid id, CancellationToken cancellationToken)
-		=> await _dbContext.Tenants
-			.Include(t => t.ClientSecrets)
-			.Include(t => t.Connections)
-			.Include(t => t.Config)
-			.AsNoTracking()
-			.SingleOrDefaultAsync(t => t.Id == id, cancellationToken: cancellationToken);
-
-	/// <inheritdoc />
-	public async Task<Guid> CreateTenantAsync(Tenant tenant, CancellationToken cancellationToken)
+	public async Task CreateTenantAsync(Tenant tenant, CancellationToken cancellationToken)
 	{
-		if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenant.Id, cancellationToken))
-		{
-			throw new InvalidOperationException(
-				$"Tenant with id {tenant.Id} does already exist and cannot be created.");
-		}
+		tenant.NormalizedName = NormalizeName(tenant.Name);
 
-		if (tenant.Id == Guid.Empty)
-		{
-			tenant.Id = Guid.NewGuid();
-		}
+		if (await _dbContext.Tenants.AnyAsync(t => t.NormalizedName == tenant.NormalizedName, cancellationToken))
+			throw new InvalidOperationException($"Tenant {tenant.Name} does already exist and cannot be created.");
 
 		var newTenant = new Tenant()
 		{
-			Id = tenant.Id,
+			Name = tenant.Name,
+			NormalizedName = tenant.NormalizedName,
 		};
 
-		tenant.NormalizedName = NormalizeName(tenant.Name);
 		newTenant.UpdateFrom(tenant);
 
 		// ReSharper disable once MethodHasAsyncOverload
 		_dbContext.Tenants.Add(newTenant);
 		await _dbContext.SaveChangesAsync(cancellationToken);
-
-		return newTenant.Id;
 	}
 
 	/// <inheritdoc />
-	public async Task<bool> UpdateTenantAsync(Guid tenantId, Tenant tenant, CancellationToken cancellationToken)
+	public async Task<bool> UpdateTenantAsync(string tenantName, Tenant tenant, CancellationToken cancellationToken)
 	{
+		tenant.NormalizedName = NormalizeName(tenantName);
+
 		var existingTenant = await _dbContext.Tenants
 			.Include(t => t.Config)
 			.Include(t => t.ClientSecrets)
-			.SingleOrDefaultAsync(t => t.Id == tenantId, cancellationToken: cancellationToken);
+			.SingleOrDefaultAsync(t => t.NormalizedName == tenant.NormalizedName, cancellationToken: cancellationToken);
 
-		if (existingTenant == null)
-		{
-			return false;
-		}
+		if (existingTenant == null) return false;
 
-		if (tenant.Id == Guid.Empty)
-		{
-			tenant.Id = tenantId;
-		}
-
-		tenant.NormalizedName = tenant.Name.ToUpperInvariant();
 		existingTenant.UpdateFrom(tenant);
 		await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -130,9 +118,9 @@ public class TenantService : ITenantService
 	}
 
 	/// <inheritdoc />
-	public async Task<bool> DeleteTenantByIdAsync(Guid id, CancellationToken cancellationToken)
+	public async Task<bool> DeleteTenantAsync(string tenantName, CancellationToken cancellationToken)
 	{
-		var tenant = new Tenant() { Id = id, };
+		var tenant = new Tenant() { NormalizedName = NormalizeName(tenantName) };
 
 		_dbContext.Attach(tenant);
 		_dbContext.Tenants.Remove(tenant);
@@ -149,37 +137,37 @@ public class TenantService : ITenantService
 	}
 
 	/// <inheritdoc />
-	public async Task<Config?> LoadTenantConfigAsync(Guid id, CancellationToken cancellationToken)
-		=> await _dbContext.Configs
+	public async Task<Config?> LoadTenantConfigAsync(string tenantName, CancellationToken cancellationToken)
+	{
+		var normalizedName = NormalizeName(tenantName);
+
+		return await _dbContext.Configs
 			.AsNoTracking()
-			.SingleOrDefaultAsync(c => c.TenantId == id, cancellationToken: cancellationToken);
+			.SingleOrDefaultAsync(c => c.TenantName == normalizedName, cancellationToken: cancellationToken);
+	}
 
 	/// <inheritdoc />
 	public async Task CreateClientSecretAsync(ClientSecret clientSecret, CancellationToken cancellationToken)
 	{
 		if (String.IsNullOrWhiteSpace(clientSecret.Value))
-		{
 			throw new InvalidOperationException("Client secret needs a value.");
-		}
 
 		if (_dbContext.ClientSecrets.Any(cs => cs.Id == clientSecret.Id))
-		{
 			throw new InvalidOperationException(
 				$"Client secret with id {clientSecret.Id} does already exist and cannot be created.");
-		}
 
-		if (!_dbContext.Tenants.Any(t => t.Id == clientSecret.TenantId))
-		{
+		var normalizeName = NormalizeName(clientSecret.TenantName);
+
+		if (!_dbContext.Tenants.Any(t => t.NormalizedName == normalizeName))
 			throw new InvalidOperationException(
-				$"Client secret cannot be created because tenant with id {clientSecret.TenantId} does not exist.");
-		}
+				$"Client secret cannot be created because tenant {clientSecret.TenantName} does not exist.");
 
 		if (clientSecret.Id == Guid.Empty)
 		{
 			clientSecret.Id = Guid.NewGuid();
 		}
 
-		var newSecret = new ClientSecret() { Id = clientSecret.Id, TenantId = clientSecret.TenantId, };
+		var newSecret = new ClientSecret() { Id = clientSecret.Id, TenantName = normalizeName, };
 		newSecret.UpdateFrom(clientSecret);
 
 		_dbContext.ClientSecrets.Add(newSecret);
