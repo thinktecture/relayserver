@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.DependencyInjection;

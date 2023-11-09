@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Title>Thinktecture RelayServer Interceptors</Title>
     <Description>Contains interceptors for the RelayServer server.</Description>
-    <RootNamespace>Thinktecture.Relay.Interceptors</RootNamespace>
+    <RootNamespace>Thinktecture.Relay.Server.Interceptors</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

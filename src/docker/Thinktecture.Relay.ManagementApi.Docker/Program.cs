@@ -1,9 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -11,7 +9,6 @@ using Thinktecture.Relay.Docker;
 using Thinktecture.Relay.Docker.Authentication;
 using Thinktecture.Relay.Server.Management;
 using Thinktecture.Relay.Server.Management.Extensions;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 try
@@ -78,7 +75,7 @@ try
 	app.UseSwagger(options => options.RouteTemplate = "/docs/{DocumentName}/openapi.json");
 	app.UseSwaggerUI(options =>
 	{
-		options.RoutePrefix = String.Empty;
+		options.RoutePrefix = string.Empty;
 		options.SwaggerEndpoint($"/docs/{applicationName}/openapi.json", "RelayServer Example Management API");
 	});
 

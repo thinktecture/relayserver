@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
-using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Connector.Transport;
 using Thinktecture.Relay.Transport;
 

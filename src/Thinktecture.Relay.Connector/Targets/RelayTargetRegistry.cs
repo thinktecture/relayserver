@@ -5,7 +5,6 @@ using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Thinktecture.Relay.Connector.Options;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Connector.Targets;
