@@ -26,3 +26,10 @@ public interface IClientRequestInterceptor<TRequest, TResponse>
 	Task OnRequestReceivedAsync(IRelayContext<TRequest, TResponse> context,
 		CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// An implementation of an interceptor dealing with the request of the client.
+/// </summary>
+public interface IClientRequestInterceptor : IClientRequestInterceptor<ClientRequest, TargetResponse>
+{
+}

@@ -6,7 +6,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Interceptor;
 
 /// <summary>
-/// An implementation of an interceptor dealing with the target response.
+/// An implementation of an interceptor dealing with the response of a target.
 /// </summary>
 /// <typeparam name="TRequest">The type of request.</typeparam>
 /// <typeparam name="TResponse">The type of response.</typeparam>
@@ -25,4 +25,11 @@ public interface ITargetResponseInterceptor<TRequest, TResponse>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	Task OnResponseReceivedAsync(IRelayContext<TRequest, TResponse> context,
 		CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// An implementation of an interceptor dealing with the response of a target.
+/// </summary>
+public interface ITargetResponseInterceptor : ITargetResponseInterceptor<ClientRequest, TargetResponse>
+{
 }
