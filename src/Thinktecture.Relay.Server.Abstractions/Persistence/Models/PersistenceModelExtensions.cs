@@ -51,6 +51,8 @@ public static class PersistenceModelsExtensions
 
 		instance.DisplayName = other.DisplayName;
 		instance.Description = other.Description;
+		instance.RequireAuthentication = other.RequireAuthentication;
+		instance.MaximumConcurrentConnectorRequests = other.MaximumConcurrentConnectorRequests;
 
 		// copy over config if available
 		if (other.Config != null)
