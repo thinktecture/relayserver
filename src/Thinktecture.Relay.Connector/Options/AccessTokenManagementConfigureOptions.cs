@@ -35,9 +35,13 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 
 	public void Configure(AccessTokenManagementOptions options)
 	{
+		var baseAddress = _relayConnectorOptions.DiscoveryDocument.AuthorizationServer;
+		if (!baseAddress.EndsWith("/"))
+		{
+			baseAddress += "/";
+		}
 		var httpClient = _httpClientFactory.CreateClient(Constants.HttpClientNames.ConnectionClose);
-
-		var baseUri = new Uri(_relayConnectorOptions.DiscoveryDocument.AuthorizationServer);
+		var baseUri = new Uri(baseAddress);
 		var fullUri = new Uri(baseUri, OidcConstants.Discovery.DiscoveryEndpoint);
 		while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
 		{
