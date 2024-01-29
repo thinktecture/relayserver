@@ -1,0 +1,7 @@
+{
+  "name": "thinktecture-relay-server-management-frontend",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
