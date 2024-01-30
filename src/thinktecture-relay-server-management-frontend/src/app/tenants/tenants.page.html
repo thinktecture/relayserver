@@ -13,7 +13,7 @@
 
   <ion-list>
     @for (tenant of tenants; track tenant.name) {
-    <ion-item>
+    <ion-item [routerLink]="['/tabs', 'tenants', tenant.name]" [button]="true">
       <ion-label>{{ tenant.name }}</ion-label>
     </ion-item>
     }
