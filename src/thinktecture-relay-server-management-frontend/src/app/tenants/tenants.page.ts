@@ -34,10 +34,7 @@ export class TenantsPage {
     const page = await lastValueFrom(
       this.api.getTenantsPaged(this.tenants.length, PAGE_SIZE),
     );
-    for (const tenant of page.results ?? []) {
-      this.tenants.push(tenant);
-    }
-
+    this.tenants.push(...(page.results ?? []));
     this.scrollDisabled = (page.results?.length ?? 0) < PAGE_SIZE;
   }
 }
