@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button default-href="/tabs/tenants"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ name }}</ion-title>
+    <ion-title>{{ name() }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -13,9 +13,9 @@
       <ion-buttons slot="start">
         <ion-back-button default-href="/tabs/tenants"></ion-back-button>
       </ion-buttons>
-      <ion-title size="large">{{ name }}</ion-title>
+      <ion-title size="large">{{ name() }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div>{{ name }}</div>
+  <pre>{{ details | async | json }}</pre>
 </ion-content>
