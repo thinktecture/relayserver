@@ -25,7 +25,6 @@ export class TenantsPage {
   }
 
   async onInfinite(ev: Event) {
-    console.log('onInfinite');
     const cev = ev as InfiniteScrollCustomEvent;
     await this.loadTenants();
     cev.target.complete();
@@ -38,7 +37,6 @@ export class TenantsPage {
     for (const tenant of page.results ?? []) {
       this.tenants.push(tenant);
     }
-    console.log(`${this.tenants.length} / ${page.totalCount}`);
 
     this.scrollDisabled = (page.results?.length ?? 0) < PAGE_SIZE;
   }
