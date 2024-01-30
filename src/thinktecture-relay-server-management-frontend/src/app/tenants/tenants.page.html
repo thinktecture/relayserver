@@ -11,5 +11,18 @@
     </ion-toolbar>
   </ion-header>
 
-  {{ tenants() | json }}
+  <ion-list>
+    @for (tenant of tenants; track tenant.name) {
+    <ion-item>
+      <ion-label>{{ tenant.name }}</ion-label>
+    </ion-item>
+    }
+  </ion-list>
+
+  <ion-infinite-scroll
+    (ionInfinite)="onInfinite($event)"
+    [disabled]="scrollDisabled"
+  >
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>
