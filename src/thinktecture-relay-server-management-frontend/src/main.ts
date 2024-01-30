@@ -9,8 +9,9 @@ import {
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { API_BASE_URL, ApiService } from './app/api/api.service';
+import { apiInterceptor } from './app/api/api.interceptor';
 
 if (environment.production) {
   enableProdMode();
@@ -21,7 +22,7 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([apiInterceptor])),
     ApiService,
     { provide: API_BASE_URL, useValue: '/api' },
   ],
