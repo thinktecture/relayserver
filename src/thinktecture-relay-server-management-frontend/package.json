@@ -9,7 +9,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "types": "nswag openapi2tsclient /input:http://localhost:5004/docs/ManagementApi/openapi.json /output:src/app/api/api.service.ts /template:Angular /injectionTokenType:InjectionToken /className:ApiService /typeStyle:Interface /generateOptionalParameters:true /typescriptVersion:5.3"
   },
   "private": true,
   "dependencies": {
@@ -58,7 +59,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.2.2"
+    "nswag": "^14.0.2",
+    "typescript": "~5.3.3"
   },
   "description": "An Ionic project"
 }
