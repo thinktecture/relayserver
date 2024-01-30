@@ -1,13 +1,19 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>tenant-details</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button default-href="/tabs/tenants"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ name() }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">tenant-details</ion-title>
+      <ion-buttons slot="start">
+        <ion-back-button default-href="/tabs/tenants"></ion-back-button>
+      </ion-buttons>
+      <ion-title size="large">{{ name() }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
