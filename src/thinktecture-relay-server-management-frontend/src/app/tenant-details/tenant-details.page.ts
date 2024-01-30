@@ -1,8 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { Component, Input } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
-import { map } from 'rxjs';
 
 @Component({
   selector: 'app-tenant-details',
@@ -12,5 +9,5 @@ import { map } from 'rxjs';
   imports: [IonicModule],
 })
 export class TenantDetailsPage {
-  name = toSignal(inject(ActivatedRoute).params.pipe(map((p) => p['name'])));
+  @Input() name = '';
 }
