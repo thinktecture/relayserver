@@ -1,16 +1,10 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
     <ion-title>Tenants</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tenants</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
+<ion-content>
   <ion-list>
     @for (tenant of tenants; track tenant.name) {
     <ion-item [routerLink]="['/tabs', 'tenants', tenant.name]" [button]="true">
