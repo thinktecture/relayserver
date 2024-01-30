@@ -5,6 +5,12 @@
 </ion-header>
 
 <ion-content>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button>
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
   <ion-list>
     @for (tenant of tenants; track tenant.name) {
     <ion-item [routerLink]="['/tabs', 'tenants', tenant.name]" [button]="true">
