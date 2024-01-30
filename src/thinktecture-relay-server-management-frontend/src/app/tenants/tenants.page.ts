@@ -4,6 +4,8 @@ import { lastValueFrom } from 'rxjs';
 import { ApiService, Tenant } from '../api/api.service';
 import { RouterLink } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { add } from 'ionicons/icons';
 
 const PAGE_SIZE = 20;
 
@@ -22,6 +24,7 @@ export class TenantsPage {
 
   constructor() {
     this.loadTenants();
+    addIcons({ add });
   }
 
   async onInfinite(ev: Event) {
