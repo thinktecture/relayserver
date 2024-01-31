@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>New Tenant</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss.emit()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-input
+        #tenantName
+        aria-label="Tenant name"
+        placeholder="Tenant name"
+      ></ion-input>
+    </ion-item>
+  </ion-list>
+</ion-content>

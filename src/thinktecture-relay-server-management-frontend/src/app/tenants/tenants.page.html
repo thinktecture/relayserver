@@ -34,29 +34,10 @@
     #modal
     trigger="add-tenant"
     [presentingElement]="presentingElement"
-    (didPresent)="tenantName?.setFocus()"
+    (didPresent)="newTenant?.focus()"
   >
     <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>New Tenant</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="modal.dismiss()">Close</ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-
-      <ion-content>
-        <ion-list>
-          <ion-item>
-            <ion-input
-              #tenantName
-              aria-label="Tenant name"
-              placeholder="Tenant name"
-            ></ion-input>
-          </ion-item>
-        </ion-list>
-      </ion-content>
+      <app-new-tenant (dismiss)="modal.dismiss()" #newTenant />
     </ng-template>
   </ion-modal>
 </ion-content>

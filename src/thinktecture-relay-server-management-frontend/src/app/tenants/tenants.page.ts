@@ -24,6 +24,7 @@ import { ApiService, Tenant } from '../api/api.service';
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
+import { NewTenantComponent } from '../new-tenant/new-tenant.component';
 
 const PAGE_SIZE = 20;
 
@@ -48,9 +49,7 @@ const PAGE_SIZE = 20;
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonModal,
-    IonButtons,
-    IonButton,
-    IonInput,
+    NewTenantComponent,
   ],
 })
 export class TenantsPage implements OnInit {
@@ -60,7 +59,7 @@ export class TenantsPage implements OnInit {
   scrollDisabled = false;
   presentingElement: HTMLIonRouterOutletElement | null = null;
 
-  @ViewChild('tenantName') tenantName: IonInput | null = null;
+  @ViewChild('newTenant') newTenant: NewTenantComponent | null = null;
 
   constructor() {
     this.loadTenants();
