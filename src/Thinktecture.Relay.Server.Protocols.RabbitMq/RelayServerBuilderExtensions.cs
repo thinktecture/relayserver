@@ -66,8 +66,11 @@ public static class RelayServerBuilderExtensions
 				Uri = new Uri(options.Value.Uri),
 			};
 
-			return factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts ?? factory.Uri.Host),
-				$"RelayServer {context.OriginId}");
+			var clientName = $"RelayServer {context.OriginId}";
+
+			return options.Value.ClusterHosts == null
+				? factory.CreateConnection(clientName)
+				: factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts), clientName);
 		});
 		builder.Services.AddSingleton<ModelFactory<TAcknowledge>>();
 
