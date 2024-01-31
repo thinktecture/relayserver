@@ -1,8 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>New Tenant</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss.emit()">Cancel</ion-button>
+    </ion-buttons>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss.emit()">Close</ion-button>
+      <ion-button (click)="dismiss.emit()">Done</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
