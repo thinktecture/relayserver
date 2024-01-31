@@ -10,12 +10,12 @@
     <ion-item [routerLink]="['/tabs', 'tenants', tenant.name]" [button]="true">
       <ion-label>{{ tenant.name }}</ion-label>
     </ion-item>
+    } @if (scrollDisabled) {
+    <ion-item>
+      <ion-note color="light">No more tenants</ion-note>
+    </ion-item>
     }
   </ion-list>
-
-  @if (scrollDisabled) {
-  <ion-note color="light">No more tenants</ion-note>
-  }
 
   <ion-infinite-scroll
     (ionInfinite)="onInfinite($event)"
