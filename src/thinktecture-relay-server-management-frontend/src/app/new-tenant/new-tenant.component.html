@@ -11,75 +11,105 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item>
-      <ion-input #tenantName aria-label="Name" placeholder="Name" />
-    </ion-item>
-    <ion-item>
-      <ion-input aria-label="Display name" placeholder="Display name" />
-    </ion-item>
-  </ion-list>
+  <form [formGroup]="form">
+    <ion-list>
+      <ion-item>
+        <ion-input
+          #tenantName
+          formControlName="name"
+          aria-label="Name"
+          placeholder="Name"
+        />
+      </ion-item>
+      <ion-item>
+        <ion-input
+          formControlName="displayName"
+          aria-label="Display name"
+          placeholder="Display name"
+        />
+      </ion-item>
+    </ion-list>
 
-  <ion-list>
-    <ion-item>
-      <ion-textarea
-        label="Description"
-        labelPlacement="stacked"
-        autoGrow
-      ></ion-textarea>
-    </ion-item>
-  </ion-list>
+    <ion-list>
+      <ion-item>
+        <ion-textarea
+          formControlName="description"
+          label="Description"
+          labelPlacement="stacked"
+          autoGrow
+        ></ion-textarea>
+      </ion-item>
+    </ion-list>
 
-  <ion-list>
-    <ion-item>
-      <ion-input
-        type="number"
-        label="Concurrent requests"
-        helperText="Maximum amount of concurrent requests a connector should receive. Zero is unlimited."
-      />
-    </ion-item>
-    <ion-item>
-      <ion-input
-        type="number"
-        label="Keepalive interval"
-        helperText="Keepalive interval in seconds."
-      />
-    </ion-item>
-    <ion-item>
-      <ion-checkbox labelPlacement="end" justify="start">
-        Require authentication
-      </ion-checkbox>
-    </ion-item>
-    <ion-item>
-      <ion-checkbox labelPlacement="end" justify="start">
-        Enable tracing
-      </ion-checkbox>
-    </ion-item>
-  </ion-list>
+    <ion-list>
+      <ion-item>
+        <ion-input
+          type="number"
+          formControlName="maximumConcurrentConnectorRequests"
+          label="Concurrent requests"
+          helperText="Maximum amount of concurrent requests a connector should receive. Zero is unlimited."
+        />
+      </ion-item>
+      <ion-item>
+        <ion-input
+          type="number"
+          formControlName="keepAliveInterval"
+          label="Keepalive interval"
+          helperText="Keepalive interval in seconds."
+        />
+      </ion-item>
+      <ion-item>
+        <ion-checkbox
+          formControlName="requireAuthentication"
+          labelPlacement="end"
+          justify="start"
+        >
+          Require authentication
+        </ion-checkbox>
+      </ion-item>
+      <ion-item>
+        <ion-checkbox
+          formControlName="enableTracing"
+          labelPlacement="end"
+          justify="start"
+        >
+          Enable tracing
+        </ion-checkbox>
+      </ion-item>
+    </ion-list>
 
-  <ion-list>
-    <ion-item>
-      <ion-input
-        type="number"
-        label="Minimum reconnect delay"
-        helperText="Minimum delay to wait for until a reconnect of a connector should be attempted again."
-      />
-    </ion-item>
-    <ion-item>
-      <ion-input
-        type="number"
-        label="Maximum reconnect delay"
-        helperText="Maximum delay to wait for until a reconnect of a connector should be attempted again."
-      />
-    </ion-item>
-  </ion-list>
+    <ion-list>
+      <ion-item>
+        <ion-input
+          type="number"
+          formControlName="reconnectMinimumDelay"
+          label="Minimum reconnect delay"
+          helperText="Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+        />
+      </ion-item>
+      <ion-item>
+        <ion-input
+          type="number"
+          formControlName="reconnectMaximumDelay"
+          label="Maximum reconnect delay"
+          helperText="Maximum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+        />
+      </ion-item>
+    </ion-list>
 
-  <ion-list>
-    <ion-item>
-      <ion-button fill="clear">
-        <ion-icon slot="icon-only" name="add-circle" color="success" />
-        add credential
-      </ion-button>
-    </ion-item>
-  </ion-list>
+    <ion-list>
+      <ion-item>
+        <ion-button fill="clear">
+          <ion-icon slot="icon-only" name="add-circle" color="success" />
+          add credential
+        </ion-button>
+      </ion-item>
+    </ion-list>
+
+    <ion-list>
+      <ion-item>
+        <pre>{{ form.value | json }}</pre>
+      </ion-item>
+    </ion-list>
+  </form>
 </ion-content>
