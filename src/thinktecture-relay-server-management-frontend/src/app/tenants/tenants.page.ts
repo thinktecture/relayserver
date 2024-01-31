@@ -1,9 +1,23 @@
 import { Component, inject } from '@angular/core';
-import { InfiniteScrollCustomEvent } from '@ionic/angular/standalone';
+import {
+  InfiniteScrollCustomEvent,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonHeader,
+  IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonNote,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/angular/standalone';
 import { lastValueFrom } from 'rxjs';
 import { ApiService, Tenant } from '../api/api.service';
 import { RouterLink } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 
@@ -14,7 +28,22 @@ const PAGE_SIZE = 20;
   templateUrl: 'tenants.page.html',
   styleUrls: ['tenants.page.scss'],
   standalone: true,
-  imports: [RouterLink, IonicModule],
+  imports: [
+    RouterLink,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonIcon,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonNote,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
+  ],
 })
 export class TenantsPage {
   private api = inject(ApiService);

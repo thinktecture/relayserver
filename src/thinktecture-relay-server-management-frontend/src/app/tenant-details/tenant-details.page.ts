@@ -1,16 +1,32 @@
 import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { IonicModule } from '@ionic/angular';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { ApiService } from '../api/api.service';
+import {
+  IonBackButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-tenant-details',
   templateUrl: './tenant-details.page.html',
   styleUrls: ['./tenant-details.page.scss'],
   standalone: true,
-  imports: [AsyncPipe, JsonPipe, IonicModule],
+  imports: [
+    AsyncPipe,
+    JsonPipe,
+    IonHeader,
+    IonToolbar,
+    IonButtons,
+    IonBackButton,
+    IonTitle,
+    IonContent,
+  ],
 })
 export class TenantDetailsPage {
   private api = inject(ApiService);
