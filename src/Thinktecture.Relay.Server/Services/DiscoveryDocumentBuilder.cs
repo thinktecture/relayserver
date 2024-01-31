@@ -57,10 +57,16 @@ public class DiscoveryDocumentBuilder
 		=> new Uri($"{request.Scheme}://{request.Host}{request.PathBase}", UriKind.Absolute);
 
 	/// <summary>
-	/// Gets the authority from the configured <see cref="JwtBearerOptions"/>.
+	/// Gets the authority from the configured <see cref="JwtBearerOptions"/> with a slash at the end.
 	/// </summary>
-	/// <returns>The base url of the Identity Provider</returns>
+	/// <returns>The base url of the Identity Provider (including a slash at the end).</returns>
 	protected virtual string? GetAuthority()
-		=> _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()?.Get(Constants.DefaultAuthenticationScheme)
+	{
+		var authority = _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()
+			?.Get(Constants.DefaultAuthenticationScheme)
 			?.Authority;
+		if (authority == null) return null;
+
+		return authority.EndsWith("/") ? authority : $"{authority}/";
+	}
 }
