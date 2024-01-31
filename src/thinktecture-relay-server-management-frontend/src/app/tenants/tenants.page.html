@@ -19,6 +19,10 @@
     }
   </ion-list>
 
+  @if (scrollDisabled) {
+  <ion-note color="light">No more tenants</ion-note>
+  }
+
   <ion-infinite-scroll
     (ionInfinite)="onInfinite($event)"
     [disabled]="scrollDisabled"
