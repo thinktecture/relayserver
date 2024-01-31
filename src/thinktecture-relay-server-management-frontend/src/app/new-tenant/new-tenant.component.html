@@ -13,11 +13,73 @@
 <ion-content>
   <ion-list>
     <ion-item>
+      <ion-input #tenantName aria-label="Name" placeholder="Name" />
+    </ion-item>
+    <ion-item>
+      <ion-input aria-label="Display name" placeholder="Display name" />
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item>
+      <ion-textarea
+        label="Description"
+        labelPlacement="stacked"
+        autoGrow
+      ></ion-textarea>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item>
       <ion-input
-        #tenantName
-        aria-label="Tenant name"
-        placeholder="Tenant name"
-      ></ion-input>
+        type="number"
+        label="Concurrent requests"
+        helperText="Maximum amount of concurrent requests a connector should receive. Zero is unlimited."
+      />
+    </ion-item>
+    <ion-item>
+      <ion-input
+        type="number"
+        label="Keepalive interval"
+        helperText="Keepalive interval in seconds."
+      />
+    </ion-item>
+    <ion-item>
+      <ion-checkbox labelPlacement="end" justify="start">
+        Require authentication
+      </ion-checkbox>
+    </ion-item>
+    <ion-item>
+      <ion-checkbox labelPlacement="end" justify="start">
+        Enable tracing
+      </ion-checkbox>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item>
+      <ion-input
+        type="number"
+        label="Minimum reconnect delay"
+        helperText="Minimum delay to wait for until a reconnect of a connector should be attempted again."
+      />
+    </ion-item>
+    <ion-item>
+      <ion-input
+        type="number"
+        label="Maximum reconnect delay"
+        helperText="Maximum delay to wait for until a reconnect of a connector should be attempted again."
+      />
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item>
+      <ion-button fill="clear">
+        <ion-icon slot="icon-only" name="add-circle" color="success" />
+        add credential
+      </ion-button>
     </ion-item>
   </ion-list>
 </ion-content>
