@@ -5,7 +5,9 @@
       <ion-button (click)="dismiss.emit()">Cancel</ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss.emit()">Done</ion-button>
+      <ion-button [disabled]="!form.valid" (click)="dismiss.emit()">
+        Done
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
