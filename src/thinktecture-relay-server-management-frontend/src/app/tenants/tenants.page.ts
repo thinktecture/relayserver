@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import {
   InfiniteScrollCustomEvent,
+  IonButton,
+  IonButtons,
   IonContent,
   IonFab,
   IonFabButton,
@@ -8,9 +10,11 @@ import {
   IonIcon,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  IonInput,
   IonItem,
   IonLabel,
   IonList,
+  IonModal,
   IonNote,
   IonTitle,
   IonToolbar,
@@ -43,17 +47,28 @@ const PAGE_SIZE = 20;
     IonNote,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
+    IonModal,
+    IonButtons,
+    IonButton,
+    IonInput,
   ],
 })
-export class TenantsPage {
+export class TenantsPage implements OnInit {
   private api = inject(ApiService);
 
   tenants: Tenant[] = [];
   scrollDisabled = false;
+  presentingElement: HTMLIonRouterOutletElement | null = null;
+
+  @ViewChild('tenantName') tenantName: IonInput | null = null;
 
   constructor() {
     this.loadTenants();
     addIcons({ add });
+  }
+
+  ngOnInit() {
+    this.presentingElement = document.querySelector('ion-router-outlet');
   }
 
   async onInfinite(ev: Event) {

@@ -5,12 +5,6 @@
 </ion-header>
 
 <ion-content>
-  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button>
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-
   <ion-list>
     @for (tenant of tenants; track tenant.name) {
     <ion-item [routerLink]="['/tabs', 'tenants', tenant.name]" [button]="true">
@@ -29,4 +23,40 @@
   >
     <ion-infinite-scroll-content></ion-infinite-scroll-content>
   </ion-infinite-scroll>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button id="add-tenant">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal
+    #modal
+    trigger="add-tenant"
+    [presentingElement]="presentingElement"
+    (didPresent)="tenantName?.setFocus()"
+  >
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>New Tenant</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modal.dismiss()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+        <ion-list>
+          <ion-item>
+            <ion-input
+              #tenantName
+              aria-label="Tenant name"
+              placeholder="Tenant name"
+            ></ion-input>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
