@@ -13,8 +13,10 @@ import {
   IonList,
   IonModal,
   IonNote,
+  IonSearchbar,
   IonTitle,
   IonToolbar,
+  SearchbarCustomEvent,
 } from '@ionic/angular/standalone';
 import { lastValueFrom } from 'rxjs';
 import { ApiService } from '../api/api.service';
@@ -35,11 +37,12 @@ const PAGE_SIZE = 20;
     RouterLink,
     IonHeader,
     IonToolbar,
+    IonTitle,
     IonButtons,
     IonButton,
-    IonTitle,
-    IonContent,
     IonIcon,
+    IonSearchbar,
+    IonContent,
     IonList,
     IonItem,
     IonLabel,
@@ -68,10 +71,12 @@ export class TenantsPage implements OnInit {
     this.presentingElement = document.querySelector('ion-router-outlet');
   }
 
+  search(ev: SearchbarCustomEvent) {}
+
   async onInfinite(ev: Event) {
-    const cev = ev as InfiniteScrollCustomEvent;
+    const customEv = ev as InfiniteScrollCustomEvent;
     await this.loadTenants();
-    cev.target.complete();
+    customEv.target.complete();
   }
 
   private async loadTenants() {
