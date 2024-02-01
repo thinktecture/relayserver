@@ -46,7 +46,7 @@ public static partial class EndpointRouteBuilderExtensions
 internal static class GetTenantsPagedEndpoint
 {
 	public static async Task<Page<Tenant>> HandleRequestAsync([FromServices] ITenantService service,
-		[FromQuery] int skip = 0, [FromQuery] int take = 10, CancellationToken cancellationToken = default
-	)
-		=> (await service.LoadAllTenantsPagedAsync(skip, take, cancellationToken)).ToModel();
+		[FromQuery] int skip = 0, [FromQuery] int take = 10, [FromQuery] string? filter = null,
+		CancellationToken cancellationToken = default)
+		=> (await service.LoadAllTenantsPagedAsync(skip, take, filter, cancellationToken)).ToModel();
 }
