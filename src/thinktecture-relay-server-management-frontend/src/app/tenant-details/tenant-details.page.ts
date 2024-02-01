@@ -1,4 +1,4 @@
-import { AsyncPipe, JsonPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
@@ -9,6 +9,9 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonItem,
+  IonLabel,
+  IonList,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
@@ -20,7 +23,6 @@ import {
   standalone: true,
   imports: [
     AsyncPipe,
-    JsonPipe,
     IonHeader,
     IonToolbar,
     IonButtons,
@@ -28,6 +30,9 @@ import {
     IonButton,
     IonTitle,
     IonContent,
+    IonList,
+    IonItem,
+    IonLabel,
   ],
 })
 export class TenantDetailsPage {
