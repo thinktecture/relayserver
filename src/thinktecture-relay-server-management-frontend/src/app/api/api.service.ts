@@ -67,15 +67,27 @@ export class ApiService {
     };
   }
 
-  private static intervalToDto(seconds: number | null): string | null {
-    if (seconds === null) {
+  private static intervalToDto(totalSeconds: number | null): string | null {
+    if (totalSeconds === null) {
       return null;
     }
 
-    const minutes = Math.trunc(seconds / 60);
-    const hours = Math.trunc(minutes / 60);
-    const days = Math.trunc(hours / 24);
-    return `${days}.${hours % 24}:${minutes % 60}:${seconds % 60}`;
+    const totalMinutes = Math.trunc(totalSeconds / 60);
+    const totalHours = Math.trunc(totalMinutes / 60);
+    const totalDays = Math.trunc(totalHours / 24);
+
+    const format = Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
+    const seconds = format.format(totalSeconds % 60);
+    const minutes = format.format(totalMinutes % 60);
+    const hours = format.format(totalHours % 24);
+    const days = String(totalDays);
+
+    const interval = `${hours}:${minutes}:${seconds}`;
+    if (totalDays === 0) {
+      return interval;
+    }
+
+    return `${days}.${interval}`;
   }
 
   private static tenantFromDto(tenantDto: TenantDto): Tenant {
