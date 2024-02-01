@@ -12,6 +12,56 @@
 
 <ion-content>
   @if (details$ | async; as details) {
-  <pre>{{ details | json }}</pre>
+  <ion-list inset>
+    <ion-item color="light">
+      <ion-label>
+        <p>Display name</p>
+        {{ details.displayName ?? details.name }}
+      </ion-label>
+    </ion-item>
+    <ion-item color="light">
+      <ion-label>
+        <p>Description</p>
+        {{ details.description }}
+      </ion-label>
+    </ion-item>
+    <ion-item color="light">
+      <ion-label>
+        <p>Require authentication</p>
+        {{ details.requireAuthentication }}
+      </ion-label>
+    </ion-item>
+    <ion-item color="light">
+      <ion-label>
+        <p>Maximum concurrent connector requests</p>
+        {{ details.maximumConcurrentConnectorRequests }}
+      </ion-label>
+    </ion-item>
+    <ion-item color="light">
+      <ion-label>
+        <p>Keep alive interval in seconds</p>
+        {{ details.keepAliveInterval }}
+      </ion-label>
+    </ion-item>
+    <ion-item color="light">
+      <ion-label>
+        <p>Enable tracing</p>
+        {{ details.enableTracing }}
+      </ion-label>
+    </ion-item>
+    <ion-item color="light">
+      <ion-label>
+        <p>Reconnect minimum delay in seconds</p>
+        {{ details.reconnectMinimumDelay }}
+      </ion-label>
+    </ion-item>
+    <ion-item color="light">
+      <ion-label>
+        <p>Reconnect maximum delay in secons</p>
+        {{ details.reconnectMaximumDelay }}
+      </ion-label>
+    </ion-item>
+    <!-- TODO: credentials -->
+  </ion-list>
   }
 </ion-content>
