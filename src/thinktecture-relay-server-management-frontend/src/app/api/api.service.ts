@@ -29,7 +29,11 @@ export class ApiService {
     return this.http.put<void>(url, ApiService.tenantToDto(tenant));
   }
 
-  getTenantsPaged(skip?: number, take?: number): Observable<Page<Tenant>> {
+  getTenantsPaged(
+    skip?: number,
+    take?: number,
+    filter?: string,
+  ): Observable<Page<Tenant>> {
     const url = `${this.baseUrl}/management/tenants`;
 
     let params = new HttpParams();
@@ -38,6 +42,9 @@ export class ApiService {
     }
     if (take !== undefined) {
       params = params.set('take', take);
+    }
+    if (filter !== undefined && filter !== '') {
+      params = params.set('filter', filter);
     }
 
     return this.http.get<Page<TenantDto>>(url, { params }).pipe(
