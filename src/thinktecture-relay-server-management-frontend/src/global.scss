@@ -24,3 +24,11 @@
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
+
+ion-list:not(:last-of-type) {
+  margin-bottom: 1em;
+}
+
+ion-item:has(ion-input[helperText]) {
+  --inner-padding-bottom: 0.35em;
+}
