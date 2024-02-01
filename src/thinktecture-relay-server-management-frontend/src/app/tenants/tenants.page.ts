@@ -1,8 +1,6 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import {
   InfiniteScrollCustomEvent,
-  IonButton,
-  IonButtons,
   IonContent,
   IonFab,
   IonFabButton,
