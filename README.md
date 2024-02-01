@@ -1,5 +1,9 @@
 # Thinktecture RelayServer
 
+__Achtung:__ Dies ist die 2.x **LEGACY** Version des RelayServers. Sie wird nicht mehr weiter entwickelt. Die aktuelle, weiter gepflegte, Version des RelayServers finden Sie [hier auf dem MAIN-branch](https://github.com/thinktecture/relayserver).
+
+__Important:__ This is the 2.x **LEGACY** version of RelayServer, which is not maintained anymore. The current, actively maintained, version of RelayServer [can be found on the MAIN branch](https://github.com/thinktecture/relayserver).
+
 [English documentation](./Documentation/en/relayserver.md).
 
 Der Thinktecture RelayServer (nachfolgend kurz RelayServer genannt) ermöglicht als Open-Source-Software eine bidirektionale, sichere Kommunikation von Clients, mobilen Endgeräten und Applikationen mit On-Premises-Applikationen hinter Routern und Firewalls über das HTTPS-Protokoll bei vollständiger zentraler Kontrolle und Auditierung der zulässigen Teilnehmer und der erlaubten Daten.
