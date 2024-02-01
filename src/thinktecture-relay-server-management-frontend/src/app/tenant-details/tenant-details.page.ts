@@ -5,6 +5,7 @@ import { switchMap } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import {
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
@@ -24,6 +25,7 @@ import {
     IonToolbar,
     IonButtons,
     IonBackButton,
+    IonButton,
     IonTitle,
     IonContent,
   ],

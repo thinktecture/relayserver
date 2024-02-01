@@ -1,9 +1,12 @@
 <ion-header>
   <ion-toolbar>
+    <ion-title>{{ name() }}</ion-title>
     <ion-buttons slot="start">
       <ion-back-button default-href="/tabs/tenants"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ name() }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>Edit</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
