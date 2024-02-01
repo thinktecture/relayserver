@@ -19,11 +19,12 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { lastValueFrom } from 'rxjs';
-import { ApiService, Tenant } from '../api/api.service';
+import { ApiService } from '../api/api.service';
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { NewTenantComponent } from '../new-tenant/new-tenant.component';
+import { Tenant } from '../api/tenant.model';
 
 const PAGE_SIZE = 20;
 
