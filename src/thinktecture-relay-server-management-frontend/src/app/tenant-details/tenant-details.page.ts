@@ -35,7 +35,7 @@ export class TenantDetailsPage {
 
   name = input.required<string>();
 
-  details = toObservable(this.name).pipe(
+  details$ = toObservable(this.name).pipe(
     switchMap((name) => this.api.getSingleTenant(name)),
   );
 }
