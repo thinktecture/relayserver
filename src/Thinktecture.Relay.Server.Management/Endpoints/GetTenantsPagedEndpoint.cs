@@ -56,6 +56,7 @@ public static class GetTenantsPagedEndpoint
 	/// <param name="service">An instance of an <see cref="ITenantService"/> to access the persistence layer.</param>
 	/// <param name="skip">The amount of tenants to skip while retrieving.</param>
 	/// <param name="take">The amount of tenants to fetch per page. Defaults to 10.</param>
+	/// <param name="filter">String to filter the tenants by.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
 	/// <see cref="P:System.Threading.CancellationToken.None"/>.
 	/// </param>
@@ -64,7 +65,8 @@ public static class GetTenantsPagedEndpoint
 		[FromServices] ITenantService service,
 		[FromQuery] int skip = 0,
 		[FromQuery] int take = 10,
+		[FromQuery] string? filter = null,
 		CancellationToken cancellationToken = default
 	)
-		=> (await service.LoadAllTenantsPagedAsync(skip, take, cancellationToken)).ToModel();
+		=> (await service.LoadAllTenantsPagedAsync(skip, take, filter, cancellationToken)).ToModel();
 }

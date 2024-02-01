@@ -68,11 +68,12 @@ public interface ITenantService
 	/// </summary>
 	/// <param name="skip">The amount of entries to skip.</param>
 	/// <param name="take">The amount of entries to take.</param>
+	/// <param name="filter">String to filter the tenants by.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
 	/// <see cref="P:System.Threading.CancellationToken.None"/>.
 	///</param>
 	/// <returns>A <see cref="Page{Tenant}"/> representing the asynchronous loading of a page of <see cref="Tenant"/>s.</returns>
-	Task<Page<Tenant>> LoadAllTenantsPagedAsync(int skip, int take, CancellationToken cancellationToken = default);
+	Task<Page<Tenant>> LoadAllTenantsPagedAsync(int skip, int take, string? filter, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Creates a new <see cref="Tenant"/>.
