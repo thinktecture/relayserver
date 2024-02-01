@@ -4,14 +4,14 @@ export interface TenantCredential {
   id: string;
 
   /** SHA256 or SHA512 value representing the value of this credential, only used for creating a new credential. */
-  value?: string | undefined;
+  value: string | null;
 
   /** Plain text value, only used for creating a new credential. */
-  plainTextValue?: string | undefined;
+  plainTextValue: string | null;
 
   /** Date and time this credential was created at. */
   created: Date;
 
   /** Date and time this credential expires at. */
-  expiration?: Date | undefined;
+  expiration: Date | null;
 }
