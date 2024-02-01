@@ -17,7 +17,7 @@ export interface Tenant {
   /** Maximum amount of concurrent requests a connector should receive. */
   maximumConcurrentConnectorRequests: number | null;
 
-  /** Interval in seconds used to send keep alive pings between the server and a connector. */
+  /** Interval in seconds used to send keepalive pings between the server and a connector. */
   keepAliveInterval: number | null;
 
   /** Whether tracing is enabled for all requests of this particular tenant. */
