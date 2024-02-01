@@ -22,6 +22,7 @@
           aria-label="Name"
           placeholder="Name"
           helperText="Required"
+          errorText="Required"
         />
       </ion-item>
     </ion-list>
@@ -51,6 +52,7 @@
           formControlName="maximumConcurrentConnectorRequests"
           label="Concurrent requests"
           helperText="Maximum amount of concurrent requests a connector should receive. Zero is unlimited."
+          errorText="Must not be negative."
         />
       </ion-item>
       <ion-item color="light">
@@ -59,6 +61,7 @@
           formControlName="keepAliveInterval"
           label="Keepalive interval"
           helperText="Interval in seconds used to send keepalive pings between the server and a connector."
+          errorText="Must not be negative."
         />
       </ion-item>
     </ion-list>
@@ -91,6 +94,7 @@
           formControlName="reconnectMinimumDelay"
           label="Minimum reconnect delay"
           helperText="Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+          errorText="Must not be negative."
         />
       </ion-item>
       <ion-item color="light">
@@ -99,6 +103,7 @@
           formControlName="reconnectMaximumDelay"
           label="Maximum reconnect delay"
           helperText="Maximum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+          errorText="Must not be negative."
         />
       </ion-item>
     </ion-list>
