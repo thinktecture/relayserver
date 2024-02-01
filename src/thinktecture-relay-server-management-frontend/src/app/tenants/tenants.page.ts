@@ -10,7 +10,6 @@ import {
   IonIcon,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
-  IonInput,
   IonItem,
   IonLabel,
   IonList,
@@ -80,7 +79,7 @@ export class TenantsPage implements OnInit {
     const page = await lastValueFrom(
       this.api.getTenantsPaged(this.tenants.length, PAGE_SIZE),
     );
-    this.tenants.push(...(page.results ?? []));
-    this.scrollDisabled = (page.results?.length ?? 0) < PAGE_SIZE;
+    this.tenants.push(...page.results);
+    this.scrollDisabled = page.results.length < page.pageSize;
   }
 }

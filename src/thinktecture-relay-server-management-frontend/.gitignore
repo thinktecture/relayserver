@@ -66,6 +66,3 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
-
-# Generated files
-/src/app/api/api.service.ts
