@@ -15,7 +15,7 @@
 <ion-content>
   <form [formGroup]="form">
     <ion-list>
-      <ion-item>
+      <ion-item color="light">
         <ion-input
           #tenantName
           formControlName="name"
@@ -23,7 +23,7 @@
           placeholder="Name"
         />
       </ion-item>
-      <ion-item>
+      <ion-item color="light">
         <ion-input
           formControlName="displayName"
           aria-label="Display name"
@@ -33,7 +33,7 @@
     </ion-list>
 
     <ion-list>
-      <ion-item>
+      <ion-item color="light">
         <ion-textarea
           formControlName="description"
           label="Description"
@@ -44,7 +44,7 @@
     </ion-list>
 
     <ion-list>
-      <ion-item>
+      <ion-item color="light">
         <ion-input
           type="number"
           formControlName="maximumConcurrentConnectorRequests"
@@ -52,7 +52,7 @@
           helperText="Maximum amount of concurrent requests a connector should receive. Zero is unlimited."
         />
       </ion-item>
-      <ion-item>
+      <ion-item color="light" class="padding-bottom">
         <ion-input
           type="number"
           formControlName="keepAliveInterval"
@@ -60,7 +60,10 @@
           helperText="Keepalive interval in seconds."
         />
       </ion-item>
-      <ion-item>
+    </ion-list>
+
+    <ion-list>
+      <ion-item color="light">
         <ion-checkbox
           formControlName="requireAuthentication"
           labelPlacement="end"
@@ -69,7 +72,7 @@
           Require authentication
         </ion-checkbox>
       </ion-item>
-      <ion-item>
+      <ion-item color="light">
         <ion-checkbox
           formControlName="enableTracing"
           labelPlacement="end"
@@ -81,7 +84,7 @@
     </ion-list>
 
     <ion-list>
-      <ion-item>
+      <ion-item color="light">
         <ion-input
           type="number"
           formControlName="reconnectMinimumDelay"
@@ -89,7 +92,7 @@
           helperText="Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again."
         />
       </ion-item>
-      <ion-item>
+      <ion-item color="light" class="padding-bottom">
         <ion-input
           type="number"
           formControlName="reconnectMaximumDelay"
@@ -100,7 +103,7 @@
     </ion-list>
 
     <ion-list>
-      <ion-item>
+      <ion-item color="light">
         <ion-button fill="clear">
           <ion-icon slot="icon-only" name="add-circle" color="success" />
           add credential
