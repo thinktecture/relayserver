@@ -8,7 +8,7 @@
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-searchbar (ionInput)="search($event)" />
+    <ion-searchbar (ionInput)="search($event)" [debounce]="500" />
   </ion-toolbar>
 </ion-header>
 
@@ -20,7 +20,13 @@
     </ion-item>
     } @if (scrollDisabled) {
     <ion-item>
-      <ion-note color="light">No more tenants</ion-note>
+      <ion-note color="light">
+        @if (filter === '') {
+        <span>{{ tenants.length }} tenants in total</span>
+        } @else {
+        <span>{{ tenants.length }} tenants matching {{ filter }}</span>
+        }
+      </ion-note>
     </ion-item>
     }
   </ion-list>
