@@ -70,11 +70,11 @@ export class NewTenantComponent {
     displayName: new FormControl(''),
     description: new FormControl(''),
     requireAuthentication: new FormControl(false),
-    maximumConcurrentConnectorRequests: new FormControl(0),
-    keepAliveInterval: new FormControl(0),
+    maximumConcurrentConnectorRequests: new FormControl(0, Validators.min(0)),
+    keepAliveInterval: new FormControl(0, Validators.min(0)),
     enableTracing: new FormControl(false),
-    reconnectMinimumDelay: new FormControl(0),
-    reconnectMaximumDelay: new FormControl(0),
+    reconnectMinimumDelay: new FormControl(0, Validators.min(0)),
+    reconnectMaximumDelay: new FormControl(0, Validators.min(0)),
   });
 
   constructor() {
