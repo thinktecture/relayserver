@@ -26,7 +26,7 @@ export class ApiService {
   putTenant(tenant: Tenant): Observable<void> {
     const url = `${this.baseUrl}/management/tenants/${tenant.name}`;
 
-    return this.http.put<void>(url, { body: ApiService.tenantToDto(tenant) });
+    return this.http.put<void>(url, ApiService.tenantToDto(tenant));
   }
 
   getTenantsPaged(skip?: number, take?: number): Observable<Page<Tenant>> {
@@ -51,7 +51,7 @@ export class ApiService {
   postTenant(tenant: Tenant): Observable<void> {
     const url = `${this.baseUrl}/management/tenants`;
 
-    return this.http.post<void>(url, { body: ApiService.tenantToDto(tenant) });
+    return this.http.post<void>(url, ApiService.tenantToDto(tenant));
   }
 
   private static tenantToDto(tenant: Tenant): TenantDto {
