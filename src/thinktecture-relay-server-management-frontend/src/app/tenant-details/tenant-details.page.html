@@ -11,5 +11,7 @@
 </ion-header>
 
 <ion-content>
-  <pre>{{ details | async | json }}</pre>
+  @if (details$ | async; as details) {
+  <pre>{{ details | json }}</pre>
+  }
 </ion-content>
