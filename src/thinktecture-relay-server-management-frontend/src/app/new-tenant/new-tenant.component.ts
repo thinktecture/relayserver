@@ -1,5 +1,11 @@
 import { JsonPipe } from '@angular/common';
-import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -23,6 +29,10 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { addCircle } from 'ionicons/icons';
+import { ApiService } from '../api/api.service';
+import { lastValueFrom } from 'rxjs';
+import { Tenant } from '../api/tenant.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-new-tenant',
@@ -48,6 +58,9 @@ import { addCircle } from 'ionicons/icons';
   ],
 })
 export class NewTenantComponent {
+  private api = inject(ApiService);
+  private router = inject(Router);
+
   @Output() dismiss = new EventEmitter<void>();
 
   @ViewChild('tenantName') tenantName: IonInput | null = null;
@@ -70,5 +83,12 @@ export class NewTenantComponent {
 
   focus() {
     this.tenantName?.setFocus();
+  }
+
+  async create() {
+    const tenant = { ...this.form.getRawValue(), credentials: [] } as Tenant;
+    await lastValueFrom(this.api.postTenant(tenant));
+    this.dismiss.emit();
+    this.router.navigate(['/tabs', 'tenants', tenant.name]);
   }
 }
