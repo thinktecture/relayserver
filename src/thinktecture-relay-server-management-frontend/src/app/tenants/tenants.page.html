@@ -1,6 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Tenants</ion-title>
+    <ion-buttons slot="end">
+      <ion-button id="add-tenant">
+        <ion-icon slot="icon-only" name="add" />
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -23,12 +28,6 @@
   >
     <ion-infinite-scroll-content></ion-infinite-scroll-content>
   </ion-infinite-scroll>
-
-  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button id="add-tenant">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 
   <ion-modal
     #modal
