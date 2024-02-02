@@ -13,6 +13,7 @@ import {
   IonList,
   IonModal,
   IonNote,
+  IonRouterOutlet,
   IonSearchbar,
   IonTitle,
   IonToolbar,
@@ -53,12 +54,12 @@ const PAGE_SIZE = 20;
     NewTenantComponent,
   ],
 })
-export class TenantsPage implements OnInit {
+export class TenantsPage {
   private api = inject(ApiService);
 
   tenants: Tenant[] = [];
   scrollDisabled = false;
-  presentingElement: HTMLIonRouterOutletElement | null = null;
+  presentingElement = inject(IonRouterOutlet).nativeEl;
   filter = '';
 
   @ViewChild('newTenant') newTenant: NewTenantComponent | null = null;
@@ -66,10 +67,6 @@ export class TenantsPage implements OnInit {
   constructor() {
     this.loadTenants();
     addIcons({ add });
-  }
-
-  ngOnInit() {
-    this.presentingElement = document.querySelector('ion-router-outlet');
   }
 
   search(ev: SearchbarCustomEvent) {
