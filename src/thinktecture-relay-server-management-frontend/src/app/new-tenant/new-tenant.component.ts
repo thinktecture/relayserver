@@ -74,8 +74,11 @@ export class NewTenantComponent {
     }),
     displayName: new FormControl(''),
     description: new FormControl(''),
-    requireAuthentication: new FormControl(false),
-    maximumConcurrentConnectorRequests: new FormControl(0, Validators.min(0)),
+    requireAuthentication: new FormControl(false, { nonNullable: true }),
+    maximumConcurrentConnectorRequests: new FormControl(0, {
+      nonNullable: true,
+      validators: Validators.min(0),
+    }),
     keepAliveInterval: new FormControl(0, Validators.min(0)),
     enableTracing: new FormControl(false),
     reconnectMinimumDelay: new FormControl(0, Validators.min(0)),
@@ -112,7 +115,10 @@ export class NewTenantComponent {
   addCredential() {
     this.credentials.push(
       new FormGroup({
-        plainTextValue: new FormControl('', { nonNullable: true }),
+        plainTextValue: new FormControl('', {
+          nonNullable: true,
+          validators: Validators.required,
+        }),
         isExpiring: new FormControl(false, { nonNullable: true }),
         expiration: new FormControl(new Date().toISOString(), {
           nonNullable: true,
