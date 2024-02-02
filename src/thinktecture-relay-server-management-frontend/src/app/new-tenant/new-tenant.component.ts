@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import {
   Component,
   EventEmitter,
@@ -7,6 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import {
+  FormArray,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
@@ -17,18 +17,20 @@ import {
   IonButtons,
   IonCheckbox,
   IonContent,
+  IonDatetime,
+  IonDatetimeButton,
   IonHeader,
   IonIcon,
   IonInput,
   IonItem,
-  IonLabel,
   IonList,
+  IonModal,
   IonTextarea,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { addCircle } from 'ionicons/icons';
+import { addCircle, removeCircle } from 'ionicons/icons';
 import { ApiService } from '../api/api.service';
 import { lastValueFrom } from 'rxjs';
 import { Tenant } from '../api/tenant.model';
@@ -40,7 +42,6 @@ import { Router } from '@angular/router';
   styleUrls: ['./new-tenant.component.scss'],
   standalone: true,
   imports: [
-    JsonPipe,
     ReactiveFormsModule,
     IonHeader,
     IonToolbar,
@@ -54,7 +55,9 @@ import { Router } from '@angular/router';
     IonTextarea,
     IonCheckbox,
     IonIcon,
-    IonLabel,
+    IonDatetimeButton,
+    IonModal,
+    IonDatetime,
   ],
 })
 export class NewTenantComponent {
@@ -75,10 +78,15 @@ export class NewTenantComponent {
     enableTracing: new FormControl(false),
     reconnectMinimumDelay: new FormControl(0, Validators.min(0)),
     reconnectMaximumDelay: new FormControl(0, Validators.min(0)),
+    credentials: new FormArray<FormGroup<FormCredential>>([]),
   });
 
   constructor() {
-    addIcons({ addCircle });
+    addIcons({ addCircle, removeCircle });
+  }
+
+  get credentials() {
+    return this.form.controls.credentials;
   }
 
   focus() {
@@ -91,4 +99,22 @@ export class NewTenantComponent {
     this.dismiss.emit();
     this.router.navigate(['/tabs', 'tenants', tenant.name]);
   }
+
+  addCredential() {
+    this.credentials.push(
+      new FormGroup({
+        value: new FormControl('', { nonNullable: true }),
+        isExpiring: new FormControl(false, { nonNullable: true }),
+        expiration: new FormControl(new Date().toISOString(), {
+          nonNullable: true,
+        }),
+      }),
+    );
+  }
+}
+
+interface FormCredential {
+  value: FormControl<string>;
+  isExpiring: FormControl<boolean>;
+  expiration: FormControl<string>;
 }

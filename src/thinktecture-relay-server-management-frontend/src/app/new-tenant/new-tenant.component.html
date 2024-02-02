@@ -19,8 +19,7 @@
         <ion-input
           #tenantName
           formControlName="name"
-          aria-label="Name"
-          placeholder="Name"
+          label="Name"
           helperText="Required"
           errorText="Required"
         />
@@ -29,17 +28,12 @@
 
     <ion-list>
       <ion-item color="light">
-        <ion-input
-          formControlName="displayName"
-          aria-label="Display name"
-          placeholder="Display name"
-        />
+        <ion-input formControlName="displayName" label="Display name" />
       </ion-item>
       <ion-item color="light">
         <ion-textarea
           formControlName="description"
           label="Description"
-          labelPlacement="stacked"
           autoGrow
         ></ion-textarea>
       </ion-item>
@@ -108,14 +102,49 @@
       </ion-item>
     </ion-list>
 
-    <ion-list>
+    <ion-list formArrayName="credentials">
       <ion-item color="light">
-        <ion-button fill="clear">
-          <ion-icon slot="icon-only" name="add-circle" color="success" />
+        <ion-button fill="clear" (click)="addCredential()">
+          <ion-icon slot="start" name="add-circle" color="success" />
           add credential
         </ion-button>
       </ion-item>
-      <!-- TODO: credentials -->
+
+      @for (credential of credentials.controls; track $index) {
+        <ion-item [formGroupName]="$index" color="light">
+          <ion-button fill="clear">
+            <ion-icon slot="icon-only" name="remove-circle" color="danger" />
+          </ion-button>
+          <ion-list>
+            <ion-item color="light" lines="full">
+              <ion-input placeholder="Value" formControlName="value" />
+            </ion-item>
+            <ion-item color="light" lines="full">
+              <ion-checkbox
+                formControlName="isExpiring"
+                labelPlacement="end"
+                justify="start"
+                slot="start"
+              >
+                Expires
+              </ion-checkbox>
+              <ion-datetime-button
+                [datetime]="'credential-' + $index + '-expiration'"
+                [disabled]="!credential.value.isExpiring"
+              />
+              <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime
+                    [id]="'credential-' + $index + '-expiration'"
+                    formControlName="expiration"
+                    presentation="date"
+                  />
+                </ng-template>
+              </ion-modal>
+            </ion-item>
+          </ion-list>
+        </ion-item>
+      }
     </ion-list>
   </form>
 </ion-content>
