@@ -103,7 +103,7 @@ export class NewTenantComponent {
   addCredential() {
     this.credentials.push(
       new FormGroup({
-        value: new FormControl('', { nonNullable: true }),
+        plainTextValue: new FormControl('', { nonNullable: true }),
         isExpiring: new FormControl(false, { nonNullable: true }),
         expiration: new FormControl(new Date().toISOString(), {
           nonNullable: true,
@@ -114,7 +114,7 @@ export class NewTenantComponent {
 }
 
 interface FormCredential {
-  value: FormControl<string>;
+  plainTextValue: FormControl<string>;
   isExpiring: FormControl<boolean>;
   expiration: FormControl<string>;
 }
