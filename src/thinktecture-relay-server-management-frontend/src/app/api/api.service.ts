@@ -3,6 +3,7 @@ import { Injectable, InjectionToken, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Tenant } from './tenant.model';
 import { Page } from './page.model';
+import { NewTenant } from './new-tenant.model';
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
@@ -23,7 +24,7 @@ export class ApiService {
     return this.http.get<TenantDto>(url).pipe(map(ApiService.tenantFromDto));
   }
 
-  putTenant(tenant: Tenant): Observable<void> {
+  putTenant(tenant: NewTenant): Observable<void> {
     const url = `${this.baseUrl}/management/tenants/${tenant.name}`;
 
     return this.http.put<void>(url, ApiService.tenantToDto(tenant));
@@ -55,13 +56,13 @@ export class ApiService {
     );
   }
 
-  postTenant(tenant: Tenant): Observable<void> {
+  postTenant(tenant: NewTenant): Observable<void> {
     const url = `${this.baseUrl}/management/tenants`;
 
     return this.http.post<void>(url, ApiService.tenantToDto(tenant));
   }
 
-  private static tenantToDto(tenant: Tenant): TenantDto {
+  private static tenantToDto(tenant: NewTenant): NewTenantDto {
     return {
       ...tenant,
       keepAliveInterval: ApiService.intervalToDto(tenant.keepAliveInterval),
@@ -131,12 +132,8 @@ export class ApiService {
   }
 }
 
-/** Represents a tenant. */
-interface TenantDto
-  extends Omit<
-    Tenant,
-    'keepAliveInterval' | 'reconnectMinimumDelay' | 'reconnectMaximumDelay'
-  > {
+/** Overrides for the tenant data transfer objects. */
+interface TenantDtoOverrides {
   /** Interval (hh:mm:ss) used to send keep alive pings between the server and a connector. */
   keepAliveInterval: string | null;
 
@@ -146,3 +143,13 @@ interface TenantDto
   /** Maximum delay (hh:mm:ss) to wait for until a reconnect of a connector should be attempted again. */
   reconnectMaximumDelay: string | null;
 }
+
+/** Data transfer object for a new tenant. */
+interface NewTenantDto
+  extends Omit<NewTenant, keyof TenantDtoOverrides>,
+    TenantDtoOverrides {}
+
+/** Data transfer object for a stored tenant. */
+interface TenantDto
+  extends Omit<Tenant, keyof TenantDtoOverrides>,
+    TenantDtoOverrides {}
