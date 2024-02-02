@@ -96,7 +96,14 @@ export class NewTenantComponent {
   }
 
   async create() {
-    const tenant = this.form.getRawValue();
+    const formTenant = this.form.getRawValue();
+    const tenant = {
+      ...formTenant,
+      credentials: formTenant.credentials.map((credential) => ({
+        plainTextValue: credential.plainTextValue,
+        expiration: credential.isExpiring ? credential.expiration : null,
+      })),
+    };
     await lastValueFrom(this.api.postTenant(tenant));
     this.dismiss.emit();
     this.router.navigate(['/tabs', 'tenants', tenant.name]);

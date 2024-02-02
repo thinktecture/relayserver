@@ -8,7 +8,4 @@ export interface TenantCredential
 
   /** Date and time this credential was created at. */
   created: string;
-
-  /** Date and time this credential expires at. */
-  expiration: string | null;
 }
