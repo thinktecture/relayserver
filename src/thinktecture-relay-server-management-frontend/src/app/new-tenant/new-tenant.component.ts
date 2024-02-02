@@ -120,6 +120,10 @@ export class NewTenantComponent {
       }),
     );
   }
+
+  removeCredential(index: number) {
+    this.credentials.removeAt(index);
+  }
 }
 
 interface FormCredential {
