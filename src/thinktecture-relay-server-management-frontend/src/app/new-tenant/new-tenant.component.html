@@ -110,9 +110,9 @@
         </ion-button>
       </ion-item>
 
-      @for (credential of credentials.controls; track $index) {
+      @for (credential of credentials.controls; track credential) {
         <ion-item [formGroupName]="$index" color="light">
-          <ion-button fill="clear">
+          <ion-button fill="clear" (click)="removeCredential($index)">
             <ion-icon slot="icon-only" name="remove-circle" color="danger" />
           </ion-button>
           <ion-list>
