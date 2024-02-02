@@ -24,6 +24,20 @@ ion-item ion-list {
   flex: 1;
 }
 
+.ion-focused:has(ion-item:focus-within)::part(native)::after {
+  opacity: 0;
+}
+
+.ion-focused
+  ion-item:has(
+    ion-checkbox:focus-within,
+    ion-button:focus-within,
+    ion-datetime-button:focus-within
+  )::part(native)::after {
+  background-color: var(--background-focused);
+  opacity: var(--background-focused-opacity);
+}
+
 ion-item ion-list ion-item:last-child {
-  --inner-border-width: 0;
+  --border-width: 0;
 }
