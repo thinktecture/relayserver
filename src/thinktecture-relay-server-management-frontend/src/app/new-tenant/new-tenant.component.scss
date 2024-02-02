@@ -5,5 +5,25 @@
 }
 
 ion-button ion-icon {
-  margin-right: 0.5em;
+  font-size: 2em;
+}
+
+ion-item:has(.button-has-icon-only) {
+  --padding-start: 0.5em;
+}
+
+ion-item:has(ion-list) {
+  --inner-padding-end: 0;
+}
+
+ion-item .button-has-icon-only {
+  align-self: stretch;
+}
+
+ion-item ion-list {
+  flex: 1;
+}
+
+ion-item ion-list ion-item:last-child {
+  --inner-border-width: 0;
 }
