@@ -33,7 +33,6 @@ import { addIcons } from 'ionicons';
 import { addCircle, removeCircle } from 'ionicons/icons';
 import { ApiService } from '../api/api.service';
 import { lastValueFrom } from 'rxjs';
-import { Tenant } from '../api/tenant.model';
 import { Router } from '@angular/router';
 
 @Component({
@@ -69,7 +68,10 @@ export class NewTenantComponent {
   @ViewChild('tenantName') tenantName: IonInput | null = null;
 
   form = new FormGroup({
-    name: new FormControl('', Validators.required),
+    name: new FormControl('', {
+      nonNullable: true,
+      validators: Validators.required,
+    }),
     displayName: new FormControl(''),
     description: new FormControl(''),
     requireAuthentication: new FormControl(false),
@@ -94,7 +96,7 @@ export class NewTenantComponent {
   }
 
   async create() {
-    const tenant = { ...this.form.getRawValue(), credentials: [] } as Tenant;
+    const tenant = this.form.getRawValue();
     await lastValueFrom(this.api.postTenant(tenant));
     this.dismiss.emit();
     this.router.navigate(['/tabs', 'tenants', tenant.name]);
