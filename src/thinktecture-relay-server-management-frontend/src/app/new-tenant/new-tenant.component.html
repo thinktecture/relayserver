@@ -132,7 +132,7 @@
                 [datetime]="'credential-' + $index + '-expiration'"
                 [disabled]="!credential.value.isExpiring"
               />
-              <ion-modal [keepContentsMounted]="true">
+              <ion-modal keepContentsMounted>
                 <ng-template>
                   <ion-datetime
                     [id]="'credential-' + $index + '-expiration'"

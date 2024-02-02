@@ -12,10 +12,10 @@ export interface NewTenant {
   description: string | null;
 
   /** Whether authentication is required for relaying a request to this tenant. */
-  requireAuthentication: boolean | null;
+  requireAuthentication: boolean;
 
   /** Maximum amount of concurrent requests a connector should receive. */
-  maximumConcurrentConnectorRequests: number | null;
+  maximumConcurrentConnectorRequests: number;
 
   /** Interval in seconds used to send keepalive pings between the server and a connector. */
   keepAliveInterval: number | null;
