@@ -1,0 +1,152 @@
+<ng-container [formGroup]="form">
+  <ion-list>
+    <ion-item color="light">
+      <ion-input
+        #tenantName
+        formControlName="name"
+        label="Name"
+        helperText="Required"
+        errorText="Required"
+      />
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item color="light">
+      <ion-input formControlName="displayName" label="Display name" />
+    </ion-item>
+    <ion-item color="light">
+      <ion-textarea
+        formControlName="description"
+        label="Description"
+        autoGrow
+      ></ion-textarea>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item color="light">
+      <ion-input
+        type="number"
+        formControlName="maximumConcurrentConnectorRequests"
+        label="Concurrent requests"
+        helperText="Maximum amount of concurrent requests a connector should receive. Zero is unlimited."
+        errorText="Must not be negative."
+      />
+    </ion-item>
+    <ion-item color="light">
+      <ion-input
+        type="number"
+        formControlName="keepAliveInterval"
+        label="Keepalive interval"
+        helperText="Interval in seconds used to send keepalive pings between the server and a connector."
+        errorText="Must not be negative."
+      />
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item color="light">
+      <ion-checkbox
+        formControlName="requireAuthentication"
+        labelPlacement="end"
+        justify="start"
+      >
+        Require authentication
+      </ion-checkbox>
+    </ion-item>
+    <ion-item color="light">
+      <ion-checkbox
+        formControlName="enableTracing"
+        labelPlacement="end"
+        justify="start"
+      >
+        Enable tracing
+      </ion-checkbox>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item color="light">
+      <ion-input
+        type="number"
+        formControlName="reconnectMinimumDelay"
+        label="Minimum reconnect delay"
+        helperText="Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+        errorText="Must not be negative."
+      />
+    </ion-item>
+    <ion-item color="light">
+      <ion-input
+        type="number"
+        formControlName="reconnectMaximumDelay"
+        label="Maximum reconnect delay"
+        helperText="Maximum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+        errorText="Must not be negative."
+      />
+    </ion-item>
+  </ion-list>
+
+  <ion-list formArrayName="credentials">
+    <ion-item color="light">
+      <ion-button fill="clear" (click)="addCredential()">
+        <ion-icon slot="start" name="add-circle" color="success" />
+        add credential
+      </ion-button>
+    </ion-item>
+
+    @for (credential of credentials.controls; track credential) {
+      <ion-item [formGroupName]="$index" color="light">
+        <ion-button fill="clear" (click)="removeCredential($index)">
+          <ion-icon slot="icon-only" name="remove-circle" color="danger" />
+        </ion-button>
+        <ion-list>
+          <ion-item color="light" lines="full">
+            <ion-input
+              label="Value"
+              formControlName="plainTextValue"
+              helperText="Required. Can be overwritten."
+              errorText="Required"
+            >
+              <ion-button
+                fill="clear"
+                slot="end"
+                aria-label="Copy to clipboard"
+                (click)="copyCredential($index)"
+              >
+                <ion-icon
+                  slot="icon-only"
+                  name="copy-outline"
+                  aria-hidden="true"
+                />
+              </ion-button>
+            </ion-input>
+          </ion-item>
+          <ion-item color="light" lines="full">
+            <ion-checkbox
+              formControlName="isExpiring"
+              labelPlacement="end"
+              justify="start"
+              slot="start"
+            >
+              Expires
+            </ion-checkbox>
+            <ion-datetime-button
+              [datetime]="'credential-' + $index + '-expiration'"
+              [disabled]="!credential.value.isExpiring"
+            />
+            <ion-modal keepContentsMounted>
+              <ng-template>
+                <ion-datetime
+                  [id]="'credential-' + $index + '-expiration'"
+                  formControlName="expiration"
+                  presentation="date"
+                />
+              </ng-template>
+            </ion-modal>
+          </ion-item>
+        </ion-list>
+      </ion-item>
+    }
+  </ion-list>
+</ng-container>

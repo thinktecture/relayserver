@@ -3,37 +3,3 @@
   display: flex;
   flex-direction: column;
 }
-
-ion-button ion-icon {
-  font-size: 2em;
-}
-
-ion-item:has(.button-has-icon-only) {
-  --padding-start: 0.5em;
-}
-
-ion-item .button-has-icon-only {
-  align-self: stretch;
-}
-
-ion-item ion-list {
-  flex: 1;
-}
-
-.ion-focused:has(ion-item:focus-within)::part(native)::after {
-  opacity: 0;
-}
-
-.ion-focused
-  ion-item:has(
-    ion-checkbox:focus-within,
-    ion-button:focus-within,
-    ion-datetime-button:focus-within
-  )::part(native)::after {
-  background-color: var(--background-focused);
-  opacity: var(--background-focused-opacity);
-}
-
-ion-item ion-list ion-item:last-child {
-  --border-width: 0;
-}
