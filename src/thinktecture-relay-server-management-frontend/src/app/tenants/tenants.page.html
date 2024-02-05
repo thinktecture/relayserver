@@ -17,6 +17,14 @@
     @for (tenant of tenants; track tenant.name) {
     <ion-item [routerLink]="['/tabs', 'tenants', tenant.name]" [button]="true">
       <ion-label>{{ tenant.name }}</ion-label>
+      <ion-button
+        slot="end"
+        fill="clear"
+        color="danger"
+        (click)="deleteTenant($event, $index)"
+      >
+        <ion-icon slot="icon-only" name="trash-outline" />
+      </ion-button>
     </ion-item>
     } @if (scrollDisabled) {
     <ion-item>
