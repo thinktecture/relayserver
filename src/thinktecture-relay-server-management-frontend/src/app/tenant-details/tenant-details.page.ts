@@ -1,6 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { ReactiveFormsModule } from '@angular/forms';
 import {
   IonBackButton,
   IonButton,
@@ -10,8 +11,9 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { switchMap } from 'rxjs';
+import { firstValueFrom, shareReplay, switchMap } from 'rxjs';
 import { ApiService } from '../api/api.service';
+import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
 
 @Component({
@@ -21,6 +23,7 @@ import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
   standalone: true,
   imports: [
     AsyncPipe,
+    ReactiveFormsModule,
     IonHeader,
     IonToolbar,
     IonButtons,
@@ -28,6 +31,7 @@ import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
     IonButton,
     IonTitle,
     IonContent,
+    EditTenantComponent,
     ViewTenantComponent,
   ],
 })
@@ -36,7 +40,25 @@ export class TenantDetailsPage {
 
   name = input.required<string>();
 
-  details$ = toObservable(this.name).pipe(
+  tenant$ = toObservable(this.name).pipe(
     switchMap((name) => this.api.getSingleTenant(name)),
+    shareReplay(),
   );
+  editing = false;
+  form = EditTenantComponent.generateForm();
+
+  async edit() {
+    const tenant = await firstValueFrom(this.tenant$);
+    this.form.reset({
+      ...tenant,
+      credentials: tenant.credentials.map((_) => ({})),
+    });
+    this.editing = true;
+  }
+
+  async save() {}
+
+  cancel() {
+    this.editing = false;
+  }
 }
