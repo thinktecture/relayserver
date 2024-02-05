@@ -117,7 +117,12 @@
           </ion-button>
           <ion-list>
             <ion-item color="light" lines="full">
-              <ion-input placeholder="Value" formControlName="plainTextValue" />
+              <ion-input
+                label="Value"
+                formControlName="plainTextValue"
+                helperText="Required. Can be overwritten."
+                errorText="Required"
+              />
             </ion-item>
             <ion-item color="light" lines="full">
               <ion-checkbox

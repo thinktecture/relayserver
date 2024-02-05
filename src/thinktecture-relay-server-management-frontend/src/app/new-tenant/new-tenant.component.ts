@@ -115,10 +115,13 @@ export class NewTenantComponent {
   addCredential() {
     this.credentials.push(
       new FormGroup({
-        plainTextValue: new FormControl('', {
-          nonNullable: true,
-          validators: Validators.required,
-        }),
+        plainTextValue: new FormControl(
+          NewTenantComponent.generateRandomString(),
+          {
+            nonNullable: true,
+            validators: Validators.required,
+          },
+        ),
         isExpiring: new FormControl(false, { nonNullable: true }),
         expiration: new FormControl(new Date().toISOString(), {
           nonNullable: true,
@@ -129,6 +132,14 @@ export class NewTenantComponent {
 
   removeCredential(index: number) {
     this.credentials.removeAt(index);
+  }
+
+  private static generateRandomString(): string {
+    const characters =
+      '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    return Array.from(crypto.getRandomValues(new Uint32Array(37)))
+      .map((x) => characters[x % characters.length])
+      .join('');
   }
 }
 
