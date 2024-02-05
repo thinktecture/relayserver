@@ -2,16 +2,30 @@
   <ion-toolbar>
     <ion-title>{{ name() }}</ion-title>
     <ion-buttons slot="start">
-      <ion-back-button default-href="/tabs/tenants"></ion-back-button>
+      @if (editing) {
+        <ion-button (click)="cancel()">Cancel</ion-button>
+      } @else {
+        <ion-back-button default-href="/tabs/tenants"></ion-back-button>
+      }
     </ion-buttons>
     <ion-buttons slot="end">
-      <ion-button>Edit</ion-button>
+      @if (editing) {
+        <ion-button strong (click)="save()">Done</ion-button>
+      } @else {
+        <ion-button (click)="edit()">Edit</ion-button>
+      }
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  @if (details$ | async; as details) {
-    <app-view-tenant [tenant]="details" />
+  @if (editing) {
+    <form [formGroup]="form">
+      <app-edit-tenant />
+    </form>
+  } @else {
+    @if (tenant$ | async; as tenant) {
+      <app-view-tenant [tenant]="tenant" />
+    }
   }
 </ion-content>
