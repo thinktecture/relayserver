@@ -15,27 +15,32 @@
 <ion-content>
   <ion-list>
     @for (tenant of tenants; track tenant.name) {
-    <ion-item [routerLink]="['/tabs', 'tenants', tenant.name]" [button]="true">
-      <ion-label>{{ tenant.displayName ?? tenant.name }}</ion-label>
-      <ion-button
-        slot="end"
-        fill="clear"
-        color="danger"
-        (click)="deleteTenant($event, $index)"
+      <ion-item
+        [routerLink]="['/tabs', 'tenants', tenant.name]"
+        [button]="true"
       >
-        <ion-icon slot="icon-only" name="trash-outline" />
-      </ion-button>
-    </ion-item>
-    } @if (scrollDisabled) {
-    <ion-item>
-      <ion-note color="light">
-        @if (filter === '') {
-        <span>{{ tenants.length }} tenants in total</span>
-        } @else {
-        <span>{{ tenants.length }} tenants matching {{ filter }}</span>
-        }
-      </ion-note>
-    </ion-item>
+        <ion-label>{{ tenant.displayName ?? tenant.name }}</ion-label>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="danger"
+          (click)="deleteTenant($event, $index)"
+        >
+          <ion-icon slot="icon-only" name="trash-outline" />
+        </ion-button>
+      </ion-item>
+    }
+
+    @if (scrollDisabled) {
+      <ion-item>
+        <ion-note color="light">
+          @if (filter === "") {
+            <span>{{ tenants.length }} tenants in total</span>
+          } @else {
+            <span>{{ tenants.length }} tenants matching {{ filter }}</span>
+          }
+        </ion-note>
+      </ion-item>
     }
   </ion-list>
 
