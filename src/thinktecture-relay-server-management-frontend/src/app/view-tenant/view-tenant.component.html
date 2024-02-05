@@ -1,0 +1,93 @@
+<ion-list inset>
+  <ion-item color="light">
+    <ion-label>
+      <p>Name</p>
+      {{ tenant().displayName ?? tenant.name }}
+    </ion-label>
+  </ion-item>
+
+  @if (tenant().description !== null) {
+    <ion-item color="light">
+      <ion-label>
+        <p>Description</p>
+        {{ tenant().description }}
+      </ion-label>
+    </ion-item>
+  }
+
+  <ion-item color="light">
+    <ion-label>
+      <p>Require authentication</p>
+      {{ tenant().requireAuthentication }}
+    </ion-label>
+  </ion-item>
+
+  <ion-item color="light">
+    <ion-label>
+      <p>Maximum concurrent connector requests</p>
+      {{ tenant().maximumConcurrentConnectorRequests }}
+    </ion-label>
+  </ion-item>
+
+  @if (tenant().keepAliveInterval !== null) {
+    <ion-item color="light">
+      <ion-label>
+        <p>Keep alive interval in seconds</p>
+        {{ tenant().keepAliveInterval }}
+      </ion-label>
+    </ion-item>
+  }
+
+  @if (tenant().enableTracing !== null) {
+    <ion-item color="light">
+      <ion-label>
+        <p>Enable tracing</p>
+        {{ tenant().enableTracing }}
+      </ion-label>
+    </ion-item>
+  }
+
+  @if (tenant().reconnectMinimumDelay !== null) {
+    <ion-item color="light">
+      <ion-label>
+        <p>Reconnect minimum delay in seconds</p>
+        {{ tenant().reconnectMinimumDelay }}
+      </ion-label>
+    </ion-item>
+  }
+
+  @if (tenant().reconnectMaximumDelay !== null) {
+    <ion-item color="light">
+      <ion-label>
+        <p>Reconnect maximum delay in secons</p>
+        {{ tenant().reconnectMaximumDelay }}
+      </ion-label>
+    </ion-item>
+  }
+</ion-list>
+
+@if (tenant().credentials.length > 0) {
+  <ion-list inset>
+    <ion-item color="light">
+      <ion-label>Credentials</ion-label>
+    </ion-item>
+
+    @for (credential of tenant().credentials; track credential.id) {
+      <ion-item color="light">
+        <ion-label>
+          <p>Created</p>
+          {{ credential.created }}
+        </ion-label>
+      </ion-item>
+
+      @if (credential.expiration !== null) {
+        <ion-item color="light">
+          <ion-label>
+            <p>Expires</p>
+            {{ credential.expiration }}
+          </ion-label>
+        </ion-item>
+      }
+    }
+  </ion-list>
+}
