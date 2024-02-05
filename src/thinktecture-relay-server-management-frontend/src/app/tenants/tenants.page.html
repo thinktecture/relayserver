@@ -2,8 +2,8 @@
   <ion-toolbar>
     <ion-title>Tenants</ion-title>
     <ion-buttons slot="end">
-      <ion-button id="add-tenant">
-        <ion-icon slot="icon-only" name="add" />
+      <ion-button id="add-tenant" aria-label="Add tenant">
+        <ion-icon slot="icon-only" name="add" aria-hidden />
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -25,8 +25,9 @@
           fill="clear"
           color="danger"
           (click)="deleteTenant($event, $index)"
+          aria-label="Delete tenant"
         >
-          <ion-icon slot="icon-only" name="trash-outline" />
+          <ion-icon slot="icon-only" name="trash-outline" aria-hidden />
         </ion-button>
       </ion-item>
     }

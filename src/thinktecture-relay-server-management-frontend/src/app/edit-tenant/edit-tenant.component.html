@@ -103,8 +103,17 @@
 
     @for (credential of credentials.controls; track credential) {
       <ion-item [formGroupName]="$index" color="light">
-        <ion-button fill="clear" (click)="removeCredential($index)">
-          <ion-icon slot="icon-only" name="remove-circle" color="danger" />
+        <ion-button
+          fill="clear"
+          (click)="removeCredential($index)"
+          aria-label="Remove credential"
+        >
+          <ion-icon
+            slot="icon-only"
+            name="remove-circle"
+            color="danger"
+            aria-hidden
+          />
         </ion-button>
         <ion-list>
           <ion-item color="light" lines="full">
@@ -120,11 +129,7 @@
                 aria-label="Copy to clipboard"
                 (click)="copyCredential($index)"
               >
-                <ion-icon
-                  slot="icon-only"
-                  name="copy-outline"
-                  aria-hidden="true"
-                />
+                <ion-icon slot="icon-only" name="copy-outline" aria-hidden />
               </ion-button>
             </ion-input>
           </ion-item>
