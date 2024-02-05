@@ -122,7 +122,20 @@
                 formControlName="plainTextValue"
                 helperText="Required. Can be overwritten."
                 errorText="Required"
-              />
+              >
+                <ion-button
+                  fill="clear"
+                  slot="end"
+                  aria-label="Copy to clipboard"
+                  (click)="copyCredential($index)"
+                >
+                  <ion-icon
+                    slot="icon-only"
+                    name="copy-outline"
+                    aria-hidden="true"
+                  />
+                </ion-button>
+              </ion-input>
             </ion-item>
             <ion-item color="light" lines="full">
               <ion-checkbox

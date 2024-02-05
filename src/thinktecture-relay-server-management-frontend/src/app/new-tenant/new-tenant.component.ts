@@ -30,10 +30,11 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { addCircle, removeCircle } from 'ionicons/icons';
+import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
 import { ApiService } from '../api/api.service';
 import { lastValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
+import { Clipboard } from '@capacitor/clipboard';
 
 @Component({
   selector: 'app-new-tenant',
@@ -87,7 +88,7 @@ export class NewTenantComponent {
   });
 
   constructor() {
-    addIcons({ addCircle, removeCircle });
+    addIcons({ addCircle, removeCircle, copyOutline });
   }
 
   get credentials() {
@@ -132,6 +133,13 @@ export class NewTenantComponent {
 
   removeCredential(index: number) {
     this.credentials.removeAt(index);
+  }
+
+  copyCredential(index: number) {
+    const value = this.credentials.at(index).value.plainTextValue;
+    if (value !== undefined) {
+      Clipboard.write({ string: value });
+    }
   }
 
   private static generateRandomString(): string {
