@@ -7,14 +7,12 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { switchMap } from 'rxjs';
 import { ApiService } from '../api/api.service';
+import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
 
 @Component({
   selector: 'app-tenant-details',
@@ -30,9 +28,7 @@ import { ApiService } from '../api/api.service';
     IonButton,
     IonTitle,
     IonContent,
-    IonList,
-    IonItem,
-    IonLabel,
+    ViewTenantComponent,
   ],
 })
 export class TenantDetailsPage {
