@@ -1,8 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs';
-import { ApiService } from '../api/api.service';
 import {
   IonBackButton,
   IonButton,
@@ -15,6 +13,8 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
+import { switchMap } from 'rxjs';
+import { ApiService } from '../api/api.service';
 
 @Component({
   selector: 'app-tenant-details',
