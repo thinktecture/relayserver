@@ -5,36 +5,19 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import {
   IonButton,
   IonButtons,
-  IonCheckbox,
   IonContent,
-  IonDatetime,
-  IonDatetimeButton,
   IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonList,
-  IonModal,
-  IonTextarea,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
-import { ApiService } from '../api/api.service';
 import { lastValueFrom } from 'rxjs';
-import { Router } from '@angular/router';
-import { Clipboard } from '@capacitor/clipboard';
+import { ApiService } from '../api/api.service';
+import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 
 @Component({
   selector: 'app-new-tenant',
@@ -49,15 +32,7 @@ import { Clipboard } from '@capacitor/clipboard';
     IonButtons,
     IonButton,
     IonContent,
-    IonList,
-    IonItem,
-    IonInput,
-    IonTextarea,
-    IonCheckbox,
-    IonIcon,
-    IonDatetimeButton,
-    IonModal,
-    IonDatetime,
+    EditTenantComponent,
   ],
 })
 export class NewTenantComponent {
@@ -66,37 +41,12 @@ export class NewTenantComponent {
 
   @Output() dismiss = new EventEmitter<void>();
 
-  @ViewChild('tenantName') tenantName: IonInput | null = null;
+  @ViewChild(EditTenantComponent) editTenant: EditTenantComponent | undefined;
 
-  form = new FormGroup({
-    name: new FormControl('', {
-      nonNullable: true,
-      validators: Validators.required,
-    }),
-    displayName: new FormControl(''),
-    description: new FormControl(''),
-    requireAuthentication: new FormControl(false, { nonNullable: true }),
-    maximumConcurrentConnectorRequests: new FormControl(0, {
-      nonNullable: true,
-      validators: Validators.min(0),
-    }),
-    keepAliveInterval: new FormControl(0, Validators.min(0)),
-    enableTracing: new FormControl(false),
-    reconnectMinimumDelay: new FormControl(0, Validators.min(0)),
-    reconnectMaximumDelay: new FormControl(0, Validators.min(0)),
-    credentials: new FormArray<FormGroup<FormCredential>>([]),
-  });
-
-  constructor() {
-    addIcons({ addCircle, removeCircle, copyOutline });
-  }
-
-  get credentials() {
-    return this.form.controls.credentials;
-  }
+  form = EditTenantComponent.generateForm();
 
   focus() {
-    this.tenantName?.setFocus();
+    this.editTenant?.focus();
   }
 
   async create() {
@@ -112,47 +62,4 @@ export class NewTenantComponent {
     this.dismiss.emit();
     this.router.navigate(['/tabs', 'tenants', tenant.name]);
   }
-
-  addCredential() {
-    this.credentials.push(
-      new FormGroup({
-        plainTextValue: new FormControl(
-          NewTenantComponent.generateRandomString(),
-          {
-            nonNullable: true,
-            validators: Validators.required,
-          },
-        ),
-        isExpiring: new FormControl(false, { nonNullable: true }),
-        expiration: new FormControl(new Date().toISOString(), {
-          nonNullable: true,
-        }),
-      }),
-    );
-  }
-
-  removeCredential(index: number) {
-    this.credentials.removeAt(index);
-  }
-
-  copyCredential(index: number) {
-    const value = this.credentials.at(index).value.plainTextValue;
-    if (value !== undefined) {
-      Clipboard.write({ string: value });
-    }
-  }
-
-  private static generateRandomString(): string {
-    const characters =
-      '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    return Array.from(crypto.getRandomValues(new Uint32Array(37)))
-      .map((x) => characters[x % characters.length])
-      .join('');
-  }
-}
-
-interface FormCredential {
-  plainTextValue: FormControl<string>;
-  isExpiring: FormControl<boolean>;
-  expiration: FormControl<string>;
 }
