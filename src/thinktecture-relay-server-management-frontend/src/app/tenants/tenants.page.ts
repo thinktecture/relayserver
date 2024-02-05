@@ -1,5 +1,7 @@
 import { Component, ViewChild, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
+  AlertController,
   InfiniteScrollCustomEvent,
   IonButton,
   IonButtons,
@@ -19,13 +21,12 @@ import {
   IonToolbar,
   SearchbarCustomEvent,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { add, trashOutline } from 'ionicons/icons';
 import { lastValueFrom } from 'rxjs';
 import { ApiService } from '../api/api.service';
-import { RouterLink } from '@angular/router';
-import { addIcons } from 'ionicons';
-import { add } from 'ionicons/icons';
-import { NewTenantComponent } from '../new-tenant/new-tenant.component';
 import { Tenant } from '../api/tenant.model';
+import { NewTenantComponent } from '../new-tenant/new-tenant.component';
 
 const PAGE_SIZE = 20;
 
@@ -56,6 +57,7 @@ const PAGE_SIZE = 20;
 })
 export class TenantsPage {
   private api = inject(ApiService);
+  private alertController = inject(AlertController);
 
   tenants: Tenant[] = [];
   scrollDisabled = false;
@@ -66,12 +68,34 @@ export class TenantsPage {
 
   constructor() {
     this.loadTenants();
-    addIcons({ add });
+    addIcons({ add, trashOutline });
   }
 
   search(ev: SearchbarCustomEvent) {
     this.filter = ev.target.value ?? '';
     this.loadTenants(true);
+  }
+
+  async deleteTenant(event: MouseEvent, index: number) {
+    event.stopPropagation();
+
+    const tenant = this.tenants[index];
+
+    const alert = await this.alertController.create({
+      message: `Are you sure you want to delete the tenant "${tenant.displayName ?? tenant.name}"`,
+      buttons: [
+        {
+          text: 'Delete tenant',
+          role: 'destructive',
+          handler: async () => {
+            await lastValueFrom(this.api.deleteTenant(tenant.name));
+            this.loadTenants(true);
+          },
+        },
+        { text: 'Cancel', role: 'cancel' },
+      ],
+    });
+    await alert.present();
   }
 
   async onInfinite(ev: Event) {
