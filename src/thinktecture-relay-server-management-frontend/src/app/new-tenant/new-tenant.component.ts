@@ -12,6 +12,9 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonInput,
+  IonItem,
+  IonList,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
@@ -32,6 +35,9 @@ import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
     IonButtons,
     IonButton,
     IonContent,
+    IonList,
+    IonItem,
+    IonInput,
     EditTenantComponent,
   ],
 })
