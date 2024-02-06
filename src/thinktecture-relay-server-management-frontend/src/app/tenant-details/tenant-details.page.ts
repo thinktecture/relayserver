@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
   IonBackButton,
   IonButton,
@@ -49,10 +49,28 @@ export class TenantDetailsPage {
 
   async edit() {
     const tenant = await firstValueFrom(this.tenant$);
+
     this.form.reset({
       ...tenant,
-      credentials: tenant.credentials.map((_) => ({})),
+      credentials: [],
     });
+
+    this.form.controls.credentials.clear();
+    for (const credential of tenant.credentials) {
+      this.form.controls.credentials.push(
+        new FormGroup({
+          plainTextValue: new FormControl('', { nonNullable: true }),
+          isExpiring: new FormControl(credential.expiration !== null, {
+            nonNullable: true,
+          }),
+          expiration: new FormControl(
+            new Date(credential.expiration ?? Date.now()).toISOString(),
+            { nonNullable: true },
+          ),
+        }),
+      );
+    }
+
     this.editing = true;
   }
 
