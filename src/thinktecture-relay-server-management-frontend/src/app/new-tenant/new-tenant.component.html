@@ -14,6 +14,18 @@
 
 <ion-content>
   <form [formGroup]="form">
+    <ion-list>
+      <ion-item color="light">
+        <ion-input
+          #tenantName
+          formControlName="name"
+          label="Name"
+          helperText="Required"
+          errorText="Required"
+        />
+      </ion-item>
+    </ion-list>
+
     <app-edit-tenant />
   </form>
 </ion-content>
