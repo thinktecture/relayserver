@@ -15,12 +15,19 @@ ion-item ion-list {
   flex: 1;
 }
 
-.ion-focused:has(ion-item:focus-within)::part(native)::after {
-  opacity: 0;
+ion-item:has(ion-item:focus-within)::part(native)::after,
+ion-item:not(
+    :hover,
+    :has(
+        ion-checkbox:focus-within,
+        ion-button:focus-within,
+        ion-datetime-button:focus-within
+      )
+  )::part(native)::after {
+  opacity: 0 !important;
 }
 
-.ion-focused
-  ion-item:has(
+ion-item:has(
     ion-checkbox:focus-within,
     ion-button:focus-within,
     ion-datetime-button:focus-within
@@ -29,6 +36,24 @@ ion-item ion-list {
   opacity: var(--background-focused-opacity);
 }
 
-ion-item ion-list ion-item:last-child {
+ion-item ion-item:has(ion-checkbox):hover::part(native)::after {
+  background-color: var(--background-hover);
+  opacity: var(--background-hover-opacity);
+}
+
+ion-item ion-item:last-child {
   --border-width: 0;
+}
+
+ion-item:has(ion-list) {
+  --inner-padding-bottom: 0;
+}
+
+ion-list ion-list {
+  margin-bottom: 0;
+}
+
+// https://github.com/ionic-team/ionic-framework/issues/28983
+ion-item {
+  --show-full-highlight: 0;
 }
