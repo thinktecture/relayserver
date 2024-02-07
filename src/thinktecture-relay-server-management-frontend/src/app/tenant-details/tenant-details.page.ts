@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import {
   IonBackButton,
   IonButton,
@@ -11,7 +11,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { firstValueFrom, shareReplay, switchMap } from 'rxjs';
+import { firstValueFrom, lastValueFrom, shareReplay, switchMap } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
@@ -50,31 +50,40 @@ export class TenantDetailsPage {
   async edit() {
     const tenant = await firstValueFrom(this.tenant$);
 
-    this.form.reset({
-      ...tenant,
-      credentials: [],
-    });
-
     this.form.controls.credentials.clear();
-    for (const credential of tenant.credentials) {
-      this.form.controls.credentials.push(
-        new FormGroup({
-          plainTextValue: new FormControl('', { nonNullable: true }),
-          isExpiring: new FormControl(credential.expiration !== null, {
-            nonNullable: true,
-          }),
-          expiration: new FormControl(
-            new Date(credential.expiration ?? Date.now()).toISOString(),
-            { nonNullable: true },
-          ),
-        }),
+
+    for (const _ of tenant.credentials) {
+      this.form.controls.credentials.controls.push(
+        EditTenantComponent.generateCredentialForm(),
       );
     }
+
+    this.form.reset({
+      ...tenant,
+      credentials: tenant.credentials.map((credential) => ({
+        id: credential.id,
+        plainTextValue: null,
+        created: credential.created,
+        isExpiring: credential.expiration !== null,
+        expiration: credential.expiration ?? '',
+      })),
+    });
 
     this.editing = true;
   }
 
-  async save() {}
+  async save() {
+    const formTenant = this.form.getRawValue();
+    const tenant = {
+      ...formTenant,
+      credentials: formTenant.credentials.map((credential) => ({
+        id: credential.id,
+        plainTextValue: credential.plainTextValue,
+        expiration: credential.isExpiring ? credential.expiration : null,
+      })),
+    };
+    await lastValueFrom(this.api.putTenant(tenant));
+  }
 
   cancel() {
     this.editing = false;
