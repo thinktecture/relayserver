@@ -74,20 +74,25 @@
 
     @for (credential of tenant().credentials; track credential.id) {
       <ion-item color="light">
-        <ion-label>
-          <p>Created</p>
-          {{ credential.created }}
-        </ion-label>
-      </ion-item>
+        <ion-label>{{ $index + 1 }}</ion-label>
+        <ion-list>
+          <ion-item color="light">
+            <ion-label>
+              <p>Created</p>
+              {{ credential.created }}
+            </ion-label>
+          </ion-item>
 
-      @if (credential.expiration !== null) {
-        <ion-item color="light">
-          <ion-label>
-            <p>Expires</p>
-            {{ credential.expiration }}
-          </ion-label>
-        </ion-item>
-      }
+          @if (credential.expiration !== null) {
+            <ion-item color="light">
+              <ion-label>
+                <p>Expires</p>
+                {{ credential.expiration }}
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      </ion-item>
     }
   </ion-list>
 }

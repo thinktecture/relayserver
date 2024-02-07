@@ -29,6 +29,18 @@ ion-list {
   margin-bottom: 1em;
 }
 
-ion-item:has(ion-input[helperText]) {
+ion-list ion-list {
+  margin-bottom: 0;
+}
+
+ion-item:has(ion-input[helperText], ion-input[errorText]) {
   --inner-padding-bottom: 0.35em;
+}
+
+ion-item:has(ion-list) > ion-label {
+  flex-grow: 0 !important;
+}
+
+ion-item ion-list {
+  flex: 1;
 }

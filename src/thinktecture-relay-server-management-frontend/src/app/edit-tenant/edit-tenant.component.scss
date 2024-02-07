@@ -11,10 +11,6 @@ ion-item .button-has-icon-only {
   align-self: stretch;
 }
 
-ion-item ion-list {
-  flex: 1;
-}
-
 ion-item::part(native)::after {
   opacity: 0;
 }
@@ -47,8 +43,4 @@ ion-item ion-item:last-child {
 
 ion-item:has(ion-list) {
   --inner-padding-bottom: 0;
-}
-
-ion-list ion-list {
-  margin-bottom: 0;
 }
