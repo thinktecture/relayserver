@@ -2,14 +2,14 @@
   <ion-toolbar>
     <ion-title>{{ name() }}</ion-title>
     <ion-buttons slot="start">
-      @if (editing) {
+      @if (editing()) {
         <ion-button (click)="cancel()">Cancel</ion-button>
       } @else {
         <ion-back-button default-href="/tabs/tenants"></ion-back-button>
       }
     </ion-buttons>
     <ion-buttons slot="end">
-      @if (editing) {
+      @if (editing()) {
         <ion-button strong (click)="save()" [disabled]="!form.valid">
           Done
         </ion-button>
@@ -21,7 +21,7 @@
 </ion-header>
 
 <ion-content>
-  @if (editing) {
+  @if (editing()) {
     <form [formGroup]="form">
       <app-edit-tenant />
     </form>
