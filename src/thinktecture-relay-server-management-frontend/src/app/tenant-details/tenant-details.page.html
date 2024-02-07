@@ -10,7 +10,9 @@
     </ion-buttons>
     <ion-buttons slot="end">
       @if (editing) {
-        <ion-button strong (click)="save()">Done</ion-button>
+        <ion-button strong (click)="save()" [disabled]="!form.valid">
+          Done
+        </ion-button>
       } @else {
         <ion-button (click)="edit()">Edit</ion-button>
       }
