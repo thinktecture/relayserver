@@ -90,6 +90,8 @@ export class TenantDetailsPage {
       })),
     };
     await lastValueFrom(this.api.putTenant(tenant));
+
+    this.editing = false;
   }
 
   cancel() {
