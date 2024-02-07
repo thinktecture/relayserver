@@ -30,4 +30,4 @@ bootstrapApplication(AppComponent, {
     ApiService,
     { provide: API_BASE_URL, useValue: '/api' },
   ],
-});
+}).catch(console.error);
