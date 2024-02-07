@@ -47,16 +47,23 @@ export class TenantDetailsPage {
   editing = false;
   form = EditTenantComponent.generateForm();
 
+  get credentials() {
+    return this.form.controls.credentials;
+  }
+
   async edit() {
     const tenant = await firstValueFrom(this.tenant$);
 
-    this.form.controls.credentials.clear();
+    this.credentials.clear();
 
-    for (const _ of tenant.credentials) {
-      this.form.controls.credentials.controls.push(
-        EditTenantComponent.generateCredentialForm(),
-      );
-    }
+    tenant.credentials.forEach(() => {
+      const control = EditTenantComponent.generateCredentialForm();
+
+      // plainTextValue is required, disable it to make the form valid
+      control.controls.plainTextValue.disable();
+
+      this.credentials.push(control);
+    });
 
     this.form.reset({
       ...tenant,
