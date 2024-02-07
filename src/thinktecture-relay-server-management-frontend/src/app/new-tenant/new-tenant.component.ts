@@ -60,6 +60,7 @@ export class NewTenantComponent {
     const tenant = {
       ...formTenant,
       credentials: formTenant.credentials.map((credential) => ({
+        id: credential.id,
         plainTextValue: credential.plainTextValue,
         expiration: credential.isExpiring ? credential.expiration : null,
       })),

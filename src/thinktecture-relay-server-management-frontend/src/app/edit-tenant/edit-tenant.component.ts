@@ -83,6 +83,21 @@ export class EditTenantComponent {
     });
   }
 
+  static generateCredentialForm() {
+    return new FormGroup({
+      id: new FormControl('', { nonNullable: true }),
+      plainTextValue: new FormControl(
+        EditTenantComponent.generateRandomString(),
+        Validators.required,
+      ),
+      created: new FormControl('', { nonNullable: true }),
+      isExpiring: new FormControl(false, { nonNullable: true }),
+      expiration: new FormControl(new Date().toISOString(), {
+        nonNullable: true,
+      }),
+    });
+  }
+
   get form() {
     return this.formGroupDirective.form as ReturnType<
       typeof EditTenantComponent.generateForm
@@ -107,25 +122,9 @@ export class EditTenantComponent {
 
   copyCredential(index: number) {
     const value = this.credentials?.at(index).value.plainTextValue;
-    if (value !== undefined) {
+    if (value) {
       Clipboard.write({ string: value });
     }
-  }
-
-  private static generateCredentialForm() {
-    return new FormGroup({
-      plainTextValue: new FormControl(
-        EditTenantComponent.generateRandomString(),
-        {
-          nonNullable: true,
-          validators: Validators.required,
-        },
-      ),
-      isExpiring: new FormControl(false, { nonNullable: true }),
-      expiration: new FormControl(new Date().toISOString(), {
-        nonNullable: true,
-      }),
-    });
   }
 
   private static generateRandomString(): string {
