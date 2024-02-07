@@ -84,7 +84,7 @@ export class TenantDetailsPage {
     const tenant = {
       ...formTenant,
       credentials: formTenant.credentials.map((credential) => ({
-        id: credential.id,
+        id: credential.id ?? undefined,
         plainTextValue: credential.plainTextValue,
         expiration: credential.isExpiring ? credential.expiration : null,
       })),

@@ -1,7 +1,7 @@
 /** Represents a new credential for a tenant. */
 export interface NewTenantCredential {
   /** Unique identifier for this credential. */
-  id: string;
+  id?: string;
 
   /** Plaintext value of this credential. */
   plainTextValue: string | null;
