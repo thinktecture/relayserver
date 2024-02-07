@@ -87,7 +87,7 @@ export class EditTenantComponent {
 
   static generateCredentialForm() {
     return new FormGroup({
-      id: new FormControl('', { nonNullable: true }),
+      id: new FormControl<string | null>(null),
       plainTextValue: new FormControl(
         EditTenantComponent.generateRandomString(),
         Validators.required,

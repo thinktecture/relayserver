@@ -104,7 +104,23 @@
           />
         </ion-button>
         <ion-list lines="full">
-          @if (credential.value.id === "") {
+          @if (credential.value.id) {
+            <ion-item color="light">
+              <ion-label>
+                <p>Created</p>
+                {{ credential.value.created }}
+              </ion-label>
+            </ion-item>
+
+            @if (credential.value.isExpiring) {
+              <ion-item color="light">
+                <ion-label>
+                  <p>Expires</p>
+                  {{ credential.value.expiration }}
+                </ion-label>
+              </ion-item>
+            }
+          } @else {
             <ion-item color="light">
               <ion-input
                 label="Value"
@@ -145,22 +161,6 @@
                 </ng-template>
               </ion-modal>
             </ion-item>
-          } @else {
-            <ion-item color="light">
-              <ion-label>
-                <p>Created</p>
-                {{ credential.value.created }}
-              </ion-label>
-            </ion-item>
-
-            @if (credential.value.isExpiring) {
-              <ion-item color="light">
-                <ion-label>
-                  <p>Expires</p>
-                  {{ credential.value.expiration }}
-                </ion-label>
-              </ion-item>
-            }
           }
         </ion-list>
       </ion-item>
