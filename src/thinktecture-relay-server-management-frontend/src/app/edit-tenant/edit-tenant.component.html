@@ -104,46 +104,64 @@
           />
         </ion-button>
         <ion-list lines="full">
-          <ion-item color="light">
-            <ion-input
-              label="Value"
-              formControlName="plainTextValue"
-              helperText="Required. Can be overwritten."
-              errorText="Required"
-            >
-              <ion-button
-                fill="clear"
-                slot="end"
-                aria-label="Copy to clipboard"
-                (click)="copyCredential($index)"
+          @if (credential.value.id === "") {
+            <ion-item color="light">
+              <ion-input
+                label="Value"
+                formControlName="plainTextValue"
+                helperText="Required. Can be overwritten."
+                errorText="Required"
               >
-                <ion-icon slot="icon-only" name="copy-outline" aria-hidden />
-              </ion-button>
-            </ion-input>
-          </ion-item>
-          <ion-item color="light">
-            <ion-checkbox
-              formControlName="isExpiring"
-              labelPlacement="end"
-              justify="start"
-              slot="start"
-            >
-              Expires
-            </ion-checkbox>
-            <ion-datetime-button
-              [datetime]="'credential-' + $index + '-expiration'"
-              [disabled]="!credential.value.isExpiring"
-            />
-            <ion-modal keepContentsMounted>
-              <ng-template>
-                <ion-datetime
-                  [id]="'credential-' + $index + '-expiration'"
-                  formControlName="expiration"
-                  presentation="date"
-                />
-              </ng-template>
-            </ion-modal>
-          </ion-item>
+                <ion-button
+                  fill="clear"
+                  slot="end"
+                  aria-label="Copy to clipboard"
+                  (click)="copyCredential($index)"
+                >
+                  <ion-icon slot="icon-only" name="copy-outline" aria-hidden />
+                </ion-button>
+              </ion-input>
+            </ion-item>
+            <ion-item color="light">
+              <ion-checkbox
+                formControlName="isExpiring"
+                labelPlacement="end"
+                justify="start"
+                slot="start"
+              >
+                Expires
+              </ion-checkbox>
+              <ion-datetime-button
+                [datetime]="'credential-' + $index + '-expiration'"
+                [disabled]="!credential.value.isExpiring"
+              />
+              <ion-modal keepContentsMounted>
+                <ng-template>
+                  <ion-datetime
+                    [id]="'credential-' + $index + '-expiration'"
+                    formControlName="expiration"
+                    presentation="date"
+                  />
+                </ng-template>
+              </ion-modal>
+            </ion-item>
+          } @else {
+            <ion-item color="light">
+              <ion-label>
+                <p>Created</p>
+                {{ credential.value.created }}
+              </ion-label>
+            </ion-item>
+
+            @if (credential.value.isExpiring) {
+              <ion-item color="light">
+                <ion-label>
+                  <p>Expires</p>
+                  {{ credential.value.expiration }}
+                </ion-label>
+              </ion-item>
+            }
+          }
         </ion-list>
       </ion-item>
     }
