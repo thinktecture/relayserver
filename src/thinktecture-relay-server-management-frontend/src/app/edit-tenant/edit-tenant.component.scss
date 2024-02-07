@@ -52,8 +52,3 @@ ion-item:has(ion-list) {
 ion-list ion-list {
   margin-bottom: 0;
 }
-
-// https://github.com/ionic-team/ionic-framework/issues/28983
-ion-item {
-  --show-full-highlight: 0;
-}
