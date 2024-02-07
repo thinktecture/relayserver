@@ -22,9 +22,7 @@
               "base": "www"
             },
             "index": "src/index.html",
-            "polyfills": [
-              "src/polyfills.ts"
-            ],
+            "polyfills": ["src/polyfills.ts"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -81,9 +79,6 @@
             "development": {
               "buildTarget": "app:build:development",
               "proxyConfig": "src/proxy.conf.json"
-            },
-            "ci": {
-              "progress": false
             }
           },
           "defaultConfiguration": "development"
