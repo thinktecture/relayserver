@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   IonHeader,
   IonToolbar,
@@ -12,5 +12,6 @@ import {
   styleUrls: ['stats.page.scss'],
   standalone: true,
   imports: [IonHeader, IonToolbar, IonTitle, IonContent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatsPage {}
