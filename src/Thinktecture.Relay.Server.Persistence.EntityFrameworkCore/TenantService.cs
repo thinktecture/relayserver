@@ -69,7 +69,7 @@ public class TenantService : ITenantService
 	/// <inheritdoc />
 	public async Task<Page<Tenant>> LoadAllTenantsPagedAsync(int skip, int take, string? filter, CancellationToken cancellationToken)
 		=> await _dbContext.Tenants
-			.Where(t => filter == null || EF.Functions.Like(t.NormalizedName, $"%{filter.ToUpper()}%"))
+			.Where(t => filter == null || t.NormalizedName.Contains(filter.ToUpper()))
 			.Include(t => t.Config)
 			.AsNoTracking()
 			.OrderBy(t => t.NormalizedName)
