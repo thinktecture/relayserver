@@ -1,17 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ViewChild,
-  inject,
-} from '@angular/core';
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  FormGroupDirective,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormGroupDirective, ReactiveFormsModule } from '@angular/forms';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IonButton,
@@ -28,6 +16,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
+import { EditTenantService } from './edit-tenant.service';
 
 @Component({
   selector: 'app-edit-tenant',
@@ -52,61 +41,15 @@ import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
 })
 export class EditTenantComponent {
   private formGroupDirective = inject(FormGroupDirective);
+  private editTenantService = inject(EditTenantService);
 
   constructor() {
     addIcons({ addCircle, removeCircle, copyOutline });
   }
 
-  static generateForm() {
-    return new FormGroup({
-      name: new FormControl('', {
-        nonNullable: true,
-        validators: Validators.required,
-      }),
-      displayName: new FormControl<string | null>(null),
-      description: new FormControl<string | null>(null),
-      requireAuthentication: new FormControl(false, { nonNullable: true }),
-      maximumConcurrentConnectorRequests: new FormControl(0, {
-        nonNullable: true,
-        validators: Validators.min(0),
-      }),
-      keepAliveInterval: new FormControl<number | null>(
-        null,
-        Validators.min(0),
-      ),
-      enableTracing: new FormControl<boolean | null>(null),
-      reconnectMinimumDelay: new FormControl<number | null>(
-        null,
-        Validators.min(0),
-      ),
-      reconnectMaximumDelay: new FormControl<number | null>(
-        null,
-        Validators.min(0),
-      ),
-      credentials: new FormArray<
-        ReturnType<typeof EditTenantComponent.generateCredentialForm>
-      >([]),
-    });
-  }
-
-  static generateCredentialForm() {
-    return new FormGroup({
-      id: new FormControl<string | null>(null),
-      plainTextValue: new FormControl(
-        EditTenantComponent.generateRandomString(),
-        Validators.required,
-      ),
-      created: new FormControl('', { nonNullable: true }),
-      isExpiring: new FormControl(false, { nonNullable: true }),
-      expiration: new FormControl(new Date().toISOString(), {
-        nonNullable: true,
-      }),
-    });
-  }
-
   get form() {
     return this.formGroupDirective.form as ReturnType<
-      typeof EditTenantComponent.generateForm
+      EditTenantService['generateForm']
     >;
   }
 
@@ -115,7 +58,7 @@ export class EditTenantComponent {
   }
 
   addCredential() {
-    this.credentials.push(EditTenantComponent.generateCredentialForm());
+    this.credentials.push(this.editTenantService.generateCredentialForm());
   }
 
   removeCredential(index: number) {
@@ -127,13 +70,5 @@ export class EditTenantComponent {
     if (value) {
       Clipboard.write({ string: value });
     }
-  }
-
-  private static generateRandomString(): string {
-    const characters =
-      '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    return Array.from(crypto.getRandomValues(new Uint32Array(37)))
-      .map((x) => characters[x % characters.length])
-      .join('');
   }
 }

@@ -22,6 +22,7 @@ import { ApiService } from '../api/api.service';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
 import { Tenant } from '../api/tenant.model';
+import { EditTenantService } from '../edit-tenant/edit-tenant.service';
 
 @Component({
   selector: 'app-tenant-details',
@@ -45,6 +46,7 @@ import { Tenant } from '../api/tenant.model';
 })
 export class TenantDetailsPage {
   private api = inject(ApiService);
+  private editTenantService = inject(EditTenantService);
 
   name = input.required<string>();
 
@@ -55,7 +57,7 @@ export class TenantDetailsPage {
     switchMap(([name]) => this.api.getSingleTenant(name)),
     tap((tenant) => this.updateForm(tenant)),
   );
-  form = EditTenantComponent.generateForm();
+  form = this.editTenantService.generateForm();
 
   get credentials() {
     return this.form.controls.credentials;
@@ -92,7 +94,7 @@ export class TenantDetailsPage {
     this.credentials.clear();
 
     tenant.credentials.forEach(() => {
-      const control = EditTenantComponent.generateCredentialForm();
+      const control = this.editTenantService.generateCredentialForm();
 
       // plainTextValue is required, disable it to make the form valid
       control.controls.plainTextValue.disable();
