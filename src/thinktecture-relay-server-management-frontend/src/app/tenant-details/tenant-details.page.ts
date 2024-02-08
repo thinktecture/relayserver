@@ -52,7 +52,7 @@ export class TenantDetailsPage {
     combineLatestWith(toObservable(this.editing)),
     filter(([, editing]) => !editing),
     switchMap(([name]) => this.api.getSingleTenant(name)),
-    shareReplay(1),
+    tap((tenant) => this.updateForm(tenant)),
   );
   form = EditTenantComponent.generateForm();
 
@@ -61,8 +61,33 @@ export class TenantDetailsPage {
   }
 
   async edit() {
-    const tenant = await firstValueFrom(this.tenant$);
+    this.editing.set(true);
+  }
 
+  async save() {
+    const formTenant = this.form.getRawValue();
+    const tenant = {
+      ...formTenant,
+      credentials: formTenant.credentials.map((credential) => ({
+        id: credential.id ?? undefined,
+        plainTextValue: credential.plainTextValue,
+        expiration: credential.isExpiring
+          ? new Date(
+              `${credential.expiration.substring(0, 10)}T23:59:59`,
+            ).toISOString()
+          : null,
+      })),
+    };
+    await lastValueFrom(this.api.putTenant(tenant));
+
+    this.editing.set(false);
+  }
+
+  cancel() {
+    this.editing.set(false);
+  }
+
+  private updateForm(tenant: Tenant) {
     this.credentials.clear();
 
     tenant.credentials.forEach(() => {
@@ -84,26 +109,5 @@ export class TenantDetailsPage {
         expiration: credential.expiration ?? '',
       })),
     });
-
-    this.editing.set(true);
-  }
-
-  async save() {
-    const formTenant = this.form.getRawValue();
-    const tenant = {
-      ...formTenant,
-      credentials: formTenant.credentials.map((credential) => ({
-        id: credential.id ?? undefined,
-        plainTextValue: credential.plainTextValue,
-        expiration: credential.isExpiring ? credential.expiration : null,
-      })),
-    };
-    await lastValueFrom(this.api.putTenant(tenant));
-
-    this.editing.set(false);
-  }
-
-  cancel() {
-    this.editing.set(false);
   }
 }

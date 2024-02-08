@@ -62,7 +62,11 @@ export class NewTenantComponent {
       credentials: formTenant.credentials.map((credential) => ({
         id: credential.id ?? undefined,
         plainTextValue: credential.plainTextValue,
-        expiration: credential.isExpiring ? credential.expiration : null,
+        expiration: credential.isExpiring
+          ? new Date(
+              `${credential.expiration.substring(0, 10)}T23:59:59`,
+            ).toISOString()
+          : null,
       })),
     };
     await lastValueFrom(this.api.postTenant(tenant));
