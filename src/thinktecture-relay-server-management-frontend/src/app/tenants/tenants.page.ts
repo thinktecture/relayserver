@@ -39,7 +39,7 @@ import { AsyncPipe } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Page } from '../api/page.model';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 @Component({
   selector: 'app-tenants',
