@@ -5,29 +5,27 @@ import { Tenant } from './tenant.model';
 import { Page } from './page.model';
 import { NewTenant } from './new-tenant.model';
 
-export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
-
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private baseUrl = inject(API_BASE_URL);
+  private baseUrl = '/management';
 
   deleteTenant(tenantName: string): Observable<void> {
-    const url = `${this.baseUrl}/management/tenants/${tenantName}`;
+    const url = `${this.baseUrl}/tenants/${tenantName}`;
 
     return this.http.delete<void>(url);
   }
 
   getSingleTenant(tenantName: string): Observable<Tenant> {
-    const url = `${this.baseUrl}/management/tenants/${tenantName}`;
+    const url = `${this.baseUrl}/tenants/${tenantName}`;
 
     return this.http.get<TenantDto>(url).pipe(map(ApiService.tenantFromDto));
   }
 
   putTenant(tenant: NewTenant): Observable<void> {
-    const url = `${this.baseUrl}/management/tenants/${tenant.name}`;
+    const url = `${this.baseUrl}/tenants/${tenant.name}`;
 
     return this.http.put<void>(url, ApiService.tenantToDto(tenant));
   }
@@ -37,7 +35,7 @@ export class ApiService {
     take?: number,
     filter?: string,
   ): Observable<Page<Tenant>> {
-    const url = `${this.baseUrl}/management/tenants`;
+    const url = `${this.baseUrl}/tenants`;
 
     let params = new HttpParams();
     if (skip !== undefined) {
@@ -59,7 +57,7 @@ export class ApiService {
   }
 
   postTenant(tenant: NewTenant): Observable<void> {
-    const url = `${this.baseUrl}/management/tenants`;
+    const url = `${this.baseUrl}/tenants`;
 
     return this.http.post<void>(url, ApiService.tenantToDto(tenant));
   }

@@ -1,9 +1,6 @@
 {
-  "/api": {
+  "/management": {
     "target": "http://localhost:5004",
-    "secure": "false",
-    "pathRewrite": {
-      "^/api": ""
-    }
+    "secure": "false"
   }
 }
