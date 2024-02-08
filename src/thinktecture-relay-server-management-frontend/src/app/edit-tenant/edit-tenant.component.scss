@@ -7,10 +7,6 @@ ion-item:has(ion-list) {
   --padding-start: 0.5em;
 }
 
-ion-item .button-has-icon-only {
-  align-self: stretch;
-}
-
 ion-item::part(native)::after {
   opacity: 0;
 }
