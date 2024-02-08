@@ -13,44 +13,49 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    @for (tenant of tenants(); track tenant.name) {
-      <ion-item
-        [routerLink]="['/tabs', 'tenants', tenant.name]"
-        [button]="true"
-      >
-        <ion-label>{{ tenant.displayName ?? tenant.name }}</ion-label>
-        <ion-button
-          slot="end"
-          fill="clear"
-          color="danger"
-          (click)="deleteTenant($event, $index)"
-          aria-label="Delete tenant"
+  @if (tenantsPage$ | async; as tenantsPage) {
+    <ion-list>
+      @for (tenant of tenantsPage.results; track tenant.name) {
+        <ion-item
+          [routerLink]="['/tabs', 'tenants', tenant.name]"
+          [button]="true"
         >
-          <ion-icon slot="icon-only" name="trash-outline" aria-hidden />
-        </ion-button>
-      </ion-item>
-    }
+          <ion-label>{{ tenant.displayName ?? tenant.name }}</ion-label>
+          <ion-button
+            slot="end"
+            fill="clear"
+            color="danger"
+            (click)="deleteTenant($event, tenant)"
+            aria-label="Delete tenant"
+          >
+            <ion-icon slot="icon-only" name="trash-outline" aria-hidden />
+          </ion-button>
+        </ion-item>
+      }
 
-    @if (scrollDisabled()) {
-      <ion-item>
-        <ion-note>
-          @if (filter === "") {
-            <span>{{ tenants().length }} tenants in total</span>
-          } @else {
-            <span>{{ tenants().length }} tenants matching {{ filter }}</span>
-          }
-        </ion-note>
-      </ion-item>
-    }
-  </ion-list>
+      @if (tenantsPage.results.length >= tenantsPage.totalCount) {
+        <ion-item>
+          <ion-note>
+            @if (filter() === "") {
+              <span>{{ tenantsPage.results.length }} tenants in total</span>
+            } @else {
+              <span
+                >{{ tenantsPage.results.length }} tenants matching
+                {{ filter() }}</span
+              >
+            }
+          </ion-note>
+        </ion-item>
+      }
+    </ion-list>
 
-  <ion-infinite-scroll
-    (ionInfinite)="onInfinite($event)"
-    [disabled]="scrollDisabled()"
-  >
-    <ion-infinite-scroll-content></ion-infinite-scroll-content>
-  </ion-infinite-scroll>
+    <ion-infinite-scroll
+      (ionInfinite)="onInfinite($event)"
+      [disabled]="tenantsPage.results.length >= tenantsPage.totalCount"
+    >
+      <ion-infinite-scroll-content></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  }
 
   <ion-modal
     #modal
