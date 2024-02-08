@@ -21,13 +21,13 @@ export class ApiService {
   getSingleTenant(tenantName: string): Observable<Tenant> {
     const url = `${this.baseUrl}/tenants/${tenantName}`;
 
-    return this.http.get<TenantDto>(url).pipe(map(ApiService.tenantFromDto));
+    return this.http.get<TenantDto>(url).pipe(map(this.tenantFromDto));
   }
 
   putTenant(tenant: NewTenant): Observable<void> {
     const url = `${this.baseUrl}/tenants/${tenant.name}`;
 
-    return this.http.put<void>(url, ApiService.tenantToDto(tenant));
+    return this.http.put<void>(url, this.tenantToDto(tenant));
   }
 
   getTenantsPaged(
@@ -51,7 +51,7 @@ export class ApiService {
     return this.http.get<Page<TenantDto>>(url, { params }).pipe(
       map((page) => ({
         ...page,
-        results: page.results.map(ApiService.tenantFromDto),
+        results: page.results.map(this.tenantFromDto),
       })),
     );
   }
@@ -59,23 +59,19 @@ export class ApiService {
   postTenant(tenant: NewTenant): Observable<void> {
     const url = `${this.baseUrl}/tenants`;
 
-    return this.http.post<void>(url, ApiService.tenantToDto(tenant));
+    return this.http.post<void>(url, this.tenantToDto(tenant));
   }
 
-  private static tenantToDto(tenant: NewTenant): NewTenantDto {
+  private tenantToDto(tenant: NewTenant): NewTenantDto {
     return {
       ...tenant,
-      keepAliveInterval: ApiService.intervalToDto(tenant.keepAliveInterval),
-      reconnectMinimumDelay: ApiService.intervalToDto(
-        tenant.reconnectMinimumDelay,
-      ),
-      reconnectMaximumDelay: ApiService.intervalToDto(
-        tenant.reconnectMaximumDelay,
-      ),
+      keepAliveInterval: this.intervalToDto(tenant.keepAliveInterval),
+      reconnectMinimumDelay: this.intervalToDto(tenant.reconnectMinimumDelay),
+      reconnectMaximumDelay: this.intervalToDto(tenant.reconnectMaximumDelay),
     };
   }
 
-  private static intervalToDto(totalSeconds: number | null): string | null {
+  private intervalToDto(totalSeconds: number | null): string | null {
     if (totalSeconds === null) {
       return null;
     }
@@ -98,22 +94,20 @@ export class ApiService {
     return `${days}.${interval}`;
   }
 
-  private static tenantFromDto(tenantDto: TenantDto): Tenant {
+  private tenantFromDto(tenantDto: TenantDto): Tenant {
     return {
       ...tenantDto,
-      keepAliveInterval: ApiService.intervalFromDto(
-        tenantDto.keepAliveInterval,
-      ),
-      reconnectMinimumDelay: ApiService.intervalFromDto(
+      keepAliveInterval: this.intervalFromDto(tenantDto.keepAliveInterval),
+      reconnectMinimumDelay: this.intervalFromDto(
         tenantDto.reconnectMinimumDelay,
       ),
-      reconnectMaximumDelay: ApiService.intervalFromDto(
+      reconnectMaximumDelay: this.intervalFromDto(
         tenantDto.reconnectMaximumDelay,
       ),
     };
   }
 
-  private static intervalFromDto(interval: string | null): number | null {
+  private intervalFromDto(interval: string | null): number | null {
     if (interval === null) {
       return null;
     }
