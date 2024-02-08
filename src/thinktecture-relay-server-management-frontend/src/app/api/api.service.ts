@@ -90,7 +90,7 @@ export class ApiService {
     const seconds = format.format(totalSeconds % 60);
     const minutes = format.format(totalMinutes % 60);
     const hours = format.format(totalHours % 24);
-    const days = String(totalDays);
+    const days = totalDays.toString();
 
     const interval = `${hours}:${minutes}:${seconds}`;
     if (totalDays === 0) {
