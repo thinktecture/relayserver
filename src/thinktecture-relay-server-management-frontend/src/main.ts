@@ -14,7 +14,6 @@ import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { API_BASE_URL } from './app/api/api.service';
 import { apiInterceptor } from './app/api/api.interceptor';
 
 if (environment.production) {
@@ -27,6 +26,5 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular({ mode: 'ios' }),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([apiInterceptor])),
-    { provide: API_BASE_URL, useValue: '/api' },
   ],
 }).catch(console.error);
