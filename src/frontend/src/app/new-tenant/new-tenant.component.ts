@@ -22,6 +22,7 @@ import {
 import { lastValueFrom } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
+import { EditTenantService } from '../edit-tenant/edit-tenant.service';
 
 @Component({
   selector: 'app-new-tenant',
@@ -46,12 +47,13 @@ import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 export class NewTenantComponent {
   private api = inject(ApiService);
   private router = inject(Router);
+  private editTenantService = inject(EditTenantService);
 
   @Output() dismiss = new EventEmitter<void>();
 
   @ViewChild('tenantName') tenantName: IonInput | undefined;
 
-  form = EditTenantComponent.generateForm();
+  form = this.editTenantService.generateForm();
 
   focusTenantName() {
     this.tenantName?.setFocus();

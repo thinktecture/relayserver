@@ -1,5 +1,5 @@
 import { Observable, map } from 'rxjs';
-import { Injectable, InjectionToken, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Tenant } from './tenant.model';
 import { Page } from './page.model';
@@ -21,7 +21,9 @@ export class ApiService {
   getSingleTenant(tenantName: string): Observable<Tenant> {
     const url = `${this.baseUrl}/tenants/${tenantName}`;
 
-    return this.http.get<TenantDto>(url).pipe(map(this.tenantFromDto));
+    return this.http
+      .get<TenantDto>(url)
+      .pipe(map((tenantDto) => this.tenantFromDto(tenantDto)));
   }
 
   putTenant(tenant: NewTenant): Observable<void> {
@@ -51,7 +53,7 @@ export class ApiService {
     return this.http.get<Page<TenantDto>>(url, { params }).pipe(
       map((page) => ({
         ...page,
-        results: page.results.map(this.tenantFromDto),
+        results: page.results.map((tenantDto) => this.tenantFromDto(tenantDto)),
       })),
     );
   }
