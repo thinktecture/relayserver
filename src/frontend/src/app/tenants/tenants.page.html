@@ -13,9 +13,9 @@
 </ion-header>
 
 <ion-content>
-  @if (tenantsPage$ | async; as tenantsPage) {
+  @if (tenants$ | async; as tenants) {
     <ion-list>
-      @for (tenant of tenantsPage.results; track tenant.name) {
+      @for (tenant of tenants.results; track tenant.name) {
         <ion-item
           [routerLink]="['/tabs', 'tenants', tenant.name]"
           [button]="true"
@@ -33,16 +33,15 @@
         </ion-item>
       }
 
-      @if (tenantsPage.results.length >= tenantsPage.totalCount) {
+      @if (!tenants.moreAvailable) {
         <ion-item>
           <ion-note>
             @if (filter() === "") {
-              <span>{{ tenantsPage.results.length }} tenants in total</span>
+              <span>{{ tenants.results.length }} tenants in total</span>
             } @else {
-              <span
-                >{{ tenantsPage.results.length }} tenants matching
-                {{ filter() }}</span
-              >
+              <span>
+                {{ tenants.results.length }} tenants matching {{ filter() }}
+              </span>
             }
           </ion-note>
         </ion-item>
@@ -51,7 +50,7 @@
 
     <ion-infinite-scroll
       (ionInfinite)="onInfinite($event)"
-      [disabled]="tenantsPage.results.length >= tenantsPage.totalCount"
+      [disabled]="!tenants.moreAvailable"
     >
       <ion-infinite-scroll-content></ion-infinite-scroll-content>
     </ion-infinite-scroll>
@@ -64,7 +63,7 @@
     (didPresent)="newTenant?.focusTenantName()"
   >
     <ng-template>
-      <app-new-tenant (dismiss)="modal.dismiss()" #newTenant />
+      <app-new-tenant (dismiss)="modal.dismiss()" />
     </ng-template>
   </ion-modal>
 </ion-content>

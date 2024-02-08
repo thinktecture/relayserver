@@ -25,9 +25,11 @@ import { addIcons } from 'ionicons';
 import { add, trashOutline } from 'ionicons/icons';
 import {
   BehaviorSubject,
-  combineLatestWith,
+  Subject,
   lastValueFrom,
   map,
+  mergeWith,
+  of,
   switchMap,
   switchScan,
   tap,
@@ -37,7 +39,6 @@ import { Tenant } from '../api/tenant.model';
 import { NewTenantComponent } from '../new-tenant/new-tenant.component';
 import { AsyncPipe } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Page } from '../api/page.model';
 
 const PAGE_SIZE = 50;
 
@@ -71,30 +72,30 @@ export class TenantsPage {
   private api = inject(ApiService);
   private alertController = inject(AlertController);
 
-  private scrollEv$ = new BehaviorSubject<InfiniteScrollCustomEvent | null>(
-    null,
-  );
-  private deleteEv$ = new BehaviorSubject<null>(null);
+  private scrollEv$ = new BehaviorSubject<
+    InfiniteScrollCustomEvent | undefined
+  >(undefined);
+  private deleteEv$ = new Subject<string>();
 
   presentingElement = inject(IonRouterOutlet).nativeEl;
 
   filter = signal('');
-  tenantsPage$ = toObservable(this.filter).pipe(
-    combineLatestWith(this.deleteEv$),
-    switchMap(([filter]) =>
+  tenants$ = toObservable(this.filter).pipe(
+    tap(() => this.content?.scrollToTop()),
+    switchMap((filter) =>
       this.scrollEv$.pipe(
         map((scrollEv) => ({ scrollEv, filter })),
-        switchScan((accumulated, value) => this.loadPage(accumulated, value), {
-          results: [],
-          offset: 0,
-          pageSize: 0,
-          totalCount: 0,
-        }),
+        mergeWith(this.deleteEv$.pipe(map((deleteEv) => ({ deleteEv })))),
+        switchScan(
+          (accumulated, value) => this.accumulateTenants(accumulated, value),
+          { results: [], moreAvailable: true },
+        ),
       ),
     ),
   );
 
-  @ViewChild('newTenant') newTenant: NewTenantComponent | null = null;
+  @ViewChild(NewTenantComponent) newTenant?: NewTenantComponent;
+  @ViewChild(IonContent) content?: IonContent;
 
   constructor() {
     addIcons({ add, trashOutline });
@@ -115,7 +116,7 @@ export class TenantsPage {
           role: 'destructive',
           handler: async () => {
             await lastValueFrom(this.api.deleteTenant(tenant.name));
-            this.deleteEv$.next(null);
+            this.deleteEv$.next(tenant.name);
           },
         },
         { text: 'Cancel', role: 'cancel' },
@@ -129,21 +130,35 @@ export class TenantsPage {
     this.scrollEv$.next(ev as InfiniteScrollCustomEvent);
   }
 
-  private loadPage(
-    accumulated: Page<Tenant>,
+  private accumulateTenants(
+    { results, moreAvailable }: { results: Tenant[]; moreAvailable: boolean },
     {
       scrollEv,
       filter,
-    }: { scrollEv: InfiniteScrollCustomEvent | null; filter: string },
+      deleteEv,
+    }: {
+      scrollEv?: InfiniteScrollCustomEvent;
+      filter?: string;
+      deleteEv?: string;
+    },
   ) {
-    return this.api
-      .getTenantsPaged(accumulated.results.length, PAGE_SIZE, filter)
-      .pipe(
-        map((page) => ({
-          ...page,
-          results: [...accumulated.results, ...page.results],
-        })),
-        tap(() => scrollEv?.target.complete()),
-      );
+    if (deleteEv !== undefined) {
+      return of({
+        results: results.filter((result) => result.name !== deleteEv),
+        moreAvailable,
+      });
+    }
+
+    if (!moreAvailable) {
+      return of({ results, moreAvailable });
+    }
+
+    return this.api.getTenantsPaged(results.length, PAGE_SIZE, filter).pipe(
+      map((page) => ({
+        results: [...results, ...page.results],
+        moreAvailable: page.results.length >= page.pageSize,
+      })),
+      tap(() => scrollEv?.target.complete()),
+    );
   }
 }
