@@ -14,7 +14,7 @@
 
 <ion-content>
   <ion-list>
-    @for (tenant of tenants; track tenant.name) {
+    @for (tenant of tenants(); track tenant.name) {
       <ion-item
         [routerLink]="['/tabs', 'tenants', tenant.name]"
         [button]="true"
@@ -32,13 +32,13 @@
       </ion-item>
     }
 
-    @if (scrollDisabled) {
+    @if (scrollDisabled()) {
       <ion-item>
-        <ion-note color="light">
+        <ion-note>
           @if (filter === "") {
-            <span>{{ tenants.length }} tenants in total</span>
+            <span>{{ tenants().length }} tenants in total</span>
           } @else {
-            <span>{{ tenants.length }} tenants matching {{ filter }}</span>
+            <span>{{ tenants().length }} tenants matching {{ filter }}</span>
           }
         </ion-note>
       </ion-item>
@@ -47,7 +47,7 @@
 
   <ion-infinite-scroll
     (ionInfinite)="onInfinite($event)"
-    [disabled]="scrollDisabled"
+    [disabled]="scrollDisabled()"
   >
     <ion-infinite-scroll-content></ion-infinite-scroll-content>
   </ion-infinite-scroll>

@@ -1,4 +1,10 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   AlertController,
@@ -54,13 +60,15 @@ const PAGE_SIZE = 20;
     IonModal,
     NewTenantComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TenantsPage {
   private api = inject(ApiService);
   private alertController = inject(AlertController);
 
-  tenants: Tenant[] = [];
-  scrollDisabled = false;
+  tenants = signal<Tenant[]>([], {});
+  scrollDisabled = signal(false);
+
   presentingElement = inject(IonRouterOutlet).nativeEl;
   filter = '';
 
@@ -79,7 +87,7 @@ export class TenantsPage {
   async deleteTenant(event: MouseEvent, index: number) {
     event.stopPropagation();
 
-    const tenant = this.tenants[index];
+    const tenant = this.tenants()[index];
 
     const alert = await this.alertController.create({
       message: `Are you sure you want to delete the tenant "${tenant.displayName ?? tenant.name}"`,
@@ -107,17 +115,17 @@ export class TenantsPage {
   private async loadTenants(reset = false) {
     const page = await lastValueFrom(
       this.api.getTenantsPaged(
-        reset ? 0 : this.tenants.length,
+        reset ? 0 : this.tenants().length,
         PAGE_SIZE,
         this.filter,
       ),
     );
     if (reset) {
-      this.tenants = page.results;
+      this.tenants.set(page.results);
     } else {
-      this.tenants.push(...page.results);
+      this.tenants.update((tenants) => [...tenants, ...page.results]);
     }
 
-    this.scrollDisabled = page.results.length < page.pageSize;
+    this.scrollDisabled.set(page.results.length < page.pageSize);
   }
 }
