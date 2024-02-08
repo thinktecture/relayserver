@@ -7,7 +7,9 @@ import { NewTenant } from './new-tenant.model';
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ApiService {
   private http = inject(HttpClient);
   private baseUrl = inject(API_BASE_URL);
