@@ -49,12 +49,12 @@ export class NewTenantComponent {
 
   @Output() dismiss = new EventEmitter<void>();
 
-  @ViewChild(EditTenantComponent) editTenant: EditTenantComponent | undefined;
+  @ViewChild('tenantName') tenantName: IonInput | undefined;
 
   form = EditTenantComponent.generateForm();
 
-  focus() {
-    this.editTenant?.focus();
+  focusTenantName() {
+    this.tenantName?.setFocus();
   }
 
   async create() {

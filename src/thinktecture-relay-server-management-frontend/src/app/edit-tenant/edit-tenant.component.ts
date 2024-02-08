@@ -53,8 +53,6 @@ import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
 export class EditTenantComponent {
   private formGroupDirective = inject(FormGroupDirective);
 
-  @ViewChild('tenantName') tenantName: IonInput | undefined;
-
   constructor() {
     addIcons({ addCircle, removeCircle, copyOutline });
   }
@@ -114,10 +112,6 @@ export class EditTenantComponent {
 
   get credentials() {
     return this.form.controls.credentials;
-  }
-
-  focus() {
-    this.tenantName?.setFocus();
   }
 
   addCredential() {

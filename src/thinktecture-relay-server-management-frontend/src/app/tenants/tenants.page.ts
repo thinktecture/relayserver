@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ViewChild,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, ViewChild, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   AlertController,
@@ -72,7 +66,6 @@ const PAGE_SIZE = 20;
     IonModal,
     NewTenantComponent,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TenantsPage {
   private api = inject(ApiService);
