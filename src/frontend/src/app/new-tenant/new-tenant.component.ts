@@ -51,7 +51,7 @@ export class NewTenantComponent {
 
   @Output() dismiss = new EventEmitter<void>();
 
-  @ViewChild('tenantName') tenantName: IonInput | undefined;
+  @ViewChild('tenantName') tenantName?: IonInput;
 
   form = this.editTenantService.generateForm();
 
