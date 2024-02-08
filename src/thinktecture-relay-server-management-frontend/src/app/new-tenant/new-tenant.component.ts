@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Output,
@@ -40,6 +41,7 @@ import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
     IonInput,
     EditTenantComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewTenantComponent {
   private api = inject(ApiService);

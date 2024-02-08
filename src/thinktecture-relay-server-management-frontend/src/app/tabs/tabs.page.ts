@@ -1,4 +1,9 @@
-import { Component, EnvironmentInjector, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EnvironmentInjector,
+  inject,
+} from '@angular/core';
 import {
   IonIcon,
   IonLabel,
@@ -15,6 +20,7 @@ import { apps, statsChartOutline } from 'ionicons/icons';
   styleUrls: ['tabs.page.scss'],
   standalone: true,
   imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TabsPage {
   public environmentInjector = inject(EnvironmentInjector);

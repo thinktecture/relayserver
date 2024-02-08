@@ -1,4 +1,9 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import {
   FormArray,
   FormControl,
@@ -43,6 +48,7 @@ import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
     IonModal,
     IonDatetime,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditTenantComponent {
   private formGroupDirective = inject(FormGroupDirective);

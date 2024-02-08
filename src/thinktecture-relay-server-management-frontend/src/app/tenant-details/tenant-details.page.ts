@@ -1,5 +1,11 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 import {
@@ -11,17 +17,11 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import {
-  combineLatestWith,
-  filter,
-  firstValueFrom,
-  lastValueFrom,
-  shareReplay,
-  switchMap,
-} from 'rxjs';
+import { combineLatestWith, filter, lastValueFrom, switchMap, tap } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
+import { Tenant } from '../api/tenant.model';
 
 @Component({
   selector: 'app-tenant-details',
@@ -41,6 +41,7 @@ import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
     EditTenantComponent,
     ViewTenantComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TenantDetailsPage {
   private api = inject(ApiService);
