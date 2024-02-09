@@ -25,6 +25,7 @@ import { addIcons } from 'ionicons';
 import { add, trashOutline } from 'ionicons/icons';
 import {
   BehaviorSubject,
+  Observable,
   Subject,
   lastValueFrom,
   map,
@@ -39,6 +40,17 @@ import { Tenant } from '../api/tenant.model';
 import { NewTenantComponent } from '../new-tenant/new-tenant.component';
 import { AsyncPipe } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
+
+interface AccumulatedTenants {
+  results: Tenant[];
+  moreAvailable: boolean;
+}
+
+interface AccumulateTenantsInput {
+  scrollEv?: InfiniteScrollCustomEvent;
+  filter?: string;
+  deleteEv?: string;
+}
 
 const PAGE_SIZE = 50;
 
@@ -101,11 +113,11 @@ export class TenantsPage {
     addIcons({ add, trashOutline });
   }
 
-  search(ev: SearchbarCustomEvent) {
+  search(ev: SearchbarCustomEvent): void {
     this.filter.set(ev.target.value ?? '');
   }
 
-  async deleteTenant(event: MouseEvent, tenant: Tenant) {
+  async deleteTenant(event: MouseEvent, tenant: Tenant): Promise<void> {
     event.stopPropagation();
 
     const alert = await this.alertController.create({
@@ -126,22 +138,14 @@ export class TenantsPage {
     await alert.present();
   }
 
-  async onInfinite(ev: Event) {
+  onInfinite(ev: Event): void {
     this.scrollEv$.next(ev as InfiniteScrollCustomEvent);
   }
 
   private accumulateTenants(
-    { results, moreAvailable }: { results: Tenant[]; moreAvailable: boolean },
-    {
-      scrollEv,
-      filter,
-      deleteEv,
-    }: {
-      scrollEv?: InfiniteScrollCustomEvent;
-      filter?: string;
-      deleteEv?: string;
-    },
-  ) {
+    { results, moreAvailable }: AccumulatedTenants,
+    { scrollEv, filter, deleteEv }: AccumulateTenantsInput,
+  ): Observable<AccumulatedTenants> {
     if (deleteEv !== undefined) {
       return of({
         results: results.filter((result) => result.name !== deleteEv),

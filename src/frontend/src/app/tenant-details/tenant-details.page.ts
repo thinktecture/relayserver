@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import {
   IonBackButton,
   IonButton,
@@ -59,15 +59,17 @@ export class TenantDetailsPage {
   );
   form = this.editTenantService.generateForm();
 
-  get credentials() {
+  get credentials(): FormArray<
+    ReturnType<EditTenantService['generateCredentialForm']>
+  > {
     return this.form.controls.credentials;
   }
 
-  async edit() {
+  edit(): void {
     this.editing.set(true);
   }
 
-  async save() {
+  async save(): Promise<void> {
     const formTenant = this.form.getRawValue();
     const tenant = {
       ...formTenant,
@@ -81,16 +83,17 @@ export class TenantDetailsPage {
           : null,
       })),
     };
+
     await lastValueFrom(this.api.putTenant(tenant));
 
     this.editing.set(false);
   }
 
-  cancel() {
+  cancel(): void {
     this.editing.set(false);
   }
 
-  private updateForm(tenant: Tenant) {
+  private updateForm(tenant: Tenant): void {
     this.credentials.clear();
 
     tenant.credentials.forEach(() => {

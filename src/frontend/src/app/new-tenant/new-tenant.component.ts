@@ -55,11 +55,11 @@ export class NewTenantComponent {
 
   form = this.editTenantService.generateForm();
 
-  focusTenantName() {
+  focusTenantName(): void {
     this.tenantName?.setFocus();
   }
 
-  async create() {
+  async create(): Promise<void> {
     const formTenant = this.form.getRawValue();
     const tenant = {
       ...formTenant,
@@ -73,7 +73,9 @@ export class NewTenantComponent {
           : null,
       })),
     };
+
     await lastValueFrom(this.api.postTenant(tenant));
+
     this.dismiss.emit();
     this.router.navigate(['/tabs', 'tenants', tenant.name]);
   }
