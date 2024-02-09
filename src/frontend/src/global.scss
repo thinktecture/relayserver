@@ -29,6 +29,7 @@ ion-list {
   margin-bottom: 1em;
 }
 
+ion-list:last-of-type,
 ion-list ion-list {
   margin-bottom: 0;
 }
