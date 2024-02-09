@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormGroupDirective, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormArray,
+  FormGroupDirective,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IonButton,
@@ -47,25 +51,25 @@ export class EditTenantComponent {
     addIcons({ addCircle, removeCircle, copyOutline });
   }
 
-  get form() {
-    return this.formGroupDirective.form as ReturnType<
-      EditTenantService['generateForm']
-    >;
+  get form(): ReturnType<EditTenantService['generateForm']> {
+    return this.formGroupDirective.form;
   }
 
-  get credentials() {
+  get credentials(): FormArray<
+    ReturnType<EditTenantService['generateCredentialForm']>
+  > {
     return this.form.controls.credentials;
   }
 
-  addCredential() {
+  addCredential(): void {
     this.credentials.push(this.editTenantService.generateCredentialForm());
   }
 
-  removeCredential(index: number) {
+  removeCredential(index: number): void {
     this.credentials?.removeAt(index);
   }
 
-  copyCredential(index: number) {
+  copyCredential(index: number): void {
     const value = this.credentials?.at(index).value.plainTextValue;
     if (value) {
       Clipboard.write({ string: value });
