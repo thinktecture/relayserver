@@ -158,7 +158,7 @@ export class TenantsPage {
         results: [...results, ...page.results],
         moreAvailable: page.results.length >= page.pageSize,
       })),
-      tap(() => scrollEv?.target.complete()),
+      tap(() => setTimeout(() => scrollEv?.target.complete())),
     );
   }
 }
