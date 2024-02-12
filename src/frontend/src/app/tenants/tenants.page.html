@@ -10,7 +10,7 @@
     </ion-toolbar>
     <ion-toolbar>
       <ion-searchbar (ionInput)="search($event)" [debounce]="500" />
-      @if (tenants.loading) {
+      @if (loading()) {
         <ion-progress-bar type="indeterminate" />
       }
     </ion-toolbar>
@@ -37,7 +37,7 @@
           </ion-item>
         }
 
-        @if (!tenants.loading && !tenants.moreAvailable) {
+        @if (!loading() && !tenants.moreAvailable) {
           <ion-item>
             <ion-note>
               @if (filter() === "") {
