@@ -17,7 +17,13 @@
   </ion-header>
 
   <ion-content>
-    @if (tenants.error === undefined) {
+    @if (tenants.error) {
+      <ion-list>
+        <ion-item>
+          <ion-note>Failed to load tenants</ion-note>
+        </ion-item>
+      </ion-list>
+    } @else {
       <ion-list>
         @for (tenant of tenants.results; track tenant.name) {
           <ion-item
@@ -41,15 +47,11 @@
           <ion-item>
             <ion-note>
               @if (filter() === "") {
-                <span>
-                  {{ tenants.results.length | i18nPlural: tenantsMapping }} in
-                  total
-                </span>
+                {{ tenants.results.length | i18nPlural: tenantsMapping }} in
+                total
               } @else {
-                <span>
-                  {{ tenants.results.length | i18nPlural: tenantsMapping }}
-                  matching {{ filter() }}
-                </span>
+                {{ tenants.results.length | i18nPlural: tenantsMapping }}
+                matching {{ filter() }}
               }
             </ion-note>
           </ion-item>
@@ -62,21 +64,6 @@
       >
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
       </ion-infinite-scroll>
-    } @else {
-      <ion-list inset>
-        <ion-item color="danger">
-          <ion-label>
-            @if (tenants.error === 401) {
-              Unauthorized
-            } @else {
-              An unknown error occurred ({{ tenants.error }})
-            }
-          </ion-label>
-          <ion-button fill="clear" color="dark" [routerLink]="['/sign-in']">
-            Set API key
-          </ion-button>
-        </ion-item>
-      </ion-list>
     }
 
     <ion-modal
