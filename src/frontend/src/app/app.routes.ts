@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
-import { ApiAuthService } from './api/api-auth.service';
+import { ApiAuthStore } from './api/api-auth.store';
 
 export const routes: Routes = [
   {
@@ -8,8 +8,8 @@ export const routes: Routes = [
     loadChildren: () => import('./tabs/tabs.routes').then((m) => m.routes),
     canActivate: [
       () => {
-        const apiAuth = inject(ApiAuthService);
-        if (apiAuth.key !== undefined && apiAuth.headerName !== undefined) {
+        const apiAuth = inject(ApiAuthStore);
+        if (apiAuth.key() !== undefined && apiAuth.headerName() !== undefined) {
           return true;
         }
 

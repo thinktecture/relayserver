@@ -3,16 +3,16 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular/standalone';
 import { catchError } from 'rxjs';
-import { ApiAuthService } from './api-auth.service';
+import { ApiAuthStore } from './api-auth.store';
 
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
-  const apiAuth = inject(ApiAuthService);
-  if (apiAuth.headerName === undefined || apiAuth.key === undefined) {
+  const apiAuth = inject(ApiAuthStore);
+  if (apiAuth.headerName() === undefined || apiAuth.key() === undefined) {
     return next(req);
   }
 
   const reqWithAuth = req.clone({
-    setHeaders: { [apiAuth.headerName]: apiAuth.key },
+    setHeaders: { [apiAuth.headerName()!]: apiAuth.key()! },
   });
 
   const toastService = inject(ToastController);

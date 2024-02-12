@@ -31,6 +31,7 @@ import {
   Observable,
   Subject,
   catchError,
+  combineLatest,
   lastValueFrom,
   map,
   mergeWith,
@@ -42,6 +43,7 @@ import {
 import { ApiService } from '../api/api.service';
 import { Tenant } from '../api/tenant.model';
 import { NewTenantComponent } from '../new-tenant/new-tenant.component';
+import { ApiAuthStore } from '../api/api-auth.store';
 
 interface AccumulatedTenants {
   results: Tenant[];
@@ -88,6 +90,7 @@ const PAGE_SIZE = 50;
 export class TenantsPage {
   private api = inject(ApiService);
   private alertController = inject(AlertController);
+  private apiAuth = inject(ApiAuthStore);
 
   private scrollEv$ = new BehaviorSubject<
     InfiniteScrollCustomEvent | undefined
@@ -103,10 +106,14 @@ export class TenantsPage {
 
   loading = signal(false);
   filter = signal('');
-  tenants$ = toObservable(this.filter).pipe(
+  tenants$ = combineLatest({
+    filter: toObservable(this.filter),
+    headerName: toObservable(this.apiAuth.headerName),
+    key: toObservable(this.apiAuth.key),
+  }).pipe(
     tap(() => this.content?.scrollToTop()),
     tap(() => this.loading.set(true)),
-    switchMap((filter) =>
+    switchMap(({ filter }) =>
       this.scrollEv$.pipe(
         map((scrollEv) => ({ scrollEv, filter })),
         mergeWith(this.deleteEv$.pipe(map((deleteEv) => ({ deleteEv })))),
@@ -114,15 +121,15 @@ export class TenantsPage {
           (accumulated, value) => this.accumulateTenants(accumulated, value),
           { results: [], moreAvailable: true, error: false },
         ),
+        catchError(() => {
+          return of({
+            results: [] as Tenant[],
+            moreAvailable: false,
+            error: true,
+          } as AccumulatedTenants);
+        }),
       ),
     ),
-    catchError(() => {
-      return of({
-        results: [],
-        moreAvailable: false,
-        error: true,
-      } as AccumulatedTenants);
-    }),
     tap(() => this.loading.set(false)),
   );
 

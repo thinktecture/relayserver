@@ -14,8 +14,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronForwardOutline } from 'ionicons/icons';
-import { ApiAuthService } from '../api/api-auth.service';
 import { Router } from '@angular/router';
+import { ApiAuthStore } from '../api/api-auth.store';
 
 @Component({
   selector: 'app-sign-in',
@@ -37,7 +37,7 @@ import { Router } from '@angular/router';
   ],
 })
 export class SignInPage {
-  private apiAuth = inject(ApiAuthService);
+  private apiAuth = inject(ApiAuthStore);
   private router = inject(Router);
 
   @ViewChild('headerName') headerName?: IonInput;
@@ -53,9 +53,8 @@ export class SignInPage {
   }
 
   done() {
-    this.apiAuth.headerName = this.model.headerName;
-    this.apiAuth.key = this.model.key;
-    this.router.navigate(['/']);
+    this.apiAuth.update(this.model.headerName, this.model.key);
+    this.router.navigate(['/tabs', 'tenants']);
     // TODO: check access
   }
 }
