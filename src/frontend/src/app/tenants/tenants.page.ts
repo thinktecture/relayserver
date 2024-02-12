@@ -42,12 +42,11 @@ import {
 import { ApiService } from '../api/api.service';
 import { Tenant } from '../api/tenant.model';
 import { NewTenantComponent } from '../new-tenant/new-tenant.component';
-import { HttpErrorResponse } from '@angular/common/http';
 
 interface AccumulatedTenants {
   results: Tenant[];
   moreAvailable: boolean;
-  error?: number;
+  error: boolean;
 }
 
 interface AccumulateTenantsInput {
@@ -113,16 +112,16 @@ export class TenantsPage {
         mergeWith(this.deleteEv$.pipe(map((deleteEv) => ({ deleteEv })))),
         switchScan(
           (accumulated, value) => this.accumulateTenants(accumulated, value),
-          { results: [], moreAvailable: true, error: undefined },
+          { results: [], moreAvailable: true, error: false },
         ),
       ),
     ),
-    catchError(async (err: HttpErrorResponse) => {
-      return {
+    catchError(() => {
+      return of({
         results: [],
         moreAvailable: false,
-        error: err.status,
-      };
+        error: true,
+      } as AccumulatedTenants);
     }),
     tap(() => this.loading.set(false)),
   );
@@ -171,17 +170,19 @@ export class TenantsPage {
       return of({
         results: results.filter((result) => result.name !== deleteEv),
         moreAvailable,
+        error: false,
       });
     }
 
     if (!moreAvailable) {
-      return of({ results, moreAvailable });
+      return of({ results, moreAvailable, error: false });
     }
 
     return this.api.getTenantsPaged(results.length, PAGE_SIZE, filter).pipe(
       map((page) => ({
         results: [...results, ...page.results],
         moreAvailable: page.results.length >= page.pageSize,
+        error: false,
       })),
       tap(() => setTimeout(() => scrollEv?.target.complete())),
     );
