@@ -1,4 +1,6 @@
+import { AsyncPipe, I18nPluralPipe } from '@angular/common';
 import { Component, ViewChild, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
   AlertController,
@@ -15,6 +17,7 @@ import {
   IonList,
   IonModal,
   IonNote,
+  IonProgressBar,
   IonRouterOutlet,
   IonSearchbar,
   IonTitle,
@@ -27,10 +30,12 @@ import {
   BehaviorSubject,
   Observable,
   Subject,
+  catchError,
   lastValueFrom,
   map,
   mergeWith,
   of,
+  startWith,
   switchMap,
   switchScan,
   tap,
@@ -38,12 +43,13 @@ import {
 import { ApiService } from '../api/api.service';
 import { Tenant } from '../api/tenant.model';
 import { NewTenantComponent } from '../new-tenant/new-tenant.component';
-import { AsyncPipe } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface AccumulatedTenants {
   results: Tenant[];
   moreAvailable: boolean;
+  loading: boolean;
+  error?: number;
 }
 
 interface AccumulateTenantsInput {
@@ -62,6 +68,7 @@ const PAGE_SIZE = 50;
   imports: [
     RouterLink,
     AsyncPipe,
+    I18nPluralPipe,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -69,6 +76,7 @@ const PAGE_SIZE = 50;
     IonButton,
     IonIcon,
     IonSearchbar,
+    IonProgressBar,
     IonContent,
     IonList,
     IonItem,
@@ -91,6 +99,11 @@ export class TenantsPage {
 
   presentingElement = inject(IonRouterOutlet).nativeEl;
 
+  tenantsMapping = {
+    '=1': '1 tenant',
+    other: '# tenants',
+  };
+
   filter = signal('');
   tenants$ = toObservable(this.filter).pipe(
     tap(() => this.content?.scrollToTop()),
@@ -100,10 +113,25 @@ export class TenantsPage {
         mergeWith(this.deleteEv$.pipe(map((deleteEv) => ({ deleteEv })))),
         switchScan(
           (accumulated, value) => this.accumulateTenants(accumulated, value),
-          { results: [], moreAvailable: true },
+          { results: [], moreAvailable: true, loading: true, error: undefined },
         ),
+        startWith({
+          results: [],
+          moreAvailable: true,
+          loading: true,
+          error: undefined,
+        }),
       ),
     ),
+    catchError(async (err: HttpErrorResponse) => {
+      console.error(err);
+      return {
+        results: [],
+        moreAvailable: false,
+        loading: false,
+        error: err.status,
+      };
+    }),
   );
 
   @ViewChild(NewTenantComponent) newTenant?: NewTenantComponent;
@@ -150,17 +178,19 @@ export class TenantsPage {
       return of({
         results: results.filter((result) => result.name !== deleteEv),
         moreAvailable,
+        loading: false,
       });
     }
 
     if (!moreAvailable) {
-      return of({ results, moreAvailable });
+      return of({ results, moreAvailable, loading: false });
     }
 
     return this.api.getTenantsPaged(results.length, PAGE_SIZE, filter).pipe(
       map((page) => ({
         results: [...results, ...page.results],
         moreAvailable: page.results.length >= page.pageSize,
+        loading: false,
       })),
       tap(() => setTimeout(() => scrollEv?.target.complete())),
     );
