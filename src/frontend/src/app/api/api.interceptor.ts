@@ -31,12 +31,14 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
               handler: () => router.navigate(['/sign-in']),
             },
           ],
+          positionAnchor: 'tab-bar',
         });
       } else {
         toast = await toastService.create({
           message: `An unknown error occurred (${err.status})`,
           color: 'danger',
           duration: 5000,
+          positionAnchor: 'tab-bar',
         });
       }
 
