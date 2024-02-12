@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { Component, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -24,7 +23,6 @@ import { ApiAuthStore } from '../api/api-auth.store';
   standalone: true,
   imports: [
     FormsModule,
-    JsonPipe,
     IonHeader,
     IonToolbar,
     IonTitle,
