@@ -35,7 +35,6 @@ import {
   map,
   mergeWith,
   of,
-  startWith,
   switchMap,
   switchScan,
   tap,
@@ -48,7 +47,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 interface AccumulatedTenants {
   results: Tenant[];
   moreAvailable: boolean;
-  loading: boolean;
   error?: number;
 }
 
@@ -104,34 +102,29 @@ export class TenantsPage {
     other: '# tenants',
   };
 
+  loading = signal(false);
   filter = signal('');
   tenants$ = toObservable(this.filter).pipe(
     tap(() => this.content?.scrollToTop()),
+    tap(() => this.loading.set(true)),
     switchMap((filter) =>
       this.scrollEv$.pipe(
         map((scrollEv) => ({ scrollEv, filter })),
         mergeWith(this.deleteEv$.pipe(map((deleteEv) => ({ deleteEv })))),
         switchScan(
           (accumulated, value) => this.accumulateTenants(accumulated, value),
-          { results: [], moreAvailable: true, loading: true, error: undefined },
+          { results: [], moreAvailable: true, error: undefined },
         ),
-        startWith({
-          results: [],
-          moreAvailable: true,
-          loading: true,
-          error: undefined,
-        }),
       ),
     ),
     catchError(async (err: HttpErrorResponse) => {
-      console.error(err);
       return {
         results: [],
         moreAvailable: false,
-        loading: false,
         error: err.status,
       };
     }),
+    tap(() => this.loading.set(false)),
   );
 
   @ViewChild(NewTenantComponent) newTenant?: NewTenantComponent;
@@ -178,19 +171,17 @@ export class TenantsPage {
       return of({
         results: results.filter((result) => result.name !== deleteEv),
         moreAvailable,
-        loading: false,
       });
     }
 
     if (!moreAvailable) {
-      return of({ results, moreAvailable, loading: false });
+      return of({ results, moreAvailable });
     }
 
     return this.api.getTenantsPaged(results.length, PAGE_SIZE, filter).pipe(
       map((page) => ({
         results: [...results, ...page.results],
         moreAvailable: page.results.length >= page.pageSize,
-        loading: false,
       })),
       tap(() => setTimeout(() => scrollEv?.target.complete())),
     );
