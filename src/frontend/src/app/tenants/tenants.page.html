@@ -1,69 +1,93 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Tenants</ion-title>
-    <ion-buttons slot="end">
-      <ion-button id="add-tenant" aria-label="Add tenant">
-        <ion-icon slot="icon-only" name="add" aria-hidden />
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-  <ion-toolbar>
-    <ion-searchbar (ionInput)="search($event)" [debounce]="500" />
-  </ion-toolbar>
-</ion-header>
+@if (tenants$ | async; as tenants) {
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Tenants</ion-title>
+      <ion-buttons slot="end">
+        <ion-button id="add-tenant" aria-label="Add tenant">
+          <ion-icon slot="icon-only" name="add" aria-hidden />
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-searchbar (ionInput)="search($event)" [debounce]="500" />
+      @if (tenants.loading) {
+        <ion-progress-bar type="indeterminate" />
+      }
+    </ion-toolbar>
+  </ion-header>
 
-<ion-content>
-  @if (tenants$ | async; as tenants) {
-    <ion-list>
-      @for (tenant of tenants.results; track tenant.name) {
-        <ion-item
-          [routerLink]="['/tabs', 'tenants', tenant.name]"
-          [button]="true"
-        >
-          <ion-label>{{ tenant.displayName ?? tenant.name }}</ion-label>
-          <ion-button
-            slot="end"
-            fill="clear"
-            color="danger"
-            (click)="deleteTenant($event, tenant)"
-            aria-label="Delete tenant"
+  <ion-content>
+    @if (tenants.error === undefined) {
+      <ion-list>
+        @for (tenant of tenants.results; track tenant.name) {
+          <ion-item
+            [routerLink]="['/tabs', 'tenants', tenant.name]"
+            [button]="true"
           >
-            <ion-icon slot="icon-only" name="trash-outline" aria-hidden />
+            <ion-label>{{ tenant.displayName ?? tenant.name }}</ion-label>
+            <ion-button
+              slot="end"
+              fill="clear"
+              color="danger"
+              (click)="deleteTenant($event, tenant)"
+              aria-label="Delete tenant"
+            >
+              <ion-icon slot="icon-only" name="trash-outline" aria-hidden />
+            </ion-button>
+          </ion-item>
+        }
+
+        @if (!tenants.loading && !tenants.moreAvailable) {
+          <ion-item>
+            <ion-note>
+              @if (filter() === "") {
+                <span>
+                  {{ tenants.results.length | i18nPlural: tenantsMapping }} in
+                  total
+                </span>
+              } @else {
+                <span>
+                  {{ tenants.results.length | i18nPlural: tenantsMapping }}
+                  matching {{ filter() }}
+                </span>
+              }
+            </ion-note>
+          </ion-item>
+        }
+      </ion-list>
+
+      <ion-infinite-scroll
+        (ionInfinite)="onInfinite($event)"
+        [disabled]="!tenants.moreAvailable"
+      >
+        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+    } @else {
+      <ion-list inset>
+        <ion-item color="danger">
+          <ion-label>
+            @if (tenants.error === 401) {
+              Unauthorized
+            } @else {
+              An unknown error occurred ({{ tenants.error }})
+            }
+          </ion-label>
+          <ion-button fill="clear" color="dark" [routerLink]="['/sign-in']">
+            Set API key
           </ion-button>
         </ion-item>
-      }
+      </ion-list>
+    }
 
-      @if (!tenants.moreAvailable) {
-        <ion-item>
-          <ion-note>
-            @if (filter() === "") {
-              <span>{{ tenants.results.length }} tenants in total</span>
-            } @else {
-              <span>
-                {{ tenants.results.length }} tenants matching {{ filter() }}
-              </span>
-            }
-          </ion-note>
-        </ion-item>
-      }
-    </ion-list>
-
-    <ion-infinite-scroll
-      (ionInfinite)="onInfinite($event)"
-      [disabled]="!tenants.moreAvailable"
+    <ion-modal
+      #modal
+      trigger="add-tenant"
+      [presentingElement]="presentingElement"
+      (didPresent)="newTenant?.focusTenantName()"
     >
-      <ion-infinite-scroll-content></ion-infinite-scroll-content>
-    </ion-infinite-scroll>
-  }
-
-  <ion-modal
-    #modal
-    trigger="add-tenant"
-    [presentingElement]="presentingElement"
-    (didPresent)="newTenant?.focusTenantName()"
-  >
-    <ng-template>
-      <app-new-tenant (dismiss)="modal.dismiss()" />
-    </ng-template>
-  </ion-modal>
-</ion-content>
+      <ng-template>
+        <app-new-tenant (dismiss)="modal.dismiss()" />
+      </ng-template>
+    </ion-modal>
+  </ion-content>
+}
