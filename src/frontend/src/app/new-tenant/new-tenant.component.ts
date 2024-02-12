@@ -60,6 +60,10 @@ export class NewTenantComponent {
   }
 
   async create(): Promise<void> {
+    if (!this.form.valid) {
+      return;
+    }
+
     const formTenant = this.form.getRawValue();
     const tenant = {
       ...formTenant,

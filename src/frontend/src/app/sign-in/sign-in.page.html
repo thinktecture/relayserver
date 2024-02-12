@@ -10,7 +10,7 @@
 </ion-header>
 
 <ion-content>
-  <form #form="ngForm">
+  <form #form="ngForm" (ngSubmit)="done()">
     <ion-list>
       <ion-item color="light">
         <ion-input

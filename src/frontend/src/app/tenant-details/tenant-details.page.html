@@ -22,7 +22,7 @@
 
 <ion-content>
   @if (editing()) {
-    <form [formGroup]="form">
+    <form [formGroup]="form" (ngSubmit)="save()">
       <app-edit-tenant />
     </form>
   } @else {
