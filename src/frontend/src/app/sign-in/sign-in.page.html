@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Sign-in</ion-title>
+    <ion-buttons slot="end">
+      <ion-button strong (click)="done()" [disabled]="!form.valid">
+        Done
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form #form="ngForm">
+    <ion-list>
+      <ion-item color="light">
+        <ion-input
+          label="Header name"
+          required
+          [(ngModel)]="model.headerName"
+          name="headerName"
+          helperText="Required"
+          errorText="Required"
+          #headerName
+        />
+      </ion-item>
+      <ion-item color="light">
+        <ion-input
+          label="API key"
+          required
+          [(ngModel)]="model.key"
+          name="key"
+          helperText="Required"
+          errorText="Required"
+        />
+      </ion-item>
+    </ion-list>
+  </form>
+
+  <ion-list>
+    <ion-item color="light">
+      <pre>{{ model | json }}</pre>
+    </ion-item>
+  </ion-list>
+</ion-content>
