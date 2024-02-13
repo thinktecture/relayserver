@@ -12,7 +12,7 @@ import { IonInput, InputCustomEvent } from '@ionic/angular/standalone';
   standalone: true,
   imports: [IonInput],
   templateUrl: './interval-input.component.html',
-  styleUrl: './interval-input.component.css',
+  styleUrl: './interval-input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
