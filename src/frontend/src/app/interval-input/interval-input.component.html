@@ -1,0 +1,13 @@
+<ion-input
+  (ionBlur)="onTouched()"
+  (ionInput)="onChange($event)"
+  [disabled]="disabled()"
+  type="number"
+  min="0"
+  clearInput
+  [value]="value()"
+  [label]="label()"
+  [placeholder]="placeholder()"
+  [helperText]="helperText()"
+  [errorText]="errorText()"
+/>
