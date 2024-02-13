@@ -34,18 +34,12 @@ export class IntervalInputComponent implements ControlValueAccessor {
   value = signal<number | null>(null);
 
   writeValue(value: string | null): void {
-    console.log(`IIC: value=${JSON.stringify(value)}`);
     this.value.set(this.intervalToSecons(value));
   }
 
   registerOnChange(fn: (interval: string | null) => void): void {
-    const fn2 = (interval: string | null) => {
-      console.log(`IIC#onChange: value=${JSON.stringify(interval)}`);
-      fn(interval);
-    };
-
     this.onChange = (interval: InputCustomEvent) => {
-      fn2(this.secondsToInterval(interval.detail.value));
+      fn(this.secondsToInterval(interval.detail.value));
     };
   }
 
