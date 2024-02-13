@@ -23,14 +23,12 @@
       />
     </ion-item>
     <ion-item color="light">
-      <ion-input
-        type="number"
+      <app-interval-input
         formControlName="keepAliveInterval"
         label="Keepalive interval"
+        placeholder="Default"
         helperText="Interval in seconds used to send keepalive pings between the server and a connector."
         errorText="Must not be negative."
-        placeholder="Default"
-        clearInput
       />
     </ion-item>
   </ion-list>
@@ -59,25 +57,21 @@
 
   <ion-list>
     <ion-item color="light">
-      <ion-input
-        type="number"
+      <app-interval-input
         formControlName="reconnectMinimumDelay"
         label="Minimum reconnect delay"
         helperText="Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again."
         errorText="Must not be negative."
         placeholder="Default"
-        clearInput
       />
     </ion-item>
     <ion-item color="light">
-      <ion-input
-        type="number"
+      <app-interval-input
         formControlName="reconnectMaximumDelay"
         label="Maximum reconnect delay"
         helperText="Maximum delay in seconds to wait for until a reconnect of a connector should be attempted again."
         errorText="Must not be negative."
         placeholder="Default"
-        clearInput
       />
     </ion-item>
   </ion-list>

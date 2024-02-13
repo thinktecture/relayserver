@@ -21,6 +21,7 @@ import {
 import { addIcons } from 'ionicons';
 import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
 import { EditTenantService } from './edit-tenant.service';
+import { IntervalInputComponent } from '../interval-input/interval-input.component';
 
 @Component({
   selector: 'app-edit-tenant',
@@ -40,6 +41,7 @@ import { EditTenantService } from './edit-tenant.service';
     IonDatetimeButton,
     IonModal,
     IonDatetime,
+    IntervalInputComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
