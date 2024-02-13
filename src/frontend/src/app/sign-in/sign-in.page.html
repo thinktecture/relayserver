@@ -2,7 +2,13 @@
   <ion-toolbar>
     <ion-title>Sign-in</ion-title>
     <ion-buttons slot="end">
-      <ion-button strong (click)="done()" [disabled]="!form.valid">
+      <ion-button
+        strong
+        (click)="done()"
+        [disabled]="!form.valid"
+        type="submit"
+        form="sign-in-form"
+      >
         Done
       </ion-button>
     </ion-buttons>
@@ -10,7 +16,7 @@
 </ion-header>
 
 <ion-content>
-  <form #form="ngForm" (ngSubmit)="done()">
+  <form #form="ngForm" (ngSubmit)="done()" id="sign-in-form">
     <ion-list>
       <ion-item color="light">
         <ion-input
