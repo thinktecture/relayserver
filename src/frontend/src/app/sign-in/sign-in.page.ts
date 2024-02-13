@@ -1,5 +1,5 @@
 import { Component, ViewChild, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import {
   IonButton,
   IonButtons,
@@ -15,6 +15,8 @@ import { addIcons } from 'ionicons';
 import { chevronForwardOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { ApiAuthStore } from '../api/api-auth.store';
+import { ApiService } from '../api/api.service';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-sign-in',
@@ -37,8 +39,10 @@ import { ApiAuthStore } from '../api/api-auth.store';
 export class SignInPage {
   private apiAuth = inject(ApiAuthStore);
   private router = inject(Router);
+  private api = inject(ApiService);
 
   @ViewChild('headerName') headerName?: IonInput;
+  @ViewChild('form') form?: NgForm;
 
   model = { headerName: '', key: '' };
 
@@ -50,9 +54,19 @@ export class SignInPage {
     this.headerName?.setFocus();
   }
 
-  done() {
+  async done() {
+    if (!this.form?.valid) {
+      return;
+    }
+
     this.apiAuth.update(this.model.headerName, this.model.key);
-    this.router.navigate(['/tabs', 'tenants']);
-    // TODO: check access
+
+    try {
+      await lastValueFrom(this.api.getTenantsPaged());
+    } catch {
+      return;
+    }
+
+    this.router.navigate(['/']);
   }
 }
