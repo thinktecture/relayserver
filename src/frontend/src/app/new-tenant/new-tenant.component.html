@@ -5,7 +5,13 @@
       <ion-button (click)="dismiss.emit()">Cancel</ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
-      <ion-button strong [disabled]="!form.valid" (click)="create()">
+      <ion-button
+        strong
+        [disabled]="!form.valid"
+        (click)="create()"
+        type="submit"
+        form="new-tenant-form"
+      >
         Done
       </ion-button>
     </ion-buttons>
@@ -13,7 +19,7 @@
 </ion-header>
 
 <ion-content>
-  <form [formGroup]="form" (ngSubmit)="create()">
+  <form [formGroup]="form" (ngSubmit)="create()" id="new-tenant-form">
     <ion-list>
       <ion-item color="light">
         <ion-input
