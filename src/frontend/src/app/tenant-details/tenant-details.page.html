@@ -10,7 +10,13 @@
     </ion-buttons>
     <ion-buttons slot="end">
       @if (editing()) {
-        <ion-button strong (click)="save()" [disabled]="!form.valid">
+        <ion-button
+          strong
+          (click)="save()"
+          [disabled]="!form.valid"
+          type="submit"
+          form="tenant-details-form"
+        >
           Done
         </ion-button>
       } @else {
@@ -22,7 +28,7 @@
 
 <ion-content>
   @if (editing()) {
-    <form [formGroup]="form" (ngSubmit)="save()">
+    <form [formGroup]="form" (ngSubmit)="save()" id="tenant-details-form">
       <app-edit-tenant />
     </form>
   } @else {
