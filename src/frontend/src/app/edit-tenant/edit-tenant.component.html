@@ -50,6 +50,7 @@
         formControlName="enableTracing"
         labelPlacement="end"
         justify="start"
+        [indeterminate]="form.value.enableTracing === null"
       >
         Enable tracing
       </ion-checkbox>
