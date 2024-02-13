@@ -18,16 +18,16 @@ export interface NewTenant {
   maximumConcurrentConnectorRequests: number;
 
   /** Interval in seconds used to send keepalive pings between the server and a connector. */
-  keepAliveInterval: number | null;
+  keepAliveInterval: string | null;
 
   /** Whether tracing is enabled for all requests of this particular tenant. */
   enableTracing: boolean | null;
 
   /** Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again. */
-  reconnectMinimumDelay: number | null;
+  reconnectMinimumDelay: string | null;
 
   /** Maximum delay in seconds to wait for until a reconnect of a connector should be attempted again. */
-  reconnectMaximumDelay: number | null;
+  reconnectMaximumDelay: string | null;
 
   /** List of tenant credentials. */
   credentials: NewTenantCredential[];

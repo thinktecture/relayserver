@@ -18,19 +18,10 @@ export class EditTenantService {
         nonNullable: true,
         validators: Validators.min(0),
       }),
-      keepAliveInterval: new FormControl<number | null>(
-        null,
-        Validators.min(0),
-      ),
+      keepAliveInterval: new FormControl<string | null>(null),
       enableTracing: new FormControl<boolean | null>(null),
-      reconnectMinimumDelay: new FormControl<number | null>(
-        null,
-        Validators.min(0),
-      ),
-      reconnectMaximumDelay: new FormControl<number | null>(
-        null,
-        Validators.min(0),
-      ),
+      reconnectMinimumDelay: new FormControl<string | null>(null),
+      reconnectMaximumDelay: new FormControl<string | null>(null),
       credentials: new FormArray<
         ReturnType<EditTenantService['generateCredentialForm']>
       >([]),
