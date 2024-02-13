@@ -1,22 +1,22 @@
-@if (tenants$ | async; as tenants) {
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Tenants</ion-title>
-      <ion-buttons slot="end">
-        <ion-button id="add-tenant" aria-label="Add tenant">
-          <ion-icon slot="icon-only" name="add" aria-hidden />
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-    <ion-toolbar>
-      <ion-searchbar (ionInput)="search($event)" [debounce]="500" />
-      @if (loading()) {
-        <ion-progress-bar type="indeterminate" />
-      }
-    </ion-toolbar>
-  </ion-header>
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Tenants</ion-title>
+    <ion-buttons slot="end">
+      <ion-button id="add-tenant" aria-label="Add tenant">
+        <ion-icon slot="icon-only" name="add" aria-hidden />
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar (ionInput)="search($event)" [debounce]="500" />
+    @if (loading()) {
+      <ion-progress-bar type="indeterminate" />
+    }
+  </ion-toolbar>
+</ion-header>
 
-  <ion-content>
+<ion-content>
+  @if (tenants$ | async; as tenants) {
     @if (tenants.error) {
       <ion-list>
         <ion-item>
@@ -65,16 +65,16 @@
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
       </ion-infinite-scroll>
     }
+  }
 
-    <ion-modal
-      #modal
-      trigger="add-tenant"
-      [presentingElement]="presentingElement"
-      (didPresent)="newTenant?.focusTenantName()"
-    >
-      <ng-template>
-        <app-new-tenant (dismiss)="modal.dismiss()" />
-      </ng-template>
-    </ion-modal>
-  </ion-content>
-}
+  <ion-modal
+    #modal
+    trigger="add-tenant"
+    [presentingElement]="presentingElement"
+    (didPresent)="newTenant?.focusTenantName()"
+  >
+    <ng-template>
+      <app-new-tenant (dismiss)="modal.dismiss()" />
+    </ng-template>
+  </ion-modal>
+</ion-content>
