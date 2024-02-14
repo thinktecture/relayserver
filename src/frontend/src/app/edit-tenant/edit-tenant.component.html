@@ -22,15 +22,13 @@
         errorText="Must not be negative."
       />
     </ion-item>
-    <ion-item color="light">
-      <app-interval-input
-        formControlName="keepAliveInterval"
-        label="Keepalive interval"
-        placeholder="Default"
-        helperText="Interval in seconds used to send keepalive pings between the server and a connector."
-        errorText="Must not be negative."
-      />
-    </ion-item>
+    <app-interval-input
+      formControlName="keepAliveInterval"
+      label="Keepalive interval"
+      placeholder="Default"
+      helperText="Interval in seconds used to send keepalive pings between the server and a connector."
+      errorText="Must not be negative."
+    />
   </ion-list>
 
   <ion-list>
@@ -56,24 +54,20 @@
   </ion-list>
 
   <ion-list>
-    <ion-item color="light">
-      <app-interval-input
-        formControlName="reconnectMinimumDelay"
-        label="Minimum reconnect delay"
-        helperText="Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again."
-        errorText="Must not be negative."
-        placeholder="Default"
-      />
-    </ion-item>
-    <ion-item color="light">
-      <app-interval-input
-        formControlName="reconnectMaximumDelay"
-        label="Maximum reconnect delay"
-        helperText="Maximum delay in seconds to wait for until a reconnect of a connector should be attempted again."
-        errorText="Must not be negative."
-        placeholder="Default"
-      />
-    </ion-item>
+    <app-interval-input
+      formControlName="reconnectMinimumDelay"
+      label="Minimum reconnect delay"
+      helperText="Minimum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+      errorText="Must not be negative."
+      placeholder="Default"
+    />
+    <app-interval-input
+      formControlName="reconnectMaximumDelay"
+      label="Maximum reconnect delay"
+      helperText="Maximum delay in seconds to wait for until a reconnect of a connector should be attempted again."
+      errorText="Must not be negative."
+      placeholder="Default"
+    />
   </ion-list>
 
   <ion-list formArrayName="credentials">

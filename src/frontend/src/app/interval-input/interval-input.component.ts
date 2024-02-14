@@ -5,12 +5,12 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { IonInput, InputCustomEvent } from '@ionic/angular/standalone';
+import { IonInput, InputCustomEvent, IonItem } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-interval-input',
   standalone: true,
-  imports: [IonInput],
+  imports: [IonItem, IonInput],
   templateUrl: './interval-input.component.html',
   styleUrl: './interval-input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
