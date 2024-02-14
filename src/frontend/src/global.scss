@@ -51,7 +51,7 @@ ion-item ion-list {
   flex: 1;
 }
 
-ion-item:has(ion-list) {
+ion-item:has(> ion-button[fill="clear"]) {
   --padding-start: 0.5em;
 }
 
