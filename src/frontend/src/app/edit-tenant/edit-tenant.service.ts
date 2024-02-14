@@ -5,6 +5,8 @@ import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
   providedIn: 'root',
 })
 export class EditTenantService {
+  // TODO: return type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   generateForm() {
     return new FormGroup({
       name: new FormControl('', {
@@ -28,6 +30,8 @@ export class EditTenantService {
     });
   }
 
+  // TODO: return type
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   generateCredentialForm() {
     return new FormGroup({
       id: new FormControl<string | null>(null),
