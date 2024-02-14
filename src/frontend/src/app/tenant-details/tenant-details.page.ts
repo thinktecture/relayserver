@@ -14,6 +14,7 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonProgressBar,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
@@ -22,7 +23,7 @@ import {
   combineLatestWith,
   exhaustMap,
   filter,
-  lastValueFrom,
+  map,
   pipe,
   switchMap,
   tap,
@@ -48,6 +49,7 @@ import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
     IonButton,
     IonTitle,
     IonContent,
+    IonProgressBar,
     EditTenantComponent,
     ViewTenantComponent,
   ],
@@ -60,29 +62,31 @@ export class TenantDetailsPage {
   name = input.required<string>();
 
   editing = signal(false);
+  loading = signal(false);
   tenant$ = toObservable(this.name).pipe(
     combineLatestWith(toObservable(this.editing)),
     filter(([, editing]) => !editing),
+    tap(() => this.loading.set(true)),
     switchMap(([name]) => this.api.getSingleTenant(name)),
     tap((tenant) => this.updateForm(tenant)),
+    tap(() => this.loading.set(false)),
   );
   form = this.editTenantService.generateForm();
 
   save = rxMethod<void>(
     pipe(
       filter(() => this.form.valid),
-      exhaustMap(() => {
-        const formTenant = this.form.getRawValue();
-        const tenant = {
-          ...formTenant,
-          credentials: formTenant.credentials.map((credential) => ({
-            ...credential,
-            id: credential.id ?? undefined,
-          })),
-        };
-
-        return this.api.putTenant(tenant);
-      }),
+      tap(() => this.loading.set(true)),
+      map(() => this.form.getRawValue()),
+      map((formTenant) => ({
+        ...formTenant,
+        credentials: formTenant.credentials.map((credential) => ({
+          ...credential,
+          id: credential.id ?? undefined,
+        })),
+      })),
+      exhaustMap((tenant) => this.api.putTenant(tenant)),
+      tap(() => this.loading.set(false)),
       tap(() => this.editing.set(false)),
     ),
   );

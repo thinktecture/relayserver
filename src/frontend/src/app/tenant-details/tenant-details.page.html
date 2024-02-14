@@ -3,7 +3,9 @@
     <ion-title>{{ name() }}</ion-title>
     <ion-buttons slot="start">
       @if (editing()) {
-        <ion-button (click)="cancel()">Cancel</ion-button>
+        <ion-button (click)="cancel()" [disabled]="loading()">
+          Cancel
+        </ion-button>
       } @else {
         <ion-back-button default-href="/tabs/tenants"></ion-back-button>
       }
@@ -13,16 +15,19 @@
         <ion-button
           strong
           (click)="save()"
-          [disabled]="!form.valid"
+          [disabled]="!form.valid || loading()"
           type="submit"
           form="tenant-details-form"
         >
           Done
         </ion-button>
       } @else {
-        <ion-button (click)="edit()">Edit</ion-button>
+        <ion-button (click)="edit()" [disabled]="loading()">Edit</ion-button>
       }
     </ion-buttons>
+    @if (loading()) {
+      <ion-progress-bar type="indeterminate" />
+    }
   </ion-toolbar>
 </ion-header>
 
