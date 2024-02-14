@@ -2,38 +2,3 @@ ion-icon[name="add-circle"],
 ion-icon[name="remove-circle"] {
   font-size: 2em;
 }
-
-ion-item:has(ion-list) {
-  --padding-start: 0.5em;
-  --inner-padding-bottom: 0;
-}
-
-ion-item::part(native)::after {
-  opacity: 0;
-}
-
-.ion-focused:not(:has(ion-item:focus-within)):has(
-    ion-checkbox:focus-within,
-    ion-button:focus-within,
-    ion-datetime-button:focus-within
-  )::part(native)::after,
-.ion-focused
-  ion-item:has(
-    ion-checkbox:focus-within,
-    ion-button:focus-within,
-    ion-datetime-button:focus-within
-  )::part(native)::after {
-  background-color: var(--background-focused);
-  opacity: var(--background-focused-opacity);
-}
-
-ion-item:not(:has(ion-item:hover)):has(ion-checkbox:hover)::part(
-    native
-  )::after {
-  background-color: var(--background-hover);
-  opacity: var(--background-hover-opacity);
-}
-
-ion-item ion-item:last-child {
-  --border-width: 0;
-}
