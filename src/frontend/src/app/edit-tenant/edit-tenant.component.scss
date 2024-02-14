@@ -2,3 +2,7 @@ ion-icon[name="add-circle"],
 ion-icon[name="remove-circle"] {
   font-size: 2em;
 }
+
+ion-item:has(ion-list) {
+  --padding-start: 0.5em;
+}

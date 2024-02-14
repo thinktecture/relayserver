@@ -51,10 +51,6 @@ ion-item ion-list {
   flex: 1;
 }
 
-ion-item:has(> ion-button[fill="clear"]) {
-  --padding-start: 0.5em;
-}
-
 ion-item::part(native)::after {
   opacity: 0;
 }
