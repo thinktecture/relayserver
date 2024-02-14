@@ -17,12 +17,21 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { combineLatestWith, filter, lastValueFrom, switchMap, tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import {
+  combineLatestWith,
+  exhaustMap,
+  filter,
+  lastValueFrom,
+  pipe,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { ApiService } from '../api/api.service';
-import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
-import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
 import { Tenant } from '../api/tenant.model';
+import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { EditTenantService } from '../edit-tenant/edit-tenant.service';
+import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
 
 @Component({
   selector: 'app-tenant-details',
@@ -59,6 +68,25 @@ export class TenantDetailsPage {
   );
   form = this.editTenantService.generateForm();
 
+  save = rxMethod<void>(
+    pipe(
+      filter(() => this.form.valid),
+      exhaustMap(() => {
+        const formTenant = this.form.getRawValue();
+        const tenant = {
+          ...formTenant,
+          credentials: formTenant.credentials.map((credential) => ({
+            ...credential,
+            id: credential.id ?? undefined,
+          })),
+        };
+
+        return this.api.putTenant(tenant);
+      }),
+      tap(() => this.editing.set(false)),
+    ),
+  );
+
   get credentials(): FormArray<
     ReturnType<EditTenantService['generateCredentialForm']>
   > {
@@ -67,26 +95,6 @@ export class TenantDetailsPage {
 
   edit(): void {
     this.editing.set(true);
-  }
-
-  async save(): Promise<void> {
-    if (!this.form.valid) {
-      return;
-    }
-
-    const formTenant = this.form.getRawValue();
-    const tenant = {
-      ...formTenant,
-      credentials: formTenant.credentials.map((credential) => ({
-        id: credential.id ?? undefined,
-        plainTextValue: credential.plainTextValue,
-        expiration: credential.expiration,
-      })),
-    };
-
-    await lastValueFrom(this.api.putTenant(tenant));
-
-    this.editing.set(false);
   }
 
   cancel(): void {
