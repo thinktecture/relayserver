@@ -7,7 +7,7 @@
       <ion-textarea
         formControlName="description"
         label="Description"
-        autoGrow
+        [autoGrow]="true"
       ></ion-textarea>
     </ion-item>
   </ion-list>
@@ -146,7 +146,7 @@
                 [datetime]="'credential-' + $index + '-expiration'"
                 [disabled]="!credential.value.isExpiring"
               />
-              <ion-modal keepContentsMounted>
+              <ion-modal [keepContentsMounted]="true">
                 <ng-template>
                   <ion-datetime
                     [id]="'credential-' + $index + '-expiration'"
