@@ -101,7 +101,7 @@
               </ion-label>
             </ion-item>
 
-            @if (credential.value.isExpiring) {
+            @if (credential.value.expiration) {
               <ion-item color="light">
                 <ion-label>
                   <p>Expires</p>
@@ -127,29 +127,7 @@
                 </ion-button>
               </ion-input>
             </ion-item>
-            <ion-item color="light">
-              <ion-checkbox
-                formControlName="isExpiring"
-                labelPlacement="end"
-                justify="start"
-                slot="start"
-              >
-                Expires
-              </ion-checkbox>
-              <ion-datetime-button
-                [datetime]="'credential-' + $index + '-expiration'"
-                [disabled]="!credential.value.isExpiring"
-              />
-              <ion-modal [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime
-                    [id]="'credential-' + $index + '-expiration'"
-                    formControlName="expiration"
-                    presentation="date"
-                  />
-                </ng-template>
-              </ion-modal>
-            </ion-item>
+            <app-date-input formControlName="expiration" label="Expires" />
           }
         </ion-list>
       </ion-item>

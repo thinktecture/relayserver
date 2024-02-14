@@ -8,20 +8,18 @@ import { Clipboard } from '@capacitor/clipboard';
 import {
   IonButton,
   IonCheckbox,
-  IonDatetime,
-  IonDatetimeButton,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonList,
-  IonModal,
   IonTextarea,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { addCircle, copyOutline, removeCircle } from 'ionicons/icons';
 import { EditTenantService } from './edit-tenant.service';
 import { IntervalInputComponent } from '../interval-input/interval-input.component';
+import { DateInputComponent } from '../date-input/date-input.component';
 
 @Component({
   selector: 'app-edit-tenant',
@@ -38,10 +36,8 @@ import { IntervalInputComponent } from '../interval-input/interval-input.compone
     IonButton,
     IonIcon,
     IonLabel,
-    IonDatetimeButton,
-    IonModal,
-    IonDatetime,
     IntervalInputComponent,
+    DateInputComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
