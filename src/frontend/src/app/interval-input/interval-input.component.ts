@@ -34,12 +34,12 @@ export class IntervalInputComponent implements ControlValueAccessor {
   value = signal<number | null>(null);
 
   writeValue(value: string | null): void {
-    this.value.set(this.intervalToSecons(value));
+    this.value.set(this.intervalToSeconds(value));
   }
 
-  registerOnChange(fn: (interval: string | null) => void): void {
-    this.onChange = (interval: InputCustomEvent) => {
-      fn(this.secondsToInterval(interval.detail.value));
+  registerOnChange(fn: (value: string | null) => void): void {
+    this.onChange = (event: InputCustomEvent) => {
+      fn(this.secondsToInterval(event.detail.value));
     };
   }
 
@@ -81,7 +81,7 @@ export class IntervalInputComponent implements ControlValueAccessor {
     return `${days}.${interval}`;
   }
 
-  private intervalToSecons(interval: string | null): number | null {
+  private intervalToSeconds(interval: string | null): number | null {
     if (interval === null) {
       return null;
     }
