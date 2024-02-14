@@ -36,7 +36,7 @@ export class DateInputComponent implements ControlValueAccessor {
 
   datetimeId = `datetime-${Math.random()}`;
   onChange: (value: string | null) => void = () => {};
-  onTouched = () => {};
+  onTouched = (): void => {};
   disabled = signal(false);
   value = signal<string>(new Date().toISOString().substring(0, 10));
   indeterminate = signal(true);

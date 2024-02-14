@@ -40,10 +40,7 @@ export class EditTenantService {
         Validators.required,
       ),
       created: new FormControl('', { nonNullable: true }),
-      isExpiring: new FormControl(false, { nonNullable: true }),
-      expiration: new FormControl(new Date().toISOString(), {
-        nonNullable: true,
-      }),
+      expiration: new FormControl<string | null>(null),
     });
   }
 

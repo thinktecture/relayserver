@@ -80,11 +80,7 @@ export class TenantDetailsPage {
       credentials: formTenant.credentials.map((credential) => ({
         id: credential.id ?? undefined,
         plainTextValue: credential.plainTextValue,
-        expiration: credential.isExpiring
-          ? new Date(
-              `${credential.expiration.substring(0, 10)}T23:59:59`,
-            ).toISOString()
-          : null,
+        expiration: credential.expiration,
       })),
     };
 
@@ -109,15 +105,6 @@ export class TenantDetailsPage {
       this.credentials.push(control);
     });
 
-    this.form.reset({
-      ...tenant,
-      credentials: tenant.credentials.map((credential) => ({
-        id: credential.id,
-        plainTextValue: null,
-        created: credential.created,
-        isExpiring: credential.expiration !== null,
-        expiration: credential.expiration ?? '',
-      })),
-    });
+    this.form.reset(tenant);
   }
 }
