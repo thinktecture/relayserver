@@ -29,7 +29,7 @@ export class IntervalInputComponent implements ControlValueAccessor {
   errorText = input<string>();
 
   onChange: (event: InputCustomEvent) => void = () => {};
-  onTouched = () => {};
+  onTouched = (): void => {};
   disabled = signal(false);
   value = signal<number | null>(null);
 

@@ -50,11 +50,11 @@ export class SignInPage {
     addIcons({ chevronForwardOutline });
   }
 
-  ionViewDidEnter() {
+  ionViewDidEnter(): void {
     this.headerName?.setFocus();
   }
 
-  async done() {
+  async done(): Promise<void> {
     if (!this.form?.valid) {
       return;
     }
