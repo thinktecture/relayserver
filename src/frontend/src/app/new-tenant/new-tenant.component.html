@@ -2,7 +2,9 @@
   <ion-toolbar>
     <ion-title>New Tenant</ion-title>
     <ion-buttons slot="start">
-      <ion-button (click)="dismiss.emit()">Cancel</ion-button>
+      <ion-button (click)="dismiss.emit()" [disabled]="loading()">
+        Cancel
+      </ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
       <ion-button
@@ -11,11 +13,15 @@
         (click)="create()"
         type="submit"
         form="new-tenant-form"
+        [disabled]="loading()"
       >
         Done
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  @if (loading()) {
+    <ion-progress-bar type="indeterminate" />
+  }
 </ion-header>
 
 <ion-content>

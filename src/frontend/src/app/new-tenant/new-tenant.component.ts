@@ -5,6 +5,7 @@ import {
   Output,
   ViewChild,
   inject,
+  signal,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,10 +17,12 @@ import {
   IonInput,
   IonItem,
   IonList,
+  IonProgressBar,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { lastValueFrom } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { exhaustMap, filter, map, pipe, tap } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { EditTenantService } from '../edit-tenant/edit-tenant.service';
@@ -40,6 +43,7 @@ import { EditTenantService } from '../edit-tenant/edit-tenant.service';
     IonList,
     IonItem,
     IonInput,
+    IonProgressBar,
     EditTenantComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,28 +58,31 @@ export class NewTenantComponent {
   @ViewChild('tenantName') tenantName?: IonInput;
 
   form = this.editTenantService.generateForm();
+  loading = signal(false);
+
+  create = rxMethod<void>(
+    pipe(
+      filter(() => this.form.valid),
+      tap(() => this.loading.set(true)),
+      map(() => this.form.getRawValue()),
+      map((formTenant) => ({
+        ...formTenant,
+        credentials: formTenant.credentials.map((credential) => ({
+          plainTextValue: credential.plainTextValue,
+          expiration: credential.expiration,
+        })),
+      })),
+      exhaustMap((tenant) =>
+        this.api.postTenant(tenant).pipe(
+          tap(() => this.loading.set(false)),
+          tap(() => this.dismiss.emit()),
+          tap(() => this.router.navigate(['/tabs', 'tenants', tenant.name])),
+        ),
+      ),
+    ),
+  );
 
   focusTenantName(): void {
     this.tenantName?.setFocus();
-  }
-
-  async create(): Promise<void> {
-    if (!this.form.valid) {
-      return;
-    }
-
-    const formTenant = this.form.getRawValue();
-    const tenant = {
-      ...formTenant,
-      credentials: formTenant.credentials.map((credential) => ({
-        plainTextValue: credential.plainTextValue,
-        expiration: credential.expiration,
-      })),
-    };
-
-    await lastValueFrom(this.api.postTenant(tenant));
-
-    this.dismiss.emit();
-    this.router.navigate(['/tabs', 'tenants', tenant.name]);
   }
 }
