@@ -1,0 +1,29 @@
+<ion-item color="light">
+  <ion-checkbox
+    labelPlacement="end"
+    justify="start"
+    slot="start"
+    (ionChange)="onCheckboxChange($event)"
+    (ionBlur)="onTouched()"
+    [disabled]="disabled()"
+    [checked]="!indeterminate()"
+  >
+    {{ label() }}
+  </ion-checkbox>
+
+  <ion-datetime-button
+    [datetime]="datetimeId"
+    [disabled]="disabled() || indeterminate()"
+  />
+
+  <ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime
+        [id]="datetimeId"
+        presentation="date"
+        (ionChange)="onDateChange($event)"
+        (ionBlur)="onTouched()"
+      />
+    </ng-template>
+  </ion-modal>
+</ion-item>
