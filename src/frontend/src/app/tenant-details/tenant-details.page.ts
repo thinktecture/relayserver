@@ -70,13 +70,26 @@ export class TenantDetailsPage {
 
   editing = signal(false);
   loading = signal(false);
+  error = signal(false);
   tenant$ = toObservable(this.name).pipe(
     combineLatestWith(toObservable(this.editing)),
     filter(([, editing]) => !editing),
     tap(() => this.loading.set(true)),
-    switchMap(([name]) => this.api.getSingleTenant(name)),
-    tap((tenant) => this.updateForm(tenant)),
-    tap(() => this.loading.set(false)),
+    switchMap(([name]) =>
+      this.api.getSingleTenant(name).pipe(
+        tapResponse({
+          next: (tenant) => {
+            this.updateForm(tenant);
+            this.loading.set(false);
+          },
+          error: () => {
+            // error toast is shown by API interceptor
+            this.error.set(true);
+            this.loading.set(false);
+          },
+        }),
+      ),
+    ),
   );
   form = this.editTenantService.generateForm();
 
@@ -92,9 +105,20 @@ export class TenantDetailsPage {
           id: credential.id ?? undefined,
         })),
       })),
-      exhaustMap((tenant) => this.api.putTenant(tenant)),
-      tap(() => this.loading.set(false)),
-      tap(() => this.editing.set(false)),
+      exhaustMap((tenant) =>
+        this.api.putTenant(tenant).pipe(
+          tapResponse({
+            next: () => {
+              this.loading.set(false);
+              this.editing.set(false);
+            },
+            error: () => {
+              // error toast is shown by API interceptor
+              this.loading.set(false);
+            },
+          }),
+        ),
+      ),
     ),
   );
 

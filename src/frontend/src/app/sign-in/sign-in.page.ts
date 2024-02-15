@@ -63,10 +63,9 @@ export class SignInPage {
 
     try {
       await lastValueFrom(this.api.getTenantsPaged());
+      this.router.navigate(['/']);
     } catch {
-      return;
+      // error toast is shown by API interceptor
     }
-
-    this.router.navigate(['/']);
   }
 }
