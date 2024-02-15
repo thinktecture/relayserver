@@ -26,6 +26,7 @@ import { exhaustMap, filter, map, pipe, tap } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { EditTenantService } from '../edit-tenant/edit-tenant.service';
+import { tapResponse } from '@ngrx/operators';
 
 @Component({
   selector: 'app-new-tenant',
@@ -74,9 +75,17 @@ export class NewTenantComponent {
       })),
       exhaustMap((tenant) =>
         this.api.postTenant(tenant).pipe(
-          tap(() => this.loading.set(false)),
-          tap(() => this.dismiss.emit()),
-          tap(() => this.router.navigate(['/tabs', 'tenants', tenant.name])),
+          tapResponse({
+            next: () => {
+              this.loading.set(false);
+              this.dismiss.emit();
+              this.router.navigate(['/tabs', 'tenants', tenant.name]);
+            },
+            error: () => {
+              // error toast is shown by API interceptor
+              this.loading.set(false);
+            },
+          }),
         ),
       ),
     ),
