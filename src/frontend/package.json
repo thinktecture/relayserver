@@ -28,6 +28,7 @@
     "@capacitor/keyboard": "5.0.7",
     "@capacitor/status-bar": "5.0.6",
     "@ionic/angular": "^7.5.0",
+    "@ngrx/operators": "^17.1.0",
     "@ngrx/signals": "^17.1.0",
     "ionicons": "^7.2.1",
     "rxjs": "~7.8.0",
