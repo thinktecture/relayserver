@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular/standalone';
-import { catchError } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { ApiAuthStore } from './api-auth.store';
 
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
@@ -44,7 +44,7 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
           .then((toast) => toast.present());
       }
 
-      throw err;
+      return throwError(() => err);
     }),
   );
 };
