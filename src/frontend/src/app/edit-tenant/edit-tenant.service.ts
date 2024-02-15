@@ -1,13 +1,23 @@
 import { Injectable } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
+import { NewTenant } from '../api/new-tenant.model';
+import { NewTenantCredential } from '../api/new-tenant-credential.model';
+
+type GenericFormGroup<T> = FormGroup<{
+  [k in keyof T]-?: T[k] extends (infer U)[]
+    ? FormArray<GenericFormGroup<U>>
+    : FormControl<UndefinedToNull<T[k]>>;
+}>;
+
+type UndefinedToNull<T> = undefined extends T
+  ? Exclude<T, undefined> | null
+  : T;
 
 @Injectable({
   providedIn: 'root',
 })
 export class EditTenantService {
-  // TODO: return type
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  generateForm() {
+  generateForm(): GenericFormGroup<NewTenant> {
     return new FormGroup({
       name: new FormControl('', {
         nonNullable: true,
@@ -30,16 +40,14 @@ export class EditTenantService {
     });
   }
 
-  // TODO: return type
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  generateCredentialForm() {
+  generateCredentialForm(): GenericFormGroup<NewTenantCredential> {
     return new FormGroup({
       id: new FormControl<string | null>(null),
       plainTextValue: new FormControl(
         this.generateRandomString(),
         Validators.required,
       ),
-      created: new FormControl('', { nonNullable: true }),
+      created: new FormControl<string | null>(null),
       expiration: new FormControl<string | null>(null),
     });
   }

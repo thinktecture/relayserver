@@ -103,6 +103,7 @@ export class TenantDetailsPage {
         credentials: formTenant.credentials.map((credential) => ({
           ...credential,
           id: credential.id ?? undefined,
+          created: credential.created ?? undefined,
         })),
       })),
       exhaustMap((tenant) =>

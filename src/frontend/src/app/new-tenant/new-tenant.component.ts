@@ -69,8 +69,9 @@ export class NewTenantComponent {
       map((formTenant) => ({
         ...formTenant,
         credentials: formTenant.credentials.map((credential) => ({
-          plainTextValue: credential.plainTextValue,
-          expiration: credential.expiration,
+          ...credential,
+          id: undefined,
+          created: undefined,
         })),
       })),
       exhaustMap((tenant) =>

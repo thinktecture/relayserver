@@ -6,6 +6,9 @@ export interface NewTenantCredential {
   /** Plaintext value of this credential. */
   plainTextValue: string | null;
 
+  /** Date and time this credential was created at. */
+  created?: string;
+
   /** Date and time this credential expires at. */
   expiration: string | null;
 }
