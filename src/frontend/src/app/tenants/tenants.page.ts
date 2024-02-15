@@ -121,13 +121,6 @@ export class TenantsPage {
           (accumulated, value) => this.accumulateTenants(accumulated, value),
           { results: [], moreAvailable: true, error: false },
         ),
-        catchError(() => {
-          return of({
-            results: [] as Tenant[],
-            moreAvailable: false,
-            error: true,
-          } as AccumulatedTenants);
-        }),
       ),
     ),
     tap(() => this.loading.set(false)),
@@ -154,8 +147,12 @@ export class TenantsPage {
           text: 'Delete tenant',
           role: 'destructive',
           handler: async () => {
-            await lastValueFrom(this.api.deleteTenant(tenant.name));
-            this.deleteEv$.next(tenant.name);
+            try {
+              await lastValueFrom(this.api.deleteTenant(tenant.name));
+              this.deleteEv$.next(tenant.name);
+            } catch (error) {
+              // error toast is shown by API interceptor
+            }
           },
         },
         { text: 'Cancel', role: 'cancel' },
@@ -191,6 +188,14 @@ export class TenantsPage {
         moreAvailable: page.results.length >= page.pageSize,
         error: false,
       })),
+      catchError(() => {
+        // error toast is shown by API interceptor
+        return of({
+          results,
+          moreAvailable: false,
+          error: true,
+        });
+      }),
       tap(() => setTimeout(() => scrollEv?.target.complete())),
     );
   }
