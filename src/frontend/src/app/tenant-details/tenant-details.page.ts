@@ -14,6 +14,9 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonItem,
+  IonList,
+  IonNote,
   IonProgressBar,
   IonTitle,
   IonToolbar,
@@ -33,6 +36,7 @@ import { Tenant } from '../api/tenant.model';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { EditTenantService } from '../edit-tenant/edit-tenant.service';
 import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
+import { tapResponse } from '@ngrx/operators';
 
 @Component({
   selector: 'app-tenant-details',
@@ -50,6 +54,9 @@ import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
     IonTitle,
     IonContent,
     IonProgressBar,
+    IonList,
+    IonItem,
+    IonNote,
     EditTenantComponent,
     ViewTenantComponent,
   ],

@@ -22,7 +22,9 @@
           Done
         </ion-button>
       } @else {
-        <ion-button (click)="edit()" [disabled]="loading()">Edit</ion-button>
+        <ion-button (click)="edit()" [disabled]="loading() || error()">
+          Edit
+        </ion-button>
       }
     </ion-buttons>
     @if (loading()) {
@@ -32,7 +34,13 @@
 </ion-header>
 
 <ion-content>
-  @if (editing()) {
+  @if (error()) {
+    <ion-list>
+      <ion-item>
+        <ion-note>Failed to load tenant</ion-note>
+      </ion-item>
+    </ion-list>
+  } @else if (editing()) {
     <form [formGroup]="form" (ngSubmit)="save()" id="tenant-details-form">
       <app-edit-tenant />
     </form>

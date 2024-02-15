@@ -9,11 +9,10 @@
     <ion-buttons slot="end">
       <ion-button
         strong
-        [disabled]="!form.valid"
+        [disabled]="!form.valid || loading()"
         (click)="create()"
         type="submit"
         form="new-tenant-form"
-        [disabled]="loading()"
       >
         Done
       </ion-button>
