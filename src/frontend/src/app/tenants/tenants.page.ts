@@ -185,7 +185,7 @@ export class TenantsPage {
     return this.api.getTenantsPaged(results.length, PAGE_SIZE, filter).pipe(
       map((page) => ({
         results: [...results, ...page.results],
-        moreAvailable: page.results.length >= page.pageSize,
+        moreAvailable: results.length + page.results.length < page.totalCount,
         error: false,
       })),
       catchError(() => {

@@ -18,6 +18,7 @@ import { ApiAuthStore } from '../api/api-auth.store';
 import { ApiService } from '../api/api.service';
 import { lastValueFrom } from 'rxjs';
 
+// TODO: use as modal instead?
 @Component({
   selector: 'app-sign-in',
   templateUrl: './sign-in.page.html',
