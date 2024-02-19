@@ -1,5 +1,11 @@
 import { AsyncPipe, I18nPluralPipe } from '@angular/common';
-import { Component, ViewChild, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
@@ -111,7 +117,7 @@ export class TenantsPage {
     headerName: toObservable(this.apiAuth.headerName),
     key: toObservable(this.apiAuth.key),
   }).pipe(
-    tap(() => this.content?.scrollToTop()),
+    tap(() => this.content().scrollToTop()),
     tap(() => this.loading.set(true)),
     switchMap(({ filter }) =>
       this.scrollEv$.pipe(
@@ -126,8 +132,8 @@ export class TenantsPage {
     tap(() => this.loading.set(false)),
   );
 
-  @ViewChild(NewTenantComponent) newTenant?: NewTenantComponent;
-  @ViewChild(IonContent) content?: IonContent;
+  newTenant = viewChild.required(NewTenantComponent);
+  content = viewChild.required(IonContent);
 
   constructor() {
     addIcons({ add, trashOutline });

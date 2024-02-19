@@ -1,4 +1,9 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import {
   IonButton,
@@ -36,14 +41,15 @@ import { lastValueFrom } from 'rxjs';
     IonItem,
     IonInput,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInPage {
   private apiAuth = inject(ApiAuthStore);
   private router = inject(Router);
   private api = inject(ApiService);
 
-  @ViewChild('headerName') headerName?: IonInput;
-  @ViewChild('form') form?: NgForm;
+  headerName = viewChild.required<IonInput>('headerName');
+  form = viewChild.required<NgForm>('form');
 
   model = { headerName: '', key: '' };
 
@@ -52,11 +58,11 @@ export class SignInPage {
   }
 
   ionViewDidEnter(): void {
-    this.headerName?.setFocus();
+    this.headerName().setFocus();
   }
 
   async done(): Promise<void> {
-    if (!this.form?.valid) {
+    if (!this.form().valid) {
       return;
     }
 
