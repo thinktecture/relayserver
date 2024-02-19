@@ -92,6 +92,7 @@ const PAGE_SIZE = 50;
     IonModal,
     NewTenantComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TenantsPage {
   private api = inject(ApiService);
