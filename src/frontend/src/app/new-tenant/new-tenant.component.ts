@@ -3,9 +3,9 @@ import {
   Component,
   EventEmitter,
   Output,
-  ViewChild,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -56,7 +56,7 @@ export class NewTenantComponent {
 
   @Output() dismiss = new EventEmitter<void>();
 
-  @ViewChild('tenantName') tenantName?: IonInput;
+  tenantName = viewChild.required<IonInput>('tenantName');
 
   form = this.editTenantService.generateForm();
   loading = signal(false);
@@ -93,6 +93,6 @@ export class NewTenantComponent {
   );
 
   focusTenantName(): void {
-    this.tenantName?.setFocus();
+    this.tenantName().setFocus();
   }
 }
