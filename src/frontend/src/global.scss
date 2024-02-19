@@ -34,12 +34,9 @@ ion-list ion-list {
   margin-bottom: 0;
 }
 
-ion-item:not(:has(ion-item)):has(
-    ion-input[helperText],
-    ion-input[errorText],
-    app-interval-input[helperText],
-    app-interval-input[errorText]
-  ) {
+ion-item:not(:has(ion-item)):has(ion-input[helperText], ion-input[errorText]),
+app-interval-input[helperText] ion-item,
+app-interval-input[errorText] ion-item {
   --inner-padding-bottom: 0.35em;
 }
 
