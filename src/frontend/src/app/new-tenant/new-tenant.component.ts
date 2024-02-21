@@ -1,8 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Output,
   inject,
   signal,
   viewChild,
@@ -20,13 +18,14 @@ import {
   IonProgressBar,
   IonTitle,
   IonToolbar,
+  ModalController,
 } from '@ionic/angular/standalone';
+import { tapResponse } from '@ngrx/operators';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, map, pipe, tap } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { EditTenantService } from '../edit-tenant/edit-tenant.service';
-import { tapResponse } from '@ngrx/operators';
 
 @Component({
   selector: 'app-new-tenant',
@@ -53,13 +52,16 @@ export class NewTenantComponent {
   private api = inject(ApiService);
   private router = inject(Router);
   private editTenantService = inject(EditTenantService);
-
-  @Output() dismiss = new EventEmitter<void>();
+  private modalController = inject(ModalController);
 
   tenantName = viewChild.required<IonInput>('tenantName');
 
   form = this.editTenantService.generateForm();
   loading = signal(false);
+
+  async dismiss() {
+    await this.modalController.dismiss();
+  }
 
   create = rxMethod<void>(
     pipe(
@@ -79,7 +81,7 @@ export class NewTenantComponent {
           tapResponse({
             next: () => {
               this.loading.set(false);
-              this.dismiss.emit();
+              this.dismiss();
               this.router.navigate(['/tabs', 'tenants', tenant.name]);
             },
             error: () => {
