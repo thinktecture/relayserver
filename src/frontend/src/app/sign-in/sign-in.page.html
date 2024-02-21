@@ -5,7 +5,7 @@
       <ion-button
         strong
         (click)="done()"
-        [disabled]="!form.valid"
+        [disabled]="!form().valid"
         type="submit"
         form="sign-in-form"
       >
@@ -16,7 +16,7 @@
 </ion-header>
 
 <ion-content>
-  <form #form="ngForm" (ngSubmit)="done()" id="sign-in-form">
+  <form (ngSubmit)="done()" id="sign-in-form">
     <ion-list>
       <ion-item color="light">
         <ion-input
