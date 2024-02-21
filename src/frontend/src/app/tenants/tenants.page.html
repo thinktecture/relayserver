@@ -68,13 +68,12 @@
   }
 
   <ion-modal
-    #modal
     trigger="add-tenant"
     [presentingElement]="presentingElement"
     (didPresent)="newTenant().focusTenantName()"
   >
     <ng-template>
-      <app-new-tenant (dismiss)="modal.dismiss()" />
+      <app-new-tenant />
     </ng-template>
   </ion-modal>
 </ion-content>
