@@ -23,7 +23,6 @@ import { ApiAuthStore } from '../api/api-auth.store';
 import { ApiService } from '../api/api.service';
 import { lastValueFrom } from 'rxjs';
 
-// TODO: use as modal instead?
 @Component({
   selector: 'app-sign-in',
   templateUrl: './sign-in.page.html',
@@ -49,7 +48,7 @@ export class SignInPage {
   private api = inject(ApiService);
 
   headerName = viewChild.required<IonInput>('headerName');
-  form = viewChild.required<NgForm>('form');
+  form = viewChild.required(NgForm);
 
   model = { headerName: '', key: '' };
 
