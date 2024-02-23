@@ -62,7 +62,11 @@ export class IntervalInputComponent implements ControlValueAccessor {
       return null;
     }
 
-    const totalSeconds = Number(totalSecondsStr);
+    const totalSeconds = Math.abs(Number(totalSecondsStr));
+    if (Number.isNaN(totalSeconds)) {
+      return null;
+    }
+
     const totalMinutes = Math.trunc(totalSeconds / 60);
     const totalHours = Math.trunc(totalMinutes / 60);
     const totalDays = Math.trunc(totalHours / 24);
@@ -74,11 +78,12 @@ export class IntervalInputComponent implements ControlValueAccessor {
     const days = totalDays.toString();
 
     const interval = `${hours}:${minutes}:${seconds}`;
+    const sign = Number(totalSecondsStr) < 0 ? '-' : '';
     if (totalDays === 0) {
-      return interval;
+      return `${sign}${interval}`;
     }
 
-    return `${days}.${interval}`;
+    return `${sign}${days}.${interval}`;
   }
 
   private intervalToSeconds(interval: string | null): number | null {
