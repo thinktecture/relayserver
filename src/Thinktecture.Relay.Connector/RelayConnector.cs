@@ -10,8 +10,6 @@ namespace Thinktecture.Relay.Connector;
 /// <remarks>This is just a convenient class for holding the transient <see cref="IConnectorConnection"/>.</remarks>
 public class RelayConnector
 {
-	internal static readonly string AssemblyVersion = typeof(RelayConnector).GetAssemblyVersion();
-
 	private readonly IConnectorConnection _connection;
 
 	/// <summary>

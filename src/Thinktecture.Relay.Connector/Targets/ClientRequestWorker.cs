@@ -96,7 +96,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 
 		try
 		{
-			IRelayTarget<TRequest, TResponse>? target;
+			IRelayTarget? target;
 
 			try
 			{
@@ -148,75 +148,11 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 
 			using var cts = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
 
-			var start = request.EnableTracing ? DateTime.UtcNow : (DateTime?)null;
-			var response = await target.HandleAsync(request, cts.Token);
+			if (target is IRelayTargetFunc<TRequest, TResponse> func)
+				return await GetResponseAsync(func, request, cts.Token);
 
-			if (request.EnableTracing)
-			{
-				response.RequestStart = start;
-				response.RequestDuration = DateTime.UtcNow - start;
-			}
-
-			if (response.BodyContent == null) return response;
-
-			response.BodyContent.TryRewind();
-
-			if (response.BodySize == null ||
-				response.BodySize > _connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue))
-			{
-				if (response.BodySize == null)
-				{
-					LogOutsourcingUnknownBody(request.RequestId);
-				}
-				else
-				{
-					LogOutsourcingBody(response.BodySize, _connectorTransportLimit.BinarySizeThreshold, request.RequestId);
-				}
-
-				response.BodyContent.TryRewind();
-				using var content = new CountingStreamContent(response.BodyContent);
-				try
-				{
-					var responseMessage = await HttpClient.PostAsync(
-						new Uri(_responseEndpoint, response.RequestId.ToString("N")), content,
-						cancellationToken);
-
-					if (!responseMessage.IsSuccessStatusCode)
-					{
-						_logger.LogError(10509,
-							"Uploading body of request {RelayRequestId} failed with http status {HttpStatusCode}",
-							request.RequestId,
-							responseMessage.StatusCode);
-						return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
-					}
-				}
-				catch (OperationCanceledException)
-				{
-					throw;
-				}
-				catch (Exception ex)
-				{
-					_logger.LogError(10510, ex,
-						"An error occured while uploading the body of request {RelayRequestId}",
-						request.RequestId);
-					return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
-				}
-
-				// This is the original body size, as this is what went to the relay server
-				response.OriginalBodySize = content.BytesWritten;
-				response.BodySize = response.OriginalBodySize;
-				response.BodyContent = null;
-
-				LogOutsourcedBody(content.BytesWritten, request.RequestId);
-			}
-			else if (response.BodySize > 0)
-			{
-				await using var _ = response.BodyContent;
-				response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
-				LogInlinedBody(response.BodySize, request.RequestId);
-			}
-
-			return response;
+			await ((IRelayTargetAction<TRequest>)target).HandleAsync(request, cts.Token);
+			return request.CreateResponse<TResponse>(HttpStatusCode.NoContent);
 		}
 		catch (OperationCanceledException)
 		{
@@ -227,10 +163,8 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(10512, ex,
-				"An error occured while processing request {RelayRequestId} {@Request}",
-				request.RequestId,
-				request);
+			_logger.LogError(10512, ex, "An error occured while processing request {RelayRequestId} {@Request}",
+				request.RequestId, request);
 			return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
 		}
 		finally
@@ -243,6 +177,80 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 			timeout?.Cancel();
 			timeout?.Dispose();
 		}
+	}
+
+	private async Task<TResponse> GetResponseAsync(IRelayTargetFunc<TRequest, TResponse> target, TRequest request,
+		CancellationToken cancellationToken)
+	{
+		var start = request.EnableTracing ? DateTime.UtcNow : (DateTime?)null;
+		var response = await target.HandleAsync(request, cancellationToken);
+
+		if (request.EnableTracing)
+		{
+			response.RequestStart = start;
+			response.RequestDuration = DateTime.UtcNow - start;
+		}
+
+		if (response.BodyContent == null) return response;
+
+		response.BodyContent.TryRewind();
+
+		if (response.BodySize == null ||
+			response.BodySize > _connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue))
+		{
+			if (response.BodySize == null)
+			{
+				LogOutsourcingUnknownBody(request.RequestId);
+			}
+			else
+			{
+				LogOutsourcingBody(response.BodySize, _connectorTransportLimit.BinarySizeThreshold, request.RequestId);
+			}
+
+			response.BodyContent.TryRewind();
+			using var content = new CountingStreamContent(response.BodyContent);
+			try
+			{
+				var responseMessage = await HttpClient.PostAsync(
+					new Uri(_responseEndpoint, response.RequestId.ToString("N")), content,
+					cancellationToken);
+
+				if (!responseMessage.IsSuccessStatusCode)
+				{
+					_logger.LogError(10509,
+						"Uploading body of request {RelayRequestId} failed with http status {HttpStatusCode}",
+						request.RequestId,
+						responseMessage.StatusCode);
+					return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+				}
+			}
+			catch (OperationCanceledException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(10510, ex,
+					"An error occured while uploading the body of request {RelayRequestId}",
+					request.RequestId);
+				return request.CreateResponse<TResponse>(HttpStatusCode.BadGateway);
+			}
+
+			// This is the original body size, as this is what went to the relay server
+			response.OriginalBodySize = content.BytesWritten;
+			response.BodySize = response.OriginalBodySize;
+			response.BodyContent = null;
+
+			LogOutsourcedBody(content.BytesWritten, request.RequestId);
+		}
+		else if (response.BodySize > 0)
+		{
+			await using var _ = response.BodyContent;
+			response.BodyContent = await response.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
+			LogInlinedBody(response.BodySize, request.RequestId);
+		}
+
+		return response;
 	}
 
 	/// <inheritdoc />

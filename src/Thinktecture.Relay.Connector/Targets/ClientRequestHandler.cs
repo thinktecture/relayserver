@@ -54,17 +54,21 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	{
 		if (QueueWorker(request, cancellationToken)) return;
 
+		// we could not queue the work item
+
 		if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
 		{
 			await AcknowledgeRequestAsync(request, false);
 		}
 
-		await DeliverResponseAsync(request.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable),
-			request.EnableTracing);
+		await DeliverResponseAsync(request, request.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable));
 	}
 
 	[LoggerMessage(10400, LogLevel.Debug, "Acknowledging request {RelayRequestId} on origin {OriginId}")]
 	partial void LogAcknowledgeRequest(Guid relayRequestId, Guid? originId);
+
+	[LoggerMessage(10403, LogLevel.Debug, "Discarding response for request {RelayRequestId}")]
+	partial void LogDiscardResponse(Guid relayRequestId);
 
 	/// <inheritdoc />
 	public async Task AcknowledgeRequestAsync(TRequest request, bool removeRequestBodyContent)
@@ -92,13 +96,19 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		if (request.EnableTracing)
 		{
 			request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
-			request.HttpHeaders[Constants.HeaderNames.OriginId] = new[] { request.RequestOriginId.ToString() };
+			request.HttpHeaders[Constants.HeaderNames.RequestOriginId] = new[] { request.RequestOriginId.ToString() };
 		}
 
 		try
 		{
 			var response = await worker.HandleAsync(request, cancellationToken);
-			await DeliverResponseAsync(response, request.EnableTracing);
+			if (request.DiscardConnectorResponse)
+			{
+				LogDiscardResponse(request.RequestId);
+				return;
+			}
+
+			await DeliverResponseAsync(request, response);
 		}
 		catch (OperationCanceledException)
 		{
@@ -113,15 +123,34 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	[LoggerMessage(10402, LogLevel.Debug, "Delivering response for request {RelayRequestId}")]
 	partial void LogDeliverResponse(Guid relayRequestId);
 
-	private async Task DeliverResponseAsync(TResponse response, bool enableTracing)
+	private async Task DeliverResponseAsync(TRequest request, TResponse response)
 	{
 		LogDeliverResponse(response.RequestId);
 
-		if (enableTracing)
+		if (request.EnableTracing)
 		{
 			response.HttpHeaders ??= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
 			response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
-			response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { RelayConnector.AssemblyVersion };
+			response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { Constants.AssemblyVersion };
+			response.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
+			response.HttpHeaders[Constants.HeaderNames.RequestOriginId] = new[] { request.RequestOriginId.ToString() };
+
+			if (request.AcknowledgeOriginId.HasValue)
+			{
+				response.HttpHeaders[Constants.HeaderNames.AcknowledgeOriginId] =
+					new[] { request.AcknowledgeOriginId.Value.ToString() };
+			}
+			if (response.RequestStart.HasValue)
+			{
+				response.HttpHeaders[Constants.HeaderNames.TargetStart] =
+					new[] { response.RequestStart.Value.ToString("R") };
+			}
+			if (response.RequestDuration.HasValue)
+			{
+				response.HttpHeaders[Constants.HeaderNames.TargetDuration] =
+					new[] { response.RequestDuration.Value.ToString("g") };
+			}
 		}
 
 		await _responseTransport.TransportAsync(response);

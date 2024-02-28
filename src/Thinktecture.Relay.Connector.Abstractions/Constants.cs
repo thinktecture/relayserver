@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using Thinktecture.Relay.Connector.Targets;
 
@@ -8,13 +9,15 @@ namespace Thinktecture.Relay.Connector;
 /// </summary>
 public static class Constants
 {
+	public static readonly string AssemblyVersion = typeof(Constants).GetAssemblyVersion();
+
 	/// <summary>
 	/// The identity scopes.
 	/// </summary>
 	public const string RelayServerScopes = "connector";
 
 	/// <summary>
-	/// The id for the catch-all <see cref="IRelayTarget{TRequest,TResponse}"/>.
+	/// The id for the catch-all <see cref="IRelayTarget"/>.
 	/// </summary>
 	public const string RelayTargetCatchAllId = "** CATCH-ALL **";
 
@@ -39,30 +42,52 @@ public static class Constants
 	public static class HeaderNames
 	{
 		/// <summary>
-		/// The url to use for acknowledging a request by issuing as POST with an empty body to it.
+		/// Contains the url to use for acknowledging a request by issuing as POST with an empty body to it.
 		/// </summary>
 		/// <remarks>This will only be present when manual acknowledgement is needed.</remarks>
 		public const string AcknowledgeUrl = "RelayServer-AcknowledgeUrl";
 
 		/// <summary>
-		/// The unique id of the request.
+		/// Contains the unique id of the request.
 		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
 		public const string RequestId = "RelayServer-RequestId";
 
 		/// <summary>
 		/// The unique id of the origin receiving the request.
 		/// </summary>
-		public const string OriginId = "RelayServer-OriginId";
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string RequestOriginId = "RelayServer-RequestOriginId";
 
 		/// <summary>
-		/// The machine name of the connector handling the request.
+		/// Contains the machine name of the connector handling the request.
 		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
 		public const string ConnectorMachineName = "RelayServer-Connector-MachineName";
 
 		/// <summary>
-		/// The version of the connector handling the request.
+		/// Contains the version of the connector handling the request.
 		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
 		public const string ConnectorVersion = "RelayServer-Connector-Version";
+
+		/// <summary>
+		/// Contains the unique id of the origin to use for acknowledgement.
+		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string AcknowledgeOriginId = "RelayServer-AcknowledgeOriginId";
+
+		/// <summary>
+		/// Contains the start timestamp of the target handling the request.
+		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string TargetStart = "RelayServer-TargetStart";
+
+		/// <summary>
+		/// Contains the duration of the target handling the request.
+		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string TargetDuration = "RelayServer-TargetDuration";
 	}
 
 	/// <summary>

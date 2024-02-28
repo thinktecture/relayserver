@@ -48,4 +48,7 @@ public class ClientRequest : IClientRequest
 
 	/// <inheritdoc />
 	public bool EnableTracing { get; set; }
+
+	/// <inheritdoc />
+	public bool DiscardConnectorResponse { get; set; }
 }

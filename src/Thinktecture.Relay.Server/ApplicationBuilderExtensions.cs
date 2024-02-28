@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Thinktecture.Relay.Acknowledgement;
+using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
 using Thinktecture.Relay.Server.Middleware;
 using Thinktecture.Relay.Transport;
@@ -33,7 +34,12 @@ public static class ApplicationBuilderExtensions
 		where TResponse : class, ITargetResponse, new()
 		where TAcknowledge : IAcknowledgeRequest
 	{
-		builder.Map("/relay", app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse, TAcknowledge>>());
+		builder.Map($"/{Constants.DefaultRelayPath}", true,
+			app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse, TAcknowledge>>());
+		builder.Map($"/{Constants.DefaultQueuePath}", true,
+			app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse, TAcknowledge>>());
+		builder.Map($"/{Constants.DefaultTracePath}", true,
+			app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse, TAcknowledge>>());
 
 		foreach (var part in builder.ApplicationServices.GetServices<IApplicationBuilderPart>())
 		{

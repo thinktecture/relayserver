@@ -12,26 +12,33 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Server.Services;
 
 /// <inheritdoc />
-public partial class RelayTargetResponseWriter<TResponse> : IRelayTargetResponseWriter<TResponse>
+public partial class RelayTargetResponseWriter<TRequest, TResponse> : IRelayTargetResponseWriter<TRequest, TResponse>
+	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse
 {
-	private readonly ILogger<RelayTargetResponseWriter<TResponse>> _logger;
+	private readonly ILogger<RelayTargetResponseWriter<TRequest, TResponse>> _logger;
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="RelayTargetResponseWriter{TResponse}"/> class.
+	/// Initializes a new instance of the <see cref="RelayTargetResponseWriter{TRequest,TResponse}"/> class.
 	/// </summary>
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
-	public RelayTargetResponseWriter(ILogger<RelayTargetResponseWriter<TResponse>> logger)
+	public RelayTargetResponseWriter(ILogger<RelayTargetResponseWriter<TRequest, TResponse>> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
 
 	[LoggerMessage(20700, LogLevel.Warning, "The request {RelayRequestId} failed internally with {HttpStatusCode}")]
 	partial void LogFailedRequest(Guid relayRequestId, HttpStatusCode httpStatusCode);
 
 	/// <inheritdoc />
-	public async Task WriteAsync(TResponse? targetResponse, HttpResponse httpResponse,
+	public async Task WriteAsync(TRequest clientRequest, TResponse? targetResponse, HttpResponse httpResponse,
 		CancellationToken cancellationToken = default)
 	{
+		if (clientRequest.EnableTracing)
+		{
+			httpResponse.Headers[Constants.HeaderNames.RequestId] = new[] { clientRequest.RequestId.ToString() };
+			httpResponse.Headers[Constants.HeaderNames.ServerMachineName] = new[] { Environment.MachineName };
+			httpResponse.Headers[Constants.HeaderNames.ServerVersion] = new[] { Constants.AssemblyVersion };
+		}
+
 		if (targetResponse == null)
 		{
 			httpResponse.StatusCode = StatusCodes.Status204NoContent;
@@ -51,7 +58,7 @@ public partial class RelayTargetResponseWriter<TResponse> : IRelayTargetResponse
 			{
 				if (name == HeaderNames.TransferEncoding) continue;
 
-				httpResponse.Headers.Add(name, values);
+				httpResponse.Headers[name] = values;
 			}
 		}
 
