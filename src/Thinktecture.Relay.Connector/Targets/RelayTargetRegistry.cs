@@ -10,7 +10,7 @@ using Thinktecture.Relay.Transport;
 namespace Thinktecture.Relay.Connector.Targets;
 
 /// <summary>
-/// A registry for <see cref="IRelayTarget{TRequest,TResponse}"/> types.
+/// A registry for <see cref="IRelayTarget"/> types.
 /// </summary>
 /// <typeparam name="TRequest">The type of request.</typeparam>
 /// <typeparam name="TResponse">The type of response.</typeparam>
@@ -42,7 +42,7 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	}
 
 	/// <summary>
-	/// Registers an <see cref="IRelayTarget{TRequest,TResponse}"/> type.
+	/// Registers an <see cref="IRelayTarget"/> type.
 	/// </summary>
 	/// <param name="id">The unique id of the target.</param>
 	/// <param name="type">The <see cref="Type"/> of the target.</param>
@@ -51,13 +51,8 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	/// <exception cref="ArgumentException">A registration with the same key already exists.</exception>
 	public void Register(string id, Type type, TimeSpan? timeout = null, params object[] parameters)
 	{
-		if (type.IsGenericTypeDefinition)
-		{
-			type = type.MakeGenericType(typeof(TRequest), typeof(TResponse));
-		}
-
 		var registration = new RelayTargetRegistration(
-			provider => (IRelayTarget<TRequest, TResponse>)ActivatorUtilities.CreateInstance(provider, type, parameters),
+			provider => (IRelayTarget)ActivatorUtilities.CreateInstance(provider, type, parameters),
 			timeout);
 
 		if (!_targets.TryAdd(id, registration))
@@ -67,18 +62,18 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	}
 
 	/// <summary>
-	/// Registers an <see cref="IRelayTarget{TRequest,TResponse}"/> type.
+	/// Registers an <see cref="IRelayTarget"/> type.
 	/// </summary>
 	/// <param name="id">The unique id of the target.</param>
 	/// <param name="timeout">An optional <see cref="TimeSpan"/> when the target times out. The default value is 100 seconds.</param>
 	/// <param name="parameters">Constructor arguments not provided by the <see cref="IServiceProvider"/>.</param>
 	/// <typeparam name="T">The type of target.</typeparam>
 	public void Register<T>(string id, TimeSpan? timeout = null, params object[] parameters)
-		where T : IRelayTarget<TRequest, TResponse>
+		where T : IRelayTarget
 		=> Register(id, typeof(T), timeout, parameters);
 
 	/// <summary>
-	/// Unregisters an <see cref="IRelayTarget{TRequest,TResponse}"/>.
+	/// Unregisters an <see cref="IRelayTarget"/>.
 	/// </summary>
 	/// <param name="id">The unique id of the target.</param>
 	/// <remarks>This method does not fail when the relay target was not registered.</remarks>
@@ -95,13 +90,13 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	}
 
 	/// <summary>
-	/// Attempts to create an <see cref="IRelayTarget{TRequest,TResponse}"/> instance from the specified id.
+	/// Attempts to create an <see cref="IRelayTarget"/> instance from the specified id.
 	/// </summary>
 	/// <param name="id">The unique id of the target.</param>
 	/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
 	/// <param name="target">
 	/// When this method returns, <paramref name="target"/> contains the
-	/// <see cref="IRelayTarget{TRequest,TResponse}"/> or null, if the target was not found.
+	/// <see cref="IRelayTarget"/> or null, if the target was not found.
 	/// </param>
 	/// <param name="timeout">
 	/// When this method returns, <paramref name="timeout"/> contains the
@@ -109,7 +104,7 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	/// </param>
 	/// <returns>true if the target was found; otherwise, false.</returns>
 	internal bool TryCreateRelayTarget(string id, IServiceProvider serviceProvider,
-		[MaybeNullWhen(false)] out IRelayTarget<TRequest, TResponse> target,
+		[MaybeNullWhen(false)] out IRelayTarget target,
 		[MaybeNullWhen(false)] out CancellationTokenSource timeout)
 	{
 		if (_targets.TryGetValue(id, out var registration) ||
@@ -127,11 +122,11 @@ public class RelayTargetRegistry<TRequest, TResponse>
 
 	private class RelayTargetRegistration
 	{
-		public Func<IServiceProvider, IRelayTarget<TRequest, TResponse>> Factory { get; }
+		public Func<IServiceProvider, IRelayTarget> Factory { get; }
 
 		public TimeSpan Timeout { get; }
 
-		public RelayTargetRegistration(Func<IServiceProvider, IRelayTarget<TRequest, TResponse>> factory,
+		public RelayTargetRegistration(Func<IServiceProvider, IRelayTarget> factory,
 			TimeSpan? timeout = null)
 		{
 			Factory = factory ?? throw new ArgumentNullException(nameof(factory));

@@ -25,17 +25,18 @@ public static class Startup
 		services
 			.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
 			.AddSignalRConnectorTransport()
-			.AddTarget<InProcTarget>("inproc");
+			.AddTarget<InProcFunc>("inprocfunc")
+			.AddTarget<InProcAction>("inprocaction");
 
 		services.AddHostedService<ConnectorService>();
 	}
 }
 
-internal class InProcTarget : IRelayTarget<ClientRequest, TargetResponse>
+internal class InProcFunc : IRelayTargetFunc
 {
 	private ILogger _logger;
 
-	public InProcTarget(ILogger<InProcTarget> logger)
+	public InProcFunc(ILogger<InProcFunc> logger)
 		=> _logger = logger;
 
 	public async Task<TargetResponse> HandleAsync(ClientRequest request, CancellationToken cancellationToken = default)
@@ -79,6 +80,12 @@ internal class InProcTarget : IRelayTarget<ClientRequest, TargetResponse>
 
 		return response;
 	}
+}
+
+internal class InProcAction : IRelayTargetAction
+{
+	public Task HandleAsync(ClientRequest request, CancellationToken cancellationToken = default)
+		=> Task.Delay(TimeSpan.FromSeconds(42), cancellationToken);
 }
 
 internal class ConnectorService : IHostedService

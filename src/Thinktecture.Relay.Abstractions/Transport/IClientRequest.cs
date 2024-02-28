@@ -83,4 +83,10 @@ public interface IClientRequest
 	/// Enable tracing of this particular request.
 	/// </summary>
 	bool EnableTracing { get; set; }
+
+	/// <summary>
+	/// Enable discarding the connector response of this particular request.
+	/// </summary>
+	/// <remarks>Responses provided by an interceptor will still be returned to the client.</remarks>
+	bool DiscardConnectorResponse { get; set; }
 }

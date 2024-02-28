@@ -49,7 +49,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private readonly IRequestCoordinator<TRequest> _requestCoordinator;
 	private readonly IRelayClientRequestFactory<TRequest> _requestFactory;
 	private readonly IResponseCoordinator<TResponse> _responseCoordinator;
-	private readonly IRelayTargetResponseWriter<TResponse> _responseWriter;
+	private readonly IRelayTargetResponseWriter<TRequest, TResponse> _responseWriter;
 	private readonly IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> _targetResponseInterceptors;
 	private readonly ITenantService _tenantService;
 
@@ -62,7 +62,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// <param name="tenantService">An <see cref="ITenantService"/>.</param>
 	/// <param name="bodyStore">An <see cref="IBodyStore"/>.</param>
 	/// <param name="requestCoordinator">An <see cref="IRequestCoordinator{TRequest}"/>.</param>
-	/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{T}"/>.</param>
+	/// <param name="responseWriter">An <see cref="IRelayTargetResponseWriter{TRequest,TResponse}"/>.</param>
 	/// <param name="responseCoordinator">The <see cref="IResponseCoordinator{T}"/>.</param>
 	/// <param name="relayContext">An <see cref="IRelayContext{TRequest,TResponse}"/>.</param>
 	/// <param name="tenantTransport">An <see cref="ITenantTransport{T}"/>.</param>
@@ -79,9 +79,10 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	public RelayMiddleware(ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> logger,
 		IRelayClientRequestFactory<TRequest> requestFactory, ConnectorRegistry<TRequest> connectorRegistry,
 		ITenantService tenantService, IBodyStore bodyStore, IRequestCoordinator<TRequest> requestCoordinator,
-		IRelayTargetResponseWriter<TResponse> responseWriter, IResponseCoordinator<TResponse> responseCoordinator,
-		IRelayContext<TRequest, TResponse> relayContext, ITenantTransport<TRequest> tenantTransport,
-		IConnectorTransportLimit connectorTransportLimit, IOptions<RelayServerOptions> relayServerOptions,
+		IRelayTargetResponseWriter<TRequest, TResponse> responseWriter,
+		IResponseCoordinator<TResponse> responseCoordinator, IRelayContext<TRequest, TResponse> relayContext,
+		ITenantTransport<TRequest> tenantTransport, IConnectorTransportLimit connectorTransportLimit,
+		IOptions<RelayServerOptions> relayServerOptions,
 		IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> clientRequestInterceptors,
 		IEnumerable<ITargetResponseInterceptor<TRequest, TResponse>> targetResponseInterceptors,
 		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger, IDistributedCache cache,
@@ -136,10 +137,14 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		$"Acknowledge mode of request {{RelayRequestId}} was changed to {nameof(AcknowledgeMode.ConnectorFinished)}")]
 	partial void LogAcknowledgeModeChange(Guid relayRequestId);
 
+	[LoggerMessage(20618, LogLevel.Debug, "Discarding connector response of request {RelayRequestId}")]
+	partial void LogDiscardConnectorResponse(Guid relayRequestId);
+
 	/// <inheritdoc />
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
-		var tenantName = context.Request.Path.Value?.Split('/').Skip(1).FirstOrDefault();
+		// /mode/tenant/target(...)
+		var tenantName = context.Request.Path.Value?.Split('/').Skip(2).FirstOrDefault();
 		if (string.IsNullOrEmpty(tenantName))
 		{
 			LogInvalidRequest(context.Request.Path, context.Request.QueryString);
@@ -177,8 +182,6 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			cts.CancelAfter(_relayServerOptions.RequestExpiration.Value);
 		}
 
-		_relayContext.ResponseDisposables.Add(_responseCoordinator.RegisterRequest(_relayContext.RequestId));
-
 		try
 		{
 			context.Request.EnableBuffering();
@@ -192,6 +195,21 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 			await InterceptClientRequestAsync(cts.Token);
 
+			if (_relayContext.TargetResponse != null)
+			{
+				// if we already have a response we can discard any connector response
+				_relayContext.ClientRequest.DiscardConnectorResponse = true;
+			}
+
+			if (_relayContext.ClientRequest.DiscardConnectorResponse)
+			{
+				LogDiscardConnectorResponse(_relayContext.RequestId);
+			}
+			else
+			{
+				_relayContext.ResponseDisposables.Add(_responseCoordinator.RegisterRequest(_relayContext.RequestId));
+			}
+
 			if (_relayContext.TargetResponse == null || _relayContext.ForceConnectorDelivery)
 			{
 				if (tenantState.HasRequestsLimit && _relayContext.ClientRequest.AcknowledgeMode != AcknowledgeMode.Manual)
@@ -202,16 +220,23 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 				await DeliverToConnectorAsync(cts.Token);
 
-				if (_relayContext.TargetResponse == null)
+				if (!_relayContext.ClientRequest.DiscardConnectorResponse)
 				{
 					await WaitForConnectorResponseAsync(cts.Token);
+					LogResponseReceived(_relayContext.RequestId);
 				}
 			}
 
-			LogResponseReceived(_relayContext.RequestId);
+			if (_relayContext.ClientRequest.DiscardConnectorResponse && _relayContext.TargetResponse == null)
+			{
+				_relayContext.TargetResponse =
+					_relayContext.ClientRequest.CreateResponse<TResponse>(HttpStatusCode.Accepted);
+			}
+
 			await InterceptTargetResponseAsync(cts.Token);
 
-			await _responseWriter.WriteAsync(_relayContext.TargetResponse, context.Response, cts.Token);
+			await _responseWriter.WriteAsync(_relayContext.ClientRequest, _relayContext.TargetResponse, context.Response,
+				cts.Token);
 			await _relayRequestLogger.LogSuccessAsync(_relayContext);
 		}
 		catch (TransportException)
@@ -338,33 +363,34 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	{
 		LogExecutingResponseInterceptors(_relayContext.RequestId);
 
-		var targetResponse = _relayContext.TargetResponse!;
-		var bodyContent = targetResponse.BodyContent;
+		var bodyContent = _relayContext.TargetResponse?.BodyContent;
 
 		foreach (var interceptor in _targetResponseInterceptors)
 		{
 			LogExecutingResponseInterceptor(interceptor.GetType().FullName, _relayContext.RequestId);
 			await interceptor.OnResponseReceivedAsync(_relayContext, cancellationToken);
 
-			if (targetResponse.BodyContent != bodyContent)
-			{
-				// an interceptor changed the body content - need to dispose it properly
-				if (bodyContent != null) _relayContext.ResponseDisposables.Add(bodyContent);
-				bodyContent = targetResponse.BodyContent;
-			}
+			if (_relayContext.TargetResponse?.BodyContent == bodyContent) continue;
+
+			// an interceptor changed the body content - need to dispose it properly
+			if (bodyContent != null) _relayContext.ResponseDisposables.Add(bodyContent);
+			bodyContent = _relayContext.TargetResponse?.BodyContent;
 		}
 
 		// try to rewind, in order to start sending from the start
 		bodyContent?.TryRewind();
 
-		// if possible, try to update body size (interceptor should have done that already, just to be sure)
-		if (bodyContent?.CanSeek == true)
+		if (_relayContext.TargetResponse != null)
 		{
-			targetResponse.BodySize = bodyContent.Length;
-		}
-		else if (bodyContent == null)
-		{
-			targetResponse.BodySize = 0;
+			// if possible, try to update body size (interceptor should have done that already, just to be sure)
+			if (bodyContent?.CanSeek == true)
+			{
+				_relayContext.TargetResponse.BodySize = bodyContent.Length;
+			}
+			else if (bodyContent == null)
+			{
+				_relayContext.TargetResponse.BodySize = 0;
+			}
 		}
 	}
 
@@ -404,8 +430,10 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 	private Task WriteErrorResponse(HttpStatusCode httpStatusCode, HttpResponse response,
 		CancellationToken cancellationToken)
-		=> _responseWriter.WriteAsync(_relayContext.ClientRequest.CreateResponse<TResponse>(httpStatusCode), response,
-			cancellationToken);
+	{
+		var targetResponse = _relayContext.ClientRequest.CreateResponse<TResponse>(httpStatusCode);
+		return _responseWriter.WriteAsync(_relayContext.ClientRequest, targetResponse, response, cancellationToken);
+	}
 
 	private async Task<TenantState> LoadTenantStateByNameAsync(string name,
 		CancellationToken cancellationToken = default)

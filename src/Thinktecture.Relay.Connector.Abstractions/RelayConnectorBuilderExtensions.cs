@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class RelayConnectorBuilderExtensions
 {
 	/// <summary>
-	/// Adds an <see cref="IRelayTarget{ClientRequest,TargetResponse}"/>.
+	/// Adds an <see cref="IRelayTarget"/>.
 	/// </summary>
 	/// <param name="builder">The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse,AcknowledgeRequest}"/>.</param>
 	/// <param name="id">The unique id of the target.</param>
@@ -24,13 +24,12 @@ public static class RelayConnectorBuilderExtensions
 	/// <returns>The <see cref="IRelayConnectorBuilder{ClientRequest,TargetResponse,AcknowledgeRequest}"/>.</returns>
 	public static IRelayConnectorBuilder<ClientRequest, TargetResponse, AcknowledgeRequest> AddTarget<TTarget>(
 		this IRelayConnectorBuilder<ClientRequest, TargetResponse, AcknowledgeRequest> builder, string id,
-		TimeSpan? timeout = null,
-		params object[] parameters)
-		where TTarget : IRelayTarget<ClientRequest, TargetResponse>
+		TimeSpan? timeout = null, params object[] parameters)
+		where TTarget : IRelayTarget
 		=> builder.AddTarget<ClientRequest, TargetResponse, AcknowledgeRequest, TTarget>(id, timeout, parameters);
 
 	/// <summary>
-	/// Adds an <see cref="IRelayTarget{TRequest,TResponse}"/>.
+	/// Adds an <see cref="IRelayTarget"/>.
 	/// </summary>
 	/// <param name="builder">The <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.</param>
 	/// <param name="id">The unique id of the target.</param>
@@ -41,13 +40,13 @@ public static class RelayConnectorBuilderExtensions
 	/// <typeparam name="TTarget">The type of target.</typeparam>
 	/// <typeparam name="TAcknowledge">The type of acknowledge.</typeparam>
 	/// <returns>The <see cref="IRelayConnectorBuilder{TRequest,TResponse,TAcknowledge}"/>.</returns>
-	public static IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge> AddTarget<TRequest, TResponse, TAcknowledge,
-		TTarget>(
-		this IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge> builder, string id, TimeSpan? timeout = null,
-		params object[] parameters)
+	public static IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge>
+		AddTarget<TRequest, TResponse, TAcknowledge, TTarget>(
+			this IRelayConnectorBuilder<TRequest, TResponse, TAcknowledge> builder, string id, TimeSpan? timeout = null,
+			params object[] parameters)
 		where TRequest : IClientRequest
 		where TResponse : ITargetResponse
-		where TTarget : IRelayTarget<TRequest, TResponse>
+		where TTarget : IRelayTarget
 		where TAcknowledge : IAcknowledgeRequest
 	{
 		builder.Services.Configure<RelayTargetOptions>(options => options.Targets.Add(

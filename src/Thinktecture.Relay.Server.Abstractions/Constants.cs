@@ -1,3 +1,5 @@
+using System;
+
 namespace Thinktecture.Relay.Server;
 
 /// <summary>
@@ -5,6 +7,8 @@ namespace Thinktecture.Relay.Server;
 /// </summary>
 public static class Constants
 {
+	public static readonly string AssemblyVersion = typeof(Constants).GetAssemblyVersion();
+
 	/// <summary>
 	/// The authentication scheme to use.
 	/// </summary>
@@ -26,14 +30,53 @@ public static class Constants
 	public const string DefaultAuthenticationScope = "connector";
 
 	/// <summary>
+	/// The default relay path to use.
+	/// </summary>
+	public const string DefaultRelayPath = "relay";
+
+	/// <summary>
+	/// The default queue path to use.
+	/// </summary>
+	public const string DefaultQueuePath = "queue";
+
+	/// <summary>
+	/// The default trace path to use.
+	/// </summary>
+	public const string DefaultTracePath = "trace";
+
+	/// <summary>
 	/// Constants for HTTP headers.
 	/// </summary>
 	public static class HeaderNames
 	{
 		/// <summary>
-		/// Enables tracing of the particular request when present.
+		/// Contains the unique id of the request.
 		/// </summary>
-		/// <remarks>The value of the header is ignored.</remarks>
-		public const string EnableTracing = "RelayServer-EnableTracing";
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string RequestId = "RelayServer-RequestId";
+
+		/// <summary>
+		/// Contains the machine name of the server handling the request.
+		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string ServerMachineName = "RelayServer-Server-MachineName";
+
+		/// <summary>
+		/// Contains the version of the server handling the request.
+		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string ServerVersion = "RelayServer-Server-Version";
+
+		/// <summary>
+		/// Contains the start timestamp of the target handling the request.
+		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string TargetStart = "RelayServer-TargetStart";
+
+		/// <summary>
+		/// Contains the duration of the target handling the request.
+		/// </summary>
+		/// <remarks>This will only be present when tracing is enabled.</remarks>
+		public const string TargetDuration = "RelayServer-TargetDuration";
 	}
 }

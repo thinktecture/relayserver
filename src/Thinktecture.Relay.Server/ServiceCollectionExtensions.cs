@@ -74,7 +74,9 @@ public static class ServiceCollectionExtensions
 		services.TryAddScoped<IRelayRequestLogger<TRequest, TResponse>, RelayRequestLogger<TRequest, TResponse>>();
 		services.TryAddScoped<DiscoveryDocumentBuilder>();
 
-		services.TryAddSingleton<IRelayTargetResponseWriter<TResponse>, RelayTargetResponseWriter<TResponse>>();
+		services
+			.TryAddSingleton<IRelayTargetResponseWriter<TRequest, TResponse>,
+				RelayTargetResponseWriter<TRequest, TResponse>>();
 		services.TryAddSingleton<IRelayClientRequestFactory<TRequest>, RelayClientRequestFactory<TRequest>>();
 		services.TryAddSingleton<IRequestCoordinator<TRequest>, RequestCoordinator<TRequest>>();
 		services.TryAddSingleton<IResponseCoordinator<TResponse>, ResponseCoordinator<TResponse>>();

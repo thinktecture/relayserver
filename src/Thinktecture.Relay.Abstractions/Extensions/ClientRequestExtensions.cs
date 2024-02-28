@@ -24,20 +24,22 @@ public static class ClientRequestExtensions
 	/// <see cref="IClientRequest.RequestOriginId"/>.
 	/// </summary>
 	/// <param name="request">An <see cref="IClientRequest"/>.</param>
-	/// <param name="failureStatusCode">A <see cref="HttpStatusCode"/> which marks the target response as failed.</param>
+	/// <param name="httpStatusCode">A <see cref="HttpStatusCode"/>.</param>
 	/// <returns>The <see cref="TargetResponse"/>.</returns>
-	public static TargetResponse CreateResponse(this IClientRequest request, HttpStatusCode? failureStatusCode = null)
-		=> request.CreateResponse<TargetResponse>(failureStatusCode);
+	/// <remarks>If the <paramref name="httpStatusCode"/> is 4xx or 5xx, the request will be marked as failed.</remarks>
+	public static TargetResponse CreateResponse(this IClientRequest request, HttpStatusCode? httpStatusCode = null)
+		=> request.CreateResponse<TargetResponse>(httpStatusCode);
 
 	/// <summary>
 	/// Creates a pristine <see cref="ITargetResponse"/> prefilled with <see cref="IClientRequest.RequestId"/> and
 	/// <see cref="IClientRequest.RequestOriginId"/>.
 	/// </summary>
 	/// <param name="request">An <see cref="IClientRequest"/>.</param>
-	/// <param name="failureStatusCode">A <see cref="HttpStatusCode"/> which marks the target response as failed.</param>
+	/// <param name="httpStatusCode">A <see cref="HttpStatusCode"/>.</param>
 	/// <typeparam name="T">The type of response.</typeparam>
 	/// <returns>The <see cref="ITargetResponse"/>.</returns>
-	public static T CreateResponse<T>(this IClientRequest request, HttpStatusCode? failureStatusCode = null)
+	/// <remarks>If the <paramref name="httpStatusCode"/> is 4xx or 5xx, the request will be marked as failed.</remarks>
+	public static T CreateResponse<T>(this IClientRequest request, HttpStatusCode? httpStatusCode = null)
 		where T : ITargetResponse, new()
 	{
 		var response = new T()
@@ -47,11 +49,12 @@ public static class ClientRequestExtensions
 			HttpHeaders = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase),
 		};
 
-		if (failureStatusCode == null) return response;
+		if (httpStatusCode == null || (int)httpStatusCode.GetValueOrDefault(HttpStatusCode.Continue) < 400)
+			return response;
 
 		response.OriginalBodySize = 0;
 		response.BodySize = 0;
-		response.HttpStatusCode = failureStatusCode.Value;
+		response.HttpStatusCode = httpStatusCode.Value;
 		response.RequestFailed = true;
 
 		return response;
