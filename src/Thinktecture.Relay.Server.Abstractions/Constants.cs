@@ -33,7 +33,7 @@ public static class Constants
 		/// <summary>
 		/// Enables tracing of the particular request when present.
 		/// </summary>
-		/// <remarks>The value is ignored.</remarks>
-		public const string EnableTracing = "X-RelayServer-EnableTracing";
+		/// <remarks>The value of the header is ignored.</remarks>
+		public const string EnableTracing = "RelayServer-EnableTracing";
 	}
 }
