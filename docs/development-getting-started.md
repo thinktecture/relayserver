@@ -12,7 +12,7 @@ Scripts to help building and running the system are provided as
 and Linux.
 
 A compose file is provided to build all the docker images (`src/docker/docker-compose.yml`). You can build the images
-with the `docker compose build` command.
+with the `docker compose build` command. An environment variable `RABBITMQ_ERLANG_COOKIE` needs to be set.
 
 ## First time Development & Test-Setup
 

@@ -47,5 +47,9 @@ COPY --chown=relay --from=build /app .
 EXPOSE 5000
 
 ENV ASPNETCORE_URLS=http://+:5000
+ENV Serilog__Properties__System=Management
+ENV Authentication__ApiKey__ApiKeys__read-key__managementapi=read
+ENV Authentication__ApiKey__ApiKeys__write-key__managementapi=write
+ENV Authentication__ApiKey__ApiKeys__readwrite-key__managementapi=readwrite
 
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.ManagementApi.Docker.dll"]
