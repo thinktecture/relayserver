@@ -42,27 +42,27 @@ public static class Constants
 		/// The url to use for acknowledging a request by issuing as POST with an empty body to it.
 		/// </summary>
 		/// <remarks>This will only be present when manual acknowledgement is needed.</remarks>
-		public const string AcknowledgeUrl = "X-RelayServer-AcknowledgeUrl";
+		public const string AcknowledgeUrl = "RelayServer-AcknowledgeUrl";
 
 		/// <summary>
 		/// The unique id of the request.
 		/// </summary>
-		public const string RequestId = "X-RelayServer-RequestId";
+		public const string RequestId = "RelayServer-RequestId";
 
 		/// <summary>
 		/// The unique id of the origin receiving the request.
 		/// </summary>
-		public const string OriginId = "X-RelayServer-OriginId";
+		public const string OriginId = "RelayServer-OriginId";
 
 		/// <summary>
 		/// The machine name of the connector handling the request.
 		/// </summary>
-		public const string ConnectorMachineName = "X-RelayServer-Connector-MachineName";
+		public const string ConnectorMachineName = "RelayServer-Connector-MachineName";
 
 		/// <summary>
 		/// The version of the connector handling the request.
 		/// </summary>
-		public const string ConnectorVersion = "X-RelayServer-Connector-Version";
+		public const string ConnectorVersion = "RelayServer-Connector-Version";
 	}
 
 	/// <summary>
