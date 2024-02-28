@@ -5,7 +5,28 @@ x-defaults: &defaults
 x-rabbit-defaults: &rabbit-defaults
   <<: *defaults
   image: rabbitmq:management-alpine
-  command: ["bash", "-c", "echo -n 'V2VsY29tZSB0byBUaGlua3RlY3R1cmUgUmVsYXlTZXJ2ZXIgMyDigJMgWW91IHN1Y2Nlc3NmdWxseSBkZWNvZGVkIG91ciBmYWtlIEVSTEFORyBjb29raWUgY29udGFpbmluZyB0aGlzIG1lc3NhZ2Uu' > /var/lib/rabbitmq/.erlang.cookie; chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
+  secrets:
+    - source: erlang-cookie
+      target: /var/lib/rabbitmq/.erlang.cookie
+      mode: 0600
+x-rabbit-env: &rabbit-env
+  RABBITMQ_DEFAULT_USER: guest
+  RABBITMQ_DEFAULT_PASS: guest
+  RABBITMQ_SERVER_START_ARGS: -rabbit cluster_nodes {['rabbit@relay_transport_rabbitmq1','rabbit@relay_transport_rabbitmq2'],disc} cluster_name rabbit@relay_transport
+
+x-db-connection: &db-connection
+  ConnectionStrings__PostgreSql: host=relay_persistence_postgresql;database=relayserver;username=relayserver;password=<Strong!Passw0rd>
+
+x-logging: &logging
+  Serilog__MinimumLevel__Default: Verbose
+  Serilog__MinimumLevel__Override__Microsoft: Warning
+  Serilog__MinimumLevel__Override__System: Warning
+  Serilog__WriteTo__0__Name: Seq
+  Serilog__WriteTo__0__Args__ServerUrl: http://relay_logging_seq
+
+secrets:
+  erlang-cookie:
+    environment: RABBITMQ_ERLANG_COOKIE
 
 services:
   relay_transport_rabbitmq1:
@@ -14,38 +35,42 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    env_file:
-      - environments/relay_transport_rabbitmq.env
-      - environments/relay_transport_rabbitmq1.env
+    environment:
+      <<: *rabbit-env
+      RABBITMQ_NODENAME: rabbit@relay_transport_rabbitmq1
   relay_transport_rabbitmq2:
     <<: *rabbit-defaults
     container_name: relay_transport_rabbitmq2
     ports:
       - "5673:5672"
       - "15673:15672"
-    env_file:
-      - environments/relay_transport_rabbitmq.env
-      - environments/relay_transport_rabbitmq2.env
+    environment:
+      <<: *rabbit-env
+      RABBITMQ_NODENAME: rabbit@relay_transport_rabbitmq2
+
   relay_logging_seq:
     <<: *defaults
     image: datalust/seq
     container_name: relay_logging_seq
     ports:
       - "5341:80"
-    env_file:
-      - environments/relay_logging_seq.env
+    environment:
+      ACCEPT_EULA: Y
     volumes:
       - seq-data:/data
+
   relay_persistence_postgresql:
     <<: *defaults
     image: postgres:15-alpine
     container_name: relay_persistence_postgresql
     ports:
       - "5432:5432"
-    env_file:
-      - environments/relay_persistence_postgresql.env
+    environment:
+      POSTGRES_USER: relayserver
+      POSTGRES_PASSWORD: <Strong!Passw0rd>
     volumes:
       - postgresql-data:/var/lib/postgresql/data
+
   relay_server_migrations:
     <<: *defaults
     image: relay_server
@@ -53,9 +78,13 @@ services:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Server.Docker/Dockerfile
     container_name: relay_server_migrations
+    environment:
+      <<: [*db-connection, *logging]
+      Serilog__Properties__System: Migration
     depends_on:
       - relay_persistence_postgresql
     entrypoint: ["dotnet", "Thinktecture.Relay.Server.Docker.dll", "migrate-only=true"]
+
   relay_management:
     <<: *defaults
     image: relay_management
@@ -65,10 +94,11 @@ services:
     container_name: relay_management
     ports:
       - "5004:5000"
-    env_file:
-      - environments/relay_management.env
+    environment:
+      <<: [*db-connection, *logging]
     depends_on:
       - relay_server_migrations
+
   relay_tenant_seed:
     <<: *defaults
     image: curlimages/curl
@@ -76,7 +106,8 @@ services:
     depends_on:
       - relay_server_migrations
       - relay_management
-    command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant1\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"TT-Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant2\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants" ]
+    command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant1\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant2\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants" ]
+
   relay_identityserver:
     <<: *defaults
     image: relay_identityserver
@@ -86,19 +117,21 @@ services:
     container_name: relay_identityserver
     ports:
       - "5002:5000"
-    env_file:
-      - environments/relay_identityserver.env
+    environment:
+      <<: [*db-connection, *logging]
     depends_on:
       - relay_server_migrations
+
   relay_server_a:
     <<: *defaults
     image: relay_server
     container_name: relay_server_a
     ports:
       - "5010:5000"
-    env_file:
-      - environments/relay_server.env
-      - environments/relay_server_a.env
+    environment:
+      <<: [*db-connection, *logging]
+      Serilog__Properties__System: RelayServerA
+      RabbitMq__Uri: amqp://guest:guest@relay_transport_rabbitmq1
     volumes:
       - relay-bodystore:/var/bodystore
     depends_on:
@@ -110,14 +143,16 @@ services:
     container_name: relay_server_b
     ports:
       - "5011:5000"
-    env_file:
-      - environments/relay_server.env
-      - environments/relay_server_b.env
+    environment:
+      <<: [*db-connection, *logging]
+      Serilog__Properties__System: RelayServerB
+      RabbitMq__Uri: amqp://guest:guest@relay_transport_rabbitmq2
     volumes:
       - relay-bodystore:/var/bodystore
     depends_on:
       - relay_server_migrations
       - relay_identityserver
+
   relay_connector_a1:
     <<: *defaults
     image: relay_connector
@@ -125,36 +160,45 @@ services:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Connector.Docker/Dockerfile
     container_name: relay_connector_a1
-    env_file:
-      - environments/relay_connector.env
-      - environments/relay_connector_a1.env
+    environment:
+      <<: *logging
+      Serilog__Properties__System: Connector_A1
+      RelayConnector__RelayServerBaseUri: http://relay_server_a:5000
+      RelayConnector__TenantName: TestTenant1
     depends_on:
       - relay_server_a
   relay_connector_a2:
     <<: *defaults
     image: relay_connector
     container_name: relay_connector_a2
-    env_file:
-      - environments/relay_connector.env
-      - environments/relay_connector_a2.env
+    environment:
+      <<: *logging
+      Serilog__Properties__System: Connector_A2
+      RelayConnector__RelayServerBaseUri: http://relay_server_a:5000
+      RelayConnector__TenantName: TestTenant1
     depends_on:
       - relay_connector_a1
+
   relay_connector_b1:
     <<: *defaults
     image: relay_connector
     container_name: relay_connector_b1
-    env_file:
-      - environments/relay_connector.env
-      - environments/relay_connector_b1.env
+    environment:
+      <<: *logging
+      Serilog__Properties__System: Connector_B1
+      RelayConnector__RelayServerBaseUri: http://relay_server_b:5000
+      RelayConnector__TenantName: TestTenant2
     depends_on:
       - relay_server_b
   relay_connector_b2:
     <<: *defaults
     image: relay_connector
     container_name: relay_connector_b2
-    env_file:
-      - environments/relay_connector.env
-      - environments/relay_connector_b2.env
+    environment:
+      <<: *logging
+      Serilog__Properties__System: Connector_B2
+      RelayConnector__RelayServerBaseUri: http://relay_server_b:5000
+      RelayConnector__TenantName: TestTenant2
     depends_on:
       - relay_connector_b1
 

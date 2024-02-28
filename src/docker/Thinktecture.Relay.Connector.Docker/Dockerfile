@@ -42,4 +42,6 @@ RUN chmod u-s /usr/bin/gpasswd /usr/bin/chsh /bin/umount /bin/mount /sbin/unix_c
 USER relay
 COPY --chown=relay --from=build /app .
 
+ENV DOTNET_ENVIRONMENT=Development
+
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.Connector.Docker.dll"]
