@@ -79,7 +79,7 @@
           <ion-item color="light">
             <ion-label>
               <p>Created</p>
-              {{ credential.created }}
+              {{ credential.created | date: "medium" }}
             </ion-label>
           </ion-item>
 
@@ -87,7 +87,7 @@
             <ion-item color="light">
               <ion-label>
                 <p>Expires</p>
-                {{ credential.expiration }}
+                {{ credential.expiration | date: "medium" }}
               </ion-label>
             </ion-item>
           }
