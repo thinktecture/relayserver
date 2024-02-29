@@ -18,6 +18,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'tenants/:name/connections',
+        loadComponent: () =>
+          import('../connections/connections.page').then(
+            (m) => m.ConnectionsPage,
+          ),
+      },
+      {
         path: 'stats',
         loadComponent: () =>
           import('../stats/stats.page').then((m) => m.StatsPage),
