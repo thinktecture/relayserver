@@ -17,7 +17,7 @@ type UndefinedToNull<T> = undefined extends T
   providedIn: 'root',
 })
 export class EditTenantService {
-  generateForm(): GenericFormGroup<NewTenant> {
+  generate(): GenericFormGroup<NewTenant> {
     return new FormGroup({
       name: new FormControl('', {
         nonNullable: true,
@@ -35,12 +35,12 @@ export class EditTenantService {
       reconnectMinimumDelay: new FormControl<string | null>(null),
       reconnectMaximumDelay: new FormControl<string | null>(null),
       credentials: new FormArray<
-        ReturnType<EditTenantService['generateCredentialForm']>
+        ReturnType<EditTenantService['generateCredential']>
       >([]),
     });
   }
 
-  generateCredentialForm(): GenericFormGroup<NewTenantCredential> {
+  generateCredential(): GenericFormGroup<NewTenantCredential> {
     return new FormGroup({
       id: new FormControl<string | null>(null),
       plainTextValue: new FormControl(
