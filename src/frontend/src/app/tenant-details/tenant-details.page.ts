@@ -78,15 +78,10 @@ export class TenantDetailsPage {
     switchMap(([name]) =>
       this.api.getSingleTenant(name).pipe(
         tapResponse({
-          next: (tenant) => {
-            this.updateForm(tenant);
-            this.loading.set(false);
-          },
-          error: () => {
-            // error toast is shown by API interceptor
-            this.error.set(true);
-            this.loading.set(false);
-          },
+          next: (tenant) => this.updateForm(tenant),
+          // error toast is shown by API interceptor
+          error: () => this.error.set(true),
+          finalize: () => this.loading.set(false),
         }),
       ),
     ),
@@ -109,14 +104,10 @@ export class TenantDetailsPage {
       exhaustMap((tenant) =>
         this.api.putTenant(tenant).pipe(
           tapResponse({
-            next: () => {
-              this.loading.set(false);
-              this.editing.set(false);
-            },
-            error: () => {
-              // error toast is shown by API interceptor
-              this.loading.set(false);
-            },
+            next: () => this.editing.set(false),
+            // error toast is shown by API interceptor
+            error: () => this.loading.set(false),
+            finalize: () => this.loading.set(false),
           }),
         ),
       ),

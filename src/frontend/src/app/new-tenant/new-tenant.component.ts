@@ -80,14 +80,12 @@ export class NewTenantComponent {
         this.api.postTenant(tenant).pipe(
           tapResponse({
             next: () => {
-              this.loading.set(false);
               this.dismiss();
               this.router.navigate(['/tabs', 'tenants', tenant.name]);
             },
-            error: () => {
-              // error toast is shown by API interceptor
-              this.loading.set(false);
-            },
+            // error toast is shown by API interceptor
+            error: () => {},
+            finalize: () => this.loading.set(false),
           }),
         ),
       ),
