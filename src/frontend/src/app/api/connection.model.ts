@@ -13,11 +13,11 @@ export interface Connection {
   connectTime: string;
 
   /** The time when this connection was closed. */
-  disconnectTime?: string;
+  disconnectTime: string | null;
 
   /** The last time when the last message through this connection was recorded. */
-  lastSeenTime?: string;
+  lastSeenTime: string | null;
 
   /** The remote IP address of the connector. */
-  remoteIpAddress?: string;
+  remoteIpAddress: string | null;
 }
