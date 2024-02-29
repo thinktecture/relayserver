@@ -49,18 +49,18 @@ export class EditTenantComponent {
     addIcons({ addCircle, removeCircle, copyOutline });
   }
 
-  get form(): ReturnType<EditTenantService['generateForm']> {
+  get form(): ReturnType<EditTenantService['generate']> {
     return this.formGroupDirective.form;
   }
 
   get credentials(): FormArray<
-    ReturnType<EditTenantService['generateCredentialForm']>
+    ReturnType<EditTenantService['generateCredential']>
   > {
     return this.form.controls.credentials;
   }
 
   addCredential(): void {
-    this.credentials.push(this.editTenantService.generateCredentialForm());
+    this.credentials.push(this.editTenantService.generateCredential());
   }
 
   removeCredential(index: number): void {

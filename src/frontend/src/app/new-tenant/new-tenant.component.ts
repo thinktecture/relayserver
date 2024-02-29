@@ -56,10 +56,10 @@ export class NewTenantComponent {
 
   tenantName = viewChild.required<IonInput>('tenantName');
 
-  form = this.editTenantService.generateForm();
+  form = this.editTenantService.generate();
   loading = signal(false);
 
-  async dismiss() {
+  async dismiss(): Promise<void> {
     await this.modalController.dismiss();
   }
 

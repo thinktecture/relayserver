@@ -91,7 +91,7 @@ export class TenantDetailsPage {
       ),
     ),
   );
-  form = this.editTenantService.generateForm();
+  form = this.editTenantService.generate();
 
   save = rxMethod<void>(
     pipe(
@@ -124,7 +124,7 @@ export class TenantDetailsPage {
   );
 
   get credentials(): FormArray<
-    ReturnType<EditTenantService['generateCredentialForm']>
+    ReturnType<EditTenantService['generateCredential']>
   > {
     return this.form.controls.credentials;
   }
@@ -141,7 +141,7 @@ export class TenantDetailsPage {
     this.credentials.clear();
 
     tenant.credentials.forEach(() => {
-      const control = this.editTenantService.generateCredentialForm();
+      const control = this.editTenantService.generateCredential();
 
       // plainTextValue is required, disable it to make the form valid
       control.controls.plainTextValue.disable();
