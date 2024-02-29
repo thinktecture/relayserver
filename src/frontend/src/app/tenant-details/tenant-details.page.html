@@ -7,7 +7,7 @@
           Cancel
         </ion-button>
       } @else {
-        <ion-back-button default-href="/tabs/tenants"></ion-back-button>
+        <ion-back-button defaultHref="/tabs/tenants"></ion-back-button>
       }
     </ion-buttons>
     <ion-buttons slot="end">
@@ -48,5 +48,11 @@
     @if (tenant$ | async; as tenant) {
       <app-view-tenant [tenant]="tenant" />
     }
+
+    <ion-list inset>
+      <ion-item color="light" [routerLink]="['connections']" [button]="true">
+        Connections
+      </ion-item>
+    </ion-list>
   }
 </ion-content>

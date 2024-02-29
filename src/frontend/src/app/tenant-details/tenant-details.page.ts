@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormArray, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   IonBackButton,
   IonButton,
@@ -21,6 +22,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
+import { tapResponse } from '@ngrx/operators';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   combineLatestWith,
@@ -36,7 +38,6 @@ import { Tenant } from '../api/tenant.model';
 import { EditTenantComponent } from '../edit-tenant/edit-tenant.component';
 import { EditTenantService } from '../edit-tenant/edit-tenant.service';
 import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
-import { tapResponse } from '@ngrx/operators';
 
 @Component({
   selector: 'app-tenant-details',
@@ -46,6 +47,7 @@ import { tapResponse } from '@ngrx/operators';
   imports: [
     AsyncPipe,
     ReactiveFormsModule,
+    RouterLink,
     IonHeader,
     IonToolbar,
     IonButtons,
