@@ -1,9 +1,10 @@
-import { Observable } from 'rxjs';
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Tenant } from './tenant.model';
-import { Page } from './page.model';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Connection } from './connection.model';
 import { NewTenant } from './new-tenant.model';
+import { Page } from './page.model';
+import { Tenant } from './tenant.model';
 
 @Injectable({
   providedIn: 'root',
@@ -55,5 +56,11 @@ export class ApiService {
     const url = `${this.baseUrl}/tenants`;
 
     return this.http.post<void>(url, tenant);
+  }
+
+  getTenantConnections(tenantName: string): Observable<Connection[]> {
+    const url = `${this.baseUrl}/tenants/${tenantName}/connections`;
+
+    return this.http.get<Connection[]>(url);
   }
 }
