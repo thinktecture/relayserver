@@ -9,6 +9,16 @@ import { IonicRouteStrategy } from '@ionic/angular';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { apiInterceptor } from './api/api.interceptor';
 import { routes } from './app.routes';
+import { provideCharts } from 'ng2-charts';
+import {
+  CategoryScale,
+  Colors,
+  Legend,
+  LineController,
+  LineElement,
+  LinearScale,
+  PointElement,
+} from 'chart.js';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,5 +26,16 @@ export const appConfig: ApplicationConfig = {
     provideIonicAngular({ mode: 'ios' }),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([apiInterceptor])),
+    provideCharts({
+      registerables: [
+        LineController,
+        LineElement,
+        PointElement,
+        CategoryScale,
+        LinearScale,
+        Legend,
+        Colors,
+      ],
+    }),
   ],
 };
