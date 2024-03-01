@@ -229,6 +229,7 @@ are the available settings:
       "UseHttpKeepAlive": true
    }
 }
+```
 
 ### Targets
 
