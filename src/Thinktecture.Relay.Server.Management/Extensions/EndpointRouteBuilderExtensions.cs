@@ -19,6 +19,7 @@ public static class EndpointRouteBuilderExtensions
 
 		app.MapGetTenantsPaged(endpointPath, ManagementApiPolicyNames.Read);
 		app.MapGetTenant(endpointPath, ManagementApiPolicyNames.Read);
+		app.MapGetTenantConnections(endpointPath, ManagementApiPolicyNames.Read);
 		app.MapPostTenant(endpointPath, ManagementApiPolicyNames.Write);
 		app.MapPutTenant(endpointPath, ManagementApiPolicyNames.Write);
 		app.MapDeleteTenant(endpointPath, ManagementApiPolicyNames.Write);

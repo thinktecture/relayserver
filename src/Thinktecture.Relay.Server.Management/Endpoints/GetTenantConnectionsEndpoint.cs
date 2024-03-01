@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Thinktecture.Relay.Server.Management.DataTransferObjects;
-using Thinktecture.Relay.Server.Management.Extensions;
 using Thinktecture.Relay.Server.Persistence;
 
 namespace Thinktecture.Relay.Server.Management.Endpoints;
@@ -24,8 +23,8 @@ public static partial class EndpointRouteBuilderExtensions
 	{
 		var builder = app
 			.MapGet($"{pattern}/{{tenantName}}/connections", GetTenantConnectionsEndpoint.HandleRequestAsync)
-			.WithName("GetSingleTenant")
-			.WithDisplayName("Get single tenant")
+			.WithName("GetTenantConnections")
+			.WithDisplayName("Get connections of a tenant")
 			.Produces<Tenant>()
 			.Produces(StatusCodes.Status404NotFound);
 
@@ -46,18 +45,18 @@ public static partial class EndpointRouteBuilderExtensions
 public static class GetTenantConnectionsEndpoint
 {
 	/// <summary>
-	/// Retrieves a single tenant.
+	/// Retrieves connections of a tenant.
 	/// </summary>
 	/// <param name="tenantName">The name of the tenant to load.</param>
 	/// <param name="service">An instance of an <see cref="ITenantService"/> to access the persistence.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
 	/// <see cref="P:System.Threading.CancellationToken.None"/>.
 	/// </param>
-	/// <returns>The tenant, if found; otherwise, 404.</returns>
+	/// <returns>The connections, if the tenant exists; otherwise, 404.</returns>
 	public static async Task<IResult> HandleRequestAsync([FromRoute] string tenantName,
 		[FromServices] ITenantService service, CancellationToken cancellationToken = default
 	)
-		=> await service.LoadTenantAsync(tenantName, cancellationToken) is { } tenant
-			? Results.Ok(tenant.ToModel())
+		=> await service.LoadTenantWithConnectionsAsync(tenantName, cancellationToken) is { } tenant
+			? Results.Ok(tenant.Connections)
 			: Results.NotFound();
 }
