@@ -1,9 +1,22 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Statistics</ion-title>
+    @if (loading()) {
+      <ion-progress-bar type="indeterminate" />
+    }
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <canvas baseChart [data]="data" [options]="options" type="line"></canvas>
+  @if (error()) {
+    <ion-list>
+      <ion-item>
+        <ion-note>Failed to load statistics</ion-note>
+      </ion-item>
+    </ion-list>
+  } @else {
+    @if (data$ | async; as data) {
+      <canvas baseChart type="line" [options]="options" [data]="data"></canvas>
+    }
+  }
 </ion-content>
