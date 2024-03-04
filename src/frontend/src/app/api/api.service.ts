@@ -5,6 +5,7 @@ import { Connection } from './connection.model';
 import { NewTenant } from './new-tenant.model';
 import { Page } from './page.model';
 import { Tenant } from './tenant.model';
+import { DateStatistic } from './date-statistic';
 
 @Injectable({
   providedIn: 'root',
@@ -62,5 +63,11 @@ export class ApiService {
     const url = `${this.baseUrl}/tenants/${tenantName}/connections`;
 
     return this.http.get<Connection[]>(url);
+  }
+
+  getStatistics(): Observable<DateStatistic[]> {
+    const url = `${this.baseUrl}/statistics`;
+
+    return this.http.get<DateStatistic[]>(url);
   }
 }
