@@ -58,12 +58,12 @@ export class StatsPage {
         {
           data: statistics.map((s) => s.totalRequestBodySize),
           label: 'Total request body size',
-          yAxisID: 'yRight',
+          yAxisID: 'yBytes',
         },
         {
           data: statistics.map((s) => s.totalResponseBodySize),
           label: 'Total response body size',
-          yAxisID: 'yRight',
+          yAxisID: 'yBytes',
         },
         {
           data: statistics.map((s) => s.requestCount),
