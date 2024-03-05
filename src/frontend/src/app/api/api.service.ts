@@ -5,7 +5,7 @@ import { Connection } from './connection.model';
 import { NewTenant } from './new-tenant.model';
 import { Page } from './page.model';
 import { Tenant } from './tenant.model';
-import { DateStatistic } from './date-statistic';
+import { DateStatistic } from './date-statistic.model';
 
 @Injectable({
   providedIn: 'root',
