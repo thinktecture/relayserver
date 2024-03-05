@@ -53,7 +53,15 @@
 
       <ion-list inset>
         <ion-item color="light" [routerLink]="['connections']" [button]="true">
-          Connections
+          <ion-icon aria-hidden name="link-outline" slot="start" />
+          <ion-label>Connections</ion-label>
+        </ion-item>
+      </ion-list>
+
+      <ion-list inset>
+        <ion-item color="light" [routerLink]="['statistics']" [button]="true">
+          <ion-icon aria-hidden name="stats-chart-outline" slot="start" />
+          <ion-label>Statistics</ion-label>
         </ion-item>
       </ion-list>
     }

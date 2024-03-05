@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        [text]="name()"
+        [defaultHref]="'/tabs/tenants/' + name()"
+      ></ion-back-button>
+    </ion-buttons>
+    <ion-title>Connections</ion-title>
+
+    @if (loading()) {
+      <ion-progress-bar type="indeterminate" />
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (error()) {
+    <ion-list>
+      <ion-item>
+        <ion-note>Failed to load statistics</ion-note>
+      </ion-item>
+    </ion-list>
+  } @else {
+    @if (statistics$ | async; as statistics) {
+      <app-view-stats [statistics]="statistics" />
+    }
+  }
+</ion-content>
