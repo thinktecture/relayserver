@@ -25,9 +25,9 @@ import { switchMap, tap } from 'rxjs';
 import { ApiService } from '../api/api.service';
 
 @Component({
-  selector: 'app-connections',
-  templateUrl: './connections.page.html',
-  styleUrls: ['./connections.page.scss'],
+  selector: 'app-tenant-connections',
+  templateUrl: './tenant-connections.page.html',
+  styleUrls: ['./tenant-connections.page.scss'],
   standalone: true,
   imports: [
     AsyncPipe,
@@ -47,7 +47,7 @@ import { ApiService } from '../api/api.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConnectionsPage {
+export class TenantConnectionsPage {
   private api = inject(ApiService);
 
   name = input.required<string>();
