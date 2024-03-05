@@ -20,8 +20,8 @@ export const routes: Routes = [
       {
         path: 'tenants/:name/connections',
         loadComponent: () =>
-          import('../connections/connections.page').then(
-            (m) => m.ConnectionsPage,
+          import('../tenant-connections/tenant-connections.page').then(
+            (m) => m.TenantConnectionsPage,
           ),
       },
       {
