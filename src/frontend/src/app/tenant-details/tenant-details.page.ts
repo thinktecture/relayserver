@@ -15,7 +15,9 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonIcon,
   IonItem,
+  IonLabel,
   IonList,
   IonNote,
   IonProgressBar,
@@ -24,6 +26,8 @@ import {
 } from '@ionic/angular/standalone';
 import { tapResponse } from '@ngrx/operators';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { addIcons } from 'ionicons';
+import { linkOutline, statsChartOutline } from 'ionicons/icons';
 import {
   combineLatestWith,
   exhaustMap,
@@ -59,6 +63,8 @@ import { ViewTenantComponent } from '../view-tenant/view-tenant.component';
     IonList,
     IonItem,
     IonNote,
+    IonLabel,
+    IonIcon,
     EditTenantComponent,
     ViewTenantComponent,
   ],
@@ -89,6 +95,10 @@ export class TenantDetailsPage {
     ),
   );
   form = this.editTenantService.generate();
+
+  constructor() {
+    addIcons({ linkOutline, statsChartOutline });
+  }
 
   save = rxMethod<void>(
     pipe(

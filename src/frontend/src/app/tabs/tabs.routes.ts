@@ -25,6 +25,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'tenants/:name/statistics',
+        loadComponent: () =>
+          import('../tenant-statistics/tenant-statistics.page').then(
+            (m) => m.TenantStatisticsPage,
+          ),
+      },
+      {
         path: 'stats',
         loadComponent: () =>
           import('../stats/stats.page').then((m) => m.StatsPage),
