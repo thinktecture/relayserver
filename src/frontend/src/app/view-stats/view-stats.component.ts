@@ -5,7 +5,7 @@ import { BaseChartDirective } from 'ng2-charts';
 @Component({
   selector: 'app-view-stats',
   templateUrl: './view-stats.component.html',
-  styleUrl: './view-stats.component.css',
+  styleUrl: './view-stats.component.scss',
   standalone: true,
   imports: [BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
