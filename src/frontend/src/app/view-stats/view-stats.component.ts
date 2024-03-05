@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from '@angular/core';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { DateStatistic } from '../api/date-statistic.model';
 
 @Component({
   selector: 'app-view-stats',
@@ -11,7 +17,43 @@ import { BaseChartDirective } from 'ng2-charts';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewStatsComponent {
-  data = input.required<ChartConfiguration['data']>();
+  statistics = input.required<DateStatistic[]>();
+
+  data = computed<ChartConfiguration['data']>(() => ({
+    datasets: [
+      {
+        data: this.statistics().map((s) => s.totalRequestBodySize),
+        label: 'Total request body size',
+        yAxisID: 'yBytes',
+      },
+      {
+        data: this.statistics().map((s) => s.totalResponseBodySize),
+        label: 'Total response body size',
+        yAxisID: 'yBytes',
+      },
+      {
+        data: this.statistics().map((s) => s.requestCount),
+        label: 'Total requests',
+      },
+      {
+        data: this.statistics().map((s) => s.abortedRequestCount),
+        label: 'Aborted requests',
+      },
+      {
+        data: this.statistics().map((s) => s.failedRequestCount),
+        label: 'Failed requests',
+      },
+      {
+        data: this.statistics().map((s) => s.expiredRequestCount),
+        label: 'Expired requests',
+      },
+      {
+        data: this.statistics().map((s) => s.erroredRequestCount),
+        label: 'Errored requests',
+      },
+    ],
+    labels: this.statistics().map((s) => s.date),
+  }));
 
   options: ChartConfiguration['options'] = {
     elements: {

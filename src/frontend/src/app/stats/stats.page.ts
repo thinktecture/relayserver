@@ -15,10 +15,8 @@ import {
   IonItem,
   IonNote,
 } from '@ionic/angular/standalone';
-import { ChartConfiguration } from 'chart.js';
 import { ApiService } from '../api/api.service';
 import { tapResponse } from '@ngrx/operators';
-import { Observable, map } from 'rxjs';
 import { ViewStatsComponent } from '../view-stats/view-stats.component';
 
 @Component({
@@ -46,47 +44,12 @@ export class StatsPage {
   loading = signal(true);
   error = signal(false);
 
-  data$: Observable<ChartConfiguration['data']> = this.api.getStatistics().pipe(
+  statistics$ = this.api.getStatistics().pipe(
     tapResponse({
       next: () => {},
       // error toast is shown by API interceptor
       error: () => this.error.set(true),
       finalize: () => this.loading.set(false),
     }),
-    map((statistics) => ({
-      datasets: [
-        {
-          data: statistics.map((s) => s.totalRequestBodySize),
-          label: 'Total request body size',
-          yAxisID: 'yBytes',
-        },
-        {
-          data: statistics.map((s) => s.totalResponseBodySize),
-          label: 'Total response body size',
-          yAxisID: 'yBytes',
-        },
-        {
-          data: statistics.map((s) => s.requestCount),
-          label: 'Total requests',
-        },
-        {
-          data: statistics.map((s) => s.abortedRequestCount),
-          label: 'Aborted requests',
-        },
-        {
-          data: statistics.map((s) => s.failedRequestCount),
-          label: 'Failed requests',
-        },
-        {
-          data: statistics.map((s) => s.expiredRequestCount),
-          label: 'Expired requests',
-        },
-        {
-          data: statistics.map((s) => s.erroredRequestCount),
-          label: 'Errored requests',
-        },
-      ],
-      labels: statistics.map((s) => s.date),
-    })),
   );
 }
