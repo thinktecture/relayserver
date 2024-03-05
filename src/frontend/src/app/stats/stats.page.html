@@ -16,7 +16,7 @@
     </ion-list>
   } @else {
     @if (data$ | async; as data) {
-      <canvas baseChart type="line" [options]="options" [data]="data"></canvas>
+      <app-view-stats [data]="data" />
     }
   }
 </ion-content>
