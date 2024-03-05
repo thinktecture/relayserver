@@ -15,8 +15,8 @@
       </ion-item>
     </ion-list>
   } @else {
-    @if (data$ | async; as data) {
-      <app-view-stats [data]="data" />
+    @if (statistics$ | async; as statistics) {
+      <app-view-stats [statistics]="statistics" />
     }
   }
 </ion-content>
