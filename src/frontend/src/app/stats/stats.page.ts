@@ -16,10 +16,10 @@ import {
   IonNote,
 } from '@ionic/angular/standalone';
 import { ChartConfiguration } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
 import { ApiService } from '../api/api.service';
 import { tapResponse } from '@ngrx/operators';
 import { Observable, map } from 'rxjs';
+import { ViewStatsComponent } from '../view-stats/view-stats.component';
 
 @Component({
   selector: 'app-stats',
@@ -36,29 +36,12 @@ import { Observable, map } from 'rxjs';
     IonList,
     IonItem,
     IonNote,
-    BaseChartDirective,
+    ViewStatsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatsPage {
   private api = inject(ApiService);
-
-  options: ChartConfiguration['options'] = {
-    elements: {
-      line: {
-        tension: 0.5,
-      },
-    },
-    scales: {
-      y: {
-        title: { display: true, text: 'Count' },
-      },
-      yRight: {
-        position: 'right',
-        title: { display: true, text: 'Size in bytes' },
-      },
-    },
-  };
 
   loading = signal(true);
   error = signal(false);
