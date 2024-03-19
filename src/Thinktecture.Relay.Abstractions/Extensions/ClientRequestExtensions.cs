@@ -49,12 +49,16 @@ public static class ClientRequestExtensions
 			HttpHeaders = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase),
 		};
 
+		if (httpStatusCode is not null)
+		{
+			response.HttpStatusCode = httpStatusCode.Value;
+		}
+
 		if (httpStatusCode == null || (int)httpStatusCode.GetValueOrDefault(HttpStatusCode.Continue) < 400)
 			return response;
 
 		response.OriginalBodySize = 0;
 		response.BodySize = 0;
-		response.HttpStatusCode = httpStatusCode.Value;
 		response.RequestFailed = true;
 
 		return response;
