@@ -22,7 +22,7 @@ public class RelayServerOptions
 	/// <summary>
 	///  The default request logger level.
 	/// </summary>
-	public static readonly RelayRequestLoggerLevel DefaultRequestLoggerLevel = RelayRequestLoggerLevel.All;
+	public static readonly RelayRequestLoggerLevel DefaultRequestLoggerLevel = RelayRequestLoggerLevel.Errored;
 
 	/// <summary>
 	///  The default acknowledge mode.
