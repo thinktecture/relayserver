@@ -1,5 +1,3 @@
-using System;
-
 namespace Thinktecture.Relay.Server;
 
 /// <summary>
@@ -7,8 +5,6 @@ namespace Thinktecture.Relay.Server;
 /// </summary>
 public static class Constants
 {
-	public static readonly string AssemblyVersion = typeof(Constants).GetAssemblyVersion();
-
 	/// <summary>
 	/// The authentication scheme to use.
 	/// </summary>

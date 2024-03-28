@@ -36,7 +36,7 @@ public partial class RelayTargetResponseWriter<TRequest, TResponse> : IRelayTarg
 		{
 			httpResponse.Headers[Constants.HeaderNames.RequestId] = new[] { clientRequest.RequestId.ToString() };
 			httpResponse.Headers[Constants.HeaderNames.ServerMachineName] = new[] { Environment.MachineName };
-			httpResponse.Headers[Constants.HeaderNames.ServerVersion] = new[] { Constants.AssemblyVersion };
+			httpResponse.Headers[Constants.HeaderNames.ServerVersion] = new[] { GetType().GetAssemblyVersion() };
 		}
 
 		if (targetResponse == null)
