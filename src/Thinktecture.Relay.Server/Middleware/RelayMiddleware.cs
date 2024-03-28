@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server.Diagnostics;
+using Thinktecture.Relay.Server.Extensions;
 using Thinktecture.Relay.Server.Interceptor;
 using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Persistence.Models;
@@ -143,38 +144,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	/// <inheritdoc />
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
-		// /mode/tenant/target(...)
-		var tenantName = context.Request.Path.Value?.Split('/').Skip(2).FirstOrDefault();
-		if (string.IsNullOrEmpty(tenantName))
-		{
-			LogInvalidRequest(context.Request.Path, context.Request.QueryString);
-			await next.Invoke(context);
-			return;
-		}
-
-		var tenantState = await LoadTenantStateByNameAsync(tenantName);
-		if (tenantState.Unknown)
-		{
-			LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
-			await next.Invoke(context);
-			return;
-		}
-
-		if (tenantState.RequireAuthentication && !IsAuthenticated(context))
-		{
-			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-			return;
-		}
-
-		// ensure the correct casing (ignore it from url starting from here)
-		tenantName = tenantState.TenantName;
-
-		if (_relayServerOptions.RequireActiveConnection && !tenantState.HasActiveConnections)
-		{
-			LogNoActiveConnection(tenantName);
-			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-			return;
-		}
+		var (_, tenantName, _, _) = context.Request.GetRelayRequest();
 
 		using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
 		if (_relayServerOptions.RequestExpiration != null)
@@ -184,6 +154,37 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 		try
 		{
+			if (string.IsNullOrEmpty(tenantName))
+			{
+				LogInvalidRequest(context.Request.Path, context.Request.QueryString);
+				await next.Invoke(context);
+				return;
+			}
+
+			var tenantState = await LoadTenantStateByNameAsync(tenantName);
+			if (tenantState.Unknown)
+			{
+				LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
+				await next.Invoke(context);
+				return;
+			}
+
+			if (tenantState.RequireAuthentication && !IsAuthenticated(context))
+			{
+				context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+				return;
+			}
+
+			// ensure the correct casing (ignore it from url starting from here)
+			tenantName = tenantState.TenantName;
+
+			if (_relayServerOptions.RequireActiveConnection && !tenantState.HasActiveConnections)
+			{
+				LogNoActiveConnection(tenantName);
+				context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+				return;
+			}
+
 			context.Request.EnableBuffering();
 			await context.Request.Body.DrainAsync(cts.Token);
 
@@ -191,7 +192,9 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				await _requestFactory.CreateAsync(tenantName, _relayContext.RequestId, context.Request, cts.Token);
 
 			if (_logger.IsEnabled(LogLevel.Trace))
+			{
 				_logRequestParsed(_logger, _relayContext.ClientRequest, null);
+			}
 
 			await InterceptClientRequestAsync(cts.Token);
 
@@ -237,23 +240,29 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 			await _responseWriter.WriteAsync(_relayContext.ClientRequest, _relayContext.TargetResponse, context.Response,
 				cts.Token);
-			await _relayRequestLogger.LogSuccessAsync(_relayContext);
+			await _relayRequestLogger.LogSuccessAsync(_relayContext,
+				_relayContext.ClientRequest.BodySize.GetValueOrDefault(), context.Request, _relayContext.TargetResponse);
 		}
 		catch (TransportException)
 		{
-			await _relayRequestLogger.LogFailAsync(_relayContext);
+			await _relayRequestLogger.LogFailAsync(_relayContext, _relayContext.ClientRequest.BodySize.GetValueOrDefault(),
+				context.Request);
 			await WriteErrorResponse(HttpStatusCode.ServiceUnavailable, context.Response, cts.Token);
 		}
 		catch (OperationCanceledException)
 		{
+			// if the exception is raised too early we don't have a client request yet
+			// ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+			var bodySize = _relayContext.ClientRequest?.BodySize ?? context.Request.Body.Length;
+
 			if (context.RequestAborted.IsCancellationRequested)
 			{
-				await _relayRequestLogger.LogAbortAsync(_relayContext);
+				await _relayRequestLogger.LogAbortAsync(_relayContext, bodySize, context.Request);
 				LogClientAborted(_relayContext.RequestId);
 			}
 			else
 			{
-				await _relayRequestLogger.LogExpiredAsync(_relayContext);
+				await _relayRequestLogger.LogExpiredAsync(_relayContext, bodySize, context.Request);
 				await WriteErrorResponse(HttpStatusCode.RequestTimeout, context.Response, cts.Token);
 				LogRequestExpired(_relayContext.RequestId);
 			}
@@ -261,7 +270,11 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		catch (Exception ex)
 		{
 			await WriteErrorResponse(HttpStatusCode.InternalServerError, context.Response, cts.Token);
-			await _relayRequestLogger.LogErrorAsync(_relayContext);
+
+			// if the exception is raised too early we don't have a client request yet
+			// ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+			var bodySize = _relayContext.ClientRequest?.BodySize ?? context.Request.Body.Length;
+			await _relayRequestLogger.LogErrorAsync(_relayContext, bodySize, context.Request);
 			_logger.LogError(20606, ex, "Could not handle request {RelayRequestId}", _relayContext.RequestId);
 		}
 	}
@@ -296,8 +309,11 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 			if (clientRequest.BodyContent != bodyContent)
 			{
-				// an interceptor changed the body content - need to dispose it properly
-				if (bodyContent != null) _relayContext.ResponseDisposables.Add(bodyContent);
+				// an interceptor changed the body content - need to dispose it properly (but not the request body)
+				if (bodyContent != null && bodyContent != _relayContext.HttpContext.Request.Body)
+				{
+					_relayContext.ResponseDisposables.Add(bodyContent);
+				}
 				bodyContent = clientRequest.BodyContent;
 			}
 		}
@@ -373,7 +389,10 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			if (_relayContext.TargetResponse?.BodyContent == bodyContent) continue;
 
 			// an interceptor changed the body content - need to dispose it properly
-			if (bodyContent != null) _relayContext.ResponseDisposables.Add(bodyContent);
+			if (bodyContent != null)
+			{
+				_relayContext.ResponseDisposables.Add(bodyContent);
+			}
 			bodyContent = _relayContext.TargetResponse?.BodyContent;
 		}
 

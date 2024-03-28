@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Thinktecture.Relay.Server.Extensions;
 using Thinktecture.Relay.Server.Persistence;
 using Thinktecture.Relay.Server.Persistence.Models;
 using Thinktecture.Relay.Server.Transport;
@@ -42,16 +44,17 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogSuccess(Guid relayRequestId);
 
 	/// <inheritdoc />
-	public async Task LogSuccessAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public async Task LogSuccessAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest,
+		TResponse? targetResponse)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogSucceeded()) return;
 
 		LogSuccess(relayContext.RequestId);
 
-		var request = CreateRequest(relayContext);
-		request.HttpStatusCode = relayContext.TargetResponse?.HttpStatusCode;
-		request.ResponseOriginalBodySize = relayContext.TargetResponse?.OriginalBodySize;
-		request.ResponseBodySize = relayContext.TargetResponse?.BodySize;
+		var request = CreateRequest(relayContext, bodySize, httpRequest);
+		request.HttpStatusCode = targetResponse?.HttpStatusCode;
+		request.ResponseOriginalBodySize = targetResponse?.OriginalBodySize;
+		request.ResponseBodySize = targetResponse?.BodySize;
 		await _requestService.StoreRequestAsync(request);
 	}
 
@@ -59,13 +62,13 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogAbort(Guid relayRequestId);
 
 	/// <inheritdoc />
-	public async Task LogAbortAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public async Task LogAbortAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogAborted()) return;
 
 		LogAbort(relayContext.RequestId);
 
-		var request = CreateRequest(relayContext);
+		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Aborted = true;
 		await _requestService.StoreRequestAsync(request);
 	}
@@ -74,13 +77,13 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogFail(Guid relayRequestId);
 
 	/// <inheritdoc />
-	public async Task LogFailAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public async Task LogFailAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogFailed()) return;
 
 		LogFail(relayContext.RequestId);
 
-		var request = CreateRequest(relayContext);
+		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Failed = true;
 		await _requestService.StoreRequestAsync(request);
 	}
@@ -89,13 +92,13 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogExpired(Guid relayRequestId);
 
 	/// <inheritdoc />
-	public async Task LogExpiredAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public async Task LogExpiredAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogExpired()) return;
 
 		LogExpired(relayContext.RequestId);
 
-		var request = CreateRequest(relayContext);
+		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Expired = true;
 		await _requestService.StoreRequestAsync(request);
 	}
@@ -104,28 +107,32 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	partial void LogError(Guid relayRequestId);
 
 	/// <inheritdoc />
-	public async Task LogErrorAsync(IRelayContext<TRequest, TResponse> relayContext)
+	public async Task LogErrorAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogErrored()) return;
 
 		LogError(relayContext.RequestId);
 
-		var request = CreateRequest(relayContext);
+		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Errored = true;
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	private Request CreateRequest(IRelayContext<TRequest, TResponse> relayContext)
-		=> new Request()
+	private Request CreateRequest(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
+	{
+		var (_, tenantName, target, url) = httpRequest.GetRelayRequest();
+
+		return new Request()
 		{
-			TenantName = _tenantService.NormalizeName(relayContext.ClientRequest.TenantName),
+			TenantName = _tenantService.NormalizeName(tenantName),
 			RequestId = relayContext.RequestId,
 			RequestDate = relayContext.RequestStart,
 			RequestDuration = (long)(DateTime.UtcNow - relayContext.RequestStart).TotalMilliseconds,
-			RequestOriginalBodySize = relayContext.ClientRequest.OriginalBodySize.GetValueOrDefault(),
-			RequestBodySize = relayContext.ClientRequest.BodySize.GetValueOrDefault(),
-			Target = relayContext.ClientRequest.Target,
-			HttpMethod = relayContext.ClientRequest.HttpMethod,
-			RequestUrl = relayContext.ClientRequest.Url,
+			RequestOriginalBodySize = httpRequest.Body.Length,
+			RequestBodySize = bodySize,
+			Target = target,
+			HttpMethod = httpRequest.Method,
+			RequestUrl = url,
 		};
+	}
 }

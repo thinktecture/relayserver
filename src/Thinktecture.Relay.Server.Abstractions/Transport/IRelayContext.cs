@@ -8,11 +8,7 @@ namespace Thinktecture.Relay.Server.Transport;
 /// <summary>
 /// A context containing processing information and data for one relay task (request).
 /// </summary>
-/// <typeparam name="TRequest">The type of request.</typeparam>
-/// <typeparam name="TResponse">The type of response.</typeparam>
-public interface IRelayContext<TRequest, TResponse>
-	where TRequest : IClientRequest
-	where TResponse : class, ITargetResponse
+public interface IRelayContext
 {
 	/// <summary>
 	/// The date and time of the request start.
@@ -28,23 +24,6 @@ public interface IRelayContext<TRequest, TResponse>
 	/// The unique id of the origin.
 	/// </summary>
 	Guid OriginId { get; }
-
-	/// <summary>
-	/// The client request.
-	/// </summary>
-	TRequest ClientRequest { get; set; }
-
-	/// <summary>
-	/// The target response.
-	/// </summary>
-	/// <remarks>Setting this to an instance in an interceptor prevents requesting any target by default.</remarks>
-	/// <seealso cref="ForceConnectorDelivery"/>
-	TResponse? TargetResponse { get; set; }
-
-	/// <summary>
-	/// Indicates if at least one connector should be available for processing the <see cref="ClientRequest"/>.
-	/// </summary>
-	bool ConnectorAvailable { get; }
 
 	/// <summary>
 	/// Indicates that regardless of an already available <see cref="TargetResponse"/> the <see cref="ClientRequest"/> should
@@ -63,4 +42,31 @@ public interface IRelayContext<TRequest, TResponse>
 	/// The <see cref="HttpContext"/>.
 	/// </summary>
 	HttpContext HttpContext { get; }
+}
+
+/// <summary>
+/// A context containing processing information and data for one relay task (request).
+/// </summary>
+/// <typeparam name="TRequest">The type of request.</typeparam>
+/// <typeparam name="TResponse">The type of response.</typeparam>
+public interface IRelayContext<TRequest, TResponse> : IRelayContext
+	where TRequest : IClientRequest
+	where TResponse : class, ITargetResponse
+{
+	/// <summary>
+	/// The client request.
+	/// </summary>
+	TRequest ClientRequest { get; set; }
+
+	/// <summary>
+	/// The target response.
+	/// </summary>
+	/// <remarks>Setting this to an instance in an interceptor prevents requesting any target by default.</remarks>
+	/// <seealso cref="IRelayContext.ForceConnectorDelivery"/>
+	TResponse? TargetResponse { get; set; }
+
+	/// <summary>
+	/// Indicates if at least one connector should be available for processing the <see cref="ClientRequest"/>.
+	/// </summary>
+	bool ConnectorAvailable { get; }
 }
