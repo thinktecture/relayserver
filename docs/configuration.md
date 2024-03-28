@@ -49,7 +49,7 @@ the available settings:
       // The verbosity of the IRelayRequestLogger.
       // Values: 0 = None, 1 = Succeeded, 2 = Aborted, 4 = Failed, 8 = Expired,
       // 16 = Errored, All = Succeeded | Aborted | Failed | Expired | Errored
-      "RequestLoggerLevel": "All",
+      "RequestLoggerLevel": "Errored",
 
       // Acknowledge mode, ENUM, defaults to "Disabled"
       // Defines the mode in which requests are acknowledged on the server transport.
