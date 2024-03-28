@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Thinktecture.Relay.Server.Extensions;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport;
@@ -33,11 +34,7 @@ public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 	public Task<T> CreateAsync(string tenantName, Guid requestId, HttpRequest httpRequest,
 		CancellationToken cancellationToken = default)
 	{
-		// /mode/tenant/target(...)
-		var parts = httpRequest.Path.Value?.Split('/').Skip(1).ToArray() ?? Array.Empty<string>();
-		var mode = parts.ElementAt(0).ToLower();
-		var target = parts.ElementAtOrDefault(2) ?? string.Empty;
-		var url = $"{string.Join("/", parts.Skip(3))}{httpRequest.QueryString}";
+		var (mode, _, target, url) = httpRequest.GetRelayRequest();
 
 		var request = new T()
 		{
