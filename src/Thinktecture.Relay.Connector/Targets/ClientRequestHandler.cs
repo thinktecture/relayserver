@@ -132,7 +132,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 			response.HttpHeaders ??= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
 			response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
-			response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { Constants.AssemblyVersion };
+			response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { GetType().GetAssemblyVersion() };
 			response.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
 			response.HttpHeaders[Constants.HeaderNames.RequestOriginId] = new[] { request.RequestOriginId.ToString() };
 

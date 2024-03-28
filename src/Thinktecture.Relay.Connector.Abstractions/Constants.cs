@@ -1,4 +1,3 @@
-using System;
 using System.Net.Http;
 using Thinktecture.Relay.Connector.Targets;
 
@@ -9,8 +8,6 @@ namespace Thinktecture.Relay.Connector;
 /// </summary>
 public static class Constants
 {
-	public static readonly string AssemblyVersion = typeof(Constants).GetAssemblyVersion();
-
 	/// <summary>
 	/// The identity scopes.
 	/// </summary>
