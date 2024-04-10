@@ -68,6 +68,12 @@ public static class ModelBuilderExtensions
 				.WithOne()
 				.HasForeignKey(e => e.TenantName)
 				.OnDelete(DeleteBehavior.Cascade);
+
+			builder
+				.HasOne(e => e.Config)
+				.WithOne()
+				.HasForeignKey<Config>(e => e.TenantName)
+				.OnDelete(DeleteBehavior.Cascade);
 		});
 
 	private static ModelBuilder ConfigureClientSecret(this ModelBuilder modelBuilder)

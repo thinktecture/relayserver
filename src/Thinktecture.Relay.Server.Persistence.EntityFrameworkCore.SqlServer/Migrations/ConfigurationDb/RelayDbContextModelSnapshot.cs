@@ -53,7 +53,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Config", b =>
                 {
                     b.Property<string>("TenantName")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool?>("EnableTracing")
                         .HasColumnType("bit");
@@ -201,9 +201,6 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("ConfigTenantName")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -225,8 +222,6 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
 
                     b.HasKey("NormalizedName");
 
-                    b.HasIndex("ConfigTenantName");
-
                     b.HasIndex("Name")
                         .IsUnique();
 
@@ -238,6 +233,15 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                     b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
                         .WithMany("ClientSecrets")
                         .HasForeignKey("TenantName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Config", b =>
+                {
+                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Tenant", null)
+                        .WithOne("Config")
+                        .HasForeignKey("Thinktecture.Relay.Server.Persistence.Models.Config", "TenantName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -266,15 +270,6 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
-                {
-                    b.HasOne("Thinktecture.Relay.Server.Persistence.Models.Config", "Config")
-                        .WithMany()
-                        .HasForeignKey("ConfigTenantName");
-
-                    b.Navigation("Config");
-                });
-
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Origin", b =>
                 {
                     b.Navigation("Connections");
@@ -283,6 +278,8 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
             modelBuilder.Entity("Thinktecture.Relay.Server.Persistence.Models.Tenant", b =>
                 {
                     b.Navigation("ClientSecrets");
+
+                    b.Navigation("Config");
 
                     b.Navigation("Connections");
 
