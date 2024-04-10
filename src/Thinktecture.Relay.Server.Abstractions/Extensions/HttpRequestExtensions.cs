@@ -8,7 +8,8 @@ namespace Thinktecture.Relay.Server.Extensions;
 /// A struct containing the parsed request url.
 /// </summary>
 /// <param name="Mode">The requested mode.</param>
-/// <param name="Target">The unique name of the tenant.</param>
+/// <param name="TenantName">The unique name of the tenant.</param>
+/// <param name="Target">The name of the target.</param>
 /// <param name="Url">The url for the target.</param>
 public record struct RelayRequest(string Mode, string TenantName, string Target, string Url);
 
