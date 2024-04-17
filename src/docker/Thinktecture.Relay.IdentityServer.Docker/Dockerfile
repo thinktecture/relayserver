@@ -8,6 +8,7 @@ COPY ./Thinktecture.Relay.Abstractions/Thinktecture.Relay.Abstractions.csproj ./
 COPY ./Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstractions.csproj ./Thinktecture.Relay.Server.Abstractions/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer/
 COPY ./Thinktecture.Relay.IdentityServer/Thinktecture.Relay.IdentityServer.csproj ./Thinktecture.Relay.IdentityServer/
 COPY ./docker/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj ./docker/Thinktecture.Relay.IdentityServer.Docker/
 
@@ -21,6 +22,7 @@ COPY ./Thinktecture.Relay.Abstractions ./Thinktecture.Relay.Abstractions
 COPY ./Thinktecture.Relay.Server.Abstractions ./Thinktecture.Relay.Server.Abstractions
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer
 COPY ./Thinktecture.Relay.IdentityServer ./Thinktecture.Relay.IdentityServer
 COPY ./docker/Thinktecture.Relay.IdentityServer.Docker ./docker/Thinktecture.Relay.IdentityServer.Docker
 

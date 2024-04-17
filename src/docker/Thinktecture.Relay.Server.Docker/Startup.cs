@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.Server.Docker.Interceptors;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 namespace Thinktecture.Relay.Server.Docker;
 
@@ -36,8 +35,7 @@ public class Startup
 				options.RefreshInterval = TimeSpan.FromSeconds(15);
 			});
 
-		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql")
-			?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
+		services.AddRelayServerDbContext(Configuration);
 		services.AddRelayServer(options => Configuration.GetSection("RelayServer").Bind(options))
 			.AddRabbitMqRouting(options => Configuration.GetSection("RabbitMq").Bind(options))
 			.AddSignalRConnectorTransport()

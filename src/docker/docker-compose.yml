@@ -15,7 +15,9 @@ x-rabbit-env: &rabbit-env
   RABBITMQ_SERVER_START_ARGS: -rabbit cluster_nodes {['rabbit@relay_transport_rabbitmq1','rabbit@relay_transport_rabbitmq2'],disc} cluster_name rabbit@relay_transport
 
 x-db-connection: &db-connection
+  DatabaseType: ${RELAYSERVER_DATABASE_TYPE:-PostgreSql} # PostgreSql or SqlServer
   ConnectionStrings__PostgreSql: host=relay_persistence_postgresql;database=relayserver;username=relayserver;password=<Strong!Passw0rd>
+  ConnectionStrings__SqlServer: Server=relay_persistence_sqlserver;Database=relayserver;User Id=sa;Password=<Strong!Passw0rd>
 
 x-logging: &logging
   Serilog__MinimumLevel__Default: Verbose
@@ -70,7 +72,38 @@ services:
       POSTGRES_PASSWORD: <Strong!Passw0rd>
     volumes:
       - postgresql-data:/var/lib/postgresql/data
-
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL", "pg_isready", "-d", "db_prod"
+        ]
+      interval: 10s
+      timeout: 60s
+      retries: 10
+      start_period: 10s
+  relay_persistence_sqlserver:
+    <<: *defaults
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: relay_persistence_sqlserver
+    user: root
+    platform: linux/amd64
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: <Strong!Passw0rd>
+      MSSQL_PID: Express
+    volumes:
+      - sqlserver-data:/var/opt/mssql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '<Strong!Passw0rd>' -Q 'SELECT 1' || exit 1"
+        ]
+      interval: 10s
+      timeout: 60s
+      retries: 10
+      start_period: 10s
   relay_server_migrations:
     <<: *defaults
     image: relay_server
@@ -82,7 +115,10 @@ services:
       <<: [*db-connection, *logging]
       Serilog__Properties__System: Migration
     depends_on:
-      - relay_persistence_postgresql
+      relay_persistence_postgresql:
+        condition: service_healthy
+      relay_persistence_sqlserver:
+        condition: service_healthy
     entrypoint: ["dotnet", "Thinktecture.Relay.Server.Docker.dll", "migrate-only=true"]
 
   relay_management:
@@ -121,6 +157,7 @@ services:
       <<: [*db-connection, *logging]
     depends_on:
       - relay_server_migrations
+      - relay_tenant_seed
 
   relay_server_a:
     <<: *defaults
@@ -205,6 +242,7 @@ services:
 volumes:
   seq-data:
   postgresql-data:
+  sqlserver-data:
   relay-bodystore:
 
 networks:

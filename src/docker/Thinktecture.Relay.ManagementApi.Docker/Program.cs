@@ -7,9 +7,9 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Thinktecture.Relay.Docker;
 using Thinktecture.Relay.Docker.Authentication;
+using Thinktecture.Relay.ManagementApi.Docker;
 using Thinktecture.Relay.Server.Management;
 using Thinktecture.Relay.Server.Management.Extensions;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 try
 {
@@ -30,8 +30,7 @@ try
 		);
 
 	// Register the db context, which in turn also registers the persistence services
-	builder.Services.AddRelayServerDbContext(builder.Configuration.GetConnectionString("PostgreSql")
-		?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
+	builder.Services.AddRelayServerDbContext(builder.Configuration);
 
 	// Example: Add some authentication system, in this example we use api keys defined in the config file
 	builder.Services.AddAuthentication(ApiKeyAuthenticationDefaults.AuthenticationScheme)
