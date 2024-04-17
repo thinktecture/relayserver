@@ -9,6 +9,7 @@ COPY ./Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstract
 COPY ./Thinktecture.Relay.Server.Management/Thinktecture.Relay.Server.Management.csproj ./Thinktecture.Relay.Server.Management/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer/
 COPY ./docker/Thinktecture.Relay.ManagementApi.Docker/Thinktecture.Relay.ManagementApi.Docker.csproj ./docker/Thinktecture.Relay.ManagementApi.Docker/
 
 # Restore packages
@@ -22,6 +23,7 @@ COPY ./Thinktecture.Relay.Server.Abstractions ./Thinktecture.Relay.Server.Abstra
 COPY ./Thinktecture.Relay.Server.Management ./Thinktecture.Relay.Server.Management
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer
 COPY ./docker/Thinktecture.Relay.ManagementApi.Docker ./docker/Thinktecture.Relay.ManagementApi.Docker
 
 RUN dotnet publish /src/docker/Thinktecture.Relay.ManagementApi.Docker/Thinktecture.Relay.ManagementApi.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true

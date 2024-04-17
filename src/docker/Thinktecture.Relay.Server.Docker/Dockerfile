@@ -9,6 +9,7 @@ COPY ./Thinktecture.Relay.Server.Interceptors/Thinktecture.Relay.Server.Intercep
 COPY ./Thinktecture.Relay.Server.Abstractions/Thinktecture.Relay.Server.Abstractions.csproj ./Thinktecture.Relay.Server.Abstractions/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore/
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql/
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer/Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.csproj ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer/
 COPY ./Thinktecture.Relay.Server/Thinktecture.Relay.Server.csproj ./Thinktecture.Relay.Server/
 COPY ./Thinktecture.Relay.Server.Protocols.RabbitMq/Thinktecture.Relay.Server.Protocols.RabbitMq.csproj ./Thinktecture.Relay.Server.Protocols.RabbitMq/
 COPY ./Thinktecture.Relay.Server.Protocols.SignalR/Thinktecture.Relay.Server.Protocols.SignalR.csproj ./Thinktecture.Relay.Server.Protocols.SignalR/
@@ -25,6 +26,7 @@ COPY ./Thinktecture.Relay.Server.Interceptors ./Thinktecture.Relay.Server.Interc
 COPY ./Thinktecture.Relay.Server.Abstractions ./Thinktecture.Relay.Server.Abstractions
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql
+COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer
 COPY ./Thinktecture.Relay.Server ./Thinktecture.Relay.Server
 COPY ./Thinktecture.Relay.Server.Protocols.RabbitMq ./Thinktecture.Relay.Server.Protocols.RabbitMq
 COPY ./Thinktecture.Relay.Server.Protocols.SignalR ./Thinktecture.Relay.Server.Protocols.SignalR

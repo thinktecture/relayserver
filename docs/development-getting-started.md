@@ -7,11 +7,7 @@ _Note:_ The containers in this repository are intended for **demo and example** 
 encouraged to create your own host applications tailored and configured to your specific needs and to build and use
 your own container images.
 
-Scripts to help building and running the system are provided as
-[PowerShell Core](https://github.com/powershell/powershell) scripts, to be able to run cross platform on Windows, macOS
-and Linux.
-
-A compose file is provided to build all the docker images (`src/docker/docker-compose.yml`). You can build the images
+A docker compose file is provided to build all the docker images (`src/docker/docker-compose.yml`). You can build the images
 with the `docker compose build` command. An environment variable `RABBITMQ_ERLANG_COOKIE` needs to be set.
 
 ## First time Development & Test-Setup
@@ -22,7 +18,6 @@ In order to build and run the development environment, you need the following co
 - [Docker](https://www.docker.com/products/docker-desktop/)
 - [.NET SDK 6.0.100](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
   or newer features within .NET 6.0
-- [PowerShell Core 6](https://github.com/PowerShell/PowerShell/releases) or newer
 
 The _development_ environment also comes with a [Seq](https://datalust.co/seq) logging server in a local docker
 container (using the local, free single-user license). For production, the RelayServer components log to stdout and
@@ -35,10 +30,12 @@ The relay server environment consists of several parts.
 
 - Configuration database  
   The current implementation supports PostgreSQL and Microsoft SQL Server. The development environment is built for
-  PostgreSQL only.
+  PostgreSQL as default. By setting an environment variable `RELAYSERVER_DATABASE_TYPE` to `SqlServer` you can switch to
+  Microsoft SQL Server.
 
    - Only needs to be accessible from specifically listed components.
    - The PostgreSQL database server can be accessed through its default port (5432) on localhost.
+   - The Microsoft SQL Server database server can be accessed through its default port (1433) on localhost.
 
 - Message queue  
   Currently only RabbitMQ is supported. The development environment launches 2 Rabbit nodes in a cluster configuration.

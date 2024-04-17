@@ -1,4 +1,3 @@
-using System;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.IdentityServer.Stores;
-using Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql;
 
 namespace Thinktecture.Relay.IdentityServer.Docker;
 
@@ -22,8 +20,7 @@ public class Startup
 	{
 		services.AddControllersWithViews();
 
-		services.AddRelayServerDbContext(Configuration.GetConnectionString("PostgreSql")
-			?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
+		services.AddRelayServerDbContext(Configuration);
 
 		services.AddIdentityServer(options => options.InputLengthRestrictions.ClientSecret = 200)
 			.AddClientStore<RelayServerTenantStore>()
