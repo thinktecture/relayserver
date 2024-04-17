@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -20,6 +20,10 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                 name: "ConfigTenantName",
                 table: "Tenants");
 
+            migrationBuilder.DropPrimaryKey(
+	            name: "PK_Configs",
+	            table: "Configs");
+
             migrationBuilder.AlterColumn<string>(
                 name: "TenantName",
                 table: "Configs",
@@ -27,6 +31,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
+
+            migrationBuilder.AddPrimaryKey(
+	            name: "PK_Configs",
+	            table: "Configs",
+	            columns: new[] { "TenantName" });
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Configs_Tenants_TenantName",
@@ -49,6 +58,10 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                 type: "nvarchar(450)",
                 nullable: true);
 
+            migrationBuilder.DropPrimaryKey(
+	            name: "PK_Configs",
+	            table: "Configs");
+
             migrationBuilder.AlterColumn<string>(
                 name: "TenantName",
                 table: "Configs",
@@ -56,6 +69,11 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.Mi
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)");
+
+            migrationBuilder.AddPrimaryKey(
+	            name: "PK_Configs",
+	            table: "Configs",
+	            columns: new[] { "TenantName" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tenants_ConfigTenantName",
