@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Title>Thinktecture RelayServer Connector Abstractions</Title>
     <Description>Contains abstractions for the connector.</Description>
     <RootNamespace>Thinktecture.Relay.Connector</RootNamespace>

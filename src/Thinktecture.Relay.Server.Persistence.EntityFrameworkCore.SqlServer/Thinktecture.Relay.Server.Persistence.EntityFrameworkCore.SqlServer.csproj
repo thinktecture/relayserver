@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Title>Thinktecture RelayServer EntityFramework SqlServer</Title>
     <Description>Contains the EF Core migrations and extension methods for using Microsoft SQL Server as persistence.</Description>
     <NoWarn>CS1591</NoWarn>

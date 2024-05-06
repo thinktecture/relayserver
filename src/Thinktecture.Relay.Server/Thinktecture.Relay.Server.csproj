@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Title>Thinktecture RelayServer Server</Title>
     <Description>Contains the server implementations for the RelayServer.</Description>
   </PropertyGroup>
