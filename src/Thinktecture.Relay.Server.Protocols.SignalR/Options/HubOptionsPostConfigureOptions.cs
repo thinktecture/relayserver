@@ -21,7 +21,7 @@ internal class HubOptionsPostConfigureOptions<TRequest, TResponse, TAcknowledge>
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	public void PostConfigure(string name, HubOptions<ConnectorHub<TRequest, TResponse, TAcknowledge>> options)
+	public void PostConfigure(string? name, HubOptions<ConnectorHub<TRequest, TResponse, TAcknowledge>> options)
 	{
 		options.HandshakeTimeout = _relayServerOptions.HandshakeTimeout;
 		options.KeepAliveInterval = _relayServerOptions.KeepAliveInterval;

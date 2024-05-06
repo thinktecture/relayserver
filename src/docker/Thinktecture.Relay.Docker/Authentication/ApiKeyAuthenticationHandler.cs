@@ -26,7 +26,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 	{
 		if (Context.Request.Headers.TryGetValue(Options.HeaderName, out var apiKeys) &&
 		    !String.IsNullOrEmpty(apiKeys.First()) &&
-		    Options.ApiKeys.TryGetValue(apiKeys.First(), out var claims))
+		    Options.ApiKeys.TryGetValue(apiKeys.First()!, out var claims))
 		{
 			return Task.FromResult(AuthenticateResult.Success(BuildTicket(claims)));
 		}
