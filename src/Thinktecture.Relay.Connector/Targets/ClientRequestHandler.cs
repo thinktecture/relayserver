@@ -39,7 +39,7 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		IOptions<RelayConnectorOptions> relayConnectorOptions, IResponseTransport<TResponse> responseTransport,
 		IAcknowledgeTransport<TAcknowledge> acknowledgeTransport)
 	{
-		if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+		if (relayConnectorOptions is null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));

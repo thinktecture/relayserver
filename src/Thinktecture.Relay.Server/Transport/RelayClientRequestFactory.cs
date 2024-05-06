@@ -24,7 +24,7 @@ public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 	public RelayClientRequestFactory(RelayServerContext relayServerContext,
 		IOptions<RelayServerOptions> relayServerOptions)
 	{
-		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+		if (relayServerOptions is null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 		_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));
 		_relayServerOptions = relayServerOptions.Value;

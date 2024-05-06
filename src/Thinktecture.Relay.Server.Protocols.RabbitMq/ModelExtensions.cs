@@ -31,7 +31,7 @@ internal static class ModelExtensions
 
 		consumer.ConsumerCancelled += (sender, _) =>
 		{
-			if (((AsyncDefaultBasicConsumer)sender).ShutdownReason == null)
+			if (((AsyncDefaultBasicConsumer)sender).ShutdownReason is null)
 			{
 				logger.LogWarning("Lost consumer {ConsumerTag} on queue {QueueName}", consumerTag, queueName);
 

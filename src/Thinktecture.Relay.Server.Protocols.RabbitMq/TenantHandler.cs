@@ -49,7 +49,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		_acknowledgeCoordinator =
 			acknowledgeCoordinator ?? throw new ArgumentNullException(nameof(acknowledgeCoordinator));
 
-		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
+		if (modelFactory is null) throw new ArgumentNullException(nameof(modelFactory));
 
 		_model = modelFactory.Create($"tenant handler for {tenantName} of connection {connectionId}", true);
 

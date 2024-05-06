@@ -12,5 +12,5 @@ public static class TargetResponseExtensions
 	/// <param name="response">An <see cref="ITargetResponse"/>.</param>
 	/// <returns>true if the body content is outsourced; otherwise, false.</returns>
 	public static bool IsBodyContentOutsourced(this ITargetResponse response)
-		=> response.BodySize > 0 && response.BodyContent == null;
+		=> response.BodySize > 0 && response.BodyContent is null;
 }

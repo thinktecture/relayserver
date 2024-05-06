@@ -23,7 +23,7 @@ internal class NullableTimeSpanJsonConverter : JsonConverter<TimeSpan?>
 
 	public override void Write(Utf8JsonWriter writer, TimeSpan? value, JsonSerializerOptions options)
 	{
-		if (value == null)
+		if (value is null)
 		{
 			writer.WriteNullValue();
 		}

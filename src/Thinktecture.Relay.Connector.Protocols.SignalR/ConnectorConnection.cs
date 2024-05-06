@@ -83,11 +83,14 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	/// <inheritdoc />
 	public async Task DisconnectAsync(CancellationToken cancellationToken)
 	{
-		if (_hubConnection == null) return;
+		if (_hubConnection is null) return;
 
 		_logger.LogTrace("Disconnecting connection {TransportConnectionId}", _connectionId);
 
-		_cancellationTokenSource?.Cancel();
+		if (_cancellationTokenSource is not null)
+		{
+			await _cancellationTokenSource.CancelAsync();
+		}
 		await _hubConnection.StopAsync(cancellationToken);
 		_logger.LogInformation("Disconnected on connection {TransportConnectionId}", _connectionId);
 
@@ -97,14 +100,14 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	/// <inheritdoc />
 	public void Dispose()
 	{
-		if (_hubConnection == null && _cancellationTokenSource == null) return;
+		if (_hubConnection is null && _cancellationTokenSource is null) return;
 
 		lock (this)
 		{
 			var connection = _hubConnection;
 			_hubConnection = null;
 
-			if (connection != null)
+			if (connection is not null)
 			{
 				connection.Closed -= HubConnectionClosed;
 				connection.Reconnecting -= HubConnectionReconnecting;
@@ -131,7 +134,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 			_logger.LogWarning(11203, ex, "Connection {TransportConnectionId} closed", _connectionId);
 
 			var token = _cancellationTokenSource?.Token;
-			if (token == null) return;
+			if (token is null) return;
 
 			await Reconnecting.InvokeAsync(this, _connectionId);
 			await ConnectAsyncInternal(token.Value);
@@ -141,7 +144,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	private async Task HubConnectionReconnecting(Exception? ex)
 	{
-		if (ex == null)
+		if (ex is null)
 		{
 			_logger.LogInformation(11205,
 				"Trying to reconnect after connection {TransportConnectionId} was lost", _connectionId);
@@ -157,7 +160,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	private async Task HubConnectionReconnected(string? connectionId)
 	{
-		if (connectionId == null)
+		if (connectionId is null)
 		{
 			_logger.LogWarning(11206, "Reconnected without a connection id");
 		}
@@ -186,7 +189,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		request.EnableTracing = request.EnableTracing || _enableTracing.GetValueOrDefault();
 
 		var token = _cancellationTokenSource?.Token;
-		if (token == null) return;
+		if (token is null) return;
 
 		await _clientRequestHandler.HandleAsync(request, token.Value);
 	}
@@ -199,7 +202,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 		_hubConnection?.SetKeepAliveInterval(config.KeepAliveInterval);
 		_retryPolicy.SetReconnectDelays(config.ReconnectMinimumDelay, config.ReconnectMaximumDelay);
 
-		if (config.EnableTracing != null)
+		if (config.EnableTracing is not null)
 		{
 			_enableTracing = config.EnableTracing;
 		}
@@ -209,7 +212,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 
 	private async Task ConnectAsyncInternal(CancellationToken cancellationToken)
 	{
-		if (_hubConnection == null) return;
+		if (_hubConnection is null) return;
 
 		try
 		{
@@ -237,7 +240,7 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 	/// <returns></returns>
 	public async Task PongAsync()
 	{
-		if (_hubConnection == null) return;
+		if (_hubConnection is null) return;
 
 		_logger.LogTrace(11212, "Pong on connection {TransportConnectionId}", _connectionId);
 		try

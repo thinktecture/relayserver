@@ -16,7 +16,7 @@ public class RoundRobinEndpointResolver : IEndpointResolver
 	/// <param name="endpoints">The <see cref="AmqpTcpEndpoint"/>s to use.</param>
 	public RoundRobinEndpointResolver(IEnumerable<AmqpTcpEndpoint> endpoints)
 	{
-		if (endpoints == null) throw new ArgumentNullException(nameof(endpoints));
+		if (endpoints is null) throw new ArgumentNullException(nameof(endpoints));
 
 		_endpoints = endpoints.ToArray();
 	}

@@ -22,7 +22,7 @@ public class DiscoveryDocumentRetryPolicy : IRetryPolicy
 	public DiscoveryDocumentRetryPolicy(ILogger<DiscoveryDocumentRetryPolicy> logger,
 		IOptions<RelayConnectorOptions> relayConnectorOptions)
 	{
-		if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+		if (relayConnectorOptions is null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 

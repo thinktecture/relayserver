@@ -94,8 +94,8 @@ public partial class RelayWebTarget<TRequest, TResponse> : IRelayTargetFunc<TReq
 	private HttpClient CreateHttpClient(IHttpClientFactory httpClientFactory, RelayWebTargetOptions options,
 		Uri baseAddress)
 	{
-		if (httpClientFactory == null) throw new ArgumentNullException(nameof(httpClientFactory));
-		if (baseAddress == null) throw new ArgumentNullException(nameof(baseAddress));
+		if (httpClientFactory is null) throw new ArgumentNullException(nameof(httpClientFactory));
+		if (baseAddress is null) throw new ArgumentNullException(nameof(baseAddress));
 
 		var httpClient = options switch
 		{
@@ -125,7 +125,7 @@ public partial class RelayWebTarget<TRequest, TResponse> : IRelayTargetFunc<TReq
 			requestMessage.Headers.TryAddWithoutValidation(key, value);
 		}
 
-		if (request.BodyContent == null) return requestMessage;
+		if (request.BodyContent is null) return requestMessage;
 
 		requestMessage.Content = new StreamContent(request.BodyContent);
 

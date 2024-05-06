@@ -78,7 +78,7 @@ public static class RelayServerBuilderExtensions
 		where TResponse : ITargetResponse
 		where TAcknowledge : IAcknowledgeRequest
 	{
-		if (configure != null)
+		if (configure is not null)
 		{
 			builder.Services.Configure(configure);
 		}
@@ -105,7 +105,7 @@ public static class RelayServerBuilderExtensions
 		where TResponse : ITargetResponse
 		where TAcknowledge : IAcknowledgeRequest
 	{
-		if (configure != null)
+		if (configure is not null)
 		{
 			builder.Services.Configure(configure);
 		}

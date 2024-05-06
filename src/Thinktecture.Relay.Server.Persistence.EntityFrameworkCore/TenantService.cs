@@ -109,7 +109,7 @@ public class TenantService : ITenantService
 			.Include(t => t.ClientSecrets)
 			.SingleOrDefaultAsync(t => t.NormalizedName == tenant.NormalizedName, cancellationToken: cancellationToken);
 
-		if (existingTenant == null) return false;
+		if (existingTenant is null) return false;
 
 		existingTenant.UpdateFrom(tenant);
 		await _dbContext.SaveChangesAsync(cancellationToken);

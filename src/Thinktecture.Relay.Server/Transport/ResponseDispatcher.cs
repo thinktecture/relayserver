@@ -32,7 +32,7 @@ public partial class ResponseDispatcher<TResponse, TAcknowledge> : IResponseDisp
 		IResponseCoordinator<TResponse> responseCoordinator, IOptions<RelayServerOptions> relayServerOptions,
 		IServerTransport<TResponse, TAcknowledge> serverTransport)
 	{
-		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+		if (relayServerOptions is null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_relayServerContext = relayServerContext ?? throw new ArgumentNullException(nameof(relayServerContext));

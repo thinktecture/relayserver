@@ -33,7 +33,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 
 	public void PostConfigure(string? name, RelayConnectorOptions options)
 	{
-		if (options.Targets != null)
+		if (options.Targets is not null)
 		{
 			RegisterTargets(options.Targets);
 		}
@@ -82,7 +82,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 
 			var typeName = parameters[Constants.RelayConnectorOptionsTargetType];
 			var type = Type.GetType(typeName);
-			if (type == null)
+			if (type is null)
 			{
 				_logger.LogError(10302, "Could not find target type {TargetType}", typeName);
 				return;

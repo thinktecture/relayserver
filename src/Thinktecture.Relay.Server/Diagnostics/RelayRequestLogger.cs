@@ -35,7 +35,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		_requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
 		_tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
 
-		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+		if (relayServerOptions is null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 		_relayServerOptions = relayServerOptions.Value;
 	}

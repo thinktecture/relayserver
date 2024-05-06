@@ -50,7 +50,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 		IServiceScopeFactory serviceProvider, IClientRequestHandler<TRequest> clientRequestHandler,
 		IConnectorTransportLimit connectorTransportLimit)
 	{
-		if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+		if (relayConnectorOptions is null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
@@ -156,7 +156,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 		}
 		catch (OperationCanceledException)
 		{
-			if (timeout == null || !timeout.IsCancellationRequested) throw;
+			if (timeout is null || !timeout.IsCancellationRequested) throw;
 
 			_logger.LogWarning(10511, "The request {RelayRequestId} timed out", request.RequestId);
 			return request.CreateResponse<TResponse>(HttpStatusCode.GatewayTimeout);
@@ -191,14 +191,14 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 			response.RequestDuration = DateTime.UtcNow - start;
 		}
 
-		if (response.BodyContent == null) return response;
+		if (response.BodyContent is null) return response;
 
 		response.BodyContent.TryRewind();
 
-		if (response.BodySize == null ||
+		if (response.BodySize is null ||
 			response.BodySize > _connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue))
 		{
-			if (response.BodySize == null)
+			if (response.BodySize is null)
 			{
 				LogOutsourcingUnknownBody(request.RequestId);
 			}

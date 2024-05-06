@@ -75,7 +75,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		_connectionStatisticsWriter = connectionStatisticsWriter ??
 			throw new ArgumentNullException(nameof(connectionStatisticsWriter));
 
-		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+		if (relayServerOptions is null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 		_relayServerOptions = relayServerOptions.Value;
 	}
@@ -94,7 +94,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		}
 
 		var tenant = await _tenantService.LoadTenantWithConfigAsync(tenantName);
-		if (tenant == null)
+		if (tenant is null)
 		{
 			if (_relayServerOptions.EnableAutomaticTenantCreation)
 			{
@@ -126,13 +126,13 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 
 			var needsUpdate = false;
 
-			if (displayName != null && tenant.DisplayName != displayName)
+			if (displayName is not null && tenant.DisplayName != displayName)
 			{
 				tenant.DisplayName = displayName;
 				needsUpdate = true;
 			}
 
-			if (description != null && tenant.Description != description)
+			if (description is not null && tenant.Description != description)
 			{
 				tenant.Description = description;
 				needsUpdate = true;
@@ -152,7 +152,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Name, tenant.MaximumConcurrentConnectorRequests,
 			Context.GetHttpContext()?.Connection.RemoteIpAddress);
 
-		if (tenant.Config != null)
+		if (tenant.Config is not null)
 		{
 			await Clients.Caller.Configure(tenant.Config);
 		}
@@ -163,7 +163,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	/// <inheritdoc />
 	public override async Task OnDisconnectedAsync(Exception? exception)
 	{
-		if (exception == null)
+		if (exception is null)
 		{
 			_logger.LogWarning(26102, exception,
 				"Connection {TransportConnectionId} disconnected for tenant {TenantName}", Context.ConnectionId,

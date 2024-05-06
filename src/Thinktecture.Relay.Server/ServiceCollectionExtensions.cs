@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
 		where TResponse : class, ITargetResponse, new()
 		where TAcknowledge : IAcknowledgeRequest
 	{
-		if (configure != null)
+		if (configure is not null)
 		{
 			services.Configure(configure);
 		}

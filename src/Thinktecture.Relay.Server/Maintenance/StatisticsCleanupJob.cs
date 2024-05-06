@@ -20,7 +20,7 @@ public class StatisticsCleanupJob : IMaintenanceJob
 	public StatisticsCleanupJob(IStatisticsService statisticsService,
 		IOptions<StatisticsOptions> statisticsOptions)
 	{
-		if (statisticsOptions == null) throw new ArgumentNullException(nameof(statisticsOptions));
+		if (statisticsOptions is null) throw new ArgumentNullException(nameof(statisticsOptions));
 
 		_statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
 		_statisticsOptions = statisticsOptions.Value;

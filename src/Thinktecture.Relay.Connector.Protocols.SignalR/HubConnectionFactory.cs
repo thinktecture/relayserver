@@ -26,7 +26,7 @@ public class HubConnectionFactory
 	public HubConnectionFactory(ILogger<HubConnectionFactory> logger, IAccessTokenProvider accessTokenProvider,
 		DiscoveryDocumentRetryPolicy retryPolicy, IOptions<RelayConnectorOptions> relayConnectorOptions)
 	{
-		if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+		if (relayConnectorOptions is null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_accessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
