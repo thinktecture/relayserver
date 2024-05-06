@@ -196,7 +196,7 @@ internal class FileBodyStoreValidateOptions : IValidateOptions<FileBodyStoreOpti
 	public FileBodyStoreValidateOptions(ILogger<FileBodyStoreValidateOptions> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-	public ValidateOptionsResult Validate(string name, FileBodyStoreOptions options)
+	public ValidateOptionsResult Validate(string? name, FileBodyStoreOptions options)
 	{
 		if (string.IsNullOrWhiteSpace(options.StoragePath))
 			return ValidateOptionsResult.Fail("Storage path must be set.");

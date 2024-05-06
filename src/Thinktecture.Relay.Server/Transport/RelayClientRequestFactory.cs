@@ -44,8 +44,12 @@ public class RelayClientRequestFactory<T> : IRelayClientRequestFactory<T>
 			TenantName = tenantName,
 			HttpMethod = httpRequest.Method,
 			Url = url,
-			HttpHeaders =
-				httpRequest.Headers.ToDictionary(h => h.Key, h => h.Value.ToArray(), StringComparer.OrdinalIgnoreCase),
+			HttpHeaders = httpRequest.Headers
+				.ToDictionary(
+					h => h.Key,
+					h => h.Value.Where(v => v is not null).OfType<string>().ToArray(),
+					StringComparer.OrdinalIgnoreCase
+				),
 			OriginalBodySize = httpRequest.Body.Length,
 			BodySize = httpRequest.Body.Length,
 			BodyContent = httpRequest.Body.Length == 0 ? null : httpRequest.Body,

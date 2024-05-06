@@ -31,7 +31,7 @@ internal class RelayConnectorPostConfigureOptions<TRequest, TResponse> : IPostCo
 		_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 	}
 
-	public void PostConfigure(string name, RelayConnectorOptions options)
+	public void PostConfigure(string? name, RelayConnectorOptions options)
 	{
 		if (options.Targets != null)
 		{

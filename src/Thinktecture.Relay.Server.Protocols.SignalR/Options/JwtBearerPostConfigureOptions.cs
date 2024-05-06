@@ -6,7 +6,7 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR.Options;
 
 internal class JwtBearerPostConfigureOptions : IPostConfigureOptions<JwtBearerOptions>
 {
-	public void PostConfigure(string name, JwtBearerOptions options)
+	public void PostConfigure(string? name, JwtBearerOptions options)
 	{
 		// We have to hook the OnMessageReceived event in order to
 		// allow the JWT authentication handler to read the access

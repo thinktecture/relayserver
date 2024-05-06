@@ -6,7 +6,7 @@ namespace Thinktecture.Relay.Connector.Options;
 
 internal class RelayConnectorValidateOptions : IValidateOptions<RelayConnectorOptions>
 {
-	public ValidateOptionsResult Validate(string name, RelayConnectorOptions options)
+	public ValidateOptionsResult Validate(string? name, RelayConnectorOptions options)
 	{
 		if (options.Targets == null || options.Targets.Count == 0) return ValidateOptionsResult.Success;
 
