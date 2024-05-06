@@ -233,24 +233,4 @@ public class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IConnector
 			await ConnectAsyncInternal(cancellationToken);
 		}
 	}
-
-	/// <summary>
-	/// TODO extract transport interface
-	/// </summary>
-	/// <returns></returns>
-	public async Task PongAsync()
-	{
-		if (_hubConnection is null) return;
-
-		_logger.LogTrace(11212, "Pong on connection {TransportConnectionId}", _connectionId);
-		try
-		{
-			await _hubConnection.InvokeAsync("Pong", CancellationToken.None);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(11213, ex,
-				"An error occured while sending pong on connection {TransportConnectionId}", _connectionId);
-		}
-	}
 }
