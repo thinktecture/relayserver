@@ -43,8 +43,8 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		RelayServerContext relayServerContext, IResponseCoordinator<TResponse> responseCoordinator,
 		IAcknowledgeCoordinator<TAcknowledge> acknowledgeCoordinator)
 	{
-		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
-		if (rabbitMqOptions == null) throw new ArgumentNullException(nameof(rabbitMqOptions));
+		if (modelFactory is null) throw new ArgumentNullException(nameof(modelFactory));
+		if (rabbitMqOptions is null) throw new ArgumentNullException(nameof(rabbitMqOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_responseCoordinator = responseCoordinator ?? throw new ArgumentNullException(nameof(responseCoordinator));

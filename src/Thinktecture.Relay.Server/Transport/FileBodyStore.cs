@@ -17,7 +17,7 @@ internal partial class FileBodyStore : IBodyStore
 
 	public FileBodyStore(ILogger<FileBodyStore> logger, IOptions<FileBodyStoreOptions> fileBodyStoreOptions)
 	{
-		if (fileBodyStoreOptions == null) throw new ArgumentNullException(nameof(fileBodyStoreOptions));
+		if (fileBodyStoreOptions is null) throw new ArgumentNullException(nameof(fileBodyStoreOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_basePath = fileBodyStoreOptions.Value.StoragePath ??

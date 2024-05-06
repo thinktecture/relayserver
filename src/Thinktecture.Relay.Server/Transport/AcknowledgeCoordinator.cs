@@ -73,7 +73,7 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 			return;
 		}
 
-		if (acknowledgeState.AcknowledgeId != null)
+		if (acknowledgeState.AcknowledgeId is not null)
 		{
 			await _connectorRegistry.AcknowledgeRequestAsync(acknowledgeState.ConnectionId, acknowledgeState.AcknowledgeId,
 				cancellationToken);

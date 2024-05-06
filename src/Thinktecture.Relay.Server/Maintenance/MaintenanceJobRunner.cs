@@ -27,7 +27,7 @@ public class MaintenanceJobRunner : BackgroundService
 	public MaintenanceJobRunner(ILogger<MaintenanceJobRunner> logger, IServiceScopeFactory serviceProvider,
 		IOptions<MaintenanceOptions> maintenanceOptions)
 	{
-		if (maintenanceOptions == null) throw new ArgumentNullException(nameof(maintenanceOptions));
+		if (maintenanceOptions is null) throw new ArgumentNullException(nameof(maintenanceOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));

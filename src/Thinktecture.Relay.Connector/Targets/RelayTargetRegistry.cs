@@ -31,7 +31,7 @@ public class RelayTargetRegistry<TRequest, TResponse>
 	public RelayTargetRegistry(ILogger<RelayTargetRegistry<TRequest, TResponse>> logger,
 		IOptions<RelayTargetOptions> relayTargetOptions)
 	{
-		if (relayTargetOptions == null) throw new ArgumentNullException(nameof(relayTargetOptions));
+		if (relayTargetOptions is null) throw new ArgumentNullException(nameof(relayTargetOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 

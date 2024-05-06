@@ -24,7 +24,7 @@ internal class AccessTokenManagementConfigureOptions : IConfigureOptions<AccessT
 		IHostApplicationLifetime hostApplicationLifetime, IOptions<RelayConnectorOptions> relayConnectorOptions,
 		IHttpClientFactory httpClientFactory)
 	{
-		if (relayConnectorOptions == null) throw new ArgumentNullException(nameof(relayConnectorOptions));
+		if (relayConnectorOptions is null) throw new ArgumentNullException(nameof(relayConnectorOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_hostApplicationLifetime =

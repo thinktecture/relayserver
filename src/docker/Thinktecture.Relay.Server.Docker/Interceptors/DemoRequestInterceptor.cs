@@ -41,7 +41,7 @@ public class DemoRequestInterceptor : IClientRequestInterceptor<ClientRequest, T
 				"Request stream interceptor enabled for request {RequestId}, input was {OriginalRequestSize}, output will be {RequestSize} bytes",
 				context.RequestId, context.ClientRequest.BodySize, size);
 
-			if (context.ClientRequest.BodyContent != null)
+			if (context.ClientRequest.BodyContent is not null)
 			{
 				// double the original content by appending it twice
 				var buffer = new byte[size];

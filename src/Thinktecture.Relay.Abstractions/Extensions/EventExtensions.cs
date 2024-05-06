@@ -33,7 +33,7 @@ public static class EventExtensions
 	public static async Task<Exception[]> InvokeAsync<T>(this AsyncEventHandler<T>? eventHandler, object sender,
 		T @event)
 	{
-		if (eventHandler == null) return Array.Empty<Exception>();
+		if (eventHandler is null) return Array.Empty<Exception>();
 
 		var exceptions = new List<Exception>();
 		foreach (var handler in eventHandler.GetInvocationList().Cast<AsyncEventHandler<T>>())

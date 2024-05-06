@@ -37,7 +37,7 @@ public static class RelayServerBuilderExtensions
 		where TResponse : ITargetResponse
 		where TAcknowledge : IAcknowledgeRequest
 	{
-		if (configure != null)
+		if (configure is not null)
 		{
 			builder.Services.Configure(configure);
 		}
@@ -68,7 +68,7 @@ public static class RelayServerBuilderExtensions
 
 			var clientName = $"RelayServer {context.OriginId}";
 
-			return options.Value.ClusterHosts == null
+			return options.Value.ClusterHosts is null
 				? factory.CreateConnection(clientName)
 				: factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.Value.ClusterHosts), clientName);
 		});

@@ -16,7 +16,7 @@ internal class HubOptionsPostConfigureOptions<TRequest, TResponse, TAcknowledge>
 
 	public HubOptionsPostConfigureOptions(IOptions<RelayServerOptions> relayServerOptions)
 	{
-		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+		if (relayServerOptions is null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 		_relayServerOptions = relayServerOptions.Value;
 	}

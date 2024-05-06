@@ -52,8 +52,8 @@ public class RelayContext<TRequest, TResponse> : IRelayContext<TRequest, TRespon
 	public RelayContext(IHttpContextAccessor httpContextAccessor, RelayServerContext relayServerContext,
 		IConnectionService connectionService)
 	{
-		if (httpContextAccessor == null) throw new ArgumentNullException(nameof(httpContextAccessor));
-		if (relayServerContext == null) throw new ArgumentNullException(nameof(relayServerContext));
+		if (httpContextAccessor is null) throw new ArgumentNullException(nameof(httpContextAccessor));
+		if (relayServerContext is null) throw new ArgumentNullException(nameof(relayServerContext));
 
 		_connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
 		HttpContext = httpContextAccessor.HttpContext ?? throw new Exception("No HttpContext available.");

@@ -60,7 +60,7 @@ public static class ServiceProviderExtensions
 
 		var applied = (await context.Database.GetAppliedMigrationsAsync(cancellationToken)).ToArray();
 		var migration = applied.FirstOrDefault(m => m.Equals(targetMigration, StringComparison.OrdinalIgnoreCase));
-		if (migration == null)
+		if (migration is null)
 		{
 			if (applied.Length == 0)
 			{

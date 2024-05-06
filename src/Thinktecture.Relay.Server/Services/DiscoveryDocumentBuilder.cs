@@ -22,7 +22,7 @@ public class DiscoveryDocumentBuilder
 	/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	public DiscoveryDocumentBuilder(IServiceProvider serviceProvider, IOptions<RelayServerOptions> relayServerOptions)
 	{
-		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
+		if (relayServerOptions is null) throw new ArgumentNullException(nameof(relayServerOptions));
 
 		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		_relayServerOptions = relayServerOptions.Value;
@@ -65,7 +65,7 @@ public class DiscoveryDocumentBuilder
 		var authority = _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()
 			?.Get(Constants.DefaultAuthenticationScheme)
 			?.Authority;
-		if (authority == null) return null;
+		if (authority is null) return null;
 
 		return authority.EndsWith("/") ? authority : $"{authority}/";
 	}

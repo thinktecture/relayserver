@@ -30,8 +30,8 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 	public TenantTransport(ILogger<TenantTransport<TRequest, TAcknowledge>> logger, ModelFactory<TAcknowledge> modelFactory,
 		IOptions<RabbitMqOptions> rabbitMqOptions)
 	{
-		if (modelFactory == null) throw new ArgumentNullException(nameof(modelFactory));
-		if (rabbitMqOptions == null) throw new ArgumentNullException(nameof(rabbitMqOptions));
+		if (modelFactory is null) throw new ArgumentNullException(nameof(modelFactory));
+		if (rabbitMqOptions is null) throw new ArgumentNullException(nameof(rabbitMqOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 

@@ -46,7 +46,7 @@ internal class InProcFunc : IRelayTargetFunc
 
 		var responseData = new MemoryStream(Encoding.UTF8.GetBytes("{ \"Hello\" : \"World 👋\" }"));
 
-		if (request.BodyContent != null)
+		if (request.BodyContent is not null)
 		{
 			_logger.LogInformation(2, "Request {RequestId} provided {BodySize} bytes in body",
 				request.RequestId, request.BodySize);

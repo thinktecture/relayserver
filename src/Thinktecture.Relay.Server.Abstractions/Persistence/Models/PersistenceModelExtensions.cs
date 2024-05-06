@@ -55,14 +55,14 @@ public static class PersistenceModelsExtensions
 		instance.MaximumConcurrentConnectorRequests = other.MaximumConcurrentConnectorRequests;
 
 		// copy over config if available
-		if (other.Config != null)
+		if (other.Config is not null)
 		{
 			instance.Config ??= new Config();
 			instance.Config.UpdateFrom(other.Config);
 		}
 
 		// copy over secrets when they are complete with values
-		if (other.ClientSecrets != null)
+		if (other.ClientSecrets is not null)
 		{
 			instance.ClientSecrets ??= new List<ClientSecret>();
 			instance.ClientSecrets.RemoveAll(cs => other.ClientSecrets.All(os => os.Id != cs.Id));
@@ -71,7 +71,7 @@ public static class PersistenceModelsExtensions
 			foreach (var secret in other.ClientSecrets.Where(o => !String.IsNullOrWhiteSpace(o.Value)))
 			{
 				var existingSecret = instance.ClientSecrets.SingleOrDefault(cs => cs.Id == secret.Id);
-				if (existingSecret == null)
+				if (existingSecret is null)
 				{
 					// create new secret, either with given id or with a new one
 					if (secret.Id == Guid.Empty)

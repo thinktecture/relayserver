@@ -41,7 +41,7 @@ public class DemoResponseInterceptor : ITargetResponseInterceptor<ClientRequest,
 				"Response stream interceptor enabled for request {RequestId}, input was {OriginalResponseSize}, output will be {ResponseSize} bytes",
 				context.RequestId, context.TargetResponse.BodySize, size);
 
-			if (context.TargetResponse.BodyContent != null)
+			if (context.TargetResponse.BodyContent is not null)
 			{
 				// Reverse the original content
 				var buffer = new byte[size];

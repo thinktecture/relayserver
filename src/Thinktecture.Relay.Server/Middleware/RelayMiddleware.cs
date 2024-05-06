@@ -89,9 +89,9 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		IRelayRequestLogger<TRequest, TResponse> relayRequestLogger, IDistributedCache cache,
 		IOptionsSnapshot<JwtBearerOptions>? jwtBearerOptions)
 	{
-		if (relayServerOptions == null) throw new ArgumentNullException(nameof(relayServerOptions));
-		if (tenantTransport == null) throw new ArgumentNullException(nameof(tenantTransport));
-		if (connectorTransportLimit == null) throw new ArgumentNullException(nameof(connectorTransportLimit));
+		if (relayServerOptions is null) throw new ArgumentNullException(nameof(relayServerOptions));
+		if (tenantTransport is null) throw new ArgumentNullException(nameof(tenantTransport));
+		if (connectorTransportLimit is null) throw new ArgumentNullException(nameof(connectorTransportLimit));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_requestFactory = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
@@ -147,7 +147,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		var (_, tenantName, _, _) = context.Request.GetRelayRequest();
 
 		using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
-		if (_relayServerOptions.RequestExpiration != null)
+		if (_relayServerOptions.RequestExpiration is not null)
 		{
 			cts.CancelAfter(_relayServerOptions.RequestExpiration.Value);
 		}
@@ -198,7 +198,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 			await InterceptClientRequestAsync(cts.Token);
 
-			if (_relayContext.TargetResponse != null)
+			if (_relayContext.TargetResponse is not null)
 			{
 				// if we already have a response we can discard any connector response
 				_relayContext.ClientRequest.DiscardConnectorResponse = true;
@@ -213,7 +213,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				_relayContext.ResponseDisposables.Add(_responseCoordinator.RegisterRequest(_relayContext.RequestId));
 			}
 
-			if (_relayContext.TargetResponse == null || _relayContext.ForceConnectorDelivery)
+			if (_relayContext.TargetResponse is null || _relayContext.ForceConnectorDelivery)
 			{
 				if (tenantState.HasRequestsLimit && _relayContext.ClientRequest.AcknowledgeMode != AcknowledgeMode.Manual)
 				{
@@ -230,7 +230,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				}
 			}
 
-			if (_relayContext.ClientRequest.DiscardConnectorResponse && _relayContext.TargetResponse == null)
+			if (_relayContext.ClientRequest.DiscardConnectorResponse && _relayContext.TargetResponse is null)
 			{
 				_relayContext.TargetResponse =
 					_relayContext.ClientRequest.CreateResponse<TResponse>(HttpStatusCode.Accepted);
@@ -281,7 +281,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 	private bool IsAuthenticated(HttpContext context)
 	{
-		if (_jwtBearerOptions?.Authority == null || _jwtBearerOptions?.Audience == null) return false;
+		if (_jwtBearerOptions?.Authority is null || _jwtBearerOptions?.Audience is null) return false;
 
 		if (context.User.Identity is not ClaimsIdentity { IsAuthenticated: true } identity) return false;
 
@@ -310,7 +310,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			if (clientRequest.BodyContent != bodyContent)
 			{
 				// an interceptor changed the body content - need to dispose it properly (but not the request body)
-				if (bodyContent != null && bodyContent != _relayContext.HttpContext.Request.Body)
+				if (bodyContent is not null && bodyContent != _relayContext.HttpContext.Request.Body)
 				{
 					_relayContext.ResponseDisposables.Add(bodyContent);
 				}
@@ -326,7 +326,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		{
 			clientRequest.BodySize = bodyContent.Length;
 		}
-		else if (bodyContent == null)
+		else if (bodyContent is null)
 		{
 			clientRequest.BodySize = 0;
 		}
@@ -339,7 +339,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	{
 		LogDeliveringRequest(_relayContext.RequestId);
 
-		if (_relayContext.ClientRequest.BodyContent != null &&
+		if (_relayContext.ClientRequest.BodyContent is not null &&
 			await TryInlineBodyContentAsync(_relayContext.ClientRequest, cancellationToken))
 		{
 			_relayContext.ResponseDisposables.Add(_relayContext.ClientRequest.BodyContent);
@@ -359,11 +359,11 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		LogWaitForResponse(_relayContext.RequestId);
 
 		var context = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, cancellationToken);
-		if (context == null) return;
+		if (context is null) return;
 
 		_relayContext.TargetResponse = context.Response;
 
-		if (context.Disposable != null)
+		if (context.Disposable is not null)
 		{
 			_relayContext.ResponseDisposables.Add(context.Disposable);
 		}
@@ -389,7 +389,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			if (_relayContext.TargetResponse?.BodyContent == bodyContent) continue;
 
 			// an interceptor changed the body content - need to dispose it properly
-			if (bodyContent != null)
+			if (bodyContent is not null)
 			{
 				_relayContext.ResponseDisposables.Add(bodyContent);
 			}
@@ -399,14 +399,14 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		// try to rewind, in order to start sending from the start
 		bodyContent?.TryRewind();
 
-		if (_relayContext.TargetResponse != null)
+		if (_relayContext.TargetResponse is not null)
 		{
 			// if possible, try to update body size (interceptor should have done that already, just to be sure)
 			if (bodyContent?.CanSeek == true)
 			{
 				_relayContext.TargetResponse.BodySize = bodyContent.Length;
 			}
-			else if (bodyContent == null)
+			else if (bodyContent is null)
 			{
 				_relayContext.TargetResponse.BodySize = 0;
 			}
@@ -428,7 +428,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 	private async Task<bool> TryInlineBodyContentAsync(TRequest request, CancellationToken cancellationToken)
 	{
-		if (request.BodyContent == null) return false;
+		if (request.BodyContent is null) return false;
 
 		if (request.BodySize > _maximumBodySize)
 		{
@@ -459,7 +459,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	{
 		var cacheKey = $"tenant_state_{_tenantService.NormalizeName(name)}";
 		var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
-		if (cachedData != null) return TenantState.FromSpan(cachedData);
+		if (cachedData is not null) return TenantState.FromSpan(cachedData);
 
 		var tenant = await _tenantService.LoadTenantWithConnectionsAsync(name, cancellationToken);
 		var state = TenantState.FromTenant(tenant);
@@ -485,12 +485,12 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 		public static TenantState FromTenant(Tenant? tenant)
 		{
-			if (tenant == null) return new TenantState() { Unknown = true };
+			if (tenant is null) return new TenantState() { Unknown = true };
 
 			return new TenantState
 			{
 				TenantName = tenant.Name,
-				HasActiveConnections = tenant.Connections?.Any(c => c.DisconnectTime == null) ?? false,
+				HasActiveConnections = tenant.Connections?.Any(c => c.DisconnectTime is null) ?? false,
 				RequireAuthentication = tenant.RequireAuthentication,
 				HasRequestsLimit = tenant.MaximumConcurrentConnectorRequests > 0,
 			};

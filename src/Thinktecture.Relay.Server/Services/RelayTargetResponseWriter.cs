@@ -39,7 +39,7 @@ public partial class RelayTargetResponseWriter<TRequest, TResponse> : IRelayTarg
 			httpResponse.Headers[Constants.HeaderNames.ServerVersion] = new[] { GetType().GetAssemblyVersion() };
 		}
 
-		if (targetResponse == null)
+		if (targetResponse is null)
 		{
 			httpResponse.StatusCode = StatusCodes.Status204NoContent;
 			return;
@@ -52,7 +52,7 @@ public partial class RelayTargetResponseWriter<TRequest, TResponse> : IRelayTarg
 
 		httpResponse.StatusCode = (int)targetResponse.HttpStatusCode;
 
-		if (targetResponse.HttpHeaders != null)
+		if (targetResponse.HttpHeaders is not null)
 		{
 			foreach (var (name, values) in targetResponse.HttpHeaders)
 			{

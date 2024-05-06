@@ -7,7 +7,7 @@ internal static class HubConnectionExtensions
 {
 	public static void SetKeepAliveInterval(this HubConnection connection, TimeSpan? keepAliveInterval)
 	{
-		if (keepAliveInterval == null) return;
+		if (keepAliveInterval is null) return;
 
 		connection.KeepAliveInterval = keepAliveInterval.Value;
 		connection.ServerTimeout =

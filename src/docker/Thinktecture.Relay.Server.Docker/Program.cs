@@ -21,7 +21,7 @@ public class Program
 			if (config.GetValue<bool>("migrate") || config.GetValue<bool>("migrate-only"))
 			{
 				var rollback = config.GetValue<string>("rollback");
-				if (rollback == null)
+				if (rollback is null)
 				{
 					await host.Services.ApplyPendingMigrationsAsync();
 				}

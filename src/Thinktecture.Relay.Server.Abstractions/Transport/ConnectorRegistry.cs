@@ -187,9 +187,9 @@ public partial class ConnectorRegistry<T>
 		public ConnectorRegistration(string tenantName, string connectionId, int maximumConcurrentRequests,
 			IConnectorTransportFactory<T> connectorTransportFactory, ITenantHandlerFactory tenantHandlerFactory)
 		{
-			if (connectionId == null) throw new ArgumentNullException(nameof(connectionId));
-			if (connectorTransportFactory == null) throw new ArgumentNullException(nameof(connectorTransportFactory));
-			if (tenantHandlerFactory == null) throw new ArgumentNullException(nameof(tenantHandlerFactory));
+			if (connectionId is null) throw new ArgumentNullException(nameof(connectionId));
+			if (connectorTransportFactory is null) throw new ArgumentNullException(nameof(connectorTransportFactory));
+			if (tenantHandlerFactory is null) throw new ArgumentNullException(nameof(tenantHandlerFactory));
 
 			TenantName = tenantName;
 			ConnectorTransport = connectorTransportFactory.Create(connectionId);

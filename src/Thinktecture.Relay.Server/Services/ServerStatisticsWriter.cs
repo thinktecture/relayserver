@@ -30,7 +30,7 @@ public class ServerStatisticsWriter : BackgroundService
 		RelayServerContext serverContext,
 		IOptions<StatisticsOptions> statisticsOptions)
 	{
-		if (statisticsOptions == null) throw new ArgumentNullException(nameof(statisticsOptions));
+		if (statisticsOptions is null) throw new ArgumentNullException(nameof(statisticsOptions));
 
 		_originWriter = originWriter ?? throw new ArgumentNullException(nameof(originWriter));
 		_connectionWriter = connectionWriter ?? throw new ArgumentNullException(nameof(connectionWriter));

@@ -17,7 +17,7 @@ public static class ClientRequestExtensions
 	/// <param name="request">An <see cref="IClientRequest"/>.</param>
 	/// <returns>true if the body content is outsourced; otherwise, false.</returns>
 	public static bool IsBodyContentOutsourced(this IClientRequest request)
-		=> request.BodySize > 0 && request.BodyContent == null;
+		=> request.BodySize > 0 && request.BodyContent is null;
 
 	/// <summary>
 	/// Creates a pristine <see cref="TargetResponse"/> prefilled with <see cref="IClientRequest.RequestId"/> and
@@ -54,7 +54,7 @@ public static class ClientRequestExtensions
 			response.HttpStatusCode = httpStatusCode.Value;
 		}
 
-		if (httpStatusCode == null || (int)httpStatusCode.GetValueOrDefault(HttpStatusCode.Continue) < 400)
+		if (httpStatusCode is null || (int)httpStatusCode.GetValueOrDefault(HttpStatusCode.Continue) < 400)
 			return response;
 
 		response.OriginalBodySize = 0;

@@ -27,19 +27,19 @@ public class RelayServerTenantStore : IClientStore
 	async Task<Client?> IClientStore.FindClientByIdAsync(string clientId)
 	{
 		var tenant = await _tenantService.LoadTenantCompleteAsync(clientId);
-		return tenant == null ? null : ConvertToClient(tenant);
+		return tenant is null ? null : ConvertToClient(tenant);
 	}
 
 	private Client ConvertToClient(Tenant tenant)
 	{
 		var claims = new HashSet<ClientClaim>();
 
-		if (tenant.DisplayName != null)
+		if (tenant.DisplayName is not null)
 		{
 			claims.Add(new ClientClaim("name", tenant.DisplayName));
 		}
 
-		if (tenant.Description != null)
+		if (tenant.Description is not null)
 		{
 			claims.Add(new ClientClaim("description", tenant.Description));
 		}

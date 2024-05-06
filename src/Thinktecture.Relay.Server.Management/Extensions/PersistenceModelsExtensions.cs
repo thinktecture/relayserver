@@ -59,10 +59,10 @@ internal static class PersistenceModelsExtensions
 	{
 		var config = (ConfigEntity?)null;
 
-		if (tenant.KeepAliveInterval != null ||
-			tenant.EnableTracing != null ||
-			tenant.ReconnectMinimumDelay != null ||
-			tenant.ReconnectMaximumDelay != null)
+		if (tenant.KeepAliveInterval is not null ||
+			tenant.EnableTracing is not null ||
+			tenant.ReconnectMinimumDelay is not null ||
+			tenant.ReconnectMaximumDelay is not null)
 		{
 			config = new ConfigEntity()
 			{
