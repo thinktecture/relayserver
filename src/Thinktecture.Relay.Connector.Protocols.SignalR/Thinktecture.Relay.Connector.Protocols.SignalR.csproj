@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Title>Thinktecture RelayServer Connector SignalR Protocol</Title>
     <Description>Contains the SignalR connector transport implementation for the RelayServer.</Description>
   </PropertyGroup>

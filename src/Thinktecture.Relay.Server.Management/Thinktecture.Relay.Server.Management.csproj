@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Title>Thinktecture RelayServer Server Management</Title>
     <Description>Contains management support for the Thinktecture Relay Server.</Description>
     <RootNamespace>Thinktecture.Relay.Server.Management</RootNamespace>
