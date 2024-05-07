@@ -15,7 +15,7 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 	where TRequest : IClientRequest
 	where TAcknowledge : IAcknowledgeRequest
 {
-	private readonly ILogger<TenantTransport<TRequest, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 	private readonly IModel _model;
 
 	/// <inheritdoc />
@@ -34,15 +34,10 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 		if (rabbitMqOptions is null) throw new ArgumentNullException(nameof(rabbitMqOptions));
 
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		_model = modelFactory.Create("tenant dispatcher");
 
 		BinarySizeThreshold = rabbitMqOptions.Value.MaximumBinarySize;
-
-		_model = modelFactory.Create("tenant dispatcher");
 	}
-
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25400, LogLevel.Trace, "Published request {RelayRequestId} to tenant {TenantName}")]
-	partial void LogPublishedRequest(Guid relayRequestId, string tenantName);
 
 	/// <inheritdoc />
 	public async Task TransportAsync(TRequest request)
@@ -50,13 +45,11 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 		try
 		{
 			await _model.PublishJsonAsync($"{Constants.RequestQueuePrefix} {request.TenantName}", request, autoDelete: false);
-			LogPublishedRequest(request.RequestId, request.TenantName);
+			Log.PublishedRequest(_logger, request.RequestId, request.TenantName);
 		}
 		catch (RabbitMQClientException ex)
 		{
-			_logger.LogError(25401, ex,
-				"An error occured while dispatching request {RelayRequestId} to tenant {TenantName} queue",
-				request.RequestId, request.TenantName);
+			Log.ErrorDispatchingRequest(_logger, ex, request.RequestId, request.TenantName);
 			throw new TransportException(ex);
 		}
 	}

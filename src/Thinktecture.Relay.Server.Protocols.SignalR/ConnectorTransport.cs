@@ -11,18 +11,14 @@ namespace Thinktecture.Relay.Server.Protocols.SignalR;
 
 /// <inheritdoc />
 // ReSharper disable once ClassNeverInstantiated.Global
-public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorTransport<TRequest>
+public partial class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorTransport<TRequest>
 	where TRequest : IClientRequest
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
 {
 	private readonly string _connectionId;
 	private readonly IHubContext<ConnectorHub<TRequest, TResponse, TAcknowledge>, IConnector<TRequest>> _hubContext;
-	private readonly ILogger<ConnectorTransport<TRequest, TResponse, TAcknowledge>> _logger;
-
-	private readonly Action<ILogger, IClientRequest, Guid, string, Exception?> _logTransportingRequest =
-		LoggerMessage.Define<IClientRequest, Guid, string>(LogLevel.Trace, 26200,
-			"Transporting request {@Request} for request {RelayRequestId} on connection {TransportConnectionId}");
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectorTransport{TRequest,TResponse,TAcknowledge}"/> class.
@@ -41,8 +37,7 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 	/// <inheritdoc />
 	public async Task TransportAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
-		if (_logger.IsEnabled(LogLevel.Trace))
-			_logTransportingRequest(_logger, request, request.RequestId, _connectionId, null);
+		Log.TransportingRequest(_logger, request, request.RequestId, _connectionId);
 
 		try
 		{
@@ -50,10 +45,7 @@ public class ConnectorTransport<TRequest, TResponse, TAcknowledge> : IConnectorT
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(26201, ex,
-				"An error occured while transporting request {RelayRequestId} on connection {TransportConnectionId}",
-				request.RequestId,
-				_connectionId);
+			Log.ErrorTransportingRequest(_logger, ex, request.RequestId, _connectionId);
 		}
 	}
 }

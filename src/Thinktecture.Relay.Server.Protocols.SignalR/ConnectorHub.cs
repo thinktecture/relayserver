@@ -46,7 +46,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
 	private readonly IConnectionStatisticsWriter _connectionStatisticsWriter;
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
-	private readonly ILogger<ConnectorHub<TRequest, TResponse, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 	private readonly IResponseDispatcher<TResponse> _responseDispatcher;
 	private readonly ITenantService _tenantService;
 	private readonly RelayServerOptions _relayServerOptions;
@@ -86,9 +86,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		var tenantName = Context.User.GetTenantName();
 		if (tenantName == string.Empty)
 		{
-			_logger.LogError(26100,
-				"Rejecting incoming connection {TransportConnectionId} because of missing tenant name",
-				Context.ConnectionId);
+			Log.ErrorNoTenantName(_logger, Context.ConnectionId);
 			Context.Abort();
 			return;
 		}
@@ -107,14 +105,11 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 
 				await _tenantService.CreateTenantAsync(tenant);
 
-				_logger.LogInformation(26107, "Incoming connection {TransportConnectionId} created tenant {TenantName}",
-					Context.ConnectionId, tenantName);
+				Log.IncomingConnectionCreatedTenant(_logger, Context.ConnectionId, tenantName);
 			}
 			else
 			{
-				_logger.LogError(26106,
-					"Rejecting incoming connection {TransportConnectionId} because of unknown tenant {TenantName}",
-					Context.ConnectionId, tenantName);
+				Log.RejectingUnknownTenant(_logger, Context.ConnectionId, tenantName);
 				Context.Abort();
 				return;
 			}
@@ -140,14 +135,12 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 
 			if (needsUpdate)
 			{
-				_logger.LogInformation(26107, "Incoming connection {TransportConnectionId} updated tenant {TenantName}",
-					Context.ConnectionId, tenantName);
+				Log.IncomingConnectionUpdatedTenant(_logger, Context.ConnectionId, tenantName);
 				await _tenantService.UpdateTenantAsync(tenantName, tenant);
 			}
 		}
 
-		_logger.LogDebug(26101, "Incoming connection {TransportConnectionId} for tenant {@Tenant}",
-			Context.ConnectionId, tenant);
+		Log.IncomingConnection(_logger, Context.ConnectionId, tenant);
 
 		await _connectorRegistry.RegisterAsync(Context.ConnectionId, tenant.Name, tenant.MaximumConcurrentConnectorRequests,
 			Context.GetHttpContext()?.Connection.RemoteIpAddress);
@@ -163,25 +156,18 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	/// <inheritdoc />
 	public override async Task OnDisconnectedAsync(Exception? exception)
 	{
-		if (exception is null)
+		if (exception is not null)
 		{
-			_logger.LogWarning(26102, exception,
-				"Connection {TransportConnectionId} disconnected for tenant {TenantName}", Context.ConnectionId,
-				Context.User.GetTenantName());
+			Log.DisconnectedError(_logger, exception, Context.ConnectionId, Context.User.GetTenantName());
 		}
 		else
 		{
-			_logger.LogDebug(26103, "Connection {TransportConnectionId} disconnected for tenant {TenantName}",
-				Context.ConnectionId, Context.User.GetTenantName());
+			Log.Disconnected(_logger, Context.ConnectionId, Context.User.GetTenantName());
 		}
 
 		await _connectorRegistry.UnregisterAsync(Context.ConnectionId);
 		await base.OnDisconnectedAsync(exception);
 	}
-
-	[LoggerMessage(26104, LogLevel.Debug,
-		"Connection {TransportConnectionId} received response for request {RelayRequestId}")]
-	partial void LogReceivedResponse(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Hub method.
@@ -192,16 +178,12 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	// ReSharper disable once UnusedMember.Global
 	public async Task DeliverAsync(TResponse response)
 	{
-		LogReceivedResponse(Context.ConnectionId, response.RequestId);
+		Log.ReceivedResponse(_logger, Context.ConnectionId, response.RequestId);
 		response.ConnectionId = Context.ConnectionId;
 
 		await _responseDispatcher.DispatchAsync(response);
 		await _connectionStatisticsWriter.UpdateLastSeenTimeAsync(Context.ConnectionId);
 	}
-
-	[LoggerMessage(26105, LogLevel.Debug,
-		"Connection {TransportConnectionId} received acknowledgement for request {RelayRequestId}")]
-	partial void LogReceivedAcknowledge(string transportConnectionId, Guid relayRequestId);
 
 	/// <summary>
 	/// Hub method.
@@ -212,7 +194,7 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 	// ReSharper disable once UnusedMember.Global
 	public async Task AcknowledgeAsync(TAcknowledge request)
 	{
-		LogReceivedAcknowledge(Context.ConnectionId, request.RequestId);
+		Log.ReceivedAcknowledge(_logger, Context.ConnectionId, request.RequestId);
 		await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);
 		await _connectionStatisticsWriter.UpdateLastSeenTimeAsync(Context.ConnectionId);
 	}

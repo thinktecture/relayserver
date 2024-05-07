@@ -20,7 +20,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	private readonly AsyncEventingBasicConsumer _acknowledgeConsumer;
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
 	private readonly IModel _acknowledgeDispatchModel;
-	private readonly ILogger<ServerTransport<TResponse, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 	private readonly IModel _responseConsumeModel;
 	private readonly AsyncEventingBasicConsumer _responseConsumer;
 	private readonly IResponseCoordinator<TResponse> _responseCoordinator;
@@ -87,52 +87,34 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 			response,
 			durable: false,
 			persistent: false);
-		LogDispatchedResponse(response.RequestId, response.RequestOriginId);
+		Log.DispatchedResponse(_logger, response.RequestId, response.RequestOriginId);
 	}
 
 	/// <inheritdoc />
 	public async Task DispatchAcknowledgeAsync(TAcknowledge request)
 	{
-		_logger.LogTrace("Dispatching acknowledge {@AcknowledgeRequest}", request);
+		Log.DispatchingAcknowledge(_logger, request);
+
 		await _acknowledgeDispatchModel.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix} {request.OriginId}", request,
 			durable: false,
 			persistent: false);
-		LogDispatchedAcknowledge(request.RequestId, request.OriginId);
+		Log.DispatchedAcknowledge(_logger, request.RequestId, request.OriginId);
 	}
-
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25200, LogLevel.Trace, "Dispatched response for request {RelayRequestId} to origin {OriginId}")]
-	partial void LogDispatchedResponse(Guid relayRequestId, Guid originId);
-
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25201, LogLevel.Trace,
-		"Dispatched acknowledgement for request {RelayRequestId} to origin {OriginId}")]
-	partial void LogDispatchedAcknowledge(Guid relayRequestId, Guid originId);
-
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25202, LogLevel.Trace,
-		"Received response for request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
-	partial void LogResponseConsumed(Guid relayRequestId, string queueName, string consumerTag);
 
 	private async Task ResponseConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{
 		var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize response.");
-		LogResponseConsumed(response.RequestId, @event.RoutingKey, @event.ConsumerTag);
+		Log.ResponseConsumed(_logger, response.RequestId, @event.RoutingKey, @event.ConsumerTag);
 		await _responseCoordinator.ProcessResponseAsync(response);
 	}
-
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25203, LogLevel.Trace,
-		"Received acknowledge for request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
-	partial void LogAcknowledgeConsumed(Guid relayRequestId, string queueName, string consumerTag);
 
 	private async Task AcknowledgeConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{
 		var request = JsonSerializer.Deserialize<TAcknowledge>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize acknowledge request.");
 
-		LogAcknowledgeConsumed(request.RequestId, @event.RoutingKey, @event.ConsumerTag);
+		Log.AcknowledgeConsumed(_logger, request.RequestId, @event.RoutingKey, @event.ConsumerTag);
 		await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);
 	}
 }
