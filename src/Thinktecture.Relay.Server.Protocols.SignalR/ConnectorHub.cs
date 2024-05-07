@@ -216,13 +216,4 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge> : Hub<IConn
 		await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);
 		await _connectionStatisticsWriter.UpdateLastSeenTimeAsync(Context.ConnectionId);
 	}
-
-	/// <summary>
-	/// Hub method.
-	/// </summary>
-	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	[HubMethodName("Pong")]
-	// ReSharper disable once UnusedMember.Global
-	public Task PongAsync()
-		=> throw new NotImplementedException();
 }
