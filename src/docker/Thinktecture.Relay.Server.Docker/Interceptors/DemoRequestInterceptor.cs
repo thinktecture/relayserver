@@ -10,7 +10,7 @@ using System;
 
 namespace Thinktecture.Relay.Server.Docker.Interceptors;
 
-public class DemoRequestInterceptor : IClientRequestInterceptor<ClientRequest, TargetResponse>
+public partial class DemoRequestInterceptor : IClientRequestInterceptor<ClientRequest, TargetResponse>
 {
 	private readonly ILogger _logger;
 
@@ -28,18 +28,14 @@ public class DemoRequestInterceptor : IClientRequestInterceptor<ClientRequest, T
 			if (context.ClientRequest.HttpHeaders.TryGetValue("tt-demo-request-stream-nulling", out var nulling) &&
 			    nulling.Any(v => v == "enabled"))
 			{
-				_logger.LogInformation(1,
-					"Request stream interceptor enabled for request {RequestId}, input was {OriginalRequestSize}, output will be NULL",
-					context.RequestId, context.ClientRequest.BodySize);
+				Log.RemovingOutput(_logger, context.RequestId, context.ClientRequest.BodySize);
 
 				context.ClientRequest.BodyContent = null;
 				return;
 			}
 
 			var size = (int)context.ClientRequest.BodySize * 2;
-			_logger.LogInformation(1,
-				"Request stream interceptor enabled for request {RequestId}, input was {OriginalRequestSize}, output will be {RequestSize} bytes",
-				context.RequestId, context.ClientRequest.BodySize, size);
+			Log.Enabled(_logger, context.RequestId, context.ClientRequest.BodySize, size);
 
 			if (context.ClientRequest.BodyContent is not null)
 			{
