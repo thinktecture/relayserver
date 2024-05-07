@@ -20,9 +20,7 @@ internal class RotateValidationKeysFileStore : IValidationKeysStore
 	/// </summary>
 	/// <param name="fileStore">An instance of an <see cref="RotateCertificateFileStore"/>.</param>
 	public RotateValidationKeysFileStore(RotateCertificateFileStore fileStore)
-	{
-		_fileStore = fileStore ?? throw new ArgumentNullException(nameof(fileStore));
-	}
+		=> _fileStore = fileStore ?? throw new ArgumentNullException(nameof(fileStore));
 
 	/// <inheritdoc />
 	public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
