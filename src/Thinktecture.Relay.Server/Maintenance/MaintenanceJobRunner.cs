@@ -12,9 +12,9 @@ namespace Thinktecture.Relay.Server.Maintenance;
 /// Background service that runs all registered <see cref="IMaintenanceJob"/> implementations in an interval
 /// defined by the <see cref="MaintenanceOptions"/> configuration.
 /// </summary>
-public class MaintenanceJobRunner : BackgroundService
+public partial class MaintenanceJobRunner : BackgroundService
 {
-	private readonly ILogger<MaintenanceJobRunner> _logger;
+	private readonly ILogger _logger;
 	private readonly MaintenanceOptions _maintenanceOptions;
 	private readonly IServiceScopeFactory _serviceProvider;
 
@@ -64,7 +64,7 @@ public class MaintenanceJobRunner : BackgroundService
 
 			try
 			{
-				_logger.LogTrace(20500, "Running maintenance job {MaintenanceJob}", job.GetType().FullName);
+				Log.RunMaintenanceJob(_logger, job.GetType().FullName);
 				await job.DoMaintenanceAsync(cancellationToken);
 			}
 			catch (OperationCanceledException)
@@ -73,8 +73,7 @@ public class MaintenanceJobRunner : BackgroundService
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(20501, ex, "An error occured while running maintenance job {MaintenanceJob}",
-					job.GetType().FullName);
+				Log.RunMaintenanceJobFailed(_logger, ex, job.GetType().FullName);
 			}
 		}
 	}

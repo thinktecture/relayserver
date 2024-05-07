@@ -5,11 +5,11 @@ using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Transport;
 
-internal class InMemoryTenantTransport<T> : ITenantTransport<T>
+internal partial class InMemoryTenantTransport<T> : ITenantTransport<T>
 	where T : IClientRequest
 {
 	private readonly ConnectorRegistry<T> _connectorRegistry;
-	private readonly ILogger<InMemoryTenantTransport<T>> _logger;
+	private readonly ILogger _logger;
 
 	public int? BinarySizeThreshold { get; } = null;
 
@@ -23,7 +23,7 @@ internal class InMemoryTenantTransport<T> : ITenantTransport<T>
 	{
 		if (!await _connectorRegistry.TryDeliverRequestAsync(request))
 		{
-			_logger.LogError(21200, "Could not deliver request {RelayRequestId} to a connection", request.RequestId);
+			Log.ErrorDeliveringRequest(_logger, request.RequestId);
 		}
 	}
 }

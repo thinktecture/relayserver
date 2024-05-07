@@ -14,7 +14,7 @@ public partial class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowled
 	where TAcknowledge : IAcknowledgeRequest
 {
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
-	private readonly ILogger<AcknowledgeDispatcher<TResponse, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 	private readonly RelayServerContext _relayServerContext;
 	private readonly RelayServerOptions _relayServerOptions;
 	private readonly IServerTransport<TResponse, TAcknowledge> _serverTransport;
@@ -42,24 +42,17 @@ public partial class AcknowledgeDispatcher<TResponse, TAcknowledge> : IAcknowled
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	[LoggerMessage(20900, LogLevel.Trace, "Locally dispatching acknowledge for request {RelayRequestId}")]
-	partial void LogLocalAcknowledge(Guid relayRequestId);
-
-	[LoggerMessage(20901, LogLevel.Trace,
-		"Remotely dispatching acknowledge for request {RelayRequestId} to origin {OriginId}")]
-	partial void LogRedirectAcknowledge(Guid relayRequestId, Guid originId);
-
 	/// <inheritdoc />
 	public async Task DispatchAsync(TAcknowledge request, CancellationToken cancellationToken = default)
 	{
 		if (_relayServerOptions.EnableServerTransportShortcut && request.OriginId == _relayServerContext.OriginId)
 		{
-			LogLocalAcknowledge(request.RequestId);
+			Log.LocalAcknowledge(_logger, request.RequestId);
 			await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request, cancellationToken);
 			return;
 		}
 
-		LogRedirectAcknowledge(request.RequestId, request.OriginId);
+		Log.RedirectAcknowledge(_logger, request.RequestId, request.OriginId);
 		await _serverTransport.DispatchAcknowledgeAsync(request);
 	}
 }

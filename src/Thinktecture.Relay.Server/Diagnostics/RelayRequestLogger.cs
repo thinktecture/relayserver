@@ -16,7 +16,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse
 {
-	private readonly ILogger<RelayRequestLogger<TRequest, TResponse>> _logger;
+	private readonly ILogger _logger;
 	private readonly RelayServerOptions _relayServerOptions;
 	private readonly IRequestService _requestService;
 	private readonly ITenantService _tenantService;
@@ -40,16 +40,13 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	[LoggerMessage(20400, LogLevel.Trace, "Writing request log for successful request {RelayRequestId}")]
-	partial void LogSuccess(Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task LogSuccessAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest,
 		TResponse? targetResponse)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogSucceeded()) return;
 
-		LogSuccess(relayContext.RequestId);
+		Log.Success(_logger, relayContext.RequestId);
 
 		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.HttpStatusCode = targetResponse?.HttpStatusCode;
@@ -66,52 +63,43 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogAborted()) return;
 
-		LogAbort(relayContext.RequestId);
+		Log.Abort(_logger, relayContext.RequestId);
 
 		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Aborted = true;
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	[LoggerMessage(20402, LogLevel.Trace, "Writing request log for failed request {RelayRequestId}")]
-	partial void LogFail(Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task LogFailAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogFailed()) return;
 
-		LogFail(relayContext.RequestId);
+		Log.Fail(_logger, relayContext.RequestId);
 
 		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Failed = true;
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	[LoggerMessage(20403, LogLevel.Trace, "Writing request log for expired request {RelayRequestId}")]
-	partial void LogExpired(Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task LogExpiredAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogExpired()) return;
 
-		LogExpired(relayContext.RequestId);
+		Log.Expired(_logger, relayContext.RequestId);
 
 		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Expired = true;
 		await _requestService.StoreRequestAsync(request);
 	}
 
-	[LoggerMessage(20404, LogLevel.Trace, "Writing request log for error on request {RelayRequestId}")]
-	partial void LogError(Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task LogErrorAsync(IRelayContext relayContext, long bodySize, HttpRequest httpRequest)
 	{
 		if (!_relayServerOptions.RequestLoggerLevel.LogErrored()) return;
 
-		LogError(relayContext.RequestId);
+		Log.Error(_logger, relayContext.RequestId);
 
 		var request = CreateRequest(relayContext, bodySize, httpRequest);
 		request.Errored = true;

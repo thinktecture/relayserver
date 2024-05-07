@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Controllers;
 [Route(DiscoveryDocument.WellKnownPath)]
 public partial class DiscoveryDocumentController : Controller
 {
-	private readonly ILogger<DiscoveryDocumentController> _logger;
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="DiscoveryDocumentController"/> class.
@@ -21,9 +21,6 @@ public partial class DiscoveryDocumentController : Controller
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	public DiscoveryDocumentController(ILogger<DiscoveryDocumentController> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-	[LoggerMessage(20300, LogLevel.Debug, "Returning discovery document")]
-	partial void LogReturnDiscoveryDocument();
 
 	/// <summary>
 	/// Returns the discovery document that provides initial configuration to the connectors.
@@ -33,7 +30,7 @@ public partial class DiscoveryDocumentController : Controller
 	[HttpGet]
 	public IActionResult GetDiscoveryDocument([FromServices] DiscoveryDocumentBuilder documentBuilder)
 	{
-		LogReturnDiscoveryDocument();
+		Log.ReturnDiscoveryDocument(_logger);
 		return Ok(documentBuilder.Build(Request));
 	}
 }

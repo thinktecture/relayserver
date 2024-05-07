@@ -16,7 +16,7 @@ public partial class RelayTargetResponseWriter<TRequest, TResponse> : IRelayTarg
 	where TRequest : IClientRequest
 	where TResponse : class, ITargetResponse
 {
-	private readonly ILogger<RelayTargetResponseWriter<TRequest, TResponse>> _logger;
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RelayTargetResponseWriter{TRequest,TResponse}"/> class.
@@ -24,9 +24,6 @@ public partial class RelayTargetResponseWriter<TRequest, TResponse> : IRelayTarg
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	public RelayTargetResponseWriter(ILogger<RelayTargetResponseWriter<TRequest, TResponse>> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-	[LoggerMessage(20700, LogLevel.Warning, "The request {RelayRequestId} failed internally with {HttpStatusCode}")]
-	partial void LogFailedRequest(Guid relayRequestId, HttpStatusCode httpStatusCode);
 
 	/// <inheritdoc />
 	public async Task WriteAsync(TRequest clientRequest, TResponse? targetResponse, HttpResponse httpResponse,
@@ -47,7 +44,7 @@ public partial class RelayTargetResponseWriter<TRequest, TResponse> : IRelayTarg
 
 		if (targetResponse.RequestFailed)
 		{
-			LogFailedRequest(targetResponse.RequestId, targetResponse.HttpStatusCode);
+			Log.FailedRequest(_logger, targetResponse.RequestId, targetResponse.HttpStatusCode);
 		}
 
 		httpResponse.StatusCode = (int)targetResponse.HttpStatusCode;

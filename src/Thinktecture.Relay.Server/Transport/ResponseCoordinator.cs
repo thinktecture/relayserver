@@ -12,11 +12,7 @@ public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 	where T : class, ITargetResponse
 {
 	private readonly IBodyStore _bodyStore;
-	private readonly ILogger<ResponseCoordinator<T>> _logger;
-
-	private readonly Action<ILogger, ITargetResponse, Guid, Exception?> _logResponseReceived =
-		LoggerMessage.Define<ITargetResponse, Guid>(LogLevel.Trace, 21407,
-			"Response {@Response} for request {RelayRequestId} received");
+	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<Guid, WaitingState> _waitingStates =
 		new ConcurrentDictionary<Guid, WaitingState>();
@@ -42,38 +38,25 @@ public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 				return Task.CompletedTask;
 			});
 
-		_logger.LogError(21400, "Request {RelayRequestId} is already registered", requestId);
+		Log.RequestAlreadyRegistered(_logger, requestId);
 		throw new InvalidOperationException($"Duplicate request registration for request id {requestId}");
 	}
-
-	[LoggerMessage(21401, LogLevel.Debug, "Waiting for response for request {RelayRequestId}")]
-	partial void LogWaitingForResponse(Guid relayRequestId);
-
-	[LoggerMessage(21404, LogLevel.Debug,
-		"Opened outsourced response body for request {RelayRequestId} with {BodySize} bytes")]
-	partial void LogBodyOpened(Guid relayRequestId, long? bodySize);
-
-	[LoggerMessage(21405, LogLevel.Debug, "Response with inlined body for request {RelayRequestId} received")]
-	partial void LogInlinedReceived(Guid relayRequestId);
-
-	[LoggerMessage(21406, LogLevel.Debug, "Response for request {RelayRequestId} without body received")]
-	partial void LogNoBodyReceived(Guid relayRequestId);
 
 	/// <inheritdoc />
 	public async Task<IResponseContext<T>?> GetResponseAsync(Guid requestId,
 		CancellationToken cancellationToken = default)
 	{
-		LogWaitingForResponse(requestId);
+		Log.WaitingForResponse(_logger, requestId);
 
 		if (!_waitingStates.TryGetValue(requestId, out var waitingState))
 		{
-			_logger.LogWarning(21402, "No waiting state for request {RelayRequestId} found", requestId);
+			Log.NoWaitingStateFound(_logger, requestId);
 			return null;
 		}
 
 		cancellationToken.Register(() =>
 		{
-			_logger.LogTrace(21403, "Canceling response wait for request {RelayRequestId}", requestId);
+			Log.CancelingWait(_logger, requestId);
 			waitingState.TaskCompletionSource.TrySetCanceled();
 		});
 
@@ -81,34 +64,30 @@ public partial class ResponseCoordinator<T> : IResponseCoordinator<T>
 		if (responseContext.Response.IsBodyContentOutsourced())
 		{
 			responseContext.Response.BodyContent = await _bodyStore.OpenResponseBodyAsync(requestId, cancellationToken);
-			LogBodyOpened(requestId, responseContext.Response.BodySize);
+			Log.BodyOpened(_logger, requestId, responseContext.Response.BodySize);
 			responseContext.Disposable = _bodyStore.GetResponseBodyRemoveDisposable(requestId);
 		}
 		else if (responseContext.Response.BodySize > 0)
 		{
-			LogInlinedReceived(requestId);
+			Log.InlinedReceived(_logger, requestId);
 		}
 		else
 		{
-			LogNoBodyReceived(requestId);
+			Log.NoBodyReceived(_logger, requestId);
 		}
 
 		return responseContext;
 	}
 
-	[LoggerMessage(21408, LogLevel.Debug, "Response for request {RelayRequestId} discarded")]
-	partial void LogResponseDiscarded(Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task ProcessResponseAsync(T response, CancellationToken cancellationToken = default)
 	{
-		if (_logger.IsEnabled(LogLevel.Trace))
-			_logResponseReceived(_logger, response, response.RequestId, null);
+		Log.ResponseReceived(_logger, response, response.RequestId);
 
 		if (!_waitingStates.TryGetValue(response.RequestId, out var waitingState) ||
 		    !waitingState.TaskCompletionSource.TrySetResult(response))
 		{
-			LogResponseDiscarded(response.RequestId);
+			Log.ResponseDiscarded(_logger, response.RequestId);
 
 			if (response.IsBodyContentOutsourced())
 			{

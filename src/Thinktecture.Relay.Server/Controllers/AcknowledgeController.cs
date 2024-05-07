@@ -12,7 +12,7 @@ namespace Thinktecture.Relay.Server.Controllers;
 /// </summary>
 public partial class AcknowledgeController : Controller
 {
-	private readonly ILogger<AcknowledgeController> _logger;
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="AcknowledgeController"/> class.
@@ -20,9 +20,6 @@ public partial class AcknowledgeController : Controller
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	public AcknowledgeController(ILogger<AcknowledgeController> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-	[LoggerMessage(20100, LogLevel.Debug, "Received acknowledgement for request {RelayRequestId} on origin {OriginId}")]
-	partial void LogAcknowledgementReceived(Guid relayRequestId, Guid originId);
 
 	/// <summary>
 	/// </summary>
@@ -35,7 +32,7 @@ public partial class AcknowledgeController : Controller
 	public async Task<IActionResult> AcknowledgeAsync([FromRoute] Guid originId, [FromRoute] Guid requestId,
 		[FromServices] IAcknowledgeDispatcher<AcknowledgeRequest> acknowledgeDispatcher)
 	{
-		LogAcknowledgementReceived(requestId, originId);
+		Log.AcknowledgementReceived(_logger, requestId, originId);
 
 		await acknowledgeDispatcher.DispatchAsync(new AcknowledgeRequest()
 			{ OriginId = originId, RequestId = requestId, RemoveRequestBodyContent = true });
