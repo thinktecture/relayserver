@@ -32,7 +32,7 @@ public static class Startup
 	}
 }
 
-internal class InProcFunc : IRelayTargetFunc
+internal partial class InProcFunc : IRelayTargetFunc
 {
 	private ILogger _logger;
 
@@ -41,21 +41,18 @@ internal class InProcFunc : IRelayTargetFunc
 
 	public async Task<TargetResponse> HandleAsync(ClientRequest request, CancellationToken cancellationToken = default)
 	{
-		_logger.LogInformation(1, "Executing demo in proc target for request {RequestId}",
-			request.RequestId);
+		Log.Executing(_logger, request.RequestId);
 
 		var responseData = new MemoryStream(Encoding.UTF8.GetBytes("{ \"Hello\" : \"World 👋\" }"));
 
 		if (request.BodyContent is not null)
 		{
-			_logger.LogInformation(2, "Request {RequestId} provided {BodySize} bytes in body",
-				request.RequestId, request.BodySize);
+			Log.BodySize(_logger, request.RequestId, request.BodySize);
 
 			// if echo is requested, return the received content
 			if (request.HttpHeaders.TryGetValue("tt-demo-target-echo", out var value) && value.Contains("enabled"))
 			{
-				_logger.LogInformation(3, "Demo in proc target is ECHOING received request body");
-
+				Log.Echo(_logger);
 				request.BodyContent.TryRewind();
 
 				responseData = new MemoryStream();
@@ -88,10 +85,10 @@ internal class InProcAction : IRelayTargetAction
 		=> Task.Delay(TimeSpan.FromSeconds(42), cancellationToken);
 }
 
-internal class ConnectorService : IHostedService
+internal partial class ConnectorService : IHostedService
 {
 	private readonly RelayConnector _connector;
-	private readonly ILogger<ConnectorService> _logger;
+	private readonly ILogger _logger;
 
 	public ConnectorService(ILogger<ConnectorService> logger, RelayConnector connector)
 	{
@@ -101,13 +98,13 @@ internal class ConnectorService : IHostedService
 
 	public async Task StartAsync(CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Starting connector");
+		Log.Starting(_logger);
 		await _connector.ConnectAsync(cancellationToken);
 	}
 
 	public async Task StopAsync(CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Gracefully stopping connector");
+		Log.Stopping(_logger);
 		await _connector.DisconnectAsync(cancellationToken);
 	}
 }
