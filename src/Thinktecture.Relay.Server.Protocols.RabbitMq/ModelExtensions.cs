@@ -6,7 +6,7 @@ using RabbitMQ.Client.Events;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
-internal static class ModelExtensions
+internal static partial class ModelExtensions
 {
 	/// <summary>
 	/// Convenience method to consume a queue by declaring the exchange and queue and binding them together and starting to
@@ -27,13 +27,13 @@ internal static class ModelExtensions
 		var consumer = new AsyncEventingBasicConsumer(model);
 		var consumerTag = model.BasicConsume(queueName, autoAck, consumer);
 
-		logger.LogTrace("Consuming {QueueName} with consumer {ConsumerTag}", queueName, consumerTag);
+		Log.ConsumingConsumer(logger, queueName, consumerTag);
 
 		consumer.ConsumerCancelled += (sender, _) =>
 		{
 			if (((AsyncDefaultBasicConsumer)sender).ShutdownReason is null)
 			{
-				logger.LogWarning("Lost consumer {ConsumerTag} on queue {QueueName}", consumerTag, queueName);
+				Log.LostConsumer(logger, consumerTag, queueName);
 
 				var oldConsumerTag = consumerTag;
 
@@ -43,7 +43,7 @@ internal static class ModelExtensions
 					consumerTag = model.BasicConsume(queueName, autoAck, consumer);
 				}
 
-				logger.LogInformation("Restored consumer {ConsumerTag} on queue {QueueName} (was {OldConsumerTag})", consumerTag, queueName, oldConsumerTag);
+				Log.RestoredConsumer(logger, consumerTag, queueName, oldConsumerTag);
 			}
 
 			return Task.CompletedTask;

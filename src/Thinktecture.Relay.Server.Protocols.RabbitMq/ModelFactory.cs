@@ -9,12 +9,12 @@ namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 /// <summary>
 /// An implementation of a factory to create an instance of a class implementing <see cref="IModel"/>.
 /// </summary>
-public class ModelFactory<TAcknowledge>
+public partial class ModelFactory<TAcknowledge>
 	where TAcknowledge : IAcknowledgeRequest
 {
 	private readonly IConnection _connection;
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
-	private readonly ILogger<ModelFactory<TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ModelFactory{TAcknowledge}"/> class.
@@ -32,12 +32,10 @@ public class ModelFactory<TAcknowledge>
 
 		if (connection is IAutorecoveringConnection autorecoveringConnection)
 		{
-			autorecoveringConnection.RecoverySucceeded += (_, _)
-				=> _logger.LogInformation(25100, "Connection successful recovered");
+			autorecoveringConnection.RecoverySucceeded += (_, _) => Log.ConnectionRecovered(_logger);
 		}
 
-		connection.ConnectionShutdown += (_, args)
-			=> _logger.LogDebug(25101, "Connection closed ({ShutdownReason})", args.ReplyText);
+		connection.ConnectionShutdown += (_, args) => Log.ConnectionClosed(_logger, args.ReplyText);
 	}
 
 	/// <summary>
@@ -50,13 +48,10 @@ public class ModelFactory<TAcknowledge>
 	{
 		// TODO model context information in logging is not yet satisfying
 		var model = _connection.CreateModel();
+		Log.ModelCreated(_logger, context, model.ChannelNumber);
 
-		_logger.LogTrace(25102, "Model for {ModelContext} with channel {ModelChannel} created", context,
-			model.ChannelNumber);
-
-		model.CallbackException += (_, args) => _logger.LogError(25103, args.Exception,
-			"An error occured in a model callback for {ModelContext} with channel {ModelChannel}", context,
-			model.ChannelNumber);
+		model.CallbackException += (_, args)
+			=> Log.ModelCallbackError(_logger, args.Exception, context, model.ChannelNumber);
 
 		model.ModelShutdown += (_, args)
 			=>
@@ -66,8 +61,7 @@ public class ModelFactory<TAcknowledge>
 				_acknowledgeCoordinator.PruneOutstandingAcknowledgeIds();
 			}
 
-			_logger.LogTrace(25104, "Model for {ModelContext} with channel {ModelChannel} closed ({ShutdownReason})",
-				context, model.ChannelNumber, args.ReplyText);
+			Log.ModelClosed(_logger, context, model.ChannelNumber, args.ReplyText);
 		};
 
 		return model;

@@ -18,7 +18,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	where TAcknowledge : IAcknowledgeRequest
 {
 	// ReSharper disable once NotAccessedField.Local; Justification: Used by LoggerMessage source generator
-	private readonly ILogger<TenantHandler<TRequest, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
 	private readonly string _connectionId;
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
@@ -71,45 +71,31 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		_model.Dispose();
 	}
 
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25300, LogLevel.Trace, "Acknowledging {AcknowledgeId}")]
-	partial void LogAcknowledge(string acknowledgeId);
-
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25301, LogLevel.Warning, "Could not parse acknowledge id {AcknowledgeId}")]
-	partial void LogCouldNotParseAcknowledge(string acknowledgeId);
-
 	/// <inheritdoc />
 	public async Task AcknowledgeAsync(string acknowledgeId, CancellationToken cancellationToken = default)
 	{
 		if (ulong.TryParse(acknowledgeId, out var deliveryTag))
 		{
-			LogAcknowledge(acknowledgeId);
+			Log.Acknowledge(_logger, acknowledgeId);
 			await _model.AcknowledgeAsync(deliveryTag);
 		}
 		else
 		{
-			LogCouldNotParseAcknowledge(acknowledgeId);
+			Log.CouldNotParseAcknowledge(_logger, acknowledgeId);
 		}
 	}
-
-	// ReSharper disable once PartialMethodWithSinglePart; Justification: Source generator
-	[LoggerMessage(25302, LogLevel.Trace,
-		"Received request {RelayRequestId} from queue {QueueName} by consumer {ConsumerTag}")]
-	partial void LogReceivedRequest(Guid relayRequestId, string queueName, string consumerTag);
-
 	private async Task ConsumerReceived(object sender, BasicDeliverEventArgs @event)
 	{
 		var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize request.");
 
-		LogReceivedRequest(request.RequestId, @event.RoutingKey, @event.ConsumerTag);
+		Log.ReceivedRequest(_logger, request.RequestId, @event.RoutingKey, @event.ConsumerTag);
 
 		var acknowledgeId = @event.DeliveryTag.ToString();
 
 		if (request.AcknowledgeMode == AcknowledgeMode.Disabled)
 		{
-			LogAcknowledge(acknowledgeId);
+			Log.Acknowledge(_logger, acknowledgeId);
 			await _model.AcknowledgeAsync(@event.DeliveryTag);
 		}
 		else
