@@ -13,9 +13,9 @@ namespace Thinktecture.Relay.IdentityServer.Stores;
 /// <summary>
 /// Provides support for rotating signing certificates.
 /// </summary>
-internal class RotateCertificateFileStore
+internal partial class RotateCertificateFileStore
 {
-	private readonly ILogger<RotateCertificateFileStore> _logger;
+	private readonly ILogger _logger;
 	private readonly IOptions<RotateCertificateStoreOptions> _options;
 	private readonly TimeSpan _longestTokenLifetime = TimeSpan.FromDays(2);
 
@@ -27,11 +27,11 @@ internal class RotateCertificateFileStore
 	/// <param name="options"></param>
 	/// <param name="logger"></param>
 	/// <exception cref="ArgumentNullException"></exception>
-	public RotateCertificateFileStore(IOptions<RotateCertificateStoreOptions> options,
-		ILogger<RotateCertificateFileStore> logger)
+	public RotateCertificateFileStore(ILogger<RotateCertificateFileStore> logger,
+		IOptions<RotateCertificateStoreOptions> options)
 	{
-		_options = options ?? throw new ArgumentNullException(nameof(options));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		_options = options ?? throw new ArgumentNullException(nameof(options));
 	}
 
 	/// <summary>
@@ -77,7 +77,7 @@ internal class RotateCertificateFileStore
 		{
 			if (_cache.Any(IsExpired) || NeedNewCertificate(_cache))
 			{
-				_logger.LogDebug(1, "Rebuilding certificate cache");
+				Log.RebuildingCertificateCache(_logger);
 				var list = LoadAllCertificatesFromFolder();
 
 				RemoveOutdated(list);
@@ -108,9 +108,8 @@ internal class RotateCertificateFileStore
 		var pfxBytes = certificate.Export(X509ContentType.Pfx, _options.Value.Password);
 		var fileName = GetFileName(certificate);
 
-		_logger.LogInformation(2,
-			"Create certificate [{CertificateName}], validity from {CertificateNotBefore} until {CertificateNotAfter} as {CertificateFileName}",
-			certificate.SerialNumber, certificate.NotBeforeUtc(), certificate.NotAfterUtc(), fileName);
+		Log.CreateCertificate(_logger, certificate.SerialNumber, certificate.NotBeforeUtc(), certificate.NotAfterUtc(),
+			fileName);
 
 		File.WriteAllBytes(fileName, pfxBytes);
 		list.Add(certificate);
@@ -122,9 +121,7 @@ internal class RotateCertificateFileStore
 
 		foreach (var c in outdated)
 		{
-			_logger.LogInformation(3,
-				"Remove outdated certificate [{CertificateName}], was valid until {CertificateNotAfter} with grace period of {LongestTokenLifetime}",
-				c.SerialNumber, c.NotAfterUtc(), _longestTokenLifetime);
+			Log.RemoveOutdatedCertificate(_logger, c.SerialNumber, c.NotAfterUtc(), _longestTokenLifetime);
 
 			RemoveCertificateFromFolder(c);
 			list.Remove(c);
@@ -138,7 +135,8 @@ internal class RotateCertificateFileStore
 		var certFiles = Directory.GetFiles(_options.Value.Path, "*.pfx");
 		foreach (var fileName in certFiles)
 		{
-			_logger.LogDebug(4, "Loading certificate from file {CertificateFileName}", fileName);
+			Log.LoadCertificate(_logger, fileName);
+
 			var cert = new X509Certificate2(fileName, _options.Value.Password, X509KeyStorageFlags.MachineKeySet);
 			result.Add(cert);
 		}
@@ -149,7 +147,7 @@ internal class RotateCertificateFileStore
 	private void RemoveCertificateFromFolder(X509Certificate2 certificate)
 	{
 		var fileName = GetFileName(certificate);
-		_logger.LogDebug(5, "Deleting certificate file {CertificateFileName}", fileName);
+		Log.DeleteCertificateFile(_logger, fileName);
 
 		File.Delete(fileName);
 	}
