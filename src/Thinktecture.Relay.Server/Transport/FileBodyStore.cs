@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Transport;
 internal partial class FileBodyStore : IBodyStore
 {
 	private readonly string _basePath;
-	private readonly ILogger<FileBodyStore> _logger;
+	private readonly ILogger _logger;
 
 	public FileBodyStore(ILogger<FileBodyStore> logger, IOptions<FileBodyStoreOptions> fileBodyStoreOptions)
 	{
@@ -23,21 +23,8 @@ internal partial class FileBodyStore : IBodyStore
 		_basePath = fileBodyStoreOptions.Value.StoragePath ??
 			throw new ArgumentNullException(nameof(fileBodyStoreOptions));
 
-		_logger.LogDebug(21000, "Using {StorageType} with storage path {StoragePath} as body store",
-			nameof(FileBodyStore),
-			_basePath);
+		Log.UsingStorage(_logger, nameof(FileBodyStore), _basePath);
 	}
-
-	[LoggerMessage(21001, LogLevel.Trace, "{FileOperation} {FileBodyType} body for request {RelayRequestId}")]
-	partial void LogOperation(string fileOperation, string fileBodyType, Guid relayRequestId);
-
-	[LoggerMessage(21002, LogLevel.Debug,
-		"Writing of {FileBodyType} body for request {RelayRequestId} completed with {BodySize} bytes")]
-	partial void LogWriting(string fileBodyType, Guid relayRequestId, long bodySize);
-
-	[LoggerMessage(21003, LogLevel.Warning,
-		"An error occured while {FileOperation} {FileBodyType} body for request {RelayRequestId}")]
-	partial void LogError(Exception ex, string fileOperation, string fileBodyType, Guid relayRequestId);
 
 	/// <inheritdoc />
 	public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream,
@@ -45,10 +32,10 @@ internal partial class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			LogOperation("Writing", "request", requestId);
+			Log.Operation(_logger, "Writing", "request", requestId);
 			var size = await StoreBodyAsync(BuildRequestFilePath(requestId), bodyStream, cancellationToken);
 
-			LogWriting("request", requestId, size);
+			Log.Writing(_logger, "request", requestId, size);
 			return size;
 		}
 		catch (OperationCanceledException)
@@ -58,7 +45,7 @@ internal partial class FileBodyStore : IBodyStore
 		}
 		catch (Exception ex)
 		{
-			LogError(ex, "writing", "request", requestId);
+			Log.Error(_logger, ex, "writing", "request", requestId);
 			throw;
 		}
 	}
@@ -69,10 +56,10 @@ internal partial class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			LogOperation("Writing", "response", requestId);
+			Log.Operation(_logger, "Writing", "response", requestId);
 			var size = await StoreBodyAsync(BuildResponseFilePath(requestId), bodyStream, cancellationToken);
 
-			LogWriting("response", requestId, size);
+			Log.Writing(_logger, "response", requestId, size);
 			return size;
 		}
 		catch (OperationCanceledException)
@@ -82,7 +69,7 @@ internal partial class FileBodyStore : IBodyStore
 		}
 		catch (Exception ex)
 		{
-			LogError(ex, "writing", "response", requestId);
+			Log.Error(_logger, ex, "writing", "response", requestId);
 			throw;
 		}
 	}
@@ -92,12 +79,12 @@ internal partial class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			LogOperation("Reading", "request", requestId);
+			Log.Operation(_logger, "Reading", "request", requestId);
 			return Task.FromResult(File.OpenRead(BuildRequestFilePath(requestId)) as Stream);
 		}
 		catch (Exception ex)
 		{
-			LogError(ex, "reading", "request", requestId);
+			Log.Error(_logger, ex, "reading", "request", requestId);
 			throw;
 		}
 	}
@@ -107,12 +94,12 @@ internal partial class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			LogOperation("Reading", "response", requestId);
+			Log.Operation(_logger, "Reading", "response", requestId);
 			return Task.FromResult(File.OpenRead(BuildResponseFilePath(requestId)) as Stream);
 		}
 		catch (Exception ex)
 		{
-			LogError(ex, "reading", "response", requestId);
+			Log.Error(_logger, ex, "reading", "response", requestId);
 			throw;
 		}
 	}
@@ -122,13 +109,13 @@ internal partial class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			LogOperation("Deleting", "request", requestId);
+			Log.Operation(_logger, "Deleting", "request", requestId);
 			File.Delete(BuildRequestFilePath(requestId));
 			return Task.CompletedTask;
 		}
 		catch (Exception ex)
 		{
-			LogError(ex, "deleting", "request", requestId);
+			Log.Error(_logger, ex, "deleting", "request", requestId);
 			throw;
 		}
 	}
@@ -138,13 +125,13 @@ internal partial class FileBodyStore : IBodyStore
 	{
 		try
 		{
-			LogOperation("Deleting", "response", requestId);
+			Log.Operation(_logger, "Deleting", "response", requestId);
 			File.Delete(BuildResponseFilePath(requestId));
 			return Task.CompletedTask;
 		}
 		catch (Exception ex)
 		{
-			LogError(ex, "deleting", "response", requestId);
+			Log.Error(_logger, ex, "deleting", "response", requestId);
 			throw;
 		}
 	}
@@ -189,9 +176,9 @@ public class FileBodyStoreOptions
 	public string StoragePath { get; set; } = Path.GetTempPath();
 }
 
-internal class FileBodyStoreValidateOptions : IValidateOptions<FileBodyStoreOptions>
+internal partial  class FileBodyStoreValidateOptions : IValidateOptions<FileBodyStoreOptions>
 {
-	private readonly ILogger<FileBodyStoreValidateOptions> _logger;
+	private readonly ILogger _logger;
 
 	public FileBodyStoreValidateOptions(ILogger<FileBodyStoreValidateOptions> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -232,9 +219,7 @@ internal class FileBodyStoreValidateOptions : IValidateOptions<FileBodyStoreOpti
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(21004, ex,
-				"An error occured while checking file creation, read and write permission on configured body store path {Path}",
-				basePath);
+			Log.ErrorCheckingPermissions(_logger, ex, basePath);
 			return false;
 		}
 	}

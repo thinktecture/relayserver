@@ -15,7 +15,7 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 {
 	private readonly IBodyStore _bodyStore;
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
-	private readonly ILogger<AcknowledgeCoordinator<TRequest, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<Guid, AcknowledgeState> _requests =
 		new ConcurrentDictionary<Guid, AcknowledgeState>();
@@ -34,42 +34,28 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
 	}
 
-	[LoggerMessage(20800, LogLevel.Trace,
-		"Registering acknowledge state of request {RelayRequestId} from connection {TransportConnectionId} for id {AcknowledgeId}")]
-	partial void LogRegisterAcknowledgeState(Guid relayRequestId, string transportConnectionId, string acknowledgeId);
-
-	[LoggerMessage(20802, LogLevel.Warning,
-		"Re-registering an already existing request {RelayRequestId} from connection {TransportConnectionId} for id {AcknowledgeId} – this can happen when a request got queued again and will lead to a re-execution of the request but only the first result be acknowledged and the others will be discarded")]
-	partial void LogReRegisterAcknowledgeState(Guid relayRequestId, string transportConnectionId, string acknowledgeId);
-
 	/// <inheritdoc />
 	public void RegisterRequest(Guid requestId, string connectionId, string acknowledgeId,
 		bool outsourcedRequestBodyContent)
 	{
 		if (_requests.ContainsKey(requestId))
 		{
-			LogReRegisterAcknowledgeState(requestId, connectionId, acknowledgeId);
+			Log.ReRegisterAcknowledgeState(_logger, requestId, connectionId, acknowledgeId);
 		}
 		else
 		{
-			LogRegisterAcknowledgeState(requestId, connectionId, acknowledgeId);
+			Log.RegisterAcknowledgeState(_logger, requestId, connectionId, acknowledgeId);
 		}
 
 		_requests[requestId] = new AcknowledgeState(connectionId, acknowledgeId, outsourcedRequestBodyContent);
 	}
-
-	[LoggerMessage(20801, LogLevel.Warning, "Unknown request {RelayRequestId} to acknowledge received")]
-	partial void LogUnknownRequest(Guid relayRequestId);
-
-	[LoggerMessage(20803, LogLevel.Debug, "Request {RelayRequestId} was already pruned and will not be acknowledged – this happens after an auto-recovery of the message queue transport")]
-	partial void LogPrunedRequest(Guid relayRequestId);
 
 	/// <inheritdoc />
 	public async Task ProcessAcknowledgeAsync(TAcknowledge request, CancellationToken cancellationToken = default)
 	{
 		if (!_requests.TryRemove(request.RequestId, out var acknowledgeState))
 		{
-			LogUnknownRequest(request.RequestId);
+			Log.UnknownRequest(_logger, request.RequestId);
 			return;
 		}
 
@@ -80,7 +66,7 @@ public partial class AcknowledgeCoordinator<TRequest, TAcknowledge> : IAcknowled
 		}
 		else
 		{
-			LogPrunedRequest(request.RequestId);
+			Log.PrunedRequest(_logger, request.RequestId);
 		}
 
 		if (acknowledgeState.OutsourcedRequestBodyContent && request.RemoveRequestBodyContent)

@@ -13,7 +13,7 @@ public partial class ResponseDispatcher<TResponse, TAcknowledge> : IResponseDisp
 	where TResponse : ITargetResponse
 	where TAcknowledge : IAcknowledgeRequest
 {
-	private readonly ILogger<ResponseDispatcher<TResponse, TAcknowledge>> _logger;
+	private readonly ILogger _logger;
 	private readonly RelayServerContext _relayServerContext;
 	private readonly RelayServerOptions _relayServerOptions;
 	private readonly IResponseCoordinator<TResponse> _responseCoordinator;
@@ -41,23 +41,17 @@ public partial class ResponseDispatcher<TResponse, TAcknowledge> : IResponseDisp
 		_relayServerOptions = relayServerOptions.Value;
 	}
 
-	[LoggerMessage(21500, LogLevel.Trace, "Locally dispatching response for request {RelayRequestId}")]
-	partial void LogLocalDispatch(Guid relayRequestId);
-
-	[LoggerMessage(21501, LogLevel.Trace, "Remotely dispatching response for request {RelayRequestId} to origin {OriginId}")]
-	partial void LogRedirectDispatch(Guid relayRequestId, Guid originId);
-
 	/// <inheritdoc />
 	public async Task DispatchAsync(TResponse response, CancellationToken cancellationToken = default)
 	{
 		if (_relayServerOptions.EnableServerTransportShortcut && response.RequestOriginId == _relayServerContext.OriginId)
 		{
-			LogLocalDispatch(response.RequestId);
+			Log.LocalDispatch(_logger, response.RequestId);
 			await _responseCoordinator.ProcessResponseAsync(response, cancellationToken);
 			return;
 		}
 
-		LogRedirectDispatch(response.RequestId, response.RequestOriginId);
+		Log.RedirectDispatch(_logger, response.RequestId, response.RequestOriginId);
 		await _serverTransport.DispatchResponseAsync(response);
 	}
 }

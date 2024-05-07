@@ -34,12 +34,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 	private readonly IBodyStore _bodyStore;
 	private readonly IEnumerable<IClientRequestInterceptor<TRequest, TResponse>> _clientRequestInterceptors;
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
-	private readonly ILogger<RelayMiddleware<TRequest, TResponse, TAcknowledge>> _logger;
-
-	// TODO move to LoggerMessage source generator when destructuring is supported
-	// (see https://github.com/dotnet/runtime/issues/69490)
-	private readonly Action<ILogger, IClientRequest, Exception?> _logRequestParsed =
-		LoggerMessage.Define<IClientRequest>(LogLevel.Trace, 20602, "Parsed request {@Request}");
+	private readonly ILogger _logger;
 
 	private readonly int _maximumBodySize;
 	private readonly IRelayContext<TRequest, TResponse> _relayContext;
@@ -116,31 +111,6 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			connectorTransportLimit.BinarySizeThreshold.GetValueOrDefault(int.MaxValue));
 	}
 
-	[LoggerMessage(20600, LogLevel.Warning, "Invalid request received {Path}{Query}, does not contain a tenant id")]
-	partial void LogInvalidRequest(string path, QueryString query);
-
-	[LoggerMessage(20601, LogLevel.Information, "Unknown tenant {Tenant} in request received {Path}{Query}")]
-	partial void LogUnknownTenant(string tenant, string path, QueryString query);
-
-	[LoggerMessage(20603, LogLevel.Trace, "Received response for request {RelayRequestId}")]
-	partial void LogResponseReceived(Guid relayRequestId);
-
-	[LoggerMessage(20604, LogLevel.Debug, "Client aborted request {RelayRequestId}")]
-	partial void LogClientAborted(Guid relayRequestId);
-
-	[LoggerMessage(20605, LogLevel.Information, "Request {RelayRequestId} expired")]
-	partial void LogRequestExpired(Guid relayRequestId);
-
-	[LoggerMessage(20616, LogLevel.Debug, "Request to tenant {Tenant} was rejected due to no active connection")]
-	partial void LogNoActiveConnection(string tenant);
-
-	[LoggerMessage(20617, LogLevel.Debug,
-		$"Acknowledge mode of request {{RelayRequestId}} was changed to {nameof(AcknowledgeMode.ConnectorFinished)}")]
-	partial void LogAcknowledgeModeChange(Guid relayRequestId);
-
-	[LoggerMessage(20618, LogLevel.Debug, "Discarding connector response of request {RelayRequestId}")]
-	partial void LogDiscardConnectorResponse(Guid relayRequestId);
-
 	/// <inheritdoc />
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
@@ -156,7 +126,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		{
 			if (string.IsNullOrEmpty(tenantName))
 			{
-				LogInvalidRequest(context.Request.Path, context.Request.QueryString);
+				Log.InvalidRequest(_logger, context.Request.Path, context.Request.QueryString);
 				await next.Invoke(context);
 				return;
 			}
@@ -164,7 +134,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			var tenantState = await LoadTenantStateByNameAsync(tenantName);
 			if (tenantState.Unknown)
 			{
-				LogUnknownTenant(tenantName, context.Request.Path, context.Request.QueryString);
+				Log.UnknownTenant(_logger, tenantName, context.Request.Path, context.Request.QueryString);
 				await next.Invoke(context);
 				return;
 			}
@@ -180,7 +150,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 			if (_relayServerOptions.RequireActiveConnection && !tenantState.HasActiveConnections)
 			{
-				LogNoActiveConnection(tenantName);
+				Log.NoActiveConnection(_logger, tenantName);
 				context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
 				return;
 			}
@@ -191,10 +161,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			_relayContext.ClientRequest =
 				await _requestFactory.CreateAsync(tenantName, _relayContext.RequestId, context.Request, cts.Token);
 
-			if (_logger.IsEnabled(LogLevel.Trace))
-			{
-				_logRequestParsed(_logger, _relayContext.ClientRequest, null);
-			}
+			Log.RequestParsed(_logger, _relayContext.ClientRequest);
 
 			await InterceptClientRequestAsync(cts.Token);
 
@@ -206,7 +173,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 			if (_relayContext.ClientRequest.DiscardConnectorResponse)
 			{
-				LogDiscardConnectorResponse(_relayContext.RequestId);
+				Log.DiscardConnectorResponse(_logger, _relayContext.RequestId);
 			}
 			else
 			{
@@ -218,7 +185,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				if (tenantState.HasRequestsLimit && _relayContext.ClientRequest.AcknowledgeMode != AcknowledgeMode.Manual)
 				{
 					_relayContext.ClientRequest.AcknowledgeMode = AcknowledgeMode.ConnectorFinished;
-					LogAcknowledgeModeChange(_relayContext.RequestId);
+					Log.AcknowledgeModeChange(_logger, _relayContext.RequestId);
 				}
 
 				await DeliverToConnectorAsync(cts.Token);
@@ -226,7 +193,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				if (!_relayContext.ClientRequest.DiscardConnectorResponse)
 				{
 					await WaitForConnectorResponseAsync(cts.Token);
-					LogResponseReceived(_relayContext.RequestId);
+					Log.ResponseReceived(_logger, _relayContext.RequestId);
 				}
 			}
 
@@ -258,13 +225,13 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			if (context.RequestAborted.IsCancellationRequested)
 			{
 				await _relayRequestLogger.LogAbortAsync(_relayContext, bodySize, context.Request);
-				LogClientAborted(_relayContext.RequestId);
+				Log.ClientAborted(_logger, _relayContext.RequestId);
 			}
 			else
 			{
 				await _relayRequestLogger.LogExpiredAsync(_relayContext, bodySize, context.Request);
 				await WriteErrorResponse(HttpStatusCode.RequestTimeout, context.Response, cts.Token);
-				LogRequestExpired(_relayContext.RequestId);
+				Log.RequestExpired(_logger, _relayContext.RequestId);
 			}
 		}
 		catch (Exception ex)
@@ -275,7 +242,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			// ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 			var bodySize = _relayContext.ClientRequest?.BodySize ?? context.Request.Body.Length;
 			await _relayRequestLogger.LogErrorAsync(_relayContext, bodySize, context.Request);
-			_logger.LogError(20606, ex, "Could not handle request {RelayRequestId}", _relayContext.RequestId);
+			Log.ErrorHandlingRequest(_logger, ex, _relayContext.RequestId);
 		}
 	}
 
@@ -289,22 +256,16 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 			identity.HasClaim(JwtRegisteredClaimNames.Aud, _jwtBearerOptions.Audience);
 	}
 
-	[LoggerMessage(20607, LogLevel.Debug, "Executing client request interceptors for request {RelayRequestId}")]
-	partial void LogExecutingRequestInterceptors(Guid relayRequestId);
-
-	[LoggerMessage(20608, LogLevel.Trace, "Executing interceptor {Interceptor} for request {RelayRequestId}")]
-	partial void LogExecutingRequestInterceptor(string? interceptor, Guid relayRequestId);
-
 	private async Task InterceptClientRequestAsync(CancellationToken cancellationToken)
 	{
-		LogExecutingRequestInterceptors(_relayContext.RequestId);
+		Log.ExecutingRequestInterceptors(_logger, _relayContext.RequestId);
 
 		var clientRequest = _relayContext.ClientRequest;
 		var bodyContent = _relayContext.HttpContext.Request.Body;
 
 		foreach (var interceptor in _clientRequestInterceptors)
 		{
-			LogExecutingRequestInterceptor(interceptor.GetType().FullName, _relayContext.RequestId);
+			Log.ExecutingRequestInterceptor(_logger, interceptor.GetType().FullName, _relayContext.RequestId);
 			await interceptor.OnRequestReceivedAsync(_relayContext, cancellationToken);
 
 			if (clientRequest.BodyContent != bodyContent)
@@ -332,12 +293,9 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		}
 	}
 
-	[LoggerMessage(20609, LogLevel.Trace, "Delivering request {RelayRequestId} to connector")]
-	partial void LogDeliveringRequest(Guid relayRequestId);
-
 	private async Task DeliverToConnectorAsync(CancellationToken cancellationToken)
 	{
-		LogDeliveringRequest(_relayContext.RequestId);
+		Log.DeliveringRequest(_logger, _relayContext.RequestId);
 
 		if (_relayContext.ClientRequest.BodyContent is not null &&
 			await TryInlineBodyContentAsync(_relayContext.ClientRequest, cancellationToken))
@@ -351,12 +309,9 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		await _requestCoordinator.ProcessRequestAsync(_relayContext.ClientRequest, cancellationToken);
 	}
 
-	[LoggerMessage(20610, LogLevel.Trace, "Waiting for connector response for request {RelayRequestId}")]
-	partial void LogWaitForResponse(Guid relayRequestId);
-
 	private async Task WaitForConnectorResponseAsync(CancellationToken cancellationToken)
 	{
-		LogWaitForResponse(_relayContext.RequestId);
+		Log.WaitForResponse(_logger, _relayContext.RequestId);
 
 		var context = await _responseCoordinator.GetResponseAsync(_relayContext.RequestId, cancellationToken);
 		if (context is null) return;
@@ -369,21 +324,15 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		}
 	}
 
-	[LoggerMessage(20611, LogLevel.Debug, "Executing target response interceptors for request {RelayRequestId}")]
-	partial void LogExecutingResponseInterceptors(Guid relayRequestId);
-
-	[LoggerMessage(20612, LogLevel.Trace, "Executing interceptor {Interceptor} for request {RelayRequestId}")]
-	partial void LogExecutingResponseInterceptor(string? interceptor, Guid relayRequestId);
-
 	private async Task InterceptTargetResponseAsync(CancellationToken cancellationToken)
 	{
-		LogExecutingResponseInterceptors(_relayContext.RequestId);
+		Log.ExecutingResponseInterceptors(_logger, _relayContext.RequestId);
 
 		var bodyContent = _relayContext.TargetResponse?.BodyContent;
 
 		foreach (var interceptor in _targetResponseInterceptors)
 		{
-			LogExecutingResponseInterceptor(interceptor.GetType().FullName, _relayContext.RequestId);
+			Log.ExecutingResponseInterceptor(_logger, interceptor.GetType().FullName, _relayContext.RequestId);
 			await interceptor.OnResponseReceivedAsync(_relayContext, cancellationToken);
 
 			if (_relayContext.TargetResponse?.BodyContent == bodyContent) continue;
@@ -413,36 +362,23 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		}
 	}
 
-	[LoggerMessage(20613, LogLevel.Debug,
-		"Outsourcing from request {BodySize} bytes (original {OriginalBodySize} bytes) because of a maximum of {BinarySizeThreshold} for request {RelayRequestId}")]
-	partial void LogOutsourcingRequestBody(long? bodySize, long? originalBodySize, int binarySizeThreshold,
-		Guid relayRequestId);
-
-	[LoggerMessage(20614, LogLevel.Trace,
-		"Outsourced from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
-	partial void LogOutsourcedRequestBody(long? bodySize, long? originalBodySize, Guid relayRequestId);
-
-	[LoggerMessage(20615, LogLevel.Debug,
-		"Inlined from request {BodySize} bytes (original {OriginalBodySize} bytes) for request {RelayRequestId}")]
-	partial void LogInlinedRequestBody(long? bodySize, long? originalBodySize, Guid relayRequestId);
-
 	private async Task<bool> TryInlineBodyContentAsync(TRequest request, CancellationToken cancellationToken)
 	{
 		if (request.BodyContent is null) return false;
 
 		if (request.BodySize > _maximumBodySize)
 		{
-			LogOutsourcingRequestBody(request.BodySize, request.OriginalBodySize, _maximumBodySize, request.RequestId);
+			Log.OutsourcingRequestBody(_logger, request.BodySize, request.OriginalBodySize, _maximumBodySize, request.RequestId);
 			await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, cancellationToken);
 
 			request.BodyContent = null;
-			LogOutsourcedRequestBody(request.BodySize, request.OriginalBodySize, request.RequestId);
+			Log.OutsourcedRequestBody(_logger, request.BodySize, request.OriginalBodySize, request.RequestId);
 
 			return false;
 		}
 
 		request.BodyContent = await request.BodyContent.CopyToMemoryStreamAsync(cancellationToken);
-		LogInlinedRequestBody(request.BodySize, request.OriginalBodySize, request.RequestId);
+		Log.InlinedRequestBody(_logger, request.BodySize, request.OriginalBodySize, request.RequestId);
 
 		return true;
 	}

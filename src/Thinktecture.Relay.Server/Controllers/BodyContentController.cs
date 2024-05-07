@@ -14,7 +14,7 @@ namespace Thinktecture.Relay.Server.Controllers;
 [Authorize(Constants.DefaultAuthenticationPolicy)]
 public partial class BodyContentController : Controller
 {
-	private readonly ILogger<BodyContentController> _logger;
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="BodyContentController"/> class.
@@ -22,10 +22,6 @@ public partial class BodyContentController : Controller
 	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	public BodyContentController(ILogger<BodyContentController> logger)
 		=> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-	[LoggerMessage(20200, LogLevel.Debug,
-		"Delivering request body content for request {RelayRequestId}, should delete: {DeleteBody}")]
-	partial void LogDeliverBody(Guid relayRequestId, bool deleteBody);
 
 	/// <summary>
 	/// Streams the body content of the request.
@@ -40,7 +36,7 @@ public partial class BodyContentController : Controller
 		[FromServices] IBodyStore bodyStore,
 		[FromQuery] bool delete = false)
 	{
-		LogDeliverBody(requestId, delete);
+		Log.DeliverBody(_logger, requestId, delete);
 
 		var stream = await bodyStore.OpenRequestBodyAsync(requestId, HttpContext.RequestAborted);
 		Response.RegisterForDisposeAsync(stream);
@@ -53,9 +49,6 @@ public partial class BodyContentController : Controller
 		return new FileStreamResult(stream, MediaTypeNames.Application.Octet);
 	}
 
-	[LoggerMessage(20201, LogLevel.Debug, "Storing response body content for request {RelayRequestId}")]
-	partial void LogStoreBody(Guid relayRequestId);
-
 	/// <summary>
 	/// Stores the body content of the response.
 	/// </summary>
@@ -67,7 +60,7 @@ public partial class BodyContentController : Controller
 	public async Task<IActionResult> StoreResponseBodyContentAsync([FromRoute] Guid requestId,
 		[FromServices] IBodyStore bodyStore)
 	{
-		LogStoreBody(requestId);
+		Log.StoreBody(_logger, requestId);
 
 		try
 		{
@@ -76,9 +69,7 @@ public partial class BodyContentController : Controller
 		}
 		catch (OperationCanceledException)
 		{
-			_logger.LogWarning(20202,
-				"Connector for {TenantName} aborted the response body upload for request {RelayRequestId}",
-				User.GetTenantName(), requestId);
+			Log.ResponseAborted(_logger, User.GetTenantName(), requestId);
 			return NoContent();
 		}
 	}

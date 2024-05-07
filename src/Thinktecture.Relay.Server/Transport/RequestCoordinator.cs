@@ -10,7 +10,7 @@ namespace Thinktecture.Relay.Server.Transport;
 public partial class RequestCoordinator<T> : IRequestCoordinator<T>
 	where T : IClientRequest
 {
-	private readonly ILogger<RequestCoordinator<T>> _logger;
+	private readonly ILogger _logger;
 	private readonly ITenantTransport<T> _tenantTransport;
 
 	/// <summary>
@@ -24,13 +24,10 @@ public partial class RequestCoordinator<T> : IRequestCoordinator<T>
 		_tenantTransport = tenantTransport ?? throw new ArgumentNullException(nameof(tenantTransport));
 	}
 
-	[LoggerMessage(21300, LogLevel.Debug, "Redirecting request {RelayRequestId} to transport for tenant {TenantName}")]
-	partial void LogRedirect(Guid relayRequestId, string tenantName);
-
 	/// <inheritdoc />
 	public async Task ProcessRequestAsync(T request, CancellationToken cancellationToken = default)
 	{
-		LogRedirect(request.RequestId, request.TenantName);
+		Log.Redirect(_logger, request.RequestId, request.TenantName);
 		await _tenantTransport.TransportAsync(request);
 	}
 }

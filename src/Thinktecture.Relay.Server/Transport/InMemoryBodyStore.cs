@@ -9,13 +9,13 @@ using Microsoft.Extensions.Logging;
 namespace Thinktecture.Relay.Server.Transport;
 
 /// <inheritdoc />
-internal class InMemoryBodyStore : IBodyStore
+internal partial class InMemoryBodyStore : IBodyStore
 {
 	private readonly ConcurrentDictionary<Guid, byte[]> _requestStore = new ConcurrentDictionary<Guid, byte[]>();
 	private readonly ConcurrentDictionary<Guid, byte[]> _responseStore = new ConcurrentDictionary<Guid, byte[]>();
 
 	public InMemoryBodyStore(ILogger<InMemoryBodyStore> logger)
-		=> logger.LogDebug(21100, "Using {StorageType} as body store", nameof(InMemoryBodyStore));
+		=> Log.UsingStorage(logger, nameof(InMemoryBodyStore));
 
 	/// <inheritdoc />
 	public async Task<long> StoreRequestBodyAsync(Guid requestId, Stream bodyStream,
