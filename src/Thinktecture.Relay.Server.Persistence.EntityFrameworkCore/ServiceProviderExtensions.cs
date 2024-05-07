@@ -13,7 +13,7 @@ namespace Thinktecture.Relay.Server.Persistence.EntityFrameworkCore;
 /// <summary>
 /// Extension methods for the <see cref="IServiceProvider"/>.
 /// </summary>
-public static class ServiceProviderExtensions
+public static partial class ServiceProviderExtensions
 {
 	/// <summary>
 	/// Apply the pending database migrations.
@@ -33,12 +33,12 @@ public static class ServiceProviderExtensions
 		var pending = (await context.Database.GetPendingMigrationsAsync(cancellationToken)).ToArray();
 		if (pending.Length > 0)
 		{
-			logger.LogInformation(23200, "Applying {MigrationCount} pending migration(s)", pending.Length);
+			Log.ApplyingPendingMigrations(logger, pending.Length);
 			await context.Database.MigrateAsync(cancellationToken);
 		}
 		else
 		{
-			logger.LogDebug(23201, "No migrations pending");
+			Log.NoMigrationsPending(logger);
 		}
 	}
 
@@ -64,18 +64,16 @@ public static class ServiceProviderExtensions
 		{
 			if (applied.Length == 0)
 			{
-				logger.LogError(23202, "Cannot rollback any migrations on a non-migrated database");
+				Log.CannotRollback(logger);
 			}
 			else
 			{
-				logger.LogWarning(23203,
-					"The provided target migration \"{TargetMigration}\" was not found in the already applied migrations (\"{Migrations}\")",
-					targetMigration, string.Join("\", \"", applied));
+				Log.MigrationNotFound(logger, targetMigration, string.Join("\", \"", applied));
 			}
 		}
 		else
 		{
-			logger.LogWarning(203204, "Rolling back to migration {TargetMigration}", migration);
+			Log.RollingBack(logger, migration);
 			await context.GetService<IMigrator>().MigrateAsync(migration, cancellationToken);
 		}
 	}

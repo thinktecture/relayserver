@@ -15,7 +15,7 @@ public partial class StatisticsService : IStatisticsService
 {
 	private readonly RelayDbContext _dbContext;
 	private readonly ITenantService _tenantService;
-	private readonly ILogger<StatisticsService> _logger;
+	private readonly ILogger _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="StatisticsService"/> class.
@@ -33,7 +33,7 @@ public partial class StatisticsService : IStatisticsService
 	/// <inheritdoc />
 	public async Task SetStartupTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug(23300, "Adding new origin {OriginId} to statistics tracking", originId);
+		Log.AddingNewOrigin(_logger, originId);
 
 		var startup = DateTimeOffset.UtcNow;
 		try
@@ -53,18 +53,14 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23301, ex, "An error occured while creating origin {OriginId} for statistics tracking",
-				originId);
+			Log.ErrorCreatingOrigin(_logger, ex, originId);
 		}
 	}
-
-	[LoggerMessage(23302, LogLevel.Debug, "Updating last seen time of origin {OriginId} in statistics tracking")]
-	partial void LogUpdateLastSeen(Guid originId);
 
 	/// <inheritdoc />
 	public async Task UpdateLastSeenTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
-		LogUpdateLastSeen(originId);
+		Log.UpdateLastSeen(_logger, originId);
 
 		try
 		{
@@ -79,19 +75,18 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23303, ex, "An error occured while updating origin {OriginId} for statistics tracking",
-				originId);
+			Log.ErrorUpdatingOrigin(_logger, ex, originId);
 		}
 	}
 
 	/// <inheritdoc />
 	public async Task SetShutdownTimeAsync(Guid originId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug(23304, "Setting shutdown time of origin {OriginId} in statistics tracking", originId);
+		Log.SettingShutdownTime(_logger, originId);
 
 		try
 		{
-			var entity = new Origin() { Id = originId };
+			var entity = new Origin() { Id = originId, };
 			_dbContext.Attach(entity);
 			entity.ShutdownTime = entity.LastSeenTime = DateTimeOffset.UtcNow;
 			await _dbContext.SaveChangesAsync(cancellationToken);
@@ -102,20 +97,15 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23305, ex, "An error occured while updating origin {OriginId} for statistics tracking",
-				originId);
+			Log.ErrorSettingShutdownTime(_logger, ex, originId);
 		}
 	}
-
-	[LoggerMessage(23306, LogLevel.Debug,
-		"Cleaning up statistics storage by deleting all origins that have not been seen since {OriginLastSeen}")]
-	partial void LogCleanup(DateTimeOffset originLastSeen);
 
 	/// <inheritdoc />
 	public async Task CleanUpOriginsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 	{
 		var lastSeen = DateTimeOffset.UtcNow - maxAge;
-		LogCleanup(lastSeen);
+		Log.Cleanup(_logger, lastSeen);
 
 		try
 		{
@@ -129,7 +119,7 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23307, ex, "An error occured while deleting old origins");
+			Log.ErrorDeletingOrigins(_logger, ex);
 		}
 	}
 
@@ -138,8 +128,7 @@ public partial class StatisticsService : IStatisticsService
 		IPAddress? remoteIpAddress,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug(23308, "Adding new connection {TransportConnectionId} for statistics tracking",
-			connectionId);
+		Log.AddingNewConnection(_logger, connectionId);
 
 		try
 		{
@@ -160,24 +149,15 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23309, ex,
-				"An error occured while creating connection {TransportConnectionId} for statistics tracking",
-				connectionId);
+			Log.ErrorCreatingConnection(_logger, ex, connectionId);
 		}
 	}
-
-	[LoggerMessage(23310, LogLevel.Debug,
-		"Updating last seen time of connection {TransportConnectionId} to {LastSeenTime} within batch {UpdateBatchId} in statistics tracking")]
-	partial void LogUpdateConnectionLastSeenTime(string transportConnectionId, DateTimeOffset lastSeenTime, Guid updateBatchId);
 
 	/// <inheritdoc />
 	public async Task UpdateLastSeenTimeAsync(IDictionary<string, DateTimeOffset> data, CancellationToken cancellationToken = default)
 	{
 		var batchId = Guid.NewGuid();
-
-		_logger.LogDebug(23319,
-			"Starting batch {UpdateBatchId} to update the last seen time of {UpdateAmount} connections",
-			batchId, data.Count);
+		Log.UpdateConnectionsLastSeenTime(_logger, batchId, data.Count);
 
 		try
 		{
@@ -186,7 +166,7 @@ public partial class StatisticsService : IStatisticsService
 				var connectionId = entry.Key;
 				var lastSeenTime = entry.Value;
 
-				LogUpdateConnectionLastSeenTime(connectionId, lastSeenTime, batchId);
+				Log.UpdateConnectionLastSeenTime(_logger, connectionId, lastSeenTime, batchId);
 
 				var entity = new Connection() { Id = connectionId, };
 				_dbContext.Attach(entity);
@@ -202,18 +182,14 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23311, ex,
-				"An error occured while updating last seen time of multiple connections in batch {UpdateBatchId} in statistics tracking",
-				batchId);
+			Log.ErrorUpdatingConnections(_logger, ex, batchId);
 		}
 	}
 
 	/// <inheritdoc />
 	public async Task SetDisconnectTimeAsync(string connectionId, CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug(23312,
-			"Setting disconnect time of connection {TransportConnectionId} in statistics tracking",
-			connectionId);
+		Log.SettingDisconnectTime(_logger, connectionId);
 
 		try
 		{
@@ -228,21 +204,15 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23313, ex,
-				"An error occured while updating connection {TransportConnectionId} in statistics tracking",
-				connectionId);
+			Log.ErrorSettingDisconnectTime(_logger, ex, connectionId);
 		}
 	}
-
-	[LoggerMessage(23314, LogLevel.Debug,
-		"Cleaning up statistics storage by deleting all connections that have no activity or are disconnected since {ConnectionLastActivity}")]
-	partial void LogConnectionCleanup(DateTimeOffset connectionLastActivity);
 
 	/// <inheritdoc />
 	public async Task CleanUpConnectionsAsync(TimeSpan maxAge, CancellationToken cancellationToken = default)
 	{
 		var lastSeen = DateTimeOffset.UtcNow - maxAge;
-		LogConnectionCleanup(lastSeen);
+		Log.ConnectionCleanup(_logger, lastSeen);
 
 		try
 		{
@@ -259,7 +229,7 @@ public partial class StatisticsService : IStatisticsService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(23315, ex, "An error occured while deleting old connections");
+			Log.ErrorCleaningUpConnections(_logger, ex);
 		}
 	}
 }
