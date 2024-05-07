@@ -18,9 +18,7 @@ internal class RotateSigningCredentialFileStore : ISigningCredentialStore
 	/// </summary>
 	/// <param name="fileStore">An instance of an <see cref="RotateCertificateFileStore"/>.</param>
 	public RotateSigningCredentialFileStore(RotateCertificateFileStore fileStore)
-	{
-		_fileStore = fileStore ?? throw new ArgumentNullException(nameof(fileStore));
-	}
+		=> _fileStore = fileStore ?? throw new ArgumentNullException(nameof(fileStore));
 
 	/// <inheritdoc />
 	public Task<SigningCredentials> GetSigningCredentialsAsync()
