@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
 WORKDIR /src
 
 # Copy only project files for restore
@@ -29,7 +29,7 @@ COPY ./docker/Thinktecture.Relay.IdentityServer.Docker ./docker/Thinktecture.Rel
 RUN dotnet publish /src/docker/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
 
 # Create final image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-bullseye-slim
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim
 
 WORKDIR /app
 RUN adduser -u 5678 --disabled-password --gecos "" idsrv && chown -R idsrv /app
