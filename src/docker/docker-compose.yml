@@ -144,20 +144,21 @@ services:
       - relay_management
     command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant1\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant2\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants" ]
 
-  relay_identityserver:
+  relay_identityprovider:
     <<: *defaults
-    image: relay_identityserver
-    build:
-      context: ..
-      dockerfile: ./docker/Thinktecture.Relay.IdentityServer.Docker/Dockerfile
-    container_name: relay_identityserver
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: relayidentityprovider # this should also be named relay_identityprovider, but Keycloak does not support underscores in host names 🤦 See https://stackoverflow.com/a/76991211/199861
     ports:
-      - "5002:5000"
+      - "5002:5002"
+    volumes:
+      - ./keycloak_data:/opt/keycloak/data/import
     environment:
-      <<: [*db-connection, *logging]
-    depends_on:
-      - relay_server_migrations
-      - relay_tenant_seed
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: admin
+        KC_HEALTH_ENABLED: true
+        KC_METRICS_ENABLED: true
+        KC_HOSTNAME_DEBUG: true
+    command: [ "start-dev", "--http-port=5002", "--import-realm" ]
 
   relay_server_a:
     <<: *defaults
@@ -173,7 +174,7 @@ services:
       - relay-bodystore:/var/bodystore
     depends_on:
       - relay_server_migrations
-      - relay_identityserver
+      - relay_identityprovider
   relay_server_b:
     <<: *defaults
     image: relay_server
@@ -188,7 +189,7 @@ services:
       - relay-bodystore:/var/bodystore
     depends_on:
       - relay_server_migrations
-      - relay_identityserver
+      - relay_identityprovider
 
   relay_connector_a1:
     <<: *defaults
