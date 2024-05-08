@@ -26,7 +26,7 @@ to use other logging targets or acquire a commercial Seq license.
 
 ## Components
 
-The relay server environment consists of several parts.
+The relay server development environment consists of several parts.
 
 - Configuration database  
   The current implementation supports PostgreSQL and Microsoft SQL Server. The development environment is built for
@@ -44,13 +44,12 @@ The relay server environment consists of several parts.
    - Node 1 management UI can be accessed at http://localhost:15672/, login with guest/guest.
    - Node 2 management UI can be accessed at http://localhost:15673/, login with guest/guest.
 
-- IdentityServer  
-  The IdentityServer provides an authentication service for the other components.
+- OIDC compliant identity provider  
+  The identity provider provides an authentication service for the other components. In the development environment we
+  use a preconfigured Keycloak instance.
 
    - Needs to be accessible from outside the system.
-   - Needs access to the configuration database.
-   - Currently NOT YET capable of running more than one node.
-   - The identity server can be accessed at http://localhost:5002/ as the authority.
+   - The development OIDC server can be accessed at http://localhost:5002/realms/relayserver as the authority.
 
 - ManagementApi  
   The Management API is used to manage the data in the configuration database.
@@ -66,7 +65,7 @@ The relay server environment consists of several parts.
    - Needs to be accessible from outside the system.
    - Needs access to the configuration database.
    - Needs access to the message queue.
-   - Needs access to the identity server.
+   - Needs access to the identity provider.
    - If this component is started more than once, all instances need to share one storage volume (shared file storage).
    - RelayServer can be accessed at http://localhost:5000/ in single-node mode.
    - RelayServer node A can be accessed at http://localhost:5010/ in multi-server mode.
@@ -75,7 +74,7 @@ The relay server environment consists of several parts.
 - Connector  
   This component will be installed on-premises at tenants.
 
-   - Needs access to identity server through public url.
+   - Needs access to identity provider through public url.
    - Needs access to relay server through public url.
 
 - Seq  
@@ -91,5 +90,4 @@ backing service classes. The way we structured the components listed above is ba
 so far and does not mean that this is the only way to deploy and use RelayServer.
 
 It might be the case that your specific use case demands or favours a different component layout, i.e. combining the
-management- and statistics API together with the IdentityServer part into a single host project, or even putting all
-server components together.
+management- and statistics API together into a single host project, or even putting all server components together.

@@ -33,22 +33,13 @@ RelayServer deployments consist of multiple instances (pods) of different contai
   cluster.  
   **Do NOT** use the example / development database containers from this repository in production.
 
+* Access Token Provider  
+  RelayServer v3 requires an OIDC compliant identity provider instance to provide access tokens for the connectors. This
+  instance should be set up and configured to provide the required tokens for the tenants.  
+  **DO** set up and operate a reliable, highly available (HA) and performant OIDC server instance.  
+  **Do NOT** use the example / development Keycloak container from this repository in production.
+
 ## RelayServer Components
-
-* Thinktecture.Relay.IdentityServer  
-  The purpose of this component is to provide a default way how a connector can authenticate. A connector uses the OAuth
-  client credential flow with the IdentityServer component to receive an access token for authenticated communication
-  with the RelayServer. The service needs to request a single new token in regular intervals. This component does not
-  need to handle a lot of load, and the load is expected to increase in a linear way with the amount of concurrently
-  running connectors.
-
-  **DO** create your own project using the RelayServer v3 NuGet packages. Use the corresponding persistence packages for
-  the database of your choice.  
-  **Do NOT** use the example / development project and docker file from this repository in production.  
-  **Do NOT** run multiple instances of the RelayServer.IdentityServer component, as this is not yet supported.
-
-  Configuration:
-  * Provide a connection string to the RelayServer database.
 
 * Thinktecture.Relay.Server
   This is the main component of the RelayServer. It provides all endpoints required for the connectors and it also
@@ -61,9 +52,9 @@ RelayServer deployments consist of multiple instances (pods) of different contai
   Consider providing automatic scaling functionality of this component based on load.
 
   Configuration:
-  * Provide a shared volume to all instances of Thinktecture.Relay.IdentityServer i.e. on /var/bodystore and add a
+  * Provide a shared volume to all instances of Thinktecture.Relay.Server i.e. on /var/bodystore and add a
   configuration property for the storage path to this directory
-  * Provide a url to the RelayServer.IdentityServer component
+  * Provide a authority url pointing to your OIDC compliant identity provider instance 
   * Provide a connection string to the RelayServer database
   * Provide a connection string to the RabbitMQ
 

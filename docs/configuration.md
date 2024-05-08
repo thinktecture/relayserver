@@ -188,7 +188,7 @@ not needed/wanted anymore.
 ### Require authentication
 
 If a tenant has `RequireAuthentication` enabled in the database, the RelayServer only relays
-when the request contains an access token from it's own issuer and audience (e.g., it comes
+when the request contains an access token from its own issuer and audience (e.g., it comes
 from a connector). In any other case it returns 401.
 
 ### Maximum concurrent connector requests
