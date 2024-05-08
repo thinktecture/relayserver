@@ -6,6 +6,7 @@ Concepts explained in this document are:
 - [Transports](#transports)
 - [Acknowledgment](#acknowledgment)
 - [Body content handling](#body-content-handling)
+- [Authentication](#authentication)
 
 ## Request Processing
 
@@ -179,3 +180,20 @@ deletion when loading the request body from the server using the request endpoin
 ### Response body
 
 The persisted response body will automatically be deleted when the response has been send to the waiting client.
+
+## Authentication
+
+A Connector needs to authenticate itself against the RelayServer. This is done by providing a valid access token. The
+token will be retrieved from the `Authority` that the RelayServer is configured to use. The connector will retrieve the
+url to the token provider from the `.well-known/relayserver-configuration` endpoint on the RelayServer.
+
+The identity provider needs to be an OIDC compliant service, like Entra ID, Keycloak, Auth0, IdentityServer or others.
+
+The token needs to provide at least the following values in its claims:
+* `client_id`: the name of the tenant as it is configured in the RelayServer database
+* `aud` (audience): `relayserver`, only when the RelayServer knows that this token is intended for it, it will accept it
+* `scope`: `connector`, the endpoints on the RelayServer that the connector needs to call require this scope
+
+The configuration of the tenant in the RelayServer database can be omitted if the server is configured for automatic
+tenant creation (see `Automatic Tenant Creation` in the [Configuration](./configuration.md#automatic-tenant-creation)
+documentation.

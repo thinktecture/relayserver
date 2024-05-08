@@ -84,7 +84,6 @@ The following is the list of supported scopes:
 - **persistence**
 - **server**
 - **server-abstractions**
-- **idsrv**
 - **management**
 - **statistics**
 - **interceptor**
