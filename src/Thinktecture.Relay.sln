@@ -56,8 +56,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer", "Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer\Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer.csproj", "{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.IdentityServer", "Thinktecture.Relay.IdentityServer\Thinktecture.Relay.IdentityServer.csproj", "{BBA20B5D-7319-453E-918E-46BBAA6E0E06}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA1D-9755-4842-BDE0-34F7EADF9969}"
 	ProjectSection(SolutionItems) = preProject
 		docker\Directory.Build.props = docker\Directory.Build.props
@@ -65,8 +63,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{3126FA
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.Docker", "docker\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj", "{599D7AD9-7901-4A20-A81F-6C71E60A71DF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.IdentityServer.Docker", "docker\Thinktecture.Relay.IdentityServer.Docker\Thinktecture.Relay.IdentityServer.Docker.csproj", "{A22125AE-D673-4B9C-908F-DE0270380DAE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thinktecture.Relay.ManagementApi.Docker", "docker\Thinktecture.Relay.ManagementApi.Docker\Thinktecture.Relay.ManagementApi.Docker.csproj", "{D1866E02-8665-4166-8F6D-ECED1BAAEF7E}"
 EndProject
@@ -139,18 +135,10 @@ Global
 		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCABE418-3B8E-47C0-BD63-41DD24B80FB3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BBA20B5D-7319-453E-918E-46BBAA6E0E06}.Release|Any CPU.Build.0 = Release|Any CPU
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A22125AE-D673-4B9C-908F-DE0270380DAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A22125AE-D673-4B9C-908F-DE0270380DAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A22125AE-D673-4B9C-908F-DE0270380DAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A22125AE-D673-4B9C-908F-DE0270380DAE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D1866E02-8665-4166-8F6D-ECED1BAAEF7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D1866E02-8665-4166-8F6D-ECED1BAAEF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1866E02-8665-4166-8F6D-ECED1BAAEF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -200,7 +188,6 @@ Global
 		{0E3FCC70-66BC-43DE-A498-A04085F1BF0C} = {AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}
 		{329E6E2B-FEB6-4FA9-A893-0435300A122D} = {AAA28426-F20E-4797-9B0E-F8AA4EF1A7FC}
 		{599D7AD9-7901-4A20-A81F-6C71E60A71DF} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
-		{A22125AE-D673-4B9C-908F-DE0270380DAE} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{D1866E02-8665-4166-8F6D-ECED1BAAEF7E} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{29B6CBFA-43A8-447E-90AB-6B22CD0EA413} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
 		{055B9A9E-9A45-4100-BA64-378443F6AB73} = {3126FA1D-9755-4842-BDE0-34F7EADF9969}
