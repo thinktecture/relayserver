@@ -3,7 +3,6 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
 
@@ -39,20 +38,6 @@
       <Pack>true</Pack>
       <PackagePath>/</PackagePath>
     </None>
-  </ItemGroup>
-
-  <!-- Enable sourcelink support for debugging our sources -->
-  <PropertyGroup Condition="'$(DisableSourceLink)' != 'true'">
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(DisableSourceLink)' != 'true'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <SourceRoot Include="$(MSBuildThisFileDirectory)" />
   </ItemGroup>
 
 </Project>

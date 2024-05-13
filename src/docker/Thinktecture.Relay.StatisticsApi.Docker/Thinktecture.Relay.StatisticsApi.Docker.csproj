@@ -17,8 +17,4 @@
     <ProjectReference Include="..\Thinktecture.Relay.Docker\Thinktecture.Relay.Docker.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-  </ItemGroup>
-
 </Project>
