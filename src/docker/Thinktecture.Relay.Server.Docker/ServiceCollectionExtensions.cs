@@ -11,11 +11,11 @@ public static class ServiceCollectionExtensions
 	{
 		if ("SqlServer".Equals(configuration.GetValue<string>("DatabaseType"),
 			    StringComparison.InvariantCultureIgnoreCase))
-			return Server.Persistence.EntityFrameworkCore.SqlServer.ServiceCollectionExtensions
+			return Persistence.EntityFrameworkCore.SqlServer.ServiceCollectionExtensions
 				.AddRelayServerDbContext(services, configuration.GetConnectionString("SqlServer")
 					?? throw new InvalidOperationException("No 'SqlServer' connection string found."));
 
-		return Server.Persistence.EntityFrameworkCore.PostgreSql.ServiceCollectionExtensions
+		return Persistence.EntityFrameworkCore.PostgreSql.ServiceCollectionExtensions
 			.AddRelayServerDbContext(services, configuration.GetConnectionString("PostgreSql")
 				?? throw new InvalidOperationException("No 'PostgreSql' connection string found."));
 	}

@@ -63,8 +63,7 @@ public class DiscoveryDocumentBuilder
 	protected virtual string? GetAuthority()
 	{
 		var authority = _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()
-			?.Get(Constants.DefaultAuthenticationScheme)
-			?.Authority;
+			?.Get(Constants.DefaultAuthenticationScheme).Authority;
 		if (authority is null) return null;
 
 		return authority.EndsWith("/") ? authority : $"{authority}/";

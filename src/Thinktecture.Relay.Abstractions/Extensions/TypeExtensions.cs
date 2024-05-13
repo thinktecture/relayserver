@@ -14,7 +14,7 @@ public static class TypeExtensions
 	/// </summary>
 	/// <param name="type">The <see cref="Type"/>.</param>
 	/// <returns>The simple name of the assembly.</returns>
-	public static string GetAssemblySimpleName(this Type type)
+	public static string? GetAssemblySimpleName(this Type type)
 		=> type.Assembly.GetName().Name;
 
 	/// <summary>
