@@ -24,7 +24,7 @@ COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.PostgreSql ./Th
 COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer
 COPY ./docker/Thinktecture.Relay.StatisticsApi.Docker ./docker/Thinktecture.Relay.StatisticsApi.Docker
 
-RUN dotnet publish /src/docker/Thinktecture.Relay.StatisticsApi.Docker/Thinktecture.Relay.StatisticsApi.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
+RUN dotnet publish /src/docker/Thinktecture.Relay.StatisticsApi.Docker/Thinktecture.Relay.StatisticsApi.Docker.csproj --no-restore -c Release -o /app
 
 # Create final image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim

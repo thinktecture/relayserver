@@ -21,7 +21,7 @@ COPY ./Thinktecture.Relay.Connector.Abstractions ./Thinktecture.Relay.Connector.
 COPY ./Thinktecture.Relay.Connector.Protocols.SignalR ./Thinktecture.Relay.Connector.Protocols.SignalR
 COPY ./docker/Thinktecture.Relay.Connector.Docker ./docker/Thinktecture.Relay.Connector.Docker
 
-RUN dotnet publish /src/docker/Thinktecture.Relay.Connector.Docker/Thinktecture.Relay.Connector.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
+RUN dotnet publish /src/docker/Thinktecture.Relay.Connector.Docker/Thinktecture.Relay.Connector.Docker.csproj --no-restore -c Release -o /app
 
 # Create final image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim

@@ -26,7 +26,7 @@ COPY ./Thinktecture.Relay.Server.Persistence.EntityFrameworkCore.SqlServer ./Thi
 COPY ./Thinktecture.Relay.IdentityServer ./Thinktecture.Relay.IdentityServer
 COPY ./docker/Thinktecture.Relay.IdentityServer.Docker ./docker/Thinktecture.Relay.IdentityServer.Docker
 
-RUN dotnet publish /src/docker/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
+RUN dotnet publish /src/docker/Thinktecture.Relay.IdentityServer.Docker/Thinktecture.Relay.IdentityServer.Docker.csproj --no-restore -c Release -o /app
 
 # Create final image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim

@@ -32,7 +32,7 @@ COPY ./Thinktecture.Relay.Server.Protocols.RabbitMq ./Thinktecture.Relay.Server.
 COPY ./Thinktecture.Relay.Server.Protocols.SignalR ./Thinktecture.Relay.Server.Protocols.SignalR
 COPY ./docker/Thinktecture.Relay.Server.Docker ./docker/Thinktecture.Relay.Server.Docker
 
-RUN dotnet publish /src/docker/Thinktecture.Relay.Server.Docker/Thinktecture.Relay.Server.Docker.csproj --no-restore -c Release -o /app -p:DisableSourceLink=true
+RUN dotnet publish /src/docker/Thinktecture.Relay.Server.Docker/Thinktecture.Relay.Server.Docker.csproj --no-restore -c Release -o /app
 
 # Create final image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim
