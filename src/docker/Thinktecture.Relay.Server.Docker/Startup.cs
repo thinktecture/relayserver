@@ -24,7 +24,9 @@ public class Startup
 			.AddAuthentication(Constants.DefaultAuthenticationScheme)
 			.AddJwtBearer(Constants.DefaultAuthenticationScheme, options =>
 			{
-				var authorityUri = new Uri(Configuration.GetValue<string>("Authentication:Authority"));
+				var value = Configuration.GetValue<string>("Authentication:Authority") ??
+					throw new ArgumentException("The configuration value 'Authentication:Authority' is missing.");
+				var authorityUri = new Uri(value);
 				options.Authority = authorityUri.AbsoluteUri;
 				options.Audience = Constants.DefaultAuthenticationAudience;
 				options.RequireHttpsMetadata = authorityUri.Scheme == "https";
