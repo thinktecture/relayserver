@@ -30,6 +30,4 @@ public interface ITargetResponseInterceptor<TRequest, TResponse>
 /// <summary>
 /// An implementation of an interceptor dealing with the response of a target.
 /// </summary>
-public interface ITargetResponseInterceptor : ITargetResponseInterceptor<ClientRequest, TargetResponse>
-{
-}
+public interface ITargetResponseInterceptor : ITargetResponseInterceptor<ClientRequest, TargetResponse>;

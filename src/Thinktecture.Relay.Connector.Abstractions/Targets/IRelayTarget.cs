@@ -8,9 +8,7 @@ namespace Thinktecture.Relay.Connector.Targets;
 /// An implementation of a target.
 /// </summary>
 /// <remarks>This is just a marker interface.</remarks>
-public interface IRelayTarget
-{
-}
+public interface IRelayTarget;
 
 /// <summary>
 /// An implementation of a target executing logic triggered by a request.
@@ -32,9 +30,7 @@ public interface IRelayTargetAction<in TRequest> : IRelayTarget
 }
 
 /// <inheritdoc />
-public interface IRelayTargetAction : IRelayTargetAction<ClientRequest>
-{
-}
+public interface IRelayTargetAction : IRelayTargetAction<ClientRequest>;
 
 /// <summary>
 /// An implementation of a target providing the necessary response information for a request.
@@ -58,6 +54,4 @@ public interface IRelayTargetFunc<in TRequest, TResponse> : IRelayTarget
 }
 
 /// <inheritdoc />
-public interface IRelayTargetFunc : IRelayTargetFunc<ClientRequest, TargetResponse>
-{
-}
+public interface IRelayTargetFunc : IRelayTargetFunc<ClientRequest, TargetResponse>;

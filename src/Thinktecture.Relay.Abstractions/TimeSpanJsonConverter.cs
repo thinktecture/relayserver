@@ -8,7 +8,7 @@ namespace Thinktecture.Relay;
 internal class TimeSpanJsonConverter : JsonConverter<TimeSpan>
 {
 	public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		=> TimeSpan.Parse(reader.GetString(), CultureInfo.InvariantCulture);
+		=> TimeSpan.Parse(reader.GetString() ?? TimeSpan.Zero.ToString(), CultureInfo.InvariantCulture);
 
 	public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
 		=> writer.WriteStringValue(value.ToString("c"));
@@ -18,7 +18,7 @@ internal class NullableTimeSpanJsonConverter : JsonConverter<TimeSpan?>
 {
 	public override TimeSpan? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		=> reader.TokenType == JsonTokenType.String
-			? TimeSpan.Parse(reader.GetString(), CultureInfo.InvariantCulture)
+			? TimeSpan.Parse(reader.GetString() ?? TimeSpan.Zero.ToString(), CultureInfo.InvariantCulture)
 			: null;
 
 	public override void Write(Utf8JsonWriter writer, TimeSpan? value, JsonSerializerOptions options)
