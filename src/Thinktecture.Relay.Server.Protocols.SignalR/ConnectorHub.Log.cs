@@ -23,7 +23,6 @@ public partial class ConnectorHub<TRequest, TResponse, TAcknowledge>
 		public static partial void
 			RejectingUnknownTenant(ILogger logger, string transportConnectionId, string tenantName);
 
-
 		[LoggerMessage(LoggingEventIds.ConnectorHubIncomingConnectionUpdatedTenant, LogLevel.Information,
 			"Incoming connection {TransportConnectionId} updated tenant {TenantName}")]
 		public static partial void IncomingConnectionUpdatedTenant(ILogger logger, string transportConnectionId,

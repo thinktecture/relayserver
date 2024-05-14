@@ -7,8 +7,7 @@ public partial class RelayRequestLogger<TRequest, TResponse>
 {
 	private static partial class Log
 	{
-		[LoggerMessage(20400, LogLevel.Trace,
-	"Writing request log for successful request {RelayRequestId}")]
+		[LoggerMessage(20400, LogLevel.Trace, "Writing request log for successful request {RelayRequestId}")]
 		public static partial void Success(ILogger logger, Guid relayRequestId);
 
 		[LoggerMessage(20401, LogLevel.Trace, "Writing request log for aborted request {RelayRequestId}")]

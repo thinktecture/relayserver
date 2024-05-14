@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 namespace Thinktecture.Relay.Server.Controllers;
+
 public partial class DiscoveryDocumentController
 {
 	private static partial class Log
