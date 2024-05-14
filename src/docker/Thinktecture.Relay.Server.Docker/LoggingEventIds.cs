@@ -7,5 +7,4 @@ internal static class LoggingEventIds
 
 	public const int DemoResponseInterceptorRemovingOutput = 3;
 	public const int DemoResponseInterceptorEnabled = 4;
-
 }
