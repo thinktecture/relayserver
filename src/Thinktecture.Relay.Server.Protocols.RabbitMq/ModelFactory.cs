@@ -37,7 +37,7 @@ public class ModelFactory<TAcknowledge>
 		}
 
 		connection.ConnectionShutdown += (_, args)
-			=> _logger.LogDebug(25101, "Connection closed ({ShutdownReason}", args.ReplyText);
+			=> _logger.LogDebug(25101, "Connection closed ({ShutdownReason})", args.ReplyText);
 	}
 
 	/// <summary>
