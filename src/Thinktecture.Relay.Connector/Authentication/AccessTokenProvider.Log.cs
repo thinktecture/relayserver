@@ -6,7 +6,7 @@ internal partial class AccessTokenProvider
 {
 	private static partial class Log
 	{
-		[LoggerMessage(LoggerEventIds.AccessTokenProviderRequestingAccessToken, LogLevel.Error, "Requesting access token")]
+		[LoggerMessage(LoggerEventIds.AccessTokenProviderRequestingAccessToken, LogLevel.Debug, "Requesting access token")]
 		public static partial void RequestingAccessToken(ILogger logger);
 	}
 }
