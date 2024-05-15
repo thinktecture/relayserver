@@ -19,7 +19,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '6.0.x' # use latest 6.0 SDK
+          dotnet-version: '8.0.x'
         env:
           DOTNET_NOLOGO: true
           DOTNET_CLI_TELEMETRY_OPTOUT: true
