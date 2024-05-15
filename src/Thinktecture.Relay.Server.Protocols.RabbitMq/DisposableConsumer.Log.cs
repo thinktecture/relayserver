@@ -1,8 +1,9 @@
+using System;
 using Microsoft.Extensions.Logging;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
-internal static partial class ModelExtensions
+internal partial class DisposableConsumer
 {
 	private static partial class Log
 	{
