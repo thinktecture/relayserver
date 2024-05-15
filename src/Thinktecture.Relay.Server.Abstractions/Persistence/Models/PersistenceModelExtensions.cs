@@ -32,6 +32,7 @@ public static class PersistenceModelsExtensions
 	/// <param name="other">The source to copy the data over from to this instance.</param>
 	public static void UpdateFrom(this Config instance, Config other)
 	{
+		instance.TenantName = other.TenantName;
 		instance.KeepAliveInterval = other.KeepAliveInterval;
 		instance.EnableTracing = other.EnableTracing;
 		instance.ReconnectMinimumDelay = other.ReconnectMinimumDelay;
