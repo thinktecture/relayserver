@@ -22,7 +22,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
 	private readonly string _connectionId;
 	private readonly ConnectorRegistry<TRequest> _connectorRegistry;
-	private readonly AsyncEventingBasicConsumer _consumer;
+	private readonly DisposableConsumer _consumer;
 	private readonly IModel _model;
 	private readonly RelayServerContext _relayServerContext;
 
@@ -58,15 +58,15 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 			_model.BasicQos(0, (ushort)maximumConcurrentRequests, false);
 		}
 
-		_consumer = _model.ConsumeQueue(_logger, $"{Constants.RequestQueuePrefix} {tenantName}", autoDelete: false,
-			autoAck: false);
-		_consumer.Received += ConsumerReceived;
+		_consumer = new DisposableConsumer(_logger, _model, $"{Constants.RequestQueuePrefix} {tenantName}",
+			autoDelete: false, autoAck: false);
+		_consumer.Consume(ConsumerReceivedAsync);
 	}
 
 	/// <inheritdoc />
 	public void Dispose()
 	{
-		_consumer.Received -= ConsumerReceived;
+		_consumer.Dispose();
 
 		_model.Dispose();
 	}
@@ -84,7 +84,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 			Log.CouldNotParseAcknowledge(_logger, acknowledgeId);
 		}
 	}
-	private async Task ConsumerReceived(object sender, BasicDeliverEventArgs @event)
+	private async Task ConsumerReceivedAsync(BasicDeliverEventArgs @event)
 	{
 		var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize request.");

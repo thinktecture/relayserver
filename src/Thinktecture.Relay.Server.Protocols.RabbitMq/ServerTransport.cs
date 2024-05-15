@@ -17,12 +17,12 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	where TAcknowledge : IAcknowledgeRequest
 {
 	private readonly IModel _acknowledgeConsumeModel;
-	private readonly AsyncEventingBasicConsumer _acknowledgeConsumer;
+	private readonly DisposableConsumer _acknowledgeConsumer;
 	private readonly IAcknowledgeCoordinator<TAcknowledge> _acknowledgeCoordinator;
 	private readonly IModel _acknowledgeDispatchModel;
 	private readonly ILogger _logger;
 	private readonly IModel _responseConsumeModel;
-	private readonly AsyncEventingBasicConsumer _responseConsumer;
+	private readonly DisposableConsumer _responseConsumer;
 	private readonly IResponseCoordinator<TResponse> _responseCoordinator;
 	private readonly IModel _responseDispatchModel;
 
@@ -57,14 +57,14 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		_acknowledgeDispatchModel = modelFactory.Create("acknowledge dispatcher");
 
 		_responseConsumeModel = modelFactory.Create("response handler");
-		_responseConsumer =
-			_responseConsumeModel.ConsumeQueue(_logger, $"{Constants.ResponseQueuePrefix} {relayServerContext.OriginId}");
-		_responseConsumer.Received += ResponseConsumerReceived;
+		_responseConsumer = new DisposableConsumer(_logger, _responseConsumeModel,
+			$"{Constants.ResponseQueuePrefix} {relayServerContext.OriginId}");
+		_responseConsumer.Consume(ResponseConsumerReceivedAsync);
 
 		_acknowledgeConsumeModel = modelFactory.Create("acknowledge handler");
-		_acknowledgeConsumer =
-			_acknowledgeConsumeModel.ConsumeQueue(_logger, $"{Constants.AcknowledgeQueuePrefix} {relayServerContext.OriginId}");
-		_acknowledgeConsumer.Received += AcknowledgeConsumerReceived;
+		_acknowledgeConsumer = new DisposableConsumer(_logger, _acknowledgeConsumeModel,
+			$"{Constants.AcknowledgeQueuePrefix} {relayServerContext.OriginId}");
+		_acknowledgeConsumer.Consume(AcknowledgeConsumerReceivedAsync);
 	}
 
 	/// <inheritdoc />
@@ -73,8 +73,8 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		_responseDispatchModel.Dispose();
 		_acknowledgeDispatchModel.Dispose();
 
-		_responseConsumer.Received -= ResponseConsumerReceived;
-		_acknowledgeConsumer.Received -= AcknowledgeConsumerReceived;
+		_responseConsumer.Dispose();
+		_acknowledgeConsumer.Dispose();
 
 		_responseConsumeModel.Dispose();
 		_acknowledgeConsumeModel.Dispose();
@@ -96,12 +96,11 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		Log.DispatchingAcknowledge(_logger, request);
 
 		await _acknowledgeDispatchModel.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix} {request.OriginId}", request,
-			durable: false,
-			persistent: false);
+			durable: false, persistent: false);
 		Log.DispatchedAcknowledge(_logger, request.RequestId, request.OriginId);
 	}
 
-	private async Task ResponseConsumerReceived(object sender, BasicDeliverEventArgs @event)
+	private async Task ResponseConsumerReceivedAsync(BasicDeliverEventArgs @event)
 	{
 		var response = JsonSerializer.Deserialize<TResponse>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize response.");
@@ -109,7 +108,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		await _responseCoordinator.ProcessResponseAsync(response);
 	}
 
-	private async Task AcknowledgeConsumerReceived(object sender, BasicDeliverEventArgs @event)
+	private async Task AcknowledgeConsumerReceivedAsync(BasicDeliverEventArgs @event)
 	{
 		var request = JsonSerializer.Deserialize<TAcknowledge>(@event.Body.Span) ??
 			throw new Exception("Could not deserialize acknowledge request.");
