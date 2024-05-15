@@ -5,7 +5,7 @@ namespace Thinktecture.Relay.Connector.Options;
 
 internal partial class RelayConnectorPostConfigureOptions<TRequest, TResponse>
 {
-	public static partial class Log
+	private static partial class Log
 	{
 		[LoggerMessage(LoggingEventIds.RelayConnectorPostConfigureOptionsGotDiscoveryDocument, LogLevel.Trace,
 			"Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})")]
