@@ -8,12 +8,12 @@ public partial class ResponseTransport<T>
 {
 	private partial class Log
 	{
-		[LoggerMessage(LoggerEventIds.ResponseTransportTransportingResponse, LogLevel.Trace,
+		[LoggerMessage(LoggingEventIds.ResponseTransportTransportingResponse, LogLevel.Trace,
 			"Transporting response {@Response} for request {RelayRequestId} on connection {TransportConnectionId}")]
 		public static partial void TransportingResponse(ILogger logger, ITargetResponse response, Guid relayRequestId,
 			string? transportConnectionId);
 
-		[LoggerMessage(LoggerEventIds.ResponseTransportErrorTransportingResponse, LogLevel.Error,
+		[LoggerMessage(LoggingEventIds.ResponseTransportErrorTransportingResponse, LogLevel.Error,
 			"An error occured while transporting response for request {RelayRequestId} on connection {TransportConnectionId}")]
 		public static partial void ErrorTransportingResponse(ILogger logger, Exception exception,
 			Guid relayRequestId, string? transportConnectionId);

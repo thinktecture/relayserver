@@ -1,6 +1,6 @@
 namespace Thinktecture.Relay.Connector.Protocols.SignalR;
 
-internal static class LoggerEventIds
+internal static class LoggingEventIds
 {
 	public const int AcknowledgeTransportTransportingAck = 1;
 	public const int AcknowledgeTransportErrorTransportingAck = 2;

@@ -8,12 +8,12 @@ internal partial class AccessTokenManagementConfigureOptions
 {
 	private static partial class Log
 	{
-		[LoggerMessage(LoggerEventIds.AccessTokenManagementConfigureOptionsGotDiscoveryDocument, LogLevel.Trace,
+		[LoggerMessage(LoggingEventIds.AccessTokenManagementConfigureOptionsGotDiscoveryDocument, LogLevel.Trace,
 			"Got discovery document from {DiscoveryDocumentUrl} ({@DiscoveryDocument})")]
 		public static partial void GotDiscoveryDocument(ILogger logger, Uri discoveryDocumentUrl,
 			OpenIdConnectConfiguration discoveryDocument);
 
-		[LoggerMessage(LoggerEventIds.AccessTokenManagementConfigureOptionsErrorRetrievingDiscoveryDocument,
+		[LoggerMessage(LoggingEventIds.AccessTokenManagementConfigureOptionsErrorRetrievingDiscoveryDocument,
 			LogLevel.Error,
 			"An error occured while retrieving the discovery document from {DiscoveryDocumentUrl}")]
 		public static partial void ErrorRetrievingDiscoveryDocument(ILogger logger,

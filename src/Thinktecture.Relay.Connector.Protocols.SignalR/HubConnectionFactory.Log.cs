@@ -6,7 +6,7 @@ public partial class HubConnectionFactory
 {
 	private static partial class Log
 	{
-		[LoggerMessage(LoggerEventIds.HubConnectionFactoryCreatingConnection, LogLevel.Information,
+		[LoggerMessage(LoggingEventIds.HubConnectionFactoryCreatingConnection, LogLevel.Information,
 			"Creating connection to {ConnectorEndpoint}")]
 		public static partial void CreatingConnection(ILogger logger, string connectorEndpoint);
 	}
