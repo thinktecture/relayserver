@@ -1,6 +1,6 @@
 namespace Thinktecture.Relay.Connector;
 
-internal static class LoggerEventIds
+internal static class LoggingEventIds
 {
 	public const int AccessTokenProviderRequestingAccessToken = 1;
 	public const int AccessTokenManagementConfigureOptionsGotDiscoveryDocument = 2;
