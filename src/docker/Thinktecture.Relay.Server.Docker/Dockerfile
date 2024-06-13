@@ -58,8 +58,8 @@ COPY --chown=relay --from=build /app .
 EXPOSE 5000
 
 ENV ASPNETCORE_URLS=http://+:5000
-ENV RabbitMq__ClusterHosts=relay_transport_rabbitmq1,relay_transport_rabbitmq2
+ENV RabbitMq__ClusterHosts=relay-transport-rabbitmq-1,relay-transport-rabbitmq-2
 ENV BodyStore__StoragePath=/var/bodystore
-ENV Authentication__Authority=http://relayidentityprovider:5002/realms/relayserver
+ENV Authentication__Authority=http://relay-identityprovider:5002/realms/relayserver
 
 ENTRYPOINT ["dotnet", "Thinktecture.Relay.Server.Docker.dll"]
