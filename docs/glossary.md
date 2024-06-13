@@ -13,9 +13,9 @@ RelayServer v3 supports different types of authentication for different use case
 use OAuth 2 client credential authentication to be able to securely communicate with the [RelayServer](#relayserver).
 However you can customize and change that.
 
-When you want to use the [Management API](#management-api) or the [Statistics API](#statistics-api), we suggest that you
-use your own existing OIDC-based Identity Provider and configure your clients and the APIs to use this.
-The demo service uses API keys authentication as an example.
+When you want to use the [Management API](#management-api) we suggest that you use your own existing OIDC-based Identity
+Provider and configure your clients and the APIs to use this. The demo service uses API keys authentication as an
+example.
 
 ## B
 
@@ -102,17 +102,6 @@ processed by the [RelayServer](#relayserver). It will be passed on to a [Target]
 A _Response_ always corresponds to a [Request](#request). When the [Request](#request) was executed by the
 [Target](#target), the [Connector](#connector) will receive the _Response_ and send it back to the
 [RelayServer](#relayserver) to be passed back to the [Client](#client).
-
-## S
-
-### Statistics API
-
-The _Statistics API_ is a service that you can host publicly alongside the [RelayServer](#relayserver) or only on your
-private network. The _Statistics API_ will provide you with statistical data about the whole system, i.e. how many
-[Requests](#request) have been handled in what time frame, for what [Tenant](#tenant) these were handled, how many bytes
-were transferred, how many [Connectors](#connector) are connected and a lot of more data.
-
-In RelayServer v2, similar endpoints were an integral part of the RelayServer host process.
 
 ## T
 

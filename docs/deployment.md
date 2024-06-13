@@ -72,21 +72,6 @@ RelayServer deployments consist of multiple instances (pods) of different contai
   Configuration:
   * Provide a connection string to the RelayServer database 
 
-* Thinktecture.Relay.StatisticsApi  
-  This component provides endpoints to retrieve usage data about the system from the database. For example you could
-  fetch this data in intervals and feed it into your monitoring or billing systems. Load on this component is based
-  on your internal usage only and should be fairly constant.  
-  If not absolutley required we suggested not exposing this container to the public internet. Only have it available
-  for your internal administrative usages. Unless you have higher load or higher reliability requirements (i.e. for
-  monitoring) it should be fine to run only a single instance.
-
-  **DO** create your own project using the RelayServer v3 NuGet packages. Use the corresponding persistence packages for
-  the database of your choice.  
-  **Do NOT** use the example / development project and docker file from this repository in production.
-
-  Configuration:
-  * Provide a connection string to the RelayServer database 
-
 ## Connector
 
 * Thinktecture.Relay.Connector  
