@@ -7,8 +7,8 @@ _Note:_ The containers in this repository are intended for **demo and example** 
 encouraged to create your own host applications tailored and configured to your specific needs and to build and use
 your own container images.
 
-A docker compose file is provided to build all the docker images (`src/docker/docker-compose.yml`). You can build the images
-with the `docker compose build` command. An environment variable `RABBITMQ_ERLANG_COOKIE` needs to be set.
+A docker compose file is provided to build all the docker images (`src/docker/docker-compose.yml`). You can build the
+images with the `docker compose build` command.
 
 ## First time Development & Test-Setup
 

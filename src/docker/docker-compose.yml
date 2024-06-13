@@ -5,55 +5,55 @@ x-defaults: &defaults
 x-rabbit-defaults: &rabbit-defaults
   <<: *defaults
   image: rabbitmq:management-alpine
-  secrets:
+  configs:
     - source: erlang-cookie
       target: /var/lib/rabbitmq/.erlang.cookie
       mode: 0600
 x-rabbit-env: &rabbit-env
   RABBITMQ_DEFAULT_USER: guest
   RABBITMQ_DEFAULT_PASS: guest
-  RABBITMQ_SERVER_START_ARGS: -rabbit cluster_nodes {['rabbit@relay_transport_rabbitmq1','rabbit@relay_transport_rabbitmq2'],disc} cluster_name rabbit@relay_transport
+  RABBITMQ_SERVER_START_ARGS: -rabbit cluster_nodes {['rabbit@relay-transport-rabbitmq-1','rabbit@relay-transport-rabbitmq-2'],disc} cluster_name rabbit@relayserver
 
 x-db-connection: &db-connection
   DatabaseType: ${RELAYSERVER_DATABASE_TYPE:-PostgreSql} # PostgreSql or SqlServer
-  ConnectionStrings__PostgreSql: host=relay_persistence_postgresql;database=relayserver;username=relayserver;password=<Strong!Passw0rd>
-  ConnectionStrings__SqlServer: Server=relay_persistence_sqlserver;Database=relayserver;User Id=sa;Password=<Strong!Passw0rd>
+  ConnectionStrings__PostgreSql: host=relay-persistence-postgresql;database=relayserver;username=relayserver;password=<Strong!Passw0rd>
+  ConnectionStrings__SqlServer: Server=relay-persistence-sqlserver;Database=relayserver;User Id=sa;Password=<Strong!Passw0rd>
 
 x-logging: &logging
   Serilog__MinimumLevel__Default: Verbose
   Serilog__MinimumLevel__Override__Microsoft: Warning
   Serilog__MinimumLevel__Override__System: Warning
   Serilog__WriteTo__0__Name: Seq
-  Serilog__WriteTo__0__Args__ServerUrl: http://relay_logging_seq
+  Serilog__WriteTo__0__Args__ServerUrl: http://relay-logging-seq
 
-secrets:
+configs:
   erlang-cookie:
-    environment: RABBITMQ_ERLANG_COOKIE
+    content: VEhJUyBJUyBUSElOS1RFQ1RVUkUh
 
 services:
-  relay_transport_rabbitmq1:
+  relay-transport-rabbitmq-1:
     <<: *rabbit-defaults
-    container_name: relay_transport_rabbitmq1
+    container_name: relay-transport-rabbitmq-1
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
       <<: *rabbit-env
-      RABBITMQ_NODENAME: rabbit@relay_transport_rabbitmq1
-  relay_transport_rabbitmq2:
+      RABBITMQ_NODENAME: rabbit@relay-transport-rabbitmq-1
+  relay-transport-rabbitmq-2:
     <<: *rabbit-defaults
-    container_name: relay_transport_rabbitmq2
+    container_name: relay-transport-rabbitmq-2
     ports:
       - "5673:5672"
       - "15673:15672"
     environment:
       <<: *rabbit-env
-      RABBITMQ_NODENAME: rabbit@relay_transport_rabbitmq2
+      RABBITMQ_NODENAME: rabbit@relay-transport-rabbitmq-2
 
-  relay_logging_seq:
+  relay-logging-seq:
     <<: *defaults
     image: datalust/seq
-    container_name: relay_logging_seq
+    container_name: relay-logging-seq
     ports:
       - "5341:80"
     environment:
@@ -61,10 +61,10 @@ services:
     volumes:
       - seq-data:/data
 
-  relay_persistence_postgresql:
+  relay-persistence-postgresql:
     <<: *defaults
     image: postgres:15-alpine
-    container_name: relay_persistence_postgresql
+    container_name: relay-persistence-postgresql
     ports:
       - "5432:5432"
     environment:
@@ -81,10 +81,10 @@ services:
       timeout: 60s
       retries: 10
       start_period: 10s
-  relay_persistence_sqlserver:
+  relay-persistence-sqlserver:
     <<: *defaults
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: relay_persistence_sqlserver
+    container_name: relay-persistence-sqlserver
     user: root
     platform: linux/amd64
     ports:
@@ -104,50 +104,50 @@ services:
       timeout: 60s
       retries: 10
       start_period: 10s
-  relay_server_migrations:
+  relay-server-migrations:
     <<: *defaults
-    image: relay_server
+    image: relay-server
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Server.Docker/Dockerfile
-    container_name: relay_server_migrations
+    container_name: relay-server-migrations
     environment:
       <<: [*db-connection, *logging]
       Serilog__Properties__System: Migration
     depends_on:
-      relay_persistence_postgresql:
+      relay-persistence-postgresql:
         condition: service_healthy
-      relay_persistence_sqlserver:
+      relay-persistence-sqlserver:
         condition: service_healthy
     entrypoint: ["dotnet", "Thinktecture.Relay.Server.Docker.dll", "migrate-only=true"]
 
-  relay_management:
+  relay-management-api:
     <<: *defaults
-    image: relay_management
+    image: relay-management-api
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.ManagementApi.Docker/Dockerfile
-    container_name: relay_management
+    container_name: relay-management-api
     ports:
       - "5004:5000"
     environment:
       <<: [*db-connection, *logging]
     depends_on:
-      - relay_server_migrations
+      - relay-server-migrations
 
-  relay_tenant_seed:
+  relay-seed:
     <<: *defaults
     image: curlimages/curl
-    container_name: relay_tenant_seed
+    container_name: relay-seed
     depends_on:
-      - relay_server_migrations
-      - relay_management
-    command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant1\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant2\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay_management:5000/management/tenants" ]
+      - relay-server-migrations
+      - relay-management-api
+    command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant1\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay-management-api:5000/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant2\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay-management-api:5000/management/tenants" ]
 
-  relay_identityprovider:
+  relay-identityprovider:
     <<: *defaults
     image: quay.io/keycloak/keycloak:24.0
-    container_name: relayidentityprovider # this should also be named relay_identityprovider, but Keycloak does not support underscores in host names 🤦 See https://stackoverflow.com/a/76991211/199861
+    container_name: relay-identityprovider
     ports:
       - "5002:5002"
     volumes:
@@ -160,85 +160,85 @@ services:
         KC_HOSTNAME_DEBUG: true
     command: [ "start-dev", "--http-port=5002", "--import-realm" ]
 
-  relay_server_a:
+  relay-server-a:
     <<: *defaults
-    image: relay_server
-    container_name: relay_server_a
+    image: relay-server
+    container_name: relay-server-a
     ports:
       - "5010:5000"
     environment:
       <<: [*db-connection, *logging]
       Serilog__Properties__System: RelayServerA
-      RabbitMq__Uri: amqp://guest:guest@relay_transport_rabbitmq1
+      RabbitMq__Uri: amqp://guest:guest@relay-transport-rabbitmq-1
     volumes:
       - relay-bodystore:/var/bodystore
     depends_on:
-      - relay_server_migrations
-      - relay_identityprovider
-  relay_server_b:
+      - relay-server-migrations
+      - relay-identityprovider
+  relay-server-b:
     <<: *defaults
-    image: relay_server
-    container_name: relay_server_b
+    image: relay-server
+    container_name: relay-server-b
     ports:
       - "5011:5000"
     environment:
       <<: [*db-connection, *logging]
       Serilog__Properties__System: RelayServerB
-      RabbitMq__Uri: amqp://guest:guest@relay_transport_rabbitmq2
+      RabbitMq__Uri: amqp://guest:guest@relay-transport-rabbitmq-2
     volumes:
       - relay-bodystore:/var/bodystore
     depends_on:
-      - relay_server_migrations
-      - relay_identityprovider
+      - relay-server-migrations
+      - relay-identityprovider
 
-  relay_connector_a1:
+  relay-connector-a1:
     <<: *defaults
-    image: relay_connector
+    image: relay-connector
     build:
       context: ..
       dockerfile: ./docker/Thinktecture.Relay.Connector.Docker/Dockerfile
-    container_name: relay_connector_a1
+    container_name: relay-connector-a1
     environment:
       <<: *logging
       Serilog__Properties__System: Connector_A1
-      RelayConnector__RelayServerBaseUri: http://relay_server_a:5000
+      RelayConnector__RelayServerBaseUri: http://relay-server-a:5000
       RelayConnector__TenantName: TestTenant1
     depends_on:
-      - relay_server_a
-  relay_connector_a2:
+      - relay-server-a
+  relay-connector-a2:
     <<: *defaults
-    image: relay_connector
-    container_name: relay_connector_a2
+    image: relay-connector
+    container_name: relay-connector-a2
     environment:
       <<: *logging
       Serilog__Properties__System: Connector_A2
-      RelayConnector__RelayServerBaseUri: http://relay_server_a:5000
+      RelayConnector__RelayServerBaseUri: http://relay-server-a:5000
       RelayConnector__TenantName: TestTenant1
     depends_on:
-      - relay_connector_a1
+      - relay-connector-a1
 
-  relay_connector_b1:
+  relay-connector-b1:
     <<: *defaults
-    image: relay_connector
-    container_name: relay_connector_b1
+    image: relay-connector
+    container_name: relay-connector-b1
     environment:
       <<: *logging
       Serilog__Properties__System: Connector_B1
-      RelayConnector__RelayServerBaseUri: http://relay_server_b:5000
+      RelayConnector__RelayServerBaseUri: http://relay-server-b:5000
       RelayConnector__TenantName: TestTenant2
     depends_on:
-      - relay_server_b
-  relay_connector_b2:
+      - relay-server-b
+  relay-connector-b2:
     <<: *defaults
-    image: relay_connector
-    container_name: relay_connector_b2
+    image: relay-connector
+    container_name: relay-connector-b2
     environment:
       <<: *logging
       Serilog__Properties__System: Connector_B2
-      RelayConnector__RelayServerBaseUri: http://relay_server_b:5000
+      RelayConnector__RelayServerBaseUri: http://relay-server-b:5000
       RelayConnector__TenantName: TestTenant2
     depends_on:
-      - relay_connector_b1
+      - relay-connector-b1
 
 volumes:
   seq-data:
