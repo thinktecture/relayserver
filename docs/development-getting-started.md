@@ -90,4 +90,4 @@ backing service classes. The way we structured the components listed above is ba
 so far and does not mean that this is the only way to deploy and use RelayServer.
 
 It might be the case that your specific use case demands or favours a different component layout, i.e. combining the
-management- and statistics API together into a single host project, or even putting all server components together.
+management API and RelayServer together into a single host project, or even putting all server components together.
