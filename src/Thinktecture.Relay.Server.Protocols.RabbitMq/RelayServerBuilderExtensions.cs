@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using Thinktecture.Relay.Acknowledgement;
@@ -44,14 +45,18 @@ public static class RelayServerBuilderExtensions
 
 		if (useServerRouting)
 		{
-			builder.Services
-				.TryAddSingleton<IServerTransport<TResponse, TAcknowledge>, ServerTransport<TResponse, TAcknowledge>>();
+			builder.Services.AddSingleton<ServerTransport<TResponse, TAcknowledge>>();
+			builder.Services.AddHostedService(provider
+				=> provider.GetRequiredService<ServerTransport<TResponse, TAcknowledge>>());
+
+			builder.Services.AddSingleton<IServerTransport<TResponse, TAcknowledge>>(provider
+				=> provider.GetRequiredService<ServerTransport<TResponse, TAcknowledge>>());
 		}
 
 		if (useTenantRouting)
 		{
-			builder.Services.TryAddSingleton<ITenantTransport<TRequest>, TenantTransport<TRequest, TAcknowledge>>();
-			builder.Services.TryAddSingleton<ITenantHandlerFactory, TenantHandlerFactory<TRequest, TAcknowledge>>();
+			builder.Services.AddSingleton<ITenantTransport<TRequest>, TenantTransport<TRequest, TAcknowledge>>();
+			builder.Services.AddSingleton<ITenantHandlerFactory, TenantHandlerFactory<TRequest, TAcknowledge>>();
 		}
 
 		builder.Services.TryAddSingleton<IConnection>(provider =>
