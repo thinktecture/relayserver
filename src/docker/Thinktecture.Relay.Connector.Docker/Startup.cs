@@ -25,6 +25,8 @@ public static class Startup
 		services
 			.AddRelayConnector(options => configuration.GetSection("RelayConnector").Bind(options))
 			.AddSignalRConnectorTransport()
+			.AddPingTarget()
+			.AddEchoTarget()
 			.AddTarget<InProcFunc>("inprocfunc")
 			.AddTarget<InProcAction>("inprocaction");
 
