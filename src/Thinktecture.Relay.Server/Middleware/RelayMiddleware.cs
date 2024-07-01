@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,6 +25,11 @@ using Thinktecture.Relay.Server.Transport;
 using Thinktecture.Relay.Transport;
 
 namespace Thinktecture.Relay.Server.Middleware;
+
+internal static class RelayMiddleware
+{
+	public static readonly ConcurrentDictionary<string, object> CacheLocks = new ConcurrentDictionary<string, object>();
+}
 
 /// <inheritdoc />
 public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddleware
@@ -131,7 +137,7 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 				return;
 			}
 
-			var tenantState = await LoadTenantStateByNameAsync(tenantName);
+			var tenantState = await LoadTenantStateByNameAsync(tenantName, CancellationToken.None);
 			if (tenantState.Unknown)
 			{
 				Log.UnknownTenant(_logger, tenantName, context.Request.Path, context.Request.QueryString);
@@ -368,7 +374,8 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 
 		if (request.BodySize > _maximumBodySize)
 		{
-			Log.OutsourcingRequestBody(_logger, request.BodySize, request.OriginalBodySize, _maximumBodySize, request.RequestId);
+			Log.OutsourcingRequestBody(_logger, request.BodySize, request.OriginalBodySize, _maximumBodySize,
+				request.RequestId);
 			await _bodyStore.StoreRequestBodyAsync(request.RequestId, request.BodyContent, cancellationToken);
 
 			request.BodyContent = null;
@@ -390,21 +397,33 @@ public partial class RelayMiddleware<TRequest, TResponse, TAcknowledge> : IMiddl
 		return _responseWriter.WriteAsync(_relayContext.ClientRequest, targetResponse, response, cancellationToken);
 	}
 
-	private async Task<TenantState> LoadTenantStateByNameAsync(string name,
-		CancellationToken cancellationToken = default)
+	private async Task<TenantState> LoadTenantStateByNameAsync(string name, CancellationToken cancellationToken)
 	{
 		var cacheKey = $"tenant_state_{_tenantService.NormalizeName(name)}";
 		var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
 		if (cachedData is not null) return TenantState.FromSpan(cachedData);
 
-		var tenant = await _tenantService.LoadTenantWithConnectionsAsync(name, cancellationToken);
-		var state = TenantState.FromTenant(tenant);
+		lock (RelayMiddleware.CacheLocks.GetOrAdd(cacheKey, () => new object()))
+		{
+			cachedData = _cache.Get(cacheKey);
+			if (cachedData is not null) return TenantState.FromSpan(cachedData);
 
-		var cacheEntryOptions = new DistributedCacheEntryOptions()
-			.SetAbsoluteExpiration(_relayServerOptions.TenantInfoCacheDuration);
-		await _cache.SetAsync(cacheKey, TenantState.AsSpan(state).ToArray(), cacheEntryOptions, cancellationToken);
+			try
+			{
+				var tenant = _tenantService.LoadTenantWithConnections(name);
+				var state = TenantState.FromTenant(tenant);
 
-		return state;
+				var cacheEntryOptions = new DistributedCacheEntryOptions()
+					.SetAbsoluteExpiration(_relayServerOptions.TenantInfoCacheDuration);
+				_cache.Set(cacheKey, TenantState.AsSpan(state).ToArray(), cacheEntryOptions);
+
+				return state;
+			}
+			catch
+			{
+				return TenantState.FromTenant(null);
+			}
+		}
 	}
 
 	private record TenantState
