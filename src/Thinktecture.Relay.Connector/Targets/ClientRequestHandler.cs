@@ -70,13 +70,13 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		if (request.AcknowledgeMode == AcknowledgeMode.Manual)
 		{
 			var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
-			request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = new[] { url };
+			request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = [url];
 		}
 
 		if (request.EnableTracing)
 		{
-			request.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
-			request.HttpHeaders[Constants.HeaderNames.RequestOriginId] = new[] { request.RequestOriginId.ToString() };
+			request.HttpHeaders[Constants.HeaderNames.RequestId] = [request.RequestId.ToString()];
+			request.HttpHeaders[Constants.HeaderNames.RequestOriginId] = [request.RequestOriginId.ToString()];
 		}
 
 		try
@@ -108,25 +108,23 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		{
 			response.HttpHeaders ??= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
-			response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = new[] { Environment.MachineName };
-			response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = new[] { GetType().GetAssemblyVersion() };
-			response.HttpHeaders[Constants.HeaderNames.RequestId] = new[] { request.RequestId.ToString() };
-			response.HttpHeaders[Constants.HeaderNames.RequestOriginId] = new[] { request.RequestOriginId.ToString() };
+			response.HttpHeaders[Constants.HeaderNames.ConnectorMachineName] = [Environment.MachineName];
+			response.HttpHeaders[Constants.HeaderNames.ConnectorVersion] = [GetType().GetAssemblyVersion()];
+			response.HttpHeaders[Constants.HeaderNames.RequestId] = [request.RequestId.ToString()];
+			response.HttpHeaders[Constants.HeaderNames.RequestOriginId] = [request.RequestOriginId.ToString()];
 
 			if (request.AcknowledgeOriginId.HasValue)
 			{
 				response.HttpHeaders[Constants.HeaderNames.AcknowledgeOriginId] =
-					new[] { request.AcknowledgeOriginId.Value.ToString() };
+					[request.AcknowledgeOriginId.Value.ToString()];
 			}
 			if (response.RequestStart.HasValue)
 			{
-				response.HttpHeaders[Constants.HeaderNames.TargetStart] =
-					new[] { response.RequestStart.Value.ToString("R") };
+				response.HttpHeaders[Constants.HeaderNames.TargetStart] = [response.RequestStart.Value.ToString("R")];
 			}
 			if (response.RequestDuration.HasValue)
 			{
-				response.HttpHeaders[Constants.HeaderNames.TargetDuration] =
-					new[] { response.RequestDuration.Value.ToString("g") };
+				response.HttpHeaders[Constants.HeaderNames.TargetDuration] = [response.RequestDuration.Value.ToString("g")];
 			}
 		}
 
