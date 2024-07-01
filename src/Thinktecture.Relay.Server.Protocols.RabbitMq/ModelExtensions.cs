@@ -13,40 +13,32 @@ internal static class ModelExtensions
 	/// <param name="queueName">The name of the queue.</param>
 	/// <param name="durable">The queue should survive a broker restart.</param>
 	/// <param name="autoDelete">The queue should be deleted when the last consumer goes away.</param>
-	public static void EnsureQueue(this IModel model, string queueName, bool durable = true, bool autoDelete = true)
+	public static void EnsureQueue(this IModel model, string queueName, bool durable = true, bool autoDelete = false)
 	{
 		model.ExchangeDeclare(Constants.ExchangeName, ExchangeType.Direct);
-		model.QueueDeclare(queueName, autoDelete: autoDelete, durable: durable, exclusive: false);
+		model.QueueDeclare(queueName, durable: durable, exclusive: false, autoDelete: autoDelete);
 		model.QueueBind(queueName, Constants.ExchangeName, queueName);
 	}
 
 	/// <summary>
-	/// Convenience method to publish a payload as JSON to a queue. Ensures the existence of the queue when
-	/// <paramref name="persistent"/> is set to true.
+	/// Convenience method to publish a payload as JSON to a queue.
 	/// </summary>
 	/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
 	/// <param name="queueName">The name of the queue.</param>
 	/// <param name="payload">The payload to serialize as JSON and publish to the queue.</param>
 	/// <param name="persistent">The publication should survive a broker restart (when the queue supports it).</param>
-	/// <param name="durable">The queue should survive a broker restart.</param>
-	/// <param name="autoDelete">The queue should be deleted when the last consumer goes away.</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	public static Task PublishJsonAsync(this IModel model, string queueName, object payload, bool persistent = true,
-		bool durable = true, bool autoDelete = true)
+	public static Task PublishJsonAsync(this IModel model, string queueName, object payload, bool persistent = false)
 	{
 		var properties = model.CreateBasicProperties();
 		properties.Persistent = persistent;
 		properties.ContentType = "application/json";
 
+		var body = JsonSerializer.SerializeToUtf8Bytes(payload);
+
 		lock (model)
 		{
-			if (persistent)
-			{
-				model.EnsureQueue(queueName, durable, autoDelete);
-			}
-
-			model.BasicPublish(Constants.ExchangeName, queueName, properties,
-				JsonSerializer.SerializeToUtf8Bytes(payload));
+			model.BasicPublish(Constants.ExchangeName, queueName, properties, body);
 		}
 
 		return Task.CompletedTask;

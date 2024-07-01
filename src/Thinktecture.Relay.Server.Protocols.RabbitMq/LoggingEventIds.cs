@@ -24,4 +24,6 @@ internal static class LoggingEventIds
 
 	public const int TenantTransportPublishedRequest = 10401;
 	public const int TenantTransportErrorDispatchingRequest = 10402;
+	public const int TenantTransportLoadedTenantNames = 10403;
+	public const int TenantTransportEnsuredTenantQueue = 10404;
 }

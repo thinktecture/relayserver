@@ -28,7 +28,7 @@ internal partial class DisposableConsumer : IDisposable
 	/// <param name="durable">The queue should survive a broker restart.</param>
 	/// <param name="autoDelete">The queue should be deleted when the last consumer goes away.</param>
 	public DisposableConsumer(ILogger logger, IModel model, string queueName, bool autoAck = true, bool durable = true,
-		bool autoDelete = true)
+		bool autoDelete = false)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -49,7 +49,7 @@ internal partial class DisposableConsumer : IDisposable
 		_consumer.Received += ConsumerReceivedAsync;
 		_consumer.ConsumerCancelled += ConsumerCancelledAsync;
 
-		_consumer.Model.EnsureQueue(_queueName, _durable, _autoDelete);
+		_consumer.Model.EnsureQueue(_queueName, durable: _durable, autoDelete: _autoDelete);
 		_consumerTag = _consumer.Model.BasicConsume(_queueName, _autoAck, _consumer);
 
 		Log.ConsumingConsumer(_logger, _queueName, _consumerTag);
@@ -66,7 +66,7 @@ internal partial class DisposableConsumer : IDisposable
 
 			lock (_consumer.Model)
 			{
-				_consumer.Model.EnsureQueue(_queueName, _durable, _autoDelete);
+				_consumer.Model.EnsureQueue(_queueName, durable: _durable, autoDelete: _autoDelete);
 				var consumerTag = _consumer.Model.BasicConsume(_queueName, _autoAck, _consumer);
 				Log.RestoredConsumer(_logger, consumerTag, _queueName, _consumerTag);
 				_consumerTag = consumerTag;

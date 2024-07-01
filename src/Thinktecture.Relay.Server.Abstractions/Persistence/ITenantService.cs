@@ -65,8 +65,17 @@ public interface ITenantService
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
 	/// <see cref="P:System.Threading.CancellationToken.None"/>.
 	///</param>
-	/// <returns>A <see cref="Page{Tenant}"/> representing the asynchronous loading of a page of <see cref="Tenant"/>s.</returns>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Page{Tenant}"/>.</returns>
 	Task<Page<Tenant>> LoadAllTenantsPagedAsync(int skip, int take, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Loads all tenant names.
+	/// </summary>
+	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
+	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	///</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the list of tenant names.</returns>
+	Task<string[]> LoadAllTenantNamesAsync(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Creates a new <see cref="Tenant"/>.

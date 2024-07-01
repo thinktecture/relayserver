@@ -55,7 +55,13 @@ public static class RelayServerBuilderExtensions
 
 		if (useTenantRouting)
 		{
-			builder.Services.AddSingleton<ITenantTransport<TRequest>, TenantTransport<TRequest, TAcknowledge>>();
+			builder.Services.AddSingleton<TenantTransport<TRequest, TAcknowledge>>();
+			builder.Services.AddHostedService(provider
+				=> provider.GetRequiredService<TenantTransport<TRequest, TAcknowledge>>());
+
+			builder.Services.AddSingleton<ITenantTransport<TRequest>>(provider
+				=> provider.GetRequiredService<TenantTransport<TRequest, TAcknowledge>>());
+
 			builder.Services.AddSingleton<ITenantHandlerFactory, TenantHandlerFactory<TRequest, TAcknowledge>>();
 		}
 

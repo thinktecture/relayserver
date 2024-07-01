@@ -78,6 +78,10 @@ public class TenantService : ITenantService
 			.ToPagedResultAsync(skip, take, cancellationToken);
 
 	/// <inheritdoc />
+	public Task<string[]> LoadAllTenantNamesAsync(CancellationToken cancellationToken = default)
+		=> _dbContext.Tenants.Select(t => t.Name).ToArrayAsync(cancellationToken);
+
+	/// <inheritdoc />
 	public async Task CreateTenantAsync(Tenant tenant, CancellationToken cancellationToken)
 	{
 		tenant.NormalizedName = NormalizeName(tenant.Name);
