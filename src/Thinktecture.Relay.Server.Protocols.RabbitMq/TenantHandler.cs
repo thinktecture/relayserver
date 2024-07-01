@@ -59,7 +59,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 		}
 
 		_consumer = new DisposableConsumer(_logger, _model, $"{Constants.RequestQueuePrefix} {tenantName}",
-			autoDelete: false, autoAck: false);
+			autoAck: false);
 		_consumer.Consume(ConsumerReceivedAsync);
 	}
 

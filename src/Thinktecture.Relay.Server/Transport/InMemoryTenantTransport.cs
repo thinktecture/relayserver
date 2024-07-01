@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Thinktecture.Relay.Transport;
@@ -18,6 +19,9 @@ internal partial class InMemoryTenantTransport<T> : ITenantTransport<T>
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_connectorRegistry = connectorRegistry ?? throw new ArgumentNullException(nameof(connectorRegistry));
 	}
+
+	public Task EnsureKnownTransports(CancellationToken cancellationToken = default)
+		=> Task.CompletedTask;
 
 	public async Task TransportAsync(T request)
 	{

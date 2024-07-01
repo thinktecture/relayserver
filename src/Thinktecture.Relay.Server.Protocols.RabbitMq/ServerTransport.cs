@@ -83,7 +83,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	public async Task DispatchResponseAsync(TResponse response)
 	{
 		await _responseDispatchModel.PublishJsonAsync($"{Constants.ResponseQueuePrefix} {response.RequestOriginId}",
-			response, durable: false, persistent: false);
+			response);
 		Log.DispatchedResponse(_logger, response.RequestId, response.RequestOriginId);
 	}
 
@@ -93,7 +93,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		Log.DispatchingAcknowledge(_logger, request);
 
 		await _acknowledgeDispatchModel.PublishJsonAsync($"{Constants.AcknowledgeQueuePrefix} {request.OriginId}",
-			request, durable: false, persistent: false);
+			request);
 		Log.DispatchedAcknowledge(_logger, request.RequestId, request.OriginId);
 	}
 
@@ -114,21 +114,19 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 		await _acknowledgeCoordinator.ProcessAcknowledgeAsync(request);
 	}
 
-	/// <inheritdoc />
-	public Task StartAsync(CancellationToken cancellationToken)
+	Task IHostedService.StartAsync(CancellationToken cancellationToken)
 	{
 		_responseConsumer = new DisposableConsumer(_logger, _responseConsumeModel,
-			$"{Constants.ResponseQueuePrefix} {_originId}");
+			$"{Constants.ResponseQueuePrefix} {_originId}", autoDelete: true);
 		_responseConsumer.Consume(ResponseConsumerReceivedAsync);
 
 		_acknowledgeConsumer = new DisposableConsumer(_logger, _acknowledgeConsumeModel,
-			$"{Constants.AcknowledgeQueuePrefix} {_originId}");
+			$"{Constants.AcknowledgeQueuePrefix} {_originId}", autoDelete: true);
 		_acknowledgeConsumer.Consume(AcknowledgeConsumerReceivedAsync);
 
 		return Task.CompletedTask;
 	}
 
-	/// <inheritdoc />
-	public Task StopAsync(CancellationToken cancellationToken)
+	Task IHostedService.StopAsync(CancellationToken cancellationToken)
 		=> Task.CompletedTask;
 }
