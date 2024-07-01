@@ -20,7 +20,7 @@ x-db-connection: &db-connection
   ConnectionStrings__SqlServer: Server=relay-persistence-sqlserver;Database=relayserver;User Id=sa;Password=<Strong!Passw0rd>
 
 x-logging: &logging
-  Serilog__MinimumLevel__Default: Verbose
+  Serilog__MinimumLevel__Default: Error
   Serilog__MinimumLevel__Override__Microsoft: Warning
   Serilog__MinimumLevel__Override__System: Warning
   Serilog__WriteTo__0__Name: Seq
@@ -239,6 +239,14 @@ services:
       RelayConnector__TenantName: TestTenant2
     depends_on:
       - relay-connector-b1
+
+  relay-httpbin:
+    <<: *defaults
+    image: kennethreitz/httpbin
+    container_name: relay-httpbin
+    platform: linux/amd64
+    ports:
+      - "8080:80"
 
 volumes:
   seq-data:
