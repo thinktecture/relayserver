@@ -41,14 +41,8 @@ public interface ITenantService
 	/// Loads a <see cref="Tenant"/> together with its connections.
 	/// </summary>
 	/// <param name="tenantName">The name of the <see cref="Tenant"/> to load.</param>
-	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
-	/// </param>
-	/// <returns>
-	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
-	/// not found.
-	/// </returns>
-	Task<Tenant?> LoadTenantWithConnectionsAsync(string tenantName, CancellationToken cancellationToken = default);
+	/// <returns>The <see cref="Tenant"/> or null if not found.</returns>
+	Tenant? LoadTenantWithConnections(string tenantName);
 
 	/// <summary>
 	/// Loads a <see cref="Tenant"/> together with its config.

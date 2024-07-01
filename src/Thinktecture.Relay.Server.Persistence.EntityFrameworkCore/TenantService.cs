@@ -46,15 +46,14 @@ public class TenantService : ITenantService
 	}
 
 	/// <inheritdoc />
-	public async Task<Tenant?> LoadTenantWithConnectionsAsync(string tenantName,
-		CancellationToken cancellationToken = default)
+	public Tenant? LoadTenantWithConnections(string tenantName)
 	{
 		var normalizedName = NormalizeName(tenantName);
 
-		return await _dbContext.Tenants
+		return _dbContext.Tenants
 			.Include(t => t.Connections)
 			.AsNoTracking()
-			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
+			.SingleOrDefault(t => t.NormalizedName == normalizedName);
 	}
 
 	/// <inheritdoc />
