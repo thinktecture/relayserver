@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,18 +47,10 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	}
 
 	/// <inheritdoc />
-	public async Task HandleAsync(TRequest request, CancellationToken cancellationToken = default)
+	public Task HandleAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
-		if (QueueWorker(request, cancellationToken)) return;
-
-		// we could not queue the work item
-
-		if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
-		{
-			await AcknowledgeRequestAsync(request, false);
-		}
-
-		await DeliverResponseAsync(request, request.CreateResponse<TResponse>(HttpStatusCode.ServiceUnavailable));
+		_ = WorkerCallAsync(request, cancellationToken);
+		return Task.CompletedTask;
 	}
 
 	/// <inheritdoc />
@@ -68,9 +59,6 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 		Log.AcknowledgeRequest(_logger, request.RequestId, request.AcknowledgeOriginId);
 		await _acknowledgeTransport.TransportAsync(request.CreateAcknowledge<TAcknowledge>(removeRequestBodyContent));
 	}
-
-	private bool QueueWorker(TRequest request, CancellationToken cancellationToken = default)
-		=> ThreadPool.QueueUserWorkItem(_ => WorkerCallAsync(request, cancellationToken).GetAwaiter().GetResult());
 
 	private async Task WorkerCallAsync(TRequest request, CancellationToken cancellationToken = default)
 	{
