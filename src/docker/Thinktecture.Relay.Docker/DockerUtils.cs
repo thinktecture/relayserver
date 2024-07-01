@@ -27,7 +27,7 @@ public static class DockerUtils
 			.UseSerilog((context, loggerConfiguration) =>
 			{
 				loggerConfiguration
-					.MinimumLevel.Information()
+					.MinimumLevel.Error()
 					.Destructure.With<StreamDestructuringPolicy>()
 					.Enrich.FromLogContext()
 					.Enrich.WithProperty("Application", applicationName)
