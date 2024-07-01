@@ -14,10 +14,8 @@ namespace Thinktecture.Relay.Connector.Targets;
 
 /// <inheritdoc cref="IDisposable"/>
 public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWorker<TRequest, TResponse>, IDisposable
-// ReSharper disable RedundantNameQualifier; (this is needed in 6.0, see https://github.com/dotnet/runtime/issues/58550)
-	where TRequest : Thinktecture.Relay.Transport.IClientRequest
-	where TResponse : Thinktecture.Relay.Transport.ITargetResponse, new()
-// ReSharper restore RedundantNameQualifier
+	where TRequest : IClientRequest
+	where TResponse : ITargetResponse, new()
 {
 	private readonly IClientRequestHandler<TRequest> _clientRequestHandler;
 	private readonly IConnectorTransportLimit _connectorTransportLimit;

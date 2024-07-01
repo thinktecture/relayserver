@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace Thinktecture.Relay.Server.Protocols.RabbitMq;
 
-internal static partial class ModelExtensions
+internal static class ModelExtensions
 {
 	/// <summary>
 	/// Convenience method to declare the exchange and queue.

@@ -84,6 +84,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 			Log.CouldNotParseAcknowledge(_logger, acknowledgeId);
 		}
 	}
+
 	private async Task ConsumerReceivedAsync(BasicDeliverEventArgs @event)
 	{
 		var request = JsonSerializer.Deserialize<TRequest>(@event.Body.Span) ??
