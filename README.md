@@ -37,6 +37,7 @@ exchangeable way for you to build your own product and services with RelayServer
   of the box.
 - See [migration](./docs/migration.md) for some ideas how to migrate from RelayServer 2 to version 3.
 - See [configuration](./docs/configuration.md) for some guidance on how to configure the RelayServer 3 components.
+- See [release notes](./docs/release-notes.md) for the latest release notes on RelayServer 3.
 
 ## Features
 
