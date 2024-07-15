@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Title>Thinktecture RelayServer EntityFramework PostgreSql</Title>
-    <Description>Contains the EF Core migrations and extension methods for using PostgreSql as persistence.</Description>
+    <Title>Thinktecture RelayServer EntityFramework PostgreSQL</Title>
+    <Description>Contains the EF Core migrations and extension methods for using PostgreSQL as persistence.</Description>
     <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
 
