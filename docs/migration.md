@@ -1,6 +1,7 @@
 # Migration
 
-This section explains how a migration path from RelayServer v2 to v3 might look like.
+This section explains how a migration path from RelayServer v2 (see branch
+[legacy-v2](https://github.com/thinktecture/relayserver/tree/legacy-v2)) to v3 might look like.
 
 ## Update to latest v2
 

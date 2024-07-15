@@ -22,9 +22,10 @@ permitted data.
 ## Library concept
 
 Thinktecture RelayServer v3 is more of a collection of libraries than a few ready-to run executables. We looked at
-how RelayServer v2 was used previously and learned that in most cases a lot of customization and extension was
-performed. This is now much easier to achieve in RelayServer v3, by providing all components and modules in an
-exchangeable way for you to build your own product and services with RelayServer as a library.
+how [RelayServer v2](https://github.com/thinktecture/relayserver/tree/legacy-v2) was used previously and learned that in
+most cases a lot of customization and extension was performed. This is now much easier to achieve in RelayServer v3, by
+providing all components and modules in an exchangeable way for you to build your own product and services with
+RelayServer as a library.
 
 ## Contents of the documentation
 
