@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{EEE512D2-C
 		..\docs\migration.md = ..\docs\migration.md
 		..\docs\modules.md = ..\docs\modules.md
 		..\docs\configuration.md = ..\docs\configuration.md
+		..\docs\release-notes.md = ..\docs\release-notes.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{AD756171-B728-4FD3-9BC6-20C2E32141C6}"
