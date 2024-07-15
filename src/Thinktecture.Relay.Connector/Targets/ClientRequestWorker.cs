@@ -90,7 +90,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 					try
 					{
 						request.BodyContent = await HttpClient.GetStreamAsync(new Uri(_requestEndpoint,
-							$"{request.RequestId:N}?delete={request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived}"
+							$"{request.RequestId:N}?delete={request.AcknowledgeMode == AcknowledgeMode.Disabled}"
 								.ToLowerInvariant()
 						), CancellationToken.None);
 					}
@@ -109,7 +109,7 @@ public partial class ClientRequestWorker<TRequest, TResponse> : IClientRequestWo
 			{
 				if (request.AcknowledgeMode == AcknowledgeMode.ConnectorReceived)
 				{
-					await _clientRequestHandler.AcknowledgeRequestAsync(request, false);
+					await _clientRequestHandler.AcknowledgeRequestAsync(request, true);
 				}
 			}
 
