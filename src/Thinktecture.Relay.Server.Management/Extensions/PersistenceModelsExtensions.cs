@@ -38,15 +38,6 @@ internal static class PersistenceModelsExtensions
 			EnableTracing = tenant.Config?.EnableTracing,
 			ReconnectMinimumDelay = tenant.Config?.ReconnectMinimumDelay,
 			ReconnectMaximumDelay = tenant.Config?.ReconnectMaximumDelay,
-
-			// credential property
-			Credentials = tenant.ClientSecrets?.Select(s => new TenantCredential()
-				{
-					Id = s.Id,
-					Created = s.Created,
-					Expiration = s.Expiration,
-				}).ToArray() ??
-				Array.Empty<TenantCredential>(),
 		};
 
 	/// <summary>
@@ -79,15 +70,6 @@ internal static class PersistenceModelsExtensions
 			DisplayName = tenant.DisplayName,
 			Description = tenant.Description,
 			Config = config,
-			ClientSecrets = tenant.Credentials.Select(s =>
-				new ClientSecret()
-				{
-					Id = s.Id,
-					Created = s.Created,
-					Value = s.Value ?? Sha512(s.PlainTextValue)!,
-					Expiration = s.Expiration,
-				}
-			).ToList(),
 		};
 
 		if (tenant.RequireAuthentication.HasValue)

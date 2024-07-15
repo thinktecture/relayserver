@@ -29,6 +29,17 @@ x-logging: &logging
 configs:
   erlang-cookie:
     content: VEhJUyBJUyBUSElOS1RFQ1RVUkUh
+  curl-headers:
+    content: |
+      Accept: application/json
+      Content-Type: application/json
+      Api-Key: write-key
+  test-tenant-1:
+    content: |
+      { "name": "TestTenant1", "displayName": "Test Tenant 1" }
+  test-tenant-2:
+    content: |
+      { "name": "TestTenant2", "displayName": "Test Tenant 2" }
 
 services:
   relay-transport-rabbitmq-1:
@@ -74,9 +85,10 @@ services:
       - postgresql-data:/var/lib/postgresql/data
     healthcheck:
       test:
-        [
-          "CMD-SHELL", "pg_isready", "-d", "db_prod"
-        ]
+        - "CMD-SHELL"
+        - "pg_isready"
+        - "-d"
+        - "db_prod"
       interval: 10s
       timeout: 60s
       retries: 10
@@ -97,9 +109,8 @@ services:
       - sqlserver-data:/var/opt/mssql/data
     healthcheck:
       test:
-        [
-          "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '<Strong!Passw0rd>' -Q 'SELECT 1' || exit 1"
-        ]
+        - "CMD-SHELL"
+        - "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '<Strong!Passw0rd>' -Q 'SELECT 1' || exit 1"
       interval: 10s
       timeout: 60s
       retries: 10
@@ -119,7 +130,10 @@ services:
         condition: service_healthy
       relay-persistence-sqlserver:
         condition: service_healthy
-    entrypoint: ["dotnet", "Thinktecture.Relay.Server.Docker.dll", "migrate-only=true"]
+    entrypoint:
+      - "dotnet"
+      - "Thinktecture.Relay.Server.Docker.dll"
+      - "migrate-only=true"
 
   relay-management-api:
     <<: *defaults
@@ -142,7 +156,20 @@ services:
     depends_on:
       - relay-server-migrations
       - relay-management-api
-    command: [ "sh", "-c", "sleep 5 && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant1\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay-management-api:5000/management/tenants && curl -H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Api-Key: write-key\" --data-raw '{ \"name\": \"TestTenant2\", \"credentials\": [{ \"plainTextValue\": \"<Strong!Passw0rd>\" }]}' http://relay-management-api:5000/management/tenants" ]
+    configs:
+      - source: curl-headers
+        target: /headers
+        mode: 0644
+      - source: test-tenant-1
+        target: /test-tenant-1.json
+        mode: 0644
+      - source: test-tenant-2
+        target: /test-tenant-2.json
+        mode: 0644
+    command:
+      - "sh"
+      - "-c"
+      - "curl -H @/headers -d @/test-tenant-1.json http://relay-management-api:5000/management/tenants && curl -H @/headers -d @/test-tenant-2.json http://relay-management-api:5000/management/tenants"
 
   relay-identityprovider:
     <<: *defaults
@@ -158,7 +185,10 @@ services:
         KC_HEALTH_ENABLED: true
         KC_METRICS_ENABLED: true
         KC_HOSTNAME_DEBUG: true
-    command: [ "start-dev", "--http-port=5002", "--import-realm" ]
+    command:
+      - "start-dev"
+      - "--http-port=5002"
+      - "--import-realm"
 
   relay-server-a:
     <<: *defaults
@@ -213,9 +243,9 @@ services:
       <<: *logging
       Serilog__Properties__System: Connector_A2
       RelayConnector__RelayServerBaseUri: http://relay-server-a:5000
-      RelayConnector__TenantName: TestTenant1
+      RelayConnector__TenantName: TestTenant2
     depends_on:
-      - relay-connector-a1
+      - relay-server-a
 
   relay-connector-b1:
     <<: *defaults
@@ -225,7 +255,7 @@ services:
       <<: *logging
       Serilog__Properties__System: Connector_B1
       RelayConnector__RelayServerBaseUri: http://relay-server-b:5000
-      RelayConnector__TenantName: TestTenant2
+      RelayConnector__TenantName: TestTenant1
     depends_on:
       - relay-server-b
   relay-connector-b2:
@@ -238,7 +268,7 @@ services:
       RelayConnector__RelayServerBaseUri: http://relay-server-b:5000
       RelayConnector__TenantName: TestTenant2
     depends_on:
-      - relay-connector-b1
+      - relay-server-b
 
   relay-httpbin:
     <<: *defaults

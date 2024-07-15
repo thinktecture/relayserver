@@ -61,32 +61,5 @@ public static class PersistenceModelsExtensions
 			instance.Config ??= new Config();
 			instance.Config.UpdateFrom(other.Config);
 		}
-
-		// copy over secrets when they are complete with values
-		if (other.ClientSecrets is not null)
-		{
-			instance.ClientSecrets ??= new List<ClientSecret>();
-			instance.ClientSecrets.RemoveAll(cs => other.ClientSecrets.All(os => os.Id != cs.Id));
-
-			// only consider secrets that actually have a value
-			foreach (var secret in other.ClientSecrets.Where(o => !String.IsNullOrWhiteSpace(o.Value)))
-			{
-				var existingSecret = instance.ClientSecrets.SingleOrDefault(cs => cs.Id == secret.Id);
-				if (existingSecret is null)
-				{
-					// create new secret, either with given id or with a new one
-					if (secret.Id == Guid.Empty)
-					{
-						secret.Id = Guid.NewGuid();
-					}
-
-					secret.Created = DateTime.UtcNow;
-
-					instance.ClientSecrets.Add(existingSecret = new ClientSecret() { Id = secret.Id, });
-				}
-
-				existingSecret.UpdateFrom(secret);
-			}
-		}
 	}
 }
