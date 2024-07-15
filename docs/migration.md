@@ -39,28 +39,6 @@ If your are unsure if your deployment scenario is well suited for your specific 
 Thinktecture AG. We do offer review and consulting services so that you can be sure that your deployment and operation
 scenario is safe and sound.
 
-## Migrate all Connectors to intermediate "v2.9"
-
-We will provide an intermediate connector "v2.9" that is able to work with the old RelayServer v2 but is also capable of
-connecting to the new RelayServer v3. Since the SignalR transport had to be incompatible between v2 where we use SignalR
-2 and v3 where we use ASP.NET Core SignalR, we also did introduce some changes in the wire protocol. This means that
-your intermediate connector will need to provide both implementations for the old and the new version in a single
-project. We suggest using different assemblies for your new code, so that you can easily get rid of the old v2 parts
-after the migration is completed.
-
-The v3 connector does not provide connector-side interceptor support in the way v2 did. Instead, you can chose to
-implement an `IRelayTarget` or extend the `RelayWebTarget` type. We suggest to try extending the `RelayWebTarget` class
-and overriding the `HandleAsync` method first.
-
-The logic that was done on the request interceptor should be done before calling the base implementation of
-`HandleAsync`, and the logic that was done in the response interceptor can work on the result of the base
-implementation.
-
-In most cases you should be able to re-use most of your existing logic and only have to adjust your code where it
-interacts with the actual request and response objects, as they have a different interface in v3.
-
-You then should roll out all connectors to the "v2.9" intermediate connector state.
-
 ## Migrate to RelayServer v3
 
 Following your deployment plan, create the host projects for your RelayServer v3 and management API. You can use our
@@ -74,5 +52,11 @@ Migrate your server-side interceptor to the new interfaces of v3. In most cases 
 your existing logic and only have to adjust your code where it interacts with the actual request and response objects,
 as they have a different interface in v3.
 
-Move the database entries for your connectors from the v2 database to a new v3 database. A migration tool is currently
-in planning to help you with that.
+Recreate the entries for your connectors in the RelayServer v3 database. As an alternative, you can configure your
+RelayServer to automatically create the tenant entry on first connect by enabling the autoprovision feature.
+
+Then create the new connectors. Be aware that there is no direct migration path for connector-side interceptors. You
+need to implement a custom target in a RelayServer v3 connector where you implement the logic of a request interceptor
+right before requesting the target and the logic of a response interceptor directly after requesting the target.
+
+When ready, launch your new RelayServer v3 server and then update all connectors.
