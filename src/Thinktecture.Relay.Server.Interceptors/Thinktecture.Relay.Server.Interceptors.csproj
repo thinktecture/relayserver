@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Thinktecture.Relay.Server.Abstractions\Thinktecture.Relay.Server.Abstractions.csproj" />
   </ItemGroup>
 
