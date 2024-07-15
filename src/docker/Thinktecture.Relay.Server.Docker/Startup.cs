@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Thinktecture.Relay.Server.Docker.Interceptors;
+using Thinktecture.Relay.Server.Endpoints;
 
 namespace Thinktecture.Relay.Server.Docker;
 
@@ -62,11 +63,6 @@ public class Startup
 
 		app.UseAuthentication();
 		app.UseAuthorization();
-
-		app.UseEndpoints(endpoints =>
-		{
-			endpoints.MapControllers();
-		});
 
 		app.UseRelayServer();
 	}

@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
+using Thinktecture.Relay;
 using Thinktecture.Relay.Acknowledgement;
 using Thinktecture.Relay.Server;
 using Thinktecture.Relay.Server.DependencyInjection;
+using Thinktecture.Relay.Server.Endpoints;
 using Thinktecture.Relay.Server.Middleware;
 using Thinktecture.Relay.Transport;
 
@@ -40,6 +42,13 @@ public static class ApplicationBuilderExtensions
 			app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse, TAcknowledge>>());
 		builder.Map($"/{Constants.DefaultTracePath}", true,
 			app => app.UseMiddleware<RelayMiddleware<TRequest, TResponse, TAcknowledge>>());
+
+		builder.UseEndpoints(endpoints =>
+		{
+			endpoints.MapAcknowledge("/acknowledge");
+			endpoints.MapBodyContentEndpoints("/body");
+			endpoints.MapDiscoveryDocument($"/{DiscoveryDocument.WellKnownPath}");
+		});
 
 		foreach (var part in builder.ApplicationServices.GetServices<IApplicationBuilderPart>())
 		{

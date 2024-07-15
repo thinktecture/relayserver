@@ -13,6 +13,8 @@ public class ApplicationBuilderPart<TRequest, TResponse, TAcknowledge> : IApplic
 {
 	/// <inheritdoc />
 	public void Use(IApplicationBuilder builder)
-		=> builder.UseEndpoints(endpoints
-			=> endpoints.MapHub<ConnectorHub<TRequest, TResponse, TAcknowledge>>("/connector"));
+		=> builder.UseEndpoints(endpoints =>
+		{
+			endpoints.MapHub<ConnectorHub<TRequest, TResponse, TAcknowledge>>("/connector");
+		});
 }

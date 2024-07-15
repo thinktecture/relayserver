@@ -37,7 +37,7 @@ public partial class ServerTransport<TResponse, TAcknowledge> : IServerTransport
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ServerTransport{TResponse,TAcknowledge}"/> class.
 	/// </summary>
-	/// <param name="logger">An <see cref="ILogger{TCatgegory}"/>.</param>
+	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="modelFactory">The <see cref="ModelFactory{TAcknowledge}"/>.</param>
 	/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>

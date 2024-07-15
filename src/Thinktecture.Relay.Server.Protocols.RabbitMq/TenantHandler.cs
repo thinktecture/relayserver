@@ -29,7 +29,7 @@ public partial class TenantHandler<TRequest, TAcknowledge> : ITenantHandler, IDi
 	/// <summary>
 	/// Initializes a new instance of the <see cref="TenantHandler{TRequest,TAcknowledge}"/> class.
 	/// </summary>
-	/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
+	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="tenantName">The unique name of the tenant.</param>
 	/// <param name="connectionId">The unique id of the connection.</param>
 	/// <param name="maximumConcurrentRequests">The amount of maximum concurrent requests.</param>

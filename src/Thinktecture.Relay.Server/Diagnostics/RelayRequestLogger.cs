@@ -24,7 +24,7 @@ public partial class RelayRequestLogger<TRequest, TResponse> : IRelayRequestLogg
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RelayRequestLogger{TRequest,TResponse}"/> class.
 	/// </summary>
-	/// <param name="logger">An instance of an <see cref="ILogger{TCategoryName}"/>.</param>
+	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="requestService">An <see cref="IRequestService"/>.</param>
 	/// <param name="relayServerOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	/// <param name="tenantService">An <see cref="ITenantService"/>.</param>

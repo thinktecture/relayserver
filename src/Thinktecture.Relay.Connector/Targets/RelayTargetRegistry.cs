@@ -26,7 +26,7 @@ public partial class RelayTargetRegistry<TRequest, TResponse>
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RelayTargetRegistry{TRequest,TResponse}"/> class.
 	/// </summary>
-	/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
+	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="relayTargetOptions">An <see cref="IOptions{TOptions}"/>.</param>
 	public RelayTargetRegistry(ILogger<RelayTargetRegistry<TRequest, TResponse>> logger,
 		IOptions<RelayTargetOptions> relayTargetOptions)

@@ -21,7 +21,7 @@ internal partial class DisposableConsumer : IDisposable
 	/// <summary>
 	/// Initializes a new instance of the <see cref="DisposableConsumer"/> class.
 	/// </summary>
-	/// <param name="logger">An <see cref="ILogger"/>.</param>
+	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="model">The <see cref="IModel"/> used to communicate with Rabbit MQ.</param>
 	/// <param name="queueName">The name of the queue.</param>
 	/// <param name="autoAck">The consumer should automatically acknowledge the message.</param>
