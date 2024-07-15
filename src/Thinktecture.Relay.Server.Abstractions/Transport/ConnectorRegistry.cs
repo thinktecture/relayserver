@@ -32,7 +32,7 @@ public partial class ConnectorRegistry<T>
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ConnectorRegistry{T}"/> class.
 	/// </summary>
-	/// <param name="logger">An <see cref="ILogger{TCategory}"/>.</param>
+	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="serviceProvider">An <see cref="IServiceProvider"/></param>
 	/// <param name="connectionStatisticsWriter">An <see cref="IConnectionStatisticsWriter"/>.</param>
 	/// <param name="relayServerContext">The <see cref="RelayServerContext"/>.</param>

@@ -2,13 +2,13 @@ namespace Thinktecture.Relay.Server;
 
 internal static class LoggingEventIds
 {
-	public const int AcknowledgeControllerAcknowledgementReceived = 10001;
+	public const int AcknowledgeEndpointAcknowledgementReceived = 10001;
 
-	public const int BodyContentControllerDeliverBody = 10101;
-	public const int BodyContentControllerStoreBody = 10102;
-	public const int BodyContentControllerResponseAborted = 10103;
+	public const int BodyContentEndpointDeliverBody = 10101;
+	public const int BodyContentEndpointStoreBody = 10102;
+	public const int BodyContentEndpointResponseAborted = 10103;
 
-	public const int DiscoveryDocumentControllerReturnDiscoveryDocument = 10201;
+	public const int DiscoveryDocumentEndpointReturnDiscoveryDocument = 10201;
 
 	public const int MaintenanceJobRunnerRunMaintenanceJob = 10301;
 	public const int MaintenanceJobRunnerRunMaintenanceJobFailed = 10302;

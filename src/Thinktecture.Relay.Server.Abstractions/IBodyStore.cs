@@ -13,7 +13,7 @@ public interface IBodyStore
 	/// <summary>
 	/// Stores the request body stream for the request id.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <param name="bodyStream">The request stream to store.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is
@@ -25,7 +25,7 @@ public interface IBodyStore
 	/// <summary>
 	/// Stores the response body stream for the request id.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <param name="bodyStream">The response stream to store.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is
@@ -37,7 +37,7 @@ public interface IBodyStore
 	/// <summary>
 	/// Opens the request body stream for the request id.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is
 	/// <see cref="CancellationToken.None"/>.
@@ -48,7 +48,7 @@ public interface IBodyStore
 	/// <summary>
 	/// Opens the response body stream for the request id.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is
 	/// <see cref="CancellationToken.None"/>.
@@ -59,7 +59,7 @@ public interface IBodyStore
 	/// <summary>
 	/// Removes the stored request body.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is
 	/// <see cref="CancellationToken.None"/>.
@@ -70,7 +70,7 @@ public interface IBodyStore
 	/// <summary>
 	/// Removes the stored response body.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is
 	/// <see cref="CancellationToken.None"/>.
@@ -81,14 +81,14 @@ public interface IBodyStore
 	/// <summary>
 	/// Returns an <see cref="IAsyncDisposable"/> which removes the stored request body when disposed.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <returns>An <see cref="IAsyncDisposable"/>.</returns>
 	IAsyncDisposable GetRequestBodyRemoveDisposable(Guid requestId);
 
 	/// <summary>
 	/// Returns an <see cref="IAsyncDisposable"/> which removes the stored response body when disposed.
 	/// </summary>
-	/// <param name="requestId">The id of the request.</param>
+	/// <param name="requestId">The unique id of the request.</param>
 	/// <returns>An <see cref="IAsyncDisposable"/>.</returns>
 	IAsyncDisposable GetResponseBodyRemoveDisposable(Guid requestId);
 }

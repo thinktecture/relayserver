@@ -29,7 +29,7 @@ public partial class TenantTransport<TRequest, TAcknowledge> : ITenantTransport<
 	/// <summary>
 	/// Initializes a new instance of the <see cref="TenantTransport{TRequest,TAcknowledge}"/> class.
 	/// </summary>
-	/// <param name="logger">An <see cref="ILogger{TCatgeory}"/>.</param>
+	/// <param name="logger">An <see cref="ILogger{TCategoryName}"/>.</param>
 	/// <param name="serviceProvider">An <see cref="IServiceProvider"/>.</param>
 	/// <param name="modelFactory">The <see cref="ModelFactory{TAcknowledge}"/>.</param>
 	/// <param name="rabbitMqOptions">An <see cref="IOptions{TOptions}"/>.</param>
