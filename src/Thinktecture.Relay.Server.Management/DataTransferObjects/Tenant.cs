@@ -56,9 +56,4 @@ public class Tenant
 	/// Gets or sets maximum delay to wait for until a reconnect of a connector should be attempted again.
 	/// </summary>
 	public TimeSpan? ReconnectMaximumDelay { get; set; }
-
-	/// <summary>
-	/// Gets or sets a list of tenant credentials stored for this tenant.
-	/// </summary>
-	public TenantCredential[] Credentials { get; set; } = Array.Empty<TenantCredential>();
 }

@@ -26,7 +26,6 @@ public class TenantService : ITenantService
 		var normalizedName = NormalizeName(tenantName);
 
 		return await _dbContext.Tenants
-			.Include(t => t.ClientSecrets)
 			.Include(t => t.Connections)
 			.Include(t => t.Config)
 			.AsNoTracking()
@@ -39,7 +38,6 @@ public class TenantService : ITenantService
 		var normalizedName = NormalizeName(tenantName);
 
 		return await _dbContext.Tenants
-			.Include(t => t.ClientSecrets)
 			.Include(t => t.Config)
 			.AsNoTracking()
 			.SingleOrDefaultAsync(t => t.NormalizedName == normalizedName, cancellationToken: cancellationToken);
@@ -72,7 +70,6 @@ public class TenantService : ITenantService
 	public async Task<Page<Tenant>> LoadAllTenantsPagedAsync(int skip, int take, CancellationToken cancellationToken)
 		=> await _dbContext.Tenants
 			.Include(t => t.Config)
-			.Include(t => t.ClientSecrets)
 			.AsNoTracking()
 			.OrderBy(t => t.NormalizedName)
 			.ToPagedResultAsync(skip, take, cancellationToken);
@@ -109,7 +106,6 @@ public class TenantService : ITenantService
 
 		var existingTenant = await _dbContext.Tenants
 			.Include(t => t.Config)
-			.Include(t => t.ClientSecrets)
 			.SingleOrDefaultAsync(t => t.NormalizedName == tenant.NormalizedName, cancellationToken: cancellationToken);
 
 		if (existingTenant is null) return false;
