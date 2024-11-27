@@ -61,3 +61,4 @@ We would like to thank our sponsors that helped to make RelayServer possible.
 
 [<img width="120px" src="./docs/assets/logo_sponsor_cmi.svg" />](https://www.cmiag.ch/)
 [<img width="120px" src="./docs/assets/logo_sponsor_abraxas.png" />](https://www.abraxas.ch/)
+[<img width="120px" src="./docs/assets/logo_sponsor_kms_ag.png" />](https://www.kms-ag.ch/)
