@@ -6,14 +6,14 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
 
-    <VersionPrefix>3.0.1</VersionPrefix>
+    <VersionPrefix>3.1.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Version Condition="'$(BuildNumber)' != ''">$(VersionPrefix)-$(VersionSuffix)-$(BuildNumber)</Version>
 
     <!-- NuGet Package information -->
     <Company>Thinktecture AG</Company>
     <Product>Thinktecture RelayServer</Product>
-    <Copyright>Copyright © $(Company) 2015 - 2024. All rights reserved.</Copyright>
+    <Copyright>Copyright © $(Company) 2015 - 2025. All rights reserved.</Copyright>
     <Authors>Sebastian Gingter;Thomas Hilzendegen</Authors>
     <PackageTags>thinktecture;relayserver</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
