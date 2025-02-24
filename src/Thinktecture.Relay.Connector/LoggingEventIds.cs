@@ -3,12 +3,11 @@ namespace Thinktecture.Relay.Connector;
 internal static class LoggingEventIds
 {
 	public const int AccessTokenProviderRequestingAccessToken = 10001;
-	public const int AccessTokenManagementConfigureOptionsGotDiscoveryDocument = 10002;
-	public const int AccessTokenManagementConfigureOptionsErrorRetrievingDiscoveryDocument = 10003;
-	public const int AccessTokenManagementConfigureOptionsErrorTargetTypeNotFound = 10004;
-	public const int AccessTokenManagementConfigureOptionsCouldNotParseTimeout = 10005;
 
 	public const int RelayConnectorPostConfigureOptionsGotDiscoveryDocument = 10101;
+	public const int RelayConnectorPostConfigureOptionsErrorRetrievingDiscoveryDocument = 10102;
+	public const int RelayConnectorPostConfigureOptionsErrorTargetTypeNotFound = 10103;
+	public const int RelayConnectorPostConfigureOptionsCouldNotParseTimeout = 10104;
 
 	public const int ClientRequestHandlerAcknowledgeRequest = 10201;
 	public const int ClientRequestHandlerErrorHandlingRequest = 10202;
@@ -37,4 +36,6 @@ internal static class LoggingEventIds
 
 	public const int RelayWebTargetRequestingTarget = 10501;
 	public const int RelayWebTargetRequestedTarget = 10502;
+
+	public const int ClientCredentialsClientConfigureOptionsSetTokenEndpoint = 10601;
 }

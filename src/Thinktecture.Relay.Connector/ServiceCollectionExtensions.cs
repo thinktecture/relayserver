@@ -1,7 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading;
-using IdentityModel.AspNetCore.AccessTokenManagement;
+using Duende.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Thinktecture.Relay.Acknowledgement;
@@ -57,27 +57,22 @@ public static class ServiceCollectionExtensions
 			.AddTransient<IPostConfigureOptions<RelayConnectorOptions>,
 				RelayConnectorPostConfigureOptions<TRequest, TResponse>>()
 			.AddTransient<IValidateOptions<RelayConnectorOptions>, RelayConnectorValidateOptions>()
-			.AddTransient<IConfigureOptions<AccessTokenManagementOptions>, AccessTokenManagementConfigureOptions>()
 			.TryAddTransient<IAccessTokenProvider, AccessTokenProvider>();
 
-		builder.Services.AddClientAccessTokenManagement((provider, options) =>
-		{
-			var clientOptions = provider.GetRequiredService<IOptions<AccessTokenManagementOptions>>().Value.Client;
-			options.Clients = clientOptions.Clients;
-			options.DefaultClient = clientOptions.DefaultClient;
-			options.CacheKeyPrefix = clientOptions.CacheKeyPrefix;
-			options.CacheLifetimeBuffer = clientOptions.CacheLifetimeBuffer;
-		});
+		builder.Services.AddDistributedMemoryCache()
+			.AddClientCredentialsTokenManagement();
+
+		services.AddSingleton<IConfigureOptions<ClientCredentialsClient>, ClientCredentialsClientConfigureOptions>();
 
 		builder.Services
-			.AddHttpClient(Constants.HttpClientNames.RelayServer, (provider, client) =>
-			{
-				var options = provider.GetRequiredService<IOptions<RelayConnectorOptions>>();
-				client.BaseAddress = options.Value.RelayServerBaseUri;
-				client.Timeout = options.Value.DiscoveryDocument.EndpointTimeout;
-				client.DefaultRequestHeaders.ConnectionClose = !options.Value.UseHttpKeepAlive;
-			})
-			.AddClientAccessTokenHandler();
+			.AddClientCredentialsHttpClient(Constants.HttpClientNames.RelayServer, Constants.RelayServerClientName,
+				(provider, client) =>
+				{
+					var options = provider.GetRequiredService<IOptions<RelayConnectorOptions>>();
+					client.BaseAddress = options.Value.RelayServerBaseUri;
+					client.Timeout = options.Value.DiscoveryDocument.EndpointTimeout;
+					client.DefaultRequestHeaders.ConnectionClose = !options.Value.UseHttpKeepAlive;
+				});
 
 		builder.Services
 			.AddHttpClient(Constants.HttpClientNames.RelayWebTargetDefault,

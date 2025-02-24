@@ -11,7 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="IdentityModel.AspNetCore" Version="4.3.0" />
+    <PackageReference Include="Duende.AccessTokenManagement" Version="3.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.6.0" />
+    <PackageReference Include="Microsoft.Net.Http.Headers" Version="8.0.13" />
   </ItemGroup>
 
   <ItemGroup>

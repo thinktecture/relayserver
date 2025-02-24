@@ -1,6 +1,9 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -33,6 +36,7 @@ public class DiscoveryDocumentBuilder
 	/// </summary>
 	/// <param name="request">A <see cref="HttpRequest"/>.</param>
 	/// <returns>A new instance of the discovery document.</returns>
+	[Obsolete("This method is obsolete and will be removed in a future version. Please use BuildAsync() instead.")]
 	public DiscoveryDocument Build(HttpRequest request)
 	{
 		var baseUri = BuildBaseUri(request);
@@ -41,6 +45,36 @@ public class DiscoveryDocumentBuilder
 		{
 			ServerVersion = GetType().GetAssemblyVersion(),
 			AuthorizationServer = GetAuthority() ?? string.Empty,
+			AuthorizationTokenEndpoint = GetTokenEndpointAsync().GetAwaiter().GetResult() ?? string.Empty,
+			EndpointTimeout = _relayServerOptions.EndpointTimeout,
+			ConnectorEndpoint = new Uri(baseUri, "connector").ToString(),
+			AcknowledgeEndpoint = new Uri(baseUri, "acknowledge").ToString(),
+			RequestEndpoint = new Uri(baseUri, "body/request").ToString(),
+			ResponseEndpoint = new Uri(baseUri, "body/response").ToString(),
+			ReconnectMinimumDelay = _relayServerOptions.ReconnectMinimumDelay,
+			ReconnectMaximumDelay = _relayServerOptions.ReconnectMaximumDelay,
+			HandshakeTimeout = _relayServerOptions.HandshakeTimeout,
+			KeepAliveInterval = _relayServerOptions.KeepAliveInterval,
+		};
+	}
+
+	/// <summary>
+	/// Builds a discovery document.
+	/// </summary>
+	/// <param name="request">A <see cref="HttpRequest"/>.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.</param>
+	/// <returns>A new instance of the discovery document.</returns>
+	public async Task<DiscoveryDocument> BuildAsync(HttpRequest request, CancellationToken cancellationToken = default)
+	{
+		var baseUri = BuildBaseUri(request);
+
+		return new DiscoveryDocument()
+		{
+			ServerVersion = GetType().GetAssemblyVersion(),
+			AuthorizationServer = GetAuthority() ?? string.Empty,
+			AuthorizationTokenEndpoint = await GetTokenEndpointAsync(cancellationToken) ?? string.Empty,
 			EndpointTimeout = _relayServerOptions.EndpointTimeout,
 			ConnectorEndpoint = new Uri(baseUri, "connector").ToString(),
 			AcknowledgeEndpoint = new Uri(baseUri, "acknowledge").ToString(),
@@ -55,6 +89,31 @@ public class DiscoveryDocumentBuilder
 
 	private Uri BuildBaseUri(HttpRequest request)
 		=> new Uri($"{request.Scheme}://{request.Host}{request.PathBase}", UriKind.Absolute);
+
+	/// <summary>
+	/// Gets the token endpoint from the configured <see cref="JwtBearerOptions"/>.
+	/// </summary>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the token endpoint.</returns>
+	protected virtual async Task<string?> GetTokenEndpointAsync(CancellationToken cancellationToken = default)
+	{
+		var options = _serviceProvider.GetService<IOptionsSnapshot<JwtBearerOptions>>()?.Get(Constants.DefaultAuthenticationScheme);
+		if (options is null)
+		{
+			return null;
+		}
+
+		var configuration = options.Configuration;
+
+		if (configuration is null && options.ConfigurationManager is not null)
+		{
+			configuration = await options.ConfigurationManager.GetConfigurationAsync(cancellationToken);
+		}
+
+		return configuration?.TokenEndpoint;
+	}
 
 	/// <summary>
 	/// Gets the authority from the configured <see cref="JwtBearerOptions"/> with a slash at the end.
