@@ -23,13 +23,13 @@ internal static partial class EndpointRouteBuilderExtensions
 
 internal partial class DiscoveryDocumentEndpoint
 {
-	public static Task<IResult> HandleRequestAsync([FromServices] ILogger<DiscoveryDocumentEndpoint> logger,
+	public static async Task<IResult> HandleRequestAsync([FromServices] ILogger<DiscoveryDocumentEndpoint> logger,
 		[FromServices] DiscoveryDocumentBuilder documentBuilder, [FromServices] IHttpContextAccessor httpContextAccessor)
 	{
 		Log.ReturnDiscoveryDocument(logger);
 
-		var document = documentBuilder.Build(httpContextAccessor.HttpContext!.Request);
+		var document = await documentBuilder.BuildAsync(httpContextAccessor.HttpContext!.Request, httpContextAccessor.HttpContext!.RequestAborted);
 
-		return Task.FromResult(Results.Ok(document));
+		return Results.Ok(document);
 	}
 }

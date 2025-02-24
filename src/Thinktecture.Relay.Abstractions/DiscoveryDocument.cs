@@ -41,7 +41,14 @@ public class DiscoveryDocument
 	/// <summary>
 	/// The url of the authorization server.
 	/// </summary>
+	[Obsolete(
+		"This property is obsolete and will be removed in a future version. Please use AuthorizationTokenEndpoint instead.")]
 	public string AuthorizationServer { get; set; } = default!;
+
+	/// <summary>
+	/// The url of the authorization server token endpoint.
+	/// </summary>
+	public string AuthorizationTokenEndpoint { get; set; } = default!;
 
 	/// <summary>
 	/// The endpoint where the connector needs to connect to.

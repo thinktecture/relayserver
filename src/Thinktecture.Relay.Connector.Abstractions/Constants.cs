@@ -9,6 +9,11 @@ namespace Thinktecture.Relay.Connector;
 public static class Constants
 {
 	/// <summary>
+	/// The name of the client credentials client.
+	/// </summary>
+	public static readonly string RelayServerClientName = $"{typeof(Constants).Namespace}.ClientCredentials";
+
+	/// <summary>
 	/// The identity scopes.
 	/// </summary>
 	public const string RelayServerScopes = "connector";

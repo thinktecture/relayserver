@@ -15,8 +15,9 @@ public interface ITenantService
 	/// Loads a <see cref="Tenant"/> with all depending entities (connections, secrets, config).
 	/// </summary>
 	/// <param name="tenantName">The name of the <see cref="Tenant"/> to load.</param>
-	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>
 	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
@@ -28,8 +29,9 @@ public interface ITenantService
 	/// Loads a <see cref="Tenant"/> with some depending entities (secrets, config).
 	/// </summary>
 	/// <param name="tenantName">The name of the <see cref="Tenant"/> to load.</param>
-	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>
 	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
@@ -48,8 +50,9 @@ public interface ITenantService
 	/// Loads a <see cref="Tenant"/> together with its config.
 	/// </summary>
 	/// <param name="tenantName">The name of the <see cref="Tenant"/> to load.</param>
-	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>
 	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Tenant"/> or null if
@@ -62,8 +65,9 @@ public interface ITenantService
 	/// </summary>
 	/// <param name="skip">The amount of entries to skip.</param>
 	/// <param name="take">The amount of entries to take.</param>
-	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
 	///</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Page{Tenant}"/>.</returns>
 	Task<Page<Tenant>> LoadAllTenantsPagedAsync(int skip, int take, CancellationToken cancellationToken = default);
@@ -71,8 +75,9 @@ public interface ITenantService
 	/// <summary>
 	/// Loads all tenant names.
 	/// </summary>
-	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
 	///</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the list of tenant names.</returns>
 	Task<string[]> LoadAllTenantNamesAsync(CancellationToken cancellationToken = default);
@@ -81,8 +86,9 @@ public interface ITenantService
 	/// Creates a new <see cref="Tenant"/>.
 	/// </summary>
 	/// <param name="tenant">The <see cref="Tenant"/> to create.</param>
-	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	Task CreateTenantAsync(Tenant tenant, CancellationToken cancellationToken = default);
@@ -93,7 +99,7 @@ public interface ITenantService
 	/// <param name="tenantName">The name of the <see cref="Tenant"/> to update.</param>
 	/// <param name="tenant">The <see cref="Tenant"/> with the data to update.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	Task<bool> UpdateTenantAsync(string tenantName, Tenant tenant, CancellationToken cancellationToken = default);
@@ -105,7 +111,7 @@ public interface ITenantService
 	/// </summary>
 	/// <param name="clientSecret">The secret to create.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	Task CreateClientSecretAsync(ClientSecret clientSecret, CancellationToken cancellationToken = default);
@@ -115,7 +121,7 @@ public interface ITenantService
 	/// </summary>
 	/// <param name="tenantName">The name of the <see cref="Tenant"/> to delete.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous operation, which wraps the success of the deletion.</returns>
 	Task<bool> DeleteTenantAsync(string tenantName, CancellationToken cancellationToken = default);
@@ -125,7 +131,7 @@ public interface ITenantService
 	/// </summary>
 	/// <param name="tenantName">The name of the <see cref="Tenant"/> to load the config for.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is
-	/// <see cref="P:System.Threading.CancellationToken.None"/>.
+	/// <see cref="CancellationToken.None"/>.
 	/// </param>
 	/// <returns>
 	/// A <see cref="Task"/> representing the asynchronous operation, which wraps the <see cref="Config"/> or null if
