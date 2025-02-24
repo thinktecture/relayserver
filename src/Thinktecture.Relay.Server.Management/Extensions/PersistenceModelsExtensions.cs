@@ -1,11 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using Thinktecture.Relay.Server.Management.DataTransferObjects;
 using Thinktecture.Relay.Server.Persistence.DataTransferObjects;
-using Thinktecture.Relay.Server.Persistence.Models;
 using TenantModel = Thinktecture.Relay.Server.Management.DataTransferObjects.Tenant;
 using TenantEntity = Thinktecture.Relay.Server.Persistence.Models.Tenant;
 using ConfigEntity = Thinktecture.Relay.Server.Persistence.Models.Config;
@@ -109,15 +104,4 @@ internal static class PersistenceModelsExtensions
 			PageSize = page.PageSize,
 			Results = page.Results.ToModels().ToArray(),
 		};
-
-	private static string? Sha512(string? input)
-	{
-		if (String.IsNullOrEmpty(input)) return null;
-
-		using var sha = SHA512.Create();
-		var bytes = Encoding.UTF8.GetBytes(input);
-		var hash = sha.ComputeHash(bytes);
-
-		return Convert.ToBase64String(hash);
-	}
 }

@@ -1,6 +1,5 @@
 using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using Thinktecture.Relay.Acknowledgement;
