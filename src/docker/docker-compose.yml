@@ -1,14 +1,16 @@
+name: relayserver
+
 x-defaults: &defaults
   networks:
     - relayserver
 
 x-rabbit-defaults: &rabbit-defaults
   <<: *defaults
-  image: rabbitmq:management-alpine
+  image: rabbitmq:3-management-alpine
   configs:
     - source: erlang-cookie
       target: /var/lib/rabbitmq/.erlang.cookie
-      mode: 0600
+      mode: 0400
 x-rabbit-env: &rabbit-env
   RABBITMQ_DEFAULT_USER: guest
   RABBITMQ_DEFAULT_PASS: guest
@@ -20,11 +22,21 @@ x-db-connection: &db-connection
   ConnectionStrings__SqlServer: Server=relay-persistence-sqlserver;Database=relayserver;User Id=sa;Password=<Strong!Passw0rd>
 
 x-logging: &logging
-  Serilog__MinimumLevel__Default: Error
+  Serilog__MinimumLevel__Default: Debug
   Serilog__MinimumLevel__Override__Microsoft: Warning
   Serilog__MinimumLevel__Override__System: Warning
   Serilog__WriteTo__0__Name: Seq
   Serilog__WriteTo__0__Args__ServerUrl: http://relay-logging-seq
+
+x-curl-defaults: &curl-defaults
+  <<: *defaults
+  image: alpine/curl
+  depends_on:
+    - relay-server-migrations
+    - relay-management-api
+  configs:
+    - source: curl-headers
+      target: /headers
 
 configs:
   erlang-cookie:
@@ -34,12 +46,6 @@ configs:
       Accept: application/json
       Content-Type: application/json
       Api-Key: write-key
-  test-tenant-1:
-    content: |
-      { "name": "TestTenant1", "displayName": "Test Tenant 1" }
-  test-tenant-2:
-    content: |
-      { "name": "TestTenant2", "displayName": "Test Tenant 2" }
 
 services:
   relay-transport-rabbitmq-1:
@@ -63,12 +69,13 @@ services:
 
   relay-logging-seq:
     <<: *defaults
-    image: datalust/seq
+    image: datalust/seq:2025
     container_name: relay-logging-seq
     ports:
       - "5341:80"
     environment:
       ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_NOAUTHENTICATION: True
     volumes:
       - seq-data:/data
 
@@ -88,11 +95,14 @@ services:
         - "CMD-SHELL"
         - "pg_isready"
         - "-d"
-        - "db_prod"
+        - "$$POSTGRES_USER"
+        - "-U"
+        - "$$POSTGRES_USER"
       interval: 10s
       timeout: 60s
       retries: 10
       start_period: 10s
+
   relay-persistence-sqlserver:
     <<: *defaults
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -115,6 +125,26 @@ services:
       timeout: 60s
       retries: 10
       start_period: 10s
+
+  relay-identityprovider:
+    <<: *defaults
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: relay-identityprovider
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./keycloak_data:/opt/keycloak/data/import
+    environment:
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: admin
+        KC_HEALTH_ENABLED: true
+        KC_METRICS_ENABLED: true
+        KC_HOSTNAME_DEBUG: true
+    command:
+      - "start-dev"
+      - "--http-port=5002"
+      - "--import-realm"
+
   relay-server-migrations:
     <<: *defaults
     image: relay-server
@@ -149,46 +179,30 @@ services:
     depends_on:
       - relay-server-migrations
 
-  relay-seed:
-    <<: *defaults
-    image: curlimages/curl
-    container_name: relay-seed
-    depends_on:
-      - relay-server-migrations
-      - relay-management-api
-    configs:
-      - source: curl-headers
-        target: /headers
-        mode: 0644
-      - source: test-tenant-1
-        target: /test-tenant-1.json
-        mode: 0644
-      - source: test-tenant-2
-        target: /test-tenant-2.json
-        mode: 0644
+  relay-seed-tenant1:
+    <<: *curl-defaults
+    container_name: relay-seed-tenant1
     command:
-      - "sh"
-      - "-c"
-      - "curl -H @/headers -d @/test-tenant-1.json http://relay-management-api:5000/management/tenants && curl -H @/headers -d @/test-tenant-2.json http://relay-management-api:5000/management/tenants"
+      - "-v"
+      - "-H@/headers"
+      - "-d { \"name\": \"TestTenant1\", \"displayName\": \"Test Tenant 1\" }"
+      - "http://relay-management-api:5000/management/tenants"
+  relay-seed-tenant2:
+    <<: *curl-defaults
+    container_name: relay-seed-tenant2
+    command:
+      - "-v"
+      - "-H@/headers"
+      - "-d { \"name\": \"TestTenant2\", \"displayName\": \"Test Tenant 2\" }"
+      - "http://relay-management-api:5000/management/tenants"
 
-  relay-identityprovider:
+  relay-httpbin:
     <<: *defaults
-    image: quay.io/keycloak/keycloak:24.0
-    container_name: relay-identityprovider
+    image: kennethreitz/httpbin
+    container_name: relay-httpbin
+    platform: linux/amd64
     ports:
-      - "5002:5002"
-    volumes:
-      - ./keycloak_data:/opt/keycloak/data/import
-    environment:
-        KEYCLOAK_ADMIN: admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
-        KC_HEALTH_ENABLED: true
-        KC_METRICS_ENABLED: true
-        KC_HOSTNAME_DEBUG: true
-    command:
-      - "start-dev"
-      - "--http-port=5002"
-      - "--import-realm"
+      - "8080:80"
 
   relay-server-a:
     <<: *defaults
@@ -203,8 +217,10 @@ services:
     volumes:
       - relay-bodystore:/var/bodystore
     depends_on:
-      - relay-server-migrations
+      - relay-transport-rabbitmq-1
       - relay-identityprovider
+      - relay-seed-tenant1
+      - relay-seed-tenant2
   relay-server-b:
     <<: *defaults
     image: relay-server
@@ -218,8 +234,10 @@ services:
     volumes:
       - relay-bodystore:/var/bodystore
     depends_on:
-      - relay-server-migrations
+      - relay-transport-rabbitmq-2
       - relay-identityprovider
+      - relay-seed-tenant1
+      - relay-seed-tenant2
 
   relay-connector-a1:
     <<: *defaults
@@ -269,14 +287,6 @@ services:
       RelayConnector__TenantName: TestTenant2
     depends_on:
       - relay-server-b
-
-  relay-httpbin:
-    <<: *defaults
-    image: kennethreitz/httpbin
-    container_name: relay-httpbin
-    platform: linux/amd64
-    ports:
-      - "8080:80"
 
 volumes:
   seq-data:
