@@ -66,7 +66,9 @@ public partial class StatisticsService : IStatisticsService
 		{
 			var entity = new Origin() { Id = originId };
 			_dbContext.Attach(entity);
+
 			entity.LastSeenTime = DateTimeOffset.UtcNow;
+
 			await _dbContext.SaveChangesAsync(cancellationToken);
 		}
 		catch (OperationCanceledException)
@@ -86,9 +88,11 @@ public partial class StatisticsService : IStatisticsService
 
 		try
 		{
-			var entity = new Origin() { Id = originId, };
+			var entity = new Origin() { Id = originId };
 			_dbContext.Attach(entity);
+
 			entity.ShutdownTime = entity.LastSeenTime = DateTimeOffset.UtcNow;
+
 			await _dbContext.SaveChangesAsync(cancellationToken);
 		}
 		catch (OperationCanceledException)
@@ -168,13 +172,20 @@ public partial class StatisticsService : IStatisticsService
 
 				Log.UpdateConnectionLastSeenTime(_logger, connectionId, lastSeenTime, batchId);
 
-				var entity = new Connection() { Id = connectionId, };
+				var entity = new Connection() { Id = connectionId };
 				_dbContext.Attach(entity);
 
 				entity.LastSeenTime = lastSeenTime;
 			}
 
-			await _dbContext.SaveChangesAsync(cancellationToken);
+			try
+			{
+				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				// Ignore this, as this will be thrown when the connection isn't tracked at all
+			}
 		}
 		catch (OperationCanceledException)
 		{
@@ -195,8 +206,14 @@ public partial class StatisticsService : IStatisticsService
 		{
 			var entity = new Connection() { Id = connectionId };
 			_dbContext.Attach(entity);
+
 			entity.DisconnectTime = DateTimeOffset.UtcNow;
+
 			await _dbContext.SaveChangesAsync(cancellationToken);
+		}
+		catch (DbUpdateConcurrencyException)
+		{
+			// Ignore this, as this will be thrown when the connection isn't tracked at all
 		}
 		catch (OperationCanceledException)
 		{
@@ -221,6 +238,7 @@ public partial class StatisticsService : IStatisticsService
 				.ToArrayAsync(cancellationToken);
 
 			_dbContext.Connections.RemoveRange(connections);
+
 			await _dbContext.SaveChangesAsync(cancellationToken);
 		}
 		catch (OperationCanceledException)
