@@ -116,6 +116,7 @@ public partial class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IC
 		if (ex is null or OperationCanceledException)
 		{
 			Log.ConnectionClosedGracefully(_logger, _connectionId);
+			await Disconnected.InvokeAsync(this, _connectionId);
 		}
 		else
 		{
