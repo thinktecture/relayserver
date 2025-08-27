@@ -34,7 +34,7 @@ WORKDIR /app
 RUN adduser -u 5678 --disabled-password --gecos "" relay && chown -R relay /app
 
 # Add .NET Diagnostic Counters
-RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists && \
+RUN apt-get update && apt-get install -y wget curl && rm -rf /var/lib/apt/lists && \
   wget -O dotnet-counters https://aka.ms/dotnet-counters/linux-x64 && \
   chmod +x dotnet-counters && \
   apt purge wget --yes
