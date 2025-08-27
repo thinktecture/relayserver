@@ -120,7 +120,7 @@ services:
     healthcheck:
       test:
         - "CMD-SHELL"
-        - "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '<Strong!Passw0rd>' -Q 'SELECT 1' || exit 1"
+        - "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '<Strong!Passw0rd>' -Q 'SELECT 1' || exit 1"
       interval: 10s
       timeout: 60s
       retries: 10
