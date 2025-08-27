@@ -32,8 +32,10 @@ x-curl-defaults: &curl-defaults
   <<: *defaults
   image: alpine/curl
   depends_on:
-    - relay-server-migrations
-    - relay-management-api
+    relay-server-migrations:
+      condition: service_completed_successfully
+    relay-management-api:
+      condition: service_healthy
   configs:
     - source: curl-headers
       target: /headers
@@ -178,6 +180,12 @@ services:
       <<: [*db-connection, *logging]
     depends_on:
       - relay-server-migrations
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   relay-seed-tenant1:
     <<: *curl-defaults
@@ -253,6 +261,7 @@ services:
       RelayConnector__TenantName: TestTenant1
     depends_on:
       - relay-server-a
+      - relay-seed-tenant1
   relay-connector-a2:
     <<: *defaults
     image: relay-connector
@@ -264,6 +273,7 @@ services:
       RelayConnector__TenantName: TestTenant2
     depends_on:
       - relay-server-a
+      - relay-seed-tenant2
 
   relay-connector-b1:
     <<: *defaults
@@ -276,6 +286,7 @@ services:
       RelayConnector__TenantName: TestTenant1
     depends_on:
       - relay-server-b
+      - relay-seed-tenant1
   relay-connector-b2:
     <<: *defaults
     image: relay-connector
@@ -287,6 +298,7 @@ services:
       RelayConnector__TenantName: TestTenant2
     depends_on:
       - relay-server-b
+      - relay-seed-tenant2
 
 volumes:
   seq-data:
